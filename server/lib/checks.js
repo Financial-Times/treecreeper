@@ -29,4 +29,4 @@ const checkNodeType = (req, res, next) => {
 	}
 };
 
-module.exports = { checkNodeType };
+module.exports = { checkNodeType, nodeTypes };
