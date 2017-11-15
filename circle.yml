@@ -1,0 +1,6 @@
+machine:
+  node:
+    version: 7.10.0
+deployment:
+  production:
+    branch: master
