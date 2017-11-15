@@ -1,5 +1,6 @@
 const db = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
+const createSurveys = require('./surveys/create');
 
 const constraints = async (verb) => {
 	console.log(`${verb}ing constraints...`);
@@ -24,8 +25,7 @@ const constraints = async (verb) => {
 	}
 
 	const constraints = await db.run('CALL db.constraints');
-	console.log('CALL db.constraints ok?', verb, constraints.records);
-	console.log('CALL db.constraints ok?', verb, constraints.records.length, constraintQueries.length);
+	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
 const dropNodes = async (nodeType) => {
@@ -35,23 +35,33 @@ const dropNodes = async (nodeType) => {
 
 const dropRelationships = async () => {
 	console.log('dropping relationships...');
-	return await db.run('MATCH ()-[o:OWNEDBY]->() DELETE o');
+	await db.run('MATCH ()-[o:OWNEDBY]->() DELETE o');
+	await db.run('MATCH ()-[o:ASKS]->() DELETE o');
 };
 
 const createNodes = async () => {
+	createSurveys(db);
+
 	// TODO create some suppliers with contracts
 	// TODO create all surveys
 	// TODO create some responses
 	// Uuse save endpoint to create nodes and relationships
 };
 
-if (process.env.NODE_ENV !== 'production') {
-	// DROP
-	constraints('DROP');
-	dropRelationships();
-	for (let nodeType of nodeTypes) dropNodes(nodeType);
+const init = async () => {
+	if (process.env.NODE_ENV !== 'production') {
+		// DROP
+		await constraints('DROP');
+		await dropRelationships();
+		for (let nodeType of nodeTypes) {
+			await dropNodes(nodeType);
+		}
 
-	// CREATE
-	constraints('CREATE');
-	for (let nodeType of nodeTypes)	createNodes(nodeType);
-}
+		// CREATE
+		await constraints('CREATE');
+		await createNodes();
+	}
+};
+
+
+init();

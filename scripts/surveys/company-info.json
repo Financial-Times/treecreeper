@@ -1,0 +1,31 @@
+{
+    "_id": "company-info",
+    "surveyTitle": "Company Information",
+    "section": [
+        {
+            "title": "Your company",
+            "form": [
+                {
+                    "question": "Name of Company"
+                },
+                {
+                    "question": "Countries and sectors of Operation"
+                },
+                {
+                    "question": "Date of Completion of Questionnaire"
+                }
+            ]
+        },
+        {
+            "title": "About you",
+            "form": [
+                {
+                    "question": "What is your name?"
+                },
+                {
+                    "question": "What is your role?"
+                }
+            ]
+        }
+    ]
+}

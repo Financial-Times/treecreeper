@@ -1,0 +1,117 @@
+{
+    "_id": "abc",
+    "surveyTitle": "Anti-Bribery and Corruption",
+    "section": [
+        {
+            "title": null,
+            "form": [
+                {
+                    "_id": "abc_1232",
+                    "question": "Will any part of the service(s) be outsourced by Company to third parties?",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "abc_1233",
+                            "question": "Please outline the nature of outsourced services, the name and location of third parties.",
+                            "prompt": null,
+                            "fieldType": "long-text"
+                        }
+                    ]
+                },
+                {
+                    "_id": "abc_12323",
+                    "question": "Does Company currently appear (or appeared in the past) on any international, regional, local government authority, criminal, regulatory or enforcement activity databases?",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"]
+                },
+                {
+                    "_id": "abc_1123",
+                    "question": "Please list the full names of all Company's Directors and Shareholders, (to ultimate controlling parent).",
+                    "prompt": null,
+                    "fieldType": "long-text"
+                },
+                {
+                    "_id": "abc_11123",
+                    "question": "Please provide details of any technical or specialist expertise required to perform the services including details of experience or any relevant accreditations.",
+                    "prompt": null,
+                    "fieldType": "long-text"
+                },
+                {
+                    "_id": "abc_1253",
+                    "question": "Will any part of the fee paid to Company by FT be paid directly to any official or employee of a government, political party, party official, political candidate or public sector employee?",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"]
+                },
+                {
+                    "_id": "abc_1273",
+                    "question": "Are any Directors or officials of the Company listed as PEP’s?",
+                    "prompt": "Politically Exposed Persons: Defined by  HYPERLINK \"http://www.fatf-gafi.org/\" FATF as an individual who is or has been entrusted with a prominent public function.",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"]
+                },
+                {
+                    "_id": "abc_12783",
+                    "question": "Does any government or government agency own an interest or exert control over Company? ",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "abc_12344",
+                            "child_question_trigger": "Yes",
+                            "question": "What is the extent of this interest/level of control?",
+                            "fieldType": "long-text"
+                        }
+                    ]
+                },
+                {
+                    "_id": "abc_1923",
+                    "question": "Does Company make facilitation payments in relation to the service(s)? i.e. unofficial payments to facilitate or expedite routine action by public officials.",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "abc_1243",
+                            "child_question_trigger": "Yes",
+                            "question": "Please describe circumstances.",
+                            "prompt": null
+                        }
+                    ]
+                },
+                {
+                    "_id": "abc_12223",
+                    "question": "Has Company ever been prosecuted or investigated for bribery or corruption related offences in any country? ",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "abc_17523",
+                            "child_question_trigger": "Yes",
+                            "question": "Please describe circumstances.",
+                            "prompt": null,
+                            "fieldType": "long-text"
+                        }
+                    ]
+                },
+                {
+                    "_id": "abc_12353",
+                    "question": "Does Company have an Anti-Bribery and Corruption programme in place?",
+                    "prompt": "Please provide copies of any relevant Policies or Codes.",
+                    "fieldType": "upload"
+                },
+                {
+                    "_id": "abc_13623",
+                    "question": "Does Company provide training to staff on Anti-Bribery and Corruption?",
+                    "prompt": null,
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"]
+                }
+            ]
+            }]
+        }
