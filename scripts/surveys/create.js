@@ -17,6 +17,22 @@ const createSurveys = async (db) => {
 	}
 };
 
+const createQuestion = async (db, question) => {
+
+	console.log('creating', question);
+	const query =`
+		CREATE (a:survey_question {
+					id: $_id,
+					text: $question
+					${question.prompt ? ', prompt: $prompt' : ''}
+					${question.fieldType ? ', fieldType: $fieldType' : ''}
+				})
+		RETURN a
+	`;
+
+	await db.run(query, question);
+};
+
 const createQuestions = async (db, surveyId) => {
 
 	const sections = require(`./${surveyId}.json`).section;
@@ -25,17 +41,50 @@ const createQuestions = async (db, surveyId) => {
 		const questions = section.form;
 
 		for (let question of questions) {
-			await db.run(`CREATE (a:survey_question {id: $_id, text: $question${question.fieldType ? ', fieldType: $fieldType' : ''}}) RETURN a`, question);
-			const result = await db.run(`
+			createQuestion(db, question);
+			await db.run(`
 				MATCH (a:survey),(b:survey_question)
 				WHERE a.id = '${surveyId}'
 				AND b.id = '${question._id}'
 				CREATE (a)-[r:ASKS {section: '${section.title}'}]->(b)
 				RETURN r
 			`);
-			console.log(surveyId, question._id, result.records.length);
+
+			if (question.child_questions) {
+				for (let child of question.child_questions) {
+					createQuestion(db, child);
+					await db.run(`
+						MATCH (a:survey_question),(b:survey_question)
+						WHERE a.id = '${child._id}'
+						AND b.id = '${question._id}'
+						CREATE (a)-[r:RAISES {trigger: '${child.child_question_trigger}'}]->(b)
+						RETURN r
+					`);
+
+					if (child.fieldOptions) {
+						fieldOptions(db, child);
+					}
+				}
+			}
+
+			if (question.fieldOptions) {
+				fieldOptions(db, question);
+			}
 
 		}
+	}
+};
+
+const fieldOptions = async (db, question) => {
+	for (let option of question.fieldOptions) {
+		await db.run(`CREATE (a:survey_question_option {text: '${option}', id: '${question._id+option}'}) RETURN a`);
+		await db.run(`
+			MATCH (a:survey_question),(b:survey_question_option)
+			WHERE a.id = '${question._id}'
+			AND b.id = '${question._id+option}'
+			CREATE (a)-[r:ALLOWS]->(b)
+			RETURN r
+		`);
 	}
 };
 

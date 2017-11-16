@@ -1,4 +1,4 @@
-const nodeTypes = ['supplier', 'contract', 'response', 'risk', 'survey', 'survey_section', 'survey_question'];
+const nodeTypes = ['supplier', 'contract', 'response', 'risk', 'survey', 'survey_section', 'survey_question', 'survey_question_option'];
 
 const checkNodeType = (req, res, next) => {
 
