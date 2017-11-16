@@ -1,6 +1,8 @@
 const db = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
 const createSurveys = require('./surveys/create');
+const createSuppliers = require('./suppliers/create');
+const createResponses = require('./responses/create');
 
 const constraints = async (verb) => {
 	console.log(`${verb}ing constraints...`);
@@ -14,7 +16,7 @@ const constraints = async (verb) => {
 		`${verb} CONSTRAINT ON (r:response) ASSERT exists(r.id)`,
 		`${verb} CONSTRAINT ON (s:survey) ASSERT s.id IS UNIQUE`,
 		`${verb} CONSTRAINT ON (s:survey) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:survey) ASSERT exists(s.version)`,
+		`${verb} CONSTRAINT ON (s:survey) ASSERT exists(s.version)`
 	];
 
 	for (let constraintQuery of constraintQueries) {
@@ -39,13 +41,14 @@ const dropRelationships = async () => {
 	await db.run('MATCH ()-[o:ASKS]->() DELETE o');
 	await db.run('MATCH ()-[o:RAISES]->() DELETE o');
 	await db.run('MATCH ()-[o:ALLOWS]->() DELETE o');
+	await db.run('MATCH ()-[o:SIGNS]->() DELETE o');
 };
 
 const createNodes = async () => {
 	createSurveys(db);
-
+	createSuppliers(db);
+	createResponses(db);
 	// TODO create some suppliers with contracts
-	// TODO create all surveys
 	// TODO create some responses
 	// Uuse save endpoint to create nodes and relationships
 };
