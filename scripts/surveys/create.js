@@ -11,15 +11,12 @@ const surveys = [
 
 const createSurveys = async (db) => {
 	for (let survey of surveys) {
-		console.log('trying to create survey', survey);
 		await db.run('CREATE (a:survey {version: $version, id: $id, title: $title}) RETURN a', survey);
 		createQuestions(db, survey.id);
 	}
 };
 
 const createQuestion = async (db, question) => {
-
-	console.log('creating', question);
 	const query =`
 		CREATE (a:survey_question {
 					id: $_id,

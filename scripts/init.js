@@ -2,21 +2,21 @@ const db = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
 const createSurveys = require('./surveys/create');
 const createSuppliers = require('./suppliers/create');
-const createResponses = require('./responses/create');
+const createSubmissions = require('./submissions/create');
 
 const constraints = async (verb) => {
 	console.log(`${verb}ing constraints...`);
 
 	const constraintQueries = [
-		`${verb} CONSTRAINT ON (s:supplier) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:supplier) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (c:contract) ASSERT c.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (c:contract) ASSERT exists(c.id)`,
-		`${verb} CONSTRAINT ON (r:response) ASSERT r.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (r:response) ASSERT exists(r.id)`,
-		`${verb} CONSTRAINT ON (s:survey) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:survey) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:survey) ASSERT exists(s.version)`
+		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.id IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Supplier) ASSERT exists(s.id)`,
+		`${verb} CONSTRAINT ON (c:Contract) ASSERT c.id IS UNIQUE`,
+		`${verb} CONSTRAINT ON (c:Contract) ASSERT exists(c.id)`,
+		`${verb} CONSTRAINT ON (r:Submission) ASSERT r.id IS UNIQUE`,
+		`${verb} CONSTRAINT ON (r:Submission) ASSERT exists(r.id)`,
+		`${verb} CONSTRAINT ON (s:Survey) ASSERT s.id IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.id)`,
+		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.version)`
 	];
 
 	for (let constraintQuery of constraintQueries) {
@@ -42,14 +42,18 @@ const dropRelationships = async () => {
 	await db.run('MATCH ()-[o:RAISES]->() DELETE o');
 	await db.run('MATCH ()-[o:ALLOWS]->() DELETE o');
 	await db.run('MATCH ()-[o:SIGNS]->() DELETE o');
+	await db.run('MATCH ()-[o:SUBMITTED]->() DELETE o');
+	await db.run('MATCH ()-[o:ANSWERS]->() DELETE o');
+	await db.run('MATCH ()-[o:ANSWERS_QUESTION]->() DELETE o');
+	await db.run('MATCH ()-[o:HAS]->() DELETE o');
+	await db.run('MATCH ()-[o:OWNEDBY]->() DELETE o'); // TODO DELETE THIS ONE
 };
 
 const createNodes = async () => {
 	createSurveys(db);
 	createSuppliers(db);
-	createResponses(db);
+	createSubmissions(db);
 	// TODO create some suppliers with contracts
-	// TODO create some responses
 	// Uuse save endpoint to create nodes and relationships
 };
 
