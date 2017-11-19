@@ -1,5 +1,5 @@
-const nodeTypes = ['Supplier', 'Contract', 'Submission', 'Risk', 'Survey', 'SurveySection', 'SurveyQuestion', 'SurveyQuestionOption', 'SubmissionAnswer'];
-// const nodeTypes = ['supplier', 'contract', 'response', 'risk', 'survey', 'survey_section', 'survey_question', 'survey_question_option', 'submission_answer', 'submission'];
+// const nodeTypes = ['Supplier', 'Contract', 'Submission', 'Risk', 'Survey', 'SurveySection', 'SurveyQuestion', 'SurveyQuestionOption', 'SubmissionAnswer'];
+const nodeTypes = ['supplier', 'contract', 'response', 'risk', 'survey', 'survey_section', 'survey_question', 'survey_question_option', 'submission_answer', 'submission'];
 const checkNodeType = (req, res, next) => {
 
 	console.log('CHECK');
