@@ -9,7 +9,7 @@ const get = async (req, res) => {
 			return res.send(result.records[0]._fields[0].properties);
 		}
 		else {
-			return res.status(400).end(`${req.params.id} not found`);
+			return res.status(404).end(`${req.params.id} not found`);
 		}
 	}
 	catch (e) {
@@ -22,7 +22,7 @@ const create = async (req, res) => {
 
 	try {
 		const result = await db.run(createQuery, req.body);
-		res.send(result);
+		res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
 		return res.status(400).end(e.toString());
@@ -39,10 +39,10 @@ const update = async (req, res) => {
 		const result = await db.run(query, {props: req.body});
 
 		if (result.records.length) {
-			return res.status(200).end(`${req.body.id} updated`);
+			return res.send(result.records[0]._fields[0].properties);
 		}
 		else {
-			return res.status(400).end('No nodes updated');
+			return res.status(404).end(`${req.body.id} not found. No nodes updated.`);
 		}
 
 		res.send(result);
@@ -60,7 +60,7 @@ const remove = async (req, res) => {
 			return res.status(200).end(`${req.params.id} deleted`);
 		}
 		else {
-			return res.status(400).end('No nodes deleted');
+			return res.status(404).end(`${req.params.id} not found. No nodes deleted.`);
 		}
 	}
 	catch (e) {
