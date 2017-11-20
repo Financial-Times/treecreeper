@@ -27,9 +27,9 @@ const createSubmissions = async (db) => {
 			MATCH (a:Contract),(b:Submission)
 			WHERE a.id = '${submission.contractId}'
 			AND b.id = '${submission.id}'
-			CREATE (a)-[r:SUBMITTED]->(b)
+			CREATE (a)-[r:SUBMITS]->(b)
 			RETURN r`);
-		console.log('submitted', JSON.stringify(x, null, 2));
+		console.log('submits', JSON.stringify(x, null, 2));
 		await db.run(`
 			MATCH (a:Submission),(b:Survey)
 			WHERE a.id = '${submission.id}'

@@ -17,38 +17,43 @@ const get = async (req, res, nodeType) => {
 	}
 };
 
-const create = async (req, res, nodeType, relationship) => {
-	const createQuery = `CREATE (a:${nodeType} {name: $name, id: $id})	RETURN a`;
+const create = async (req, res, obj, nodeType, relationships) => {
+	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
+	console.log('create', nodeType, relationships);
 	try {
-		const result = await db.run(createQuery, req.body);
-				console.log('created node');
+		const result = await db.run(createQuery, {node: obj});
 
-		if (relationship) {
-			const createRelationship = `
-				MATCH (a:${relationship.from}),(b:${relationship.to})
-				WHERE a.id = '${req.body.supplierId}'
-				AND b.id = '${req.body.id}'
-				CREATE (a)-[r:${relationship.name}]->(b)
-				RETURN r
-			`;
+		console.log('trying to create');
 
-			try {
-				// TODO use single transaction
-				// fail both if either fails
-				const resultRel = await db.run(createRelationship, req.body);
+		if (relationships) {
+			console.log('relationshiops', relationships);
+			for (let relationship of relationships) {
+				const createRelationship = `
+					MATCH (a:${relationship.from}),(b:${relationship.to})
+					WHERE a.id = '${obj.supplierId}'
+					AND b.id = '${obj.id}'
+					CREATE (a)-[r:${relationship.name}]->(b)
+					RETURN r
+				`;
 
-				// console.log(result);
-				// console.log(resultRel);
+				try {
+					// TODO use single transaction
+					// fail both if either fails
+					await db.run(createRelationship, obj);
 
-				console.log('created relationship');
+					// console.log(result);
+					// console.log(resultRel);
 
-				// TODO check node created, check REL created
-				return res.status(200).end('Contract and link to Supplier created');
+					console.log('created relationship');
+				}
+				catch (e) {
+					return res.status(400).end(e.toString());
+				}
 			}
-			catch (e) {
-				return res.status(400).end(e.toString());
-			}
+
+			// TODO check node created, check REL created, more explicit message
+			return res.status(200).end('Relationships created');
 		}
 		res.send(result.records[0]._fields[0].properties);
 	}
@@ -57,20 +62,20 @@ const create = async (req, res, nodeType, relationship) => {
 	}
 };
 
-const update = async (req, res, nodeType) => {
+const update = async (req, res, obj, nodeType) => {
 	try {
 		const query = `
-			MATCH (a:${nodeType} {id: "${req.body.id}"})
+			MATCH (a:${nodeType} {id: "${obj.id}"})
 			SET a = $props
 			RETURN a
 		`;
-		const result = await db.run(query, {props: req.body});
+		const result = await db.run(query, {props: obj});
 
 		if (result.records.length) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
 		else {
-			return res.status(404).end(`${nodeType}${req.body.id} not found. No nodes updated.`);
+			return res.status(404).end(`${nodeType}${obj.id} not found. No nodes updated.`);
 		}
 
 		res.send(result);
@@ -96,4 +101,22 @@ const remove = async (req, res, nodeType, detach) => {
 	}
 };
 
-module.exports = { get, create, update, remove };
+
+const getAll = async (req, res, relationship, param) => {
+	try {
+		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
+		const result = await db.run(query);
+
+		if (result.records.length) {
+			return res.send(result.records);
+		}
+		else {
+			return res.status(404).end(`No ${relationship.to} found for ${relationship.from} ${param}`);
+		}
+	}
+	catch (e) {
+		return res.status(500).end(e.toString());
+	}
+};
+
+module.exports = { get, create, update, remove, getAll };

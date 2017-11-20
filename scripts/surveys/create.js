@@ -52,8 +52,8 @@ const createQuestions = async (db, surveyId) => {
 					createQuestion(db, child);
 					await db.run(`
 						MATCH (a:SurveyQuestion),(b:SurveyQuestion)
-						WHERE a.id = '${child._id}'
-						AND b.id = '${question._id}'
+						WHERE a.id = '${question._id}'
+						AND b.id = '${child._id}'
 						CREATE (a)-[r:RAISES {trigger: '${child.child_question_trigger}'}]->(b)
 						RETURN r
 					`);
@@ -74,9 +74,9 @@ const createQuestions = async (db, surveyId) => {
 
 const fieldOptions = async (db, question) => {
 	for (let option of question.fieldOptions) {
-		await db.run(`CREATE (a:surveyQuestionOption {text: '${option}', id: '${question._id+option}'}) RETURN a`);
+		await db.run(`CREATE (a:SurveyQuestionOption {text: '${option}', id: '${question._id+option}'}) RETURN a`);
 		await db.run(`
-			MATCH (a:SurveyQuestion),(b:surveyQuestionOption)
+			MATCH (a:SurveyQuestion),(b:SurveyQuestionOption)
 			WHERE a.id = '${question._id}'
 			AND b.id = '${question._id+option}'
 			CREATE (a)-[r:ALLOWS]->(b)

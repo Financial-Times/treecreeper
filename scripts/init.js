@@ -42,7 +42,7 @@ const dropRelationships = async () => {
 	await db.run('MATCH ()-[o:RAISES]->() DELETE o');
 	await db.run('MATCH ()-[o:ALLOWS]->() DELETE o');
 	await db.run('MATCH ()-[o:SIGNS]->() DELETE o');
-	await db.run('MATCH ()-[o:SUBMITTED]->() DELETE o');
+	await db.run('MATCH ()-[o:SUBMITS]->() DELETE o');
 	await db.run('MATCH ()-[o:ANSWERS]->() DELETE o');
 	await db.run('MATCH ()-[o:ANSWERS_QUESTION]->() DELETE o');
 	await db.run('MATCH ()-[o:HAS]->() DELETE o');

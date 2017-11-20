@@ -5,11 +5,11 @@ const get = (req, res) => {
 };
 
 const create = async (req, res) => {
-	return crud.create(req, res, 'Supplier');
+	return crud.create(req, res, req.body.node, 'Supplier');
 };
 
 const update = async (req, res) => {
-	return crud.update(req, res, 'Supplier');
+	return crud.update(req, res, req.body.node, 'Supplier');
 };
 
 const remove = async (req, res) => {
