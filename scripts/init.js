@@ -46,7 +46,6 @@ const dropRelationships = async () => {
 	await db.run('MATCH ()-[o:ANSWERS]->() DELETE o');
 	await db.run('MATCH ()-[o:ANSWERS_QUESTION]->() DELETE o');
 	await db.run('MATCH ()-[o:HAS]->() DELETE o');
-	await db.run('MATCH ()-[o:OWNEDBY]->() DELETE o'); // TODO DELETE THIS ONE
 };
 
 const createNodes = async () => {

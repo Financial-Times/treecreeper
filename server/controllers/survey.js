@@ -15,7 +15,7 @@ const get = async (req, res) => {
 		};
 
 		if (result.records.length) {
-			surveyObj.title = result.records[0]._fields[0].start.properties.title;
+			const sections = [];
 
 			for (const record of result.records) {
 				for (const field of record._fields) {
@@ -25,6 +25,11 @@ const get = async (req, res) => {
 							const sectionName = segment.relationship.properties.section;
 							const questionAsEnd = segment.end.properties;
 							questionAsEnd.section = sectionName;
+
+							if (!sections.includes(sectionName)) {
+								sections.push(sectionName);
+							}
+
 							if (!surveyObj.questions[questionAsEnd.id]) {
 								surveyObj.questions[questionAsEnd.id] = questionAsEnd;
 							}
@@ -47,13 +52,13 @@ const get = async (req, res) => {
 						else if (segment.relationship.type === 'RAISES') {
 							const parentQuestion = segment.start.properties;
 							const childQuestion = segment.end.properties;
+
 							childQuestion.parent = parentQuestion.id;
-							console.log('raises', segment)
+							childQuestion.trigger = segment.relationship.properties.trigger;
+
 							if (surveyObj.questions[parentQuestion.id])	{
-								console.log('HAS CHILD QUESTIONS')
-								console.log(surveyObj.questions[parentQuestion.id])
 								if (!surveyObj.questions[parentQuestion.id].childQuestions) {
-									surveyObj.questions[parentQuestion.id].childQuestions = []
+									surveyObj.questions[parentQuestion.id].childQuestions = [];
 								}
 								surveyObj.questions[parentQuestion.id].childQuestions.push(childQuestion);
 							}
@@ -61,7 +66,30 @@ const get = async (req, res) => {
 					}
 				}
 			}
-			return res.send(surveyObj);
+
+			const surveyObjWithSections = {
+				title: result.records[0]._fields[0].start.properties.title,
+				id: req.params.id,
+				sections: {}
+			};
+
+			for (const section of sections) {
+				surveyObjWithSections.sections[section] = {
+					questions: []
+				};
+
+				for (const i in surveyObj.questions) {
+					if (surveyObj.questions.hasOwnProperty(i)) {
+
+						const question = surveyObj.questions[i];
+
+						if (section === question.section) {
+							surveyObjWithSections.sections[section].questions.push(question);
+						}
+					}
+				}
+			}
+			return res.send(surveyObjWithSections);
 		}
 		else {
 			return res.status(404).end(`Survey ${req.params.id} not found`);

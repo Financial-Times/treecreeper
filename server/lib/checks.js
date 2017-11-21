@@ -6,10 +6,6 @@ const checkNodeType = (req, res, next) => {
 	const nodeType = req.params.nodeType;
 	const relationship = req.body.relationship;
 
-	// console.log(nodeType)
-	// console.log(relationship)
-	// console.log(relationship && !relationship.targetNode)
-
 	if (!nodeType ||
 		relationship && !relationship.targetNode ||
 		relationship && relationship.targetNode && !relationship.targetNode.type) {
