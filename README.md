@@ -2,4 +2,5 @@
 
 API for the GDPR graph database
 
-WIP
+npm run env
+npm start
