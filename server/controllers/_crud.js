@@ -58,7 +58,6 @@ const create = async (req, res, obj, nodeType, relationships) => {
 		res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
-		console.log(e)
 		return res.status(400).end(e.toString());
 	}
 };
@@ -103,13 +102,17 @@ const remove = async (req, res, nodeType, detach) => {
 };
 
 
-const getAll = async (req, res, relationship, param) => {
+const getAllforOne = async (req, res, relationship, param) => {
 	try {
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
 		const result = await db.run(query);
 
 		if (result.records.length) {
-			return res.send(result.records);
+			const elements = result.records.map((node) => {
+				return node._fields[0].end.properties;
+			});
+			console.log(elements)
+			return res.send(elements);
 		}
 		else {
 			return res.status(404).end(`No ${relationship.to} found for ${relationship.from} ${param}`);
@@ -120,4 +123,27 @@ const getAll = async (req, res, relationship, param) => {
 	}
 };
 
-module.exports = { get, create, update, remove, getAll };
+
+const getAll = async (req, res, nodeType) => {
+
+	try {
+		const query = `MATCH (a:${nodeType}) RETURN a`;
+		const result = await db.run(query);
+
+		if (result.records.length) {
+			const elements = result.records.map((node) => {
+				return node._fields[0].properties;
+			});
+
+			return res.send(elements);
+		}
+		else {
+			return res.status(404).end(`No ${nodeType} found`);
+		}
+	}
+	catch (e) {
+		return res.status(500).end(e.toString());
+	}
+};
+
+module.exports = { get, create, update, remove, getAll, getAllforOne };

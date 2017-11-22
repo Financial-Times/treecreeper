@@ -12,7 +12,6 @@ const create = async (req, res) => {
 	]);
 
 	for (let answer of req.body.answers) {
-		// console.log('\n\ncreating answer', answer)
 		crud.create(req, res, answer, 'SubmissionAnswer', [
 			{name:'HAS', from: 'Submission', fromId: req.body.node.id, toId: answer.id, to: 'SubmissionAnswer'},
 			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.id, to: 'SurveyQuestion'}
@@ -28,8 +27,8 @@ const remove = async (req, res) => {
 	return crud.remove(req, res, 'Submission', true);
 };
 
-const getAll = async (req, res) => {
-	return crud.getAll(req, res, {name:'SUBMITS', from: 'Contract', to: 'Submission'}, req.params.contractId);
+const getAllforOne = async (req, res) => {
+	return crud.getAllforOne(req, res, {name:'SUBMITS', from: 'Contract', to: 'Submission'}, req.params.contractId);
 };
 
-module.exports = { get, getAll, create, update, remove };
+module.exports = { get, getAllforOne, create, update, remove };

@@ -16,4 +16,8 @@ const remove = async (req, res) => {
 	return crud.remove(req, res, 'Supplier');
 };
 
-module.exports = { get, create, update, remove };
+const getAll = async (req, res) => {
+	return crud.getAll(req, res, 'Supplier');
+};
+
+module.exports = { get, create, update, remove, getAll };

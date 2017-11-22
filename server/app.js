@@ -20,9 +20,13 @@ app.use(security);
 // get one
 app.get('/api/supplier/:id', supplier.get);
 app.get('/api/contract/:id', contract.get);
-app.get('/api/contracts/:supplierId', contract.getAll);
 app.get('/api/submission/:id', submission.get);
 app.get('/api/survey/:id', survey.get);
+
+// get all
+app.get('/api/contracts/:supplierId', contract.getAllforOne);
+app.get('/api/suppliers/', supplier.getAll);
+
 
 // create a new one
 app.post('/api/supplier/', supplier.create);
