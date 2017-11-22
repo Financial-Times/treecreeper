@@ -24,7 +24,7 @@ app.get('/api/submission/:id', submission.get);
 app.get('/api/survey/:id', survey.get);
 
 // get all
-app.get('/api/contracts/:supplierId', contract.getAllforOne);
+app.get('/api/contracts/:supplierId', contract.get);
 app.get('/api/suppliers/', supplier.getAll);
 
 

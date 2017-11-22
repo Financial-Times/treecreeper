@@ -111,7 +111,6 @@ const getAllforOne = async (req, res, relationship, param) => {
 			const elements = result.records.map((node) => {
 				return node._fields[0].end.properties;
 			});
-			console.log(elements)
 			return res.send(elements);
 		}
 		else {
