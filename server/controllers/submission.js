@@ -5,15 +5,17 @@ const get = (req, res) => {
 };
 
 const create = async (req, res) => {
+	console.log('submission',req.body);
 	crud.create(req, res, req.body.node, 'Submission', [
-		{name:'SUBMITS', from: 'Contract', to: 'Submission'},
-		{name:'ANSWERS', from: 'Submission', to: 'Survey'}
+		{name:'SUBMITS', from: 'Contract', fromId: req.body.node.contractId, to: 'Submission', toId: req.body.node.id},
+		{name:'ANSWERS', from: 'Submission', fromId: req.body.node.id, to: 'Survey', toId: req.body.node.surveyId}
 	]);
 
 	for (let answer of req.body.answers) {
+		// console.log('\n\ncreating answer', answer)
 		crud.create(req, res, answer, 'SubmissionAnswer', [
-			{name:'HAS', from: 'Submission', to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', to: 'SurveyQuestion'}
+			{name:'HAS', from: 'Submission', fromId: req.body.node.id, toId: answer.id, to: 'SubmissionAnswer'},
+			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.id, to: 'SurveyQuestion'}
 		]);
 	}
 };

@@ -42,7 +42,7 @@ app.delete('/api/contract/:id', contract.remove);
 app.delete('/api/submission/:id', submission.update);
 app.delete('/api/survey/:id', survey.update);
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 8888;
 
 app.listen(PORT, () => {
 	logger.info(`Listening on ${PORT}`);

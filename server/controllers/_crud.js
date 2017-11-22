@@ -18,21 +18,21 @@ const get = async (req, res, nodeType) => {
 };
 
 const create = async (req, res, obj, nodeType, relationships) => {
+
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
-	console.log('create', nodeType, relationships);
 	try {
 		const result = await db.run(createQuery, {node: obj});
 
-		console.log('trying to create');
+		console.log('trying to create', obj);
 
 		if (relationships) {
 			console.log('relationshiops', relationships);
 			for (let relationship of relationships) {
 				const createRelationship = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
-					WHERE a.id = '${obj.supplierId}'
-					AND b.id = '${obj.id}'
+					WHERE a.id = '${relationship.fromId}'
+					AND b.id = '${relationship.toId}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
@@ -40,10 +40,10 @@ const create = async (req, res, obj, nodeType, relationships) => {
 				try {
 					// TODO use single transaction
 					// fail both if either fails
-					await db.run(createRelationship, obj);
+					const resultRel = await db.run(createRelationship, obj);
 
-					// console.log(result);
-					// console.log(resultRel);
+					console.log(createRelationship, '\n\n');
+					console.log(resultRel);
 
 					console.log('created relationship');
 				}
@@ -58,6 +58,7 @@ const create = async (req, res, obj, nodeType, relationships) => {
 		res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
+		console.log(e)
 		return res.status(400).end(e.toString());
 	}
 };
