@@ -20,9 +20,13 @@ app.use(security);
 // get one
 app.get('/api/supplier/:id', supplier.get);
 app.get('/api/contract/:id', contract.get);
-app.get('/api/contracts/:supplierId', contract.getAll);
 app.get('/api/submission/:id', submission.get);
 app.get('/api/survey/:id', survey.get);
+
+// get all
+app.get('/api/contracts/:supplierId', contract.get);
+app.get('/api/suppliers/', supplier.getAll);
+
 
 // create a new one
 app.post('/api/supplier/', supplier.create);
@@ -42,7 +46,7 @@ app.delete('/api/contract/:id', contract.remove);
 app.delete('/api/submission/:id', submission.update);
 app.delete('/api/survey/:id', survey.update);
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 8888;
 
 app.listen(PORT, () => {
 	logger.info(`Listening on ${PORT}`);
