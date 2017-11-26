@@ -5,7 +5,7 @@
   "main": "server/app.js",
   "scripts": {
     "start": "nodemon server/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\"",
     "env": "export $(cat .env | xargs)"
   },
   "repository": {
@@ -27,9 +27,9 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "neo4j": "^2.0.0-RC2",
-    "neo4j-driver": "^1.5.0"
+    "neo4j-driver": "^1.5.0",
+    "nodemon": "^1.12.1"
   },
   "devDependencies": {
-    "nodemon": "^1.12.1"
   }
 }
