@@ -17,6 +17,10 @@ app.get('/__gtg', (req, res) => {
 app.use(bodyParser.json());
 app.use(security);
 
+app.get('/', (req, res) => {
+	res.send('biz op api');
+});
+
 // get one
 app.get('/api/supplier/:id', supplier.get);
 app.get('/api/contract/:id', contract.get);
