@@ -38,12 +38,16 @@ const createQuestions = async (db, surveyId) => {
 		const questions = section.form;
 
 		for (let question of questions) {
+			const sectionTitle = section.title
+				? `'${section.title}'`
+				: `''`;
+
 			createQuestion(db, question);
 			await db.run(`
 				MATCH (a:Survey),(b:SurveyQuestion)
 				WHERE a.id = '${surveyId}'
 				AND b.id = '${question._id}'
-				CREATE (a)-[r:ASKS {section: '${section.title}'}]->(b)
+				CREATE (a)-[r:ASKS {section: ${sectionTitle}}]->(b)
 				RETURN r
 			`);
 
