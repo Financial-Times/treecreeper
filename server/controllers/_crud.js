@@ -17,7 +17,15 @@ const get = async (req, res, nodeType) => {
 	}
 };
 
-const create = async (req, res, obj, nodeType, relationships) => {
+const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) => {
+
+	if (uniqueAttrName) {
+		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${obj[uniqueAttrName]}"}) RETURN a`;
+		const result = await db.run(existingNode);
+		if (result.records.length > 0) {
+			return res.status(400).end(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
+		}
+	}
 
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
