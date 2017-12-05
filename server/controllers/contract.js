@@ -110,15 +110,11 @@ const get = async (req, res) => {
 					}
 				}
 			}
-
-			console.log('contractsObj');
-			console.log(JSON.stringify(contractsObj, null, 2));
-			return res.send(contractsObj);
-		}
-		else {
-			return res.status(404).end(`Survey ${req.params.id} not found`);
 		}
 
+		console.log('contractsObj');
+		console.log(JSON.stringify(contractsObj, null, 2));
+		return res.send(contractsObj);
 	}
 	catch (e) {
 		return res.status(500).end(e.toString());

@@ -23,7 +23,7 @@ module.exports = [{
 	'name': 'Contract developers',
 	'id': 'makers2'
 },{
-	'supplierId': 'a0z0E000002qSBZ',
+	'supplierId': 'a0z0e000002qsbz',
 	'name': 'Contract-1',
-	'id': 'a0z0E000002qSBZ_1'
+	'id': 'a0z0e000002qsbz_1'
 }];
