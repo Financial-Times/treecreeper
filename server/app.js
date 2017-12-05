@@ -39,7 +39,6 @@ app.post('/api/contract/', contract.create);
 app.post('/api/submission/', submission.create);
 app.post('/api/survey/', survey.create);
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
-	// console.log(req.body);
 	return crud.create(req, res, req.body.node, req.params.nodeName, null, req.params.uniqueAttrName);
 });
 
