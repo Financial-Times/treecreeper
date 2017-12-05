@@ -6,10 +6,10 @@ const getNode = (req, res) => {
 };
 
 const get = async (req, res) => {
+
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->()-[:ALLOWS|:RAISES*0..]->() RETURN p`;
 		const result = await db.run(query);
-
 		const surveyObj = {
 			questions: {}
 		};
@@ -104,7 +104,6 @@ const get = async (req, res) => {
 const create = async (req, res) => {
 
 	crud.create(req, res, req.body.node, 'Survey');
-
 	for (let section of req.body.sections) {
 		const questions = section.form;
 
