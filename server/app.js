@@ -7,6 +7,7 @@ const supplier = require('./controllers/supplier');
 const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
 const submission = require('./controllers/submission');
+const crud = require('./controllers/_crud');
 
 const app = express();
 
@@ -37,6 +38,10 @@ app.post('/api/supplier/', supplier.create);
 app.post('/api/contract/', contract.create);
 app.post('/api/submission/', submission.create);
 app.post('/api/survey/', survey.create);
+app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
+	// console.log(req.body);
+	return crud.create(req, res, req.body.node, req.params.nodeName, null, req.params.uniqueAttrName);
+});
 
 // modify an existing one
 app.put('/api/supplier/', supplier.update);

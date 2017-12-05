@@ -22,6 +22,12 @@ module.exports = [{
 	'address': 'Lorem St',
 	'contact': 'e@mail.com',
 	'term': '10 Years'
+}, {
+	'_id': 'a0z0E000002qSBZ',
+	'name': 'Fairtlough Ltd',
+	'address': 'Lorem St',
+	'contact': 'e@mail.com',
+	'term': '10 Years'
 }];
 
 // [{

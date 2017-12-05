@@ -12,7 +12,7 @@ module.exports = [{
 	'id': 'fastly1'
 },{
 	'supplierId': 'danger',
-	'name': 'Some Dangerous Product ',
+	'name': 'Some Dangerous Product',
 	'id': 'danger1'
 },{
 	'supplierId': 'makers',
@@ -22,4 +22,11 @@ module.exports = [{
 	'supplierId': 'makers',
 	'name': 'Contract developers',
 	'id': 'makers2'
+},{
+	'supplierId': 'a0z0E000002qSBZ',
+	'name': 'Contract-1',
+	'id': 'a0z0E000002qSBZ_1'
 }];
+
+
+
