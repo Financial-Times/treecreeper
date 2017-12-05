@@ -27,6 +27,3 @@ module.exports = [{
 	'name': 'Contract-1',
 	'id': 'a0z0E000002qSBZ_1'
 }];
-
-
-
