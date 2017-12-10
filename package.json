@@ -1,5 +1,5 @@
 {
-  "name": "gdpr-api",
+  "name": "gdpr-biz-op-api",
   "version": "1.0.0",
   "description": "",
   "main": "server/app.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Financial-Times/gdpr-api.git"
+    "url": "git+https://github.com/Financial-Times/gdpr-biz-op-api.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Financial-Times/gdpr-api/issues"
+    "url": "https://github.com/Financial-Times/gdpr-biz-op-api/issues"
   },
-  "homepage": "https://github.com/Financial-Times/gdpr-api#readme",
+  "homepage": "https://github.com/Financial-Times/gdpr-biz-op-api#readme",
   "dev-dependencies": {
     "@financial-times/secret-squirrel": "^2.5.16",
     "save": "^2.3.1"
