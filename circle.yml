@@ -1,19 +1,14 @@
 machine:
   node:
     version: 7.10.0
-  java:
-    version: oraclejdk8
-  environment:
-    NEO4J_VERSION: "3.1.1"
-  post:
-    - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
-    - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
-    - sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j-community-$NEO4J_VERSION/conf/neo4j.conf
-    - neo4j-community-$NEO4J_VERSION/bin/neo4j start
-
+  services:
+    - neo4j
 deployment:
   production:
     branch: master
+database:
+  override:
+    - node gdpr-biz-op-api/scripts/init.js
 test:
   post:
     - mv coverage $CIRCLE_ARTIFACTS
