@@ -68,6 +68,7 @@ const init = async () => {
 		// CREATE
 		await constraints('CREATE');
 		await createNodes();
+		process.exit()
 	}
 };
 
