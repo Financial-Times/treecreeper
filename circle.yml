@@ -15,3 +15,6 @@ machine:
 deployment:
   production:
     branch: master
+test:
+  post:
+    - mv coverage $CIRCLE_ARTIFACTS
