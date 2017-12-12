@@ -5,7 +5,7 @@
   "main": "server/app.js",
   "scripts": {
     "start": "nodemon server/app.js",
-    "test": "echo \"Error: no test specified\"",
+    "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive",
     "env": "export $(cat .env | xargs)"
   },
   "repository": {
@@ -31,5 +31,10 @@
     "nodemon": "^1.12.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "istanbul": "^1.0.0-alpha.2",
+    "mocha": "^4.0.1"
   }
 }
