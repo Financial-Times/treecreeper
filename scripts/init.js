@@ -67,7 +67,7 @@ const init = async () => {
 
 		// CREATE
 		await constraints('CREATE');
-		await createNodes();
+		// await createNodes();
 	}
 };
 
