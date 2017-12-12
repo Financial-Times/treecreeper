@@ -1,18 +1,18 @@
 machine:
   node:
     version: 7.10.0
-  pre:
-    - sudo sed -i "s|dbms.security.auth_enabled=true|dbms.security.auth_enabled=false|g" /etc/neo4j/neo4j-server.properties
+  environment:
+    NEO4J_VERSION: "3.1.1"
   services:
     - neo4j
 deployment:
   production:
     branch: master
 database:
-  override:
-    - rake neo4j:install[community-latest,test]
-    - rake neo4j:config[gdpr,7475]
-    - rake neo4j:start[gdpr]
+    - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
+    - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
+    - sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j-community-$NEO4J_VERSION/conf/neo4j.conf
+    - neo4j-community-$NEO4J_VERSION/bin/neo4j start
     - node scripts/init.js
 test:
   post:
