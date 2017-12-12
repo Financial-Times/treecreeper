@@ -59,11 +59,11 @@ const createNodes = async () => {
 const init = async () => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
-		await constraints('DROP');
-		await dropRelationships();
-		for (let nodeType of nodeTypes) {
-			await dropNodes(nodeType);
-		}
+		// await constraints('DROP');
+		// await dropRelationships();
+		// for (let nodeType of nodeTypes) {
+		// 	await dropNodes(nodeType);
+		// }
 
 		// CREATE
 		await constraints('CREATE');
