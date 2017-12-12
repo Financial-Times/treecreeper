@@ -3,12 +3,11 @@ machine:
     version: 7.10.0
   environment:
     NEO4J_VERSION: "3.1.1"
-  services:
-    - neo4j
 deployment:
   production:
     branch: master
 database:
+  override:
     - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
     - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
     - sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j-community-$NEO4J_VERSION/conf/neo4j.conf
