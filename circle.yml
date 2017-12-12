@@ -8,7 +8,7 @@ deployment:
     branch: master
 database:
   override:
-    - node gdpr-biz-op-api/scripts/init.js
+    - node scripts/init.js
 test:
   post:
     - mv coverage $CIRCLE_ARTIFACTS
