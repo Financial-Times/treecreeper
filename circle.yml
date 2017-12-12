@@ -1,6 +1,8 @@
 machine:
   node:
     version: 7.10.0
+  pre:
+    - sudo sed -i "s|dbms.security.auth_enabled=true|dbms.security.auth_enabled=false|g" /etc/neo4j/neo4j-server.properties
   services:
     - neo4j
 deployment:
@@ -8,6 +10,9 @@ deployment:
     branch: master
 database:
   override:
+    - rake neo4j:install[community-latest,test]
+    - rake neo4j:config[gdpr,7475]
+    - rake neo4j:start[gdpr]
     - node scripts/init.js
 test:
   post:
