@@ -112,8 +112,6 @@ const get = async (req, res) => {
 			}
 		}
 
-		console.log('contractsObj');
-		console.log(JSON.stringify(contractsObj, null, 2));
 		return res.send(contractsObj);
 	}
 	catch (e) {

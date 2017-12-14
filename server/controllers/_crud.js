@@ -4,7 +4,6 @@ const get = async (req, res, nodeType) => {
 	try {
 		const query = `MATCH (a:${nodeType} {id: "${req.params.id}"}) RETURN a`;
 		const result = await db.run(query);
-
 		if (result.records.length) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
@@ -18,7 +17,6 @@ const get = async (req, res, nodeType) => {
 };
 
 const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) => {
-
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${obj[uniqueAttrName]}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -28,14 +26,12 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 	}
 
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
-
 	try {
 		const result = await db.run(createQuery, {node: obj});
 
 		console.log('trying to create', obj);
 
 		if (relationships) {
-			console.log('relationshiops', relationships);
 			for (let relationship of relationships) {
 				const createRelationship = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})

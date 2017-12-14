@@ -1,6 +1,9 @@
 const suppliers = require('./suppliers');
 const contracts = require('./contracts');
 
+console.log(suppliers, 'suppliers')
+console.log(contracts, 'contracts')
+
 const createSuppliers = async (db) => {
 	for (let supplier of suppliers) {
 		await db.run('CREATE (a:Supplier {id: $_id, name: $name, address: $address, term: $term, contact: $contact}) RETURN a', supplier);
@@ -26,4 +29,3 @@ const createAll = (db) => {
 };
 
 module.exports = createAll;
-

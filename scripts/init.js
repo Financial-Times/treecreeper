@@ -27,6 +27,7 @@ const constraints = async (verb) => {
 	}
 
 	const constraints = await db.run('CALL db.constraints');
+	console.log(constraints, 'constraints')
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
@@ -49,9 +50,10 @@ const dropRelationships = async () => {
 };
 
 const createNodes = async () => {
-	createSurveys(db);
-	createSuppliers(db);
-	createSubmissions(db);
+	await createSurveys(db);
+	await createSuppliers(db);
+	await createSubmissions(db);
+	console.log('created nodes')
 	// TODO create some suppliers with contracts
 	// Uuse save endpoint to create nodes and relationships
 };
@@ -68,7 +70,7 @@ const init = async () => {
 		// CREATE
 		await constraints('CREATE');
 		await createNodes();
-		process.exit()
+		process.exit();
 	}
 };
 
