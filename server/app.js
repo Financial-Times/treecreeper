@@ -51,8 +51,8 @@ app.put('/api/survey/', survey.update);
 // delete an existing one
 app.delete('/api/supplier/:id', supplier.remove);
 app.delete('/api/contract/:id', contract.remove);
-app.delete('/api/submission/:id', submission.update);
-app.delete('/api/survey/:id', survey.update);
+app.delete('/api/submission/:id', submission.remove);
+app.delete('/api/survey/:id', survey.remove);
 
 const PORT = process.env.PORT || 8888;
 

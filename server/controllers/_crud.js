@@ -29,8 +29,6 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 	try {
 		const result = await db.run(createQuery, {node: obj});
 
-		console.log('trying to create', obj);
-
 		if (relationships) {
 			for (let relationship of relationships) {
 				const createRelationship = `
@@ -45,9 +43,6 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 					// TODO use single transaction
 					// fail both if either fails
 					const resultRel = await db.run(createRelationship, obj);
-
-					console.log(createRelationship, '\n\n');
-					console.log(resultRel);
 
 					console.log('created relationship');
 				}

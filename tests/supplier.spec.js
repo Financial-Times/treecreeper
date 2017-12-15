@@ -53,4 +53,33 @@ describe('Supplier - API endpoints', () => {
             });
         });
     });
+
+    describe('POST should create a new supplier node', () => {
+
+        before(() => request(app)
+        .post('/api/supplier')
+        .set('API_KEY', `${process.env.API_KEY}`)
+        .send({ node: {'address': 'Lorem St', 'contact': 'test@email.com',
+        'name': 'Supplier Test', 'term': '1 Year', 'id': 'suppliertest'}}));
+
+        after(() => request(app)
+        .delete('/api/supplier/suppliertest')
+        .set('API_KEY', `${process.env.API_KEY}`));
+
+        it('GET should retrieve the new supplier node - status code 200', (done) => {
+            request(app)
+            .get('/api/supplier/suppliertest')
+            .set('API_KEY', `${process.env.API_KEY}`)
+            .expect(200, done);
+        });
+
+        it('POST should not allow duplicate nodes', (done) => {
+            request(app)
+            .post('/api/supplier')
+            .set('API_KEY', `${process.env.API_KEY}`)
+            .send({ node: {'address': 'Lorem St', 'contact': 'test@email.com',
+            'name': 'Supplier Test', 'term': '1 Year', 'id': 'suppliertest'}})
+            .expect(400, done);
+        });
+    });
 });
