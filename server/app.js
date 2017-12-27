@@ -22,37 +22,33 @@ app.get('/', (req, res) => {
 	res.send('biz op api');
 });
 
-// get one
+// supplier
 app.get('/api/supplier/:id', supplier.get);
-app.get('/api/contract/:id', contract.get);
-app.get('/api/submission/:id', submission.get);
-app.get('/api/survey/:id', survey.get);
-
-// get all
-app.get('/api/contracts/:supplierId', contract.get);
 app.get('/api/suppliers/', supplier.getAll);
-
-
-// create a new one
 app.post('/api/supplier/', supplier.create);
+app.put('/api/supplier/', supplier.update);
+
+// contract
+app.get('/api/contract/:id', contract.get);
+app.get('/api/contracts/:supplierId', contract.get); // ?? check this. shouldn't be the same as the line above
 app.post('/api/contract/', contract.create);
+app.put('/api/contract/', contract.update);
+
+// submission
+app.get('/api/submission/:id', submission.get);
+app.get('/api/submissions/:contractId/:surveyId', submission.getAllforOne);
 app.post('/api/submission/', submission.create);
+app.put('/api/submission/', submission.update);
+
+// survey
+app.get('/api/survey/:id', survey.get);
 app.post('/api/survey/', survey.create);
+app.put('/api/survey/', survey.update);
+
+// generic node (experimental)
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
 	return crud.create(req, res, req.body.node, req.params.nodeName, null, req.params.uniqueAttrName);
 });
-
-// modify an existing one
-app.put('/api/supplier/', supplier.update);
-app.put('/api/contract/', contract.update);
-app.put('/api/submission/', submission.update);
-app.put('/api/survey/', survey.update);
-
-// delete an existing one
-app.delete('/api/supplier/:id', supplier.remove);
-app.delete('/api/contract/:id', contract.remove);
-app.delete('/api/submission/:id', submission.update);
-app.delete('/api/survey/:id', survey.update);
 
 const PORT = process.env.PORT || 8888;
 

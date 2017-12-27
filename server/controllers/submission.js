@@ -1,4 +1,5 @@
 const crud = require('./_crud');
+const db = require('../db-connection');
 
 const get = (req, res) => {
 	return crud.get(req, res, 'Submission');
@@ -28,7 +29,24 @@ const remove = async (req, res) => {
 };
 
 const getAllforOne = async (req, res) => {
-	return crud.getAllforOne(req, res, {name:'SUBMITS', from: 'Contract', to: 'Submission'}, req.params.contractId);
+
+	try {
+		const query = `MATCH p=(Contract {id: "${req.params.contractId}"})-[r:SUBMITS]->(Submission {surveyId: "${req.params.surveyId}"})-[z:HAS]->(SubmissionAnswer) RETURN p`;
+		const result = await db.run(query);
+
+		if (result.records.length) {
+			const elements = result.records.map((node) => {
+				return node._fields[0].end.properties;
+			});
+			return res.send(elements);
+		}
+		else {
+			return res.status(404).end(`No ${req.params.surveyId} survey answers found for contract ${req.params.contractId}`);
+		}
+	}
+	catch (e) {
+		return res.status(500).end(e.toString());
+	}
 };
 
 module.exports = { get, getAllforOne, create, update, remove };

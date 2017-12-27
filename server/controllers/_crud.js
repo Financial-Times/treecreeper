@@ -109,6 +109,7 @@ const remove = async (req, res, nodeType, detach) => {
 const getAllforOne = async (req, res, relationship, param) => {
 	try {
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
+		console.log(query)
 		const result = await db.run(query);
 
 		if (result.records.length) {
