@@ -4,9 +4,9 @@
   "description": "",
   "main": "server/app.js",
   "scripts": {
-    "start": "nodemon server/app.js",
+    "start": "export $(cat .env | xargs) && nodemon server/app.js",
     "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive",
-    "env": "export $(cat .env | xargs)"
+    "test-dev": "mocha test/**/*.spec.js"
   },
   "repository": {
     "type": "git",
