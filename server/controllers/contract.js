@@ -112,6 +112,12 @@ const get = async (req, res) => {
 			}
 		}
 
+		const isEmpty = !Object.keys(contractsObj).length;
+
+		if (isEmpty) {
+			return res.status(404).end(`No contracts found for ${req.params.supplierId}`);
+		}
+
 		return res.send(contractsObj);
 	}
 	catch (e) {
