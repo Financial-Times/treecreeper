@@ -6,7 +6,6 @@ const get = (req, res) => {
 };
 
 const create = async (req, res) => {
-	console.log('submission',req.body);
 	crud.create(req, res, req.body.node, 'Submission', [
 		{name:'SUBMITS', from: 'Contract', fromId: req.body.node.contractId, to: 'Submission', toId: req.body.node.id},
 		{name:'ANSWERS', from: 'Submission', fromId: req.body.node.id, to: 'Survey', toId: req.body.node.surveyId}

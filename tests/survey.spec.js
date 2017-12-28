@@ -18,7 +18,35 @@ describe('Survey - API endpoints', () => {
             request(app)
             .get('/invalidId')
             .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(404, process.exit(), done);
+            .expect(404, done);
+        });
+    });
+
+//in order for the .get(/api/survey/surveytest) to work, need to create a relationship
+//so that result.records exist
+    describe('POST', () => {
+        before(() => request(app)
+        .post('/api/survey')
+        .set('API_KEY', `${process.env.API_KEY}`)
+        .send({node: {'id': 'surveytest', 'title': 'Test Survey', 'version': 0}}));
+
+        after(() => request(app)
+        .delete('/api/survey/surveytest')
+        .set('API_KEY', `${process.env.API_KEY}`));
+
+        it('GET should retrieve the new survey node - status code 200', (done) => {
+            request(app)
+            .get('/api/survey/surveytest')
+            .set('API_KEY', `${process.env.API_KEY}`)
+            .expect(200, done);
+        });
+
+        it('POST should not allow duplicate nodes', (done) => {
+            request(app)
+            .post('/api/survey')
+            .set('API_KEY', `${process.env.API_KEY}`)
+            .send({ node: {'id': 'surveytest', 'title': 'Test Survey', 'version': 0}})
+            .expect(400, process.exit(), done);
         });
     });
 });
