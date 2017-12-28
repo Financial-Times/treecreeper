@@ -29,7 +29,7 @@ app.post('/api/supplier/', supplier.create);
 app.put('/api/supplier/', supplier.update);
 
 // contract
-app.get('/api/contract/:id', contract.get);
+app.get('/api/contract/:id', contract.getNode);
 app.get('/api/contracts/:supplierId', contract.get); // ?? check this. shouldn't be the same as the line above
 app.post('/api/contract/', contract.create);
 app.put('/api/contract/', contract.update);
