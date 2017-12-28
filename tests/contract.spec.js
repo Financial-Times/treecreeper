@@ -35,7 +35,6 @@ describe ('Contract - API endpoints', () => {
 		});
 	});
 
-
 	describe('POST should create a new contract node', () => {
 
 		before(() => request(app)
