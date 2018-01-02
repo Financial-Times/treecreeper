@@ -38,7 +38,7 @@ app.put('/api/contract/', contract.update);
 app.get('/api/submission/:id', submission.get);
 app.get('/api/submissions/:contractId/:surveyId', submission.getAllforOne);
 app.post('/api/submission/', submission.create);
-app.put('/api/submission/', submission.update);
+app.put('/api/submission/:id/:surveyId', submission.update);
 
 // survey
 app.get('/api/survey/:id', survey.get);

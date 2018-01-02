@@ -38,11 +38,18 @@ const getAllforOne = async (req, res) => {
 		if (result.records.length) {
 			for (const record of result.records) {
 				for (const field of record._fields) {
+					let submission;
 					let submissionAnswer;
 					let surveyQuestion;
 
 					for (const segment of field.segments) {
+
 						switch(segment.relationship.type) {
+							case 'SUBMITS':
+								submission = submission || segment.end.properties;
+								submissionObj.status = submission.status;
+								submissionObj.id = submission.id;
+							break;
 							case 'HAS':
 								submissionAnswer = submissionAnswer || segment.end.properties;
 
@@ -64,6 +71,7 @@ const getAllforOne = async (req, res) => {
 									};
 								}
 								else {
+									console.log('ID THING', surveyQuestion.id)
 									submissionObj[surveyQuestion.id].question = surveyQuestion.text;
 								}
 							break;
@@ -71,6 +79,7 @@ const getAllforOne = async (req, res) => {
 					}
 				}
 			}
+			console.log('\n\n\n\n\nsubmissionObj', JSON.stringify(submissionObj, null, 2))
 			res.send(submissionObj);
 		}
 		else {
