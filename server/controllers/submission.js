@@ -30,9 +30,7 @@ const remove = async (req, res) => {
 const getAllforOne = async (req, res) => {
 	try {
 		const query = `MATCH p=(Contract {id: "${req.params.contractId}"})-[r:SUBMITS]->(Submission {surveyId: "${req.params.surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(SurveyQuestion) RETURN p`;
-		console.log(query);
 		const result = await db.run(query);
-
 		let submissionObj = {};
 
 		if (result.records.length) {
