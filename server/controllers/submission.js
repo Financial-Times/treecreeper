@@ -69,7 +69,6 @@ const getAllforOne = async (req, res) => {
 									};
 								}
 								else {
-									console.log('ID THING', surveyQuestion.id)
 									submissionObj[surveyQuestion.id].question = surveyQuestion.text;
 								}
 							break;
@@ -77,7 +76,6 @@ const getAllforOne = async (req, res) => {
 					}
 				}
 			}
-			console.log('\n\n\n\n\nsubmissionObj', JSON.stringify(submissionObj, null, 2))
 			res.send(submissionObj);
 		}
 		else {
@@ -86,7 +84,7 @@ const getAllforOne = async (req, res) => {
 		}
 	}
 	catch (e) {
-		console.log(e);
+		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
 };

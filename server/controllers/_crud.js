@@ -73,10 +73,6 @@ const update = async (req, res, obj, nodeType) => {
 
 		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
 
-		console.log(query)
-		console.log(`Updated ${propAmount} properties`);
-		console.log(result.records[0]._fields[0])
-
 		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
@@ -90,7 +86,7 @@ const update = async (req, res, obj, nodeType) => {
 		res.send(result);
 	}
 	catch (e) {
-		console.log(e);
+		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
 };
