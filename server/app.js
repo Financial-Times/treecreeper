@@ -23,27 +23,19 @@ app.get('/', (req, res) => {
 });
 
 // supplier
-app.get('/api/supplier/:id', supplier.get);
 app.get('/api/suppliers/', supplier.getAll);
-app.post('/api/supplier/', supplier.create);
-app.put('/api/supplier/', supplier.update);
 
 // contract
-app.get('/api/contract/:id', contract.getNode);
-app.get('/api/contracts/:supplierId', contract.get); // ?? check this. shouldn't be the same as the line above
-app.post('/api/contract/', contract.create);
-app.put('/api/contract/', contract.update);
+app.get('/api/contracts/:supplierId', contract.get);
 
 // submission
 app.get('/api/submission/:id', submission.get);
 app.get('/api/submissions/:contractId/:surveyId', submission.getAllforOne);
 app.post('/api/submission/', submission.create);
-app.put('/api/submission/', submission.update);
+app.delete('/api/submission/:id', submission.remove);
 
 // survey
 app.get('/api/survey/:id', survey.get);
-app.post('/api/survey/', survey.create);
-app.put('/api/survey/', survey.update);
 
 // generic node (experimental)
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {

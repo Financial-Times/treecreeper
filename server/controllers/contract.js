@@ -49,7 +49,6 @@ const get = async (req, res) => {
 		if (result.records.length) {
 			for (const record of result.records) {
 				for (const field of record._fields) {
-					console.log('\n');
 					let contract;
 					let submission;
 					let answer;

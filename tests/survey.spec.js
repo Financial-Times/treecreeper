@@ -18,27 +18,7 @@ describe('Survey - API endpoints', () => {
             request(app)
             .get('/invalidId')
             .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(404, done);
-        });
-    });
-
-    describe('POST', () => {
-        before(() => request(app)
-        .post('/api/survey')
-        .set('API_KEY', `${process.env.API_KEY}`)
-        .send({node: {'id': 'surveytest', 'title': 'Test Survey', 'version': 0}}));
-
-        after(() => request(app)
-        .delete('/api/survey/surveytest')
-        .set('API_KEY', `${process.env.API_KEY}`)
-        .end(process.exit()));
-
-        it('POST should not allow duplicate nodes', (done) => {
-            request(app)
-            .post('/api/survey')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .send({ node: {'id': 'surveytest', 'title': 'Test Survey', 'version': 0}})
-            .expect(400, done);
+            .expect(404, process.exit(), done);
         });
     });
 });

@@ -5,20 +5,6 @@ const request = require('supertest');
 describe('Supplier - API endpoints', () => {
     describe('GET', () => {
 
-        it('should retrieve a supplier node', (done) => {
-            request(app)
-            .get('/api/supplier/akamai')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(200, done);
-        });
-
-        it('should throw 404 for invalid supplier node', (done) => {
-            request(app)
-            .get('/api/supplier/invalidId')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(404, done);
-        });
-
         it('should retrieve all supplier nodes', (done) => {
 
             const expected = [
@@ -51,35 +37,6 @@ describe('Supplier - API endpoints', () => {
             .end( () => {
                 done();
             });
-        });
-    });
-
-    describe('POST should create a new supplier node', () => {
-
-        before(() => request(app)
-        .post('/api/supplier')
-        .set('API_KEY', `${process.env.API_KEY}`)
-        .send({ node: {'address': 'Lorem St', 'contact': 'test@email.com',
-        'name': 'Supplier Test', 'term': '1 Year', 'id': 'suppliertest'}}));
-
-        after(() => request(app)
-        .delete('/api/supplier/suppliertest')
-        .set('API_KEY', `${process.env.API_KEY}`));
-
-        it('GET should retrieve the new supplier node - status code 200', (done) => {
-            request(app)
-            .get('/api/supplier/suppliertest')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(200, done);
-        });
-
-        it('POST should not allow duplicate nodes', (done) => {
-            request(app)
-            .post('/api/supplier')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .send({ node: {'address': 'Lorem St', 'contact': 'test@email.com',
-            'name': 'Supplier Test', 'term': '1 Year', 'id': 'suppliertest'}})
-            .expect(400, done);
         });
     });
 });
