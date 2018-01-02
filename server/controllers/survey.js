@@ -91,13 +91,9 @@ const get = async (req, res) => {
 			}
 			return res.send(surveyObjWithSections);
 		}
-		else if (!result.records.length) {
-			return res.status(200).end(`Survey ${req.params.id} questions not found`);
-		}
 		else {
 			return res.status(404).end(`Survey ${req.params.id} not found`);
 		}
-
 	}
 	catch (e) {
 		return res.status(500).end(e.toString());
