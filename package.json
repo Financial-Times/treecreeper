@@ -6,7 +6,8 @@
   "scripts": {
     "start": "export $(cat .env | xargs) && nodemon server/app.js",
     "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive",
-    "test-dev": "mocha test/**/*.spec.js"
+    "test-dev": "mocha test/**/*.spec.js",
+    "init-db": "export $(cat .env | xargs) && node scripts/init.js"
   },
   "repository": {
     "type": "git",
