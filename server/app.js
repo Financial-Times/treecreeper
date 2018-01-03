@@ -40,7 +40,7 @@ app.get('/api/survey/:id', survey.get);
 
 // generic node (experimental)
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
-	return crud.create(req, res, req.body.node, req.params.nodeName, null, req.params.uniqueAttrName);
+	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
 });
 
 const PORT = process.env.PORT || 8888;
