@@ -36,11 +36,18 @@ const getAllforOne = async (req, res) => {
 		if (result.records.length) {
 			for (const record of result.records) {
 				for (const field of record._fields) {
+					let submission;
 					let submissionAnswer;
 					let surveyQuestion;
 
 					for (const segment of field.segments) {
+
 						switch(segment.relationship.type) {
+							case 'SUBMITS':
+								submission = submission || segment.end.properties;
+								submissionObj.status = submission.status;
+								submissionObj.id = submission.id;
+							break;
 							case 'HAS':
 								submissionAnswer = submissionAnswer || segment.end.properties;
 
@@ -77,7 +84,7 @@ const getAllforOne = async (req, res) => {
 		}
 	}
 	catch (e) {
-		console.log(e);
+		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
 };

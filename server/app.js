@@ -32,6 +32,7 @@ app.get('/api/contracts/:supplierId', contract.get);
 app.get('/api/submission/:id', submission.get);
 app.get('/api/submissions/:contractId/:surveyId', submission.getAllforOne);
 app.post('/api/submission/', submission.create);
+app.put('/api/submission/:id/:surveyId', submission.update);
 app.delete('/api/submission/:id', submission.remove);
 
 // survey

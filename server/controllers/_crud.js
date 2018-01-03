@@ -66,13 +66,18 @@ const update = async (req, res, obj, nodeType) => {
 	try {
 		const query = `
 			MATCH (a:${nodeType} {id: "${obj.id}"})
-			SET a = $props
+			SET a += $props
 			RETURN a
 		`;
 		const result = await db.run(query, {props: obj});
 
-		if (result.records.length) {
+		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
+
+		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
+		}
+		else if (!propAmount) {
+			return res.status(400).end('No properties were updated with', obj);
 		}
 		else {
 			return res.status(404).end(`${nodeType}${obj.id} not found. No nodes updated.`);
@@ -81,6 +86,7 @@ const update = async (req, res, obj, nodeType) => {
 		res.send(result);
 	}
 	catch (e) {
+		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
 };
