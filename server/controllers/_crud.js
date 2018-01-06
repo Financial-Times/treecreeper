@@ -45,9 +45,10 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 					// fail both if either fails
 					const resultRel = await db.run(createRelationship, obj);
 
-					console.log('created relationship');
+					console.log(`created relationship ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'NoPE');
 				}
 				catch (e) {
+					console.log(e);
 					return res.status(400).end(e.toString());
 				}
 			}

@@ -24,9 +24,11 @@ app.get('/', (req, res) => {
 
 // supplier
 app.get('/api/suppliers/', supplier.getAll);
+app.post('/api/supplier/', supplier.create);
 
 // contract
 app.get('/api/contracts/:supplierId', contract.get);
+app.post('/api/contract/', contract.create);
 
 // submission
 app.get('/api/submission/:id', submission.get);
