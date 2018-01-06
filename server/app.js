@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('@financial-times/n-logger').default;
 const security = require('./middleware/security');
-// const checks = require('./lib/checks');
 const supplier = require('./controllers/supplier');
 const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
@@ -24,6 +23,7 @@ app.get('/', (req, res) => {
 
 // supplier
 app.get('/api/suppliers/', supplier.getAll);
+app.post('/api/supplier/', supplier.create);
 
 // contract
 app.get('/api/contracts/:supplierId', contract.get);

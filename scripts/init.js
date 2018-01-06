@@ -1,8 +1,6 @@
 const db = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
 const createSurveys = require('./surveys/create');
-const createSuppliers = require('./suppliers/create');
-const createSubmissions = require('./submissions/create');
 
 const constraints = async (verb) => {
 	console.log(`${verb}ing constraints...`);
@@ -27,7 +25,7 @@ const constraints = async (verb) => {
 	}
 
 	const constraints = await db.run('CALL db.constraints');
-	console.log(constraints, 'constraints')
+	console.log(constraints, 'constraints');
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
@@ -49,15 +47,6 @@ const dropRelationships = async () => {
 	await db.run('MATCH ()-[o:HAS]->() DELETE o');
 };
 
-const createNodes = async () => {
-	await createSurveys(db);
-	await createSuppliers(db);
-	await createSubmissions(db);
-	console.log('created nodes')
-	// TODO create some suppliers with contracts
-	// Uuse save endpoint to create nodes and relationships
-};
-
 const init = async () => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
@@ -69,10 +58,9 @@ const init = async () => {
 
 		// CREATE
 		await constraints('CREATE');
-		await createNodes();
+		await createSurveys(db);
 		process.exit();
 	}
 };
-
 
 init();

@@ -12,7 +12,7 @@ const surveys = [
 const createSurveys = async (db) => {
 	for (let survey of surveys) {
 		await db.run('CREATE (a:Survey {version: $version, id: $id, title: $title}) RETURN a', survey);
-		createQuestions(db, survey.id);
+		await createQuestions(db, survey.id);
 	}
 };
 
@@ -42,7 +42,7 @@ const createQuestions = async (db, surveyId) => {
 				? `'${section.title}'`
 				: `''`;
 
-			createQuestion(db, question);
+			await createQuestion(db, question);
 			await db.run(`
 				MATCH (a:Survey),(b:SurveyQuestion)
 				WHERE a.id = '${surveyId}'
@@ -53,7 +53,7 @@ const createQuestions = async (db, surveyId) => {
 
 			if (question.child_questions) {
 				for (let child of question.child_questions) {
-					createQuestion(db, child);
+					await createQuestion(db, child);
 					await db.run(`
 						MATCH (a:SurveyQuestion),(b:SurveyQuestion)
 						WHERE a.id = '${question._id}'
@@ -63,13 +63,13 @@ const createQuestions = async (db, surveyId) => {
 					`);
 
 					if (child.fieldOptions) {
-						fieldOptions(db, child);
+						await fieldOptions(db, child);
 					}
 				}
 			}
 
 			if (question.fieldOptions) {
-				fieldOptions(db, question);
+				await fieldOptions(db, question);
 			}
 
 		}
