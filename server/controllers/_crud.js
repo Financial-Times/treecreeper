@@ -48,7 +48,7 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 					console.log(`created relationship ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'NoPE');
 				}
 				catch (e) {
-					console.log(e);
+					console.log('relationships not created', e.toString());
 					return res.status(400).end(e.toString());
 				}
 			}
@@ -59,6 +59,7 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 		res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
+		console.log(`${nodeType} not created`, e.toString());
 		return res.status(400).end(e.toString());
 	}
 };
