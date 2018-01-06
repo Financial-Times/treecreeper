@@ -6,9 +6,7 @@ const getNode = (req, res) => {
 };
 
 const create = async (req, res) => {
-	return crud.create(req, res, req.body.node, 'Contract', [
-		{name:'SIGNS', from: 'Supplier', fromId: req.body.node.supplierId, to: 'Contract', toId: req.body.node.id}
-	]);
+	return crud.create(req, res, req.body.node, 'Contract', [{name:'SIGNS', from: 'Supplier', to: 'Contract'}]);
 };
 
 const update = async (req, res) => {
