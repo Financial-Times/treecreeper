@@ -51,9 +51,9 @@ const dropRelationships = async () => {
 
 const createNodes = async () => {
 	await createSurveys(db);
-	await createSuppliers(db);
-	await createSubmissions(db);
-	console.log('created nodes')
+	// await createSuppliers(db);
+	// await createSubmissions(db);
+	console.log('created nodes');
 	// TODO create some suppliers with contracts
 	// Uuse save endpoint to create nodes and relationships
 };
