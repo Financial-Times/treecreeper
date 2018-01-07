@@ -23,6 +23,7 @@
     "@financial-times/n-logger": "^5.5.7",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "isomorphic-fetch": "^2.2.1",
     "neo4j": "^2.0.0-RC2",
     "neo4j-driver": "^1.5.0",
     "nodemon": "^1.12.1",
