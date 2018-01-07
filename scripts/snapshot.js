@@ -11,13 +11,14 @@ const run = async () => {
 		}
 	});
 
-	if (response.status === 200) {
+	if (response.status === 202) {
 		const body = await response.json();
 		console.log(body);
 		return;
 	}
 
-	console.log(await response.text());
+	const responseText = await response.text();
+	console.log(response.status, responseText);
 };
 
 run();
