@@ -131,10 +131,12 @@ const getAllforOne = async (req, res, relationship, param) => {
 };
 
 
-const getAll = async (req, res, nodeType) => {
+const getAll = async (req, res, nodeType, filters = '') => {
 
 	try {
-		const query = `MATCH (a:${nodeType}) RETURN a`;
+
+		const query = `MATCH (a:${nodeType} ${filters}) RETURN a`;
+		console.log(query);
 		const result = await db.run(query);
 
 		if (result.records.length) {

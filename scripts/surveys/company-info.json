@@ -1,17 +1,21 @@
 {
     "_id": "company-info",
     "surveyTitle": "Company Information",
+    "type": "topLevel",
     "section": [
         {
             "title": "Your company",
             "form": [
                 {
+                    "_id": "ci-01",
                     "question": "Name of Company"
                 },
                 {
+                    "_id": "ci-02",
                     "question": "Countries and sectors of Operation"
                 },
                 {
+                    "_id": "ci-03",
                     "question": "Date of Completion of Questionnaire"
                 }
             ]
@@ -20,9 +24,11 @@
             "title": "About you",
             "form": [
                 {
+                    "_id": "ci-04",
                     "question": "What is your name?"
                 },
                 {
+                    "_id": "ci-05",
                     "question": "What is your role?"
                 }
             ]
