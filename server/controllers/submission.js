@@ -6,8 +6,13 @@ const get = (req, res) => {
 };
 
 const create = async (req, res) => {
+
+	const topLevel = req.body.node.supplierId ? true : false;
+	const submitterType = topLevel ? 'Supplier' : 'Contract';
+	const submitterId = topLevel ? req.body.node.supplierId : req.body.node.contractId;
+
 	crud.create(req, res, req.body.node, 'Submission', [
-		{name:'SUBMITS', from: 'Contract', fromId: req.body.node.contractId, to: 'Submission', toId: req.body.node.id},
+		{name:'SUBMITS', from: `${submitterType}`, fromId: submitterId, to: 'Submission', toId: req.body.node.id},
 		{name:'ANSWERS', from: 'Submission', fromId: req.body.node.id, to: 'Survey', toId: req.body.node.surveyId}
 	]);
 
@@ -28,9 +33,19 @@ const remove = async (req, res) => {
 };
 
 const getAllforOne = async (req, res) => {
+
 	try {
-		const query = `MATCH p=(Contract {id: "${req.params.contractId}"})-[r:SUBMITS]->(Submission {surveyId: "${req.params.surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(SurveyQuestion) RETURN p`;
+
+		const topLevel = req.params.topLevel === 'true';
+		const surveyId = req.params.surveyId;
+
+		const submitterId = req.params.contractOrSupplierId;
+		const submitterType = topLevel ? 'Supplier' : 'Contract';
+
+		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(SurveyQuestion) RETURN p`;
+
 		const result = await db.run(query);
+
 		let submissionObj = {};
 
 		if (result.records.length) {
@@ -80,7 +95,7 @@ const getAllforOne = async (req, res) => {
 		}
 		else {
 			console.log('404');
-			return res.status(404).end(`No ${req.params.surveyId} survey answers found for contract ${req.params.contractId}`);
+			return res.status(404).end(`No ${surveyId} survey answers found for ${submitterType} ${submitterId}`);
 		}
 	}
 	catch (e) {
