@@ -6,12 +6,9 @@ const getNode = (req, res) => {
 };
 
 const get = async (req, res) => {
-	console.log('get survey');
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
-		console.log(query);
 		const result = await db.run(query);
-		console.log('query ran');
 		const surveyObj = {
 			questions: {}
 		};
