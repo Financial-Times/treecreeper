@@ -152,4 +152,10 @@ const remove = async (req, res) => {
 	return crud.remove(req, res, 'Survey');
 };
 
-module.exports = { getNode, get, create, update, remove };
+const getAll = async (req, res) => {
+	return crud.getAll(req, res, 'Survey',
+		`{ type: '${req.params.type}' }`
+	);
+};
+
+module.exports = { getNode, get, create, update, remove, getAll };

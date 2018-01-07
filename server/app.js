@@ -37,6 +37,7 @@ app.delete('/api/submission/:id', submission.remove);
 
 // survey
 app.get('/api/survey/:id', survey.get);
+app.get('/api/surveys/:type', survey.getAll);
 
 // generic node (experimental)
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {

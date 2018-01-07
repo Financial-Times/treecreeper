@@ -4,7 +4,7 @@ const request = require('supertest');
 describe ('Contract - API endpoints', () => {
 
 	describe('GET', () => {
-		it('should retrieve all contract nodes from a supplier id', (done) => {
+		it.skip('should retrieve all contract nodes from a supplier id', (done) => {
 			request(app)
 			.get('/api/contracts/makers')
 			.set('API_KEY', `${process.env.API_KEY}`)

@@ -6,12 +6,25 @@ const surveys = [
 	{version: 0, id: 'pci', title: 'PCI Compliance'},
 	{version: 0, id: 'ra', title: 'Risk Assessment'},
 	{version: 0, id: 'sla', title: 'Service Level Agreement'},
-	{version: 0, id: 'tdd', title: 'Technical Due Diligence'}
+	{version: 0, id: 'tdd', title: 'Technical Due Diligence'},
+	{version: 0, id: 'company-info', title: 'Company Info', type: 'topLevel'},
 ];
 
 const createSurveys = async (db) => {
+
 	for (let survey of surveys) {
-		await db.run('CREATE (a:Survey {version: $version, id: $id, title: $title}) RETURN a', survey);
+
+		console.log('\nCREATING SURVEY', survey);
+
+		let type = '';
+
+		if (survey.type) {
+			type = ', type: $type';
+		}
+
+		const createQuery = `CREATE (a:Survey {version: $version, id: $id, title: $title${type}}) RETURN a`;
+
+		await db.run(createQuery, survey);
 		await createQuestions(db, survey.id);
 	}
 };
