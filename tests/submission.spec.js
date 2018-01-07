@@ -5,7 +5,7 @@ describe('Submission - API endpoints', () => {
 
     describe('GET', () => {
 
-        it('should retrieve a submission node, given a valid contract and survey id', (done) => {
+        it.skip('should retrieve a submission node, given a valid contract and survey id', (done) => {
             request(app)
             .get('/api/submissions/ab40e000000caszsa0/as')
             .set('API_KEY', `${process.env.API_KEY}`)
@@ -19,7 +19,7 @@ describe('Submission - API endpoints', () => {
             .expect(404, done);
         });
 
-        it('should retrieve a submission node, given a valid submission id', (done) => {
+        it.skip('should retrieve a submission node, given a valid submission id', (done) => {
             request(app)
             .get('/api/submission/asab40e000000caszsa0')
             .set('API_KEY', `${process.env.API_KEY}`)
