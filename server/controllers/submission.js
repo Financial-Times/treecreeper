@@ -68,11 +68,11 @@ const getAllforOne = async (req, res) => {
 
 								if (!submissionObj[submissionAnswer.id]) {
 									submissionObj[submissionAnswer.id] = {
-										answer: submissionAnswer.text,
+										answer: submissionAnswer.value,
 									};
 								}
 								else {
-									submissionObj[submissionAnswer.id].answer = submissionAnswer.text;
+									submissionObj[submissionAnswer.id].answer = submissionAnswer.value;
 								}
 							break;
 							case 'ANSWERS_QUESTION':
