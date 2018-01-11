@@ -53,9 +53,7 @@
                         {
                             "_id": "tdd_sw_5_1",
                             "child_question_trigger": "Yes",
-                            "question": "Do you audit them for due diligence?",
-                            "fieldType": "binary",
-                            "fieldOptions": ["Yes", "No"]
+                            "question": "Do you audit them for due diligence?"
                         }
                     ]
                 },
