@@ -41,9 +41,7 @@
                         {
                             "_id": "as_06",
                             "question": "Do you review this regularly?",
-                            "prompt": null,
-                            "fieldType": "binary",
-                            "fieldOptions": ["Yes", "No"]
+                            "prompt": null
                         }
                     ]
                 },
