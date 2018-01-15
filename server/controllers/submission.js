@@ -42,8 +42,7 @@ const getAllforOne = async (req, res) => {
 		const submitterId = req.params.contractOrSupplierId;
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
-		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(SurveyQuestion) RETURN p`;
-
+		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x: SurveyQuestion) RETURN p ORDER BY x.id`;
 		const result = await db.run(query);
 
 		let submissionObj = {};
