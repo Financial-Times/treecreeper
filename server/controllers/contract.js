@@ -24,9 +24,10 @@ const getAllforOne = async (req, res) => {
 const get = async (req, res) => {
 	console.log('getting', req.params.supplierId);
 	try {
-		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->() RETURN p`;
-		const result = await db.run(query);
+		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
 
+		const result = await db.run(query);
+	
 		const contractsObj = {
 			//contractId: {
 			// 	  ...
