@@ -27,7 +27,7 @@ const get = async (req, res) => {
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
 
 		const result = await db.run(query);
-		console.log('result', result)
+	
 		const contractsObj = {
 			//contractId: {
 			// 	  ...
