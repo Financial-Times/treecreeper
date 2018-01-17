@@ -85,7 +85,6 @@
                     "_id": "tdd_12",
                     "question": "Please provide contact details of your Cyber Security Lead and confirm if this is a 24 x 7 contact name and number?",
                     "fieldType": "long-text",
-                    "fieldOptions": ["Yes", "No"],
                     "risk": {
                         "id": "2",
                         "trigger": "no"
