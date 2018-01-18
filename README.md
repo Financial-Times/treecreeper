@@ -4,7 +4,7 @@ WIP
 
 ## Architecture
 
-https://github.com/Financial-Times/gdpr 
+https://github.com/Financial-Times/gdpr
 
 WIP
 
@@ -15,7 +15,7 @@ WIP
 Download and start the [neo4j community edition](https://neo4j.com/download/) database.
 
 ```
-export GRAPHENEDB_BOLT_URL=bolt://localhost:7687
+export GRAPHENEDB_CHARCOAL_BOLT_URL=bolt://localhost:7687
 ```
 
 Populate it,
