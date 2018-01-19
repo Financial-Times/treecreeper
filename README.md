@@ -29,3 +29,9 @@ Run the server,
 ```
 node server/app
 ```
+
+If the have [vault cli](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli) setup and [jq](https://stedolan.github.io/jq/) installed, run the below to get environment details from vault:
+
+```sh
+$ npm run vault:env
+```
