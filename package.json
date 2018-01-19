@@ -1,5 +1,6 @@
 {
   "name": "gdpr-biz-op-api",
+  "team": "internal-products",
   "version": "1.0.0",
   "description": "",
   "main": "server/app.js",
@@ -7,7 +8,8 @@
     "start": "export $(cat .env | xargs) && nodemon server/app.js",
     "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive",
     "test-dev": "export $(cat .env | xargs) && mocha tests/**/*.spec.js",
-    "init-db": "export $(cat .env | xargs) && node scripts/init.js"
+    "init-db": "export $(cat .env | xargs) && node scripts/init.js",
+    "vault:env": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development | jq -r \".data|to_entries|map(\\\"\\(.key)=\\(.value|tostring)\\\")|.[]\" > .env"
   },
   "repository": {
     "type": "git",
@@ -38,9 +40,11 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
+    "chai": "^4.1.2",
     "istanbul": "^1.0.0-alpha.2",
     "lodash": "^4.17.4",
     "mocha": "^4.0.1",
-    "save": "^2.3.1"
+    "save": "^2.3.1",
+    "sinon": "^4.1.6"
   }
 }

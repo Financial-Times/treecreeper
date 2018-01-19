@@ -85,7 +85,6 @@
                     "_id": "tdd_12",
                     "question": "Please provide contact details of your Cyber Security Lead and confirm if this is a 24 x 7 contact name and number?",
                     "fieldType": "long-text",
-                    "fieldOptions": ["Yes", "No"],
                     "risk": {
                         "id": "2",
                         "trigger": "no"
@@ -169,12 +168,21 @@
             "form": [
                 {
                     "_id": "tdd_23",
-                    "question": "If you are processing FT data, is confidential and personal data encrypted?",
-                    "fieldType": "checkbox",
-                    "fieldOptions": ["In transit", "At rest", "Backups and archiving", "N/A"]
+                    "question": "Are you processing FT confidential and personal data?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "tdd_24",
+                            "child_question_trigger": "Yes",
+                            "question": "Is FT data you are processing encrypted?",
+                            "fieldType": "checkbox",
+                            "fieldOptions": [ "in transit", "at rest", "when backed up and archived"]
+                        }
+                    ]
                 },
                 {
-                    "_id": "tdd_27",
+                    "_id": "tdd_25",
                     "question": "If you are processing FT data, what volume of sensitive data will be held?",
                     "prompt": "Please include the number of records and volume (in GB)",
                     "fieldType": "long-text"
@@ -185,19 +193,19 @@
             "title": "Your Security - Access",
             "form": [
                 {
-                    "_id": "tdd_28",
+                    "_id": "tdd_26",
                     "question": "Is the use of shared user credentials prohibited among your staff?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
                 },
                 {
-                    "_id": "tdd_29",
+                    "_id": "tdd_27",
                     "question": "Are users' access rights reviewed at regular intervals?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
                 },
                 {
-                    "_id": "tdd_30",
+                    "_id": "tdd_28",
                     "question": "Do you enforce two-factor authentication for remote connectivity?",
                     "fieldType": "checkbox",
                     "fieldOptions": ["VPN", "Citrix", "Outlook Web Access", "Other"],
@@ -207,7 +215,7 @@
                     }
                 },
                 {
-                    "_id": "tdd_31",
+                    "_id": "tdd_29",
                     "question": "Do you enforce two-factor-authentication for access to systems that contain sensitive and personal data?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
@@ -217,7 +225,7 @@
                     }
                 },
                 {
-                    "_id": "tdd_32",
+                    "_id": "tdd_30",
                     "question": "Do you enforce two-factor authentication for systems that publish content to an FT-branded site or social media platform?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
@@ -227,13 +235,13 @@
                     }
                 },
                 {
-                    "_id": "tdd_33",
+                    "_id": "tdd_31",
                     "question": "Do you ensure that passwords are changed regularly and meet complexity requirements?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
                 },
                 {
-                    "_id": "tdd_34",
+                    "_id": "tdd_32",
                     "question": "Do you rotate keys, passwords and terminate accounts of all staff that have left?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
