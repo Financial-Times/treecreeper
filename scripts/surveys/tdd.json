@@ -170,26 +170,8 @@
                 {
                     "_id": "tdd_23",
                     "question": "If you are processing FT data, is confidential and personal data encrypted?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"]
-                },
-                {
-                    "_id": "tdd_24",
-                    "question": "If you are processing FT data, is confidential and personal data in transit?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"]
-                },
-                {
-                    "_id": "tdd_25",
-                    "question": "If you are processing FT data, is confidential and personal data at rest?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"]
-                },
-                {
-                    "_id": "tdd_26",
-                    "question": "If you are processing FT data, is confidential and personal data backups and archiving?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"]
+                    "fieldType": "checkbox",
+                    "fieldOptions": ["In transit", "At rest", "Backups and archiving", "N/A"]
                 },
                 {
                     "_id": "tdd_27",
