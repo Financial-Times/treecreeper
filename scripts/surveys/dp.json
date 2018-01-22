@@ -8,11 +8,13 @@
                 {
                     "_id": "dp_01",
                     "question": "Does Company have Data Protection and Security policies?",
+                    "prompt": "Please ensure that copies of these policies are returned to FT with this form",
                     "fieldType": "upload"
                 },
                 {
                     "_id": "dp_02",
                     "question": "Does Company have an incident response plan in case of any data breach, loss or theft of data?",
+                    "prompt": "Please return copies with this form",
                     "fieldType": "upload"
                 },
                 {
