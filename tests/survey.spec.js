@@ -35,7 +35,7 @@ describe('Survey - API endpoints', () => {
             request(app)
             .get('/invalidId')
             .set('API_KEY', `${process.env.API_KEY}`)
-            .expect(404, process.exit(), done);
+            .expect(404, done);
         });
     });
 });
