@@ -3,6 +3,7 @@ const db = require('../db-connection');
 const get = async (req, res, nodeType) => {
 
 	try {
+		// get by unique attr or id
 		const query = `MATCH (a:${nodeType} {id: "${req.params.id}"}) RETURN a`;
 		const result = await db.run(query);
 		if (result.records.length) {
@@ -66,6 +67,7 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 
 const update = async (req, res, obj, nodeType) => {
 	try {
+		// update by unique attr or id
 		const query = `
 			MATCH (a:${nodeType} {id: "${obj.id}"})
 			SET a += $props
@@ -96,6 +98,7 @@ const update = async (req, res, obj, nodeType) => {
 const remove = async (req, res, nodeType, detach) => {
 
 	try {
+		// remove by unique attr or id
 		const result = await db.run(`MATCH (a:${nodeType} {id: "${req.params.id}"})${detach ? ' DETACH' : ''} DELETE a`);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
 			return res.status(200).end(`${req.params.id} deleted`);

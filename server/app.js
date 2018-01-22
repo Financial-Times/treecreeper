@@ -40,8 +40,18 @@ app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
 
 // generic node (experimental)
+
+app.get('/api/node/:nodeName/:uniqueAttr', async (req, res) => {
+	return crud.get(req, res, req.params.nodeName);
+});
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
 	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
+});
+app.put('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
+	return crud.update(req, res, req.body.node, req.params.nodeName);
+});
+app.delete('/api/node/:nodeName/:uniqueAttr', async (req, res) => {
+	return crud.remove(req, res, req.params.nodeName, false);
 });
 
 const PORT = process.env.PORT || 8888;
