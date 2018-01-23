@@ -3,7 +3,7 @@ const nodeTypes = require('../server/lib/checks').nodeTypes;
 const createSurveys = require('./surveys/create');
 
 const constraints = async (verb) => {
-	console.log(`${verb}ing constraints...`);
+	console.log(`${verb.toLowerCase()}ing constraints...`);
 
 	const constraintQueries = [
 		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.id IS UNIQUE`,
@@ -17,14 +17,10 @@ const constraints = async (verb) => {
 		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.version)`
 	];
 
-	for (let constraintQuery of constraintQueries) {
-		try {
-			await db.run(constraintQuery);
-		}
-		catch (e) {}
-	}
-
-	const constraints = await db.run('CALL db.constraints');
+  const setupConstraintIfPossible = (constraintQuery) => db.run(constraintQuery).catch(e => Promise.resolve())
+  const constraints = await Promise.all(
+    constraintQueries.map(setupConstraintIfPossible))
+      .then(() => db.run('CALL db.constraints'));
 	console.log(constraints, 'constraints');
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
@@ -35,32 +31,40 @@ const dropNodes = async (nodeType) => {
 };
 
 const dropRelationships = async () => {
-	console.log('dropping relationships...');
-	await db.run('MATCH ()-[o:OWNEDBY]->() DELETE o');
-	await db.run('MATCH ()-[o:ASKS]->() DELETE o');
-	await db.run('MATCH ()-[o:RAISES]->() DELETE o');
-	await db.run('MATCH ()-[o:ALLOWS]->() DELETE o');
-	await db.run('MATCH ()-[o:SIGNS]->() DELETE o');
-	await db.run('MATCH ()-[o:SUBMITS]->() DELETE o');
-	await db.run('MATCH ()-[o:ANSWERS]->() DELETE o');
-	await db.run('MATCH ()-[o:ANSWERS_QUESTION]->() DELETE o');
-	await db.run('MATCH ()-[o:HAS]->() DELETE o');
+  console.log('dropping relationships...');
+  const relationships = [
+    'o:OWNEDBY',
+    'o:ASKS',
+    'o:RAISES',
+    'o:ALLOWS',
+    'o:SIGNS',
+    'o:SUBMITS',
+    'o:ANSWERS',
+    'o:ANSWERS_QUESTION',
+    'o:HAS'
+  ];
+
+  return Promise.all(relationships.map(
+    relationship => db.run(`MATCH ()-[${relationship}]->() DELETE o`)
+  ));
 };
 
-const init = async () => {
+const init = async (req, res) => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
 		await constraints('DROP');
-		await dropRelationships();
-		for (let nodeType of nodeTypes) {
-			await dropNodes(nodeType);
-		}
+    await dropRelationships();
+    await Promise.all(nodeTypes.map(nodeType => dropNodes(nodeType)));
 
 		// CREATE
 		await constraints('CREATE');
 		await createSurveys(db);
-		process.exit();
+		res.send(200,'OK')
 	}
 };
 
-init();
+if(process.argv[1] === __filename) {
+  init({}, { send: (code, result) => console.log(result) });
+}
+
+module.exports = init;

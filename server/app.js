@@ -7,6 +7,7 @@ const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
+const init = require('../scripts/init');
 
 const app = express();
 
@@ -41,8 +42,12 @@ app.get('/api/surveys/:type', survey.getAll);
 
 // generic node (experimental)
 app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
-	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
+  return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/init', init);
+}
 
 const PORT = process.env.PORT || 8888;
 
