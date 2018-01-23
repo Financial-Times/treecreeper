@@ -4,12 +4,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "server/app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Financial-Times/gdpr-biz-op-api.git"
+  },
   "scripts": {
-    "start": "export $(cat .env | xargs) && nodemon server/app.js",
+    "start": "nodemon -r dotenv/config server/app.js",
+    "debug": "nodemon -r dotenv/config --inspect=0.0.0.0:9229 server/app.js",
     "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive --exit",
-    "test-dev": "export $(cat .env | xargs) && mocha tests/**/*.spec.js",
-    "init-db": "export $(cat .env | xargs) && node scripts/init.js",
-    "vault:env": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development | jq -r \".data|to_entries|map(\\\"\\(.key)=\\(.value|tostring)\\\")|.[]\" > .env"
+    "test-dev": "mocha -r dotenv/config tests/**/*.spec.js",
+    "init-db": "node -r dotenv/config scripts/init.js",
+    "vault:read": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development",
+    "vault:env": "node -pe 'const { data } = JSON.parse(process.argv[1]); Object.keys(data).reduce((env, key) => { env += `${key}=${data[key]}\n`; return env}, '')' \"$(npm --silent run vault:read)\" > .env"
   },
   "repository": {
     "type": "git",
@@ -41,6 +47,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "chai": "^4.1.2",
+    "dotenv": "^4.0.0",
     "istanbul": "^1.0.0-alpha.2",
     "lodash": "^4.17.4",
     "mocha": "^4.0.1",
