@@ -21,36 +21,50 @@ app.get('/', (req, res) => {
 	res.send('biz op api');
 });
 
-// supplier
-app.get('/api/suppliers/', supplier.getAll);
+// SUPPLIER
 app.post('/api/supplier/', supplier.create);
 
-// contract
+// CONTRACT
 app.get('/api/contracts/:supplierId', contract.get);
 
-// submission
-app.get('/api/submission/:id', submission.get);
+// SUBMISSION
+
 app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
 app.post('/api/submission/', submission.create);
-app.put('/api/submission/:id/:surveyId', submission.update);
-app.delete('/api/submission/:id', submission.remove);
 
-// survey
+
+// SURVEY
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
 
-// generic node (experimental)
 
-app.get('/api/node/:nodeName/:uniqueAttr', async (req, res) => {
-	return crud.get(req, res, req.params.nodeName);
+
+
+
+// MOVE TO GENERIC IN SOURCE APPS
+// app.get('/api/submission/:uniqueAttr', async (req, res) => {
+// 	return crud.get(req, res, 'Submission', 'id', req.param.uniqueAttr); // TODO unique attr
+// });
+app.put('/api/submission/:id/:surveyId', async (req, res) => {
+	return crud.update(req, res, req.body.node, 'Submission'); // TODO unique attr
 });
-app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
+// app.get('/api/suppliers/', async (req, res) => {
+// 	return crud.getAll(req, res, 'Submission', 'id', req.param.uniqueAttr); // TODO unique attr and syntax
+// });
+
+
+
+// GENERIC
+app.get('/api/:nodeName/:uniqueAttrName*?/:uniqueAttr*?', async (req, res) => {
+	return crud.get(req, res, req.params.nodeName, req.params.uniqueAttrName, req.params.uniqueAttr);
+});
+app.post('/api/:nodeName/:uniqueAttrName', async (req, res) => {
 	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
 });
-app.put('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
+app.put('/api/:nodeName/:uniqueAttr', async (req, res) => {
 	return crud.update(req, res, req.body.node, req.params.nodeName);
 });
-app.delete('/api/node/:nodeName/:uniqueAttr', async (req, res) => {
+app.delete('/api/:nodeName/:uniqueAttr', async (req, res) => {
 	return crud.remove(req, res, req.params.nodeName, false);
 });
 

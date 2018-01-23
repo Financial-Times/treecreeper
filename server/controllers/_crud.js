@@ -1,16 +1,15 @@
 const db = require('../db-connection');
 
-const get = async (req, res, nodeType) => {
+const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 
 	try {
-		// get by unique attr or id
-		const query = `MATCH (a:${nodeType} {id: "${req.params.id}"}) RETURN a`;
+		const query = `MATCH (a:${nodeType} {${uniqueAttrName || 'id'}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(query);
 		if (result.records.length) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
 		else {
-			return res.status(404).end(`${nodeType} ${req.params.id} not found`);
+			return res.status(404).end(`${nodeType} ${uniqueAttr} not found`);
 		}
 	}
 	catch (e) {
@@ -18,7 +17,7 @@ const get = async (req, res, nodeType) => {
 	}
 };
 
-const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) => {
+const create = async (res, obj, nodeType, relationships, uniqueAttrName) => {
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${obj[uniqueAttrName]}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -65,7 +64,7 @@ const create = async (req, res, obj, nodeType, relationships, uniqueAttrName) =>
 	}
 };
 
-const update = async (req, res, obj, nodeType) => {
+const update = async (res, obj, nodeType) => {
 	try {
 		// update by unique attr or id
 		const query = `
@@ -95,16 +94,16 @@ const update = async (req, res, obj, nodeType) => {
 	}
 };
 
-const remove = async (req, res, nodeType, detach) => {
+const remove = async (res, nodeType, detach, uniqueAttrName, uniqueAttr) => {
 
 	try {
 		// remove by unique attr or id
-		const result = await db.run(`MATCH (a:${nodeType} {id: "${req.params.id}"})${detach ? ' DETACH' : ''} DELETE a`);
+		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${detach ? ' DETACH' : ''} DELETE a`);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
-			return res.status(200).end(`${req.params.id} deleted`);
+			return res.status(200).end(`${uniqueAttr} deleted`);
 		}
 		else {
-			return res.status(404).end(`${req.params.id} not found. No nodes deleted.`);
+			return res.status(404).end(`${uniqueAttr} not found. No nodes deleted.`);
 		}
 	}
 	catch (e) {
@@ -113,7 +112,7 @@ const remove = async (req, res, nodeType, detach) => {
 };
 
 
-const getAllforOne = async (req, res, relationship, param) => {
+const getAllforOne = async (res, relationship, param) => {
 	try {
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
 		const result = await db.run(query);
@@ -134,7 +133,7 @@ const getAllforOne = async (req, res, relationship, param) => {
 };
 
 
-const getAll = async (req, res, nodeType, filters = '') => {
+const getAll = async (res, nodeType, filters = '') => {
 
 	try {
 		const query = `MATCH (a:${nodeType} ${filters}) RETURN a`;

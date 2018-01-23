@@ -1,11 +1,9 @@
 const crud = require('./_crud');
 const db = require('../db-connection');
 
-const get = (req, res) => {
-	return crud.get(req, res, 'Submission');
-};
-
 const create = async (req, res) => {
+
+console.log('SUBMISSION', req.body)
 
 	const topLevel = req.body.node.supplierId ? true : false;
 	const submitterType = topLevel ? 'Supplier' : 'Contract';
@@ -22,14 +20,6 @@ const create = async (req, res) => {
 			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.id, to: 'SurveyQuestion'}
 		]);
 	}
-};
-
-const update = async (req, res) => {
-	return crud.update(req, res, req.body.node, 'Submission');
-};
-
-const remove = async (req, res) => {
-	return crud.remove(req, res, 'Submission', true);
 };
 
 const getAllforOne = async (req, res) => {
@@ -103,4 +93,4 @@ const getAllforOne = async (req, res) => {
 	}
 };
 
-module.exports = { get, getAllforOne, create, update, remove };
+module.exports = { getAllforOne, create };
