@@ -19,15 +19,16 @@ const constraints = async (verb) => {
 
   const setupConstraintIfPossible = (constraintQuery) => db.run(constraintQuery).catch(e => Promise.resolve())
   const constraints = await Promise.all(
-    constraintQueries.map(setupConstraintIfPossible))
-      .then(() => db.run('CALL db.constraints'));
+    constraintQueries.map(setupConstraintIfPossible)
+  ).then(() => db.run('CALL db.constraints'));
+
 	console.log(constraints, 'constraints');
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
-const dropNodes = async (nodeType) => {
-	console.log(`dropping nodes ${nodeType}...`);
-	return await db.run(`MATCH (a:${nodeType}) DELETE a`);
+const dropNodes = async (nodeTypes) => {
+	console.log(`dropping nodes ${nodeTypes.join(' ')}...`);
+	return await Promise.all(nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DELETE a`)));
 };
 
 const dropRelationships = async () => {
@@ -54,7 +55,7 @@ const init = async (req, res) => {
 		// DROP
 		await constraints('DROP');
     await dropRelationships();
-    await Promise.all(nodeTypes.map(nodeType => dropNodes(nodeType)));
+    await dropNodes(nodeTypes);
 
 		// CREATE
 		await constraints('CREATE');
@@ -64,7 +65,10 @@ const init = async (req, res) => {
 };
 
 if(process.argv[1] === __filename) {
-  init({}, { send: (code, result) => console.log(result) });
+  init({}, { send: (code, result) => {
+    console.log(result)
+    process.exit(0);
+  }});
 }
 
 module.exports = init;
