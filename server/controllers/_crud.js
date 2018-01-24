@@ -3,14 +3,27 @@ const db = require('../db-connection');
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 
 	try {
-		const query = `MATCH (a:${nodeType} {${uniqueAttrName || 'id'}: "${uniqueAttr}"}) RETURN a`;
+
+		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
+
+		const query = `MATCH (a:${nodeType} ${filter}) RETURN a`;
+
+		console.log('[CRUD] GET query');
+		console.log(query);
+
 		const result = await db.run(query);
-		if (result.records.length) {
-			return res.send(result.records[0]._fields[0].properties);
+
+		if (!result.records.length) {
+			return res.status(404).end(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
 		}
-		else {
-			return res.status(404).end(`${nodeType} ${uniqueAttr} not found`);
-		}
+
+		const formattedResult = result.records.map(record => record._fields[0].properties);
+
+		console.log('[CRUD] GET formatted result');
+		console.log(JSON.stringify(formattedResult, null, 2));
+
+		return res.send(formattedResult);
+
 	}
 	catch (e) {
 		return res.status(500).end(e.toString());

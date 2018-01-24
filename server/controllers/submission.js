@@ -9,16 +9,16 @@ console.log('SUBMISSION', req.body)
 	const submitterType = topLevel ? 'Supplier' : 'Contract';
 	const submitterId = topLevel ? req.body.node.supplierId : req.body.node.contractId;
 
-	crud.create(req, res, req.body.node, 'Submission', [
+	crud.create(res, req.body.node, 'Submission', [
 		{name:'SUBMITS', from: `${submitterType}`, fromId: submitterId, to: 'Submission', toId: req.body.node.id},
 		{name:'ANSWERS', from: 'Submission', fromId: req.body.node.id, to: 'Survey', toId: req.body.node.surveyId}
-	]);
+	], 'id');
 
 	for (let answer of req.body.answers) {
-		crud.create(req, res, answer, 'SubmissionAnswer', [
+		crud.create(res, answer, 'SubmissionAnswer', [
 			{name:'HAS', from: 'Submission', fromId: req.body.node.id, toId: answer.id, to: 'SubmissionAnswer'},
 			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.id, to: 'SurveyQuestion'}
-		]);
+		], 'id');
 	}
 };
 
