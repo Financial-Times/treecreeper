@@ -24,41 +24,32 @@ app.get('/', (req, res) => {
 	res.send('biz op api');
 });
 
-// SUPPLIER
-app.post('/api/supplier/', supplier.create);
-
-// CONTRACT
+// WEBPMA / 3SP - Specific (to phase out)
 app.get('/api/contracts/:supplierId', contract.get);
-
-// SUBMISSION
-
 app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
-app.post('/api/submission/', submission.create);
-
-
-// SURVEY
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
 
-// FIXME
-// CANNOT REOPEN
-app.put('/api/submission/:id/:surveyId', async (req, res) => {
-	return crud.update(req, res, req.body.node, 'Submission'); // TODO unique attr
-});
+app.post('/api/supplier/', supplier.create);
+app.post('/api/submission/', submission.create); // TODO can be abstracted - add relationships
 
 
 // GENERIC
-app.get('/api/:nodeName/:uniqueAttrName*?/:uniqueAttr*?', async (req, res) => {
-	return crud.get(res, req.params.nodeName, req.params.uniqueAttrName, req.params.uniqueAttr);
+app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
+	console.log('[APP] generic GET', req.params);
+	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
 });
-app.post('/api/:nodeName/:uniqueAttrName', async (req, res) => {
-	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
+app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic POST');
+	return crud.create(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships);
 });
-app.put('/api/:nodeName/:uniqueAttr', async (req, res) => {
-	return crud.update(req, res, req.body.node, req.params.nodeName);
+app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic PUT');
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node);
 });
-app.delete('/api/:nodeName/:uniqueAttr', async (req, res) => {
-	return crud.remove(req, res, req.params.nodeName, false);
+app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic DELETE');
+	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
 });
 
 const PORT = process.env.PORT || 8888;

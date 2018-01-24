@@ -1,15 +1,14 @@
 const db = require('../db-connection');
 
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
-
+	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr);
 	try {
 
 		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
 
 		const query = `MATCH (a:${nodeType} ${filter}) RETURN a`;
 
-		console.log('[CRUD] GET query');
-		console.log(query);
+		console.log('[CRUD]', query);
 
 		const result = await db.run(query);
 
@@ -30,9 +29,12 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 	}
 };
 
-const create = async (res, obj, nodeType, relationships, uniqueAttrName) => {
+const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
+
+	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr);
+
 	if (uniqueAttrName) {
-		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${obj[uniqueAttrName]}"}) RETURN a`;
+		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
 		if (result.records.length > 0) {
 			return res.status(400).end(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
@@ -41,6 +43,9 @@ const create = async (res, obj, nodeType, relationships, uniqueAttrName) => {
 
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 	try {
+		// Make sure what we've said is the primary key is in the obj
+		obj[uniqueAttrName] = uniqueAttr;
+
 		const result = await db.run(createQuery, {node: obj});
 
 		if (relationships) {
@@ -77,11 +82,12 @@ const create = async (res, obj, nodeType, relationships, uniqueAttrName) => {
 	}
 };
 
-const update = async (res, obj, nodeType) => {
+const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
+	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
 		// update by unique attr or id
 		const query = `
-			MATCH (a:${nodeType} {id: "${obj.id}"})
+			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})
 			SET a += $props
 			RETURN a
 		`;
@@ -96,22 +102,22 @@ const update = async (res, obj, nodeType) => {
 			return res.status(400).end('No properties were updated with', obj);
 		}
 		else {
-			return res.status(404).end(`${nodeType}${obj.id} not found. No nodes updated.`);
+			return res.status(404).end(`${nodeType}${uniqueAttr} not found. No nodes updated.`);
 		}
 
 		res.send(result);
 	}
 	catch (e) {
-		console.log('error', e);
+		console.log('[CRUD] update error', e);
 		return res.status(500).end(e.toString());
 	}
 };
 
-const remove = async (res, nodeType, detach, uniqueAttrName, uniqueAttr) => {
+const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 	try {
 		// remove by unique attr or id
-		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${detach ? ' DETACH' : ''} DELETE a`);
+		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${mode === 'detach' ? ' DETACH' : ''} DELETE a`);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
 			return res.status(200).end(`${uniqueAttr} deleted`);
 		}

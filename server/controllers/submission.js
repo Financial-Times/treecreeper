@@ -23,6 +23,7 @@ console.log('SUBMISSION', req.body)
 };
 
 const getAllforOne = async (req, res) => {
+	console.log('[SUBMISSION] getAllforOne');
 
 	try {
 
@@ -33,6 +34,7 @@ const getAllforOne = async (req, res) => {
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
 		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x: SurveyQuestion) RETURN p ORDER BY x.id`;
+		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);
 
 		let submissionObj = {};
