@@ -1,20 +1,15 @@
 const crud = require('./_crud');
 const db = require('../db-connection');
 
-// const create = async (req, res) => {
-// 	return crud.create(req, res, req.body.node, 'Contract', [{name:'SIGNS', from: 'Supplier', to: 'Contract'}]);
-// };
-
-
 const getAllforOne = async (req, res) => {
-	return crud.getAllforOne(req, res, {name:'SIGNS', from: 'Supplier', to: 'Contract'}, req.params.supplierId);
+	return crud.getAllforOne(res, {name:'SIGNS', from: 'Supplier', to: 'Contract'}, req.params.supplierId);
 };
 
 const get = async (req, res) => {
 	console.log('getting', req.params.supplierId);
 	try {
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
-		console.log(query)
+		console.log('[CONTRACT]', query);
 
 		const result = await db.run(query);
 
