@@ -14,6 +14,7 @@ const get = async (req, res) => {
 	console.log('getting', req.params.supplierId);
 	try {
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
+		console.log(query)
 
 		const result = await db.run(query);
 
@@ -104,7 +105,7 @@ const get = async (req, res) => {
 		const isEmpty = !Object.keys(contractsObj).length;
 
 		if (isEmpty) {
-			return res.status(404).end(`No contracts found for ${req.params.supplierId}`);
+			return res.status(404).end(`No submissions found for ${req.params.supplierId}`);
 		}
 
 		return res.send(contractsObj);

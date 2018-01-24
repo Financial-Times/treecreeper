@@ -30,46 +30,36 @@ app.post('/api/supplier/', supplier.create);
 // CONTRACT
 app.get('/api/contracts/:supplierId', contract.get);
 
-// // SUBMISSION
+// SUBMISSION
 
-// app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
-// app.post('/api/submission/', submission.create);
-
-
-// // SURVEY
-// app.get('/api/survey/:id', survey.get);
-// app.get('/api/surveys/:type', survey.getAll);
+app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
+app.post('/api/submission/', submission.create);
 
 
+// SURVEY
+app.get('/api/survey/:id', survey.get);
+app.get('/api/surveys/:type', survey.getAll);
 
-
-
-// MOVE TO GENERIC IN SOURCE APPS
-// app.get('/api/submission/:uniqueAttr', async (req, res) => {
-// 	return crud.get(req, res, 'Submission', 'id', req.param.uniqueAttr); // TODO unique attr
-// });
-// app.put('/api/submission/:id/:surveyId', async (req, res) => {
-// 	return crud.update(req, res, req.body.node, 'Submission'); // TODO unique attr
-// });
-// app.get('/api/suppliers/', async (req, res) => {
-// 	return crud.getAll(req, res, 'Submission', 'id', req.param.uniqueAttr); // TODO unique attr and syntax
-// });
-
+// FIXME
+// CANNOT REOPEN
+app.put('/api/submission/:id/:surveyId', async (req, res) => {
+	return crud.update(req, res, req.body.node, 'Submission'); // TODO unique attr
+});
 
 
 // GENERIC
 app.get('/api/:nodeName/:uniqueAttrName*?/:uniqueAttr*?', async (req, res) => {
 	return crud.get(res, req.params.nodeName, req.params.uniqueAttrName, req.params.uniqueAttr);
 });
-// app.post('/api/:nodeName/:uniqueAttrName', async (req, res) => {
-// 	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
-// });
-// app.put('/api/:nodeName/:uniqueAttr', async (req, res) => {
-// 	return crud.update(req, res, req.body.node, req.params.nodeName);
-// });
-// app.delete('/api/:nodeName/:uniqueAttr', async (req, res) => {
-// 	return crud.remove(req, res, req.params.nodeName, false);
-// });
+app.post('/api/:nodeName/:uniqueAttrName', async (req, res) => {
+	return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
+});
+app.put('/api/:nodeName/:uniqueAttr', async (req, res) => {
+	return crud.update(req, res, req.body.node, req.params.nodeName);
+});
+app.delete('/api/:nodeName/:uniqueAttr', async (req, res) => {
+	return crud.remove(req, res, req.params.nodeName, false);
+});
 
 const PORT = process.env.PORT || 8888;
 
