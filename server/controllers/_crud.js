@@ -2,6 +2,7 @@ const db = require('../db-connection');
 
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr);
+
 	try {
 
 		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
@@ -31,12 +32,13 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 
 const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
 
-	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr);
+	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships);
 
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
 		if (result.records.length > 0) {
+			console.log('EXISTS', result.records)
 			return res.status(400).end(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
 		}
 	}
@@ -98,11 +100,8 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
 		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
-		else if (!propAmount) {
-			return res.status(400).end('No properties were updated with', obj);
-		}
 		else {
-			return res.status(404).end(`${nodeType}${uniqueAttr} not found. No nodes updated.`);
+			return res.status(404).end(`${propAmount} props updated. ${nodeType}${uniqueAttr} not found. No nodes updated.`);
 		}
 
 		res.send(result);
