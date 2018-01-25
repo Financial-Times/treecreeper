@@ -9,7 +9,9 @@
     "test": "istanbul cover -i \"+(server|scripts)/**/*.js\" -x \"+(server|scripts)/**/*.spec.js\" --report html --include-all-sources node_modules/.bin/_mocha -- --require test-config \"+(server|scripts|tests)/**/*.spec.js\" --recursive --exit",
     "test-dev": "export $(cat .env | xargs) && mocha tests/**/*.spec.js",
     "init-db": "export $(cat .env | xargs) && node scripts/init.js",
-    "vault:env": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development | jq -r \".data|to_entries|map(\\\"\\(.key)=\\(.value|tostring)\\\")|.[]\" > .env"
+    "vault:env": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development | jq -r \".data|to_entries|map(\\\"\\(.key)=\\(.value|tostring)\\\")|.[]\" > .env",
+    "precommit": "node_modules/.bin/secret-squirrel",
+    "commitmsg": "node_modules/.bin/secret-squirrel-commitmsg"
   },
   "repository": {
     "type": "git",
