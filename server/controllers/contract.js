@@ -1,33 +1,18 @@
 const crud = require('./_crud');
 const db = require('../db-connection');
 
-const getNode = (req, res) => {
-	return crud.get(req, res, 'Contract');
-};
-
-const create = async (req, res) => {
-	return crud.create(req, res, req.body.node, 'Contract', [{name:'SIGNS', from: 'Supplier', to: 'Contract'}]);
-};
-
-const update = async (req, res) => {
-	return crud.update(req, res, req.body.node, 'Contract');
-};
-
-const remove = async (req, res) => {
-	return crud.remove(req, res, 'Contract', true);
-};
-
 const getAllforOne = async (req, res) => {
-	return crud.getAllforOne(req, res, {name:'SIGNS', from: 'Supplier', to: 'Contract'}, req.params.supplierId);
+	return crud.getAllforOne(res, {name:'SIGNS', from: 'Supplier', to: 'Contract'}, req.params.supplierId);
 };
 
 const get = async (req, res) => {
 	console.log('getting', req.params.supplierId);
 	try {
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
+		console.log('[CONTRACT]', query);
 
 		const result = await db.run(query);
-	
+
 		const contractsObj = {
 			//contractId: {
 			// 	  ...
@@ -115,7 +100,7 @@ const get = async (req, res) => {
 		const isEmpty = !Object.keys(contractsObj).length;
 
 		if (isEmpty) {
-			return res.status(404).end(`No contracts found for ${req.params.supplierId}`);
+			return res.status(404).end(`No submissions found for ${req.params.supplierId}`);
 		}
 
 		return res.send(contractsObj);
@@ -125,4 +110,4 @@ const get = async (req, res) => {
 	}
 };
 
-module.exports = { getNode, get, getAllforOne, create, update, remove };
+module.exports = { get, getAllforOne };
