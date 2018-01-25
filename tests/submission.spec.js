@@ -34,7 +34,7 @@ describe('Submission - API endpoints', () => {
 		});
 	});
 
-	describe.skip('POST', () => {
+	describe('POST', () => {
 		before(() => request(app)
 		.post('/api/submission')
 		.set('API_KEY', `${process.env.API_KEY}`)
@@ -44,14 +44,14 @@ describe('Submission - API endpoints', () => {
 		.delete('/api/submission/tddab40e000000caszsa0')
 		.set('API_KEY', `${process.env.API_KEY}`));
 
-		it('GET should retrieve the new submission node - status code 200', (done) => {
+		it.skip('GET should retrieve the new submission node - status code 200', (done) => {
 			request(app)
 			.get('/api/submission/tddab40e000000caszsa0')
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.expect(200, done);
 		});
 
-		it('POST should not allow duplicate nodes', (done) => {
+		it.skip('POST should not allow duplicate nodes', (done) => {
 			request(app)
 			.post('/api/submission')
 			.set('API_KEY', `${process.env.API_KEY}`)
