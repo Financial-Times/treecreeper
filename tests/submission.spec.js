@@ -34,7 +34,7 @@ describe('Submission - API endpoints', () => {
 		});
 	});
 
-	describe('POST', () => {
+	describe.skip('POST', () => {
 		before(() => request(app)
 		.post('/api/submission')
 		.set('API_KEY', `${process.env.API_KEY}`)
