@@ -1,6 +1,6 @@
 {
     "_id": "abc",
-    "surveyTitle": "Anti-Bribery and Corruption",
+    "surveyTitle": "Anti-Bribery & Corruption",
     "section": [
         {
             "title": null,
@@ -15,6 +15,7 @@
                         {
                             "_id": "abc_02",
                             "question": "Please outline the nature of outsourced services, the name and location of third parties.",
+                            "child_question_trigger": "Yes",
                             "prompt": null,
                             "fieldType": "long-text"
                         }
@@ -93,7 +94,7 @@
                         {
                             "_id": "abc_13",
                             "child_question_trigger": "Yes",
-                            "question": "Please describe circumstances.",
+                            "question": "Please detail circumstances.",
                             "prompt": null,
                             "fieldType": "long-text"
                         }
