@@ -114,46 +114,6 @@ const get = async (req, res) => {
 	}
 };
 
-// const create = async (req, res) => {
-
-// 	// const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
-// 	crud.create(res, req.body.node, 'Survey');
-// 	for (let section of req.body.sections) {
-// 		const questions = section.form;
-
-// 		for (let question of questions) {
-// 			crud.create(req, res, question, 'SurveyQuestion', [
-// 				{name:`ASKS {section: '${section.title}'}`, from: 'Survey', to: 'SurveyQuestion'}
-// 			]);
-
-// 			if (question.child_questions) {
-// 				for (let child of question.child_questions) {
-
-// 					crud.create(req, res, child, 'SurveyQuestion', [
-// 						{name:`RAISES  {trigger: '${child.child_question_trigger}'}`, from: 'SurveyQuestion', to: 'SurveyQuestion'}
-// 					]);
-
-// 					if (child.fieldOptions) {
-// 						for (let option of question.fieldOptions) {
-// 							crud.create(req, res, option, 'SurveyQuestionOption', [
-// 								{name:'ALLOWS', from: 'SurveyQuestion', to: 'SurveyQuestionOption'}
-// 							]);
-// 						}
-// 					}
-// 				}
-// 			}
-
-// 			if (question.fieldOptions) {
-// 				for (let option of question.fieldOptions) {
-// 					crud.create(req, res, option, 'SurveyQuestionOption', [
-// 						{name:'ALLOWS', from: 'SurveyQuestion', to: 'SurveyQuestionOption'}
-// 					]);
-// 				}
-// 			}
-// 		}
-// 	}
-// };
-
 const update = async (req, res) => {
 	const obj = {
 		id: req.body.id,

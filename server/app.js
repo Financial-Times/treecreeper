@@ -17,7 +17,6 @@ app.get('/__gtg', (req, res) => {
 app.use(bodyParser.json());
 app.use(security);
 
-
 app.set('case sensitive routing', true);
 
 app.get('/', (req, res) => {
