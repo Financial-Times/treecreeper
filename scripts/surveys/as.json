@@ -26,6 +26,7 @@
                         {
                             "_id": "as_04",
                             "question": "Please include as much detail as possible",
+                            "child_question_trigger": "Yes",
                             "prompt": null,
                             "fieldType": "long-text"
                         }
@@ -41,6 +42,7 @@
                         {
                             "_id": "as_06",
                             "question": "Do you review this regularly?",
+                            "child_question_trigger": "Yes",
                             "prompt": null
                         }
                     ]
