@@ -32,3 +32,5 @@ If the have [vault cli](https://github.com/Financial-Times/vault/wiki/Getting-St
 ```sh
 $ npm run vault:env
 ```
+
+laura.carvajal@ft.com
