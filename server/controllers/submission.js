@@ -15,9 +15,9 @@ const create = async (req, res) => {
 	]);
 
 	for (let answer of req.body.answers) {
-		crud.create(res, 'SubmissionAnswer', null, null, answer, [
+		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
 			{name:'HAS', from: 'Submission', fromId: req.body.node.id, toId: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.id, to: 'SurveyQuestion'}
+			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromId: answer.id, toId: answer.questionId, to: 'SurveyQuestion'}
 		]);
 	}
 };
@@ -57,13 +57,13 @@ const getAllforOne = async (req, res) => {
 							case 'HAS':
 								submissionAnswer = submissionAnswer || segment.end.properties;
 
-								if (!submissionObj[submissionAnswer.id]) {
-									submissionObj[submissionAnswer.id] = {
+								if (!submissionObj[submissionAnswer.questionId]) {
+									submissionObj[submissionAnswer.questionId] = {
 										answer: submissionAnswer.value,
 									};
 								}
 								else {
-									submissionObj[submissionAnswer.id].answer = submissionAnswer.value;
+									submissionObj[submissionAnswer.questionId].answer = submissionAnswer.value;
 								}
 							break;
 							case 'ANSWERS_QUESTION':
