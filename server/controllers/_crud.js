@@ -38,7 +38,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
 		if (result.records.length > 0) {
-			console.log('EXISTS', result.records)
+			console.log(nodeType, uniqueAttr, uniqueAttrName, 'ALREADY EXISTS', JSON.stringify(result.records, null, 2));
 			return res.status(400).end(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
 		}
 	}

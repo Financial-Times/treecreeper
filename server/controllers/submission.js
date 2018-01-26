@@ -3,7 +3,7 @@ const db = require('../db-connection');
 
 const create = async (req, res) => {
 
-console.log('SUBMISSION', req.body)
+	console.log('SUBMISSION', req.body);
 
 	const topLevel = req.body.node.supplierId ? true : false;
 	const submitterType = topLevel ? 'Supplier' : 'Contract';
