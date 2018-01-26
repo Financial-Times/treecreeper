@@ -45,8 +45,11 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 	try {
-		// Make sure what we've said is the primary key is in the obj
-		obj[uniqueAttrName] = uniqueAttr;
+
+		// Make sure if we've said there is the primary key, then it is in the obj
+		if (uniqueAttrName) {
+			obj[uniqueAttrName] = uniqueAttr;
+		}
 
 		const result = await db.run(createQuery, {node: obj});
 
