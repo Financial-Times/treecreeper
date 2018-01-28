@@ -12,7 +12,8 @@
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
-                            "_id":"pci_03",
+                            "_id": "pci_03",
+                            "child_question_trigger": "Yes",
                             "question": "Is your company currently PCI compliant?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -33,6 +34,7 @@
                         },
                         {
                             "_id":"pci_06",
+                            "child_question_trigger": "Yes",
                             "question": "Is your company using a supplier to process FT customer card data?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -53,6 +55,7 @@
                         },
                         {
                             "_id":"pci_09",
+                            "child_question_trigger": "Yes",
                             "question": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -68,6 +71,7 @@
                         },
                         {
                             "_id":"pci_11",
+                            "child_question_trigger": "Yes",
                             "question": "Will your company (or your supplier) store FT customer debit/credit card data?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -83,6 +87,7 @@
                         },
                         {
                             "_id":"pci_13",
+                            "child_question_trigger": "Yes",
                             "question": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -97,6 +102,7 @@
                         },
                         {
                             "_id":"pci_15",
+                            "child_question_trigger": "Yes",
                             "question": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -110,6 +116,7 @@
                         },
                         {
                             "_id":"pci_17",
+                            "child_question_trigger": "Yes",
                             "question": "Will your company be using or creating your own landing page through which FT customers will subscribe?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -123,6 +130,7 @@
                         },
                         {
                             "_id":"pci_19",
+                            "child_question_trigger": "Yes",
                             "question": "Do you provide training and guidance to all relevant staff on PCI?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"],
@@ -136,12 +144,14 @@
                         },
                         {
                             "_id":"pci_21",
+                            "child_question_trigger": "Yes",
                             "question": "Has your company been prosecuted or investigated for PCI related offences?",
                             "fieldType": "binary",
                             "fieldOptions": ["Yes", "No"]
                         },
                         {
                             "_id":"pci_22",
+                            "child_question_trigger": "Yes",
                             "question": "Please detail if the PAN is hashed/obfuscated and to what degree?",
                             "prompt": "Both on your company's systems or any of your supplier's. List individually if applicable.",
                             "fieldType": "long-text"

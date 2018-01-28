@@ -3,7 +3,7 @@
     "surveyTitle": "Business Continuity Management",
     "section": [
         {
-            "title": "BCM",
+            "title": null,
             "form": [
                 {
                     "_id": "bcm_01",

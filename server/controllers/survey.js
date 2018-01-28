@@ -103,6 +103,10 @@ const get = async (req, res) => {
 					}
 				}
 			}
+
+			console.log('\n\nSURVEY OBJECT');
+			console.log(JSON.stringify(surveyObjWithSections, null, 2));
+
 			return res.send(surveyObjWithSections);
 		}
 		else {
