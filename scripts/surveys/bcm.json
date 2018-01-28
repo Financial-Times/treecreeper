@@ -19,7 +19,7 @@
                 },
                 {
                     "_id": "bcm_03",
-                    "question": "Do you have a regularly reviewed Business Continuity Plan for the service you are supplying the FT",
+                    "question": "Do you have a regularly reviewed Business Continuity Plan for the service you are supplying the FT?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
@@ -32,7 +32,7 @@
                 },
                 {
                     "_id": "bcm_05",
-                    "question": "When did you last physically test that recovery plan?"
+                    "question": "When did you last physically test that Business Continuity Plan?"
                 },
                 {
                     "_id": "bcm_06",
@@ -52,16 +52,37 @@
                 },
                 {
                     "_id": "bcm_08",
-                    "question": "What frequency do you Backup data that you are holding of the FT?"
+                    "question": "How often do you backup data that you are holding of the FT?"
                 },
                 {
                     "_id": "bcm_09",
-                    "question": "Do you perform mirror image Backups or take backups at set frequency?",
-                    "prompt": "If latter what is that frequency?"
+                    "question": "Do you perform mirror image backups or take backups at set frequency?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "bcm_10",
+                            "child_question_trigger": "Yes",
+                            "question": "What is that frequency?"
+                        }
+                    ]
                 },
                 {
-                    "_id": "bcm_10",
+                    "_id": "bcm_11",
                     "question": "What timeframe will the FT service be recovered from a backup?"
+                }
+            ]
+        },
+        {
+            "title": "Please sign before submitting",
+            "form": [
+                {
+                    "_id": "bcm_40",
+                    "question": "Full Name"
+                },
+                {
+                    "_id": "bcm_41",
+                    "question": "Job Role"
                 }
             ]
         }

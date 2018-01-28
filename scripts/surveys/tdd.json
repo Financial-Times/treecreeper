@@ -84,11 +84,7 @@
                 {
                     "_id": "tdd_12",
                     "question": "Please provide contact details of your Cyber Security Lead and confirm if this is a 24 x 7 contact name and number?",
-                    "fieldType": "long-text",
-                    "risk": {
-                        "id": "2",
-                        "trigger": "no"
-                    }
+                    "fieldType": "long-text"
                 },
                 {
                     "_id": "tdd_13",
@@ -149,11 +145,7 @@
                     "_id": "tdd_21",
                     "question": "Do you apply security patches on all systems within 4 weeks of the patches becoming available?",
                     "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "risk": {
-                        "id": "3",
-                        "trigger": "no"
-                    }
+                    "fieldOptions": ["Yes", "No"]
                 },
                 {
                     "_id": "tdd_22",
@@ -208,31 +200,19 @@
                     "_id": "tdd_28",
                     "question": "Do you enforce two-factor authentication for remote connectivity?",
                     "fieldType": "checkbox",
-                    "fieldOptions": ["VPN", "Citrix", "Outlook Web Access", "Other"],
-                    "risk": {
-                        "id": "1",
-                        "trigger": "no"
-                    }
+                    "fieldOptions": ["VPN", "Citrix", "Outlook Web Access", "Other"]
                 },
                 {
                     "_id": "tdd_29",
                     "question": "Do you enforce two-factor-authentication for access to systems that contain sensitive and personal data?",
                     "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "risk": {
-                        "id": "1",
-                        "trigger": "no"
-                    }
+                    "fieldOptions": ["Yes", "No"]
                 },
                 {
                     "_id": "tdd_30",
                     "question": "Do you enforce two-factor authentication for systems that publish content to an FT-branded site or social media platform?",
                     "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "risk": {
-                        "id": "1",
-                        "trigger": "no"
-                    }
+                    "fieldOptions": ["Yes", "No"]
                 },
                 {
                     "_id": "tdd_31",
@@ -245,6 +225,19 @@
                     "question": "Do you rotate keys, passwords and terminate accounts of all staff that have left?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
+                }
+            ]
+        },
+        {
+            "title": "Please sign before submitting",
+            "form": [
+                {
+                    "_id": "tdd_40",
+                    "question": "Full Name"
+                },
+                {
+                    "_id": "tdd_41",
+                    "question": "Job Role"
                 }
             ]
         }
