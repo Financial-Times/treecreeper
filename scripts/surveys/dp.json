@@ -7,59 +7,105 @@
             "form": [
                 {
                     "_id": "dp_01",
-                    "question": "Does Company have Data Protection and Security policies?",
-                    "prompt": "Please ensure that copies of these policies are returned to FT with this form",
-                    "fieldType": "upload"
-                },
-                {
-                    "_id": "dp_02",
-                    "question": "Does Company have an incident response plan in case of any data breach, loss or theft of data?",
-                    "prompt": "Please return copies with this form",
-                    "fieldType": "upload"
+                    "question": "Does your company have Data Protection and Security policies?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "dp_02",
+                            "child_question_trigger": "Yes",
+                            "question": "Please attach your Data Protection and Security policy documents",
+                            "fieldType": "upload"
+                        }
+                    ]
                 },
                 {
                     "_id": "dp_03",
-                    "question": "Does Company provide training to staff on data protection?",
+                    "question": "Does your company have an incident response plan in case of any data breach, loss or theft of data?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
                             "_id": "dp_04",
                             "child_question_trigger": "Yes",
-                            "question": "How often?"
+                            "question": "Please attach your incident response plan",
+                            "fieldType": "upload"
                         }
                     ]
                 },
                 {
                     "_id": "dp_05",
-                    "question": "Will Company be processing (or have access to) any personal data, including but not limited to; \nNames\nPhone Numbers\nPostal Addresses\nEmail Addresses\nIP Addresses\nCustomer ID\nOr any other personal data or PII? ",
-                    "prompt": "Please detail all types of data in your answer",
-                    "fieldType": "long-text"
-                },
-                {
-                    "_id": "dp_06",
-                    "question":"Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services?",
-                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc… you may have access to.",
-                    "fieldType": "long-text"
+                    "question": "Does your company provide training to staff on data protection?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "dp_06",
+                            "child_question_trigger": "Yes",
+                            "question": "How often does this training take place?"
+                        }
+                    ]
                 },
                 {
                     "_id": "dp_07",
-                    "question": "Will any additional third parties have access to any personal data originating from or belonging to FT?",
+                    "question": "Will your company be processing (or have access to) any personal data, including but not limited to: Names, Phone Numbers, Postal Addresses, Email Addresses, IP Addresses, Customer ID, or any other personal data or PII? ",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
                             "_id": "dp_08",
                             "child_question_trigger": "Yes",
-                            "question": "Please list all additional third parties and their County of operation, including the services to be outsourced."
+                            "fieldType": "long-text",
+                            "question": "Please detail all types of personal or PII data you'll be processing"
                         }
                     ]
                 },
                 {
                     "_id": "dp_09",
-                    "question": "Has Company ever been prosecuted or investigated for data protection related offences?",
+                    "question": "Will your company transfer any personal data to or from the EEA in connection with the services?",
+                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "dp_10",
+                            "child_question_trigger": "Yes",
+                            "fieldType": "long-text",
+                            "question": "Please detail under what circumstances you will transfer personal data to/from the EEA"
+                        }
+                    ]
+                },
+                {
+                    "_id": "dp_11",
+                    "question": "Will any additional third parties have access to any personal data originating from or belonging to FT?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id": "dp_12",
+                            "child_question_trigger": "Yes",
+                            "question": "Please list all additional third parties and their county of operation, including the services to be outsourced"
+                        }
+                    ]
+                },
+                {
+                    "_id": "dp_13",
+                    "question": "Has your company ever been prosecuted or investigated for data protection related offences?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
+                }
+            ]
+        },
+        {
+            "title": "Please sign before submitting",
+            "form": [
+                {
+                    "_id": "dp_40",
+                    "question": "Full Name"
+                },
+                {
+                    "_id": "dp_41",
+                    "question": "Job Role"
                 }
             ]
         }

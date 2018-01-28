@@ -4,12 +4,15 @@ const db = require('../db-connection');
 const get = async (req, res) => {
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
+		console.log('[SURVEY]', query);
 
 		const result = await db.run(query);
 
 		const surveyObj = {
 			questions: {}
 		};
+
+		// TODO replace this while thing with _cypher-to-json.js
 
 		if (result.records.length) {
 			const sections = [];
@@ -76,6 +79,25 @@ const get = async (req, res) => {
 									surveyObj.questions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
 								}
 							}
+
+							// Didn't find it in the root, search in the children
+							// or simplify the query altogether
+							// doing below before batery ran out:c
+							// console.log('\nALL QUESTIONS', surveyObj.questions)
+							for (let key in surveyObj.questions) {
+								if (surveyObj.questions.hasOwnProperty(key)) {
+									const question = surveyObj.questions[key];
+									if (question.childQuestions && question.childQuestions[parentQuestion.id]) {
+
+										if (!question.childQuestions[parentQuestion.id].childQuestions) {
+											question.childQuestions[parentQuestion.id].childQuestions = {};
+										}
+										if (!question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id]) {
+											question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -103,6 +125,7 @@ const get = async (req, res) => {
 					}
 				}
 			}
+
 			return res.send(surveyObjWithSections);
 		}
 		else {
@@ -110,6 +133,7 @@ const get = async (req, res) => {
 		}
 	}
 	catch (e) {
+		console.log('[SURVEY] error', e)
 		return res.status(500).end(e.toString());
 	}
 };

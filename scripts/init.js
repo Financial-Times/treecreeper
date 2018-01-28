@@ -25,7 +25,6 @@ const constraints = async (verb) => {
 	}
 
 	const constraints = await db.run('CALL db.constraints');
-	console.log(constraints, 'constraints');
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
