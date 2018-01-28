@@ -1,0 +1,5258 @@
+[{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3684,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_01",
+			"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			}
+		],
+		"length": 1
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3693,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_03",
+			"text": "Is your company currently PCI compliant?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1846,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3693,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3693,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_03",
+				"text": "Is your company currently PCI compliant?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3695,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_03Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1846,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3693,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3693,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_03",
+				"text": "Is your company currently PCI compliant?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3693,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_03",
+				"text": "Is your company currently PCI compliant?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1848,
+				"high": 0
+				},
+				"start": {
+				"low": 3693,
+				"high": 0
+				},
+				"end": {
+				"low": 3695,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3695,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_03Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3700,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_03No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1846,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3693,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3693,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_03",
+				"text": "Is your company currently PCI compliant?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3693,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_03",
+				"text": "Is your company currently PCI compliant?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1863,
+				"high": 0
+				},
+				"start": {
+				"low": 3693,
+				"high": 0
+				},
+				"end": {
+				"low": 3700,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3700,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_03No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3702,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_06",
+			"text": "Is your company using a supplier to process FT customer card data?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1876,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3702,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3702,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_06",
+				"text": "Is your company using a supplier to process FT customer card data?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3707,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_06Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1876,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3702,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3702,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_06",
+				"text": "Is your company using a supplier to process FT customer card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3702,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_06",
+				"text": "Is your company using a supplier to process FT customer card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1884,
+				"high": 0
+				},
+				"start": {
+				"low": 3702,
+				"high": 0
+				},
+				"end": {
+				"low": 3707,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3707,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_06Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3724,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_06No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1876,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3702,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3702,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_06",
+				"text": "Is your company using a supplier to process FT customer card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3702,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_06",
+				"text": "Is your company using a supplier to process FT customer card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1885,
+				"high": 0
+				},
+				"start": {
+				"low": 3702,
+				"high": 0
+				},
+				"end": {
+				"low": 3724,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3724,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_06No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3744,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_09",
+			"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1928,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3744,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3744,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_09",
+				"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3771,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_09Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1928,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3744,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3744,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_09",
+				"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3744,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_09",
+				"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1944,
+				"high": 0
+				},
+				"start": {
+				"low": 3744,
+				"high": 0
+				},
+				"end": {
+				"low": 3771,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3771,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_09Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3779,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_09No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1928,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3744,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3744,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_09",
+				"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3744,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_09",
+				"text": "Will your company (or your supplier) transfer FT customer debit/credit card data (by any means) outside the EU?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1949,
+				"high": 0
+				},
+				"start": {
+				"low": 3744,
+				"high": 0
+				},
+				"end": {
+				"low": 3779,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3779,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_09No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3788,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_11",
+			"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1957,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3788,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3788,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_11",
+				"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3802,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_11Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1957,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3788,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3788,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_11",
+				"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3788,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_11",
+				"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1974,
+				"high": 0
+				},
+				"start": {
+				"low": 3788,
+				"high": 0
+				},
+				"end": {
+				"low": 3802,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3802,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_11Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3815,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_11No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1957,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3788,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3788,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_11",
+				"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3788,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_11",
+				"text": "Will your company (or your supplier) store FT customer debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1982,
+				"high": 0
+				},
+				"start": {
+				"low": 3788,
+				"high": 0
+				},
+				"end": {
+				"low": 3815,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3815,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_11No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3818,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_13",
+			"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1991,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3818,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3818,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_13",
+				"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3822,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_13Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1991,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3818,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3818,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_13",
+				"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3818,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_13",
+				"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2003,
+				"high": 0
+				},
+				"start": {
+				"low": 3818,
+				"high": 0
+				},
+				"end": {
+				"low": 3822,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3822,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_13Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3827,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_13No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1991,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3818,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3818,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_13",
+				"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3818,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_13",
+				"text": "Will any supplier of your company have access to the card systems for any other reason e.g., for hardware support?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2031,
+				"high": 0
+				},
+				"start": {
+				"low": 3818,
+				"high": 0
+				},
+				"end": {
+				"low": 3827,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3827,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_13No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3834,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_15",
+			"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2044,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3834,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3834,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_15",
+				"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3844,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_15Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2044,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3834,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3834,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_15",
+				"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3834,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_15",
+				"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2053,
+				"high": 0
+				},
+				"start": {
+				"low": 3834,
+				"high": 0
+				},
+				"end": {
+				"low": 3844,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3844,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_15Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3851,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_15No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2044,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3834,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3834,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_15",
+				"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3834,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_15",
+				"text": "Will your company (or supplier) provide equipment (e.g., iPad, PC) via which a FT landing page will process card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2095,
+				"high": 0
+				},
+				"start": {
+				"low": 3834,
+				"high": 0
+				},
+				"end": {
+				"low": 3851,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3851,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_15No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3852,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_17",
+			"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2110,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3852,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3852,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_17",
+				"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3863,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_17Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2110,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3852,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3852,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_17",
+				"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3852,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_17",
+				"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2119,
+				"high": 0
+				},
+				"start": {
+				"low": 3852,
+				"high": 0
+				},
+				"end": {
+				"low": 3863,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3863,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_17Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3864,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_17No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2110,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3852,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3852,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_17",
+				"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3852,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_17",
+				"text": "Will your company be using or creating your own landing page through which FT customers will subscribe?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2124,
+				"high": 0
+				},
+				"start": {
+				"low": 3852,
+				"high": 0
+				},
+				"end": {
+				"low": 3864,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3864,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_17No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3865,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_19",
+			"text": "Do you provide training and guidance to all relevant staff on PCI?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2129,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3865,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3865,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_19",
+				"text": "Do you provide training and guidance to all relevant staff on PCI?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3867,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_19Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2129,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3865,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3865,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_19",
+				"text": "Do you provide training and guidance to all relevant staff on PCI?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3865,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_19",
+				"text": "Do you provide training and guidance to all relevant staff on PCI?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2135,
+				"high": 0
+				},
+				"start": {
+				"low": 3865,
+				"high": 0
+				},
+				"end": {
+				"low": 3867,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3867,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_19Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3869,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_19No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2129,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3865,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3865,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_19",
+				"text": "Do you provide training and guidance to all relevant staff on PCI?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3865,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_19",
+				"text": "Do you provide training and guidance to all relevant staff on PCI?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 2141,
+				"high": 0
+				},
+				"start": {
+				"low": 3865,
+				"high": 0
+				},
+				"end": {
+				"low": 3869,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3869,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_19No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3871,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"fieldType": "binary",
+			"id": "pci_21",
+			"text": "Has your company been prosecuted or investigated for PCI related offences?"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 136,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3871,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3871,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_21",
+				"text": "Has your company been prosecuted or investigated for PCI related offences?"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3877,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_21Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 136,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3871,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3871,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_21",
+				"text": "Has your company been prosecuted or investigated for PCI related offences?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3871,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_21",
+				"text": "Has your company been prosecuted or investigated for PCI related offences?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 193,
+				"high": 0
+				},
+				"start": {
+				"low": 3871,
+				"high": 0
+				},
+				"end": {
+				"low": 3877,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3877,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_21Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 3881,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_21No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 136,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 3871,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3871,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_21",
+				"text": "Has your company been prosecuted or investigated for PCI related offences?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3871,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_21",
+				"text": "Has your company been prosecuted or investigated for PCI related offences?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 800,
+				"high": 0
+				},
+				"start": {
+				"low": 3871,
+				"high": 0
+				},
+				"end": {
+				"low": 3881,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 3881,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_21No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 3
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 1758,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"id": "pci_22",
+			"text": "Please detail if the PAN is hashed/obfuscated and to what degree?",
+			"fieldType": "long-text",
+			"prompt": "Both on your company's systems or any of your supplier's. List individually if applicable."
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 811,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 1758,
+				"high": 0
+				},
+				"type": "RAISES",
+				"properties": {
+				"trigger": "Yes"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 1758,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"id": "pci_22",
+				"text": "Please detail if the PAN is hashed/obfuscated and to what degree?",
+				"fieldType": "long-text",
+				"prompt": "Both on your company's systems or any of your supplier's. List individually if applicable."
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 2381,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_01Yes",
+			"text": "Yes"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 863,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 2381,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 2381,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_01Yes",
+				"text": "Yes"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 2432,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestionOption"
+			],
+			"properties": {
+			"id": "pci_01No",
+			"text": "No"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 1831,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 3684,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": ""
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			}
+			},
+			{
+			"start": {
+				"identity": {
+				"low": 3684,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"fieldType": "binary",
+				"id": "pci_01",
+				"text": "Will your company request, process, transfer or store FT customer or FT staff debit/credit card data?"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 950,
+				"high": 0
+				},
+				"start": {
+				"low": 3684,
+				"high": 0
+				},
+				"end": {
+				"low": 2432,
+				"high": 0
+				},
+				"type": "ALLOWS",
+				"properties": {}
+			},
+			"end": {
+				"identity": {
+				"low": 2432,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestionOption"
+				],
+				"properties": {
+				"id": "pci_01No",
+				"text": "No"
+				}
+			}
+			}
+		],
+		"length": 2
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 2439,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"id": "pci_40",
+			"text": "Full Name"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 954,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 2439,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": "Please sign before submitting"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 2439,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"id": "pci_40",
+				"text": "Full Name"
+				}
+			}
+			}
+		],
+		"length": 1
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+	},
+	{
+	"keys": [
+		"p"
+	],
+	"length": 1,
+	"_fields": [
+		{
+		"start": {
+			"identity": {
+			"low": 3683,
+			"high": 0
+			},
+			"labels": [
+			"Survey"
+			],
+			"properties": {
+			"title": "PCI Compliance",
+			"version": 0,
+			"id": "pci"
+			}
+		},
+		"end": {
+			"identity": {
+			"low": 2446,
+			"high": 0
+			},
+			"labels": [
+			"SurveyQuestion"
+			],
+			"properties": {
+			"id": "pci_41",
+			"text": "Job Role"
+			}
+		},
+		"segments": [
+			{
+			"start": {
+				"identity": {
+				"low": 3683,
+				"high": 0
+				},
+				"labels": [
+				"Survey"
+				],
+				"properties": {
+				"title": "PCI Compliance",
+				"version": 0,
+				"id": "pci"
+				}
+			},
+			"relationship": {
+				"identity": {
+				"low": 983,
+				"high": 0
+				},
+				"start": {
+				"low": 3683,
+				"high": 0
+				},
+				"end": {
+				"low": 2446,
+				"high": 0
+				},
+				"type": "ASKS",
+				"properties": {
+				"section": "Please sign before submitting"
+				}
+			},
+			"end": {
+				"identity": {
+				"low": 2446,
+				"high": 0
+				},
+				"labels": [
+				"SurveyQuestion"
+				],
+				"properties": {
+				"id": "pci_41",
+				"text": "Job Role"
+				}
+			}
+			}
+		],
+		"length": 1
+		}
+	],
+	"_fieldLookup": {
+		"p": 0
+	}
+}]

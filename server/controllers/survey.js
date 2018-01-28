@@ -2,8 +2,11 @@ const crud = require('./_crud');
 const db = require('../db-connection');
 
 const get = async (req, res) => {
+	console.log('GETTING')
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
+
+		console.log(query);
 
 		const result = await db.run(query);
 
@@ -76,6 +79,27 @@ const get = async (req, res) => {
 									surveyObj.questions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
 								}
 							}
+
+							// Didn't find it in the root, search in the children
+							// or simplify the query altogether
+							// doing below before batery ran out:c
+							// console.log('\nALL QUESTIONS', surveyObj.questions)
+							for (let key in surveyObj.questions) {
+								if (surveyObj.questions.hasOwnProperty(key)) {
+									const question = surveyObj.questions[key];
+									// console.log('CHECKING key in kids', parentQuestion.id, question.childQuestions)
+
+									if (question.childQuestions[parentQuestion.id]) {
+
+										if (!question.childQuestions[parentQuestion.id].childQuestions) {
+											question.childQuestions[parentQuestion.id].childQuestions = {};
+										}
+										if (!question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id]) {
+											question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -104,8 +128,9 @@ const get = async (req, res) => {
 				}
 			}
 
-			console.log('\n\nSURVEY OBJECT');
-			console.log(JSON.stringify(surveyObjWithSections, null, 2));
+			// console.log('******IT IS ONLY LOADING ONE LEVEL OF CHILDREN. GO ONE LEVEL DEEPER.');
+			// console.log('\n\nSURVEY OBJECT');
+			// console.log(JSON.stringify(surveyObjWithSections, null, 2));
 
 			return res.send(surveyObjWithSections);
 		}
