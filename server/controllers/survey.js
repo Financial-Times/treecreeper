@@ -4,8 +4,7 @@ const db = require('../db-connection');
 const get = async (req, res) => {
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
-
-		console.log(query);
+		console.log('[SURVEY]', query);
 
 		const result = await db.run(query);
 
@@ -88,9 +87,7 @@ const get = async (req, res) => {
 							for (let key in surveyObj.questions) {
 								if (surveyObj.questions.hasOwnProperty(key)) {
 									const question = surveyObj.questions[key];
-									// console.log('CHECKING key in kids', parentQuestion.id, question.childQuestions)
-
-									if (question.childQuestions[parentQuestion.id]) {
+									if (question.childQuestions && question.childQuestions[parentQuestion.id]) {
 
 										if (!question.childQuestions[parentQuestion.id].childQuestions) {
 											question.childQuestions[parentQuestion.id].childQuestions = {};
@@ -136,6 +133,7 @@ const get = async (req, res) => {
 		}
 	}
 	catch (e) {
+		console.log('[SURVEY] error', e)
 		return res.status(500).end(e.toString());
 	}
 };
