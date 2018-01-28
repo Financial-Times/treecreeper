@@ -50,8 +50,41 @@ if (result.records.length) {
 	}
 }
 
+const redundant = [];
+
+for (let key in intermediateHash) {
+	if (intermediateHash.hasOwnProperty(key)) {
+		const node = intermediateHash[key];
+		const rships = node.relationships;
+
+		for (let rshipKey in rships) {
+			if (rships.hasOwnProperty(rshipKey)) {
+
+				const rshipsOfType = rships[rshipKey];
+
+				for (let nodeKey in rshipsOfType) {
+					if (rshipsOfType.hasOwnProperty(nodeKey)) {
+						const endNode = rshipsOfType[nodeKey];
+						// console.log('\n\nLOOKING FOR ', endNode)
+
+						// this child node has further children
+						if (intermediateHash[endNode.id]) {
+							endNode.relationships = intermediateHash[endNode.id].relationships;
+							console.log('MOVED INSIDE PARENT, NEED TO DELETE FROM ROOT', endNode.id);
+							redundant.push(endNode.id);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+for (let id of redundant) {
+	console.log('DELETING FROM ROOT', id);
+	delete intermediateHash[id];
+}
+
 console.log(JSON.stringify(intermediateHash, null, 2));
-
-
 
 
