@@ -4,20 +4,52 @@
     "type": "topLevel",
     "section": [
         {
-            "title": "Your company",
             "form": [
                 {
                     "_id": "ci_01",
-                    "question": "Name of your company"
+                    "question": "Full Company Name",
+                    "prompt": "Including legal status e.g. Ltd"
                 },
                 {
                     "_id": "ci_02",
-                    "question": "Countries and sectors of Operation"
+                    "question": "Country of main/registered office address"
+                },
+                {
+                    "_id": "ci_03",
+                    "question": "Countries and sectors of operation"
                 },
                 {
                     "_id": "ci_04",
-                    "question": "What Service(s) are you providing the FT?",
+                    "question": "Full description of product(s) or service(s) to be provided",
                     "fieldType": "long-text"
+                },
+                {
+                    "_id": "ci_05",
+                    "question": "Is there an ultimate parent company with 50% or more shareholding or that otherwise has the ability to control the affairs of your company",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id":"ra_05",
+                            "child_question_trigger": "Yes",
+                            "question": "Name and country of this parent company",
+                            "fieldType": "long-text"
+                        }
+                    ]
+                },
+                {
+                    "_id": "ci_06",
+                    "question": "Will any part of the service(s) be outsourced to a third party?",
+                    "fieldType": "binary",
+                    "fieldOptions": ["Yes", "No"],
+                    "child_questions": [
+                        {
+                            "_id":"ra_05",
+                            "child_question_trigger": "Yes",
+                            "question": "Please list all additional third parties involved, including the services to be outsourced in each case",
+                            "fieldType": "long-text"
+                        }
+                    ]
                 }
             ]
         }

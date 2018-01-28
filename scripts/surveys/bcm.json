@@ -26,7 +26,7 @@
                         {
                             "_id": "bcm_04",
                             "child_question_trigger": "Yes",
-                            "question": "How often is it reviewed?"
+                            "question": "How often is your Business Continuity Plan reviewed?"
                         }
                     ]
                 },
@@ -47,7 +47,7 @@
                 {
                     "_id": "bcm_07",
                     "question": "Where is the data you are storing for the FT held?",
-                    "prompt": "Method of storage & Country where stored.",
+                    "prompt": "Method of storage & country where stored.",
                     "fieldType": "long-text"
                 },
                 {

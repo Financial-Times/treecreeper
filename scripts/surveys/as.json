@@ -16,14 +16,14 @@
                             "_id": "as_02",
                             "question": "Please explain the stance your organisation takes on Anti-Slavery",
                             "child_question_trigger": "No",
-                            "prompt": "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement.",
+                            "prompt": "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement",
                             "fieldType": "long-text"
                         }
                     ]
                 },
                 {
                     "_id": "as_03",
-                    "question": "Please summarise the steps your company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains.",
+                    "question": "Please summarise the steps your company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains",
                     "prompt": null,
                     "fieldType": "long-text"
                 },
@@ -36,7 +36,7 @@
                     "child_questions": [
                         {
                             "_id": "as_05",
-                            "question": "Please include as much detail as possible",
+                            "question": "Please describe your Anti-Slavery training",
                             "child_question_trigger": "Yes",
                             "prompt": null,
                             "fieldType": "long-text"
@@ -54,7 +54,8 @@
                             "_id": "as_07",
                             "question": "Do you review this regularly?",
                             "child_question_trigger": "Yes",
-                            "prompt": null
+                            "fieldType": "binary",
+                            "fieldOptions": ["Yes", "No"]
                         }
                     ]
                 },
@@ -68,7 +69,7 @@
                         {
                             "_id": "as_09",
                             "child_question_trigger": "Yes",
-                            "question": "Please include details of the country and your activity within it.",
+                            "question": "Please include details of the country and your activity within it",
                             "prompt": null,
                             "fieldType": "long-text"
                         }
@@ -84,7 +85,7 @@
                         {
                             "_id": "as_11",
                             "child_question_trigger": "Yes",
-                            "question": "Please provide details.",
+                            "question": "Please provide details",
                             "prompt": null
                         }
                     ]

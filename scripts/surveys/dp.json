@@ -42,7 +42,7 @@
                         {
                             "_id": "dp_06",
                             "child_question_trigger": "Yes",
-                            "question": "How often?"
+                            "question": "How often does this training take place?"
                         }
                     ]
                 },
@@ -63,7 +63,7 @@
                 {
                     "_id": "dp_09",
                     "question": "Will your company transfer any personal data to or from the EEA in connection with the services?",
-                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc... you may have access to.",
+                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
@@ -84,7 +84,7 @@
                         {
                             "_id": "dp_12",
                             "child_question_trigger": "Yes",
-                            "question": "Please list all additional third parties and their County of operation, including the services to be outsourced."
+                            "question": "Please list all additional third parties and their county of operation, including the services to be outsourced"
                         }
                     ]
                 },
