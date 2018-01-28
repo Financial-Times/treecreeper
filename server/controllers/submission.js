@@ -33,6 +33,8 @@ const getAllforOne = async (req, res) => {
 		const submitterId = req.params.contractOrSupplierId;
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
+		// TODO replace this while thing with _cypher-to-json.js
+
 		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x: SurveyQuestion) RETURN p ORDER BY x.id`;
 		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);

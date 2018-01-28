@@ -2,7 +2,6 @@ const crud = require('./_crud');
 const db = require('../db-connection');
 
 const get = async (req, res) => {
-	console.log('GETTING')
 	try {
 		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
 
@@ -13,6 +12,8 @@ const get = async (req, res) => {
 		const surveyObj = {
 			questions: {}
 		};
+
+		// TODO replace this while thing with _cypher-to-json.js
 
 		if (result.records.length) {
 			const sections = [];
@@ -127,10 +128,6 @@ const get = async (req, res) => {
 					}
 				}
 			}
-
-			// console.log('******IT IS ONLY LOADING ONE LEVEL OF CHILDREN. GO ONE LEVEL DEEPER.');
-			// console.log('\n\nSURVEY OBJECT');
-			// console.log(JSON.stringify(surveyObjWithSections, null, 2));
 
 			return res.send(surveyObjWithSections);
 		}

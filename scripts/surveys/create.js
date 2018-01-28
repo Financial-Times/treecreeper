@@ -78,6 +78,24 @@ const createQuestions = async (db, surveyId) => {
 					if (child.fieldOptions) {
 						await fieldOptions(db, child);
 					}
+
+					if (child.child_questions) {
+						for (let granchild of child.child_questions) {
+							await createQuestion(db, granchild);
+							await db.run(`
+								MATCH (a:SurveyQuestion),(b:SurveyQuestion)
+								WHERE a.id = '${child._id}'
+								AND b.id = '${granchild._id}'
+								CREATE (a)-[r:RAISES {trigger: '${granchild.child_question_trigger}'}]->(b)
+								RETURN r
+							`);
+
+							if (granchild.fieldOptions) {
+								await fieldOptions(db, granchild);
+							}
+						}
+					}
+
 				}
 			}
 
