@@ -7,6 +7,7 @@ const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
+const init = require('../scripts/init');
 
 const app = express();
 
@@ -28,10 +29,8 @@ app.get('/api/contracts/:supplierId', contract.get);
 app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
-
 app.post('/api/supplier/', supplier.create);
 app.post('/api/submission/', submission.create); // TODO can be abstracted - add relationships
-
 
 // GENERIC
 app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
@@ -50,6 +49,10 @@ app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
 	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/init', init);
+}
 
 const PORT = process.env.PORT || 8888;
 
