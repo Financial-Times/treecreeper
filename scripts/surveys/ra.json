@@ -3,41 +3,6 @@
     "surveyTitle": "Risk Assessment",
     "section": [
         {
-            "title": "General details",
-            "form": [
-                {
-                    "_id": "ra_01",
-                    "question": "Full Company Name (including legal status i.e. Ltd, plc) of third party organisation and Country of main/registered office address."
-                },
-                {
-                    "_id": "ra_02",
-                    "question": "Name and Country of any ultimate parent company with 50% or more shareholding or otherwise has the ability to control the affairs of the company.",
-                    "prompt": "If you’re unsure, please ask your contact at the Company to confirm these details.",
-                    "fieldType": "long-text"
-                },
-                {
-                    "_id": "ra_03",
-                    "question": "Full description of product(s) or service(s) to be provided by the Company.",
-                    "prompt": "Please include details of any transfer of data between FT and the Company.",
-                    "fieldType": "long-text"
-                },
-                {
-                    "_id": "ra_04",
-                    "question": "Will any part of the service(s) be outsourced by the Company?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id":"ra_05",
-                            "child_question_trigger": "Yes",
-                            "question": "Please list all additional third parties involved, including the services to be outsourced in each case.",
-                            "fieldType": "long-text"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "title": "Assessment of Anti-Bribery and Corruption Risk",
             "form": [
                 {
@@ -111,6 +76,19 @@
                             "question": " Please outline:\nWhat data will be transferred?\nHow it will be transferred?\nWhat security is in place? e.g. encryption.\nWho sender/recipient will be?"
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "title": "Please sign before submitting",
+            "form": [
+                {
+                    "_id": "ra_40",
+                    "question": "Full Name"
+                },
+                {
+                    "_id": "ra_41",
+                    "question": "Job Role"
                 }
             ]
         }

@@ -17,7 +17,9 @@
     "init-db": "node -r dotenv/config scripts/init.js",
     "docker:test": "docker-compose exec \"$npm_package_short\" sh -c 'npm run test'",
     "vault:read": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development",
-    "vault:env": "node -pe 'const { data } = JSON.parse(process.argv[1]); Object.keys(data).reduce((env, key) => { env += `${key}=${data[key]}\n`; return env}, \"\")' \"$(npm --silent run vault:read)\" > .env"
+    "vault:env": "node -pe 'const { data } = JSON.parse(process.argv[1]); Object.keys(data).reduce((env, key) => { env += `${key}=${data[key]}\n`; return env}, \"\")' \"$(npm --silent run vault:read)\" > .env",
+    "precommit": "node_modules/.bin/secret-squirrel",
+    "commitmsg": "node_modules/.bin/secret-squirrel-commitmsg"
   },
   "author": "",
   "license": "ISC",
@@ -36,7 +38,7 @@
     "supertest": "^3.0.0"
   },
   "devDependencies": {
-    "@financial-times/secret-squirrel": "^2.5.16",
+    "@financial-times/secret-squirrel": "^2.7.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -46,6 +48,7 @@
     "babel-preset-env": "^1.6.0",
     "chai": "^4.1.2",
     "dotenv": "^4.0.0",
+    "husky": "^0.14.3",
     "istanbul": "^1.0.0-alpha.2",
     "lodash": "^4.17.4",
     "mocha": "^4.0.1",

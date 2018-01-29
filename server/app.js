@@ -18,31 +18,36 @@ app.get('/__gtg', (req, res) => {
 app.use(bodyParser.json());
 app.use(security);
 
+app.set('case sensitive routing', true);
+
 app.get('/', (req, res) => {
 	res.send('biz op api');
 });
 
-// supplier
-app.get('/api/suppliers/', supplier.getAll);
-app.post('/api/supplier/', supplier.create);
-
-// contract
+// WEBPMA / 3SP - Specific (to phase out)
 app.get('/api/contracts/:supplierId', contract.get);
-
-// submission
-app.get('/api/submission/:id', submission.get);
 app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
-app.post('/api/submission/', submission.create);
-app.put('/api/submission/:id/:surveyId', submission.update);
-app.delete('/api/submission/:id', submission.remove);
-
-// survey
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
+app.post('/api/supplier/', supplier.create);
+app.post('/api/submission/', submission.create); // TODO can be abstracted - add relationships
 
-// generic node (experimental)
-app.post('/api/node/:nodeName/:uniqueAttrName', async (req, res) => {
-  return crud.create(req, res, req.body.node, req.params.nodeName, req.body.relationships, req.params.uniqueAttrName);
+// GENERIC
+app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
+	console.log('[APP] generic GET', req.params);
+	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
+});
+app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic POST');
+	return crud.create(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships);
+});
+app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic PUT');
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node);
+});
+app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+	console.log('[APP] generic DELETE');
+	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
 });
 
 if (process.env.NODE_ENV !== 'production') {

@@ -1,31 +1,16 @@
 const crud = require('./_crud');
 
-const get = (req, res) => {
-	return crud.get(req, res, 'Supplier');
-};
-
+// TODO can be made generic
 const create = async (req, res) => {
 	console.log('\nattempting to create supplier', req.body);
-	await crud.create(req, res, req.body.node, 'Supplier');
+	await crud.create(res, 'Supplier', 'id', req.body.node.id, req.body.node);
 
 	for (let contract of req.body.contracts) {
 		console.log('attempting to create supplier contract', contract);
-		crud.create(req, res, contract, 'Contract', [
+		crud.create(res, 'Contract', 'id', contract.id, contract, [
 			{name:'SIGNS', from: 'Supplier', fromId: req.body.node.id, toId: contract.id, to: 'Contract'},
 		]);
 	}
 };
 
-const update = async (req, res) => {
-	return crud.update(req, res, req.body.node, 'Supplier');
-};
-
-const remove = async (req, res) => {
-	return crud.remove(req, res, 'Supplier');
-};
-
-const getAll = async (req, res) => {
-	return crud.getAll(req, res, 'Supplier');
-};
-
-module.exports = { get, create, update, remove, getAll };
+module.exports = { create };
