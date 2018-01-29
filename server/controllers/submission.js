@@ -22,6 +22,13 @@ const create = async (req, res) => {
 	}
 };
 
+const update = async (req, res) => {
+	crud.update(res, 'Submission', 'id', req.body.node.id, req.body.node);
+	for(let answer of req.body.answers) {
+		crud.update(res, 'SubmissionAnswer', 'id', answer.id, answer);
+	}
+};
+
 const getAllforOne = async (req, res) => {
 	console.log('[SUBMISSION] getAllforOne');
 
@@ -97,4 +104,4 @@ const getAllforOne = async (req, res) => {
 	}
 };
 
-module.exports = { getAllforOne, create };
+module.exports = { getAllforOne, create, update };
