@@ -15,7 +15,7 @@
                     "_id": "tdd_02",
                     "question": "Which industry standards or certifications does your organisation hold?",
                     "fieldType": "checkbox",
-                    "fieldOptions": [ "PCI", "DSS", "ISO 27001", "N/A"]
+                    "fieldOptions": [  "ISO 27001", "PCI DSS", "N/A"]
                 }
             ]
         },
