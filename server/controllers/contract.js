@@ -85,14 +85,9 @@ const get = async (req, res) => {
 								submission = submission || segment.start.submission;
 
 								if (submission.type === 'topLevel') {
-									console.log('\n\n*******TOP LEVEL ANSWER', answer)
-									console.log('supplierObj submissions,', supplierObj.submissions[submission.id])
 									if (!supplierObj.submissions[submission.id].answers) {
 										supplierObj.submissions[submission.id].answers = {};
 									}
-									console.log('supplierObj submissions after,', supplierObj.submissions[submission.id])
-									console.log('writing answer.id', answer.id);
-									console.log('now have these many,', supplierObj.submissions[submission.id].answers)
 									supplierObj.submissions[submission.id].answers[answer.id] = answer;
 								}
 								else {
@@ -138,14 +133,8 @@ const get = async (req, res) => {
 
 		if (isEmpty) {
 			const message =	`No submissions found for ${req.params.supplierId}`;
-			console.log(message);
 			return res.status(404).end(message);
 		}
-
-		console.log('\n\n\nsupplierObj');
-		console.log(JSON.stringify(supplierObj, null, 2));
-		// console.log('\n\n\ncontractsObj');
-		// console.log(JSON.stringify(contractsObj, null, 2));
 		return res.send([contractsObj, supplierObj]);
 	}
 	catch (e) {
