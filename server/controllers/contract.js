@@ -6,7 +6,6 @@ const getAllforOne = async (req, res) => {
 };
 
 const get = async (req, res) => {
-	console.log('getting', req.params.supplierId);
 	try {
 
 		// TODO replace this while thing with _cypher-to-json.js
@@ -35,6 +34,10 @@ const get = async (req, res) => {
 			// }
 		};
 
+		const supplierObj = {
+			submissions: {}
+		};
+
 		if (result.records.length) {
 			for (const record of result.records) {
 				for (const field of record._fields) {
@@ -45,7 +48,6 @@ const get = async (req, res) => {
 					let survey;
 
 					for (const segment of field.segments) {
-						console.log(`${segment.start.labels[0]} (${segment.start.properties.id}), ${segment.end.labels[0]} (${segment.end.properties.id})`);
 
 						switch(segment.relationship.type) {
 							case 'SIGNS':
@@ -60,7 +62,12 @@ const get = async (req, res) => {
 								contract = contract || segment.start.properties;
 								submission = submission || segment.end.properties;
 
-								if (!contractsObj[contract.id]) {
+								if (submission.type === 'topLevel') {
+									if (!supplierObj.submissions[submission.id]) {
+										supplierObj.submissions[submission.id] = submission;
+									}
+								}
+								else if (!contractsObj[contract.id]) {
 									contractsObj[contract.id] = contract;
 								}
 								else {
@@ -77,22 +84,49 @@ const get = async (req, res) => {
 								answer = answer || segment.end.properties;
 								submission = submission || segment.start.submission;
 
-								if (!contractsObj[contract.id].submissions[submission.id].answers) {
-									contractsObj[contract.id].submissions[submission.id].answers = {};
+								if (submission.type === 'topLevel') {
+									console.log('\n\n*******TOP LEVEL ANSWER', answer)
+									console.log('supplierObj submissions,', supplierObj.submissions[submission.id])
+									if (!supplierObj.submissions[submission.id].answers) {
+										supplierObj.submissions[submission.id].answers = {};
+									}
+									console.log('supplierObj submissions after,', supplierObj.submissions[submission.id])
+									console.log('writing answer.id', answer.id);
+									console.log('now have these many,', supplierObj.submissions[submission.id].answers)
+									supplierObj.submissions[submission.id].answers[answer.id] = answer;
 								}
-								contractsObj[contract.id].submissions[submission.id].answers[answer.id] = answer;
+								else {
+
+									if (!contractsObj[contract.id].submissions[submission.id].answers) {
+										contractsObj[contract.id].submissions[submission.id].answers = {};
+									}
+									contractsObj[contract.id].submissions[submission.id].answers[answer.id] = answer;
+								}
+
 							break;
 
 							case 'ANSWERS_QUESTION':
 								answer = answer || segment.start.properties;
 								question = question || segment.end.properties;
-								contractsObj[contract.id].submissions[submission.id].answers[answer.id].questionText = question.text;
+
+								if (submission.type === 'topLevel') {
+									supplierObj.submissions[submission.id].answers[answer.id].questionText = question.text;
+								}
+								else {
+									contractsObj[contract.id].submissions[submission.id].answers[answer.id].questionText = question.text;
+								}
 							break;
 
 							case 'ANSWERS':
-								contract = contract || segment.start.properties;
-								survey = survey || segment.end.properties;
-								contractsObj[contract.id].submissions[submission.id].surveyId = survey.id;
+								if (submission.type === 'topLevel') {
+									survey = survey || segment.end.properties;
+									supplierObj.submissions[submission.id].surveyId = survey.id;
+								}
+								else {
+									contract = contract || segment.start.properties;
+									survey = survey || segment.end.properties;
+									contractsObj[contract.id].submissions[submission.id].surveyId = survey.id;
+								}
 							break;
 						}
 					}
@@ -103,12 +137,19 @@ const get = async (req, res) => {
 		const isEmpty = !Object.keys(contractsObj).length;
 
 		if (isEmpty) {
-			return res.status(404).end(`No submissions found for ${req.params.supplierId}`);
+			const message =	`No submissions found for ${req.params.supplierId}`;
+			console.log(message);
+			return res.status(404).end(message);
 		}
 
-		return res.send(contractsObj);
+		console.log('\n\n\nsupplierObj');
+		console.log(JSON.stringify(supplierObj, null, 2));
+		// console.log('\n\n\ncontractsObj');
+		// console.log(JSON.stringify(contractsObj, null, 2));
+		return res.send([contractsObj, supplierObj]);
 	}
 	catch (e) {
+		console.log('[CONTRACT]', e.toString());
 		return res.status(500).end(e.toString());
 	}
 };

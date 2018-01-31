@@ -26,6 +26,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 
 	}
 	catch (e) {
+		console.log(e.toString());
 		return res.status(500).end(e.toString());
 	}
 };
