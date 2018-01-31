@@ -8,6 +8,11 @@ https://github.com/Financial-Times/gdpr
 
 WIP
 
+## Cookbook
+
+Sample [queries/output](COOKBOOK.md)
+
+
 ## Run
 
 WIP
