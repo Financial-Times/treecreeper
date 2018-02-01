@@ -6,7 +6,7 @@ A place to keep examples of what we can do with this API.
 
 #### Show me all the systems that @dan.murley is tech lead of,
 ```
-MATCH (s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' return m
+MATCH m=(s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' return m
 ```
 
 #### Show me people with a lot of technical systems assigned,
