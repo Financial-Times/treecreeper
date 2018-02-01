@@ -56,4 +56,8 @@ RETURN count(*) as systems,
        size((s)-[:secondaryContact]->(:Contact)) as secondary
 ```
 
+#### Show me all the platinum systems and who their product owners 
 
+```
+MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
+```
