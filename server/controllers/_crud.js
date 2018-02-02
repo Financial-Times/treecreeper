@@ -58,8 +58,8 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			for (let relationship of relationships) {
 				const createRelationship = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
-					WHERE a.id = '${relationship.fromId}'
-					AND b.id = '${relationship.toId}'
+					WHERE a.${relationship.toUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+					AND b.${relationship.fromUniqueAttrName} = '${relationship.toUniqueAttrValue}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
