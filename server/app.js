@@ -7,6 +7,7 @@ const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
+const cypher = require('./controllers/_cypher');
 const init = require('../scripts/init');
 
 const app = express();
@@ -49,6 +50,11 @@ app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
 	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
+});
+
+app.post('/api/cypher/', async (req, res) => {
+	console.log('[APP] generic GET CYPHER');
+	cypher(res, req.body.query);
 });
 
 if (process.env.NODE_ENV !== 'production') {

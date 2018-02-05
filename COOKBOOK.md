@@ -6,7 +6,7 @@ A place to keep examples of what we can do with this API.
 
 #### Show me all the systems that @dan.murley is tech lead of,
 ```
-MATCH (s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' return m
+MATCH m=(s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' return m
 ```
 
 #### Show me people with a lot of technical systems assigned,
@@ -71,3 +71,8 @@ return distinct s.id, s.serviceTier, p.name, po.name, tl.name, pc.name, sc.name
 order by s.id
 ```
 
+#### Show me all the platinum systems with their product owners 
+
+```
+MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
+```
