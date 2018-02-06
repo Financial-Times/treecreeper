@@ -8,7 +8,9 @@ const create = async (req, res) => {
 	//create contracts and submissions
 	for (let contract of req.body.contracts) {
 		console.log('attempting to create supplier contract', contract);
-		const {dt, ...contractDetails} = contract;
+		const {dt} = contract;
+		const contractDetails = contract;
+		delete contractDetails.dt;
 		crud.create(res, 'Contract', 'id', contract.id, contractDetails, [
 			{name:'SIGNS', from: 'Supplier', fromUniqueAttrName: 'id',fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: contract.id, to: 'Contract'},
 		]);
