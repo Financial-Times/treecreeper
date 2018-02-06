@@ -58,8 +58,8 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			for (let relationship of relationships) {
 				const createRelationship = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
-					WHERE a.id = '${relationship.fromId}'
-					AND b.id = '${relationship.toId}'
+					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+					AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
@@ -91,7 +91,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
-		// update by unique attr or id
 		const query = `
 			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})
 			SET a += $props
@@ -119,7 +118,6 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
 const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 	try {
-		// remove by unique attr or id
 		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${mode === 'detach' ? ' DETACH' : ''} DELETE a`);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
 			return res.status(200).end(`${uniqueAttr} deleted`);
@@ -136,6 +134,9 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 const getAllforOne = async (res, relationship, param) => {
 	try {
+		// TODO
+		// use uniqueattr value and name instead of id
+		// used by webPMA contract controller
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
 		const result = await db.run(query);
 
