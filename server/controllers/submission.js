@@ -44,8 +44,10 @@ const getAllforOne = async (req, res) => {
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
 		// TODO replace this while thing with _cypher-to-json.js
-
-		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"}) OPTIONAL MATCH (Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x: SurveyQuestion) RETURN p ORDER BY x.id`;
+		const query = `MATCH submissions=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"}) 
+		OPTIONAL MATCH answers=(Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x:SurveyQuestion) 
+		RETURN submissions, collect(answers)`;
+		
 		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);
 
@@ -53,22 +55,19 @@ const getAllforOne = async (req, res) => {
 
 		if (result.records.length) {
 			for (const record of result.records) {
-				for (const field of record._fields) {
-					let submission;
-					let submissionAnswer;
-					let surveyQuestion;
-
+				let submissionAnswer;
+				let surveyQuestion;
+				
+				const [ submissions, answers ] = record._fields;
+				const submission = submissions.segments.find((segment) => segment.relationship.type === 'SUBMITS');
+				
+				submissionObj.status = submission.end.properties.status;
+				submissionObj.id = submission.end.properties.id;
+				for (const field of answers) {
 					for (const segment of field.segments) {
-
 						switch(segment.relationship.type) {
-							case 'SUBMITS':
-								submission = submission || segment.end.properties;
-								submissionObj.status = submission.status;
-								submissionObj.id = submission.id;
-							break;
 							case 'HAS':
-								submissionAnswer = submissionAnswer || segment.end.properties;
-
+								submissionAnswer = segment.end.properties;
 								if (!submissionObj[submissionAnswer.questionId]) {
 									submissionObj[submissionAnswer.questionId] = {
 										answer: submissionAnswer.value,
@@ -79,7 +78,7 @@ const getAllforOne = async (req, res) => {
 								}
 							break;
 							case 'ANSWERS_QUESTION':
-								surveyQuestion = surveyQuestion || segment.end.properties;
+								surveyQuestion = segment.end.properties;
 
 								if (!submissionObj[surveyQuestion.id]) {
 									submissionObj[surveyQuestion.id] = {
