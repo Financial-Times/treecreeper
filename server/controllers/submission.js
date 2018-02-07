@@ -10,7 +10,7 @@ const create = async (req, res) => {
 	for (let answer of req.body.answers) {
 		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
 			{name:'HAS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', ffromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
+			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
 		]);
 	}
 };
@@ -20,7 +20,7 @@ const update = async (req, res) => {
 	for (let answer of req.body.answers) {
 		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
 			{name:'HAS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', ffromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
+			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
 		]);
 	}
 };
