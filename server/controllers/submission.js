@@ -10,8 +10,8 @@ const create = async (req, res) => {
 	const submitterId = topLevel ? req.body.node.supplierId : req.body.node.contractId;
 
 	crud.create(res, 'Submission', 'id', req.body.node.id, req.body.node, [
-		{name:'SUBMITS', from: `${submitterType}`, fromId: submitterId, to: 'Submission', toId: req.body.node.id},
-		{name:'ANSWERS', from: 'Submission', fromId: req.body.node.id, to: 'Survey', toId: req.body.node.surveyId}
+		{name:'SUBMITS', from: `${submitterType}`, fromUniqueAttrName: 'id', fromUniqueAttrValue: submitterId, to: 'Submission', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.id},
+		{name:'ANSWERS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, to: 'Survey', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.surveyId}
 	]);
 
 	for (let answer of req.body.answers) {
