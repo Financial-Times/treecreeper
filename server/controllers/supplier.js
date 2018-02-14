@@ -27,7 +27,7 @@ const create = async (req, res) => {
 				{name:'ANSWERS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: submissionNode.id, to: 'Survey', toUniqueAttrName: 'id', toUniqueAttrValue: submissionNode.surveyId}
 			]);
 		}
-		
+		//test commit
 	}
 };
 
