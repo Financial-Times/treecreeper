@@ -60,13 +60,11 @@ const create = async (req, res) => {
 };
 
 const findValidSupplierSubmissions = async (supplierId, surveyId) => {
-	const lastOneYear = 
 	const subsWithAnswersQuery = `MATCH submissions=(Supplier {id:"${supplierId}"})
 									-[:SIGNS]->(Contract)
 									-[:SUBMITS]->(submission:Submission {surveyId: "${surveyId}"})
 									-[:HAS]->(SubmissionAnswer)
 									-[:ANSWERS_QUESTION]->(x: SurveyQuestion) 
-									WHERE submission.submittedDate > ${lastOneYear}
 									RETURN submissions ORDER BY x.id`;
 	const subsWithAnswers = await db.run(subsWithAnswersQuery);
 	const subsWithoutAnswersQuery = `MATCH (Supplier {id:"${supplierId}"})
