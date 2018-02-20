@@ -5,6 +5,7 @@ const security = require('./middleware/security');
 const supplier = require('./controllers/supplier');
 const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
+const sar = require('./controllers/sar');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
 const cypher = require('./controllers/_cypher');
@@ -56,6 +57,8 @@ app.post('/api/cypher/', async (req, res) => {
 	console.log('[APP] generic GET CYPHER');
 	cypher(res, req.body.query);
 });
+
+app.post('/api/sar', sar.create);
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/init', init);
