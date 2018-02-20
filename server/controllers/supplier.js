@@ -84,7 +84,6 @@ const cloneSupplierDiligenceSubmission = async (supplierId, surveyId) => {
 	const submissionsToClone = await getSupplierDiligenceWithoutSubmissions(supplierId, surveyId);
 	if (submissionsToClone) {
 		const previousSubmission = await findValidSupplierDiligenceSubmission(supplierId, surveyId);
-		console.log('previousSubmission',previousSubmission);
 		if(Object.values(previousSubmission).length > 0) {
 			let submissionCloneQuery = '';
 			//MATCH submissions
@@ -166,15 +165,14 @@ const create = async (req, res) => {
 		const result = await db.run(createQuery);
 		console.log('result', result);
 		const supplierDiligence = ['as', 'abc', 'bcm', 'pci'];
-		supplierDiligence.forEach(async (surveyId) => {
-			const cloneResult = await cloneSupplierDiligenceSubmission(req.body.node.id, surveyId);
-			console.log('cloneResult', cloneResult);
+		supplierDiligence.map(async (surveyId) => {
+			const cloneResult = await cloneSupplierDiligenceSubmission(req.body.node.id, surveyId);	
 		});
-		res.status(200).end(result);
+		res.status(200).end();
 	}
 	catch (e) {
 		console.log('initialising database failed', e.toString());
-		return res.status(400).end(e.toString());
+		return res.status(500).end(e.toString());
 	}
 };
 
