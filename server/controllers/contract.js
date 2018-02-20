@@ -12,10 +12,6 @@ const get = async (req, res) => {
 
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
 		// console.log('[CONTRACT]', query);
-		// const query = `MATCH submissions=(supplier:Supplier {id:'${req.params.supplierId}'})-[:SIGNS]->()-[:SUBMITS]->(submission) 
-		// WITH submissions,submission
-		// OPTIONAL MATCH answers=(submission)-[:HAS|:ANSWERS]->()-[:ANSWERS_QUESTION]->(question:SurveyQuestion)
-		// RETURN submissions, answers order by question.id`;
 		const result = await db.run(query);
 
 		const contractsObj = {
