@@ -1,4 +1,3 @@
-const crud = require('./_crud');
 const db = require('../db-connection');
 const util = require('util');
 
@@ -17,13 +16,6 @@ const submit = async (req, res) => {
 	console.log('[SUBMISSION] submitQuery', query);
 	const result = await db.run(query);
 	res.status(200).send(result);
-};
-
-const resubmit = async (req, res) => {
-	crud.update(res, 'Submission', 'id', req.body.node.id, req.body.node);
-	for(let answer of req.body.answers) {
-		crud.update(res, 'SubmissionAnswer', 'id', answer.id, answer);
-	}
 };
 
 const getAllforOne = async (req, res) => {
@@ -100,4 +92,4 @@ const getAllforOne = async (req, res) => {
 	}
 };
 
-module.exports = { getAllforOne, submit, resubmit};
+module.exports = { getAllforOne, submit};
