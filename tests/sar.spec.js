@@ -1,7 +1,7 @@
 const app = require('../server/app.js');
 const request = require('supertest');
 
-describe.only('SAR', () => {
+describe('SAR', () => {
 	describe('POST', (done) => {
 		it('has status code 200', () => {
 			request(app)
