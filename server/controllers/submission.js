@@ -1,28 +1,22 @@
 const crud = require('./_crud');
 const db = require('../db-connection');
+const util = require('util');
 
-const create = async (req, res) => {
-	crud.create(res, 'Submission', 'id', req.body.node.id, req.body.node, [
-		{name:'SUBMITS', from: 'Supplier', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.supplierId, to: 'Submission', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.id},
-		{name:'ANSWERS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, to: 'Survey', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.surveyId}
-	]);
+const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
 
-	for (let answer of req.body.answers) {
-		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
-			{name:'HAS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
-		]);
-	}
-};
-
-const update = async (req, res) => {
-	crud.update(res, 'Submission', 'id', req.body.node.id, req.body.node);
-	for (let answer of req.body.answers) {
-		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
-			{name:'HAS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
-		]);
-	}
+const submit = async (req, res) => {
+	let query = `MATCH (submission:Submission {id: '${req.body.node.id}'})
+								SET submission += ${stringify(req.body.node)}`;
+	req.body.answers.map((answer, index) => 
+	query += ` WITH submission 
+			MERGE (answer${index}:SubmissionAnswer {id: '${answer.id}'})
+				SET answer${index} += ${stringify(answer)}
+				WITH submission, answer${index}
+			MATCH (question${index}:SurveyQuestion {id : '${answer.questionId}'})
+			MERGE (submission)-[:HAS]->(answer${index})-[:ANSWERS_QUESTION]->(question${index})`);
+	console.log('[SUBMISSION] submitQuery', query);
+	const result = await db.run(query);
+	res.status(200).send(result);
 };
 
 const resubmit = async (req, res) => {
@@ -106,4 +100,4 @@ const getAllforOne = async (req, res) => {
 	}
 };
 
-module.exports = { getAllforOne, create, update, resubmit };
+module.exports = { getAllforOne, submit, resubmit};
