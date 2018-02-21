@@ -31,8 +31,7 @@ app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
 app.post('/api/supplier/', supplier.create);
-app.post('/api/submission/', submission.create); 
-app.post('/api/submission/id/:submissionId', submission.update); // TODO can be abstracted - add relationships
+app.post('/api/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 app.put('/api/submission/id/:submissionId', submission.resubmit);
 
 // GENERIC
