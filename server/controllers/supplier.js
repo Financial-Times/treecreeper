@@ -84,6 +84,7 @@ const cloneSupplierDiligenceSubmission = async (supplierId, surveyId) => {
 	const submissionsToClone = await getSupplierDiligenceWithoutSubmissions(supplierId, surveyId);
 	if (submissionsToClone) {
 		const previousSubmission = await findValidSupplierDiligenceSubmission(supplierId, surveyId);
+		console.log('[SUPPLIER] previousSubmission', previousSubmission);
 		if(Object.values(previousSubmission).length > 0) {
 			let submissionCloneQuery = '';
 			//MATCH submissions
@@ -168,7 +169,7 @@ const create = async (req, res) => {
 		supplierDiligence.map(async (surveyId) => {
 			const cloneResult = await cloneSupplierDiligenceSubmission(req.body.node.id, surveyId);	
 		});
-		res.status(200).end();
+		res.status(200).send(result);
 	}
 	catch (e) {
 		console.log('initialising database failed', e.toString());
