@@ -26,6 +26,10 @@ app.get('/', (req, res) => {
 	res.send('biz op api');
 });
 
+// SAR HUB - Specific (to phase out)
+app.post('/api/sar', sar.create);
+app.get('/api/sar/:id', sar.getWithSources);
+
 // WEBPMA / 3SP - Specific (to phase out)
 app.get('/api/contracts/:supplierId', contract.get);
 app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
@@ -58,10 +62,8 @@ app.post('/api/cypher/', async (req, res) => {
 	cypher(res, req.body.query);
 });
 
-app.post('/api/sar', sar.create);
-
 if (process.env.NODE_ENV !== 'production') {
-  app.get('/init', init);
+	app.get('/init', init);
 }
 
 const PORT = process.env.PORT || 8888;
