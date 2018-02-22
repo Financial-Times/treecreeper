@@ -29,20 +29,22 @@ const getWithSources = async (req, res) => {
 
 		const formattedSources = sourceResult.records.reduce((acc, { _fields }) => [
 			...acc,
-			_fields.reduce((acc, { properties }) => ({
-				...acc,
-				...properties,
-			}), {}),
+			_fields.reduce((acc, { properties }) => (Object.assign({},
+				acc,
+				properties
+			)), {}),
 		], []);
 
-		const formattedSar = sarResult.records.reduce((acc, { _fields }) => ({
-			...acc,
-			..._fields.reduce((acc, { properties }) => ({
-				...acc,
-				...properties,
-				sources: formattedSources,
-			}), {}),
-		}), {});
+		const formattedSar = sarResult.records.reduce((acc, { _fields }) => (Object.assign({},
+			acc,
+			_fields.reduce((acc, { properties }) => (Object.assign({},
+				acc,
+				properties,
+				{
+					sources: formattedSources,
+				}
+			)), {}),
+		)), {});
 
 		return res.send(JSON.stringify(formattedSar));
 	}
