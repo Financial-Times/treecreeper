@@ -16,7 +16,7 @@
 The interface currently supports single record actions as follows:
 
 <details>
-<summary><h2>Read Node (and relationships)</h2></summary>
+<summary>Read Node (and relationships)</summary>
 
 ### To retrieve information about a node
 ### GET {apiRoot}/{nodetype}/{keyname}/{keyvalue}
@@ -59,7 +59,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Create Node (and relationships)</h2></summary>
+<summary>Create Node (and relationships)</summary>
 
 ## To inset new nodes and their relationships
 ### POST {apiRoot}/{nodetype}/{keyname}/{keyvalue} {body}
@@ -127,7 +127,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Update Node (and relationships)</h2></summary>
+<summary>Update Node (and relationships)</summary>
 
 ## To update an exist node and its relationships
 ### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
@@ -195,7 +195,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Upsert Node (and relationships)</h2></summary>
+<summary>Upsert Node (and relationships)</summary>
 
 ## To create a new node and relationships or update the existing node and relationships
 ### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
@@ -262,7 +262,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Delete Node (and relationships)</h2></summary>
+<summary>Delete Node (and relationships)</summary>
 
 ## To remove an existing node and its relationships
 ### DELETE {apiRoot}/{nodetype}/{keyname}/{keyvalue}
@@ -279,7 +279,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Create Relationship</h2></summary>
+<summary>Create Relationship</summary>
 
 ## To inset new relationships between two nodes
 ### POST {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
@@ -323,7 +323,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Update Relationship</h2></summary>
+<summary>Update Relationship</summary>
 
 ## To update relationships between two nodes
 ### PUT {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
@@ -367,7 +367,7 @@ The interface currently supports single record actions as follows:
 </details>
 
 <details>
-<summary><h2>Delete Relationship</h2></summary>
+<summary>Delete Relationship</summary>
 
 ## To delete relationships between two nodes
 ### DELETE {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
