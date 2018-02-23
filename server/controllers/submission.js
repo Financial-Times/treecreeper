@@ -3,18 +3,22 @@ const util = require('util');
 
 const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
 
-const submit = async (req, res) => {
-	let query = `MATCH (submission:Submission {id: '${req.body.node.id}'})
-								SET submission += ${stringify(req.body.node)}`;
-	req.body.answers.map((answer, index) => 
+const addAnswerToQuery = (query, answer, index) => {
 	query += ` WITH submission 
 			MERGE (answer${index}:SubmissionAnswer {id: '${answer.id}'})
 				SET answer${index} += ${stringify(answer)}
 				WITH submission, answer${index}
 			MATCH (question${index}:SurveyQuestion {id : '${answer.questionId}'})
-			MERGE (submission)-[:HAS]->(answer${index})-[:ANSWERS_QUESTION]->(question${index})`);
-	console.log('[SUBMISSION] submitQuery', query);
-	const result = await db.run(query);
+			MERGE (submission)-[:HAS]->(answer${index})-[:ANSWERS_QUESTION]->(question${index})`;
+	return query;
+};
+
+const submit = async (req, res) => {
+	const initialQuery = `MATCH (submission:Submission {id: '${req.body.node.id}'})
+								SET submission += ${stringify(req.body.node)}`;
+	const submissionQuery = req.body.answers.reduce(addAnswerToQuery, initialQuery);
+	console.log('[SUBMISSION] submitQuery', submissionQuery);
+	const result = await db.run(submissionQuery);
 	res.status(200).send(result);
 };
 
