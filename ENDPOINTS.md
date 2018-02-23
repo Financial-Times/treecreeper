@@ -1,5 +1,10 @@
 # Biz Op API Endpoints
 
+Things to be aware of:
++ **id** is a field created by graphdb to hold its id - so we may want our id to be called something different
++ We use capitalization for our types, we should be case insensitive
++ API calls that return a json structure may need to include the id and type (as they are only visible as url params)
+
 The interface currently supports single record actions as follows:
 
 ## Read Node (and relationships)
@@ -172,7 +177,7 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
-## Upsert Node (and relatinoships)
+## Upsert Node (and relationships)
 ## To create a new node and relationships or update the existing node and relationships
 ### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
 + put /endpoint/id/dewey {node:{base:"dewey.in.ft.com"}}
