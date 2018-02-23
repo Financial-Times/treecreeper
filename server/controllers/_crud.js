@@ -34,7 +34,6 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
 
 	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships);
-
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -53,23 +52,20 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		const result = await db.run(createQuery, {node: obj});
-
 		if (relationships) {
 			for (let relationship of relationships) {
 				const createRelationship = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
-					WHERE a.id = '${relationship.fromId}'
-					AND b.id = '${relationship.toId}'
+					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+					AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
-
 				try {
 					// TODO use single transaction
 					// fail both if either fails
 					const resultRel = await db.run(createRelationship, obj);
-
-					console.log(`created relationship ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'NoPE');
+					console.log(`created relationship? ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'FAIL');
 				}
 				catch (e) {
 					console.log('relationships not created', e.toString());
@@ -91,7 +87,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
-		// update by unique attr or id
 		const query = `
 			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})
 			SET a += $props
@@ -119,7 +114,6 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
 const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 	try {
-		// remove by unique attr or id
 		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${mode === 'detach' ? ' DETACH' : ''} DELETE a`);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
 			return res.status(200).end(`${uniqueAttr} deleted`);
@@ -136,6 +130,9 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 const getAllforOne = async (res, relationship, param) => {
 	try {
+		// TODO
+		// use uniqueattr value and name instead of id
+		// used by webPMA contract controller
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
 		const result = await db.run(query);
 
