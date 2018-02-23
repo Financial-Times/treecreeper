@@ -17,8 +17,11 @@ The interface currently supports single record actions as follows:
 
 <details>
 <summary>
+
 ## Read Node (and relationships)
+
 </summary>
+
 ### To retrieve information about a node
 ### GET {apiRoot}/{nodetype}/{keyname}/{keyvalue}
 #### examples:
@@ -57,6 +60,7 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
+
 </details>
 
 ## Create Node (and relationships)
