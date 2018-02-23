@@ -1,15 +1,19 @@
 # Biz Op API Endpoints
 
-The interface currently supports both single record update as follows:
+The interface currently supports single record actions as follows:
 
-## Read
+## Read Node (and relationships)
 ### To retrieve information about a node
-### GET {apiRoot}/node/{type}/{key}
+### GET {apiRoot}/{nodetype}/{keyname}/{keyvalue}
+#### examples:
++ get /product/id/ftcom
++ get /product/name/ft.com
 #### params:
-+ **type** - 'System', 'Contact' or 'Endpoint'
-+ **key**
-    + the unique graphdb ID of the record to read
-    + or the unique dewey id of the record to read (e.g. systemcode)
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
 #### return:
 + **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
 + a json object that lists all the attributes and relationships as follows:
@@ -23,18 +27,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAtrrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -44,14 +42,18 @@ The interface currently supports both single record update as follows:
 }
 ```
 
-## Create
+## Create Node (and relationships)
 ## To inset new nodes and their relationships
-### POST {apiRoot}/node/{type}/{key} {body}
+### POST {apiRoot}/{nodetype}/{keyname}/{keyvalue} {body}
+#### examples:
++ post /contact/id/geoffthorpe {node:{name:"Geoff Thorpe"}}
++ post /contact/name/Geoff%20Thorpe {node:{email:"geoff.thorpe@ft.com"}}
 #### params:
-+ **type** - 'System', 'Contact' or 'Endpoint'
-+ **key**
-     + the unique graphdb ID of the record to read
-     + or the unique dewey id of the record to read (e.g. systemcode)
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
 + **body** - a json object that defines the node and its relationships as follows:
 ```json
 {
@@ -63,18 +65,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -96,18 +92,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -117,14 +107,18 @@ The interface currently supports both single record update as follows:
 }
 ```
 
-## Update
+## Update Node (and relationships)
 ## To update an exist node and its relationships
-### PUT {apiRoot}/node/{type}/{key} {partial body}
+### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
+#### examples:
++ put /endpoint/id/dewey {node:{base:"dewey.in.ft.com"}}
++ put /endpoint/base/dewey.in.ft.com {node:{about:"_about"}}
 #### params:
-+ **type** - 'System', 'Contact' or 'Endpoint'
-+ **key**
-    + the unique graphdb ID of the record to update
-    + or the unique dewey id of the record to update (e.g. systemcode)
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
 + **body** - a json object that defines the fields in the node and its relationships that are to be changed as follows:
 ```json
 {
@@ -136,18 +130,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -170,18 +158,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrNamee": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -190,14 +172,17 @@ The interface currently supports both single record update as follows:
    ]
 }
 ```
-## Upsert?
+## Upsert Node (and relatinoships)
 ## To create a new node and relationships or update the existing node and relationships
-### PUT {apiRoot}/node/{type}/{key} {partial body}
+### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
++ put /endpoint/id/dewey {node:{base:"dewey.in.ft.com"}}
++ put /endpoint/base/dewey.in.ft.com {node:{about:"_about"}}
 #### params:
-+ **type** - 'System', 'Contact' or 'Endpoint'
-+ **key**
-    + the unique graphdb ID of the record to create/update
-    + or the unique dewey id of the record to create/update (e.g. systemcode)
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
 + **body** - a json object that defines the fields in the node and its relationships that are to be changed as follows:
 ```json
 {
@@ -209,18 +194,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -243,18 +222,12 @@ The interface currently supports both single record update as follows:
   "relationships": [
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
     },
     {
       "name": "relationshipType",
-      "from": "subjectType",
-      "fromAttrName": "id",
-      "fromAttrValue": "subjectID",
       "to": "objectType",
       "toAttrName": "id",
       "toAttrValue": "objectID"
@@ -264,13 +237,115 @@ The interface currently supports both single record update as follows:
 }
 ```
 
-## Delete
+## Delete Node (and relationships)
 ## To remove an existing node and its relationships
-### DELETE {apiRoot}/node/{type}/{key}
+### DELETE {apiRoot}/{nodetype}/{keyname}/{keyvalue}
++ delete /contact/id/alanturner
++ delete /contact/name/Alan%20Turner
 #### params:
-+ **type** - 'System', 'Contact' or 'Endpoint'
-+ **key**
-    + the unique graphdb ID of the record to delete
-    + or the unique dewey id of the record to delete (e.g. systemcode)
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
 #### return:
 + **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
+
+
+## Create Relationship
+## To inset new relationships between two nodes
+### POST {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
+#### examples:
++ post /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
++ post /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
+#### params:
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
++ **reltype** - the name of the relationship to create
+#### return:
++ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
++ a json object that lists all the new content of ALL the node attributes and relationships as follows:
+```json
+{
+  "node": {
+    "attr1": "value1",
+    "attr2": "value2",
+    "...."
+  },
+  "relationships": [
+    {
+      "name": "relationshipType",
+      "to": "objectType",
+      "toAttrName": "id",
+      "toAttrValue": "objectID"
+    },
+    {
+      "name": "relationshipType",
+      "to": "objectType",
+      "toAttrName": "id",
+      "toAttrValue": "objectID"
+    },
+    "...."
+   ]
+}
+```
+
+## Update Relationship
+## To update relationships between two nodes
+### PUT {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
+#### examples:
++ put /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
++ put /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
+#### params:
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
++ **reltype** - the name of the relationship to create
+#### return:
++ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
++ a json object that lists all the new content of ALL the node attributes and relationships as follows:
+```json
+{
+  "node": {
+    "attr1": "value1",
+    "attr2": "value2",
+    "...."
+  },
+  "relationships": [
+    {
+      "name": "relationshipType",
+      "to": "objectType",
+      "toAttrName": "id",
+      "toAttrValue": "objectID"
+    },
+    {
+      "name": "relationshipType",
+      "to": "objectType",
+      "toAttrName": "id",
+      "toAttrValue": "objectID"
+    },
+    "...."
+   ]
+}
+```
+
+## Delete Relationship
+## To delete relationships between two nodes
+### DELETE {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
+#### examples:
++ delete /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
++ delete /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
+#### params:
++ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
++ **keyname** - 'id' or the name of a unique attribute
++ **keyvalue**
+    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
+    + if keyname != id, then this param is the value of the unique attribute
++ **reltype** - the name of the relationship to create
+#### return:
++ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
