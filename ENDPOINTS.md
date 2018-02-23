@@ -10,12 +10,15 @@
 + We don't have API calls to delete attributes from a node
 + We don't have API calls for queries; just direct reads of known keys
 + We don't have API calls to navigate the relationships; just to return the list for each node
-
++ We don't have API calls that return attributes of related data - e.g. service tier of systems I own
 
 # Biz Op API Endpoints
 The interface currently supports single record actions as follows:
 
+<details>
+<summary>
 ## Read Node (and relationships)
+</summary>
 ### To retrieve information about a node
 ### GET {apiRoot}/{nodetype}/{keyname}/{keyvalue}
 #### examples:
@@ -54,6 +57,7 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
+</details>
 
 ## Create Node (and relationships)
 ## To inset new nodes and their relationships
@@ -185,6 +189,7 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
+
 ## Upsert Node (and relationships)
 ## To create a new node and relationships or update the existing node and relationships
 ### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
@@ -221,7 +226,6 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
-
 #### return:
 + **status** - 200 for success, 400 for incorrect parameters, 500 for failure
 + a json object that lists all the new content of ALL the node attributes and relationships as follows:
