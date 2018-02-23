@@ -19,7 +19,6 @@ The interface currently supports single record actions as follows:
 <summary>
 
 ## Read Node (and relationships)
-
 </summary>
 
 ### To retrieve information about a node
@@ -60,10 +59,14 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
-
 </details>
 
+<details>
+<summary>
+
 ## Create Node (and relationships)
+</summary>
+
 ## To inset new nodes and their relationships
 ### POST {apiRoot}/{nodetype}/{keyname}/{keyvalue} {body}
 #### examples:
@@ -127,8 +130,14 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
+</details>
+
+<details>
+<summary>
 
 ## Update Node (and relationships)
+</summary>
+
 ## To update an exist node and its relationships
 ### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
 #### examples:
@@ -165,7 +174,6 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
-
 #### return:
 + **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
 + a json object that lists all the new content of ALL the node attributes and relationships as follows:
@@ -193,6 +201,7 @@ The interface currently supports single record actions as follows:
    ]
 }
 ```
+</details>
 
 ## Upsert Node (and relationships)
 ## To create a new node and relationships or update the existing node and relationships
