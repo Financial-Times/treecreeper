@@ -16,7 +16,7 @@ const sar = { id: 'customerEmail@test.com_1519207670717' };
 const sources = [{
 	id: 'livefyre_customerEmail@test.com_1519207670717',
 	name: 'livefyre',
-	status: 'pending'
+	status: 'pending',
 }];
 
 const deleteSource = async () => request(app)
@@ -36,7 +36,7 @@ describe('SAR', () => {
 		.then(() =>
 		deleteSource()));
 
-		it('has status code 200', (done) => {
+		it('status code should equal 200', (done) => {
 			request(app)
 			.post('/api/sar')
 			.set('API_KEY', `${process.env.API_KEY}`)
@@ -57,16 +57,16 @@ describe('SAR', () => {
 			.then(() =>
 			deleteSource()));
 
-			it('expect it to be included within the SAR object', (done) => {
+			it('should be included within the SAR object', (done) => {
 				const expected = {
 					'id':'customerEmail@test.com_1519207670717',
 					'sources':[
 						{
 							'name':'livefyre',
 							'id':'livefyre_customerEmail@test.com_1519207670717',
-							'status':'pending'
-						}
-					]
+							'status':'pending',
+						},
+					],
 				};
 
 				request(app)
@@ -81,6 +81,32 @@ describe('SAR', () => {
 	});
 
 	describe('getWithSources', () => {
+		describe('if the SAR id exists', () => {
+			after(() =>
+			deleteSar()
+			.then(() =>
+			deleteSource()));
+
+			it('status code should equal 200', (done) => {
+				request(app)
+				.post('/api/sar')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({ sar, sources })
+				.expect(200, done);
+			});
+		});
+
+		describe('if the SAR id is invalid', () => {
+			it('status code should equal 404', (done) => {
+				const invalidId = 'invalidId@test.com_1519207670717';
+				const expectedMessage = `SAR ${invalidId} does not exist`;
+				request(app)
+				.get('/api/sar/invalidId@test.com_1519207670717')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(404, expectedMessage, done);
+			});
+		});
+
 		it('should return sar object with sources array', async () => {
 			const sendMock = stub();
 			const reqId = 'someId';
@@ -154,6 +180,8 @@ describe('SAR', () => {
 			await getWithSources(req, res);
 
 			expect(sendMock.calledWith(JSON.stringify(expected))).to.be.true;
+			sendMock.reset();
+			dbRunStub.reset();
 		});
 	});
 });

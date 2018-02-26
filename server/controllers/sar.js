@@ -27,6 +27,10 @@ const getWithSources = async (req, res) => {
 		const sarResult = await db.run(sarQuery);
 		const sourceResult = await db.run(sourceQuery);
 
+		if (sarResult.records.length === 0) {
+			const message =	`SAR ${req.params.id} does not exist`;
+			return res.status(404).end(message);
+		}
 		const formattedSources = sourceResult.records.reduce((acc, { _fields }) => [
 			...acc,
 			_fields.reduce((acc, { properties }) => (Object.assign({},
@@ -45,13 +49,13 @@ const getWithSources = async (req, res) => {
 				}
 			)), {}),
 		)), {});
-
 		return res.send(JSON.stringify(formattedSar));
 	}
 	catch (e) {
 		console.log('[SAR] error', e);
 		return res.status(500).end(e.toString());
 	}
+
 };
 
 module.exports = { create, getWithSources };
