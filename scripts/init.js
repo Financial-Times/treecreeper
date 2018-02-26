@@ -17,12 +17,11 @@ const constraints = async (verb) => {
 		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.version)`
 	];
 
-  const setupConstraintIfPossible = (constraintQuery) => db.run(constraintQuery).catch(e => Promise.resolve())
-  const constraints = await Promise.all(
-    constraintQueries.map(setupConstraintIfPossible)
-  ).then(() => db.run('CALL db.constraints'));
+	const setupConstraintIfPossible = (constraintQuery) => db.run(constraintQuery).catch(() => Promise.resolve());
+	const constraints = await Promise.all(
+		constraintQueries.map(setupConstraintIfPossible)
+	).then(() => db.run('CALL db.constraints'));
 
-	console.log(constraints, 'constraints');
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
@@ -32,43 +31,43 @@ const dropNodes = async (nodeTypes) => {
 };
 
 const dropRelationships = async () => {
-  console.log('dropping relationships...');
-  const relationships = [
-    'o:OWNEDBY',
-    'o:ASKS',
-    'o:RAISES',
-    'o:ALLOWS',
-    'o:SIGNS',
-    'o:SUBMITS',
-    'o:ANSWERS',
-    'o:ANSWERS_QUESTION',
-    'o:HAS'
-  ];
+	console.log('dropping relationships...');
+	const relationships = [
+		'o:OWNEDBY',
+		'o:ASKS',
+		'o:RAISES',
+		'o:ALLOWS',
+		'o:SIGNS',
+		'o:SUBMITS',
+		'o:ANSWERS',
+		'o:ANSWERS_QUESTION',
+		'o:HAS'
+	];
 
-  return Promise.all(relationships.map(
-    relationship => db.run(`MATCH ()-[${relationship}]->() DELETE o`)
-  ));
+	return Promise.all(relationships.map(
+		relationship => db.run(`MATCH ()-[${relationship}]->() DELETE o`)
+	));
 };
 
 const init = async (req, res) => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
 		await constraints('DROP');
-    await dropRelationships();
-    await dropNodes(nodeTypes);
+		await dropRelationships();
+		await dropNodes(nodeTypes);
 
 		// CREATE
 		await constraints('CREATE');
 		await createSurveys(db);
-		res.send(200,'OK')
+		res.send(200,'OK');
 	}
 };
 
-if(process.argv[1] === __filename) {
-  init({}, { send: (code, result) => {
-    console.log(result)
-    process.exit(0);
-  }});
+if (process.argv[1] === __filename) {
+	init({}, { send: (code, result) => {
+		console.log(result);
+		process.exit(0);
+	}});
 }
 
 module.exports = init;
