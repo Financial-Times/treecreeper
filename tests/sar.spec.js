@@ -2,7 +2,6 @@ const proxyquire = require('proxyquire');
 const request = require('supertest');
 const { stub } = require('sinon');
 const { expect } = require('chai');
-const { isEqual} = require('lodash/fp');
 
 const app = require('../server/app');
 
