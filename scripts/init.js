@@ -57,9 +57,9 @@ const init = async (req, res) => {
 		await dropNodes(nodeTypes);
 
 		// CREATE
-		await constraints('CREATE');
-		await createSurveys(db);
-		res.send(200,'OK');
+		// await constraints('CREATE');
+		// await createSurveys(db);
+		// res.send(200,'OK');
 	}
 };
 

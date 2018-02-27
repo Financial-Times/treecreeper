@@ -144,6 +144,14 @@ describe('crud', () => {
 			.send({ node: node })
 			.expect(404);
 		});
+
+		it('PUT for a node that doesn\'t exist creates if using upsert', () => {
+			return request(app)
+			.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/true')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({ node: node })
+			.expect(200);
+		});
 	});
 
 	describe('DELETE generic', () => {
