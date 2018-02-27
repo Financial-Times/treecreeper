@@ -32,7 +32,6 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 };
 
 const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
-
 	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert);
 
 	if (uniqueAttrName) {
@@ -45,7 +44,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	}
 
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
-
 	try {
 
 		// Make sure if we've said there is a primary key, then it is in the obj
@@ -54,7 +52,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		const result = await db.run(createQuery, {node: obj});
-		console.log('****** createQuery', createQuery, obj)
+
 
 		if (relationships) {
 			for (let relationship of relationships) {
@@ -75,13 +73,8 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
 
-				console.log('************** createRelationship')
-				console.log(query)
-
 				try {
 					const resultRel = await db.run(query, obj);
-
-					console.log(JSON.stringify(resultRel, null, 2));
 
 					if (!resultRel.records || resultRel.records.length === 0) {
 						throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);

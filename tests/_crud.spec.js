@@ -61,11 +61,6 @@ describe('crud', () => {
 		let correctNode;
 
 		beforeEach(async () => {
-
-			const deleteRship = 'MATCH ()-[r:REL]->() DELETE r';
-			await db.run(deleteRship);
-			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
-			await db.run(deleteQuery);
 			originalNode = { SomeUniqueAttr: 'Oops', foo: 'bar' };
 			correctNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
 		});
