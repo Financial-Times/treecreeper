@@ -100,7 +100,7 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
 		}
-		else if (upsert === 'true') {
+		else if (upsert === 'upsert') {
 			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
 			if (uniqueAttrName) {

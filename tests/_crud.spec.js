@@ -147,7 +147,7 @@ describe('crud', () => {
 
 		it('PUT for a node that doesn\'t exist creates if using upsert', () => {
 			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/true')
+			.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.send({ node: node })
 			.expect(200);
