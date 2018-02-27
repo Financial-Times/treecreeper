@@ -66,7 +66,10 @@ describe('crud', () => {
 		});
 
 		afterEach(async () => {
-			const deleteQuery = 'MATCH (a:SomeNodeType { SomeUniqueAttr: "SomeUniqueAttrValue" }) DELETE a';
+
+			const deleteRship = 'MATCH ()-[r:REL]->() DELETE r';
+			await db.run(deleteRship);
+			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
 			await db.run(deleteQuery);
 			originalNode = null;
 			correctNode = null;
@@ -80,6 +83,72 @@ describe('crud', () => {
 			.expect(200, correctNode);
 		});
 
+		it('POST inserts the node and links it to related nodes if they exist', async () => {
+
+			const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
+			await db.run(createTargetNode);
+
+			return request(app)
+			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: originalNode,
+				relationships: [
+					{
+						name:'REL',
+						from: 'SomeNodeType',
+						fromUniqueAttrName: 'SomeUniqueAttr',
+						fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						toUniqueAttrName: 'OtherUniqueAttrName',
+						toUniqueAttrValue: 'OtherUniqueAttrValue',
+						to: 'SomeNodeType'
+					}
+				]
+			})
+			.expect(200, correctNode);
+		});
+
+		it('POST fails if related nodes don\'t exist', async () => {
+			return request(app)
+			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: originalNode,
+				relationships: [
+					{
+						name:'REL',
+						from: 'SomeNodeType',
+						fromUniqueAttrName: 'SomeUniqueAttr',
+						fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						toUniqueAttrName: 'id',
+						toUniqueAttrValue: 'nonExistent',
+						to: 'SomeNodeType'
+					}
+				]
+			})
+			.expect(400);
+		});
+
+		it('POST inserts the node and links it to related nodes that don\'t exist if using upsert', async () => {
+			return request(app)
+			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: originalNode,
+				relationships: [
+					{
+						name:'REL',
+						from: 'SomeNodeType',
+						fromUniqueAttrName: 'SomeUniqueAttr',
+						fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						toUniqueAttrName: 'OtherUniqueAttrName',
+						toUniqueAttrValue: 'OtherUniqueAttrValue',
+						to: 'SomeNodeType'
+					}
+				]
+			})
+			.expect(200, correctNode);
+		});
 
 		it('POST creating duplicate node returns 400', async () => {
 			const duplicateNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };

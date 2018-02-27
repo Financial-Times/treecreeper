@@ -31,9 +31,9 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 	}
 };
 
-const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
+const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
+	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert);
 
-	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships);
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -52,31 +52,42 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		const result = await db.run(createQuery, {node: obj});
+
+
 		if (relationships) {
 			for (let relationship of relationships) {
-				const createRelationship = `
+				const createRelationshipAndNode = `
+					MATCH (a:${relationship.from})
+					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+					MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+					RETURN r
+				`;
+
+				const createRelationshipAlone = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
 					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
 					AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
+
+				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
+
 				try {
-					// TODO use single transaction
-					// fail both if either fails
-					const resultRel = await db.run(createRelationship, obj);
-					console.log(`created relationship? ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'FAIL');
+					const resultRel = await db.run(query, obj);
+
+					if (!resultRel.records || resultRel.records.length === 0) {
+						throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
+					}
 				}
 				catch (e) {
-					console.log('relationships not created', e.toString());
+					console.log('[CRUD] Relationships not created', e.toString());
 					return res.status(400).end(e.toString());
 				}
 			}
-
-			// TODO check node created, check REL created, more explicit message
-			return res.status(200).end('Relationships created');
+			return res.send(result.records[0]._fields[0].properties);
 		}
-		res.send(result.records[0]._fields[0].properties);
+		return res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
 		console.log(`${nodeType} not created`, e.toString());
