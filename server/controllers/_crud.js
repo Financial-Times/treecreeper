@@ -46,7 +46,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 	try {
 
-		// Make sure if we've said there is the primary key, then it is in the obj
+		// Make sure if we've said there is a primary key, then it is in the obj
 		if (uniqueAttrName) {
 			obj[uniqueAttrName] = uniqueAttr;
 		}
@@ -84,20 +84,31 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	}
 };
 
-const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
+const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
-		const query = `
+		const updateQuery = `
 			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})
 			SET a += $props
 			RETURN a
 		`;
-		const result = await db.run(query, {props: obj});
+
+		const result = await db.run(updateQuery, {props: obj});
 
 		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
 
 		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
+		}
+		else if (upsert === 'upsert') {
+			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+
+			if (uniqueAttrName) {
+				obj[uniqueAttrName] = uniqueAttr;
+			}
+
+			const createResult = await db.run(createQuery, {node: obj});
+			return res.send(createResult.records[0]._fields[0].properties);
 		}
 		else {
 			return res.status(404).end(`${propAmount} props updated. ${nodeType}${uniqueAttr} not found. No nodes updated.`);

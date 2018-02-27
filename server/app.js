@@ -48,9 +48,9 @@ app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic POST');
 	return crud.create(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships);
 });
-app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic PUT');
-	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node);
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.params.upsert);
 });
 app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
