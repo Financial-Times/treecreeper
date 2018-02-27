@@ -34,7 +34,6 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
 
 	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships);
-
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -53,7 +52,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		const result = await db.run(createQuery, {node: obj});
-
 		if (relationships) {
 			for (let relationship of relationships) {
 				const createRelationship = `
@@ -63,12 +61,10 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
-
 				try {
 					// TODO use single transaction
 					// fail both if either fails
 					const resultRel = await db.run(createRelationship, obj);
-
 					console.log(`created relationship? ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'FAIL');
 				}
 				catch (e) {
