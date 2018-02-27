@@ -93,16 +93,6 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 			RETURN a
 		`;
 
-		// const createQuery = `CREATE (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
-
-		// TODO get res out of _crud
-		// call create() from update if upsert is true
-		// if (upsert) {
-
-		// const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
-		// 	const createResult = await db.run(createQuery, {props: obj})
-		// }
-
 		const result = await db.run(updateQuery, {props: obj});
 
 		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
