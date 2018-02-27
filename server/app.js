@@ -5,6 +5,7 @@ const security = require('./middleware/security');
 const supplier = require('./controllers/supplier');
 const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
+const sar = require('./controllers/sar');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
 const cypher = require('./controllers/_cypher');
@@ -24,6 +25,10 @@ app.set('case sensitive routing', true);
 app.get('/', (req, res) => {
 	res.send('biz op api');
 });
+
+// SAR HUB - Specific (to phase out)
+app.post('/api/sar', sar.create);
+app.get('/api/sar/:id', sar.getWithSources);
 
 // WEBPMA / 3SP - Specific (to phase out)
 app.get('/api/contracts/:supplierId', contract.get);
@@ -57,7 +62,7 @@ app.post('/api/cypher/', async (req, res) => {
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  app.get('/init', init);
+	app.get('/init', init);
 }
 
 const PORT = process.env.PORT || 8888;
