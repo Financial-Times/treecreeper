@@ -31,6 +31,11 @@ The Technology `Area` (CTO) contains several `Org`s such as Customer Products an
 All of this data ultimate relates to people. In BizOp, all of our people data comes from the (People Api)[https://github.com/Financial-Times/ip-people-api]. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
 
+## Strategies to prevent the model from going out of date
+- Every Person in BizOp will be contacted every quarter to confirm they still own the things we think they own. They can reply Yes/No to that email to update our system. If `No` they'll have an easy way to transfer some/all to other people
+- Leavers process: every time a person leaves, is promoted or changes teams we will automatically update the data in BizOp (e.g. if the user left they are deleted, everything that person owned to their line manager, etc)
+
+
 
 ## Popular queries
 #### What are the systems (and contracts, and suppliers) on my cost code, what products are they used by?
@@ -64,11 +69,6 @@ Cost centre associated to person, all the way to the top of the org, can always 
 #### What is the impact of this Person leaving on support (or on their organisational knowledge)?
 
 
-
-
-## Actions to prevent the model from going out of date
-- Every Person in BizOp will be contacted every quarter to confirm they still own the things we think they own. They can reply Yes/No to that email to update our system. If `No` they'll have an easy way to transfer some/all to other people
-- Leavers process: every time a person leaves or changes teams we will automatically update the data in BizOp (delete user, assign everything that person owned to their line manager, etc)
 
 
 ## Recreate the model (move out to own file)
