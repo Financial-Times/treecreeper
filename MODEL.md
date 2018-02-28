@@ -19,7 +19,7 @@ External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com
 Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `USES` it.
 
 ### System
-Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, <MORE EXAMPLES HERE>
+Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, ADD MORE EXAMPLES HERE.
 
 Internal systems will be related to at least one `Team` that `SUPPORTS` it. `System`s could also have an additional `Team` that `OWN`s them but is not in charge of looking after them.
 
@@ -28,7 +28,7 @@ Internal systems will be related to at least one `Team` that `SUPPORTS` it. `Sys
 ### People, Teams, Orgs and Areas
 The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
 
-All of this data ultimate relates to people. In BizOp, all of our people data comes from https://github.com/Financial-Times/ip-people-api. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
+All of this data ultimate relates to people. In BizOp, all of our people data comes from the (People Api)[https://github.com/Financial-Times/ip-people-api]. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
 
 
