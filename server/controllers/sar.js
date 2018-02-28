@@ -21,41 +21,27 @@ const create = async (req, res) => {
 
 const getWithSources = async (req, res) => {
 	try {
-		const sarQuery = `MATCH (sar { id: "${req.params.id}" }) RETURN sar`;
-		const sourceQuery = `MATCH ({ id: "${req.params.id}" })-[:CONSUMES]->(sources) RETURN sources`;
+		const query = `MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources) RETURN { sar: sar, sources: collect(sources) }`;
+		const result = await db.run(query);
 
-		const sarResult = await db.run(sarQuery);
-		const sourceResult = await db.run(sourceQuery);
-
-		if (sarResult.records.length === 0) {
-			const message =	`SAR ${req.params.id} does not exist`;
-			return res.status(404).end(message);
+		if (result.records.length === 0) {
+			return res.status(404).end(`SAR ${req.params.id} does not exist`);
 		}
-		const formattedSources = sourceResult.records.reduce((acc, { _fields }) => [
-			...acc,
-			_fields.reduce((acc, { properties }) => (Object.assign({},
-				acc,
-				properties
-			)), {}),
-		], []);
 
-		const formattedSar = sarResult.records.reduce((acc, { _fields }) => (Object.assign({},
-			acc,
-			_fields.reduce((acc, { properties }) => (Object.assign({},
-				acc,
-				properties,
-				{
-					sources: formattedSources,
-				}
-			)), {}),
-		)), {});
-		return res.send(JSON.stringify(formattedSar));
+		const { sar: { properties: sar }, sources } = result.records[0]._fields[0];
+		const formattedResult = Object.assign({},
+			sar,
+			{
+				sources: sources.map(({ properties }) => properties),
+			}
+		);
+
+		return res.send(JSON.stringify(formattedResult));
 	}
 	catch (e) {
 		console.log('[SAR] error', e);
 		return res.status(500).end(e.toString());
 	}
-
 };
 
 module.exports = { create, getWithSources };
