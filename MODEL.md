@@ -16,7 +16,7 @@ Things recognized as products by the Product team.
 
 External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products).
 
-Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `USES` it.
+Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `CONSUMES` it.
 
 ### System
 Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, ADD MORE EXAMPLES HERE.
@@ -108,14 +108,20 @@ CREATE CONSTRAINT ON (s:Team) ASSERT exists(s.id);
 CREATE CONSTRAINT ON (s:Supplier) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (s:Supplier) ASSERT exists(s.id);
 
-CREATE (n:Person {id:"john.doe"});
-CREATE (n:Person {id:"dawn.budge"});
-CREATE (n:Person {id:"gadi.lahav"});
+MERGE (n:Person {name:"John Doe", id:"john.doe"});
+MERGE (n:Person {name:"Dawn Budge", id:"dawn.budge"});
+MERGE (n:Person {name:"Gadi Lahav", id:"gadi.lahav"});
+MERGE (n:Person {name:"Georgiana Bogdan", id:"georgiana.bogdan"});
+MERGE (n:Person {name:"Rik Still", id:"richard.still"});
+MERGE (n:Person {name:"Matt Chadburn", id:"matt.chadburn"});
+
+
 CREATE (n:Team {id:"myft"});
 CREATE (n:Supplier {id:"fastly"});
 CREATE (n:Team {id:"compliance"});
-CREATE (n:Person {id:"richard.still"});
+CREATE (n:Team {id:"gdpr-tooling"});
 CREATE (n:Org {id:"cp", name: "Customer Products"});
+CREATE (n:Org {id:"ip", name: "Internal Products"});
 CREATE (n:Area {id:"tech"});
 CREATE (n:Area {id:"product"});
 
@@ -146,6 +152,9 @@ MERGE (n)-[r:HAD]->(p:Incident {id:"123", url:"https://github.com/Financial-Time
 MATCH (n:Person {id:"dawn.budge"}), (m:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:OWNS]->(m);
 
+MATCH (n:Person {id:"dawn.budge"}), (m:System {id:"ft-next-myft-page"})
+MERGE (n)-[r:OWNS]->(m);
+
 MATCH (n:Person {id:"gadi.lahav"}),(p:Product {id:"ftcom"})
 MERGE (n)-[r:OWNS]->(p);
 
@@ -162,7 +171,12 @@ MERGE (n)-[r:OWNS]->(p);
 MATCH (n:Person {id:"richard.still"}),(p:Org {id:"cp"})
 MERGE (n)-[r:LEADS]->(p);
 
+MATCH (n:Person {id:"matt.chadburn"}),(p:Org {id:"ip"})
+MERGE (n)-[r:LEADS]->(p);
+
 MATCH (n:Area {id:"tech"}),(p:Org {id:"cp"})
+MERGE (n)-[r:HAS]->(p);
+MATCH (n:Area {id:"tech"}),(p:Org {id:"ip"})
 MERGE (n)-[r:HAS]->(p);
 
 MATCH (n:Area {id:"product"})
@@ -178,8 +192,27 @@ MERGE (n)-[r:PAID_VIA]->(p);
 MATCH (n:Supplier {id:"fastly"}),(p:Contract {id:"fastly"})
 MERGE (n)-[r:SIGNS]->(p);
 
+
 MATCH (n:Team {id:"compliance"})
 MERGE (n)-[r:CONSUMES]->(p:Product {id:"sar-hub", name:"System to process SARs"});
+
+MATCH (n:Org {id:"ip"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
+MERGE (n)-[r:OWNS]->(p);
+
+MATCH (n:Person {id:"georgiana.bogdan"}),(p:Product {id:"sar-hub"})
+MERGE (n)-[r:OWNS]->(p);
+
+MATCH (n:Org {id:"ip"}),(p:Team {id:"gdpr-tooling"})
+MERGE (n)-[r:HAS]->(p);
+
+MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-sar-hub"})
+MERGE (n)-[r:SUPPORTS]->(m);
+
+MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-biz-op-api"})
+MERGE (n)-[r:SUPPORTS]->(m);
+
+MATCH (n:Team {id:"gdpr-tooling"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
+MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Product {id:"sar-hub"})
 MERGE (n)-[r:USES]->(p:System {id:"gdpr-sar-hub", name:"SAR Hub UI"});
@@ -193,10 +226,15 @@ MERGE (n)-[r:DEPENDS_ON {reason: "some reason here"}]->(p);
 MATCH (n:Person {id:"richard.still"})
 MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt111"});
 
+MATCH (n:Person {id:"matt.chadburn"})
+MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt222"});
+
 MATCH (n:System {id:"gdpr-sar-hub"})
 MERGE (n)-[r:REPORTS_HEALTH_AT]->(p:HealthCheck {id:"abc", url:"url", status:"down"});
 
 MATCH (n:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:IS]->(p:SLA {id:"platinum"});
+
+
 ```
 
