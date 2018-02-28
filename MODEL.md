@@ -28,7 +28,7 @@ Internal systems will be related to at least one `Team` that `SUPPORTS` it. `Sys
 ### People, Teams, Orgs and Areas
 The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
 
-All of this data ultimate relates to people. In BizOp, all of our people data comes from the (People Api)[https://github.com/Financial-Times/ip-people-api]. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
+All of this data ultimate relates to people. In BizOp, all of our people data comes from the [People Api](https://github.com/Financial-Times/ip-people-api). This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
 
 
