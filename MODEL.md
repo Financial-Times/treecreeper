@@ -1,10 +1,10 @@
-#Current BizOp data model (WIP)
+# Current BizOp data model (WIP)
 
 This is a snapshot example of the BizOp model. For the full model please run `db.schema()`
 
-<img src="image">
+<img src="https://user-images.githubusercontent.com/3425322/36786933-213cddd4-1c80-11e8-9f27-b636e7be4bca.png">
 
-##Popular queries
+## Popular queries
 #### What are the systems (and contracts, and suppliers) on my cost code, what products are they used by?
 Products in cost centre XT111
 ```
@@ -16,8 +16,7 @@ MATCH (s:Product)<-[r:OWNS]-(o:Org)<-[l:LEADS]-(p:Person)-[q:OWNS]->(c:CostCentr
 MATCH (:Person)-[:LEADS]->(:Org)-[:HAS]->(:Team)-[:SUPPORTS]->(s:System)<-[o:OWNS]-(p:Person) return p,s
 ```
 
-####... any single person/team looking after 'too many' things?
-#### Do I have fewer costs/systems than this time 6 months ago?
+#### ... any single person/team looking after 'too many' things?
 #### What system are up for renewal in the next 90 days (or 180 days if it is a complex/expensive)? Show me 'days to renewal' on each system, alongside cost.
 #### Show me systems that I'm responsible for with the most call outs / p1 / p2 problems.
 #### Where are there key-person dependencies?
@@ -39,12 +38,12 @@ Cost centre associated to person, all the way to the top of the org, can always 
 
 
 
-##Actions to prevent the model from going out of date
+## Actions to prevent the model from going out of date
 - Every Person in BizOp will be contacted every quarter to confirm they still own the things we think they own. They can reply Yes/No to that email to update our system. If `No` they'll have an easy way to transfer some/all to other people
 - Leavers process: every time a person leaves or changes teams we will automatically update the data in BizOp (delete user, assign everything that person owned to their line manager, etc)
 
 
-##Recreate the model
+## Recreate the model
 ```
 MATCH (n:Brand)-[r]->() delete r;
 MATCH (n:Product)-[r]->() delete r;
