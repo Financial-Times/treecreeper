@@ -31,9 +31,9 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 	}
 };
 
-const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships) => {
+const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
+	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert);
 
-	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships);
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
 		const result = await db.run(existingNode);
@@ -46,37 +46,48 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 	try {
 
-		// Make sure if we've said there is the primary key, then it is in the obj
+		// Make sure if we've said there is a primary key, then it is in the obj
 		if (uniqueAttrName) {
 			obj[uniqueAttrName] = uniqueAttr;
 		}
 
 		const result = await db.run(createQuery, {node: obj});
+
+
 		if (relationships) {
 			for (let relationship of relationships) {
-				const createRelationship = `
+				const createRelationshipAndNode = `
+					MATCH (a:${relationship.from})
+					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+					MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+					RETURN r
+				`;
+
+				const createRelationshipAlone = `
 					MATCH (a:${relationship.from}),(b:${relationship.to})
 					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
 					AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
 					CREATE (a)-[r:${relationship.name}]->(b)
 					RETURN r
 				`;
+
+				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
+
 				try {
-					// TODO use single transaction
-					// fail both if either fails
-					const resultRel = await db.run(createRelationship, obj);
-					console.log(`created relationship? ${relationship.from} -> ${relationship.to}`, resultRel.records[0]?resultRel.records[0]._fields[0].type: 'FAIL');
+					const resultRel = await db.run(query, obj);
+
+					if (!resultRel.records || resultRel.records.length === 0) {
+						throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
+					}
 				}
 				catch (e) {
-					console.log('relationships not created', e.toString());
+					console.log('[CRUD] Relationships not created', e.toString());
 					return res.status(400).end(e.toString());
 				}
 			}
-
-			// TODO check node created, check REL created, more explicit message
-			return res.status(200).end('Relationships created');
+			return res.send(result.records[0]._fields[0].properties);
 		}
-		res.send(result.records[0]._fields[0].properties);
+		return res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
 		console.log(`${nodeType} not created`, e.toString());
@@ -84,20 +95,31 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	}
 };
 
-const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj) => {
+const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
-		const query = `
+		const updateQuery = `
 			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})
 			SET a += $props
 			RETURN a
 		`;
-		const result = await db.run(query, {props: obj});
+
+		const result = await db.run(updateQuery, {props: obj});
 
 		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
 
 		if (result.records.length && propAmount > 0) {
 			return res.send(result.records[0]._fields[0].properties);
+		}
+		else if (upsert === 'upsert') {
+			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+
+			if (uniqueAttrName) {
+				obj[uniqueAttrName] = uniqueAttr;
+			}
+
+			const createResult = await db.run(createQuery, {node: obj});
+			return res.send(createResult.records[0]._fields[0].properties);
 		}
 		else {
 			return res.status(404).end(`${propAmount} props updated. ${nodeType}${uniqueAttr} not found. No nodes updated.`);
