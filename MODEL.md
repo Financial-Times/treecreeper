@@ -4,6 +4,34 @@ This is a snapshot example of the BizOp model. For the full model please run `db
 
 <img src="https://user-images.githubusercontent.com/3425322/36786933-213cddd4-1c80-11e8-9f27-b636e7be4bca.png">
 
+## Concepts
+
+### Brand
+Externally facing, consumed by subscribers, serve news content. Generally in Bede's radar. Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, serving as the primary contact for it.
+
+Brands can be created and decommissioned.
+
+### Product
+Things recognized as products by the Product team.
+
+External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products).
+
+Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `USES` it.
+
+### System
+Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, <MORE EXAMPLES HERE>
+
+Internal systems will be related to at least one `Team` that `SUPPORTS` it. `System`s could also have an additional `Team` that `OWN`s them but is not in charge of looking after them.
+
+`System`s can be external too. An external `System` is provided by a `Supplier` and will always have a `Contract` associated with it. `Fastly` is such a system.
+
+### People, Teams, Orgs and Areas
+The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
+
+All of this data ultimate relates to people. In BizOp, all of our people data comes from https://github.com/Financial-Times/ip-people-api. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
+
+
+
 ## Popular queries
 #### What are the systems (and contracts, and suppliers) on my cost code, what products are they used by?
 Products in cost centre XT111
@@ -43,7 +71,7 @@ Cost centre associated to person, all the way to the top of the org, can always 
 - Leavers process: every time a person leaves or changes teams we will automatically update the data in BizOp (delete user, assign everything that person owned to their line manager, etc)
 
 
-## Recreate the model
+## Recreate the model (move out to own file)
 ```
 MATCH (n:Brand)-[r]->() delete r;
 MATCH (n:Product)-[r]->() delete r;
