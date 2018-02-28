@@ -36,6 +36,9 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
+
+		console.log('[CRUD] exists query', existingNode);
+
 		const result = await db.run(existingNode);
 		if (result.records.length > 0) {
 			console.log(nodeType, uniqueAttr, uniqueAttrName, 'ALREADY EXISTS', JSON.stringify(result.records, null, 2));
@@ -51,8 +54,8 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			obj[uniqueAttrName] = uniqueAttr;
 		}
 
+		console.log('[CRUD] query', createQuery);
 		const result = await db.run(createQuery, {node: obj});
-
 
 		if (relationships) {
 			for (let relationship of relationships) {
@@ -72,6 +75,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				`;
 
 				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
+				console.log('[CRUD] relationship query', query);
 
 				try {
 					const resultRel = await db.run(query, obj);
@@ -104,6 +108,8 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 			RETURN a
 		`;
 
+		console.log('[CRUD] query', updateQuery);
+
 		const result = await db.run(updateQuery, {props: obj});
 
 		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
@@ -118,6 +124,7 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 				obj[uniqueAttrName] = uniqueAttr;
 			}
 
+			console.log('[CRUD] create query (upsert)', createQuery);
 			const createResult = await db.run(createQuery, {node: obj});
 			return res.send(createResult.records[0]._fields[0].properties);
 		}
@@ -136,7 +143,10 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 
 	try {
-		const result = await db.run(`MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${mode === 'detach' ? ' DETACH' : ''} DELETE a`);
+		const query = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"})${mode === 'detach' ? ' DETACH' : ''} DELETE a`;
+		console.log('[CRUD] delete query', query);
+
+		const result = await db.run(query);
 		if (result && result.summary && result.summary.counters && result.summary.counters.nodesDeleted() === 1) {
 			return res.status(200).end(`${uniqueAttr} deleted`);
 		}
@@ -156,6 +166,8 @@ const getAllforOne = async (res, relationship, param) => {
 		// use uniqueattr value and name instead of id
 		// used by webPMA contract controller
 		const query = `MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${relationship.to}) RETURN p`;
+		console.log('[CRUD] all for one query', query);
+
 		const result = await db.run(query);
 
 		if (result.records.length) {
@@ -178,6 +190,8 @@ const getAll = async (res, nodeType, filters = '') => {
 
 	try {
 		const query = `MATCH (a:${nodeType} ${filters}) RETURN a`;
+		console.log('[CRUD] get all query', query);
+
 		const result = await db.run(query);
 
 		if (result.records.length) {
