@@ -2,7 +2,7 @@
 
 This is a snapshot example of the BizOp model. For the full model please run `db.schema()`
 
-<img src="https://user-images.githubusercontent.com/3425322/36786933-213cddd4-1c80-11e8-9f27-b636e7be4bca.png">
+<img src="https://user-images.githubusercontent.com/3425322/36805022-31a7bb06-1cb4-11e8-8f18-453252bdbbc3.png">
 
 ## Concepts
 
@@ -28,7 +28,7 @@ Internal systems will be related to at least one `Team` that `SUPPORTS` it. `Sys
 ### People, Teams, Orgs and Areas
 The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
 
-All of this data ultimate relates to people. In BizOp, all of our people data comes from the (People Api)[https://github.com/Financial-Times/ip-people-api]. This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
+All of this data ultimate relates to people. In BizOp, all of our people data comes from the [People Api](https://github.com/Financial-Times/ip-people-api). This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
 
 ## Strategies to prevent the model from going out of date
