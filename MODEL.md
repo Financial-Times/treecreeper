@@ -2,7 +2,7 @@
 
 This is a snapshot example of the BizOp model. For the full model please run `db.schema()`
 
-<img src="image">
+<img src="https://user-images.githubusercontent.com/3425322/36786933-213cddd4-1c80-11e8-9f27-b636e7be4bca.png">
 
 ## Popular queries
 #### What are the systems (and contracts, and suppliers) on my cost code, what products are they used by?
