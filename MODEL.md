@@ -33,11 +33,12 @@ Internal systems will be related to at least one `Team` that `SUPPORTS` it. `Sys
 
 `System`s can be external too. An external `System` is provided by a `Supplier` and will always have a `Contract` associated with it. `Fastly` is such a system.
 
-### People ![#FF1A66](https://placehold.it/15/FF1A66/CC1452?text=+), Teams ![#CC1452](https://placehold.it/15/CC1452/CC1452?text=+), Orgs ![#990F3D](https://placehold.it/15/990F3D/CC1452?text=+) and Areas ![#660A29](https://placehold.it/15/660A29/CC1452?text=+)
+### Person ![#FF1A66](https://placehold.it/15/FF1A66/CC1452?text=+), Team ![#CC1452](https://placehold.it/15/CC1452/CC1452?text=+), Org ![#990F3D](https://placehold.it/15/990F3D/CC1452?text=+) and Area ![#660A29](https://placehold.it/15/660A29/CC1452?text=+)
 The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
 
 All of this data ultimate relates to people. In BizOp, all of our people data comes from the [People Api](https://github.com/Financial-Times/ip-people-api). This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
+### Supplier ![#0A3866](https://placehold.it/15/0A3866/CC1452?text=+) and Contract ![#0F5499](https://placehold.it/15/0F5499/CC1452?text=+)
 
 ## Strategies to prevent the model from going out of date
 - Every Person in BizOp will be contacted every quarter to confirm they still own the things we think they own. They can reply Yes/No to that email to update our system. If `No` they'll have an easy way to transfer some/all to other people
