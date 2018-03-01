@@ -16,7 +16,9 @@ Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, servin
 Brands can be created and decommissioned.
 
 ### Product
-Things recognized as products by the Product team.
+<img src="https://user-images.githubusercontent.com/3425322/36829931-33cba7fc-1d19-11e8-8417-7c85b306fa17.png" width="200px">
+
+Things recognized as products by the Product team. Normally attached to a product owner.
 
 External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products).
 
