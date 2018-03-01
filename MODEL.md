@@ -6,7 +6,7 @@ This is a snapshot example of the BizOp model. For the full model please run `db
 
 ## Concepts
 
-### Brand <img src="https://user-images.githubusercontent.com/3425322/36830026-b5ea5c6a-1d19-11e8-8358-45658c43a5e1.png" height="20px">
+### Brand <img src="https://user-images.githubusercontent.com/3425322/36830026-b5ea5c6a-1d19-11e8-8358-45658c43a5e1.png" height="12px">
 <img src="https://user-images.githubusercontent.com/3425322/36829252-396e2a98-1d16-11e8-87fd-7f7eb4f8a221.png" width="200px">
 
 Externally facing, consumed by subscribers, serve news content. Generally in Bede's radar.
@@ -15,7 +15,8 @@ Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, servin
 
 Brands can be created and decommissioned.
 
-### Product
+### Product <img src="https://user-images.githubusercontent.com/3425322/36830099-18f46ce2-1d1a-11e8-9933-501224dbd1b9.png" height="12px">
+
 <img src="https://user-images.githubusercontent.com/3425322/36829931-33cba7fc-1d19-11e8-8417-7c85b306fa17.png" width="300px">
 
 Things recognized as products by the Product team. Normally attached to a product owner.
