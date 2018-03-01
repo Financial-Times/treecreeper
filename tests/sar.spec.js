@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const app = require('../server/app');
 
 const dbRunStub = stub();
-const { getWithSources } = proxyquire('../server/controllers/sar', {
+const { get, getWithSources } = proxyquire('../server/controllers/sar', {
 	'../db-connection': {
 		run: dbRunStub,
 	},
@@ -43,6 +43,97 @@ describe('SAR', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({ sar, sources })
 				.expect(200, done);
+		});
+	});
+
+	describe('get', () => {
+		it('should return sars array with sources summary on each item', async () => {
+			const sendMock = stub();
+			const res = {
+				send: sendMock,
+			};
+
+			const sars = [
+				{
+					id: 'a',
+					some: 'value',
+				},
+				{
+					id: 'b',
+					some: 'other',
+				},
+				{
+					id: 'c',
+					some: 'stuff',
+				},
+			];
+
+			const sources = {
+				a: [
+					{
+						status: 'COMPLETE',
+					},
+					{
+						status: 'PENDING',
+					},
+					{
+						status: 'COMPLETE',
+					},
+				],
+				b: [
+					{
+						status: 'COMPLETE',
+					},
+					{
+						status: 'COMPLETE',
+					},
+				],
+				c: [
+					{
+						status: 'COMPLETE',
+					},
+				],
+			};
+
+			dbRunStub
+				.resolves({
+					records: sars.reduce((acc, sar) => [
+						...acc,
+						{
+							_fields: [
+								Object.assign(
+									{},
+									sar,
+									{
+										sources: sources[sar.id],
+									}
+								),
+							],
+						},
+					], []),
+				});
+
+			const expected = sars.reduce((acc, sar) => [
+				...acc,
+				Object.assign(
+					{},
+					sar,
+					{
+						sources: {
+							complete: sources[sar.id].reduce((acc, { status }) =>
+								status === 'COMPLETE'
+									? acc + 1
+									: acc
+								, 0),
+							total: sources[sar.id].length,
+						},
+					},
+				),
+			], []);
+
+			await get({}, res);
+
+			expect(sendMock.calledWith(JSON.stringify(expected))).to.be.true;
 		});
 	});
 
@@ -126,9 +217,13 @@ describe('SAR', () => {
 					],
 				});
 
-			const expected = Object.assign({}, sarProperties, {
-				sources: sourcesProperties,
-			});
+			const expected = Object.assign(
+				{},
+				sarProperties,
+				{
+					sources: sourcesProperties,
+				}
+			);
 
 			await getWithSources(req, res);
 

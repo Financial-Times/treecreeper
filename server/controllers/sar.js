@@ -19,9 +19,52 @@ const create = async (req, res) => {
 	}
 };
 
+const get = async (req, res) => {
+	try {
+		const query = `
+			MATCH (sar:SAR)-[:CONSUMES]->(sources)
+			WITH sar, collect(sources) as allSources
+			RETURN sar{ .*, sources: allSources }
+		`;
+		const result = await db.run(query);
+
+		const formattedResult = result.records.reduce((acc, { _fields }) => {
+			const { sources } = _fields[0];
+			const completeSources = sources.reduce((acc, { status }) =>
+				status === 'COMPLETE'
+					? acc + 1
+					: acc
+				, 0);
+
+			return [
+				...acc,
+				Object.assign(
+					{},
+					_fields[0],
+					{
+						sources: {
+							complete: completeSources,
+							total: sources.length,
+						},
+					},
+				),
+			];
+		}, []);
+
+		return res.send(JSON.stringify(formattedResult));
+	}
+	catch (e) {
+		console.log('[SAR] error', e);
+		return res.status(500).end(e.toString());
+	}
+}
+
 const getWithSources = async (req, res) => {
 	try {
-		const query = `MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources) RETURN { sar: sar, sources: collect(sources) }`;
+		const query = `
+			MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources)
+			RETURN { sar: sar, sources: collect(sources) }
+		`;
 		const result = await db.run(query);
 
 		if (result.records.length === 0) {
@@ -44,4 +87,4 @@ const getWithSources = async (req, res) => {
 	}
 };
 
-module.exports = { create, getWithSources };
+module.exports = { create, get, getWithSources };
