@@ -6,7 +6,8 @@ This is a snapshot example of the BizOp model. For the full model please run `db
 
 ## Concepts
 
-### Brand <img src="https://user-images.githubusercontent.com/3425322/36830026-b5ea5c6a-1d19-11e8-8358-45658c43a5e1.png" height="12px">
+### Brand ![#08474D](https://placehold.it/15/08474D/000000?text=+)
+
 <img src="https://user-images.githubusercontent.com/3425322/36829252-396e2a98-1d16-11e8-87fd-7f7eb4f8a221.png" width="200px">
 
 Externally facing, consumed by subscribers, serve news content. Generally in Bede's radar.
@@ -15,24 +16,24 @@ Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, servin
 
 Brands can be created and decommissioned.
 
-### Product <img src="https://user-images.githubusercontent.com/3425322/36830099-18f46ce2-1d1a-11e8-9933-501224dbd1b9.png" height="12px">
+### Product ![#0D7680](https://placehold.it/15/0D7680/000000?text=+)
 
 <img src="https://user-images.githubusercontent.com/3425322/36829931-33cba7fc-1d19-11e8-8417-7c85b306fa17.png" width="300px">
 
 Things recognized as products by the Product team. Normally attached to a product owner.
 
-External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products).
+External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products). These products are usually owned by the Customer Products `Org`
 
-Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `CONSUMES` it.
+Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `CONSUMES` it. These products are usually owned by `Org`s such as Internal Products, O&R... **DEFINE THIS**
 
-### System
-Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, ADD MORE EXAMPLES HERE.
+### System ![#12A5B3](https://placehold.it/15/12A5B3/000000?text=+)
+Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, **ADD MORE EXAMPLES HERE**
 
 Internal systems will be related to at least one `Team` that `SUPPORTS` it. `System`s could also have an additional `Team` that `OWN`s them but is not in charge of looking after them.
 
 `System`s can be external too. An external `System` is provided by a `Supplier` and will always have a `Contract` associated with it. `Fastly` is such a system.
 
-### People, Teams, Orgs and Areas
+### People ![#FF1A66](https://placehold.it/15/FF1A66/CC1452?text=+), Teams ![#CC1452](https://placehold.it/15/CC1452/CC1452?text=+), Orgs ![#990F3D](https://placehold.it/15/990F3D/CC1452?text=+) and Areas ![#660A29](https://placehold.it/15/660A29/CC1452?text=+)
 The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
 
 All of this data ultimate relates to people. In BizOp, all of our people data comes from the [People Api](https://github.com/Financial-Times/ip-people-api). This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
