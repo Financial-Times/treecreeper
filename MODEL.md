@@ -7,7 +7,10 @@ This is a snapshot example of the BizOp model. For the full model please run `db
 ## Concepts
 
 ### Brand
-Externally facing, consumed by subscribers, serve news content. Generally in Bede's radar. Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, serving as the primary contact for it.
+<img src="https://user-images.githubusercontent.com/3425322/36829252-396e2a98-1d16-11e8-87fd-7f7eb4f8a221.png" width="200px" align="right">
+Externally facing, consumed by subscribers, serve news content. Generally in Bede's radar.
+
+Each `Brand` must have one or more people (`Person`) who `REPRESENTS` it, serving as the primary contact for it.
 
 Brands can be created and decommissioned.
 
