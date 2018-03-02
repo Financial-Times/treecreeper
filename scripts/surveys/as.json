@@ -1,109 +1,117 @@
 {
-    "_id": "as",
-    "surveyTitle": "Anti Slavery",
-    "section": [
+  "_id": "as",
+  "surveyTitle": "Anti Slavery",
+  "section": [
+    {
+      "title": null,
+      "form": [
         {
-            "title": null,
-            "form": [
-                {
-                    "_id": "as_01",
-                    "question": "Does your company have a policy on Anti-Slavery?",
-                    "prompt": null,
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "as_02",
-                            "question": "Please explain the stance your organisation takes on Anti-Slavery",
-                            "child_question_trigger": "No",
-                            "prompt": "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement",
-                            "fieldType": "long-text"
-                        }
-                    ]
-                },
-                {
-                    "_id": "as_03",
-                    "question": "Please summarise the steps your company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains",
-                    "prompt": null,
-                    "fieldType": "long-text"
-                },
-                {
-                    "_id": "as_04",
-                    "question": "Do you provide training to key staff on your Anti-Slavery Policy?",
-                    "prompt": null,
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "as_05",
-                            "question": "Please describe your Anti-Slavery training",
-                            "child_question_trigger": "Yes",
-                            "prompt": null,
-                            "fieldType": "long-text"
-                        }
-                    ]
-                },
-                {
-                    "_id": "as_06",
-                    "question": "Do you consider implications of slavery on your supply chain when completing due diligence for your own suppliers?",
-                    "prompt": null,
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "as_07",
-                            "question": "Do you review this regularly?",
-                            "child_question_trigger": "Yes",
-                            "fieldType": "binary",
-                            "fieldOptions": ["Yes", "No"]
-                        }
-                    ]
-                },
-                {
-                    "_id": "as_08",
-                    "question": "Do you have any links or dealings with any entities in the following countries; Mauritania, Uzbekistan, Haiti, Qatar, India, Pakistan, Democratic Republic of the Congo, Sudan, Syria or the Central African Republic?",
-                    "prompt": null,
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "as_09",
-                            "child_question_trigger": "Yes",
-                            "question": "Please include details of the country and your activity within it",
-                            "prompt": null,
-                            "fieldType": "long-text"
-                        }
-                    ]
-                },
-                {
-                    "_id": "as_10",
-                    "question": "Are you providing any services in the operational sectors: Manufacturing, Service and Hospitality, Telecommunications, Extractive Industries, Agriculture?",
-                    "prompt": null,
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "as_11",
-                            "child_question_trigger": "Yes",
-                            "question": "Please provide details",
-                            "prompt": null
-                        }
-                    ]
-                }
-            ]
+          "_id": "as_01",
+          "question": "Does your company have a policy on Anti-Slavery?",
+          "prompt": null,
+          "fieldType": "binary",
+          "fieldOptions": ["Yes", "No"],
+          "child_questions": [
+            {
+              "_id": "as_02",
+              "question":
+                "Please explain the stance your organisation takes on Anti-Slavery.",
+              "child_question_trigger": "No",
+              "prompt":
+                "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement.",
+              "fieldType": "long-text"
+            }
+          ]
         },
         {
-            "title": "Please sign before submitting",
-            "form": [
-                {
-                    "_id": "as_40",
-                    "question": "Full Name"
-                },
-                {
-                    "_id": "as_41",
-                    "question": "Job Role"
-                }
-            ]
+          "_id": "as_03",
+          "question":
+            "Please summarise the steps your company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains.",
+          "prompt": null,
+          "fieldType": "long-text"
+        },
+        {
+          "_id": "as_04",
+          "question":
+            "Do you provide training to key staff on your Anti-Slavery Policy?",
+          "prompt": null,
+          "fieldType": "binary",
+          "fieldOptions": ["Yes", "No"],
+          "child_questions": [
+            {
+              "_id": "as_05",
+              "question": "Please describe your Anti-Slavery training.",
+              "child_question_trigger": "Yes",
+              "prompt": null,
+              "fieldType": "long-text"
+            }
+          ]
+        },
+        {
+          "_id": "as_06",
+          "question":
+            "Do you consider implications of slavery on your supply chain when completing due diligence for your own suppliers?",
+          "prompt": null,
+          "fieldType": "binary",
+          "fieldOptions": ["Yes", "No"],
+          "child_questions": [
+            {
+              "_id": "as_07",
+              "question": "Do you review this regularly?",
+              "child_question_trigger": "Yes",
+              "fieldType": "binary",
+              "fieldOptions": ["Yes", "No"]
+            }
+          ]
+        },
+        {
+          "_id": "as_08",
+          "question":
+            "Do you have any links or dealings with any entities in the following countries; Mauritania, Uzbekistan, Haiti, Qatar, India, Pakistan, Democratic Republic of the Congo, Sudan, Syria or the Central African Republic?",
+          "prompt": null,
+          "fieldType": "binary",
+          "fieldOptions": ["Yes", "No"],
+          "child_questions": [
+            {
+              "_id": "as_09",
+              "child_question_trigger": "Yes",
+              "question":
+                "Please include details of the country and your activity within it.",
+              "prompt": null,
+              "fieldType": "long-text"
+            }
+          ]
+        },
+        {
+          "_id": "as_10",
+          "question":
+            "Are you providing any services in the operational sectors: Manufacturing, Service and Hospitality, Telecommunications, Extractive Industries, Agriculture?",
+          "prompt": null,
+          "fieldType": "binary",
+          "fieldOptions": ["Yes", "No"],
+          "child_questions": [
+            {
+              "_id": "as_11",
+              "child_question_trigger": "Yes",
+              "question": "Please provide details.",
+              "prompt": null
+            }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "title": "Please sign before submitting.",
+      "form": [
+        {
+          "_id": "as_40",
+          "question": "Full Name"
+        },
+        {
+          "_id": "as_41",
+          "question": "Job Role"
+        }
+      ]
+    }
+  ]
 }
