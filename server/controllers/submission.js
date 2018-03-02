@@ -18,8 +18,14 @@ const submit = async (req, res) => {
 								SET submission += ${stringify(req.body.node)}`;
 	const submissionQuery = req.body.answers.reduce(addAnswerToQuery, initialQuery);
 	console.log('[SUBMISSION] submitQuery', submissionQuery);
-	const result = await db.run(submissionQuery);
-	res.status(200).send(result);
+	try{
+		const result = await db.run(submissionQuery);
+		res.send(result);
+	}
+	catch(e){
+		console.log('error', e);
+		return res.status(500).end(e.toString());
+	}
 };
 
 const getAllforOne = async (req, res) => {
