@@ -27,17 +27,17 @@ describe('Contract - API endpoints', () => {
 		dbRun.reset();
 	});
 
-	describe.only('get', () => {
+	describe('get', () => {
 		it('returns a json response', async () => {
+			req.params = { supplierId: 'test' };
 			dbRun.resolves(dbResponse);
 			await controller.get(req, res);
-			expect(res.status).to.be.calledWith(404);
-			expect(res.send).to.be.calledOnce; //With(parsedResult);
+			expect(res.send).to.be.calledWith(parsedResult);
 		});
 
-		it('returns a 404 if supplier id is not set', async () => {
+		it('returns a 400 if supplier id is not set', async () => {
 			await controller.get(req, res);
-			expect(res.status).to.be.calledWith(404);
+			expect(res.status).to.be.calledWith(400);
 			expect(end).to.be.calledWith('a supplier id is required.');
 		});
 

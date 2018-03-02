@@ -11,7 +11,7 @@ const getAllforOne = async (req, res) => {
 const get = async (req, res) => {
 	try {
 		const { supplierId } = req.params;
-		if(!supplierId) return res.status(404).end('a supplier id is required.');
+		if(!supplierId) return res.status(400).end('a supplier id is required.');
 
 		const query = `MATCH (supplier:Supplier {id: '${supplierId}'})
 			OPTIONAL MATCH (supplier)-[:SUBMITS]->(topLevel:Submission)
