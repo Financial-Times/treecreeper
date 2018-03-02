@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
 
 // SAR HUB - Specific (to phase out)
 app.post('/api/sar', sar.create);
+app.get('/api/sar', sar.get);
 app.get('/api/sar/:id', sar.getWithSources);
 
 // WEBPMA / 3SP - Specific (to phase out)
