@@ -1,4 +1,6 @@
-exports.dbResponse = {
+exports.supplierId = 'a0zL0000004cdWGIAY';
+
+exports.raw = {
   records: [
     {
       keys: [
@@ -747,7 +749,7 @@ exports.dbResponse = {
   }
 };
 
-exports.parsedResult = [
+exports.parsed = [
   [
     {
       ct: 'CT-05686',

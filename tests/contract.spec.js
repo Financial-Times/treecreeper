@@ -1,7 +1,7 @@
 const proxyquire = require('proxyquire');
 const { stub } = require('sinon');
 const { expect } = require('chai');
-const { dbResponse, parsedResult } = require('./fixtures/contract.get.response.js');
+const fixture = require('./fixtures/contract.get.js');
 
 describe('Contract - API endpoints', () => {
 	const req = { params: {} };
@@ -21,18 +21,20 @@ describe('Contract - API endpoints', () => {
 		});
 	});
 
-	afterEach(() => {
+	afterEach('reset mocks',() => {
 		end.reset();
 		res.send.reset();
+		res.status.resetHistory();
 		dbRun.reset();
+		req.params = { };
 	});
 
 	describe('get', () => {
 		it('returns a json response', async () => {
 			req.params = { supplierId: 'test' };
-			dbRun.resolves(dbResponse);
+			dbRun.resolves(fixture.raw);
 			await controller.get(req, res);
-			expect(res.send).to.be.calledWith(parsedResult);
+			expect(res.send).to.be.calledWith(fixture.parsed);
 		});
 
 		it('returns a 400 if supplier id is not set', async () => {
@@ -49,10 +51,10 @@ describe('Contract - API endpoints', () => {
 			expect(end).to.be.calledWith('No submissions found for hello');
 		});
 
-		it('other errors return a 500', async () => {
+		it('returns a 500 for other errors ', async () => {
 			req.params = { supplierId: 'hello' };
-			// malformed db response
-			dbRun.resolves({ records: {}});
+			const malformed = { records: {}};
+			dbRun.resolves(malformed);
 			await controller.get(req, res);
 			expect(res.status).to.be.calledWith(500);
 			expect(end).to.be.calledOnce;
