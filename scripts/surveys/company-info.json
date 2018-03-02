@@ -20,31 +20,23 @@
               },
               {
                   "_id": "ci_04",
-                  "question": "Please include details of any transfer of data between FT and the Company.",
+                  "question": "Full description of product(s) or service(s) to be provided by the Company.",
+                  "prompt": "Please include details of any transfer of data between FT and the Company.",
                   "fieldType": "long-text"
               },
               {
                   "_id": "ci_05",
-                  "question": "Is there an ultimate parent company with 50% or more shareholding or that otherwise has the ability to control the affairs of your company?",
-                  "fieldType": "binary",
-                  "fieldOptions": ["Yes", "No"],
-                  "child_questions": [
-                      {
-                          "_id":"ci_06",
-                          "child_question_trigger": "Yes",
-                          "question": "Name and Country of any ultimate parent company with 50% or more shareholding or otherwise has the ability to control the affairs of the Company.",
-                          "fieldType": "long-text"
-                      }
-                  ]
+                  "question": "Name and Country of any ultimate parent company with 50% or more shareholding or otherwise has the ability to control the affairs of the Company.",
+                  "fieldType": "long-text"
               },
               {
-                  "_id": "ci_07",
+                  "_id": "ci_06",
                   "question": "Will any part of the service(s) provided be outsourced by the Company?",
                   "fieldType": "binary",
                   "fieldOptions": ["Yes", "No"],
                   "child_questions": [
                       {
-                          "_id":"ci_08",
+                          "_id":"ci_07",
                           "child_question_trigger": "Yes",
                           "question": "Please list all additional third parties involved, including the services to be outsourced in each case.",
                           "fieldType": "long-text"
