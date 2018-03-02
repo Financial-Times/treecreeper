@@ -8,7 +8,8 @@
         {
           "_id": "as_01",
           "question": "Does Company have a policy on Anti-Slavery?",
-          "prompt": null,
+          "prompt":
+            "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement. If you are not required under the Act to make a statement, please state this in your answer.",
           "fieldType": "binary",
           "fieldOptions": ["Yes", "No"],
           "child_questions": [
@@ -17,8 +18,7 @@
               "question":
                 "Please explain the stance your organisation takes on Anti-Slavery.",
               "child_question_trigger": "No",
-              "prompt":
-                "If you are a UK Entity and have published a statement in line with the Modern Slavery Act, please include a link to your online statement. If you are not required under the Act to make a statement, please state this in your answer.",
+              "prompt": null,
               "fieldType": "long-text"
             }
           ]
