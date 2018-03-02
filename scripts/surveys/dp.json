@@ -7,35 +7,21 @@
             "form": [
                 {
                     "_id": "dp_01",
-                    "question": "Does your company have Data Protection and Security policies?",
+                    "question": "Does Company have a Data Protection policy?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
                             "_id": "dp_02",
                             "child_question_trigger": "Yes",
-                            "question": "Please attach your Data Protection and Security policy documents",
-                            "fieldType": "upload"
-                        }
-                    ]
-                },
-                {
-                    "_id": "dp_03",
-                    "question": "Does your company have an incident response plan in case of any data breach, loss or theft of data?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "dp_04",
-                            "child_question_trigger": "Yes",
-                            "question": "Please attach your incident response plan",
+                            "question": "Please attach a copy of your Data Protection policy",
                             "fieldType": "upload"
                         }
                     ]
                 },
                 {
                     "_id": "dp_05",
-                    "question": "Does your company provide training to staff on data protection?",
+                    "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services? ",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
