@@ -14,14 +14,14 @@
                         {
                             "_id": "dp_02",
                             "child_question_trigger": "Yes",
-                            "question": "Please attach a copy of your Data Protection policy",
+                            "question": "Please attach a copy of your Data Protection policy.",
                             "fieldType": "upload"
                         }
                     ]
                 },
                 {
                     "_id": "dp_05",
-                    "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services? ",
+                    "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
@@ -34,7 +34,7 @@
                 },
                 {
                     "_id": "dp_07",
-                    "question": "Will your company be processing (or have access to) any personal data, including but not limited to: Names, Phone Numbers, Postal Addresses, Email Addresses, IP Addresses, Customer ID, or any other personal data or PII? ",
+                    "question": "Will Company be processing (or have access to) any personal data, including but not limited to: Names, Phone Numbers, Postal Addresses, Email Addresses, IP Addresses, Customer ID, or any other personal data or PII? ",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
@@ -42,13 +42,13 @@
                             "_id": "dp_08",
                             "child_question_trigger": "Yes",
                             "fieldType": "long-text",
-                            "question": "Please detail all types of personal or PII data you'll be processing"
+                            "question": "Please detail all types of personal or PII data you'll be processing."
                         }
                     ]
                 },
                 {
                     "_id": "dp_09",
-                    "question": "Will your company transfer any personal data to or from the EEA in connection with the services?",
+                    "question": "Will Company transfer any personal data to or from the EEA in connection with the services?",
                     "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
@@ -57,7 +57,7 @@
                             "_id": "dp_10",
                             "child_question_trigger": "Yes",
                             "fieldType": "long-text",
-                            "question": "Please detail under what circumstances you will transfer personal data to/from the EEA"
+                            "question": "Please detail under what circumstances you will transfer personal data to/from the EEA."
                         }
                     ]
                 },
@@ -70,13 +70,13 @@
                         {
                             "_id": "dp_12",
                             "child_question_trigger": "Yes",
-                            "question": "Please list all additional third parties and their county of operation, including the services to be outsourced"
+                            "question": "Please list all additional third parties and their county of operation, including the services to be outsourced."
                         }
                     ]
                 },
                 {
                     "_id": "dp_13",
-                    "question": "Has your company ever been prosecuted or investigated for data protection related offences?",
+                    "question": "Has Company ever been prosecuted or investigated for data protection related offences?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
                 }
