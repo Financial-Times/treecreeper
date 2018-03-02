@@ -40,7 +40,7 @@
           "child_questions": [
             {
               "_id": "as_05",
-              "question": "Please describe your Anti-Slavery training.",
+              "question": "Please include as much details as possible.",
               "child_question_trigger": "Yes",
               "prompt": null,
               "fieldType": "long-text"
