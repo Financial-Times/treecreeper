@@ -7,7 +7,7 @@
       "form": [
         {
           "_id": "as_01",
-          "question": "Does your company have a policy on Anti-Slavery?",
+          "question": "Does Company have a policy on Anti-Slavery?",
           "prompt": null,
           "fieldType": "binary",
           "fieldOptions": ["Yes", "No"],
@@ -26,7 +26,7 @@
         {
           "_id": "as_03",
           "question":
-            "Please summarise the steps your company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains.",
+            "Please summarise the steps Company has taken to ensure that slavery and human trafficking is not taking place in its business or supply chains.",
           "prompt": null,
           "fieldType": "long-text"
         },
