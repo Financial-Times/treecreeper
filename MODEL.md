@@ -22,9 +22,9 @@ Brands can be created and decommissioned.
 
 Things recognized as products by the Product team. Normally attached to a product owner.
 
-External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products). These products are usually owned by the Customer Products `Org`
+External-facing `Product`s are always associated with a `Brand` (e.g. The FT.com brand is made up of the FT.com website, the FT Web App,... which are products). These products are usually owned by the Customer Products `Group`
 
-Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `CONSUMES` it. These products are usually owned by `Org`s such as Internal Products, O&R... **DEFINE THIS**
+Internal-facing ones are not tied to brands but they will generally have an internal audience: a `Team` that `CONSUMES` it. These products are usually owned by `Group`s such as Internal Products, O&R... **DEFINE THIS**
 
 ### System ![#12A5B3](https://placehold.it/15/12A5B3/000000?text=+)
 Internally, a system is something made up of code that can be deployed. Sites, APIs, lambdas, micro-services. If you can deploy it, it's a system. Things that are systems are `next-myft-api`, `gdpr-sar-hub`, **ADD MORE EXAMPLES HERE**
@@ -33,8 +33,8 @@ Internal systems will be related to at least one `Team` that `SUPPORTS` it. `Sys
 
 `System`s can be external too. An external `System` is provided by a `Supplier` and will always have a `Contract` associated with it. `Fastly` is such a system.
 
-### Person ![#FF1A66](https://placehold.it/15/FF1A66/CC1452?text=+), Team ![#CC1452](https://placehold.it/15/CC1452/CC1452?text=+), Org ![#990F3D](https://placehold.it/15/990F3D/CC1452?text=+) and Area ![#660A29](https://placehold.it/15/660A29/CC1452?text=+)
-The Technology `Area` (CTO) contains several `Org`s such as Customer Products and Internal Products. An `Org` is made up of `Team`s, and those have `Person`s in them.
+### Person ![#FF1A66](https://placehold.it/15/FF1A66/CC1452?text=+), Team ![#CC1452](https://placehold.it/15/CC1452/CC1452?text=+), Group ![#990F3D](https://placehold.it/15/990F3D/CC1452?text=+) and Area ![#660A29](https://placehold.it/15/660A29/CC1452?text=+)
+The Technology `Area` (CTO) contains several `Group`s such as Customer Products and Internal Products. An `Group` is made up of `Team`s, and those have `Person`s in them.
 
 All of this data ultimate relates to people. In BizOp, all of our people data comes from the [People Api](https://github.com/Financial-Times/ip-people-api). This API is connected to Workday, Oracle, and all of our other sources of people and financial data. Any changes in those systems (e.g. someone resigns) will be reflected in the People API and automatically fed into BizOp
 
@@ -50,12 +50,12 @@ All of this data ultimate relates to people. In BizOp, all of our people data co
 #### What are the systems (and contracts, and suppliers) on my cost code, what products are they used by?
 Products in cost centre XT111
 ```
-MATCH (s:Product)<-[r:OWNS]-(o:Org)<-[l:LEADS]-(p:Person)-[q:OWNS]->(c:CostCentre {id:"xt111"}) RETURN s
+MATCH (s:Product)<-[r:OWNS]-(o:Group)-[q:OWNS]->(c:CostCentre {id:"xt111"}) RETURN s
 ```
 
 #### Who is in charge of all the critical systems that I'm responsible for?
 ```
-MATCH (:Person)-[:LEADS]->(:Org)-[:HAS]->(:Team)-[:SUPPORTS]->(s:System)<-[o:OWNS]-(p:Person) return p,s
+MATCH (:Person)-[:LEADS]->(:Group)-[:HAS]->(:Team)-[:SUPPORTS]->(s:System)<-[o:OWNS]-(p:Person) return p,s
 ```
 
 #### ... any single person/team looking after 'too many' things?
@@ -86,7 +86,7 @@ MATCH (n:Brand)-[r]->() delete r;
 MATCH (n:Product)-[r]->() delete r;
 MATCH (n:System)-[r]->() delete r;
 MATCH (n:Person)-[r]->() delete r;
-MATCH (n:Org)-[r]->() delete r;
+MATCH (n:Group)-[r]->() delete r;
 MATCH (n:Area)-[r]->() delete r;
 MATCH (n:Team)-[r]->() delete r;
 MATCH (n:Supplier)-[r]->() delete r;
@@ -95,7 +95,7 @@ MATCH (n:Brand) delete n;
 MATCH (n:Product) delete n;
 MATCH (n:System) delete n;
 MATCH (n:Person) delete n;
-MATCH (n:Org) delete n;
+MATCH (n:Group) delete n;
 MATCH (n:Area) delete n;
 MATCH (n:Team) delete n;
 MATCH (n:Supplier) delete n;
@@ -108,8 +108,8 @@ CREATE CONSTRAINT ON (s:System) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (s:System) ASSERT exists(s.id);
 CREATE CONSTRAINT ON (s:Person) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (s:Person) ASSERT exists(s.id);
-CREATE CONSTRAINT ON (s:Org) ASSERT s.id IS UNIQUE;
-CREATE CONSTRAINT ON (s:Org) ASSERT exists(s.id);
+CREATE CONSTRAINT ON (s:Group) ASSERT s.id IS UNIQUE;
+CREATE CONSTRAINT ON (s:Group) ASSERT exists(s.id);
 CREATE CONSTRAINT ON (s:Area) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (s:Area) ASSERT exists(s.id);
 CREATE CONSTRAINT ON (s:Team) ASSERT s.id IS UNIQUE;
@@ -119,7 +119,9 @@ CREATE CONSTRAINT ON (s:Supplier) ASSERT exists(s.id);
 
 MERGE (n:Person {name:"John Doe", id:"john.doe"});
 MERGE (n:Person {name:"Dawn Budge", id:"dawn.budge"});
-MERGE (n:Person {name:"Gadi Lahav", id:"gadi.lahav"});
+MERGE (n:Person {name:"Gadi Lahav", id:"gadi.weislovits"});
+MERGE (n:Person {name:"David Griffith", id:"david.griffith"});
+MERGE (n:Person {name:"Sarah Wells", id:"sarah.wells"});
 MERGE (n:Person {name:"Georgiana Bogdan", id:"georgiana.bogdan"});
 MERGE (n:Person {name:"Rik Still", id:"richard.still"});
 MERGE (n:Person {name:"Matt Chadburn", id:"matt.chadburn"});
@@ -129,8 +131,9 @@ CREATE (n:Team {id:"myft"});
 CREATE (n:Supplier {id:"fastly"});
 CREATE (n:Team {id:"compliance"});
 CREATE (n:Team {id:"gdpr-tooling"});
-CREATE (n:Org {id:"cp", name: "Customer Products"});
-CREATE (n:Org {id:"ip", name: "Internal Products"});
+CREATE (n:Group {id:"cp", name: "Customer Products"});
+CREATE (n:Group {id:"ip", name: "Internal Products"});
+CREATE (n:Group {id:"onr", name: "O&R"});
 CREATE (n:Area {id:"tech"});
 CREATE (n:Area {id:"product"});
 
@@ -155,63 +158,74 @@ MERGE (n)-[r:USES]->(p:Repo {id:"ft-next-myft-api", url:"https://github.com/Fina
 MATCH (n:System {id:"ft-next-myft-page"}),(m:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:DEPENDS_ON]->(m);
 
-MATCH (n:System {id:"ft-next-myft-api"})
-MERGE (n)-[r:HAD]->(p:Incident {id:"123", url:"https://github.com/Financial-Times/next-bugs/blob/master/incidents/2017-02-14-Myft-emails-stopped-sending.md", status:"resolved", date:"some date"});
+MATCH (n:Person {id:"dawn.budge"}), (t:Team {id:"myft"})
+MERGE (t)-[r:HAS]->(n);
 
-MATCH (n:Person {id:"dawn.budge"}), (m:System {id:"ft-next-myft-api"})
-MERGE (n)-[r:OWNS]->(m);
+MATCH (n:Person {id:"gadi.weislovits"}),(p:Group {id:"cp"})
+MERGE (p)-[r:HAS {role: 'PO'}]->(n);
 
-MATCH (n:Person {id:"dawn.budge"}), (m:System {id:"ft-next-myft-page"})
-MERGE (n)-[r:OWNS]->(m);
+MATCH (n:Person {id:"david.griffith"}),(p:Group {id:"ip"})
+MERGE (p)-[r:HAS {role: 'PO'}]->(n);
 
-MATCH (n:Person {id:"gadi.lahav"}),(p:Product {id:"ftcom"})
-MERGE (n)-[r:OWNS]->(p);
+MATCH (n:Person {id:"sarah.wells"}),(p:Group {id:"onr"})
+MERGE (p)-[r:HAS {role: 'PO'}]->(n);
 
 MATCH (n:Team {id:"myft"}), (m:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:SUPPORTS]->(m);
 
-MATCH (n:Org {id:"cp", name: "Customer Products"}),(p:Team {id:"myft"})
+MATCH (n:Group {id:"cp", name: "Customer Products"}),(p:Team {id:"myft"})
 MERGE (n)-[r:HAS]->(p);
-MATCH (n:Org {id:"cp", name: "Customer Products"}),(p:Product {id:"ftcom"})
+MATCH (n:Group {id:"cp", name: "Customer Products"}),(p:Product {id:"ftcom"})
 MERGE (n)-[r:OWNS]->(p);
-MATCH (n:Org {id:"cp", name: "Customer Products"}),(p:Product {id:"ftapp"})
+MATCH (n:Group {id:"cp", name: "Customer Products"}),(p:Product {id:"ftapp"})
 MERGE (n)-[r:OWNS]->(p);
 
-MATCH (n:Person {id:"richard.still"}),(p:Org {id:"cp"})
+MATCH (n:Person {id:"richard.still"}),(p:Group {id:"cp"})
 MERGE (n)-[r:LEADS]->(p);
 
-MATCH (n:Person {id:"matt.chadburn"}),(p:Org {id:"ip"})
+MATCH (n:Person {id:"matt.chadburn"}),(p:Group {id:"ip"})
 MERGE (n)-[r:LEADS]->(p);
 
-MATCH (n:Area {id:"tech"}),(p:Org {id:"cp"})
+MATCH (n:Area {id:"tech"}),(p:Group {id:"cp"})
 MERGE (n)-[r:HAS]->(p);
-MATCH (n:Area {id:"tech"}),(p:Org {id:"ip"})
+MATCH (n:Area {id:"tech"}),(p:Group {id:"ip"})
 MERGE (n)-[r:HAS]->(p);
 
 MATCH (n:Area {id:"product"})
-MERGE (n)-[r:HAS]->(p:Org {id:"origami"});
+MERGE (n)-[r:HAS]->(p:Group {id:"origami"});
 
 
 MATCH (n:Product {id:"ftcom"})
-MERGE (n)-[r:USES]->(p:System {id:"fastly", name:"Fastly CDN Service"});
+MERGE (n)-[r:DEPENDS_ON]->(p:Product {id:"fastly", name:"Fastly CDN Service"});
 
-MATCH (n:System {id:"fastly"}),(p:Contract {id:"fastly"})
+MATCH (n:Product {id:"fastly"}),(p:Contract {id:"fastly"})
 MERGE (n)-[r:PAID_VIA]->(p);
 
 MATCH (n:Supplier {id:"fastly"}),(p:Contract {id:"fastly"})
 MERGE (n)-[r:SIGNS]->(p);
 
+MATCH (n:Product {id:"fastly"})
+MERGE (n)-[r:USES]->(s:System {id:'fastly-config-ft'});
+
+MATCH (n:Product {id:"fastly"})
+MERGE (n)-[r:USES]->(s:System {id:'fastly-config-foo'});
+
+MATCH (n:System {id:"fastly-config-ft"})
+MERGE (n)-[r:USES]->(p:Repo {id:"fastly-config-ft", url:"https://github.com/Financial-Times/fastly-config-ft"});
+
+MATCH (n:System {id:"fastly-config-foo"})
+MERGE (n)-[r:USES]->(p:Repo {id:"fastly-config-foo", url:"https://github.com/Financial-Times/fastly-config-foo"});
 
 MATCH (n:Team {id:"compliance"})
 MERGE (n)-[r:CONSUMES]->(p:Product {id:"sar-hub", name:"System to process SARs"});
 
-MATCH (n:Org {id:"ip"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
+MATCH (n:Group {id:"ip"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
 MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Person {id:"georgiana.bogdan"}),(p:Product {id:"sar-hub"})
 MERGE (n)-[r:OWNS]->(p);
 
-MATCH (n:Org {id:"ip"}),(p:Team {id:"gdpr-tooling"})
+MATCH (n:Group {id:"ip"}),(p:Team {id:"gdpr-tooling"})
 MERGE (n)-[r:HAS]->(p);
 
 MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-sar-hub"})
@@ -232,10 +246,10 @@ MERGE (n)-[r:USES]->(p:System {id:"gdpr-biz-op-api", name:"Biz Op API"});
 MATCH (n:System {id:"gdpr-sar-hub"}),(p:System {id:"gdpr-biz-op-api"})
 MERGE (n)-[r:DEPENDS_ON {reason: "some reason here"}]->(p);
 
-MATCH (n:Person {id:"richard.still"})
+MATCH (n:Group {id:"cp"})
 MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt111"});
 
-MATCH (n:Person {id:"matt.chadburn"})
+MATCH (n:Group {id:"ip"})
 MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt222"});
 
 MATCH (n:System {id:"gdpr-sar-hub"})
