@@ -19,34 +19,67 @@ const create = async (req, res) => {
 	}
 };
 
+const get = async (req, res) => {
+	try {
+		const query = `
+			MATCH (sar:SAR)-[:CONSUMES]->(sources)
+			WITH sar, collect(sources) as allSources
+			RETURN sar{ .*, sources: allSources }
+		`;
+		const result = await db.run(query);
+
+		const formattedResult = result.records.reduce((acc, { _fields }) => {
+			const { sources } = _fields[0];
+			const completeSources = sources.reduce((acc, { status }) =>
+				status === 'COMPLETE'
+					? acc + 1
+					: acc
+				, 0);
+
+			return [
+				...acc,
+				Object.assign(
+					{},
+					_fields[0],
+					{
+						sources: {
+							complete: completeSources,
+							total: sources.length,
+						},
+					},
+				),
+			];
+		}, []);
+
+		return res.send(JSON.stringify(formattedResult));
+	}
+	catch (e) {
+		console.log('[SAR] error', e);
+		return res.status(500).end(e.toString());
+	}
+}
+
 const getWithSources = async (req, res) => {
 	try {
-		const sarQuery = `MATCH (sar { id: "${req.params.id}" }) RETURN sar`;
-		const sourceQuery = `MATCH ({ id: "${req.params.id}" })-[:CONSUMES]->(sources) RETURN sources`;
+		const query = `
+			MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources)
+			RETURN { sar: sar, sources: collect(sources) }
+		`;
+		const result = await db.run(query);
 
-		const sarResult = await db.run(sarQuery);
-		const sourceResult = await db.run(sourceQuery);
+		if (result.records.length === 0) {
+			return res.status(404).end(`SAR ${req.params.id} does not exist`);
+		}
 
-		const formattedSources = sourceResult.records.reduce((acc, { _fields }) => [
-			...acc,
-			_fields.reduce((acc, { properties }) => (Object.assign({},
-				acc,
-				properties
-			)), {}),
-		], []);
+		const { sar: { properties: sar }, sources } = result.records[0]._fields[0];
+		const formattedResult = Object.assign({},
+			sar,
+			{
+				sources: sources.map(({ properties }) => properties),
+			}
+		);
 
-		const formattedSar = sarResult.records.reduce((acc, { _fields }) => (Object.assign({},
-			acc,
-			_fields.reduce((acc, { properties }) => (Object.assign({},
-				acc,
-				properties,
-				{
-					sources: formattedSources,
-				}
-			)), {}),
-		)), {});
-
-		return res.send(JSON.stringify(formattedSar));
+		return res.send(JSON.stringify(formattedResult));
 	}
 	catch (e) {
 		console.log('[SAR] error', e);
@@ -54,4 +87,4 @@ const getWithSources = async (req, res) => {
 	}
 };
 
-module.exports = { create, getWithSources };
+module.exports = { create, get, getWithSources };

@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
 
 // SAR HUB - Specific (to phase out)
 app.post('/api/sar', sar.create);
+app.get('/api/sar', sar.get);
 app.get('/api/sar/:id', sar.getWithSources);
 
 // WEBPMA / 3SP - Specific (to phase out)
@@ -44,13 +45,13 @@ app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
 	console.log('[APP] generic GET', req.params);
 	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
 });
-app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic POST');
-	return crud.create(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships);
+	return crud.create(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships, req.params.upsert);
 });
-app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic PUT');
-	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node);
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.params.upsert);
 });
 app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
