@@ -1,6 +1,9 @@
 module.exports = {
 	files: {
-		allow: ['doc/model.grass'],
+		allow: [
+			'doc/model.grass',
+			'doc/model.cql'
+		],
 		allowOverrides: []
 	},
 	strings: {
