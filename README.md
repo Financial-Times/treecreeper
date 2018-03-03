@@ -8,6 +8,10 @@ https://github.com/Financial-Times/gdpr
 
 WIP
 
+## Endpoints
+
+[Endpoint](ENDPOINTS.md) Reference
+
 ## Cookbook
 
 Sample [queries/output](COOKBOOK.md)
