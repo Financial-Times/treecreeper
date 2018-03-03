@@ -83,7 +83,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				`;
 
 				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
-				console.log('[CRUD] relationship query', query, relationship.attr);
+				console.log('[CRUD] relationship query', query);
 
 				try {
 					resultRel = await db.run(query);
