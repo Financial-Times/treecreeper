@@ -50,7 +50,7 @@
                     "_id": "dp_09",
                     "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services?",
                     "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to.",
-                    "fieldType": "long-text",
+                    "fieldType": "long-text"
                 },
                 {
                     "_id": "dp_10",
