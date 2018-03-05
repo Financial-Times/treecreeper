@@ -7,28 +7,14 @@
             "form": [
                 {
                     "_id": "dp_01",
-                    "question": "Does your company have Data Protection and Security policies?",
+                    "question": "Does Company have a Data Protection policy?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
                             "_id": "dp_02",
                             "child_question_trigger": "Yes",
-                            "question": "Please attach your Data Protection and Security policy documents",
-                            "fieldType": "upload"
-                        }
-                    ]
-                },
-                {
-                    "_id": "dp_03",
-                    "question": "Does your company have an incident response plan in case of any data breach, loss or theft of data?",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "dp_04",
-                            "child_question_trigger": "Yes",
-                            "question": "Please attach your incident response plan",
+                            "question": "Please attach a copy of your Data Protection policy.",
                             "fieldType": "upload"
                         }
                     ]
@@ -48,7 +34,7 @@
                 },
                 {
                     "_id": "dp_07",
-                    "question": "Will your company be processing (or have access to) any personal data, including but not limited to: Names, Phone Numbers, Postal Addresses, Email Addresses, IP Addresses, Customer ID, or any other personal data or PII? ",
+                    "question": "Will Company be processing (or have access to) any personal data, including but not limited to: Names, Phone Numbers, Postal Addresses, Email Addresses, IP Addresses, Customer ID, or any other personal data or PII? ",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
@@ -56,41 +42,32 @@
                             "_id": "dp_08",
                             "child_question_trigger": "Yes",
                             "fieldType": "long-text",
-                            "question": "Please detail all types of personal or PII data you'll be processing"
+                            "question": "Please detail all types of personal or PII data you'll be processing."
                         }
                     ]
                 },
                 {
                     "_id": "dp_09",
-                    "question": "Will your company transfer any personal data to or from the EEA in connection with the services?",
-                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "dp_10",
-                            "child_question_trigger": "Yes",
-                            "fieldType": "long-text",
-                            "question": "Please detail under what circumstances you will transfer personal data to/from the EEA"
-                        }
-                    ]
+                    "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services?",
+                    "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to.",
+                    "fieldType": "long-text"
                 },
                 {
-                    "_id": "dp_11",
+                    "_id": "dp_10",
                     "question": "Will any additional third parties have access to any personal data originating from or belonging to FT?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
-                            "_id": "dp_12",
+                            "_id": "dp_11",
                             "child_question_trigger": "Yes",
-                            "question": "Please list all additional third parties and their county of operation, including the services to be outsourced"
+                            "question": "Please list all additional third parties and their Country of operation, including the services to be outsourced."
                         }
                     ]
                 },
                 {
-                    "_id": "dp_13",
-                    "question": "Has your company ever been prosecuted or investigated for data protection related offences?",
+                    "_id": "dp_12",
+                    "question": "Has Company ever been prosecuted or investigated for data protection related offences?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
                 }
