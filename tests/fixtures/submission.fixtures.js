@@ -1840,3 +1840,30 @@ as_10:
 as_11: { answer: '', question: 'Please provide details' },
 as_40: { answer: 'Test Supplier Contact', question: 'Full Name' },
 as_41: { answer: 'Supplier', question: 'Job Role' } };
+
+exports.submitRequest = {
+  node: { id: 'sid123',
+   surveyId: 'sla',
+   contractId: 'con123',
+   supplierId: '',
+   status: 'submitted',
+   type: '',
+   submittedDate: 1520005184857 },
+ answers: [ { id: 'sla_01slacon123',
+     questionId: 'sla_01',
+     value: 'test',
+     type: 'text' },
+   { id: 'sla_02slacon123',
+     questionId: 'sla_02',
+     value: 'test',
+     type: 'text' },
+   { id: 'sla_03slacon123',
+     questionId: 'sla_03',
+     value: 'test',
+     type: 'text' }]
+};
+
+exports.getAllForOneCypher = `MATCH submissions=(Contract {id: "123"})-[r:SUBMITS]->(Submission {surveyId: "as"}) 
+OPTIONAL MATCH answers=(Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x:SurveyQuestion) 
+RETURN submissions, collect(answers)`;
+
