@@ -50,32 +50,23 @@
                     "_id": "dp_09",
                     "question": "Please detail under what circumstances (if any) you will be transferring personal data to or from the EEA in connection with the services?",
                     "prompt": " Please note that personal data includes any IP addresses, customer ID’s etc. you may have access to.",
-                    "fieldType": "binary",
-                    "fieldOptions": ["Yes", "No"],
-                    "child_questions": [
-                        {
-                            "_id": "dp_10",
-                            "child_question_trigger": "Yes",
-                            "fieldType": "long-text",
-                            "question": "Please detail under what circumstances you will transfer personal data to/from the EEA."
-                        }
-                    ]
+                    "fieldType": "long-text",
                 },
                 {
-                    "_id": "dp_11",
+                    "_id": "dp_10",
                     "question": "Will any additional third parties have access to any personal data originating from or belonging to FT?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
                         {
-                            "_id": "dp_12",
+                            "_id": "dp_11",
                             "child_question_trigger": "Yes",
                             "question": "Please list all additional third parties and their Country of operation, including the services to be outsourced."
                         }
                     ]
                 },
                 {
-                    "_id": "dp_13",
+                    "_id": "dp_12",
                     "question": "Has Company ever been prosecuted or investigated for data protection related offences?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"]
