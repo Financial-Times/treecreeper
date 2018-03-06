@@ -46,7 +46,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 	}
 
-	const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 	try {
 
 		// Make sure if we've said there is a primary key, then it is in the obj
@@ -54,10 +53,19 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			obj[uniqueAttrName] = uniqueAttr;
 		}
 
-		console.log('[CRUD] query', createQuery);
-		const result = await db.run(createQuery, {node: obj});
+		if (nodeType) {
+			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+			console.log('[CRUD] query', createQuery);
+			const result = await db.run(createQuery, {node: obj});
+
+			if (!relationships) {
+				return res.send(result.records[0]._fields[0].properties);
+			}
+		}
 
 		if (relationships) {
+			let resultRel;
+
 			for (let relationship of relationships) {
 				const createRelationshipAndNode = `
 					MATCH (a:${relationship.from})
@@ -78,7 +86,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				console.log('[CRUD] relationship query', query);
 
 				try {
-					const resultRel = await db.run(query, obj);
+					resultRel = await db.run(query);
 
 					if (!resultRel.records || resultRel.records.length === 0) {
 						throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
@@ -89,9 +97,8 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 					return res.status(400).end(e.toString());
 				}
 			}
-			return res.send(result.records[0]._fields[0].properties);
+			return res.send(resultRel.records[0]._fields);
 		}
-		return res.send(result.records[0]._fields[0].properties);
 	}
 	catch (e) {
 		console.log(`${nodeType} not created`, e.toString());
