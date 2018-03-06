@@ -15,7 +15,7 @@
             {
               "_id": "as_02",
               "question":
-                "Please explain the stance your organisation takes on Anti-Slavery",
+                "Please explain the stance your organisation takes on Anti-Slavery.",
               "child_question_trigger": "No",
               "prompt": null,
               "fieldType": "long-text"
