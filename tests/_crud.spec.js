@@ -1,6 +1,7 @@
 const app = require('../server/app.js');
 const request = require('supertest');
 const db = require('../server/db-connection');
+const assert = require('chai').assert;
 
 describe('crud', () => {
 	describe('GET generic', () => {
@@ -21,7 +22,9 @@ describe('crud', () => {
 		afterEach(async () => {
 			for (let node of nodes) {
 				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
+				const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
 				await db.run(deleteQuery);
+				await db.run(deleteRshipQuery);
 			}
 			nodes = null;
 		});
@@ -85,6 +88,16 @@ describe('crud', () => {
 
 		it('POST inserts the node and links it to related nodes if they exist', async () => {
 
+			const relationship = {
+				name:'REL',
+				from: 'SomeNodeType',
+				fromUniqueAttrName: 'SomeUniqueAttr',
+				fromUniqueAttrValue: 'SomeUniqueAttrValue',
+				toUniqueAttrName: 'OtherUniqueAttrName',
+				toUniqueAttrValue: 'OtherUniqueAttrValue',
+				to: 'SomeNodeType'
+			};
+
 			const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
 			await db.run(createTargetNode);
 
@@ -93,19 +106,15 @@ describe('crud', () => {
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.send({
 				node: originalNode,
-				relationships: [
-					{
-						name:'REL',
-						from: 'SomeNodeType',
-						fromUniqueAttrName: 'SomeUniqueAttr',
-						fromUniqueAttrValue: 'SomeUniqueAttrValue',
-						toUniqueAttrName: 'OtherUniqueAttrName',
-						toUniqueAttrValue: 'OtherUniqueAttrValue',
-						to: 'SomeNodeType'
-					}
-				]
+				relationships: [relationship]
 			})
-			.expect(200, correctNode);
+			.expect(200)
+			.then( async (response) => {
+				const body = response.body;
+				console.log('RES HERE', await body);
+				assert.equal(body.length, 1);
+				assert.equal(body[0].type, relationship.name);
+			});
 		});
 
 		it('POST fails if related nodes don\'t exist', async () => {
@@ -130,24 +139,31 @@ describe('crud', () => {
 		});
 
 		it('POST inserts the node and links it to related nodes that don\'t exist if using upsert', async () => {
+
+			const relationship = {
+				name:'REL',
+				from: 'SomeNodeType',
+				fromUniqueAttrName: 'SomeUniqueAttr',
+				fromUniqueAttrValue: 'SomeUniqueAttrValue',
+				toUniqueAttrName: 'OtherUniqueAttrName',
+				toUniqueAttrValue: 'OtherUniqueAttrValue',
+				to: 'SomeNodeType'
+			};
+
 			return request(app)
 			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.send({
 				node: originalNode,
-				relationships: [
-					{
-						name:'REL',
-						from: 'SomeNodeType',
-						fromUniqueAttrName: 'SomeUniqueAttr',
-						fromUniqueAttrValue: 'SomeUniqueAttrValue',
-						toUniqueAttrName: 'OtherUniqueAttrName',
-						toUniqueAttrValue: 'OtherUniqueAttrValue',
-						to: 'SomeNodeType'
-					}
-				]
+				relationships: [relationship]
 			})
-			.expect(200, correctNode);
+			.expect(200)
+			.then( async (response) => {
+				const body = response.body;
+				console.log('RES HERE', await body);
+				assert.equal(body.length, 1);
+				assert.equal(body[0].type, relationship.name);
+			});
 		});
 
 		it('POST creating duplicate node returns 400', async () => {

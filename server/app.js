@@ -39,7 +39,7 @@ app.get('/api/surveys/:type', survey.getAll);
 app.post('/api/supplier/', supplier.create);
 app.post('/api/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 
-// GENERIC
+// GENERIC - Node
 app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
 	console.log('[APP] generic GET', req.params);
 	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
@@ -56,6 +56,13 @@ app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
 	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
 });
+
+// GENERIC - Rship
+app.post('/api/relationships/:upsert?', async (req, res) => {
+	console.log('[APP] generic POST - rship');
+	return crud.create(res, null, null, null, null, req.body.relationships, req.params.upsert);
+});
+
 
 app.post('/api/cypher/', async (req, res) => {
 	console.log('[APP] generic GET CYPHER');
