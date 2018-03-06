@@ -53,7 +53,7 @@ const createQuestions = async (db, surveyId) => {
 		for (let question of questions) {
 			const sectionTitle = section.title
 				? `'${section.title}'`
-				: '';
+				: '\'\'';
 
 			await createQuestion(db, question);
 			await db.run(`
