@@ -94,6 +94,8 @@ MERGE (p)-[r:HAS {role: 'PO'}]->(n);
 
 MATCH (n:Team {id:"myft"}), (m:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:SUPPORTS]->(m);
+MATCH (n:Team {id:"myft"}), (m:System {id:"ft-next-myft-page"})
+MERGE (n)-[r:SUPPORTS]->(m);
 
 MATCH (n:Group {id:"cp", name: "Customer Products"}),(p:Team {id:"myft"})
 MERGE (n)-[r:HAS]->(p);
@@ -103,14 +105,19 @@ MATCH (n:Group {id:"cp", name: "Customer Products"}),(p:Product {id:"ftapp"})
 MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Person {id:"richard.still"}),(p:Group {id:"cp"})
-MERGE (n)-[r:LEADS]->(p);
+MERGE (n)<-[r:HAS {role: "Tech director"}]-(p);
 
 MATCH (n:Person {id:"matt.chadburn"}),(p:Group {id:"ip"})
-MERGE (n)-[r:LEADS]->(p);
+MERGE (n)<-[r:HAS {role: "Tech director"}]-(p);
+
+MATCH (n:Person {id:"sarah.wells"}),(p:Group {id:"onr"})
+MERGE (n)<-[r:HAS {role: "Tech director"}]-(p);
 
 MATCH (n:Area {id:"tech"}),(p:Group {id:"cp"})
 MERGE (n)-[r:HAS]->(p);
 MATCH (n:Area {id:"tech"}),(p:Group {id:"ip"})
+MERGE (n)-[r:HAS]->(p);
+MATCH (n:Area {id:"tech"}),(p:Group {id:"onr"})
 MERGE (n)-[r:HAS]->(p);
 
 MATCH (n:Area {id:"product"})
@@ -120,17 +127,14 @@ MERGE (n)-[r:HAS]->(p:Group {id:"origami"});
 MATCH (n:Product {id:"ftcom"})
 MERGE (n)-[r:DEPENDS_ON]->(p:Product {id:"fastly", name:"Fastly CDN Service"});
 
-MATCH (n:Product {id:"fastly"}),(p:Contract {id:"fastly"})
-MERGE (n)-[r:PAID_VIA]->(p);
+MATCH (n:Product {id:"fastly"})
+MERGE (n)-[r:PAID_VIA]->(p:Contract {id:"fastly"});
 
 MATCH (n:Supplier {id:"fastly"}),(p:Contract {id:"fastly"})
 MERGE (n)-[r:SIGNS]->(p);
 
-MATCH (n:Product {id:"fastly"})
-MERGE (n)-[r:USES]->(s:System {id:'fastly-config-ft'});
-
-MATCH (n:Product {id:"fastly"})
-MERGE (n)-[r:USES]->(s:System {id:'fastly-config-foo'});
+MATCH (n:Product {id:"ftcom"})
+MERGE (n)-[r:USES]->(s:System {id:'fastly-config-ft', name:"FT.com Fastly Config"});
 
 MATCH (n:System {id:"fastly-config-ft"})
 MERGE (n)-[r:USES]->(p:Repo {id:"fastly-config-ft", url:"https://github.com/Financial-Times/fastly-config-ft"});
@@ -139,9 +143,9 @@ MATCH (n:System {id:"fastly-config-foo"})
 MERGE (n)-[r:USES]->(p:Repo {id:"fastly-config-foo", url:"https://github.com/Financial-Times/fastly-config-foo"});
 
 MATCH (n:Team {id:"compliance"})
-MERGE (n)-[r:CONSUMES]->(p:Product {id:"sar-hub", name:"System to process SARs"});
+MERGE (n)-[r:CONSUMES]->(p:Product {id:"sar-hub", name:"SARHub"});
 
-MATCH (n:Group {id:"ip"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
+MATCH (n:Group {id:"ip"}),(p:Product {id:"sar-hub"})
 MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Person {id:"georgiana.bogdan"}),(p:Product {id:"sar-hub"})
@@ -149,15 +153,6 @@ MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Group {id:"ip"}),(p:Team {id:"gdpr-tooling"})
 MERGE (n)-[r:HAS]->(p);
-
-MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-sar-hub"})
-MERGE (n)-[r:SUPPORTS]->(m);
-
-MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-biz-op-api"})
-MERGE (n)-[r:SUPPORTS]->(m);
-
-MATCH (n:Team {id:"gdpr-tooling"}),(p:Product {id:"sar-hub", name:"System to process SARs"})
-MERGE (n)-[r:OWNS]->(p);
 
 MATCH (n:Product {id:"sar-hub"})
 MERGE (n)-[r:USES]->(p:System {id:"gdpr-sar-hub", name:"SAR Hub UI"});
@@ -168,11 +163,20 @@ MERGE (n)-[r:USES]->(p:System {id:"gdpr-biz-op-api", name:"Biz Op API"});
 MATCH (n:System {id:"gdpr-sar-hub"}),(p:System {id:"gdpr-biz-op-api"})
 MERGE (n)-[r:DEPENDS_ON {reason: "some reason here"}]->(p);
 
+MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-sar-hub"})
+MERGE (n)-[r:SUPPORTS]->(m);
+
+MATCH (n:Team {id:"gdpr-tooling"}), (m:System {id:"gdpr-biz-op-api"})
+MERGE (n)-[r:SUPPORTS]->(m);
+
 MATCH (n:Group {id:"cp"})
-MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt111"});
+MERGE (n)-[r:HAS]->(p:CostCentre {id:"xt111"});
 
 MATCH (n:Group {id:"ip"})
-MERGE (n)-[r:OWNS]->(p:CostCentre {id:"xt222"});
+MERGE (n)-[r:HAS]->(p:CostCentre {id:"xt222"});
+
+MATCH (n:Group {id:"onr"})
+MERGE (n)-[r:HAS]->(p:CostCentre {id:"xt333"});
 
 MATCH (n:System {id:"ft-next-myft-api"})
 MERGE (n)-[r:IS]->(p:SLA {id:"platinum"});

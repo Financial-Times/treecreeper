@@ -75,4 +75,3 @@ Cost centre associated to person, all the way to the top of the org, can always 
 #### How much of our estate is attributed to teams which don't report into the TLG?
 #### Which groups of end users (internal & external) would be impacted if the Watford datacentre went on fire?
 #### What is the impact of this Person leaving on support (or on their organisational knowledge)?
-

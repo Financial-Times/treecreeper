@@ -139,13 +139,6 @@
     "caption": "{id}",
     "diameter": "50px"
   },
-  "node.Incident": {
-    "caption": "{date}",
-    "color": "#FF756E",
-    "border-color": "#E06760",
-    "text-color-internal": "#FFFFFF",
-    "diameter": "50px"
-  },
   "node.Area": {
     "caption": "{id}",
     "diameter": "100px",
@@ -153,7 +146,7 @@
     "border-color": "#4D081F",
     "text-color-internal": "#FFFFFF"
   },
-  "node.Org": {
+  "node.Group": {
     "caption": "{name}",
     "diameter": "85px",
     "color": "#990F3D",
