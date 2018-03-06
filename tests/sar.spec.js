@@ -93,6 +93,14 @@ describe('SAR', () => {
 						status: 'COMPLETE',
 					},
 				],
+				d: [
+					{
+						status: 'EMPTY',
+					},
+					{
+						status: 'EMPTY',
+					},
+				],
 			};
 
 			dbRunStub
@@ -126,6 +134,7 @@ describe('SAR', () => {
 									: acc
 								, 0),
 							total: sources[sar.id].length,
+							allEmpty: sources[sar.id].every(({ status }) => status === 'EMPTY'),
 						},
 					},
 				),

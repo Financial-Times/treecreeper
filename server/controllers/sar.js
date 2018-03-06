@@ -36,6 +36,8 @@ const get = async (req, res) => {
 					: acc
 				, 0);
 
+			const allEmpty = sources.every(({ status}) => status === 'EMPTY');
+
 			return [
 				...acc,
 				Object.assign(
@@ -45,6 +47,7 @@ const get = async (req, res) => {
 						sources: {
 							complete: completeSources,
 							total: sources.length,
+							allEmpty,
 						},
 					},
 				),
