@@ -1,8 +1,8 @@
-# Current BizOp data model (WIP)
+# Current BizOp data model
 
 This is a snapshot example of the BizOp model. For the full model please run `db.schema()`
 
-<img src="https://user-images.githubusercontent.com/3425322/36805022-31a7bb06-1cb4-11e8-8f18-453252bdbbc3.png">
+<img src="https://user-images.githubusercontent.com/3425322/37019170-32e6ad1a-210f-11e8-89cc-978cb917c4e7.png">
 
 ## Concepts
 
