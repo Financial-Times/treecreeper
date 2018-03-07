@@ -21,7 +21,7 @@
                 },
                 {
                     "_id": "dp_05",
-                    "question": "Does your company provide training to staff on data protection?",
+                    "question": "Does Company provide training to staff on data protection?",
                     "fieldType": "binary",
                     "fieldOptions": ["Yes", "No"],
                     "child_questions": [
