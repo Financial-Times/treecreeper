@@ -1,32 +1,30 @@
-const crud = require('./_crud');
 const db = require('../db-connection');
+const util = require('util');
 
-const create = async (req, res) => {
+const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
 
-	console.log('SUBMISSION', req.body);
-
-	const topLevel = req.body.node.supplierId ? true : false;
-	const submitterType = topLevel ? 'Supplier' : 'Contract';
-	const submitterId = topLevel ? req.body.node.supplierId : req.body.node.contractId;
-
-	crud.create(res, 'Submission', 'id', req.body.node.id, req.body.node, [
-		{name:'SUBMITS', from: `${submitterType}`, fromUniqueAttrName: 'id', fromUniqueAttrValue: submitterId, to: 'Submission', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.id},
-		{name:'ANSWERS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, to: 'Survey', toUniqueAttrName: 'id', toUniqueAttrValue: req.body.node.surveyId}
-	]);
-
-	for (let answer of req.body.answers) {
-		crud.create(res, 'SubmissionAnswer', 'id', answer.id, answer, [
-			{name:'HAS', from: 'Submission', fromUniqueAttrName: 'id', fromUniqueAttrValue: req.body.node.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.id, to: 'SubmissionAnswer'},
-			{name:'ANSWERS_QUESTION', from: 'SubmissionAnswer', fromUniqueAttrName: 'id', fromUniqueAttrValue: answer.id, toUniqueAttrName: 'id', toUniqueAttrValue: answer.questionId, to: 'SurveyQuestion'}
-
-		]);
-	}
+const addAnswerToQuery = (query, answer, index) => {
+	query += ` WITH submission 
+			MERGE (answer${index}:SubmissionAnswer {id: '${answer.id}'})
+				SET answer${index} += ${stringify(answer)}
+				WITH submission, answer${index}
+			MATCH (question${index}:SurveyQuestion {id : '${answer.questionId}'})
+			MERGE (submission)-[:HAS]->(answer${index})-[:ANSWERS_QUESTION]->(question${index})`;
+	return query;
 };
 
-const update = async (req, res) => {
-	crud.update(res, 'Submission', 'id', req.body.node.id, req.body.node);
-	for(let answer of req.body.answers) {
-		crud.update(res, 'SubmissionAnswer', 'id', answer.id, answer);
+const submit = async (req, res) => {
+	const initialQuery = `MATCH (submission:Submission {id: '${req.body.node.id}'})
+								SET submission += ${stringify(req.body.node)}`;
+	const submissionQuery = req.body.answers.reduce(addAnswerToQuery, initialQuery);
+	console.log('[SUBMISSION] submitQuery', submissionQuery);
+	try{
+		const result = await db.run(submissionQuery);
+		res.send(result);
+	}
+	catch(e){
+		console.log('error', e);
+		return res.status(500).end(e.toString());
 	}
 };
 
@@ -42,8 +40,10 @@ const getAllforOne = async (req, res) => {
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
 		// TODO replace this while thing with _cypher-to-json.js
-
-		const query = `MATCH p=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x: SurveyQuestion) RETURN p ORDER BY x.id`;
+		const query = `MATCH submissions=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"}) 
+		OPTIONAL MATCH answers=(Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x:SurveyQuestion) 
+		RETURN submissions, collect(answers)`;
+		
 		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);
 
@@ -51,22 +51,19 @@ const getAllforOne = async (req, res) => {
 
 		if (result.records.length) {
 			for (const record of result.records) {
-				for (const field of record._fields) {
-					let submission;
-					let submissionAnswer;
-					let surveyQuestion;
-
+				let submissionAnswer;
+				let surveyQuestion;
+				
+				const [ submissions, answers ] = record._fields;
+				const submission = submissions.segments.find((segment) => segment.relationship.type === 'SUBMITS');
+				
+				submissionObj.status = submission.end.properties.status;
+				submissionObj.id = submission.end.properties.id;
+				for (const field of answers) {
 					for (const segment of field.segments) {
-
 						switch(segment.relationship.type) {
-							case 'SUBMITS':
-								submission = submission || segment.end.properties;
-								submissionObj.status = submission.status;
-								submissionObj.id = submission.id;
-							break;
 							case 'HAS':
-								submissionAnswer = submissionAnswer || segment.end.properties;
-
+								submissionAnswer = segment.end.properties;
 								if (!submissionObj[submissionAnswer.questionId]) {
 									submissionObj[submissionAnswer.questionId] = {
 										answer: submissionAnswer.value,
@@ -77,7 +74,7 @@ const getAllforOne = async (req, res) => {
 								}
 							break;
 							case 'ANSWERS_QUESTION':
-								surveyQuestion = surveyQuestion || segment.end.properties;
+								surveyQuestion = segment.end.properties;
 
 								if (!submissionObj[surveyQuestion.id]) {
 									submissionObj[surveyQuestion.id] = {
@@ -105,4 +102,4 @@ const getAllforOne = async (req, res) => {
 	}
 };
 
-module.exports = { getAllforOne, create, update };
+module.exports = { getAllforOne, submit};

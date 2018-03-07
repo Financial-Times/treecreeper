@@ -11,8 +11,7 @@ const get = async (req, res) => {
 		// TODO replace this while thing with _cypher-to-json.js
 
 		const query = `MATCH p=(:Supplier {id:'${req.params.supplierId}'})-[:SIGNS*0..]->()-[r:SUBMITS*0..]->()-[:HAS|:ANSWERS*0..]->()-[:ANSWERS_QUESTION*0..]->(x:SurveyQuestion) RETURN p ORDER BY x.id`;
-		console.log('[CONTRACT]', query);
-
+		// console.log('[CONTRACT]', query);
 		const result = await db.run(query);
 
 		const contractsObj = {

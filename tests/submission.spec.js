@@ -1,62 +1,71 @@
-const app = require('../server/app.js');
-const request = require('supertest');
+const proxyquire = require('proxyquire');
+const { stub } = require('sinon');
+const { expect } = require('chai');
+const dbRun = stub();
+const end = stub();
+const {getAllForOnedbResponse, getAllForOneParsedResult, submitRequest} = require('./fixtures/submission.fixtures.js');
+const submission = proxyquire('../server/controllers/submission', {
+	'../db-connection': {
+		run: dbRun
+	}
+});
 
 describe('Submission - API endpoints', () => {
-
-	describe('GET', () => {
-
-		it.skip('should retrieve a submission node, given a valid contract and survey id', (done) => {
-			request(app)
-			.get('/api/submissions/ab40e000000caszsa0/as')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, done);
+	let req;
+	let res;
+	beforeEach('set stubs', () => {
+		res = {send: stub(),
+					status: stub().returns({ end })};
+	});
+	afterEach('reset stubs', () => {
+		res.send.reset();
+		res.status.reset();
+		end.reset();
+		dbRun.reset();
+	});
+	
+	describe('getAllforOne', ()=> {
+		const surveyId = 'as';
+		const contractOrSupplierId = '123';
+		beforeEach('set stubs', () => {
+			req = {params: {surveyId, contractOrSupplierId}};
 		});
-
-		it('should throw 404 for invalid submission node', (done) => {
-			request(app)
-			.get('/api/submissions/invalidId/as')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(404, done);
+		it('gets a successful response', async() => {
+			dbRun.resolves(getAllForOnedbResponse);
+			await submission.getAllforOne(req, res);	
+			expect(res.send).to.be.calledWith(getAllForOneParsedResult);
 		});
-
-		it.skip('should retrieve a submission node, given a valid submission id', (done) => {
-			request(app)
-			.get('/api/submission/asab40e000000caszsa0')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, done);
+		it('gets an empty response', async() => {
+			dbRun.resolves({records: {}});
+			await submission.getAllforOne(req, res);	
+			expect(end).to.be.calledWith(`No ${surveyId} survey answers found for Contract ${contractOrSupplierId}`);
 		});
-
-		it('should throw 404 for invalid submission node', (done) => {
-			request(app)
-			.get('/api/submission/invalidId')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(404, done);
+		it('gets an invalid response', async() => {
+			dbRun.resolves({});
+			await submission.getAllforOne(req, res);	
+			expect(res.status).to.be.calledWith(500);
+			expect(end).to.be.calledOnce;
 		});
 	});
 
-	describe('POST', () => {
-		before(() => request(app)
-		.post('/api/submission')
-		.set('API_KEY', `${process.env.API_KEY}`)
-		.send({node: {contractId: 'ab40e000000caszsa0', id: 'tddab40e000000caszsa0'}}));
-
-		after(() => request(app)
-		.delete('/api/submission/tddab40e000000caszsa0')
-		.set('API_KEY', `${process.env.API_KEY}`));
-
-		it.skip('GET should retrieve the new submission node - status code 200', (done) => {
-			request(app)
-			.get('/api/submission/tddab40e000000caszsa0')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, done);
+	describe('submit', ()=> {
+		beforeEach('set stubs', () => {
+			req = {body:submitRequest};
+			
 		});
-
-		it.skip('POST should not allow duplicate nodes', (done) => {
-			request(app)
-			.post('/api/submission')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({ node: {contractId: 'ab40e000000caszsa0', id: 'tddab40e000000caszsa0'}})
-			.expect(400, done);
+		it('submits a survey', async() => {
+			dbRun.resolves('success');
+			await submission.submit(req, res);
+			expect(res.send).to.be.calledWith('success');
+		});
+		it('submits a survey', async() => {
+			dbRun.rejects(new Error('oh noes!'));
+			await submission.submit(req, res);
+			expect(res.status).to.be.calledWith(500);
+			expect(end).to.be.calledOnce;
 		});
 	});
 });
+
+
+
