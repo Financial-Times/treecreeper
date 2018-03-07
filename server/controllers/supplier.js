@@ -144,6 +144,7 @@ const addContractToQuery = (contract, contractIndex) => {
 	const {dt} = contract;
 	const contractDetails = contract;
 	delete contractDetails.dt;
+	delete contractDetails.dts;
 	const contractNode = `con${contractIndex}`;
 	const contractInfo = stringify(contractDetails);
 	let contractQuery = ` MERGE (supplierNode)-[:SIGNS]->(${contractNode}:Contract ${contractInfo})`;
@@ -160,15 +161,16 @@ const create = async (req, res) => {
 		surveyId: 'company-info',
 		contractId: '',
 		supplierId: req.body.node.id,
-		status: 'pending',
 		type: 'topLevel'
 	};
 	initialQuery += ` MERGE (supplierNode)-[:SUBMITS]->(companyInfoNode:Submission ${stringify(companyInfo)})
+										ON CREATE SET companyInfoNode.status = 'pending'
 										WITH supplierNode, companyInfoNode
 										MATCH (sur:Survey {id: 'company-info'})
 										MERGE (companyInfoNode)-[:ANSWERS]-> (sur)`;
 	const createQuery = req.body.contracts.map(addContractToQuery).reduce((query, contractQuery)=> (query + contractQuery), initialQuery);
 	try{
+		console.log('[SUPPLIER] createQuery', createQuery);
 		const result = await db.run(createQuery);
 		const supplierDiligence = ['as', 'abc', 'bcm', 'pci'];
 		await cloneSupplierDiligenceSubmission(req.body.node.id, supplierDiligence);
