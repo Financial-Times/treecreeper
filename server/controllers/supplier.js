@@ -3,15 +3,15 @@ const util = require('util');
 
 const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
 
-const getSupplierDiligenceWithoutSubmissions = async (supplierId, surveyId) => {
+const getSubmissionsWithoutAnswers = async (supplierId, surveyId) => {
 	const submissions = [];
 	const subsWithoutAnswersQuery = `MATCH (Supplier {id:"${supplierId}"})
 									-[:SIGNS]->(Contract)
-									-[r:SUBMITS]->(subs:Submission) 
-									WHERE NOT (subs)-[:HAS]->() 
+									-[r:SUBMITS]->(subs:Submission)
+									WHERE NOT (subs)-[:HAS]->()
 									AND subs.surveyId IN ["${surveyId}"]
 									RETURN subs`;
-	const submissionsWithoutAnswers = await db.run(subsWithoutAnswersQuery); 
+	const submissionsWithoutAnswers = await db.run(subsWithoutAnswersQuery);
 	if (submissionsWithoutAnswers.records.length){
 		submissionsWithoutAnswers.records.forEach(submission => {
 			submissions.push(submission._fields[0].properties.id);
@@ -28,8 +28,8 @@ const findValidSupplierDiligenceSubmission = async (supplierId, surveyId) => {
 									-[:SIGNS]->(Contract)
 									-[:SUBMITS]->(submission:Submission {surveyId: "${surveyId}"})
 									-[:HAS]->(SubmissionAnswer)
-									-[:ANSWERS_QUESTION]->(x: SurveyQuestion) 
-									WHERE submission.status IN ['submitted', 'resubmitted'] 
+									-[:ANSWERS_QUESTION]->(x: SurveyQuestion)
+									WHERE submission.status IN ['submitted', 'resubmitted']
 									AND submission.submittedDate > ${timeSinceLastYear}
 									RETURN submissions ORDER BY submission.submittedDate desc`;
 	const subsWithAnswers = await db.run(subsWithAnswersQuery);
@@ -83,7 +83,7 @@ const findValidSupplierDiligenceSubmission = async (supplierId, surveyId) => {
 
 const cloneSupplierDiligenceSubmission = (supplierId, surveyList) => {
 	surveyList.map(async (surveyId) => {
-		const submissionsToClone = await getSupplierDiligenceWithoutSubmissions(supplierId, surveyId);
+		const submissionsToClone = await getSubmissionsWithoutAnswers(supplierId, surveyId);
 		if (submissionsToClone) {
 			const previousSubmission = await findValidSupplierDiligenceSubmission(supplierId, surveyId);
 			if(Object.values(previousSubmission).length > 0) {
@@ -102,7 +102,7 @@ const cloneSupplierDiligenceSubmission = (supplierId, surveyList) => {
 				submissionCloneQuery = submissionCloneQuery.slice(0, -1);
 				submissionCloneQuery += 'CREATE ';
 				//CREATE answers and relationship to survey questions
-				submissionsToClone.forEach((submissionId, submissionIndex) => {	
+				submissionsToClone.forEach((submissionId, submissionIndex) => {
 					Object.keys(previousSubmission).forEach((key,answerIndex) => {
 					if (previousSubmission[key].question){
 						const answer = {
@@ -111,11 +111,11 @@ const cloneSupplierDiligenceSubmission = (supplierId, surveyList) => {
 							type: previousSubmission[key].type,
 							value: previousSubmission[key].answer
 						};
-						submissionCloneQuery += `(submission${submissionIndex}) -[:HAS]-> (:SubmissionAnswer ${stringify(answer)}) -[:ANSWERS_QUESTION]-> (question${answerIndex}),`;	
-					}	
+						submissionCloneQuery += `(submission${submissionIndex}) -[:HAS]-> (:SubmissionAnswer ${stringify(answer)}) -[:ANSWERS_QUESTION]-> (question${answerIndex}),`;
+					}
 					});
 				});
-				submissionCloneQuery = submissionCloneQuery.slice(0, -1);	
+				submissionCloneQuery = submissionCloneQuery.slice(0, -1);
 				console.log('[SUPPLIER] query to clone answers', submissionCloneQuery);
 				const response = await db.run(submissionCloneQuery);
 				return response;
@@ -125,12 +125,12 @@ const cloneSupplierDiligenceSubmission = (supplierId, surveyList) => {
 	});
 };
 
-const addSurveyToQuery = (contract, contractNode) => (query, survey, surveyIndex)=> {
+const addSubmissionQuery = (contract, contractNode) => (query, survey, surveyIndex)=> {
 	const submission = {
 		id: survey.id + contract.id,
 		surveyId: survey.id,
 		contractId: contract.id,
-	};	
+	};
 	const submissionNode = `${contractNode}sub${surveyIndex}`;
 	query += ` MERGE (${contractNode}) -[:SUBMITS]-> (${submissionNode}:Submission ${stringify(submission)})
 									ON CREATE SET ${submissionNode}.status = 'pending'
@@ -147,7 +147,8 @@ const addContractToQuery = (contract, contractIndex) => {
 	const contractNode = `con${contractIndex}`;
 	const contractInfo = stringify(contractDetails);
 	let contractQuery = ` MERGE (supplierNode)-[:SIGNS]->(${contractNode}:Contract ${contractInfo})`;
-	return dt.reduce(addSurveyToQuery(contract, contractNode), contractQuery);
+	const diligenceTypes = dt.some((dt) => { dt.id === 'ra'; }) ? dt : [{ id: 'ra' }, ...dt];
+	return diligenceTypes.reduce(addSubmissionQuery(contract, contractNode), contractQuery);
 };
 
 //new create function - creates supplier, company info submission, all contracts and submissions for each diligence type of contract
@@ -162,9 +163,9 @@ const create = async (req, res) => {
 		status: 'pending',
 		type: 'topLevel'
 	};
-	initialQuery += ` MERGE (supplierNode)-[:SUBMITS]->(companyInfoNode:Submission ${stringify(companyInfo)}) 
-										WITH supplierNode, companyInfoNode 
-										MATCH (sur:Survey {id: 'company-info'}) 
+	initialQuery += ` MERGE (supplierNode)-[:SUBMITS]->(companyInfoNode:Submission ${stringify(companyInfo)})
+										WITH supplierNode, companyInfoNode
+										MATCH (sur:Survey {id: 'company-info'})
 										MERGE (companyInfoNode)-[:ANSWERS]-> (sur)`;
 	const createQuery = req.body.contracts.map(addContractToQuery).reduce((query, contractQuery)=> (query + contractQuery), initialQuery);
 	try{
