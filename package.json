@@ -29,6 +29,7 @@
   "homepage": "https://github.com/Financial-Times/gdpr-biz-op-api#readme",
   "dependencies": {
     "@financial-times/n-logger": "^5.5.7",
+    "aws-sdk": "^2.206.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "isomorphic-fetch": "^2.2.1",
