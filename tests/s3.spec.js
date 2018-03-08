@@ -17,7 +17,7 @@ describe('S3 methods', () => {
 		S3.resetHistory();
 	});
 
-	describe.only('getSignedUrl', () => {
+	describe('getSignedUrl', () => {
 		it('creates an s3 client, queries and returns the url for the given key', async () => {
 			getSignedUrl.callsArgWith(2, null, 'a-url');
 			const result = await s3.getSignedUrl('kingdom');

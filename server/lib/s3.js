@@ -2,8 +2,8 @@ const { S3 } = require('aws-sdk');
 
 const {
 	AWS_API_VERSION: apiVersion = '2006-03-01',
-	AWS_REGION: region = 'gdpr-3sp-upload',
-	AWS_BUCKET: Bucket = 'eu-west-1',
+	AWS_REGION: region = 'eu-west-1',
+	AWS_BUCKET: Bucket = 'gdpr-3sp-upload',
 	AWS_EXPIRES: Expires = 60 * 60 * 24, // 24 hours
 	AWS_ACCESS_KEY_ID: accessKeyId,
 	AWS_SECRET_ACCESS_KEY: secretAccessKey,
