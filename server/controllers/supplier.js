@@ -141,13 +141,14 @@ const addSubmissionQuery = (contract, contractNode) => (query, survey, surveyInd
 };
 
 const addContractToQuery = (contract, contractIndex) => {
-	const {dt} = contract;
+	const {dt, dts} = contract;
 	const contractDetails = contract;
 	delete contractDetails.dt;
 	delete contractDetails.dts;
 	const contractNode = `con${contractIndex}`;
 	const contractInfo = stringify(contractDetails);
-	let contractQuery = ` MERGE (supplierNode)-[:SIGNS]->(${contractNode}:Contract ${contractInfo})`;
+	let contractQuery = ` MERGE (supplierNode)-[:SIGNS]->(${contractNode}:Contract ${contractInfo})
+												ON CREATE SET ${contractNode}.dts = '${dts}'`;
 	const diligenceTypes = dt.some((dt) => { dt.id === 'ra'; }) ? dt : [{ id: 'ra' }, ...dt];
 	return diligenceTypes.reduce(addSubmissionQuery(contract, contractNode), contractQuery);
 };
