@@ -2,8 +2,6 @@ const db = require('../db-connection');
 
 const _createRelationships = async (relationships, upsert) => {
 
-	console.log('***** _createRelationships', relationships, upsert);
-
 	let resultRel;
 
 	for (let relationship of relationships) {
@@ -27,8 +25,6 @@ const _createRelationships = async (relationships, upsert) => {
 
 		try {
 			resultRel = await db.run(query);
-
-			console.log("NO RESULTREL????????", JSON.stringify(resultRel, null, 2))
 
 			if (resultRel.records && resultRel.records.length > 0) {
 				return resultRel;
@@ -106,9 +102,6 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 		if (relationships) {
 			let resultRel = await _createRelationships(relationships, upsert);
-
-			console.log('RESULT REL, RETURNING', resultRel)
-			console.log('RESULT REL, RETURNING RECORDS', resultRel.records)
 
 			if (!resultRel) {
 				return res.status(400).end('error creating relationships');
