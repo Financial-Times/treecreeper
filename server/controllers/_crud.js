@@ -2,6 +2,8 @@ const db = require('../db-connection');
 
 const _createRelationships = async (relationships, upsert) => {
 
+	console.log('***** _createRelationships', relationships, upsert);
+
 	let resultRel;
 
 	for (let relationship of relationships) {
@@ -26,8 +28,10 @@ const _createRelationships = async (relationships, upsert) => {
 		try {
 			resultRel = await db.run(query);
 
-			if (!resultRel.records || resultRel.records.length === 0) {
-				throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
+			console.log("NO RESULTREL????????", JSON.stringify(resultRel, null, 2))
+
+			if (resultRel.records && resultRel.records.length > 0) {
+				return resultRel;
 			}
 		}
 		catch (e) {
@@ -101,7 +105,10 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		if (relationships) {
-			let resultRel = _createRelationships(relationships, upsert);
+			let resultRel = await _createRelationships(relationships, upsert);
+
+			console.log('RESULT REL, RETURNING', resultRel)
+			console.log('RESULT REL, RETURNING RECORDS', resultRel.records)
 
 			if (!resultRel) {
 				return res.status(400).end('error creating relationships');
@@ -129,12 +136,15 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 		const result = await db.run(updateQuery, {props: obj});
 
-		const propAmount = result.summary && result.summary.updateStatistics ? result.summary.updateStatistics.propertiesSet() : 0;
+		console.log('[CRUD] records', result.records)
 
-		if (result.records.length && propAmount > 0) {
-			return res.send(result.records[0]._fields[0].properties);
+		if (!upsert && result.records.length === 0) {
+			const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
+			console.log(message);
+			return res.status(404).end(message);
 		}
-		else if (upsert === 'upsert') {
+
+		if (upsert) {
 			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
 			if (uniqueAttrName) {
@@ -142,15 +152,13 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			}
 
 			console.log('[CRUD] create query (upsert)', createQuery);
-			const createResult = await db.run(createQuery, {node: obj});
-			return res.send(createResult.records[0]._fields[0].properties);
-		}
-		else {
-			return res.status(404).end(`${propAmount} props updated. ${nodeType}${uniqueAttr} not found. No nodes updated.`);
+			await db.run(createQuery, {node: obj});
 		}
 
 		if (relationships) {
-			let resultRel = _createRelationships(relationships, upsert);
+			let resultRel = await _createRelationships(relationships, upsert);
+
+			console.log('RESULT REL, RETURNING', resultRel);
 
 			if (!resultRel) {
 				return res.status(400).end('error creating relationships');
@@ -159,7 +167,7 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			return res.send(resultRel.records[0]._fields);
 		}
 
-		res.send(result);
+		res.send(result.records && result.records.length ? result.records[0]._fields[0].properties : result);
 	}
 	catch (e) {
 		console.log('[CRUD] update error', e);
