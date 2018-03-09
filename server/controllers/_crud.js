@@ -1,5 +1,42 @@
 const db = require('../db-connection');
 
+const _createRelationships = async (relationships, upsert) => {
+
+	let resultRel;
+
+	for (let relationship of relationships) {
+		const createRelationshipAndNode = `
+			MATCH (a:${relationship.from})
+			WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+			MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+			RETURN r
+		`;
+
+		const createRelationshipAlone = `
+			MATCH (a:${relationship.from}),(b:${relationship.to})
+			WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+			AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
+			CREATE (a)-[r:${relationship.name}]->(b)
+			RETURN r
+		`;
+
+		const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
+		console.log('[CRUD] relationship query', query);
+
+		try {
+			resultRel = await db.run(query);
+
+			if (!resultRel.records || resultRel.records.length === 0) {
+				throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
+			}
+		}
+		catch (e) {
+			console.log('[CRUD] Relationships not created', e.toString());
+		}
+	}
+};
+
+
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr);
 
@@ -64,39 +101,12 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		if (relationships) {
-			let resultRel;
+			let resultRel = _createRelationships(relationships, upsert);
 
-			for (let relationship of relationships) {
-				const createRelationshipAndNode = `
-					MATCH (a:${relationship.from})
-					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
-					MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
-					RETURN r
-				`;
-
-				const createRelationshipAlone = `
-					MATCH (a:${relationship.from}),(b:${relationship.to})
-					WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
-					AND b.${relationship.toUniqueAttrName} = '${relationship.toUniqueAttrValue}'
-					CREATE (a)-[r:${relationship.name}]->(b)
-					RETURN r
-				`;
-
-				const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
-				console.log('[CRUD] relationship query', query);
-
-				try {
-					resultRel = await db.run(query);
-
-					if (!resultRel.records || resultRel.records.length === 0) {
-						throw new Error(`Relationship ${relationship.from} -[${relationship.name}]-> ${relationship.to} not created. Aborting.`);
-					}
-				}
-				catch (e) {
-					console.log('[CRUD] Relationships not created', e.toString());
-					return res.status(400).end(e.toString());
-				}
+			if (!resultRel) {
+				return res.status(400).end('error creating relationships');
 			}
+
 			return res.send(resultRel.records[0]._fields);
 		}
 	}
@@ -106,7 +116,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	}
 };
 
-const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) => {
+const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
 		const updateQuery = `
@@ -137,6 +147,16 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, upsert) =>
 		}
 		else {
 			return res.status(404).end(`${propAmount} props updated. ${nodeType}${uniqueAttr} not found. No nodes updated.`);
+		}
+
+		if (relationships) {
+			let resultRel = _createRelationships(relationships, upsert);
+
+			if (!resultRel) {
+				return res.status(400).end('error creating relationships');
+			}
+
+			return res.send(resultRel.records[0]._fields);
 		}
 
 		res.send(result);
