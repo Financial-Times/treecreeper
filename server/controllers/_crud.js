@@ -131,22 +131,22 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 		console.log('[CRUD] records', result.records)
 
-		if (!upsert && result.records.length === 0) {
-			const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
-			console.log(message);
-			return res.status(404).end(message);
-		}
+		if (result.records.length === 0) {
+            if (upsert) {
+                const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
-		if (upsert) {
-			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+                if (uniqueAttrName) {
+                    obj[uniqueAttrName] = uniqueAttr;
+                }
 
-			if (uniqueAttrName) {
-				obj[uniqueAttrName] = uniqueAttr;
-			}
-
-			console.log('[CRUD] create query (upsert)', createQuery);
-			await db.run(createQuery, {node: obj});
-		}
+                console.log('[CRUD] create query (upsert)', createQuery);
+                await db.run(createQuery, {node: obj});
+            } else {
+                const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
+                console.log(message);
+                return res.status(404).end(message);
+            }
+        }
 
 		if (relationships) {
 			let resultRel = await _createRelationships(relationships, upsert);
