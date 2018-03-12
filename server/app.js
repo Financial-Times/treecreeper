@@ -50,7 +50,7 @@ app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res)
 });
 app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic PUT');
-	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.params.upsert);
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships, req.params.upsert);
 });
 app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');

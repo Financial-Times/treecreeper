@@ -199,8 +199,11 @@ describe('crud', () => {
 		});
 
 		afterEach(async () => {
-			const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
+			const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
+			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
+			await db.run(deleteRshipQuery);
 			await db.run(deleteQuery);
+
 			node = null;
 			modifiedNode = null;
 			modification = null;
@@ -237,6 +240,89 @@ describe('crud', () => {
 			.send({ node: node })
 			.expect(200);
 		});
+
+		it('PUT updates the node if it exists, and links it to related nodes if they exist', async () => {
+
+			const relationship = {
+				name:'REL',
+				from: 'SomeNodeType',
+				fromUniqueAttrName: 'SomeUniqueAttr',
+				fromUniqueAttrValue: 'SomeUniqueAttrValue',
+				toUniqueAttrName: 'OtherUniqueAttrName',
+				toUniqueAttrValue: 'OtherUniqueAttrValue',
+				to: 'SomeNodeType'
+			};
+
+			const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
+			const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
+			await db.run(createSourceNode);
+			await db.run(createTargetNode);
+
+			return request(app)
+			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: node,
+				relationships: [relationship]
+			})
+			.expect(200)
+			.then( async (response) => {
+				const body = response.body;
+				console.log('RES HERE', await body);
+				assert.equal(body.length, 1);
+				assert.equal(body[0].type, relationship.name);
+			});
+		});
+
+		it('POST fails if related nodes don\'t exist', async () => {
+			return request(app)
+			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: node,
+				relationships: [
+					{
+						name:'REL',
+						from: 'SomeNodeType',
+						fromUniqueAttrName: 'SomeUniqueAttr',
+						fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						toUniqueAttrName: 'id',
+						toUniqueAttrValue: 'nonExistent',
+						to: 'SomeNodeType'
+					}
+				]
+			})
+			.expect(400);
+		});
+
+		it('PUT creates the node if it doesnt exist, and links it to related nodes even if they dont exist, with upsert', async () => {
+
+			const relationship = {
+				name:'REL',
+				from: 'SomeNodeType',
+				fromUniqueAttrName: 'SomeUniqueAttr',
+				fromUniqueAttrValue: 'SomeUniqueAttrValue',
+				toUniqueAttrName: 'OtherUniqueAttrName',
+				toUniqueAttrValue: 'OtherUniqueAttrValue',
+				to: 'SomeNodeType'
+			};
+
+			return request(app)
+			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.send({
+				node: node,
+				relationships: [relationship]
+			})
+			.expect(200)
+			.then( async (response) => {
+				const body = response.body;
+				console.log('RES HERE', await body);
+				assert.equal(body.length, 1);
+				assert.equal(body[0].type, relationship.name);
+			});
+		});
+
 	});
 
 	describe('DELETE generic', () => {
