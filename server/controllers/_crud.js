@@ -24,16 +24,17 @@ const _createRelationships = async (relationships, upsert) => {
 		console.log('[CRUD] relationship query', query);
 
 		try {
-			resultRel = await db.run(query);
+			let oneResultRel = await db.run(query);
 
-			if (resultRel.records && resultRel.records.length > 0) {
-				return resultRel;
+			if (oneResultRel.records && oneResultRel.records.length > 0) {
+				resultRel += oneResultRel.records.length;
 			}
 		}
 		catch (e) {
-			console.log('[CRUD] Relationships not created', e.toString());
+			console.log('[CRUD] Relationship not created', e.toString());
 		}
 	}
+	return resultRel
 };
 
 
