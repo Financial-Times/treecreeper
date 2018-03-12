@@ -293,7 +293,7 @@ describe('crud', () => {
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .send({
                     node: originalNode,
-                    relationships: [relationship]
+                    relationships: relationships
                 })
                 .expect(200)
                 .then( async (response) => {
@@ -326,108 +326,108 @@ describe('crud', () => {
 	});
 
 	describe('PUT generic', () => {
-		let node;
-		let modifiedNode;
-		let modification;
+        let node;
+        let modifiedNode;
+        let modification;
 
-		beforeEach(async () => {
-			node = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
-			modification = { potato: 'potah-to' };
-			modifiedNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to' };
-			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
-			await db.run(createQuery, { node: node });
-		});
+        beforeEach(async () => {
+            node = {SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'};
+            modification = {potato: 'potah-to'};
+            modifiedNode = {SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to'};
+            const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
+            await db.run(createQuery, {node: node});
+        });
 
-		afterEach(async () => {
-			const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
-			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
-			await db.run(deleteRshipQuery);
-			await db.run(deleteQuery);
+        afterEach(async () => {
+            const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
+            const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
+            await db.run(deleteRshipQuery);
+            await db.run(deleteQuery);
 
-			node = null;
-			modifiedNode = null;
-			modification = null;
-		});
+            node = null;
+            modifiedNode = null;
+            modification = null;
+        });
 
-		it('PUT modifies an existing node', () => {
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({ node: modification })
-			.expect(200, modifiedNode);
-		});
+        it('PUT modifies an existing node', () => {
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({node: modification})
+                .expect(200, modifiedNode);
+        });
 
-		it('PUT returns 200 even if props updated with the same value they had before', () => {
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({ node: node })
-			.expect(200, node);
-		});
+        it('PUT returns 200 even if props updated with the same value they had before', () => {
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({node: node})
+                .expect(200, node);
+        });
 
-		it('PUT for a node that doesn\'t exist returns 404', () => {
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({ node: node })
-			.expect(404);
-		});
+        it('PUT for a node that doesn\'t exist returns 404', () => {
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({node: node})
+                .expect(404);
+        });
 
-		it('PUT for a node that doesn\'t exist creates if using upsert', () => {
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({ node: node })
-			.expect(200);
-		});
+        it('PUT for a node that doesn\'t exist creates if using upsert', () => {
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({node: node})
+                .expect(200);
+        });
 
-		it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
+        it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
 
-			const relationship = {
-				name:'REL',
-				from: 'SomeNodeType',
-				fromUniqueAttrName: 'SomeUniqueAttr',
-				fromUniqueAttrValue: 'SomeUniqueAttrValue',
-				toUniqueAttrName: 'OtherUniqueAttrName',
-				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType'
-			};
+            const relationship = {
+                name: 'REL',
+                from: 'SomeNodeType',
+                fromUniqueAttrName: 'SomeUniqueAttr',
+                fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                toUniqueAttrName: 'OtherUniqueAttrName',
+                toUniqueAttrValue: 'OtherUniqueAttrValue',
+                to: 'SomeNodeType'
+            };
 
-			const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
-			const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
-			await db.run(createSourceNode);
-			await db.run(createTargetNode);
+            const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
+            const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
+            await db.run(createSourceNode);
+            await db.run(createTargetNode);
 
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({
-				node: node,
-				relationships: [relationship]
-			})
-			.expect(200)
-			.then( async (response) => {
-				const body = response.body;
-				console.log('RES HERE', await body);
-				assert.equal(body.length, 1);
-				assert.equal(body[0].type, relationship.name);
-			});
-		});
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({
+                    node: node,
+                    relationships: [relationship]
+                })
+                .expect(200)
+                .then(async (response) => {
+                    const body = response.body;
+                    console.log('RES HERE', await body);
+                    assert.equal(body.length, 1);
+                    assert.equal(body[0].type, relationship.name);
+                });
+        });
 
-		it('PUT updates the node if it exists, and links it to multiple related nodes if they exist', async () => {
+        it('PUT updates the node if it exists, and links it to multiple related nodes if they exist', async () => {
 
             const relationships = [
-            	{
-                	name:'REL',
-                	from: 'SomeNodeType',
-                	fromUniqueAttrName: 'SomeUniqueAttr',
-                	fromUniqueAttrValue: 'SomeUniqueAttrValue',
-                	toUniqueAttrName: 'OneUniqueAttrName',
-                	toUniqueAttrValue: 'OneUniqueAttrValue',
-                	to: 'SomeNodeType'
-            	},
                 {
-                    name:'REL',
+                    name: 'REL',
+                    from: 'SomeNodeType',
+                    fromUniqueAttrName: 'SomeUniqueAttr',
+                    fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                    toUniqueAttrName: 'OneUniqueAttrName',
+                    toUniqueAttrValue: 'OneUniqueAttrValue',
+                    to: 'SomeNodeType'
+                },
+                {
+                    name: 'REL',
                     from: 'SomeNodeType',
                     fromUniqueAttrName: 'SomeUniqueAttr',
                     fromUniqueAttrValue: 'SomeUniqueAttrValue',
@@ -436,7 +436,7 @@ describe('crud', () => {
                     to: 'SomeNodeType'
                 },
                 {
-                    name:'REL',
+                    name: 'REL',
                     from: 'SomeNodeType',
                     fromUniqueAttrName: 'SomeUniqueAttr',
                     fromUniqueAttrValue: 'SomeUniqueAttrValue',
@@ -463,7 +463,7 @@ describe('crud', () => {
                     relationships: relationships
                 })
                 .expect(200)
-                .then( async (response) => {
+                .then(async (response) => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
@@ -471,26 +471,26 @@ describe('crud', () => {
                 });
         });
 
-		it('POST fails if the related node does not exist', async () => {
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({
-				node: node,
-				relationships: [
-					{
-						name:'REL',
-						from: 'SomeNodeType',
-						fromUniqueAttrName: 'SomeUniqueAttr',
-						fromUniqueAttrValue: 'SomeUniqueAttrValue',
-						toUniqueAttrName: 'id',
-						toUniqueAttrValue: 'nonExistent',
-						to: 'SomeNodeType'
-					}
-				]
-			})
-			.expect(400);
-		});
+        it('POST fails if the related node does not exist', async () => {
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({
+                    node: node,
+                    relationships: [
+                        {
+                            name: 'REL',
+                            from: 'SomeNodeType',
+                            fromUniqueAttrName: 'SomeUniqueAttr',
+                            fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                            toUniqueAttrName: 'id',
+                            toUniqueAttrValue: 'nonExistent',
+                            to: 'SomeNodeType'
+                        }
+                    ]
+                })
+                .expect(400);
+        });
 
         it('POST fails if the muktiple related nodes do not exist', async () => {
             return request(app)
@@ -500,7 +500,7 @@ describe('crud', () => {
                     node: node,
                     relationships: [
                         {
-                            name:'REL',
+                            name: 'REL',
                             from: 'SomeNodeType',
                             fromUniqueAttrName: 'SomeUniqueAttr',
                             fromUniqueAttrValue: 'SomeUniqueAttrValue',
@@ -509,7 +509,7 @@ describe('crud', () => {
                             to: 'SomeNodeType'
                         },
                         {
-                            name:'REL',
+                            name: 'REL',
                             from: 'SomeNodeType',
                             fromUniqueAttrName: 'SomeUniqueAttr',
                             fromUniqueAttrValue: 'SomeUniqueAttrValue',
@@ -518,7 +518,7 @@ describe('crud', () => {
                             to: 'SomeNodeType'
                         },
                         {
-                            name:'REL',
+                            name: 'REL',
                             from: 'SomeNodeType',
                             fromUniqueAttrName: 'SomeUniqueAttr',
                             fromUniqueAttrValue: 'SomeUniqueAttrValue',
@@ -531,81 +531,81 @@ describe('crud', () => {
                 .expect(400);
         });
 
-		it('PUT creates the node if it doesnt exist, and links it to a related node even if it does not exist, with upsert', async () => {
+        it('PUT creates the node if it doesnt exist, and links it to a related node even if it does not exist, with upsert', async () => {
 
-			const relationship = {
-				name:'REL',
-				from: 'SomeNodeType',
-				fromUniqueAttrName: 'SomeUniqueAttr',
-				fromUniqueAttrValue: 'SomeUniqueAttrValue',
-				toUniqueAttrName: 'OtherUniqueAttrName',
-				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType'
-			};
-
-			return request(app)
-			.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({
-				node: node,
-				relationships: [relationship]
-			})
-			.expect(200)
-			.then( async (response) => {
-				const body = response.body;
-				console.log('RES HERE', await body);
-				assert.equal(body.length, 1);
-				assert.equal(body[0].type, relationship.name);
-			});
-		});
-	});
-
-    it('PUT creates the node if it doesnt exist, and links it to multiple related node even if they do not exist, with upsert', async () => {
-
-        const relationships = [
-        	{
-            	name:'REL',
-            	from: 'SomeNodeType',
-            	fromUniqueAttrName: 'SomeUniqueAttr',
-            	fromUniqueAttrValue: 'SomeUniqueAttrValue',
-            	toUniqueAttrName: 'OneUniqueAttrName',
-            	toUniqueAttrValue: 'OneUniqueAttrValue',
-            	to: 'SomeNodeType'
-        	},
-            {
-                name:'REL',
+            const relationship = {
+                name: 'REL',
                 from: 'SomeNodeType',
                 fromUniqueAttrName: 'SomeUniqueAttr',
                 fromUniqueAttrValue: 'SomeUniqueAttrValue',
-                toUniqueAttrName: 'TwoUniqueAttrName',
-                toUniqueAttrValue: 'TwoUniqueAttrValue',
+                toUniqueAttrName: 'OtherUniqueAttrName',
+                toUniqueAttrValue: 'OtherUniqueAttrValue',
                 to: 'SomeNodeType'
-            },
-            {
-                name:'REL',
-                from: 'SomeNodeType',
-                fromUniqueAttrName: 'SomeUniqueAttr',
-                fromUniqueAttrValue: 'SomeUniqueAttrValue',
-                toUniqueAttrName: 'ThreeUniqueAttrName',
-                toUniqueAttrValue: 'ThreeUniqueAttrValue',
-                to: 'SomeNodeType'
-            }
-        ];
+            };
 
-        return request(app)
-            .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
-            .set('API_KEY', `${process.env.API_KEY}`)
-            .send({
-                node: node,
-                relationships: relationships
-            })
-            .expect(200)
-            .then( async (response) => {
-                const body = response.body;
-                console.log('RES HERE', await body);
-                assert.equal(body.length, 1);
-                assert.equal(body[0].type, relationship.name);
-            });
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({
+                    node: node,
+                    relationships: [relationship]
+                })
+                .expect(200)
+                .then(async (response) => {
+                    const body = response.body;
+                    console.log('RES HERE', await body);
+                    assert.equal(body.length, 1);
+                    assert.equal(body[0].type, relationship.name);
+                });
+        });
+
+        it('PUT creates the node if it doesnt exist, and links it to multiple related node even if they do not exist, with upsert', async () => {
+
+            const relationships = [
+                {
+                    name: 'REL',
+                    from: 'SomeNodeType',
+                    fromUniqueAttrName: 'SomeUniqueAttr',
+                    fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                    toUniqueAttrName: 'OneUniqueAttrName',
+                    toUniqueAttrValue: 'OneUniqueAttrValue',
+                    to: 'SomeNodeType'
+                },
+                {
+                    name: 'REL',
+                    from: 'SomeNodeType',
+                    fromUniqueAttrName: 'SomeUniqueAttr',
+                    fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                    toUniqueAttrName: 'TwoUniqueAttrName',
+                    toUniqueAttrValue: 'TwoUniqueAttrValue',
+                    to: 'SomeNodeType'
+                },
+                {
+                    name: 'REL',
+                    from: 'SomeNodeType',
+                    fromUniqueAttrName: 'SomeUniqueAttr',
+                    fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                    toUniqueAttrName: 'ThreeUniqueAttrName',
+                    toUniqueAttrValue: 'ThreeUniqueAttrValue',
+                    to: 'SomeNodeType'
+                }
+            ];
+
+            return request(app)
+                .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .send({
+                    node: node,
+                    relationships: relationships
+                })
+                .expect(200)
+                .then(async (response) => {
+                    const body = response.body;
+                    console.log('RES HERE', await body);
+                    assert.equal(body.length, 1);
+                    assert.equal(body[0].type, relationship.name);
+                });
+        });
     });
 
 	describe('DELETE generic', () => {

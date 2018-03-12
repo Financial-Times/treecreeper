@@ -27,7 +27,7 @@ const _createRelationships = async (relationships, upsert) => {
 			let oneResultRel = await db.run(query);
 
 			if (oneResultRel.records && oneResultRel.records.length > 0) {
-				resultRel += oneResultRel.records.length;
+				resultRel = oneResultRel
 			}
 		}
 		catch (e) {
