@@ -78,7 +78,7 @@ describe('crud', () => {
 		});
 
 		it('POST inserts the node with correct unique attribute', async () => {
-			expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }]
+			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }]
 			return request(app)
 			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 			.set('API_KEY', `${process.env.API_KEY}`)
@@ -93,7 +93,7 @@ describe('crud', () => {
 		});
 
 		it('POST inserts the node and links it to related node if it exists', async () => {
-            expectedNodes = [
+            const expectedNodes = [
             	{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
                 { OtherUniqueAttrName: "OtherUniqueAttrValue"}
             ]
