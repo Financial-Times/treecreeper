@@ -78,15 +78,25 @@ describe('crud', () => {
 		});
 
 		it('POST inserts the node with correct unique attribute', async () => {
+			expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }]
 			return request(app)
 			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.send({ node: originalNode })
-			.expect(200, correctNode);
+			.expect(200, correctNode)
+			.then( async (response) => {
+                return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
+			})
 		});
 
 		it('POST inserts the node and links it to related node if it exists', async () => {
-
+            expectedNodes = [
+            	{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+                { OtherUniqueAttrName: "OtherUniqueAttrValue"}
+            ]
 			const relationship = {
 				name:'REL',
 				from: 'SomeNodeType',
@@ -113,6 +123,10 @@ describe('crud', () => {
 				console.log('RES HERE', await body);
 				assert.equal(body.length, 1);
 				assert.equal(body[0].type, relationship.name);
+                return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
 			});
 		});
 
