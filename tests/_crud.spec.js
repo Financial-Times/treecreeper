@@ -166,7 +166,6 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
-                    // assert.equal(body[0].type, relationship.name);
                 });
         });
 
@@ -300,7 +299,6 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
-                    // assert.equal(body[0].type, relationship.name);
                 });
         });
 
@@ -467,7 +465,6 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
-                    // assert.equal(body[0].type, relationship.name);
                 });
         });
 
@@ -603,7 +600,6 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
-                    // assert.equal(body[0].type, relationship.name);
                 });
         });
     });
