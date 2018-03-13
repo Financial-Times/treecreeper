@@ -24,16 +24,17 @@ const _createRelationships = async (relationships, upsert) => {
 		console.log('[CRUD] relationship query', query);
 
 		try {
-			resultRel = await db.run(query);
+			let oneResultRel = await db.run(query);
 
-			if (resultRel.records && resultRel.records.length > 0) {
-				return resultRel;
+			if (oneResultRel.records && oneResultRel.records.length > 0) {
+				resultRel = oneResultRel
 			}
 		}
 		catch (e) {
-			console.log('[CRUD] Relationships not created', e.toString());
+			console.log('[CRUD] Relationship not created', e.toString());
 		}
 	}
+	return resultRel
 };
 
 
@@ -131,21 +132,21 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 		console.log('[CRUD] records', result.records)
 
-		if (!upsert && result.records.length === 0) {
-			const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
-			console.log(message);
-			return res.status(404).end(message);
-		}
+		if (result.records.length === 0) {
+			if (upsert) {
+				const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 
-		if (upsert) {
-			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+				if (uniqueAttrName) {
+					obj[uniqueAttrName] = uniqueAttr;
+				 }
 
-			if (uniqueAttrName) {
-				obj[uniqueAttrName] = uniqueAttr;
+				console.log('[CRUD] create query (upsert)', createQuery);
+				await db.run(createQuery, {node: obj});
+			} else {
+				const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
+				console.log(message);
+				return res.status(404).end(message);
 			}
-
-			console.log('[CRUD] create query (upsert)', createQuery);
-			await db.run(createQuery, {node: obj});
 		}
 
 		if (relationships) {
