@@ -79,7 +79,7 @@ describe('crud', () => {
                     }
                 ]
             }]
-            const addRelQuery = `MATCH (a:SomeNodeType {SomeUniqueAttr:'SomeUniqueAttrValue'}) CREATE (n)-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
+            const addRelQuery = `CREATE (t:NodeType {id:'testing'}) MATCH (n:SomeNodeType {SomeUniqueAttr:'SomeUniqueAttrValue'}) CREATE (n)-[r:TestRelationship]->(t) RETURN r`;
             await db.run(addRelQuery);
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
