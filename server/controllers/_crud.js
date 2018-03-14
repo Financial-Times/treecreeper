@@ -55,7 +55,7 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
                 from: nodeType,
                 fromUniqueAttrName: uniqueAttrName,
                 fromUniqueAttrValue: uniqueAttrValue,
-                to: relatedResult._fields[1].lables[0],
+                to: relatedResult._fields[1].labels[0],
                 toUniqueAttrName: 'id',
                 toUniqueAttrValue: relatedResult._fields[1].properties.id,
 			}
