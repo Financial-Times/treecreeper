@@ -51,7 +51,7 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
             console.log("RELATED RELATIONSHIP RESULT:",relatedResult._fields[0])
         	console.log("RELATED NODE RESULT:",relatedResult._fields[1])
 			const relationship = {
-                name: relatedResult._fields[0].Relationship.type,
+                name: relatedResult._fields[0].type,
                 from: nodeType,
                 fromUniqueAttrName: uniqueAttrName,
                 fromUniqueAttrValue: uniqueAttrValue,
