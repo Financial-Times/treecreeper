@@ -94,8 +94,8 @@ describe('crud', () => {
 
 		it('POST inserts the node and links it to related node if it exists', async () => {
             const expectedNodes = [
+                { OtherUniqueAttrName: "OtherUniqueAttrValue"},
             	{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-                { OtherUniqueAttrName: "OtherUniqueAttrValue"}
             ]
 			const relationship = {
 				name:'REL',
@@ -131,6 +131,12 @@ describe('crud', () => {
 		});
 
         it('POST inserts the node and links it to multiple related nodes if they all exist', async () => {
+            const expectedNodes = [
+                { OtherUniqueAttrName: "OneUniqueAttrValue"},
+                { OtherUniqueAttrName: "ThreeUniqueAttrValue"},
+                { OtherUniqueAttrName: "TwoUniqueAttrValue"},
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
 
             const relationships = [
             	{
@@ -180,28 +186,42 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
 
 		it('POST fails if the related node does not exist', async () => {
-			return request(app)
-			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.set('API_KEY', `${process.env.API_KEY}`)
-			.send({
-				node: originalNode,
-				relationships: [
-					{
-						name:'REL',
-						from: 'SomeNodeType',
-						fromUniqueAttrName: 'SomeUniqueAttr',
-						fromUniqueAttrValue: 'SomeUniqueAttrValue',
-						toUniqueAttrName: 'id',
-						toUniqueAttrValue: 'nonExistent',
-						to: 'SomeNodeType'
-					}
-				]
-			})
-			.expect(400);
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
+            return request(app)
+			    .post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			    .set('API_KEY', `${process.env.API_KEY}`)
+			    .send({
+				    node: originalNode,
+				    relationships: [
+					    {
+						    name:'REL',
+						    from: 'SomeNodeType',
+						    fromUniqueAttrName: 'SomeUniqueAttr',
+						    fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						    toUniqueAttrName: 'id',
+						    toUniqueAttrValue: 'nonExistent',
+						    to: 'SomeNodeType'
+					    }
+				    ]
+			    })
+			.expect(400)
+            .then( async (response) => {
+                return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
+            });
 		});
 
         it('POST fails if multiple related nodes do not exist', async () => {
@@ -240,7 +260,13 @@ describe('crud', () => {
                         }
                     ]
                 })
-                .expect(400);
+                .expect(400)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
 		it('POST inserts the node and links it to a related node that does not exist if using upsert', async () => {
