@@ -275,8 +275,8 @@ describe('crud', () => {
 
 		it('POST inserts the node and links it to a related node that does not exist if using upsert', async () => {
             const expectedNodes = [
-                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
             ]
 
 			const relationship = {
@@ -311,10 +311,10 @@ describe('crud', () => {
 
         it('POST inserts the node and links it to multple related nodes that do not exist if using upsert', async () => {
             const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
                 { OneUniqueAttr: 'OneUniqueAttrValue'},
                 { TwoUniqueAttr: 'TwoUniqueAttrValue'},
                 { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
-                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
             ]
 
             const relationships = [
@@ -390,9 +390,7 @@ describe('crud', () => {
 		// @@ another test that proves a POST doesnt return 400 if you use upsert since it will be overwritten? @@
 
 		it('POST no api_key returns 400', () => {
-            const expectedNodes = [
-                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-            ]
+            const expectedNodes = [ ]
 
 			return request(app)
 			    .post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -402,7 +400,7 @@ describe('crud', () => {
                     return request(app)
                         .get('/api/SomeNodeType/')
                         .set('API_KEY', `${process.env.API_KEY}`)
-                        .expect(200, expectedNodes);
+                        .expect(404, expectedNodes);
                 });
 		});
 	});
@@ -432,38 +430,83 @@ describe('crud', () => {
         });
 
         it('PUT modifies an existing node', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to' },
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .send({node: modification})
-                .expect(200, modifiedNode);
+                .expect(200, modifiedNode)
+                .then( async (response) => {
+                        return request(app)
+                            .get('/api/SomeNodeType/')
+                            .set('API_KEY', `${process.env.API_KEY}`)
+                            .expect(200, expectedNodes);
+                });
         });
 
         it('PUT returns 200 even if props updated with the same value they had before', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .send({node: node})
-                .expect(200, node);
+                .expect(200, node)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
         it('PUT for a node that doesn\'t exist returns 404', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .send({node: node})
-                .expect(404);
+                .expect(404)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
         it('PUT for a node that doesn\'t exist creates if using upsert', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+                { SomeUniqueAttr: 'NonExistent'},
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .send({node: node})
-                .expect(200);
+                .expect(200)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
         it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+            ]
 
             const relationship = {
                 name: 'REL',
@@ -493,10 +536,20 @@ describe('crud', () => {
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
                     assert.equal(body[0].type, relationship.name);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
 
         it('PUT updates the node if it exists, and links it to multiple related nodes if they exist', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+                { OnerUniqueAttr: 'OneUniqueAttrValue'},
+                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+            ]
 
             const relationships = [
                 {
@@ -549,10 +602,18 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
 
-        it('POST fails if the related node does not exist', async () => {
+        it('PUT fails if the related node does not exist', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
                 .set('API_KEY', `${process.env.API_KEY}`)
@@ -570,10 +631,20 @@ describe('crud', () => {
                         }
                     ]
                 })
-                .expect(400);
+                .expect(400)
+                .then(async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
-        it('POST fails if the muktiple related nodes do not exist', async () => {
+        it('PUT fails if the multiple related nodes do not exist', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+            ]
+
             return request(app)
                 .put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
                 .set('API_KEY', `${process.env.API_KEY}`)
@@ -609,10 +680,20 @@ describe('crud', () => {
                         }
                     ]
                 })
-                .expect(400);
+                .expect(400)
+                .then(async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
         });
 
         it('PUT creates the node if it doesnt exist, and links it to a related node even if it does not exist, with upsert', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+            ]
 
             const relationship = {
                 name: 'REL',
@@ -637,10 +718,20 @@ describe('crud', () => {
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
                     assert.equal(body[0].type, relationship.name);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
 
         it('PUT creates the node if it doesnt exist, and links it to multiple related node even if they do not exist, with upsert', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
+                { OneUniqueAttr: 'OneUniqueAttrValue'},
+                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+            ]
 
             const relationships = [
                 {
@@ -684,6 +775,10 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
     });
@@ -708,19 +803,38 @@ describe('crud', () => {
 		});
 
 		it('DELETE with unique attribute deletes the node', () => {
-			return request(app)
+            const expectedNodes = [
+                { SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' }
+            ];
+
+            return request(app)
 			.delete('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, 'SomeUniqueAttrValue deleted');
+			.expect(200, 'SomeUniqueAttrValue deleted')
+            .then(async (response) => {
+                 return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
+            });
 		});
 
 		it('DELETE returns 404 when trying to delete non-existent id', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+                { SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' }
+            ];
+
 			return request(app)
 			.delete('/api/SomeNodeType/SomeUniqueAttr/Foo')
 			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(404, 'Foo not found. No nodes deleted.');
+			.expect(404, 'Foo not found. No nodes deleted.')
+            .then(async (response) => {
+                return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
+            });
 		});
-
-
 	});
 });
