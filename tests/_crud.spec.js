@@ -56,11 +56,35 @@ describe('crud', () => {
 			.expect(400);
 		});
 
-        it('GET when specified with a relationships param will include related nodes', () => {
+        it('GET when specified with a relationships param will include related nodes - but none for this node', () => {
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .expect(200, [nodes[0]]);
+        });
+
+        it('GET when specified with a relationships param will include related nodes - one for this node', async () => {
+            const expectedNodes = [{
+                SomeUniqueAttr: 'SomeUniqueAttrValue',
+                foo: 'bar',
+                relationships: [
+                    {
+                        name: 'TestRelationship',
+                        from: 'SomeNodeType',
+                        fromUniqueAttrName: 'SomeUniqueAttr',
+                        fromUniqueAttrValue: 'SomeUniqueAttrValue',
+                        to: 'TestNode',
+                        toUniqueAttrName: 'id',
+                        toUniqueAttrValue: 'testing'
+                    }
+                ]
+            }]
+            const addRelQuery = `MATCH (a:SomeNodeType {SomeUniqueAttr:'SomeUniqueAttrValue'}) CREATE (n)-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
+            await db.run(addRelQuery);
+            return request(app)
+                .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .expect(200, expectedNodes);
         });
 	});
 
