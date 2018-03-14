@@ -505,7 +505,7 @@ describe('crud', () => {
         it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OtherUniqueAttrName: 'OtherUniqueAttrValue', foo: 'bar'},
+                { OtherUniqueAttrName: 'OtherUniqueAttrValue'},
             ]
 
             const relationship = {
@@ -546,7 +546,7 @@ describe('crud', () => {
         it('PUT updates the node if it exists, and links it to multiple related nodes if they exist', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OnerUniqueAttrName: 'OneUniqueAttrValue'},
+                { OneUniqueAttrName: 'OneUniqueAttrValue'},
                 { TwoUniqueAttrName: 'TwoUniqueAttrValue'},
                 { ThreeUniqueAttrName: 'ThreeUniqueAttrValue'},
             ]
