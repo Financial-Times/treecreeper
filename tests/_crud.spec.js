@@ -56,6 +56,12 @@ describe('crud', () => {
 			.expect(400);
 		});
 
+        it('GET with relationships param includes related nodes', () => {
+            return request(app)
+                .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+                .set('API_KEY', `${process.env.API_KEY}`)
+                .expect(200, [nodes[0]]);
+        });
 	});
 
 	describe('POST generic', () => {

@@ -37,9 +37,37 @@ const _createRelationships = async (relationships, upsert) => {
 	return resultRel
 };
 
+const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => {
 
-const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
-	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr);
+	const relationships = []
+
+    const query = `MATCH (s:${nodeType} {${uniqueAttrName}:${uniqueAttrValue})-[r]-(c) RETURN r,c`;
+    console.log('[CRUD] related nodes query', query);
+
+    try {
+        let relatedResults = await db.run(query);
+		for (let relatedResult of relatedResults) {
+			const relationship = {
+                name: relatedResult._fields[0].type,
+                from: nodeType,
+                fromUniqueAttrName: uniqueAttrName,
+                fromUniqueAttrValue: uniqueAttrValue,
+                to: relatedResult._fields[1].lables[0],
+                toUniqueAttrName: 'id',
+                toUniqueAttrValue: relatedResult._fields[1].properties.id,
+			}
+			relationships.push(relationship)
+		}
+    }
+    catch (e) {
+        console.log('[CRUD] related query failed', e.toString());
+    }
+
+    return relationships
+}
+
+const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
+	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr, relationships);
 
 	try {
 
@@ -56,6 +84,10 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 		}
 
 		const formattedResult = result.records.map(record => record._fields[0].properties);
+
+        if (relationships) {
+            formattedResult[relationships] = _get_relationships(nodeType, uniqueAttrName, uniqueAttr)
+        }
 
 		console.log('[CRUD] GET formatted result');
 		console.log(JSON.stringify(formattedResult, null, 2));

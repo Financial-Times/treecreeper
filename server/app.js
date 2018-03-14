@@ -40,9 +40,9 @@ app.post('/api/supplier/', supplier.create);
 app.post('/api/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 
 // GENERIC - Node
-app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
+app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?/:relationships?', async (req, res) => {
 	console.log('[APP] generic GET', req.params);
-	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
+	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.params.relationships);
 });
 app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic POST');
