@@ -41,7 +41,7 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
 
 	const relationships = []
 
-    const query = `MATCH (s:${nodeType} {${uniqueAttrName}:${uniqueAttrValue})-[r]-(c) RETURN r,c`;
+    const query = `MATCH (s:${nodeType} {${uniqueAttrName}:'${uniqueAttrValue}')-[r]-(c) RETURN r,c`;
     console.log('[CRUD] related nodes query', query);
 
     try {

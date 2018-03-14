@@ -56,7 +56,7 @@ describe('crud', () => {
 			.expect(400);
 		});
 
-        it('GET with relationships param includes related nodes', () => {
+        it('GET when specified with a relationships param will include related nodes', () => {
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
