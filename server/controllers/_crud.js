@@ -86,7 +86,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 		const formattedResult = result.records.map(record => record._fields[0].properties);
 
         if (relationships) {
-            formattedResult['relationships'] = _get_relationships(nodeType, uniqueAttrName, uniqueAttr)
+            formattedResult['relationships'] = _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
         }
 
 		console.log('[CRUD] GET formatted result');
