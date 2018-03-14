@@ -46,8 +46,8 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
 
     try {
         let relatedResults = await db.run(query);
-        console.log("RELATED RESULTS:",relatedResults)
-		for (let relatedResult of relatedResults) {
+        console.log("RELATED RESULTS:",relatedResults.records)
+		for (let relatedResult of relatedResults.records) {
         	console.log("RELATED RESULT:",relatedResult)
 			const relationship = {
                 name: relatedResult._fields[0].type,
