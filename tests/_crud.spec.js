@@ -80,9 +80,11 @@ describe('crud', () => {
                 ]
             }]
             const addNodeQuery = `CREATE (t:NodeType {id:'testing'})`;
-            await db.run(addNodeQuery);
+            const addNodeResult = await db.run(addNodeQuery);
+            console.log("ADD NODE RESULT:",addNodeResult)
             const addRelQuery = `MERGE (n:SomeNodeType {SomeUniqueAttr:'SomeUniqueAttrValue'})-[r:TestRelationship]->(t:NodeType {id:'testing'}) RETURN r`;
-            await db.run(addRelQuery);
+            const addRelResult = await db.run(addRelQuery);
+            console.log("ADD REL RESULT:",addRelResult)
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
