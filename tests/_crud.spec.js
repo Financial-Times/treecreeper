@@ -276,7 +276,7 @@ describe('crud', () => {
 		it('POST inserts the node and links it to a related node that does not exist if using upsert', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+                { OtherUniqueAttrName: 'OtherUniqueAttrValue'},
             ]
 
 			const relationship = {
@@ -312,9 +312,9 @@ describe('crud', () => {
         it('POST inserts the node and links it to multple related nodes that do not exist if using upsert', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-                { OneUniqueAttr: 'OneUniqueAttrValue'},
-                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
-                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+                { OneUniqueAttrName: 'OneUniqueAttrValue'},
+                { TwoUniqueAttrName: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttrName: 'ThreeUniqueAttrValue'},
             ]
 
             const relationships = [
@@ -486,7 +486,7 @@ describe('crud', () => {
         it('PUT for a node that doesn\'t exist creates if using upsert', () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { SomeUniqueAttr: 'NonExistent'},
+                { SomeUniqueAttr: 'NonExistent', foo: 'bar'},
             ]
 
             return request(app)
@@ -505,7 +505,7 @@ describe('crud', () => {
         it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+                { OtherUniqueAttrName: 'OtherUniqueAttrValue', foo: 'bar'},
             ]
 
             const relationship = {
@@ -518,9 +518,9 @@ describe('crud', () => {
                 to: 'SomeNodeType'
             };
 
-            const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
+//            const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
             const createTargetNode = 'CREATE (a:SomeNodeType {OtherUniqueAttrName: "OtherUniqueAttrValue"}) RETURN a';
-            await db.run(createSourceNode);
+//            await db.run(createSourceNode);
             await db.run(createTargetNode);
 
             return request(app)
@@ -546,9 +546,9 @@ describe('crud', () => {
         it('PUT updates the node if it exists, and links it to multiple related nodes if they exist', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OnerUniqueAttr: 'OneUniqueAttrValue'},
-                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
-                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+                { OnerUniqueAttrName: 'OneUniqueAttrValue'},
+                { TwoUniqueAttrName: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttrName: 'ThreeUniqueAttrValue'},
             ]
 
             const relationships = [
@@ -581,11 +581,11 @@ describe('crud', () => {
                 }
             ];
 
-            const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
+//            const createSourceNode = 'CREATE (a:SomeNodeType {SomeUniqueAttr: "SomeUniqueAttrValue"}) RETURN a';
             const createTargetNode1 = 'CREATE (a:SomeNodeType {OneUniqueAttrName: "OneUniqueAttrValue"}) RETURN a';
             const createTargetNode2 = 'CREATE (a:SomeNodeType {TwoUniqueAttrName: "TwoUniqueAttrValue"}) RETURN a';
             const createTargetNode3 = 'CREATE (a:SomeNodeType {ThreeUniqueAttrName: "ThreeUniqueAttrValue"}) RETURN a';
-            await db.run(createSourceNode);
+//            await db.run(createSourceNode);
             await db.run(createTargetNode1);
             await db.run(createTargetNode2);
             await db.run(createTargetNode3);
@@ -692,7 +692,7 @@ describe('crud', () => {
         it('PUT creates the node if it doesnt exist, and links it to a related node even if it does not exist, with upsert', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+                { OtherUniqueAttrName: 'OtherUniqueAttrValue'},
             ]
 
             const relationship = {
@@ -728,9 +728,9 @@ describe('crud', () => {
         it('PUT creates the node if it doesnt exist, and links it to multiple related node even if they do not exist, with upsert', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
-                { OneUniqueAttr: 'OneUniqueAttrValue'},
-                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
-                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+                { OneUniqueAttrName: 'OneUniqueAttrValue'},
+                { TwoUniqueAttrName: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttrName: 'ThreeUniqueAttrValue'},
             ]
 
             const relationships = [
