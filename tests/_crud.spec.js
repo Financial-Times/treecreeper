@@ -132,9 +132,9 @@ describe('crud', () => {
 
         it('POST inserts the node and links it to multiple related nodes if they all exist', async () => {
             const expectedNodes = [
-                { OtherUniqueAttrName: "OneUniqueAttrValue"},
-                { OtherUniqueAttrName: "ThreeUniqueAttrValue"},
-                { OtherUniqueAttrName: "TwoUniqueAttrValue"},
+                { OneUniqueAttrName: "OneUniqueAttrValue"},
+                { TwoUniqueAttrName: "TwoUniqueAttrValue"},
+                { ThreeUniqueAttrName: "ThreeUniqueAttrValue"},
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
             ]
 
@@ -225,6 +225,10 @@ describe('crud', () => {
 		});
 
         it('POST fails if multiple related nodes do not exist', async () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
             return request(app)
                 .post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
                 .set('API_KEY', `${process.env.API_KEY}`)
@@ -270,6 +274,11 @@ describe('crud', () => {
         });
 
 		it('POST inserts the node and links it to a related node that does not exist if using upsert', async () => {
+            const expectedNodes = [
+                { OtherUniqueAttr: 'OtherUniqueAttrValue'},
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
 			const relationship = {
 				name:'REL',
 				from: 'SomeNodeType',
@@ -293,10 +302,21 @@ describe('crud', () => {
 				console.log('RES HERE', await body);
 				assert.equal(body.length, 1);
 				assert.equal(body[0].type, relationship.name);
+                return request(app)
+                    .get('/api/SomeNodeType/')
+                    .set('API_KEY', `${process.env.API_KEY}`)
+                    .expect(200, expectedNodes);
 			});
 		});
 
         it('POST inserts the node and links it to multple related nodes that do not exist if using upsert', async () => {
+            const expectedNodes = [
+                { OneUniqueAttr: 'OneUniqueAttrValue'},
+                { TwoUniqueAttr: 'TwoUniqueAttrValue'},
+                { ThreeUniqueAttr: 'ThreeUniqueAttrValue'},
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
             const relationships = [
             	{
                 	name:'REL',
@@ -339,27 +359,51 @@ describe('crud', () => {
                     const body = response.body;
                     console.log('RES HERE', await body);
                     assert.equal(body.length, 1);
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
                 });
         });
 
 		it('POST creating duplicate node returns 400', async () => {
-			const duplicateNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
+            const duplicateNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
 			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
 			await db.run(createQuery, { node: duplicateNode });
 
 			return request(app)
-			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.send({ node: originalNode })
-			.expect(400);
+			    .post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			    .send({ node: originalNode })
+			    .expect(400)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
 		});
 
 		// @@ another test that proves a POST doesnt return 400 if you use upsert since it will be overwritten? @@
 
 		it('POST no api_key returns 400', () => {
+            const expectedNodes = [
+                { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+            ]
+
 			return request(app)
-			.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-			.send({ node: originalNode })
-			.expect(400);
+			    .post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+			    .send({ node: originalNode })
+			    .expect(400)
+                .then( async (response) => {
+                    return request(app)
+                        .get('/api/SomeNodeType/')
+                        .set('API_KEY', `${process.env.API_KEY}`)
+                        .expect(200, expectedNodes);
+                });
 		});
 	});
 
