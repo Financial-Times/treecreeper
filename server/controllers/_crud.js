@@ -48,16 +48,16 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
         let relatedResults = await db.run(query);
         console.log("RELATED RESULTS:",relatedResults.records)
 		for (let relatedResult of relatedResults.records) {
-        	console.log("RELATED NODE RESULT:",relatedResult._fields[0].Node)
-            console.log("RELATED RELATIONSHIP RESULT:",relatedResult._fields[0].Relationship)
+            console.log("RELATED RELATIONSHIP RESULT:",relatedResult._fields[0])
+        	console.log("RELATED NODE RESULT:",relatedResult._fields[1])
 			const relationship = {
                 name: relatedResult._fields[0].Relationship.type,
                 from: nodeType,
                 fromUniqueAttrName: uniqueAttrName,
                 fromUniqueAttrValue: uniqueAttrValue,
-                to: relatedResult._fields[0].Node.lables[0],
+                to: relatedResult._fields[1].lables[0],
                 toUniqueAttrName: 'id',
-                toUniqueAttrValue: relatedResult._fields[0].Node.properties.id,
+                toUniqueAttrValue: relatedResult._fields[1].properties.id,
 			}
 			relationships.push(relationship)
 		}
