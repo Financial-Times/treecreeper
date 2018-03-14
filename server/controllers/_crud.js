@@ -66,6 +66,7 @@ const _readRelationships = async (nodeType, uniqueAttrName, uniqueAttrValue) => 
         console.log('[CRUD] related query failed', e.toString());
     }
 
+    console.log("RELATIONSHIPS:",relationships)
     return relationships
 }
 
@@ -89,7 +90,9 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 		const formattedResult = result.records.map(record => record._fields[0].properties);
 
         if (relationships) {
+            console.log("BEFORE relationships get")
             formattedResult['relationships'] = _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
+            console.log("AFTER relationships get")
         }
 
 		console.log('[CRUD] GET formatted result');
