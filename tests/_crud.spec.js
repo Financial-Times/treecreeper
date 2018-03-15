@@ -79,10 +79,10 @@ describe('crud', () => {
                     }
                 ]
             }]
-            const addNodeQuery = `CREATE (t:NodeType {id:'testing'})`;
+            const addNodeQuery = `CREATE (t:TestNode {id:'testing'})`;
             const addNodeResult = await db.run(addNodeQuery);
             console.log("ADD NODE RESULT:",addNodeResult)
-            const addRelQuery = `MERGE (n:SomeNodeType {SomeUniqueAttr:'SomeUniqueAttrValue'})-[r:TestRelationship]->(t:NodeType {id:'testing'}) RETURN r`;
+            const addRelQuery = `MERGE (n:SomeNodeType {${nodes[0]}})-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
             const addRelResult = await db.run(addRelQuery);
             console.log("ADD REL RESULT:",addRelResult)
             return request(app)
