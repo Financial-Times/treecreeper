@@ -749,8 +749,8 @@ exports.raw = {
   }
 };
 
-exports.parsed = [
-  [
+exports.parsed = {
+  contracts: [
     {
       ct: 'CT-05686',
       caName: 'CA-07476',
@@ -846,5 +846,5 @@ exports.parsed = [
       ]
     }
   ],
-  { name: 'Worker Xp Ltd', id: 'a0zL0000004cdWGIAY' }
-];
+  supplier: { name: 'Worker Xp Ltd', id: 'a0zL0000004cdWGIAY' }
+};
