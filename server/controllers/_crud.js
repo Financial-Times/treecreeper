@@ -73,13 +73,13 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
             }
 			if (relationships) {
                 oneResult.relationships.push({
-                    name: relatedResult._fields[1].type,
+                    name: record._fields[1].type,
                     from: nodeType,
                     fromUniqueAttrName: uniqueAttrName,
                     fromUniqueAttrValue: uniqueAttrValue,
-                    to: relatedResult._fields[2].labels[0],
+                    to: record._fields[2].labels[0],
                     toUniqueAttrName: 'id',
-                    toUniqueAttrValue: relatedResult._fields[2].properties.id,
+                    toUniqueAttrValue: record._fields[2].properties.id,
                 });
 			}
         });
