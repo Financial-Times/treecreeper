@@ -43,8 +43,8 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 	try {
 
 		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
-		const related = relationships ? '-[r]-(c)' : ''
-		const returned = relationships ? 'a,r,c' : 'a'
+		const related = relationships ? '-[r]-(c)' : '';
+		const returned = relationships ? 'a,r,c' : 'a';
 
 		const query = `MATCH (a:${nodeType} ${filter}) ${related} RETURN ${returned}`;
 
@@ -56,20 +56,20 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 			return res.status(404).end(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
 		}
 
-		let formattedResult = []
-		let previousID = null
-        let oneResult
+		let formattedResult = [];
+		let previousID = null;
+        let oneResult;
 		result.records.forEach(record => {
-			const currentid = record.identity.low
+			const currentid = record._fields[0].identity.low;
             if (previousID !== currentID) {
 				if (previousID) {
-                    formattedResult.push(oneResult)
+                    formattedResult.push(oneResult);
 				}
-                oneResult = record._fields[0].properties
+                oneResult = record._fields[0].properties;
                 if (relationships) {
-					oneResult.relationships = []
+					oneResult.relationships = [];
                 }
-                previousID = currentID
+                previousID = currentID;
             }
 			if (relationships) {
                 oneResult.relationships.push({
@@ -80,11 +80,11 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
                     to: relatedResult._fields[2].labels[0],
                     toUniqueAttrName: 'id',
                     toUniqueAttrValue: relatedResult._fields[2].properties.id,
-                })
-			}
+                });
+			};
         });
         if (previousID) {
-            formattedResult.push(oneResult)
+            formattedResult.push(oneResult);
         }
 
 		console.log('[CRUD] GET formatted result');
