@@ -88,7 +88,7 @@ describe('crud', () => {
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .expect(200, expectedNodes)
                 .then( async (response) => {
-                    const delRelQuery = `MATCH (t:TestNode {id:'testing'}) - DETACH DELETE`;
+                    const delRelQuery = `MATCH (t:TestNode {id:'testing'}) DETACH DELETE t`;
                     await db.run(delRelQuery)
             });
         });
