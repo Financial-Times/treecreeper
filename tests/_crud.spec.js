@@ -60,7 +60,7 @@ describe('crud', () => {
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
-                .expect(200, [nodes[0]]);
+                .expect(404, [nodes[0]]);
         });
 
         it('GET when specified with a relationships param will include related nodes - one for this node', async () => {
@@ -81,14 +81,16 @@ describe('crud', () => {
             }]
             const addNodeQuery = `CREATE (t:TestNode {id:'testing'})`;
             const addNodeResult = await db.run(addNodeQuery);
-            console.log("ADD NODE RESULT:",addNodeResult)
-            const addRelQuery = `MERGE (n:SomeNodeType {${nodes[0]}})-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
+            const addRelQuery = `MERGE (n:SomeNodeType {SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'})-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
             const addRelResult = await db.run(addRelQuery);
-            console.log("ADD REL RESULT:",addRelResult)
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
-                .expect(200, expectedNodes);
+                .expect(200, expectedNodes)
+                .then( async (response) => {
+                    const delRelQuery = `MATCH (t:TestNode {id:'testing'}) - DETATCH DELETE`;
+                    await db.run(delRelQuery)
+            });
         });
 	});
 
