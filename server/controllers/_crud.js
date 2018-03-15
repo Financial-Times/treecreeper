@@ -60,7 +60,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 		let previousID = null;
         let oneResult;
 		result.records.forEach(record => {
-			const currentid = record._fields[0].identity.low;
+			const currentID = record._fields[0].identity.low;
             if (previousID !== currentID) {
 				if (previousID) {
                     formattedResult.push(oneResult);
@@ -81,7 +81,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
                     toUniqueAttrName: 'id',
                     toUniqueAttrValue: relatedResult._fields[2].properties.id,
                 });
-			};
+			}
         });
         if (previousID) {
             formattedResult.push(oneResult);
