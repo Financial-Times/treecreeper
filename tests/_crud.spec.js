@@ -60,7 +60,7 @@ describe('crud', () => {
             return request(app)
                 .get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
                 .set('API_KEY', `${process.env.API_KEY}`)
-                .expect(404, [nodes[0]]);
+                .expect(404, {});
         });
 
         it('GET when specified with a relationships param will include related nodes - one for this node', async () => {
@@ -88,7 +88,7 @@ describe('crud', () => {
                 .set('API_KEY', `${process.env.API_KEY}`)
                 .expect(200, expectedNodes)
                 .then( async (response) => {
-                    const delRelQuery = `MATCH (t:TestNode {id:'testing'}) - DETATCH DELETE`;
+                    const delRelQuery = `MATCH (t:TestNode {id:'testing'}) - DETACH DELETE`;
                     await db.run(delRelQuery)
             });
         });
