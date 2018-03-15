@@ -76,7 +76,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
                     name: record._fields[1].type,
                     from: nodeType,
                     fromUniqueAttrName: uniqueAttrName,
-                    fromUniqueAttrValue: uniqueAttrValue,
+                    fromUniqueAttrValue: uniqueAttr,
                     to: record._fields[2].labels[0],
                     toUniqueAttrName: 'id',
                     toUniqueAttrValue: record._fields[2].properties.id,
