@@ -90,7 +90,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
         if (relationships) {
 			result.records.forEach(async record  => {
                 console.log("BEFORE relationships get:",record._fields[0].properties)
-                const result = await _readRelationships(nodeType, record._fields[0].properties[uniqueAttrName], record._fields[0].properties[uniqueAttr])
+                const result = await _readRelationships(nodeType, uniqueAttrName, record._fields[0].properties[uniqueAttrName])
                 console.log("AFTER relationships get")
                 console.log(result)
                 record._fields[0].properties.relationships = result
