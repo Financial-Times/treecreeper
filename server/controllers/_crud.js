@@ -87,12 +87,15 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 			return res.status(404).end(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
 		}
 
-		const formattedResult = result.records.map(record => record._fields[0].properties);
+		let formattedResult = result.records.map(record => record._fields[0].properties);
 
         if (relationships) {
             console.log("BEFORE relationships get")
-            formattedResult['relationships'] = await _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
+            const result = await _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
             console.log("AFTER relationships get")
+            console.log(result)
+            formattedResult['relationships'] = result
+            console.log("FORMATTED:",formattedResult)
         }
 
 		console.log('[CRUD] GET formatted result');
