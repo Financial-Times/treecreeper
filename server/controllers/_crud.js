@@ -91,7 +91,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 
         if (relationships) {
             console.log("BEFORE relationships get")
-            formattedResult['relationships'] = _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
+            formattedResult['relationships'] = await _readRelationships(nodeType, uniqueAttrName, uniqueAttr)
             console.log("AFTER relationships get")
         }
 
