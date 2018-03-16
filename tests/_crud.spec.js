@@ -132,7 +132,7 @@ describe('crud', () => {
 
         it('POST inserts the node and links it to multiple related nodes if they all exist', async () => {
             const expectedNodes = [
-                { OneUniqueAttrName: "OtherUniqueAttrValue"},
+                { OneUniqueAttrName: "OneUniqueAttrValue"},
                 { TwoUniqueAttrName: "TwoUniqueAttrValue"},
                 { ThreeUniqueAttrName: "ThreeUniqueAttrValue"},
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
