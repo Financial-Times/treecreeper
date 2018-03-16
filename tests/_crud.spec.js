@@ -22,7 +22,7 @@ describe('crud', () => {
 		afterEach(async () => {
 			for (let node of nodes) {
 				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
-				const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
+				const deleteRshipQuery = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
 				await db.run(deleteQuery);
 				await db.run(deleteRshipQuery);
 			}
@@ -69,7 +69,7 @@ describe('crud', () => {
 		});
 
 		afterEach(async () => {
-			const deleteRship = 'MATCH ()-[r:REL]->() DELETE r';
+			const deleteRship = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
 			await db.run(deleteRship);
 			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
 			await db.run(deleteQuery);
@@ -580,7 +580,7 @@ describe('crud', () => {
         });
 
         afterEach(async () => {
-            const deleteRshipQuery = 'MATCH ()-[r:REL]->() DELETE r';
+            const deleteRshipQuery = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
             const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
             await db.run(deleteRshipQuery);
             await db.run(deleteQuery);
