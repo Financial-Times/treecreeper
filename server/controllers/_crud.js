@@ -12,9 +12,9 @@ const _createRelationships = async (relationships, upsert) => {
 		// 	RETURN r
 		// `;
         const createRelationshipAndNode = `
-			MERGE (a:${relationship.from} {${relationship.fromUniqueAttrName}: '${relationship.fromUniqueAttrValue}'}),
-			      (b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'}),
-			      (a)-[r:${relationship.name}]->(b)
+			MERGE (a:${relationship.from} {${relationship.fromUniqueAttrName}: '${relationship.fromUniqueAttrValue}'})
+			MERGE (b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+			MERGE (a)-[r:${relationship.name}]->(b)
 			RETURN r
 		`;
 
