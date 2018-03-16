@@ -1046,7 +1046,7 @@ describe('crud', () => {
                 });
         });
 
-        it('PUT creates the node if it doesnt exist, and links it to a single multiple-related nod even it does not exist, with upsert', async () => {
+        it('PUT creates the node if it doesnt exist, and links it to a single multiple-related node even it does not exist, with upsert', async () => {
             const expectedNodes = [
                 { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
                 { OtherUniqueAttrName: 'OtherUniqueAttrValue'},
