@@ -58,34 +58,34 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 
 		let formattedResult = [];
 		let previousID = null;
-        let oneResult;
+		let oneResult;
 		result.records.forEach(record => {
 			const currentID = record._fields[0].identity.low;
-            if (previousID !== currentID) {
+			if (previousID !== currentID) {
 				if (previousID) {
-                    formattedResult.push(oneResult);
+					formattedResult.push(oneResult);
 				}
-                oneResult = record._fields[0].properties;
-                if (relationships) {
+				oneResult = record._fields[0].properties;
+				if (relationships) {
 					oneResult.relationships = [];
-                }
-                previousID = currentID;
-            }
-			if (relationships) {
-                oneResult.relationships.push({
-                    name: record._fields[1].type,
-                    from: nodeType,
-                    fromUniqueAttrName: uniqueAttrName,
-                    fromUniqueAttrValue: uniqueAttr,
-                    to: record._fields[2].labels[0],
-                    toUniqueAttrName: 'id',
-                    toUniqueAttrValue: record._fields[2].properties.id,
-                });
+				}
+				previousID = currentID;
 			}
-        });
-        if (previousID) {
-            formattedResult.push(oneResult);
-        }
+			if (relationships) {
+				oneResult.relationships.push({
+					name: record._fields[1].type,
+					from: nodeType,
+					fromUniqueAttrName: uniqueAttrName,
+					fromUniqueAttrValue: uniqueAttr,
+					to: record._fields[2].labels[0],
+					toUniqueAttrName: 'id',
+					toUniqueAttrValue: record._fields[2].properties.id,
+				});
+			}
+		});
+		if (previousID) {
+			formattedResult.push(oneResult);
+		}
 
 		console.log('[CRUD] GET formatted result');
 		console.log(JSON.stringify(formattedResult, null, 2));
