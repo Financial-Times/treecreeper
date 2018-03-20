@@ -6,9 +6,9 @@ const _createRelationships = async (relationships, upsert) => {
 
 	for (let relationship of relationships) {
 		const createRelationshipAndNode = `
-			MATCH (a:${relationship.from})
-			WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
-			MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+			MERGE (a:${relationship.from} {${relationship.fromUniqueAttrName}: '${relationship.fromUniqueAttrValue}'})
+			MERGE (b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
+			MERGE (a)-[r:${relationship.name}]->(b)
 			RETURN r
 		`;
 
