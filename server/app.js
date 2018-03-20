@@ -37,13 +37,12 @@ app.get('/api/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission
 app.get('/api/survey/:id', survey.get);
 app.get('/api/surveys/:type', survey.getAll);
 app.post('/api/supplier/', supplier.create);
-app.post('/api/submission/', submission.create); // TODO can be abstracted - add relationships
-app.put('/api/submission/id/:submissionId', submission.update);
+app.post('/api/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 
-// GENERIC
-app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?', async (req, res) => {
+// GENERIC - Node
+app.get('/api/:nodeType/:uniqueAttrName?/:uniqueAttr?/:relationships?', async (req, res) => {
 	console.log('[APP] generic GET', req.params);
-	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr);
+	return crud.get(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.params.relationships);
 });
 app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic POST');
@@ -51,12 +50,19 @@ app.post('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res)
 });
 app.put('/api/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
 	console.log('[APP] generic PUT');
-	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.params.upsert);
+	return crud.update(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.node, req.body.relationships, req.params.upsert);
 });
 app.delete('/api/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
 	console.log('[APP] generic DELETE');
 	return crud.remove(res, req.params.nodeType, req.params.uniqueAttrName, req.params.uniqueAttr, req.body.mode);
 });
+
+// GENERIC - Rship
+app.post('/api/relationships/:upsert?', async (req, res) => {
+	console.log('[APP] generic POST - rship');
+	return crud.create(res, null, null, null, null, req.body.relationships, req.params.upsert);
+});
+
 
 app.post('/api/cypher/', async (req, res) => {
 	console.log('[APP] generic GET CYPHER');

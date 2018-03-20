@@ -51,6 +51,7 @@ describe('SAR', () => {
 			const sendMock = stub();
 			const res = {
 				send: sendMock,
+				status: stub(),
 			};
 
 			const sars = [
@@ -71,26 +72,50 @@ describe('SAR', () => {
 			const sources = {
 				a: [
 					{
-						status: 'COMPLETE',
+						properties: {
+							status: 'COMPLETE',
+						},
 					},
 					{
-						status: 'PENDING',
+						properties: {
+							status: 'PENDING',
+						},
 					},
 					{
-						status: 'COMPLETE',
+						properties: {
+							status: 'COMPLETE',
+						},
 					},
 				],
 				b: [
 					{
-						status: 'COMPLETE',
+						properties: {
+							status: 'COMPLETE',
+						},
 					},
 					{
-						status: 'COMPLETE',
+						properties: {
+							status: 'COMPLETE',
+						},
 					},
 				],
 				c: [
 					{
-						status: 'COMPLETE',
+						properties: {
+							status: 'COMPLETE',
+						},
+					},
+				],
+				d: [
+					{
+						properties: {
+							status: 'EMPTY',
+						},
+					},
+					{
+						properties: {
+							status: 'EMPTY',
+						},
 					},
 				],
 			};
@@ -120,12 +145,13 @@ describe('SAR', () => {
 					sar,
 					{
 						sources: {
-							complete: sources[sar.id].reduce((acc, { status }) =>
+							complete: sources[sar.id].reduce((acc, { properties: { status } }) =>
 								status === 'COMPLETE'
 									? acc + 1
 									: acc
 								, 0),
 							total: sources[sar.id].length,
+							allEmpty: sources[sar.id].every(({ properties: { status } }) => status === 'EMPTY'),
 						},
 					},
 				),

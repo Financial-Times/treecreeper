@@ -30,11 +30,14 @@ const get = async (req, res) => {
 
 		const formattedResult = result.records.reduce((acc, { _fields }) => {
 			const { sources } = _fields[0];
-			const completeSources = sources.reduce((acc, { status }) =>
+
+			const completeSources = sources.reduce((acc, { properties: { status } }) =>
 				status === 'COMPLETE'
 					? acc + 1
 					: acc
 				, 0);
+
+			const allEmpty = sources.every(({ properties: { status } }) => status === 'EMPTY');
 
 			return [
 				...acc,
@@ -45,6 +48,7 @@ const get = async (req, res) => {
 						sources: {
 							complete: completeSources,
 							total: sources.length,
+							allEmpty,
 						},
 					},
 				),
