@@ -56,6 +56,42 @@ describe('crud', () => {
 			.expect(400);
 		});
 
+		it('GET when specified with a relationships param will include related nodes - but none for this node', () => {
+			return request(app)
+				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(404, {});
+		});
+
+		it('GET when specified with a relationships param will include related nodes - one for this node', async () => {
+			const expectedNodes = [{
+				SomeUniqueAttr: 'SomeUniqueAttrValue',
+				foo: 'bar',
+				relationships: [
+					{
+						name: 'TestRelationship',
+						from: 'SomeNodeType',
+						fromUniqueAttrName: 'SomeUniqueAttr',
+						fromUniqueAttrValue: 'SomeUniqueAttrValue',
+						to: 'TestNode',
+						toUniqueAttrName: 'id',
+						toUniqueAttrValue: 'testing'
+					}
+				]
+			}]
+			const addNodeQuery = `CREATE (t:TestNode {id:'testing'})`;
+			const addNodeResult = await db.run(addNodeQuery);
+			const addRelQuery = `MERGE (n:SomeNodeType {SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'})-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
+			const addRelResult = await db.run(addRelQuery);
+			return request(app)
+				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(200, expectedNodes)
+				.then( async (response) => {
+					const delRelQuery = `MATCH (t:TestNode {id:'testing'}) DETACH DELETE t`;
+					await db.run(delRelQuery)
+			});
+		});
 	});
 
 	describe('POST generic', () => {
@@ -334,7 +370,6 @@ describe('crud', () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 			]
-
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -594,7 +629,6 @@ describe('crud', () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to' },
 			]
-
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -612,7 +646,6 @@ describe('crud', () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'},
 			]
-
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)

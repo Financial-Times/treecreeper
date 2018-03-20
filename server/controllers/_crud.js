@@ -37,15 +37,16 @@ const _createRelationships = async (relationships, upsert) => {
 	return resultRel
 };
 
-
-const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
-	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr);
+const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
+	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr, relationships);
 
 	try {
 
 		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
+		const related = relationships ? '-[r]-(c)' : '';
+		const returned = relationships ? 'a,r,c' : 'a';
 
-		const query = `MATCH (a:${nodeType} ${filter}) RETURN a`;
+		const query = `MATCH (a:${nodeType} ${filter}) ${related} RETURN ${returned}`;
 
 		console.log('[CRUD]', query);
 
@@ -55,7 +56,36 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
 			return res.status(404).end(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
 		}
 
-		const formattedResult = result.records.map(record => record._fields[0].properties);
+		let formattedResult = [];
+		let previousID = null;
+		let oneResult;
+		result.records.forEach(record => {
+			const currentID = record._fields[0].identity.low;
+			if (previousID !== currentID) {
+				if (previousID) {
+					formattedResult.push(oneResult);
+				}
+				oneResult = record._fields[0].properties;
+				if (relationships) {
+					oneResult.relationships = [];
+				}
+				previousID = currentID;
+			}
+			if (relationships) {
+				oneResult.relationships.push({
+					name: record._fields[1].type,
+					from: nodeType,
+					fromUniqueAttrName: uniqueAttrName,
+					fromUniqueAttrValue: uniqueAttr,
+					to: record._fields[2].labels[0],
+					toUniqueAttrName: 'id',
+					toUniqueAttrValue: record._fields[2].properties.id,
+				});
+			}
+		});
+		if (previousID) {
+			formattedResult.push(oneResult);
+		}
 
 		console.log('[CRUD] GET formatted result');
 		console.log(JSON.stringify(formattedResult, null, 2));
