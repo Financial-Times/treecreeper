@@ -1,6 +1,6 @@
 const surveys = [
 	{version: 0, id: 'abc', title: 'Anti-Bribery and Corruption'},
-	{version: 0, id: 'as', title: 'Anti Slavery'},
+	{version: 0, id: 'as', title: 'Anti-Slavery'},
 	{version: 0, id: 'bcm', title: 'Business Continuity Management'},
 	{version: 0, id: 'dp', title: 'Data Protection'},
 	{version: 0, id: 'pci', title: 'PCI Compliance'},
@@ -53,7 +53,7 @@ const createQuestions = async (db, surveyId) => {
 		for (let question of questions) {
 			const sectionTitle = section.title
 				? `'${section.title}'`
-				: `''`;
+				: '\'\'';
 
 			await createQuestion(db, question);
 			await db.run(`
