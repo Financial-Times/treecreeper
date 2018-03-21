@@ -2,43 +2,24 @@ const crud = require('./_crud');
 const db = require('../db-connection');
 
 const create = async (req, res) => {
-
+	const brands = req.body.brands;
 	crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
 
-	for (let brand of req.body.brands) {
-
-		const brandNode = {
-			id: brand.id,
-			name: brand.name,
-			status: brand.status,
-		};
-
-		crud.create(res, 'Brand', 'id', brandNode.id, brandNode, [
-			{
-				name:'CONNECTED_TO',
-				from: 'SAR',
-				fromUniqueAttrName: 'id',
-				fromUniqueAttrValue: req.body.sar.id,
-				toUniqueAttrName: 'id',
-				toUniqueAttrValue: brandObj.id,
-				to: 'Brand',
-			},
-		]);
-
-		for (let system of brand.systems) {
-			crud.create(res, 'System', 'id', system.id, system, [
+	brands.forEach(brand => {
+		brand.sources.forEach( source => {
+			crud.create(res, 'Source', 'id', source.id, source, [
 				{
 					name:'HAS',
-					from: 'Brand',
+					from: 'SAR',
 					fromUniqueAttrName: 'id',
-					fromUniqueAttrValue: brand.id,
+					fromUniqueAttrValue: req.body.sar.id,
 					toUniqueAttrName: 'id',
-					toUniqueAttrValue: system.id,
-					to: 'System',
+					toUniqueAttrValue: source.id,
+					to: 'Source',
 				},
 			]);
-		}
-	}
+		});
+	});
 };
 
 const get = async (req, res) => {
