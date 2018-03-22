@@ -2,11 +2,27 @@ const crud = require('./_crud');
 const db = require('../db-connection');
 
 const create = async (req, res) => {
-	const brands = req.body.brands;
-	crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
 
-	brands.forEach(brand => {
-		brand.sources.forEach( source => {
+	const brands = req.body.brands;
+	await crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
+	//
+	// brands.forEach( async (brand) => {
+	//
+	// });
+
+	brands.forEach( async (brand) => {
+		crud._createRelationships([
+			{
+				name: 'BELONGS_TO',
+				from: 'SAR',
+				fromUniqueAttrName: 'id',
+				fromUniqueAttrValue: `${req.body.sar.id}`,
+				toUniqueAttrName: 'id',
+				toUniqueAttrValue: `${brand.name}`,
+				to: 'Brand',
+			},
+		]);
+		brand.sources.forEach( async (source) => {
 			crud.create(res, 'Source', 'id', source.id, source, [
 				{
 					name:'HAS',
@@ -17,7 +33,17 @@ const create = async (req, res) => {
 					toUniqueAttrValue: source.id,
 					to: 'Source',
 				},
-			]);
+				{
+					name: 'BELONGS_TO',
+					from: 'System',
+					fromUniqueAttrName: 'id',
+					fromUniqueAttrValue: `${source.system}`,
+					toUniqueAttrName: 'id',
+					toUniqueAttrValue: `${source.id}`,
+					to: 'Source',
+				},
+			]
+			);
 		});
 	});
 };
