@@ -7,30 +7,21 @@
             "form": [
                 {
                     "_id": "sla_01",
-                    "question": "What SLAs are you providing?",
+                    "question": "What SLA's are you providing as part of this contract?",
                     "fieldType": "long-text"
                 },
                 {
                     "_id": "sla_02",
-                    "question": "How frequently are your SLAs measured and reported against?"
+                    "question": "Please attach a copy of your SLA’s",
+                    "fieldType": "upload"
                 },
                 {
                     "_id": "sla_03",
-                    "question": "How frequently is your availability measured and reported?"
+                    "question": "How frequently will your SLA's be reported to the FT?"
                 },
                 {
                     "_id": "sla_04",
-                    "question": "What events (if any) do not contribute towards your availability/SLA targets?"
-                },
-                {
-                    "_id": "sla_05",
-                    "question": "What is your incident escalation process?",
-                    "fieldType": "long-text"
-                },
-                {
-                    "_id": "sla_06",
-                    "question": "What is the process for handling Service Level Agreement breaches?",
-                    "fieldType": "long-text"
+                    "question": "How frequently will you hold regular review meetings with the FT to discuss the service?"
                 }
             ]
         },
