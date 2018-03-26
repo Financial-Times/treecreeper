@@ -47,12 +47,11 @@ const create = async (req, res) => {
 const get = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar:SAR)-[:CONSUMES]->(sources)
+			MATCH (sar:SAR)-[:HAS]->(sources)
 			WITH sar, collect(sources) as allSources
 			RETURN sar{ .*, sources: allSources }
 		`;
 		const result = await db.run(query);
-
 		const formattedResult = result.records.reduce((acc, { _fields }) => {
 			const { sources } = _fields[0];
 
@@ -91,7 +90,7 @@ const get = async (req, res) => {
 const getWithSources = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources)
+			MATCH (sar { id: "${req.params.id}" })-[:HAS]->(sources)
 			RETURN { sar: sar, sources: collect(sources) }
 		`;
 		const result = await db.run(query);
