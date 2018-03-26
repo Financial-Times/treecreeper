@@ -16,7 +16,7 @@ const addAnswerToQuery = (query, answer, index) => {
 const submit = async (req, res) => {
 	const initialQuery = `MATCH (submission:Submission {id: '${req.body.node.id}'})
 								SET submission += ${stringify(req.body.node)}`;
-	const submissionQuery = req.body.answers.reduce(addAnswerToQuery, initialQuery);
+	const submissionQuery = req.body.answers? req.body.answers.reduce(addAnswerToQuery, initialQuery) : initialQuery;
 	console.log('[SUBMISSION] submitQuery', submissionQuery);
 	try{
 		const result = await db.run(submissionQuery);
