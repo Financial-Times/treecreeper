@@ -5,10 +5,6 @@ const create = async (req, res) => {
 
 	const brands = req.body.brands;
 	await crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
-	//
-	// brands.forEach( async (brand) => {
-	//
-	// });
 
 	brands.forEach( async (brand) => {
 		crud._createRelationships([
