@@ -1,7 +1,6 @@
 const db = require('../db-connection');
 
 const _createRelationships = async (relationships, upsert) => {
-
 	let resultRel;
 
 	for (let relationship of relationships) {
@@ -25,7 +24,6 @@ const _createRelationships = async (relationships, upsert) => {
 
 		try {
 			let oneResultRel = await db.run(query);
-
 			if (oneResultRel.records && oneResultRel.records.length > 0) {
 				resultRel = oneResultRel
 			}
@@ -34,7 +32,7 @@ const _createRelationships = async (relationships, upsert) => {
 			console.log('[CRUD] Relationship not created', e.toString());
 		}
 	}
-	return resultRel
+	return resultRel;
 };
 
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
@@ -269,4 +267,4 @@ const getAll = async (res, nodeType, filters = '') => {
 	}
 };
 
-module.exports = { get, create, update, remove, getAll, getAllforOne };
+module.exports = { get, create, _createRelationships, update, remove, getAll, getAllforOne };
