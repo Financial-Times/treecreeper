@@ -10,6 +10,7 @@ const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
 const cypher = require('./controllers/_cypher');
 const init = require('../scripts/init');
+const timeout = require('connect-timeout');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get('/__gtg', (req, res) => {
 });
 
 app.use(bodyParser.json());
+app.use(timeout('65s'));
 app.use(security);
 
 app.set('case sensitive routing', true);
