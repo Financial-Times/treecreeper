@@ -23,7 +23,7 @@ const get = async (req, res) => {
 			OPTIONAL MATCH (submission)-[:HAS|:ANSWERS]->(answer:SubmissionAnswer)-[:ANSWERS_QUESTION]->(question:SurveyQuestion)
 			RETURN supplier, topLevel, topLevelAnswer, topLevelQuestion, contract, submission, question, answer ORDER BY question.id`;
 
-		const result = await db.run(query);
+    const result = await db.run(query);
 		const records = cypher.res.parse(result.records);
 		const [ supplier ] = cypher.res.uniquePropertiesByKey('supplier', records);
 

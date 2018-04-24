@@ -2,32 +2,56 @@ const crud = require('./_crud');
 const db = require('../db-connection');
 
 const create = async (req, res) => {
-	crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
 
-	for (let source of req.body.sources) {
-		crud.create(res, 'Source', 'id', source.id, source, [
+	const brands = req.body.brands;
+	await crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
+
+	brands.forEach( async (brand) => {
+		crud._createRelationships([
 			{
-				name:'CONSUMES',
+				name: 'BELONGS_TO',
 				from: 'SAR',
 				fromUniqueAttrName: 'id',
-				fromUniqueAttrValue: req.body.sar.id,
+				fromUniqueAttrValue: `${req.body.sar.id}`,
 				toUniqueAttrName: 'id',
-				toUniqueAttrValue: source.id,
-				to: 'Source',
+				toUniqueAttrValue: `${brand.name}`,
+				to: 'Brand',
 			},
 		]);
-	}
+		brand.sources.forEach( async (source) => {
+			crud.create(res, 'Source', 'id', source.id, source, [
+				{
+					name:'HAS',
+					from: 'SAR',
+					fromUniqueAttrName: 'id',
+					fromUniqueAttrValue: req.body.sar.id,
+					toUniqueAttrName: 'id',
+					toUniqueAttrValue: source.id,
+					to: 'Source',
+				},
+				{
+					name: 'BELONGS_TO',
+					from: 'System',
+					fromUniqueAttrName: 'id',
+					fromUniqueAttrValue: `${source.system}`,
+					toUniqueAttrName: 'id',
+					toUniqueAttrValue: `${source.id}`,
+					to: 'Source',
+				},
+			]
+			);
+		});
+	});
 };
 
 const get = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar:SAR)-[:CONSUMES]->(sources)
+			MATCH (sar:SAR)-[:HAS]->(sources)
 			WITH sar, collect(sources) as allSources
 			RETURN sar{ .*, sources: allSources }
 		`;
 		const result = await db.run(query);
-
 		const formattedResult = result.records.reduce((acc, { _fields }) => {
 			const { sources } = _fields[0];
 
@@ -61,12 +85,12 @@ const get = async (req, res) => {
 		console.log('[SAR] error', e);
 		return res.status(500).end(e.toString());
 	}
-}
+};
 
 const getWithSources = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar { id: "${req.params.id}" })-[:CONSUMES]->(sources)
+			MATCH (sar { id: "${req.params.id}" })-[:HAS]->(sources)
 			RETURN { sar: sar, sources: collect(sources) }
 		`;
 		const result = await db.run(query);
