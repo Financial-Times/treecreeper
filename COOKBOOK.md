@@ -11,7 +11,7 @@ MATCH m=(s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' ret
 
 #### Show me people with a lot of technical systems assigned,
 ```
-MATCH (c:Contact)<-[:technicalLead]-(s:System) WITH c, count(c) as r, collect(s) AS a 
+MATCH (c:Contact)<-[:technicalLead]-(s:System) WITH c, count(c) as r, collect(s) AS a
   WHERE r > 20 RETURN c, r, a
 ```
 
@@ -56,8 +56,18 @@ RETURN count(*) as systems,
        size((s)-[:secondaryContact]->(:Contact)) as secondary
 ```
 
-#### Show me all the platinum systems and who their product owners 
+#### Show me all the platinum systems and who their product owners
 
 ```
 MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
+```
+
+#### Show me contacts who share the same email address (probably duplicates)
+```
+MATCH (n:Contact) WITH n.email as email, collect(n.id) AS nodes WHERE size(nodes) > 1 RETURN email, nodes as ContactIds ORDER BY email
+```
+
+#### Show me contacts with the same name but different email addresses (probably shouldn't have the same name)
+```
+MATCH (n:Contact) WITH n.email as email, collect(n.id) AS nodes WHERE size(nodes) > 1 RETURN email, nodes as ContactIds ORDER BY email
 ```
