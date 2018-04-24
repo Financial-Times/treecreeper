@@ -45,19 +45,33 @@ MATCH (s:System) RETURN count(*) as systems, count(s.name) as names, count(s.ser
 MATCH (s:System) RETURN count(*) as systems, count(*)-count(s.name) as missing_names, count(*)-count(s.serviceTier) as missing_tiers, count(*)-count(s.description) as missing_descriptions
 ```
 
-#### Show me a table of the presence of system contacts
+#### Show me a table of platinum system contacts
 Still neeeds some work since we are trying to count multiple relationships. The current output is a count of each combination of relationships
 ```
-RETURN count(*) as systems,
-       size((s)-[:programme]->(:Contact)) as programme,
-       size((s)-[:productOwner]->(:Contact)) as productOwners,
-       size((s)-[:technicalLead]->(:Contact)) as technicalLeads,
-       size((s)-[:primaryContact]->(:Contact)) as primary,
-       size((s)-[:secondaryContact]->(:Contact)) as secondary
+MATCH (s:System) where s.serviceTier='Platinum'
+optional match (s)-[:programme]->(p:Contact)
+optional match (s)-[:productOwner]->(po:Contact)
+optional match (s)-[:technicalLead]->(tl:Contact)
+optional match (s)-[:primaryContact]->(pc:Contact)
+optional match (s)-[:secondaryContact]->(sc:Contact)
+return s.id, s.serviceTier, p.name, po.name, tl.name, pc.name, sc.name
 ```
 
-#### Show me all the platinum systems and who their product owners
+### Show me which platinum service have missing contacts
+```
+MATCH (s:System) where s.serviceTier='Platinum'
+optional match (s)-[:programme]->(p:Contact) 
+optional match (s)-[:productOwner]->(po:Contact) 
+optional match (s)-[:technicalLead]->(tl:Contact)
+optional match (s)-[:primaryContact]->(pc:Contact) 
+optional match (s)-[:secondaryContact]->(sc:Contact) 
+with s, p, po, tl, pc, sc
+where p.name is null or po.name is null or tl.name is null or pc.name is null or sc.name is null
+return distinct s.id, s.serviceTier, p.name, po.name, tl.name, pc.name, sc.name
+order by s.id
+```
 
+#### Show me all the platinum systems with their product owners 
 ```
 MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
 ```
