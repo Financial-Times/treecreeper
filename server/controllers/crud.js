@@ -1,13 +1,15 @@
 const db = require('../db-connection');
+const logger = require('@financial-times/n-logger').default;
 
 const _createRelationships = async (relationships, upsert) => {
+
 	let resultRel;
 
 	for (let relationship of relationships) {
 		const createRelationshipAndNode = `
-			MERGE (a:${relationship.from} {${relationship.fromUniqueAttrName}: '${relationship.fromUniqueAttrValue}'})
-			MERGE (b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
-			MERGE (a)-[r:${relationship.name}]->(b)
+			MATCH (a:${relationship.from})
+			WHERE a.${relationship.fromUniqueAttrName} = '${relationship.fromUniqueAttrValue}'
+			MERGE (a)-[r:${relationship.name}]->(b:${relationship.to} {${relationship.toUniqueAttrName}: '${relationship.toUniqueAttrValue}'})
 			RETURN r
 		`;
 
@@ -24,6 +26,7 @@ const _createRelationships = async (relationships, upsert) => {
 
 		try {
 			let oneResultRel = await db.run(query);
+
 			if (oneResultRel.records && oneResultRel.records.length > 0) {
 				resultRel = oneResultRel
 			}
@@ -35,70 +38,53 @@ const _createRelationships = async (relationships, upsert) => {
 	return resultRel;
 };
 
-const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
-	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr, relationships);
+
+const get = async (res, nodeType, uniqueAttrName, uniqueAttr) => {
+	logger.info({ event:'CRUD_GET', nodeType, uniqueAttrName, uniqueAttr});
+
+	let response;
 
 	try {
 
-		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
-		const related = relationships ? '-[r]-(c)' : '';
-		const returned = relationships ? 'a,r,c' : 'a';
+		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';]
 
-		const query = `MATCH (a:${nodeType} ${filter}) ${related} RETURN ${returned}`;
+		const query = `MATCH (a:${nodeType} ${filter}) RETURN a`;
 
-		console.log('[CRUD]', query);
+		logger.info({ event:'CRUD_GET_QUERY', query});
 
 		const result = await db.run(query);
 
 		if (!result.records.length) {
-			return res.status(404).end(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
+			response = {
+				status: 404,
+				data: `${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`
+			};
+		}
+		else {
+			const formattedResult = result.records.map(record => record._fields[0].properties);
+			response = {
+				status: 200,
+				data: formattedResult
+			};
 		}
 
-		let formattedResult = [];
-		let previousID = null;
-		let oneResult;
-		result.records.forEach(record => {
-			const currentID = record._fields[0].identity.low;
-			if (previousID !== currentID) {
-				if (previousID) {
-					formattedResult.push(oneResult);
-				}
-				oneResult = record._fields[0].properties;
-				if (relationships) {
-					oneResult.relationships = [];
-				}
-				previousID = currentID;
-			}
-			if (relationships) {
-				oneResult.relationships.push({
-					name: record._fields[1].type,
-					from: nodeType,
-					fromUniqueAttrName: uniqueAttrName,
-					fromUniqueAttrValue: uniqueAttr,
-					to: record._fields[2].labels[0],
-					toUniqueAttrName: 'id',
-					toUniqueAttrValue: record._fields[2].properties.id,
-				});
-			}
-		});
-		if (previousID) {
-			formattedResult.push(oneResult);
-		}
-
-		console.log('[CRUD] GET formatted result');
-		console.log(JSON.stringify(formattedResult, null, 2));
-
-		return res.send(formattedResult);
-
+		logger.info({ event:'CRUD_GET_OK', response});
+		return response;
 	}
 	catch (e) {
-		console.log(e.toString());
-		return res.status(500).end(e.toString());
+		response = {
+			status: 500,
+			data: e.toString()
+		};
+		logger.info({ event:'CRUD_GET_ERROR', response});
+		return response;
 	}
 };
 
 const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
-	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert);
+	logger.info({ event:'CRUD_GET', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert});
+
+	let response;
 
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
@@ -108,7 +94,13 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		const result = await db.run(existingNode);
 		if (result.records.length > 0) {
 			console.log(nodeType, uniqueAttr, uniqueAttrName, 'ALREADY EXISTS', JSON.stringify(result.records, null, 2));
-			return res.status(400).end(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
+
+			response = {
+				status: 400,
+				data: `node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`
+			};
+			logger.info({ event:'CRUD_CREATE_ERROR', response});
+			return response;
 		}
 	}
 
@@ -267,4 +259,4 @@ const getAll = async (res, nodeType, filters = '') => {
 	}
 };
 
-module.exports = { get, create, _createRelationships, update, remove, getAll, getAllforOne };
+module.exports = { get, create, update, remove, getAll, getAllforOne };
