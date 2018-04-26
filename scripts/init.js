@@ -1,9 +1,9 @@
-const db = require('../server/db-connection');
+const { session: db } = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
 const createSurveys = require('./surveys/create');
 
-const constraints = async (verb) => {
-	console.log(`${verb.toLowerCase()}ing constraints...`);
+const constraints = async verb => {
+	console.log(`Running ${verb} constraints...`);
 
 	const constraintQueries = [
 		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.id IS UNIQUE`,
@@ -31,10 +31,11 @@ const constraints = async (verb) => {
 		`${verb} CONSTRAINT ON (s:System) ASSERT s.id IS UNIQUE`,
 		`${verb} CONSTRAINT ON (s:System) ASSERT exists(s.id)`,
 		`${verb} CONSTRAINT ON (s:Team) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.id)`
+		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.id)`,
 	];
 
-	const setupConstraintIfPossible = (constraintQuery) => db.run(constraintQuery).catch(() => Promise.resolve());
+	const setupConstraintIfPossible = constraintQuery =>
+		db.run(constraintQuery).catch(() => Promise.resolve());
 	const constraints = await Promise.all(
 		constraintQueries.map(setupConstraintIfPossible)
 	).then(() => db.run('CALL db.constraints'));
@@ -42,9 +43,11 @@ const constraints = async (verb) => {
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
-const dropNodes = async (nodeTypes) => {
+const dropNodes = async nodeTypes => {
 	console.log(`dropping nodes ${nodeTypes.join(' ')}...`);
-	return await Promise.all(nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DELETE a`)));
+	return await Promise.all(
+		nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DELETE a`))
+	);
 };
 
 const dropRelationships = async () => {
@@ -58,15 +61,17 @@ const dropRelationships = async () => {
 		'o:SUBMITS',
 		'o:ANSWERS',
 		'o:ANSWERS_QUESTION',
-		'o:HAS'
+		'o:HAS',
 	];
 
-	return Promise.all(relationships.map(
-		relationship => db.run(`MATCH ()-[${relationship}]->() DELETE o`)
-	));
+	return Promise.all(
+		relationships.map(relationship =>
+			db.run(`MATCH ()-[${relationship}]->() DELETE o`)
+		)
+	);
 };
 
-const init = async (req, res) => {
+const init = async () => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
 		await constraints('DROP');
@@ -76,15 +81,25 @@ const init = async (req, res) => {
 		// CREATE
 		await constraints('CREATE');
 		await createSurveys(db);
-		res.send(200,'OK');
 	}
 };
 
+const initMiddleware = async (req, res) => {
+	await init();
+
+	res.send(200, 'OK');
+};
+
 if (process.argv[1] === __filename) {
-	init({}, { send: (code, result) => {
-		console.log(result);
-		process.exit(0);
-	}});
+	init()
+		.then(result => {
+			console.log('Completed init');
+			process.exit(0);
+		})
+		.catch(error => {
+			console.error('Init failed, ', error);
+			process.exit(1);
+		});
 }
 
-module.exports = init;
+module.exports = initMiddleware;

@@ -1,4 +1,4 @@
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 const logger = require('@financial-times/n-logger').default;
 
 const _createRelationships = async (relationships, upsert) => {

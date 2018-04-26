@@ -16,7 +16,9 @@ describe('Contract - API endpoints', () => {
 	before('mock the db', () => {
 		controller = proxyquire('../server/controllers/contract', {
 			'../db-connection': {
-				run: dbRun,
+				session: {
+					run: dbRun,
+				}
 			},
 		});
 	});

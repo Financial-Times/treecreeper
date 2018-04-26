@@ -1,0 +1,204 @@
+# A source code repository
+type Repository {
+    id: String!
+    # Repository URL
+    url: String!
+    # Display Name
+    name: String!
+    # Repository hosts internal ID
+    vcsID: Int
+    # SSH URL to checkout the source
+    sshUrl: String!
+    # Is the repository private
+    isPrivate: Boolean
+    # Is the repository archived
+    isArchived: Boolean
+    # Repository description field
+    description: String
+    # Most recently indexed CircleCI version used
+    mostRecentCircleCIPlatform: CircleCiVersion
+    # VCS provider that the repository is hosted by
+    storedIn: [System] @relation(name: "STORED_IN", direction: "OUT")
+    # System which the repository holds the source code of
+    system: System @relation(name: "HAS_REPO", direction: "IN")
+}
+
+type System {
+    id: String!
+    # Display name of the system
+    name: String
+    # Whether the system is supported
+    supported: YesNo
+    # The primary URL of the system
+    primaryURL: String
+    # The system type
+    systemType: String
+    # The systems service tier level
+    serviceTier: ServiceTier
+    # The type of service the system provides
+    serviceType: String
+    # The platform the service is hosted on, e.g. Heroku
+    hostPlatform: String
+    # Whether the system contains personal PI2 data
+    personalData: YesNo
+    # Whether the system contains sensitive data
+    sensitiveData: YesNo
+    # The lifecycle stage of the system
+    lifecycleStage: LifeCycleStage
+    # If the system is a VCS, the repositories it stores
+    stores: [Repository] @relation(name: "STORED_IN", direction: "IN")
+    # The other systems the system depends on
+    dependsOn(first: Int = 10, offset: Int = 0): [System]
+        @relation(name: "DEPENDS_ON", direction: "OUT")
+    # The other systems which depend on this system
+    isDependencyOf(first: Int = 10, offset: Int = 0): [System]
+        @relation(name: "DEPENDS_ON", direction: "IN")
+    # The team which supports the system
+    supportedBy: Team @relation(name: "SUPPORTS", direction: "IN")
+    # Individuals who have operational knowledge of the system
+    isKnownBy(first: Int = 10, offset: Int = 0): [Person]
+        @relation(name: "KNOWS", direction: "IN")
+    # The repository which stores the systems source code
+    repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
+}
+
+# A team within the organisation
+type Team {
+    id: String!
+    # The teams phone contact number
+    phone: String!
+    # The teams slack contact address
+    slack: String!
+    # The teams name
+    name: String!
+    # The teams email address
+    email: String!
+    status: Status!
+    # The systems the team supports
+    supports(first: Int = 10, offset: Int = 0): [System]
+        @relation(name: "SUPPORTS", direction: "IN")
+    # The tech leads of systems supported by the team
+    techLead(first: Int = 10, offset: Int = 0): [Person]
+        @cypher(
+            statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(person:Person) RETURN person"
+        )
+    # The product owners of systems supported by the team
+    productOwner(first: Int = 10, offset: Int = 0): [Person]
+        @cypher(
+            statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(person:Person) RETURN person"
+        )
+    # The group the team belongs to
+    group: Group @relation(name: "HAS_TEAM", direction: "IN")
+}
+
+# An overarching group which contains teams and is costed separately
+type Group {
+    id: String!
+    # The name of the group
+    name: String!
+    status: Status
+    # The Cost Centre associated with the group
+    hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
+    # The teams working under the group
+    teams(first: Int = 10, offset: Int = 0): [System]
+        @relation(name: "HAS_TEAM", direction: "IN")
+    # The tech director who owns the group
+    techDirector: Person @relation(name: "HAS_TECH_DIRECTOR", direction: "OUT")
+}
+
+# A cost centre which groups are costed to
+type CostCentre {
+    id: String!
+    # The name of the cost centre
+    name: String!
+    # The groups which are costed to the cost centre
+    hasGroups(first: Int = 10, offset: Int = 0): [Group]
+        @relation(name: "HAS_BUDGET", direction: "IN")
+}
+
+# A individual within the organisation who is contactable
+type Person {
+    id: String!
+    name: String!
+    email: String
+    slack: String
+    isTechDirectorFor(first: Int = 10, offset: Int = 0): [Group]
+        @relation(name: "HAS_TECH_DIRECTOR", direction: "IN")
+    isTechLeadFor(first: Int = 10, offset: Int = 0): [Person]
+        @cypher(
+            statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(system:System) RETURN system"
+        )
+    isProductOwnerFor(first: Int = 10, offset: Int = 0): [Person]
+        @cypher(
+            statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(system:System) RETURN system"
+        )
+    knows(first: Int = 10, offset: Int = 0): [System]
+        @relation(name: "KNOWS", direction: "OUT")
+}
+
+type Product {
+    id: String!
+    purpose: String
+    name: String
+    serviceTier: ServiceTier!
+    primaryURL: String
+    status: Status
+}
+
+enum Status {
+    ACTIVE
+}
+
+enum YesNo {
+    YES
+    NO
+}
+
+enum LifeCycleStage {
+    PRODUCTION
+    REQUIREMENTS
+    RETIRED
+    TESTING
+    ANALYSIS
+}
+
+# The support level
+enum ServiceTier {
+    BRONZE
+    SILVER
+    GOLD
+    PLATINUM
+}
+
+# The Circle CI version which is running
+enum CircleCiVersion {
+    ONE
+    TWO
+    NONE
+}
+
+type Query {
+    System(id: String, serviceTier: ServiceTier): System
+    Systems(first: Int = 10, offset: Int = 0): [System]
+    Team(id: String!): Team
+    Teams(first: Int = 10, offset: Int = 0): [Team]
+    Group(id: String!): Group
+    Groups(first: Int = 10, offset: Int = 0): [Group]
+    Person(name: String, id: String): Person
+    People(first: Int = 10, offset: Int = 0): [Person]
+    Repository(id: String!): Repository
+    Repositories(
+        first: Int = 10
+        offset: Int = 0
+        mostRecentCircleCIPlatform: CircleCiVersion
+    ): [Repository]
+    CostCentre(id: String!): CostCentre
+}
+
+input SystemInput {
+    serviceTier: ServiceTier
+}
+
+type Mutation {
+    System(id: String, params: SystemInput): System!
+}

@@ -1,5 +1,5 @@
 const crud = require('./_crud');
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 
 const get = async (req, res) => {
 	try {

@@ -47,6 +47,12 @@ Sample [queries/output](COOKBOOK.md)
 
 ## Run
 
+Install dependencies:
+
+```shell
+npm install
+```
+
 Start the [neo4j](https://neo4j.com/) community edition database. This requires the [APOC procedures](http://github.com/neo4j-contrib/neo4j-apoc-procedures) library to be added to a `plugins` directory:
 
 ```shell
@@ -54,20 +60,28 @@ Start the [neo4j](https://neo4j.com/) community edition database. This requires 
 docker compose up
 ```
 
-Populate it,
+This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
-```shell
-node scripts/init.js
-```
-
-Run the server,
-
-```shell
-node server/app
-```
-
-If the have [vault cli](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli) setup and [jq](https://stedolan.github.io/jq/) installed, run the below to get environment details from vault:
+Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). This allows you to populate environment variables, including secrets, from vault by running the following:
 
 ```shell
 npm run vault:env
+```
+
+Populate the database:
+
+```shell
+npm run init-db
+```
+
+Run the server:
+
+```shell
+npm start
+```
+
+Run tests locally:
+
+```shell
+npm run test-dev
 ```

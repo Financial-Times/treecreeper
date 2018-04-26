@@ -6,7 +6,9 @@ const end = stub();
 const {getAllForOnedbResponse, getAllForOneParsedResult, submitRequest} = require('./fixtures/submission.fixtures.js');
 const submission = proxyquire('../server/controllers/submission', {
 	'../db-connection': {
-		run: dbRun
+		session: {
+			run: dbRun
+		}
 	}
 });
 
@@ -23,7 +25,7 @@ describe('Submission - API endpoints', () => {
 		end.reset();
 		dbRun.reset();
 	});
-	
+
 	describe('getAllforOne', ()=> {
 		const surveyId = 'as';
 		const contractOrSupplierId = '123';
@@ -32,17 +34,17 @@ describe('Submission - API endpoints', () => {
 		});
 		it('gets a successful response', async() => {
 			dbRun.resolves(getAllForOnedbResponse);
-			await submission.getAllforOne(req, res);	
+			await submission.getAllforOne(req, res);
 			expect(res.send).to.be.calledWith(getAllForOneParsedResult);
 		});
 		it('gets an empty response', async() => {
 			dbRun.resolves({records: {}});
-			await submission.getAllforOne(req, res);	
+			await submission.getAllforOne(req, res);
 			expect(end).to.be.calledWith(`No ${surveyId} survey answers found for Contract ${contractOrSupplierId}`);
 		});
 		it('gets an invalid response', async() => {
 			dbRun.resolves({});
-			await submission.getAllforOne(req, res);	
+			await submission.getAllforOne(req, res);
 			expect(res.status).to.be.calledWith(500);
 			expect(end).to.be.calledOnce;
 		});
@@ -51,7 +53,7 @@ describe('Submission - API endpoints', () => {
 	describe('submit', ()=> {
 		beforeEach('set stubs', () => {
 			req = {body:submitRequest};
-			
+
 		});
 		it('submits a survey', async() => {
 			dbRun.resolves('success');
@@ -66,6 +68,3 @@ describe('Submission - API endpoints', () => {
 		});
 	});
 });
-
-
-
