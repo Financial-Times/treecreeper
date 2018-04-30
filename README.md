@@ -19,10 +19,12 @@ Sample [queries/output](COOKBOOK.md)
 
 ## Run
 
-WIP
+Start the [neo4j](https://neo4j.com/) community edition database. This requires the [APOC procedures](http://github.com/neo4j-contrib/neo4j-apoc-procedures) library to be added to a `plugins` directory:
 
-Download and start the [neo4j community edition](https://neo4j.com/download/) database.
-
+```shell
+./scripts/neo4j-plugins
+docker compose up
+```
 
 Populate it,
 
