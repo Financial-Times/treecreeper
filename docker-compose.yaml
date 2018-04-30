@@ -1,0 +1,15 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j:3.2.9
+    environment:
+      - NEO4J_dbms_logs_query_enabled=true
+      - NEO4J_AUTH=none
+    ports:
+      - "7474:7474"
+      - "7473:7473"
+      - "7687:7687"
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/plugins:/plugins
+      - ./neo4j/logs:/logs
