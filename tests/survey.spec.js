@@ -1,7 +1,6 @@
 const app = require('../server/app.js');
 const { expect } = require('chai');
-
-const request = require('supertest');
+const request = require('./helpers/supertest');
 
 describe('Survey - API endpoints', () => {
 
@@ -9,7 +8,7 @@ describe('Survey - API endpoints', () => {
 		['/api/survey/pci','/api/survey/ra', '/api/survey/tdd',
 		'/api/survey/dp','/api/survey/as','/api/survey/abc',
 		'/api/survey/bcm'].map( survey => {
-			it(` should retrieve ${survey} with status response 200`, (done) => {
+			it(`should retrieve ${survey} with status response 200`, (done) => {
 				request(app)
 				.get(survey)
 				.set('API_KEY', `${process.env.API_KEY}`)

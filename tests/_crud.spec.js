@@ -1,5 +1,5 @@
 const app = require('../server/app.js');
-const request = require('supertest');
+const request = require('./helpers/supertest');
 const {session: db} = require('../server/db-connection');
 const assert = require('chai').assert;
 

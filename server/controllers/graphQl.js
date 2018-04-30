@@ -1,11 +1,15 @@
 'use strict';
 
+const logger = require('@financial-times/n-logger').default;
+const { formatError } = require('graphql');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const schema = require('../graphQl/schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
-	System(id: "dewey") {}
+    System(id: "dewey") {
+      id
+    }
 }`;
 
 const graphiql = graphQlEndpoint =>
@@ -15,12 +19,16 @@ const graphiql = graphQlEndpoint =>
 	});
 
 const api = graphqlExpress(({ headers }) => ({
-	schema,
-	rootValue: {},
-	context: {
-		driver,
-		headers,
+    schema,
+    rootValue: {},
+    context: {
+        driver,
+        headers,
 	},
+	formatError(error) {
+		logger.error('GraphQL Error', {event: 'GRAPHQL_ERROR', error});
+		return formatError(error);
+	}
 }));
 
 module.exports = {
