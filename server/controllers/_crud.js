@@ -2,87 +2,146 @@
 
 const { oneLine } = require('common-tags');
 const {session: db} = require('../db-connection');
-const eventLog = require('../lib/eventLog');
+const eventLog = require('../lib/event-log');
 
-const sendEvent = (event) =>
-	eventLog.sendEvent(event)
-		.catch((error) => {
-			logger.error('Failed to send event to event log', {event});
-		})
+const sendEvent = event =>
+	eventLog.sendEvent(event).catch(error => {
+		logger.error('Failed to send event to event log', { event });
+	});
 
 const lookupField = (record, fieldName) => record._fields[record._fieldLookup[fieldName]];
 
+const sendRelationshipCreationEvents = ({
+	from,
+	fromUniqueAttrName,
+	fromUniqueAttrValue,
+	to,
+	toUniqueAttrName,
+	toUniqueAttrValue,
+	name,
+}) =>
+	Promise.all(
+		[
+			{
+				code: fromUniqueAttrValue,
+				type: from,
+				direction: 'to',
+				relatedCode: toUniqueAttrValue,
+				relatedType: to,
+			},
+			{
+				code: toUniqueAttrValue,
+				type: to,
+				direction: 'from',
+				relatedCode: fromUniqueAttrValue,
+				relatedType: from,
+			},
+		].map(({ code, type, relatedCode, relatedType, direction }) =>
+			sendEvent({
+				event: 'CREATED_RELATIONSHIP',
+				action: 'UPDATE',
+				relationship: {
+					type: name,
+					direction,
+					relatedCode,
+					relatedType,
+				},
+				code,
+				type,
+			})
+		)
+	);
+
+const _createRelationshipAndNode = async ({
+	from,
+	fromUniqueAttrName,
+	fromUniqueAttrValue,
+	to,
+	toUniqueAttrName,
+	toUniqueAttrValue,
+	name,
+}) => {
+	const query = oneLine`
+		MERGE (a:${from} {${fromUniqueAttrName}: '${fromUniqueAttrValue}'})
+		ON CREATE SET a.created = true
+		ON MATCH SET a.created = false
+		MERGE (b:${to} {${toUniqueAttrName}: '${toUniqueAttrValue}'})
+		ON CREATE SET b.created = true
+		ON MATCH SET b.created = false
+		MERGE (a)-[r:${name}]->(b)
+		WITH a, b, r, a.created as createdFrom, b.created as createdTo
+		REMOVE a.created, b.created
+		RETURN r, createdFrom, createdTo
+	`;
+	console.log('[CRUD] relationship upsert query', query);
+
+	const result = await db.run(query);
+
+	const createdFrom = lookupField(result.records[0], 'createdFrom');
+	const createdTo = lookupField(result.records[0], 'createdTo');
+
+	if (createdFrom) {
+		sendEvent({
+			event: 'CREATED_NODE',
+			action: 'CREATE',
+			code: fromUniqueAttrName,
+			type: from,
+		});
+	}
+	if (createdTo) {
+		sendEvent({
+			event: 'CREATED_NODE',
+			action: 'CREATE',
+			code: toUniqueAttrName,
+			type: to,
+		});
+	}
+
+	return result.records && result.records.length > 0 ? lookupField(result.records[0], 'r') : undefined;
+};
+
+const _createRelationship = async ({
+	from,
+	fromUniqueAttrName,
+	fromUniqueAttrValue,
+	to,
+	toUniqueAttrName,
+	toUniqueAttrValue,
+	name,
+}) => {
+	const query = oneLine`
+		MATCH (a:${from}), (b:${to})
+		WHERE a.${fromUniqueAttrName} = '${fromUniqueAttrValue}'
+		AND b.${toUniqueAttrName} = '${toUniqueAttrValue}'
+		CREATE (a)-[r:${name}]->(b)
+		RETURN r
+	`;
+	console.log('[CRUD] create relationship query', query);
+
+	const result = await db.run(query);
+
+	return result.records && result.records.length > 0 ? lookupField(result.records[0], 'r') : undefined;
+};
+
 const _createRelationships = async (relationships, upsert) => {
-	let resultRel;
-
+	let result;
 	for (let relationship of relationships) {
-		const {
-			from,
-			fromUniqueAttrName,
-			fromUniqueAttrValue,
-			to,
-			toUniqueAttrName,
-			toUniqueAttrValue,
-			name,
-		} = relationship;
-
-		const createRelationshipAndNode = oneLine`
-			MERGE (a:${from} {${fromUniqueAttrName}: '${fromUniqueAttrValue}'})
-			MERGE (b:${to} {${toUniqueAttrName}: '${toUniqueAttrValue}'})
-			MERGE (a)-[r:${name}]->(b)
-			RETURN r
-		`;
-
-		const createRelationshipAlone = oneLine`
-			MATCH (a:${from}),(b:${to})
-			WHERE a.${fromUniqueAttrName} = '${fromUniqueAttrValue}'
-			AND b.${toUniqueAttrName} = '${toUniqueAttrValue}'
-			CREATE (a)-[r:${name}]->(b)
-			RETURN r
-		`;
-
-		const query = upsert === 'upsert' ? createRelationshipAndNode : createRelationshipAlone;
-		console.log('[CRUD] relationship query', query);
-
 		try {
-			let oneResultRel = await db.run(query);
-			if (oneResultRel.records && oneResultRel.records.length > 0) {
-				resultRel = oneResultRel;
+			const createFunction = upsert === 'upsert' ? _createRelationshipAndNode : _createRelationship;
+
+			const singleResult = await createFunction(relationship);
+
+			if (singleResult) {
+				result = [singleResult];
 			}
-			[
-				{
-					code: fromUniqueAttrValue,
-					type: from,
-					direction: 'to',
-					relatedCode: toUniqueAttrValue,
-					relatedType: to,
-				},
-				{
-					code: toUniqueAttrValue,
-					type: to,
-					direction: 'from',
-					relatedCode: fromUniqueAttrValue,
-					relatedType: from,
-				},
-			].forEach(({ code, type, relatedCode, relatedType, direction }) =>
-				sendEvent({
-					event: 'CREATED_RELATIONSHIP',
-					action: 'UPDATE',
-					relationship: {
-						type: name,
-						direction,
-						relatedCode,
-						relatedType,
-					},
-					code,
-					type,
-				})
-			);
+
+			sendRelationshipCreationEvents(relationship);
 		} catch (e) {
 			console.log('[CRUD] Relationship not created', e.toString());
 		}
 	}
-	return resultRel;
+
+	return result;
 };
 
 const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
@@ -196,7 +255,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				return res.status(400).send('error creating relationships');
 			}
 
-			return res.send(resultRel.records[0]._fields);
+			return res.send(resultRel);
 		}
 	} catch (e) {
 		console.log(`${nodeType} not created`, e.toString());
@@ -244,15 +303,13 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		});
 
 		if (relationships) {
-			let resultRel = await _createRelationships(relationships, upsert);
-
-			console.log('RESULT REL, RETURNING', resultRel);
+			const resultRel = await _createRelationships(relationships, upsert);
 
 			if (!resultRel) {
 				return res.status(400).send('error creating relationships');
 			}
 
-			return res.send(resultRel.records[0]._fields);
+			return res.send(resultRel);
 		}
 
 		return res.send(
