@@ -10,7 +10,7 @@ describe('crud', () => {
 		beforeEach(async () => {
 			nodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
 			for (let node of nodes) {
-				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
+				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DETACH DELETE a`;
 				await db.run(deleteQuery);
 			}
 			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
@@ -21,10 +21,8 @@ describe('crud', () => {
 
 		afterEach(async () => {
 			for (let node of nodes) {
-				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
-				const deleteRshipQuery = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
+				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DETACH DELETE a`;
 				await db.run(deleteQuery);
-				await db.run(deleteRshipQuery);
 			}
 			nodes = null;
 		});
@@ -105,9 +103,7 @@ describe('crud', () => {
 		});
 
 		afterEach(async () => {
-			const deleteRship = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
-			await db.run(deleteRship);
-			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
+			const deleteQuery = 'MATCH (a:SomeNodeType) DETACH DELETE a';
 			await db.run(deleteQuery);
 			originalNode = null;
 			correctNode = null;
@@ -615,9 +611,7 @@ describe('crud', () => {
 		});
 
 		afterEach(async () => {
-			const deleteRshipQuery = 'MATCH ()-[r]->() WHERE type(r)=~"REL.*" DELETE r';
-			const deleteQuery = 'MATCH (a:SomeNodeType) DELETE a';
-			await db.run(deleteRshipQuery);
+			const deleteQuery = 'MATCH (a:SomeNodeType) DETACH DELETE a';
 			await db.run(deleteQuery);
 
 			node = null;
@@ -1148,7 +1142,7 @@ describe('crud', () => {
 
 		afterEach(async () => {
 			for (let node of nodes) {
-				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DELETE a`;
+				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${node.SomeUniqueAttr}" }) DETACH DELETE a`;
 				await db.run(deleteQuery);
 			}
 			nodes = null;
