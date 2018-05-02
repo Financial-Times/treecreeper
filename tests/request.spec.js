@@ -6,18 +6,19 @@ const { expect } = require('chai');
 const app = require('../server/app');
 
 const dbRunStub = stub();
-const { get, getWithSources } = proxyquire('../server/controllers/sar', {
+const { get, getWithSources } = proxyquire('../server/controllers/request', {
 	'../db-connection': {
 		run: dbRunStub,
 	},
 });
 
-const sar = { id: 'customerEmail@test.com_1519207670717' };
+const data = { id: 'customerEmail@test.com_1519207670717' };
 const sources = [{
 	id: 'livefyre_customerEmail@test.com_1519207670717',
 	name: 'livefyre',
 	status: 'PENDING',
 }];
+const type = 'Sar';
 
 const deleteSource = async () => request(app)
 	.delete('/api/Source/id/livefyre_customerEmail@test.com_1519207670717')
@@ -25,7 +26,7 @@ const deleteSource = async () => request(app)
 	.send({ mode: 'detach' });
 
 const deleteSar = async () => request(app)
-	.delete('/api/SAR/id/customerEmail@test.com_1519207670717')
+	.delete('/api/Sar/id/customerEmail@test.com_1519207670717')
 	.set('API_KEY', `${process.env.API_KEY}`)
 	.send({ mode: 'detach' });
 
@@ -39,9 +40,9 @@ describe('SAR', () => {
 
 		it('has status code 200', (done) => {
 			request(app)
-				.post('/api/sar')
+				.post('/api/request')
 				.set('API_KEY', `${process.env.API_KEY}`)
-				.send({ sar, sources })
+				.send({ data, sources, type })
 				.expect(200, done);
 		});
 	});
@@ -171,9 +172,9 @@ describe('SAR', () => {
 
 			it('status code should equal 200', (done) => {
 				request(app)
-					.post('/api/sar')
+					.post('/api/request')
 					.set('API_KEY', `${process.env.API_KEY}`)
-					.send({ sar, sources })
+					.send({ data, sources, type })
 					.expect(200, done);
 			});
 		});
@@ -183,7 +184,7 @@ describe('SAR', () => {
 				const invalidId = 'invalidId@test.com_1519207670717';
 				const expectedMessage = `SAR ${invalidId} does not exist`;
 				request(app)
-					.get('/api/sar/invalidId@test.com_1519207670717')
+					.get('/api/request/invalidId@test.com_1519207670717')
 					.set('API_KEY', `${process.env.API_KEY}`)
 					.expect(404, expectedMessage, done);
 			});

@@ -48,7 +48,7 @@ const create = async (req, res) => {
 const get = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar:SAR)-[:HAS]->(sources)
+			MATCH (sar:Sar)-[:HAS]->(sources)
 			WITH sar, collect(sources) as allSources
 			RETURN sar{ .*, sources: allSources }
 		`;
@@ -95,7 +95,7 @@ const getWithSources = async (req, res) => {
 			RETURN { sar: sar, sources: collect(sources) }
 		`;
 		const result = await db.run(query);
-
+		console.log(result, 'result')
 		if (result.records.length === 0) {
 			return res.status(404).end(`SAR ${req.params.id} does not exist`);
 		}
