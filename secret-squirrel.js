@@ -2,7 +2,9 @@ module.exports = {
 	files: {
 		allow: [
 			'doc/model.cql',
-			'doc/model.grass'
+			'doc/model.grass',
+			'scripts/neo4j-plugins',
+			'scripts/neo4j-wait-for-start'
 		],
 		allowOverrides: []
 	},
