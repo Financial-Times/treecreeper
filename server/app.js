@@ -5,7 +5,7 @@ const security = require('./middleware/security');
 const supplier = require('./controllers/supplier');
 const survey = require('./controllers/survey');
 const contract = require('./controllers/contract');
-const sar = require('./controllers/sar');
+const request = require('./controllers/request');
 const submission = require('./controllers/submission');
 const crud = require('./controllers/_crud');
 const cypher = require('./controllers/_cypher');
@@ -30,9 +30,10 @@ app.get('/', (req, res) => {
 });
 
 // SAR HUB - Specific (to phase out)
-app.post('/api/sar', sar.create);
-app.get('/api/sar', sar.get);
-app.get('/api/sar/:id', sar.getWithSources);
+app.post('/api/request', request.create);
+app.get('/api/request', request.get);
+app.get('/api/request/:id', request.getWithSources);
+
 
 // WEBPMA / 3SP - Specific (to phase out)
 app.get('/api/contracts/:supplierId', contract.get);

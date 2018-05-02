@@ -4,15 +4,16 @@ const db = require('../db-connection');
 const create = async (req, res) => {
 
 	const brands = req.body.brands;
-	await crud.create(res, 'SAR', 'id', req.body.sar.id, req.body.sar);
+	const type = req.body.type;
+	await crud.create(res, type, 'id', req.body.data.id, req.body.data);
 
 	brands.forEach( async (brand) => {
 		crud._createRelationships([
 			{
 				name: 'BELONGS_TO',
-				from: 'SAR',
+				from: type,
 				fromUniqueAttrName: 'id',
-				fromUniqueAttrValue: `${req.body.sar.id}`,
+				fromUniqueAttrValue: `${req.body.data.id}`,
 				toUniqueAttrName: 'id',
 				toUniqueAttrValue: `${brand.name}`,
 				to: 'Brand',
@@ -22,9 +23,9 @@ const create = async (req, res) => {
 			crud.create(res, 'Source', 'id', source.id, source, [
 				{
 					name:'HAS',
-					from: 'SAR',
+					from: type,
 					fromUniqueAttrName: 'id',
-					fromUniqueAttrValue: req.body.sar.id,
+					fromUniqueAttrValue: req.body.data.id,
 					toUniqueAttrName: 'id',
 					toUniqueAttrValue: source.id,
 					to: 'Source',
