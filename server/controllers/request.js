@@ -48,11 +48,12 @@ const create = async (req, res) => {
 const get = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar:Sar)-[:HAS]->(sources)
-			WITH sar, collect(sources) as allSources
-			RETURN sar{ .*, sources: allSources }
-		`;
+		MATCH (n)-[:HAS]->(sources)
+		WITH n, collect(sources) as allSources
+		RETURN n{ .*, sources: allSources }`;
+
 		const result = await db.run(query);
+
 		const formattedResult = result.records.reduce((acc, { _fields }) => {
 			const { sources } = _fields[0];
 
@@ -79,11 +80,10 @@ const get = async (req, res) => {
 				),
 			];
 		}, []);
-
 		return res.send(JSON.stringify(formattedResult));
 	}
 	catch (e) {
-		console.log('[SAR] error', e);
+		console.log('[REQUEST for erasure of SAR] error', e);
 		return res.status(500).end(e.toString());
 	}
 };
@@ -91,18 +91,17 @@ const get = async (req, res) => {
 const getWithSources = async (req, res) => {
 	try {
 		const query = `
-			MATCH (sar { id: "${req.params.id}" })-[:HAS]->(sources)
-			RETURN { sar: sar, sources: collect(sources) }
+			MATCH (request { id: "${req.params.id}" })-[:HAS]->(sources)
+			RETURN { request: request, sources: collect(sources) }
 		`;
 		const result = await db.run(query);
-		console.log(result, 'result')
 		if (result.records.length === 0) {
-			return res.status(404).end(`SAR ${req.params.id} does not exist`);
+			return res.status(404).end(`SAR or Erasure request ${req.params.id} does not exist`);
 		}
 
-		const { sar: { properties: sar }, sources } = result.records[0]._fields[0];
+		const { request: { properties: request }, sources } = result.records[0]._fields[0];
 		const formattedResult = Object.assign({},
-			sar,
+			request,
 			{
 				sources: sources.map(({ properties }) => properties),
 			}
@@ -111,7 +110,7 @@ const getWithSources = async (req, res) => {
 		return res.send(JSON.stringify(formattedResult));
 	}
 	catch (e) {
-		console.log('[SAR] error', e);
+		console.log('[SAR or ERASURE Request] error', e);
 		return res.status(500).end(e.toString());
 	}
 };

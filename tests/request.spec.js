@@ -25,16 +25,16 @@ const deleteSource = async () => request(app)
 	.set('API_KEY', `${process.env.API_KEY}`)
 	.send({ mode: 'detach' });
 
-const deleteSar = async () => request(app)
+const deleterequest = async () => request(app)
 	.delete('/api/Sar/id/customerEmail@test.com_1519207670717')
 	.set('API_KEY', `${process.env.API_KEY}`)
 	.send({ mode: 'detach' });
 
-describe('SAR', () => {
+describe('REQUESTS- SAR', () => {
 	describe('POST', () => {
 
 		after(() =>
-			deleteSar()
+			deleterequest()
 				.then(() =>
 					deleteSource()));
 
@@ -48,14 +48,14 @@ describe('SAR', () => {
 	});
 
 	describe('get', () => {
-		it('should return sars array with sources summary on each item', async () => {
+		it('should return requests array with sources summary on each item', async () => {
 			const sendMock = stub();
 			const res = {
 				send: sendMock,
 				status: stub(),
 			};
 
-			const sars = [
+			const requests = [
 				{
 					id: 'a',
 					some: 'value',
@@ -123,15 +123,15 @@ describe('SAR', () => {
 
 			dbRunStub
 				.resolves({
-					records: sars.reduce((acc, sar) => [
+					records: requests.reduce((acc, request) => [
 						...acc,
 						{
 							_fields: [
 								Object.assign(
 									{},
-									sar,
+									request,
 									{
-										sources: sources[sar.id],
+										sources: sources[request.id],
 									}
 								),
 							],
@@ -139,20 +139,20 @@ describe('SAR', () => {
 					], []),
 				});
 
-			const expected = sars.reduce((acc, sar) => [
+			const expected = requests.reduce((acc, request) => [
 				...acc,
 				Object.assign(
 					{},
-					sar,
+					request,
 					{
 						sources: {
-							complete: sources[sar.id].reduce((acc, { properties: { status } }) =>
+							complete: sources[request.id].reduce((acc, { properties: { status } }) =>
 								status === 'COMPLETE'
 									? acc + 1
 									: acc
 								, 0),
-							total: sources[sar.id].length,
-							allEmpty: sources[sar.id].every(({ properties: { status } }) => status === 'EMPTY'),
+							total: sources[request.id].length,
+							allEmpty: sources[request.id].every(({ properties: { status } }) => status === 'EMPTY'),
 						},
 					},
 				),
@@ -165,9 +165,9 @@ describe('SAR', () => {
 	});
 
 	describe('getWithSources', () => {
-		describe('if the SAR id exists', () => {
+		describe('if the request id exists', () => {
 			after(() =>
-				deleteSar()
+				deleterequest()
 					.then(() => deleteSource()));
 
 			it('status code should equal 200', (done) => {
@@ -179,10 +179,10 @@ describe('SAR', () => {
 			});
 		});
 
-		describe('if the SAR id is invalid', () => {
+		describe('if the request id is invalid', () => {
 			it('status code should equal 404', (done) => {
 				const invalidId = 'invalidId@test.com_1519207670717';
-				const expectedMessage = `SAR ${invalidId} does not exist`;
+				const expectedMessage = `SAR or Erasure request ${invalidId} does not exist`;
 				request(app)
 					.get('/api/request/invalidId@test.com_1519207670717')
 					.set('API_KEY', `${process.env.API_KEY}`)
@@ -190,7 +190,7 @@ describe('SAR', () => {
 			});
 		});
 
-		it('should return sar object with sources array', async () => {
+		it('should return request object with sources array', async () => {
 			const sendMock = stub();
 			const reqId = 'someId';
 			const res = {
@@ -202,7 +202,7 @@ describe('SAR', () => {
 				},
 			};
 
-			const sarProperties = {
+			const requestProperties = {
 				a: 'a',
 				b: 'b',
 				c: 'c',
@@ -227,8 +227,8 @@ describe('SAR', () => {
 						{
 							_fields: [
 								{
-									sar: {
-										properties: sarProperties,
+									request: {
+										properties: requestProperties,
 									},
 									sources: [
 										{
@@ -246,7 +246,7 @@ describe('SAR', () => {
 
 			const expected = Object.assign(
 				{},
-				sarProperties,
+				requestProperties,
 				{
 					sources: sourcesProperties,
 				}
