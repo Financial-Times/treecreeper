@@ -3,30 +3,31 @@
 const AWS = require('aws-sdk');
 const logger = require('@financial-times/n-logger').default;
 
-const dyno = process.env.DYNO;
-const isProduction = process.env.NODE_ENV === 'production';
+let isProduction = true;
 
 const stubInDevelopment = (action, fn) => (...args) => {
-    if (!isProduction) {
-        logger.debug(`Skipped kinesis ${action} as not in production`, { event: args[0].event });
-        return Promise.resolve();
-    }
-    return fn(...args);
+	if (!isProduction) {
+		logger.debug(`Skipped kinesis ${action} as not in production`, { event: args[0].event });
+		return Promise.resolve();
+	}
+	return fn(...args);
 };
 
-const create = streamName => {
-    const kinesis = new AWS.Kinesis({
-        apiVersion: '2013-12-02',
-        logger: {
-            log(message) {
-                logger.debug('Kinesis API call', message);
-            },
-        },
-    });
+function Kinesis(streamName) {
+	isProduction = process.env.NODE_ENV === 'production';
+	const dyno = process.env.DYNO;
+	const kinesis = new AWS.Kinesis({
+		apiVersion: '2013-12-02',
+		logger: {
+			log(message) {
+				logger.debug('Kinesis API call', message);
+			},
+		},
+	})
 
-    return {
-        putRecord: stubInDevelopment('put record', data => {
-            kinesis
+	return {
+		putRecord: stubInDevelopment('put record', (data) =>{
+			return kinesis
 				.putRecord({
 					Data: Buffer.from(JSON.stringify(data), 'utf-8'),
 					PartitionKey: `${dyno}:${Date.now()}`,
@@ -41,8 +42,8 @@ const create = streamName => {
 					});
 					throw error;
 				});
-        }),
-    };
+		})
+	}
 };
 
-module.exports = create;
+module.exports = Kinesis

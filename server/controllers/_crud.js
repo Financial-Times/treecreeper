@@ -2,14 +2,23 @@
 
 const { oneLine } = require('common-tags');
 const {session: db} = require('../db-connection');
-const eventLog = require('../lib/event-log');
+const EventLogWriter = require('../lib/event-log-writer');
+const Kinesis = require('../lib/kinesis');
+
+const kinesisClient = new Kinesis(process.env.CRUD_EVENT_LOG_STREAM_NAME);
+const eventLogWriter = new EventLogWriter(kinesisClient);
 
 const sendEvent = event =>
-	eventLog.sendEvent(event).catch(error => {
+	eventLogWriter.sendEvent(event).catch(error => {
 		logger.error('Failed to send event to event log', { event });
 	});
 
-const lookupField = (record, fieldName) => record._fields[record._fieldLookup[fieldName]];
+const lookupField = (record, fieldName) => {
+	if (typeof record._fieldLookup[fieldName] === 'undefined') {
+		return undefined;
+	}
+	return record._fields[record._fieldLookup[fieldName]];
+};
 
 const sendRelationshipCreationEvents = ({
 	from,
@@ -39,7 +48,7 @@ const sendRelationshipCreationEvents = ({
 		].map(({ code, type, relatedCode, relatedType, direction }) =>
 			sendEvent({
 				event: 'CREATED_RELATIONSHIP',
-				action: 'UPDATE',
+				action: eventLog.actions.UPDATE,
 				relationship: {
 					type: name,
 					direction,
@@ -83,7 +92,7 @@ const _createRelationshipAndNode = async ({
 	if (createdFrom) {
 		sendEvent({
 			event: 'CREATED_NODE',
-			action: 'CREATE',
+			action: eventLog.actions.CREATE,
 			code: fromUniqueAttrName,
 			type: from,
 		});
@@ -91,7 +100,7 @@ const _createRelationshipAndNode = async ({
 	if (createdTo) {
 		sendEvent({
 			event: 'CREATED_NODE',
-			action: 'CREATE',
+			action: eventLog.actions.CREATE,
 			code: toUniqueAttrName,
 			type: to,
 		});
@@ -120,6 +129,8 @@ const _createRelationship = async ({
 
 	const result = await db.run(query);
 
+	console.dir(result, { depth: null });
+
 	return result.records && result.records.length > 0 ? lookupField(result.records[0], 'r') : undefined;
 };
 
@@ -133,9 +144,8 @@ const _createRelationships = async (relationships, upsert) => {
 
 			if (singleResult) {
 				result = [singleResult];
+				sendRelationshipCreationEvents(relationship);
 			}
-
-			sendRelationshipCreationEvents(relationship);
 		} catch (e) {
 			console.log('[CRUD] Relationship not created', e.toString());
 		}
@@ -239,7 +249,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			const result = await db.run(createQuery, { node: obj });
 			sendEvent({
 				event: 'CREATED_NODE',
-				action: 'CREATE',
+				action: eventLog.actions.CREATE,
 				code: uniqueAttr,
 				type: nodeType,
 			});
@@ -279,28 +289,35 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		console.log('[CRUD] records', result.records);
 
 		if (result.records.length === 0) {
-			if (upsert) {
-				const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
-
-				if (uniqueAttrName) {
-					obj[uniqueAttrName] = uniqueAttr;
-				}
-
-				console.log('[CRUD] create query (upsert)', createQuery);
-				await db.run(createQuery, { node: obj });
-			} else {
+			if (!upsert) {
 				const message = `${nodeType}${uniqueAttr} not found. No nodes updated.`;
 				console.log(message);
 				return res.status(404).send(message);
 			}
-		}
 
-		sendEvent({
-			event: 'UPDATED_NODE',
-			action: 'UPDATE',
-			code: uniqueAttr,
-			type: nodeType,
-		});
+			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
+
+			if (uniqueAttrName) {
+				obj[uniqueAttrName] = uniqueAttr;
+			}
+
+			console.log('[CRUD] create query (upsert)', createQuery);
+			await db.run(createQuery, { node: obj });
+
+			sendEvent({
+				event: 'CREATED_NODE',
+				action: eventLog.actions.CREATE,
+				code: uniqueAttr,
+				type: nodeType,
+			});
+		} else {
+			sendEvent({
+				event: 'UPDATED_NODE',
+				action: eventLog.actions.UPDATE,
+				code: uniqueAttr,
+				type: nodeType,
+			});
+		}
 
 		if (relationships) {
 			const resultRel = await _createRelationships(relationships, upsert);
@@ -327,19 +344,25 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 			MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) ${
 			mode === 'detach'
 				? `OPTIONAL MATCH (a)-[r]-(b)
-					WITH a, b, r, TYPE(r) as relationshipType
-					DELETE a,r
+					WITH a, b, r, TYPE(r) as relationshipType, startNode(r).${uniqueAttrName} as startNodeId
+					DELETE a, r
 					RETURN
 						relationshipType,
 						b.${uniqueAttrName} as nodeId,
 						labels(b) as nodeLabels,
-						startNode(r).${uniqueAttrName} as startNodeId`
-				: 'DELETE a'
+						startNodeId`
+				: // Conditional operations in neo4j
+				  // http://markhneedham.com/blog/2014/06/17/neo4j-load-csv-handling-conditionals/
+				  `OPTIONAL MATCH (a)-[r]-()
+					FOREACH(x IN (CASE WHEN r IS NULL THEN [1] else [] END) |
+						DELETE a
+					)
+					RETURN r as relationships`
 		}`;
 		console.log('[CRUD] delete query', deleteQuery);
 
 		const result = await db.run(deleteQuery);
-		console.log('RESULT', result);
+
 		if (
 			result &&
 			result.summary &&
@@ -351,12 +374,14 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 					relationshipType: lookupField(record, 'relationshipType'),
 					nodeId: lookupField(record, 'nodeId'),
 					nodeLabels: lookupField(record, 'nodeLabels'),
+					direction: uniqueAttr === lookupField(record, 'startNodeId') ? 'from' : 'to',
 				}))
-				.forEach(({ relationshipType, nodeId, nodeLabels }) => {
-					const direction = uniqueAttr === lookupField(record, 'startNodeId') ? 'from' : 'to';
+				.filter(record => record.relationshipType)
+				.sort((recordA, recordB) => recordA.nodeId < recordB.nodeId)
+				.map(({ direction, relationshipType, nodeId, nodeLabels }) =>
 					sendEvent({
 						event: 'DELETED_RELATIONSHIP',
-						action: 'UPDATE',
+						action: eventLog.actions.UPDATE,
 						relationship: {
 							type: relationshipType,
 							direction,
@@ -365,19 +390,25 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 						},
 						code: nodeId,
 						type: nodeLabels[0],
-					});
-				});
+					})
+				);
 			sendEvent({
 				event: 'DELETED_NODE',
-				action: 'DELETE',
+				action: eventLog.actions.DELETE,
 				code: uniqueAttr,
 				type: nodeType,
 			});
+
 			return res.status(200).send(`${uniqueAttr} deleted`);
+		} else if (result.records.length > 0 && lookupField(result.records[0], 'relationships')) {
+			return res
+				.status(400)
+				.send(`Node has existing relationships. Specify mode=detach to force deletion.`);
 		} else {
 			return res.status(404).send(`${uniqueAttr} not found. No nodes deleted.`);
 		}
 	} catch (e) {
+		console.error('[CRUD] delete failed', e);
 		return res.status(500).send(e.toString());
 	}
 };

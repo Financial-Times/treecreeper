@@ -5,15 +5,16 @@ const { expect, assert } = require('chai');
 const request = require('./helpers/supertest');
 const app = require('../server/app.js');
 const {session: db} = require('../server/db-connection');
-const eventLog = require('../server/lib/event-log');
+const EventLogWriter = require('../server/lib/event-log-writer');
 
 describe('crud', () => {
 	let sandbox;
+	let stubSendEvent;
 
 	beforeEach(() => {
 		sandbox = sinon.sandbox.create();
-		const originalSendEvent = eventLog.sendEvent;
-		sandbox.stub(eventLog, 'sendEvent').callsFake((...args) => originalSendEvent(...args));
+		const originalSendEvent = EventLogWriter.prototype.sendEvent;
+		stubSendEvent = sandbox.stub(EventLogWriter.prototype, 'sendEvent').callsFake((...args) => originalSendEvent(...args));
 	});
 
 	afterEach(() => {
@@ -155,9 +156,9 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({ node: originalNode })
 				.then(async response => {
-					expect(eventLog.sendEvent).to.have.been.calledOnce;
-					expect(eventLog.sendEvent).to.have.been.calledWithExactly({
-						action: 'CREATE',
+					expect(stubSendEvent).to.have.been.calledOnce;
+					expect(stubSendEvent).to.have.been.calledWithExactly({
+						action: eventLog.actions.CREATE,
 						code: uniqueAttributeValue,
 						event: 'CREATED_NODE',
 						type: nodeType,
@@ -393,16 +394,16 @@ describe('crud', () => {
 					relationships: relationships,
 				})
 				.then(async response => {
-					expect(eventLog.sendEvent).to.have.callCount(7);
-					expect(eventLog.sendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+					expect(stubSendEvent).to.have.callCount(7);
+					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
 						{
-							action: 'CREATE',
+							action: eventLog.actions.CREATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_NODE',
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -414,7 +415,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'OtherUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -426,7 +427,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -438,7 +439,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'OtherUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -450,7 +451,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -462,7 +463,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: 'UPDATE',
+							action: eventLog.actions.UPDATE,
 							code: 'SingleRelationUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -823,7 +824,7 @@ describe('crud', () => {
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
-				.send({ node: node })
+				.send({ node })
 				.expect(200, node)
 				.then(async response => {
 					return request(app)
@@ -833,13 +834,29 @@ describe('crud', () => {
 				});
 		});
 
+		it('PUT sends an event log event that the node was updated', () => {
+			return request(app)
+				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({ node })
+				.expect(() => {
+					expect(stubSendEvent).to.have.been.calledOnce;
+					expect(stubSendEvent).to.have.been.calledWithExactly({
+						action: eventLog.actions.UPDATE,
+						code: 'SomeUniqueAttrValue',
+						event: 'UPDATED_NODE',
+						type: 'SomeNodeType',
+					});
+				});
+		});
+
 		it("PUT for a node that doesn't exist returns 404", () => {
 			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
 
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
 				.set('API_KEY', `${process.env.API_KEY}`)
-				.send({ node: node })
+				.send({ node })
 				.expect(404)
 				.then(async response => {
 					return request(app)
@@ -849,7 +866,17 @@ describe('crud', () => {
 				});
 		});
 
-		it("PUT for a node that doesn't exist creates if using upsert", () => {
+		it("PUT for a node that doesn't exist does not send an event log event", () => {
+			return request(app)
+				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({ node })
+				.expect(() => {
+					expect(stubSendEvent).to.have.not.been.called;
+				});
+		});
+
+		it("PUT with upsert creates a node if it doesn't exist", () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ SomeUniqueAttr: 'NonExistent', foo: 'bar' },
@@ -858,13 +885,29 @@ describe('crud', () => {
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
 				.set('API_KEY', `${process.env.API_KEY}`)
-				.send({ node: node })
+				.send({ node })
 				.expect(200)
 				.then(async response => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
 						.expect(200, expectedNodes);
+				});
+		});
+
+		it("PUT with upsert sends an event log event that the node was created if it doesn't exist", () => {
+			return request(app)
+				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({ node })
+				.expect(() => {
+					expect(stubSendEvent).to.have.been.calledOnce;
+					expect(stubSendEvent).to.have.been.calledWithExactly({
+						action: eventLog.actions.CREATE,
+						code: 'NonExistent',
+						event: 'CREATED_NODE',
+						type: 'SomeNodeType',
+					});
 				});
 		});
 
@@ -1031,7 +1074,7 @@ describe('crud', () => {
 				});
 		});
 
-		it('PUT fails if the related node does not exist', async () => {
+		it('PUT creates the given node, but returns a 400 if the related node does not exist', async () => {
 			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
 
 			return request(app)
@@ -1057,6 +1100,35 @@ describe('crud', () => {
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
 						.expect(200, expectedNodes);
+				});
+		});
+
+		it('PUT only sends an UPDATED_NODE event log event if the related node does not exist', async () => {
+			return request(app)
+				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({
+					node: node,
+					relationships: [
+						{
+							name: 'REL',
+							from: 'SomeNodeType',
+							fromUniqueAttrName: 'SomeUniqueAttr',
+							fromUniqueAttrValue: 'SomeUniqueAttrValue',
+							toUniqueAttrName: 'id',
+							toUniqueAttrValue: 'nonExistent',
+							to: 'SomeNodeType',
+						},
+					],
+				})
+				.expect(() => {
+					expect(stubSendEvent).to.have.been.calledOnce;
+					expect(stubSendEvent).to.have.been.calledWithExactly({
+						action: eventLog.actions.UPDATE,
+						code: 'SomeUniqueAttrValue',
+						event: 'UPDATED_NODE',
+						type: 'SomeNodeType',
+					});
 				});
 		});
 
@@ -1154,7 +1226,7 @@ describe('crud', () => {
 				});
 		});
 
-		it('PUT creates the node if it doesn\'t exist, and links it to a related node even if it does not exist, with upsert', async () => {
+		it("PUT creates the node if it doesn't exist, and links it to a related node even if it does not exist, with upsert", async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
@@ -1189,7 +1261,7 @@ describe('crud', () => {
 				});
 		});
 
-		it('PUT creates the node if it doesn\'t exist, and links it to multiple related node even if they do not exist, with upsert', async () => {
+		it("PUT creates the node if it doesn't exist, and links it to multiple related node even if they do not exist, with upsert", async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OneUniqueAttrName: 'OneUniqueAttrValue' },
@@ -1245,7 +1317,148 @@ describe('crud', () => {
 				});
 		});
 
-		it('PUT creates the node if it doesn\'t exist, and links it to a single multiple-related node even it does not exist, with upsert', async () => {
+		it('PUT sends an event log event for each created node, and each side of any created relationships', async () => {
+			const relationships = [
+				{
+					name: 'REL',
+					from: 'SomeNodeType',
+					fromUniqueAttrName: 'SomeUniqueAttr',
+					fromUniqueAttrValue: 'SomeUniqueAttrValue',
+					toUniqueAttrName: 'OneUniqueAttrName',
+					toUniqueAttrValue: 'OneUniqueAttrValue',
+					to: 'SomeNodeType',
+				},
+				{
+					name: 'REL',
+					from: 'SomeNodeType',
+					fromUniqueAttrName: 'SomeUniqueAttr',
+					fromUniqueAttrValue: 'SomeUniqueAttrValue',
+					toUniqueAttrName: 'TwoUniqueAttrName',
+					toUniqueAttrValue: 'TwoUniqueAttrValue',
+					to: 'SomeNodeType',
+				},
+				{
+					name: 'REL',
+					from: 'SomeNodeType',
+					fromUniqueAttrName: 'SomeUniqueAttr',
+					fromUniqueAttrValue: 'SomeUniqueAttrValue',
+					toUniqueAttrName: 'ThreeUniqueAttrName',
+					toUniqueAttrValue: 'ThreeUniqueAttrValue',
+					to: 'SomeNodeType',
+				},
+			];
+
+			return request(app)
+				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/upsert')
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({
+					node: node,
+					relationships: relationships,
+				})
+				.expect(() => {
+					expect(stubSendEvent).to.have.callCount(10);
+					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+						{
+							event: 'UPDATED_NODE',
+							action: eventLog.actions.UPDATE,
+							code: 'SomeUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_NODE',
+							action: eventLog.actions.CREATE,
+							code: 'OneUniqueAttrName',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'to',
+								relatedCode: 'OneUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'SomeUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'from',
+								relatedCode: 'SomeUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'OneUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_NODE',
+							action: eventLog.actions.CREATE,
+							code: 'TwoUniqueAttrName',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'to',
+								relatedCode: 'TwoUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'SomeUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'from',
+								relatedCode: 'SomeUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'TwoUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_NODE',
+							action: eventLog.actions.CREATE,
+							code: 'ThreeUniqueAttrName',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'to',
+								relatedCode: 'ThreeUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'SomeUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+						{
+							event: 'CREATED_RELATIONSHIP',
+							action: eventLog.actions.UPDATE,
+							relationship: {
+								type: 'REL',
+								direction: 'from',
+								relatedCode: 'SomeUniqueAttrValue',
+								relatedType: 'SomeNodeType',
+							},
+							code: 'ThreeUniqueAttrValue',
+							type: 'SomeNodeType',
+						},
+					]);
+				});
+		});
+
+		it("PUT creates the node if it doesn't exist, and links it to a single multiple-related node even it does not exist, with upsert", async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
@@ -1301,14 +1514,16 @@ describe('crud', () => {
 	});
 
 	describe('DELETE generic', () => {
+		const nodeType = 'SomeNodeType';
 		let nodes;
 
 		beforeEach(async () => {
 			nodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' },
+				{ SomeUniqueAttr: 'ThirdUniqueAttrValue', a: 'b' },
 			];
-			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
+			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
 			for (let node of nodes) {
 				await db.run(createQuery, { node: node });
 			}
@@ -1316,7 +1531,7 @@ describe('crud', () => {
 
 		afterEach(async () => {
 			for (let node of nodes) {
-				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${
+				const deleteQuery = `MATCH (a:${nodeType} { SomeUniqueAttr: "${
 					node.SomeUniqueAttr
 				}" }) DETACH DELETE a`;
 				await db.run(deleteQuery);
@@ -1324,13 +1539,134 @@ describe('crud', () => {
 			nodes = null;
 		});
 
-		it('DELETE with unique attribute deletes the node', () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' }];
+		it('DELETE with a unique attribute deletes the node', () => {
+			const expectedNodes = nodes.slice(1);
 
 			return request(app)
-				.delete('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.expect(200, 'SomeUniqueAttrValue deleted')
+				.then(async response => {
+					return request(app)
+						.get(`/api/${nodeType}/`)
+						.set('API_KEY', `${process.env.API_KEY}`)
+						.expect(200, expectedNodes);
+				});
+		});
+
+		it("DELETE with unique attribute does not delete the given if it has existing relationships and mode != 'detach'", async () => {
+			const addRelationshipsQuery = `
+				MATCH (n:${nodeType} {SomeUniqueAttr: "${nodes[0].SomeUniqueAttr}"})
+				MATCH (t:${nodeType} {SomeUniqueAttr: "${nodes[1].SomeUniqueAttr}"})
+				CREATE (n)<-[r:TestRelationship]-(t)
+				RETURN r`;
+			await db.run(addRelationshipsQuery);
+
+			return request(app)
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(400);
+		});
+
+		it("DELETE with unique attribute should not send an event log if existing relationships prevented deletion when mode != 'detach'", async () => {
+			const addRelationshipsQuery = `
+				MATCH (n:${nodeType} {SomeUniqueAttr: "${nodes[0].SomeUniqueAttr}"})
+				MATCH (t:${nodeType} {SomeUniqueAttr: "${nodes[1].SomeUniqueAttr}"})
+				CREATE (n)<-[r:TestRelationship]-(t)
+				RETURN r`;
+			await db.run(addRelationshipsQuery);
+
+			return request(app)
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(() => {
+					expect(stubSendEvent).to.have.not.been.called;
+				});
+		});
+
+		it('DELETE with unique attribute sends an event log event with the deleted node', () => {
+			return request(app)
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(() => {
+					expect(stubSendEvent).to.have.been.calledOnce;
+					expect(stubSendEvent).to.have.been.calledWithExactly({
+						action: eventLog.actions.DELETE,
+						code: nodes[0].SomeUniqueAttr,
+						event: 'DELETED_NODE',
+						type: nodeType,
+					});
+				});
+		});
+
+		it('DELETE mode=detach with unique attribute sends an event log event for the deleted node and for each end of the deleted relationships', async () => {
+			const addRelationshipsQuery = `
+				MATCH (n:${nodeType} {SomeUniqueAttr: "${nodes[0].SomeUniqueAttr}"})
+				MATCH (t1:${nodeType} {SomeUniqueAttr: "${nodes[1].SomeUniqueAttr}"})
+				MATCH (t2:${nodeType} {SomeUniqueAttr: "${nodes[2].SomeUniqueAttr}"})
+				CREATE (n)<-[r1:TestRelationship]-(t1)
+				CREATE (n)-[r2:TestRelationship]->(t2)
+				RETURN r1, r2`;
+			await db.run(addRelationshipsQuery);
+
+			return request(app)
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.send({
+					mode: 'detach',
+				})
+				.expect(200)
+				.then(async response => {
+					return request(app)
+						.get(`/api/${nodeType}/`)
+						.set('API_KEY', `${process.env.API_KEY}`)
+						.expect(200)
+						.expect(() => {
+							expect(stubSendEvent).to.have.been.calledThrice;
+							expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+								{
+									event: 'DELETED_RELATIONSHIP',
+									action: eventLog.actions.UPDATE,
+									relationship: {
+										type: 'TestRelationship',
+										direction: 'from',
+										relatedCode: 'SomeUniqueAttrValue',
+										relatedType: 'SomeNodeType',
+									},
+									code: 'ThirdUniqueAttrValue',
+									type: 'SomeNodeType',
+								},
+								{
+									event: 'DELETED_RELATIONSHIP',
+									action: eventLog.actions.UPDATE,
+									relationship: {
+										type: 'TestRelationship',
+										direction: 'to',
+										relatedCode: 'SomeUniqueAttrValue',
+										relatedType: 'SomeNodeType',
+									},
+									code: 'OtherUniqueAttrValue',
+									type: 'SomeNodeType',
+								},
+								{
+									event: 'DELETED_NODE',
+									action: eventLog.actions.DELETE,
+									code: 'SomeUniqueAttrValue',
+									type: 'SomeNodeType',
+								},
+							]);
+						});
+				});
+		});
+
+		it('DELETE returns 404 when trying to delete a non-existent id', () => {
+			const givenNonExistentId = 'foo-undefined';
+			const expectedNodes = nodes.slice(0);
+
+			return request(app)
+				.delete(`/api/${nodeType}/SomeUniqueAttr/${givenNonExistentId}`)
+				.set('API_KEY', `${process.env.API_KEY}`)
+				.expect(404, `${givenNonExistentId} not found. No nodes deleted.`)
 				.then(async response => {
 					return request(app)
 						.get('/api/SomeNodeType/')
@@ -1339,21 +1675,12 @@ describe('crud', () => {
 				});
 		});
 
-		it('DELETE returns 404 when trying to delete non-existent id', () => {
-			const expectedNodes = [
-				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' },
-			];
-
+		it('DELETE does not send and event log event when trying to delete non-existent id', () => {
 			return request(app)
-				.delete('/api/SomeNodeType/SomeUniqueAttr/Foo')
+				.delete(`/api/${nodeType}/SomeUniqueAttr/foo-undefined`)
 				.set('API_KEY', `${process.env.API_KEY}`)
-				.expect(404, 'Foo not found. No nodes deleted.')
-				.then(async response => {
-					return request(app)
-						.get('/api/SomeNodeType/')
-						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+				.expect(() => {
+					expect(stubSendEvent).to.have.not.been.called;
 				});
 		});
 	});
