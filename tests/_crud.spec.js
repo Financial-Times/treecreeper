@@ -1,5 +1,6 @@
 'use strict';
 
+const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
 const { expect, assert } = require('chai');
 const request = require('./helpers/supertest');
@@ -13,8 +14,10 @@ describe('crud', () => {
 
 	beforeEach(() => {
 		sandbox = sinon.sandbox.create();
-		const originalSendEvent = EventLogWriter.prototype.sendEvent;
-		stubSendEvent = sandbox.stub(EventLogWriter.prototype, 'sendEvent').callsFake((...args) => originalSendEvent(...args));
+		stubSendEvent = sandbox.stub(EventLogWriter.prototype, 'sendEvent').callsFake((data) => {
+			logger.debug('Event log stub sendEvent called', {event: data.event});
+			return Promise.resolve();
+		})
 	});
 
 	afterEach(() => {
@@ -158,7 +161,7 @@ describe('crud', () => {
 				.then(async response => {
 					expect(stubSendEvent).to.have.been.calledOnce;
 					expect(stubSendEvent).to.have.been.calledWithExactly({
-						action: eventLog.actions.CREATE,
+						action: EventLogWriter.actions.CREATE,
 						code: uniqueAttributeValue,
 						event: 'CREATED_NODE',
 						type: nodeType,
@@ -397,13 +400,13 @@ describe('crud', () => {
 					expect(stubSendEvent).to.have.callCount(7);
 					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
 						{
-							action: eventLog.actions.CREATE,
+							action: EventLogWriter.actions.CREATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_NODE',
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -415,7 +418,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'OtherUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -427,7 +430,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -439,7 +442,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'OtherUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -451,7 +454,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -463,7 +466,7 @@ describe('crud', () => {
 							type: 'SomeNodeType',
 						},
 						{
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'SingleRelationUniqueAttrValue',
 							event: 'CREATED_RELATIONSHIP',
 							relationship: {
@@ -842,7 +845,7 @@ describe('crud', () => {
 				.expect(() => {
 					expect(stubSendEvent).to.have.been.calledOnce;
 					expect(stubSendEvent).to.have.been.calledWithExactly({
-						action: eventLog.actions.UPDATE,
+						action: EventLogWriter.actions.UPDATE,
 						code: 'SomeUniqueAttrValue',
 						event: 'UPDATED_NODE',
 						type: 'SomeNodeType',
@@ -868,7 +871,7 @@ describe('crud', () => {
 
 		it("PUT for a node that doesn't exist does not send an event log event", () => {
 			return request(app)
-				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent/upsert')
+				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({ node })
 				.expect(() => {
@@ -903,7 +906,7 @@ describe('crud', () => {
 				.expect(() => {
 					expect(stubSendEvent).to.have.been.calledOnce;
 					expect(stubSendEvent).to.have.been.calledWithExactly({
-						action: eventLog.actions.CREATE,
+						action: EventLogWriter.actions.CREATE,
 						code: 'NonExistent',
 						event: 'CREATED_NODE',
 						type: 'SomeNodeType',
@@ -1124,7 +1127,7 @@ describe('crud', () => {
 				.expect(() => {
 					expect(stubSendEvent).to.have.been.calledOnce;
 					expect(stubSendEvent).to.have.been.calledWithExactly({
-						action: eventLog.actions.UPDATE,
+						action: EventLogWriter.actions.UPDATE,
 						code: 'SomeUniqueAttrValue',
 						event: 'UPDATED_NODE',
 						type: 'SomeNodeType',
@@ -1360,19 +1363,19 @@ describe('crud', () => {
 					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
 						{
 							event: 'UPDATED_NODE',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
 							type: 'SomeNodeType',
 						},
 						{
 							event: 'CREATED_NODE',
-							action: eventLog.actions.CREATE,
+							action: EventLogWriter.actions.CREATE,
 							code: 'OneUniqueAttrName',
 							type: 'SomeNodeType',
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'to',
@@ -1384,7 +1387,7 @@ describe('crud', () => {
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'from',
@@ -1396,13 +1399,13 @@ describe('crud', () => {
 						},
 						{
 							event: 'CREATED_NODE',
-							action: eventLog.actions.CREATE,
+							action: EventLogWriter.actions.CREATE,
 							code: 'TwoUniqueAttrName',
 							type: 'SomeNodeType',
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'to',
@@ -1414,7 +1417,7 @@ describe('crud', () => {
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'from',
@@ -1426,13 +1429,13 @@ describe('crud', () => {
 						},
 						{
 							event: 'CREATED_NODE',
-							action: eventLog.actions.CREATE,
+							action: EventLogWriter.actions.CREATE,
 							code: 'ThreeUniqueAttrName',
 							type: 'SomeNodeType',
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'to',
@@ -1444,7 +1447,7 @@ describe('crud', () => {
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
-							action: eventLog.actions.UPDATE,
+							action: EventLogWriter.actions.UPDATE,
 							relationship: {
 								type: 'REL',
 								direction: 'from',
@@ -1591,7 +1594,7 @@ describe('crud', () => {
 				.expect(() => {
 					expect(stubSendEvent).to.have.been.calledOnce;
 					expect(stubSendEvent).to.have.been.calledWithExactly({
-						action: eventLog.actions.DELETE,
+						action: EventLogWriter.actions.DELETE,
 						code: nodes[0].SomeUniqueAttr,
 						event: 'DELETED_NODE',
 						type: nodeType,
@@ -1626,7 +1629,7 @@ describe('crud', () => {
 							expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
 								{
 									event: 'DELETED_RELATIONSHIP',
-									action: eventLog.actions.UPDATE,
+									action: EventLogWriter.actions.UPDATE,
 									relationship: {
 										type: 'TestRelationship',
 										direction: 'from',
@@ -1638,7 +1641,7 @@ describe('crud', () => {
 								},
 								{
 									event: 'DELETED_RELATIONSHIP',
-									action: eventLog.actions.UPDATE,
+									action: EventLogWriter.actions.UPDATE,
 									relationship: {
 										type: 'TestRelationship',
 										direction: 'to',
@@ -1650,7 +1653,7 @@ describe('crud', () => {
 								},
 								{
 									event: 'DELETED_NODE',
-									action: eventLog.actions.DELETE,
+									action: EventLogWriter.actions.DELETE,
 									code: 'SomeUniqueAttrValue',
 									type: 'SomeNodeType',
 								},

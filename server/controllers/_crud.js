@@ -1,11 +1,12 @@
 'use strict';
 
 const { oneLine } = require('common-tags');
+const logger = require('@financial-times/n-logger').default;
 const {session: db} = require('../db-connection');
 const EventLogWriter = require('../lib/event-log-writer');
 const Kinesis = require('../lib/kinesis');
 
-const kinesisClient = new Kinesis(process.env.CRUD_EVENT_LOG_STREAM_NAME);
+const kinesisClient = new Kinesis(process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name');
 const eventLogWriter = new EventLogWriter(kinesisClient);
 
 const sendEvent = event =>
@@ -48,7 +49,7 @@ const sendRelationshipCreationEvents = ({
 		].map(({ code, type, relatedCode, relatedType, direction }) =>
 			sendEvent({
 				event: 'CREATED_RELATIONSHIP',
-				action: eventLog.actions.UPDATE,
+				action: EventLogWriter.actions.UPDATE,
 				relationship: {
 					type: name,
 					direction,
@@ -92,7 +93,7 @@ const _createRelationshipAndNode = async ({
 	if (createdFrom) {
 		sendEvent({
 			event: 'CREATED_NODE',
-			action: eventLog.actions.CREATE,
+			action: EventLogWriter.actions.CREATE,
 			code: fromUniqueAttrName,
 			type: from,
 		});
@@ -100,7 +101,7 @@ const _createRelationshipAndNode = async ({
 	if (createdTo) {
 		sendEvent({
 			event: 'CREATED_NODE',
-			action: eventLog.actions.CREATE,
+			action: EventLogWriter.actions.CREATE,
 			code: toUniqueAttrName,
 			type: to,
 		});
@@ -249,7 +250,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 			const result = await db.run(createQuery, { node: obj });
 			sendEvent({
 				event: 'CREATED_NODE',
-				action: eventLog.actions.CREATE,
+				action: EventLogWriter.actions.CREATE,
 				code: uniqueAttr,
 				type: nodeType,
 			});
@@ -306,14 +307,14 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 
 			sendEvent({
 				event: 'CREATED_NODE',
-				action: eventLog.actions.CREATE,
+				action: EventLogWriter.actions.CREATE,
 				code: uniqueAttr,
 				type: nodeType,
 			});
 		} else {
 			sendEvent({
 				event: 'UPDATED_NODE',
-				action: eventLog.actions.UPDATE,
+				action: EventLogWriter.actions.UPDATE,
 				code: uniqueAttr,
 				type: nodeType,
 			});
@@ -381,7 +382,7 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 				.map(({ direction, relationshipType, nodeId, nodeLabels }) =>
 					sendEvent({
 						event: 'DELETED_RELATIONSHIP',
-						action: eventLog.actions.UPDATE,
+						action: EventLogWriter.actions.UPDATE,
 						relationship: {
 							type: relationshipType,
 							direction,
@@ -394,7 +395,7 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 				);
 			sendEvent({
 				event: 'DELETED_NODE',
-				action: eventLog.actions.DELETE,
+				action: EventLogWriter.actions.DELETE,
 				code: uniqueAttr,
 				type: nodeType,
 			});

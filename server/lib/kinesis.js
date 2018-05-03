@@ -3,18 +3,9 @@
 const AWS = require('aws-sdk');
 const logger = require('@financial-times/n-logger').default;
 
-let isProduction = true;
-
-const stubInDevelopment = (action, fn) => (...args) => {
-	if (!isProduction) {
-		logger.debug(`Skipped kinesis ${action} as not in production`, { event: args[0].event });
-		return Promise.resolve();
-	}
-	return fn(...args);
-};
-
 function Kinesis(streamName) {
-	isProduction = process.env.NODE_ENV === 'production';
+	const isProduction = process.env.NODE_ENV === 'production';
+	
 	const dyno = process.env.DYNO;
 	const kinesis = new AWS.Kinesis({
 		apiVersion: '2013-12-02',
@@ -24,6 +15,14 @@ function Kinesis(streamName) {
 			},
 		},
 	})
+
+	const stubInDevelopment = (action, fn) => (...args) => {
+		if (!isProduction) {
+			logger.debug(`Skipped kinesis ${action} as not in production`, { event: args[0].event });
+			return Promise.resolve();
+		}
+		return fn(...args);
+	};
 
 	return {
 		putRecord: stubInDevelopment('put record', (data) =>{

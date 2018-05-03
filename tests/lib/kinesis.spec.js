@@ -11,11 +11,12 @@ describe('AWS kinesis client', () => {
 	let sandbox;
 	let stubPutRecord;
 	let kinesis;
-    let storedEnv;
+    let storedEnv = {};
     let clock;
 
 	beforeEach(() => {
-        storedEnv = process.env;
+        storedEnv['NODE_ENV'] = process.env.NODE_ENV;
+        storedEnv['DYNO'] = process.env.DYNO;
         process.env.NODE_ENV = 'production';
         process.env.DYNO = dynoId;
 		sandbox = sinon.sandbox.create();
@@ -33,7 +34,9 @@ describe('AWS kinesis client', () => {
 
 	afterEach(() => {
 		sandbox.restore();
-        process.env = storedEnv;
+        Object.entries(storedEnv).forEach(([key, value]) => {
+            process.env[key] = value;
+        });
 	});
 
     describe('put record', () => {
