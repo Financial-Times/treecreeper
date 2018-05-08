@@ -4,9 +4,12 @@ const { expect } = require('chai');
 
 describe('S3 methods', () => {
 	let s3;
-	const getSignedUrl = stub();
+	const getSignedUrlPromise = stub();
+	const getSignedUrl = stub().returns({
+		promise: getSignedUrlPromise,
+	});
 	const S3 = stub().returns({ getSignedUrl });
-	const sdk = { S3 } ;
+	const sdk = { S3 };
 
 	beforeEach('mock stuff', () => {
 		s3 = proxyquire('../server/lib/s3', { 'aws-sdk': sdk });
@@ -14,12 +17,13 @@ describe('S3 methods', () => {
 
 	afterEach('reset stuff', () => {
 		getSignedUrl.reset();
+		getSignedUrlPromise.reset();
 		S3.resetHistory();
 	});
 
 	describe('getSignedUrl', () => {
 		it('creates an s3 client, queries and returns the url for the given key', async () => {
-			getSignedUrl.callsArgWith(2, null, 'a-url');
+			getSignedUrlPromise.resolves('a-url');
 			const result = await s3.getSignedUrl('kingdom');
 			expect(S3).to.have.been.calledOnce;
 			expect(getSignedUrl).to.have.been.calledOnce;

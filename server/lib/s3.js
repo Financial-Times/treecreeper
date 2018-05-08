@@ -11,18 +11,16 @@ const {
 } = process.env;
 
 
-const getSignedUrlMock = (action, { Bucket, Key }, callback) => {
-	callback(null, join('/uploads', Bucket, Key));
-};
+const getSignedUrlMock = (action, { Bucket, Key }) => Promise.resolve(join('/uploads', Bucket, Key));
 
 const s3Client = () => {
-	if(env === 'development') return { getSignedUrl: getSignedUrlMock };
-	else return new S3({apiVersion: '2006-03-01', region, accessKeyId, secretAccessKey});
+	if(env === 'development') {
+		return { getSignedUrl: getSignedUrlMock };
+	}
+	return new S3({apiVersion: '2006-03-01', region, accessKeyId, secretAccessKey});
 };
 
-exports.getSignedUrl = Key => new Promise((resolve, reject) => {
-	s3Client().getSignedUrl('getObject', { Bucket, Key, Expires }, (error, url) => {
-		if (url) resolve(url);
-		else reject(error);
-	});
-});
+exports.getSignedUrl = Key  =>
+	s3Client()
+		.getSignedUrl('getObject', { Bucket, Key, Expires }	)
+		.promise()
