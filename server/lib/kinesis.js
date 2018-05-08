@@ -3,18 +3,27 @@
 const AWS = require('aws-sdk');
 const logger = require('@financial-times/n-logger').default;
 
+const {
+	KINESIS_AWS_REGION: region = 'eu-west-1',
+	KINESIS_AWS_ACCESS_KEY_ID: accessKeyId,
+	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey,
+} = process.env;
+
 function Kinesis(streamName) {
 	const isProduction = process.env.NODE_ENV === 'production';
-	
+
 	const dyno = process.env.DYNO;
 	const kinesis = new AWS.Kinesis({
+		accessKeyId,
+		secretAccessKey,
+		region,
 		apiVersion: '2013-12-02',
 		logger: {
 			log(message) {
 				logger.debug('Kinesis API call', message);
 			},
 		},
-	})
+	});
 
 	const stubInDevelopment = (action, fn) => (...args) => {
 		if (!isProduction) {
@@ -25,7 +34,7 @@ function Kinesis(streamName) {
 	};
 
 	return {
-		putRecord: stubInDevelopment('put record', (data) =>{
+		putRecord: stubInDevelopment('put record', data => {
 			return kinesis
 				.putRecord({
 					Data: Buffer.from(JSON.stringify(data), 'utf-8'),
@@ -41,8 +50,8 @@ function Kinesis(streamName) {
 					});
 					throw error;
 				});
-		})
-	}
-};
+		}),
+	};
+}
 
-module.exports = Kinesis
+module.exports = Kinesis;
