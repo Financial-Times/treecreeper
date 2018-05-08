@@ -5,6 +5,7 @@ const create = async (req, res) => {
 
 	const brands = req.body.brands;
 	const type = req.body.type;
+	
 	await crud.create(res, type, 'id', req.body.data.id, req.body.data);
 
 	brands.forEach( async (brand) => {
