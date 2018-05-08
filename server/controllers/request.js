@@ -93,7 +93,7 @@ const getWithSources = async (req, res) => {
 	try {
 		const query = `
 			MATCH (request { id: "${req.params.id}" })-[:HAS]->(source:Source)
-			RETURN { request: request, source: collect(source) }
+			RETURN { request: request, sources: collect(source) }
 		`;
 
 		const result = await db.run(query);
@@ -102,12 +102,12 @@ const getWithSources = async (req, res) => {
 			return res.status(404).end(`SAR or Erasure request ${req.params.id} does not exist`);
 		}
 
-		const { request: { properties: request }, source } = result.records[0]._fields[0];
+		const { request: { properties: request }, sources } = result.records[0]._fields[0];
 
 		const formattedResult = Object.assign({},
 			request,
 			{
-				sources: source.map(({ properties }) => properties),
+				sources: sources.map(({ properties }) => properties),
 			}
 		);
 
