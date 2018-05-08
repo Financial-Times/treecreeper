@@ -5,7 +5,7 @@ const create = async (req, res) => {
 
 	const brands = req.body.brands;
 	const type = req.body.type;
-	
+
 	await crud.create(res, type, 'id', req.body.data.id, req.body.data);
 
 	brands.forEach( async (brand) => {
@@ -92,19 +92,22 @@ const get = async (req, res) => {
 const getWithSources = async (req, res) => {
 	try {
 		const query = `
-			MATCH (request { id: "${req.params.id}" })-[:HAS]->(s:Source)
-			RETURN { request: request, s: collect(s) }
+			MATCH (request { id: "${req.params.id}" })-[:HAS]->(source:Source)
+			RETURN { request: request, source: collect(source) }
 		`;
+
 		const result = await db.run(query);
+
 		if (result.records.length === 0) {
 			return res.status(404).end(`SAR or Erasure request ${req.params.id} does not exist`);
 		}
 
-		const { request: { properties: request }, sources } = result.records[0]._fields[0];
+		const { request: { properties: request }, source } = result.records[0]._fields[0];
+
 		const formattedResult = Object.assign({},
 			request,
 			{
-				sources: sources.map(({ properties }) => properties),
+				sources: source.map(({ properties }) => properties),
 			}
 		);
 
