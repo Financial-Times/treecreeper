@@ -48,8 +48,8 @@ const create = async (req, res) => {
 const get = async (req, res) => {
 	try {
 		const query = `
-		MATCH (n)-[:HAS]->(S:Sources)
-		WITH n, collect(S) as allSources
+		MATCH (n)-[:HAS]->(s:Source)
+		WITH n, collect(s) as allSources
 		RETURN n{ .*, sources: allSources }`;
 
 		const result = await db.run(query);
@@ -91,8 +91,8 @@ const get = async (req, res) => {
 const getWithSources = async (req, res) => {
 	try {
 		const query = `
-			MATCH (request { id: "${req.params.id}" })-[:HAS]->(sources)
-			RETURN { request: request, sources: collect(sources) }
+			MATCH (request { id: "${req.params.id}" })-[:HAS]->(s:Source)
+			RETURN { request: request, s: collect(s) }
 		`;
 		const result = await db.run(query);
 		if (result.records.length === 0) {
