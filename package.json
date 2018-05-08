@@ -1,13 +1,13 @@
 {
-  "name": "gdpr-biz-op-api",
-  "short": "biz-op-api",
+  "name": "biz-ops-api",
+  "short": "biz-ops-api",
   "team": "internal-products",
   "version": "1.0.0",
   "description": "",
   "main": "server/app.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Financial-Times/gdpr-biz-op-api.git"
+    "url": "git+https://github.com/Financial-Times/biz-ops-api.git"
   },
   "scripts": {
     "start": "nodemon -r dotenv/config server/app.js",
@@ -25,9 +25,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Financial-Times/gdpr-biz-op-api/issues"
+    "url": "https://github.com/Financial-Times/biz-ops-api/issues"
   },
-  "homepage": "https://github.com/Financial-Times/gdpr-biz-op-api#readme",
+  "homepage": "https://github.com/Financial-Times/biz-ops-api#readme",
   "dependencies": {
     "@financial-times/n-logger": "^5.5.7",
     "aws-sdk": "^2.206.0",
