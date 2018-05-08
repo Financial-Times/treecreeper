@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/Financial-Times/biz-ops-api.git"
   },
+	"engines": {
+		"node": ">= 8.11.1",
+		"npm": ">= 5.6.0"
+	},
   "scripts": {
     "start": "nodemon -r dotenv/config server/app.js",
     "debug": "npm start -- --inspect=0.0.0.0:9229",
