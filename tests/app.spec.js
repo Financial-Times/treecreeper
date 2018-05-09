@@ -1,5 +1,5 @@
 const app = require('../server/app.js');
-const request = require('supertest');
+const request = require('./helpers/supertest');
 
 describe('root', () => {
 	it('GET root - status code 200', (done) => {

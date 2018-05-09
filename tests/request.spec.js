@@ -1,5 +1,5 @@
 const proxyquire = require('proxyquire');
-const request = require('supertest');
+const request = require('./helpers/supertest');
 const { stub } = require('sinon');
 const { expect } = require('chai');
 

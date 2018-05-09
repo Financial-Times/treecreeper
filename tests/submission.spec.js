@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const dbRun = stub();
 const end = stub();
 const {getAllForOnedbResponse, getAllForOneParsedResult, submitRequest} = require('./fixtures/submission.fixtures.js');
+
 const submission = proxyquire('../server/controllers/submission', {
 	'../db-connection': {
 		session: {

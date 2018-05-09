@@ -1,6 +1,6 @@
 'use strict';
 
-const s3o = require('@financial-times/s3o-middleware');
+const security = require('../middleware/security')
 const graphQl = require('../controllers/graphQl');
 
 module.exports = router => {
@@ -12,7 +12,7 @@ module.exports = router => {
 		res.send('biz op api');
 	});
 
-	router.use(s3o);
+    router.use(security.requireS3o);
 
 	router.get('/graphiql', graphQl.graphiql('/api/graphql'));
 
