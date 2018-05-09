@@ -31,8 +31,12 @@ const api = graphqlExpress(({ headers }) => ({
 		headers,
 	},
 	formatError(error) {
+		const isS3oError = /Forbidden/i.test(error.message);
 		logger.error('GraphQL Error', { event: 'GRAPHQL_ERROR', error });
-		return formatError(error);
+		const displayedError = isS3oError ?
+			new Error('FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer') :
+			error;
+		return formatError(displayedError);
 	},
 }));
 
