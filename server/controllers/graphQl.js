@@ -7,12 +7,32 @@ const schema = require('../graphQl/schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
-	System(id: "dewey") {
+  	System(id: "dewey") {
 		name
+		serviceTier
+		primaryURL
+		isKnownBy {
+			name
+		}
 		supportedBy {
 			name
 			slack
 			email
+			techLead {
+				name
+				email
+			}
+			productOwner {
+				name
+				email
+			}
+		}
+		repository {
+			url
+			mostRecentCircleCIPlatform
+			storedIn {
+				name
+			}
 		}
 	}
 }`;
