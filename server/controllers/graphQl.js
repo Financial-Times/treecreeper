@@ -11,9 +11,6 @@ const DEFAULT_QUERY = `{
 		name
 		serviceTier
 		primaryURL
-		isKnownBy {
-			name
-		}
 		supportedBy {
 			name
 			slack
@@ -26,6 +23,9 @@ const DEFAULT_QUERY = `{
 				name
 				email
 			}
+		}
+		isKnownBy {
+			name
 		}
 		repository {
 			url
