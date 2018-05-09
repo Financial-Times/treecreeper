@@ -1,4 +1,4 @@
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 
 const _createRelationships = async (relationships, upsert) => {
 	let resultRel;

@@ -1,4 +1,4 @@
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 
 const isWriteQuery = (query) => {
 	// TODO refine this

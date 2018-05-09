@@ -1,6 +1,6 @@
 const app = require('../server/app.js');
 const request = require('supertest');
-const db = require('../server/db-connection');
+const {session: db} = require('../server/db-connection');
 const assert = require('chai').assert;
 
 describe('crud', () => {

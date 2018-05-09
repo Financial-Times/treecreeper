@@ -1,10 +1,10 @@
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 const util = require('util');
 
 const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
 
 const addAnswerToQuery = (query, answer, index) => {
-	query += ` WITH submission 
+	query += ` WITH submission
 			MERGE (answer${index}:SubmissionAnswer {id: '${answer.id}'})
 				SET answer${index} += ${stringify(answer)}
 				WITH submission, answer${index}
@@ -40,10 +40,10 @@ const getAllforOne = async (req, res) => {
 		const submitterType = topLevel ? 'Supplier' : 'Contract';
 
 		// TODO replace this while thing with _cypher-to-json.js
-		const query = `MATCH submissions=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"}) 
-		OPTIONAL MATCH answers=(Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x:SurveyQuestion) 
+		const query = `MATCH submissions=(${submitterType} {id: "${submitterId}"})-[r:SUBMITS]->(Submission {surveyId: "${surveyId}"})
+		OPTIONAL MATCH answers=(Submission)-[y:HAS]->(SubmissionAnswer)-[z:ANSWERS_QUESTION]->(x:SurveyQuestion)
 		RETURN submissions, collect(answers)`;
-		
+
 		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);
 
@@ -53,10 +53,10 @@ const getAllforOne = async (req, res) => {
 			for (const record of result.records) {
 				let submissionAnswer;
 				let surveyQuestion;
-				
+
 				const [ submissions, answers ] = record._fields;
 				const submission = submissions.segments.find((segment) => segment.relationship.type === 'SUBMITS');
-				
+
 				submissionObj.status = submission.end.properties.status;
 				submissionObj.id = submission.end.properties.id;
 				for (const field of answers) {

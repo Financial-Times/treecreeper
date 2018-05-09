@@ -4,7 +4,8 @@ module.exports = {
 			'doc/model.cql',
 			'doc/model.grass',
 			'scripts/neo4j-plugins',
-			'scripts/neo4j-wait-for-start'
+			'scripts/neo4j-wait-for-start',
+			'server/graphQl/typeDefs.graphql'
 		],
 		allowOverrides: []
 	},

@@ -8,7 +8,9 @@ const app = require('../server/app');
 const dbRunStub = stub();
 const { get, getWithSources } = proxyquire('../server/controllers/request', {
 	'../db-connection': {
-		run: dbRunStub,
+		session: {
+			run: dbRunStub,
+		}
 	},
 });
 

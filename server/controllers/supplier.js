@@ -1,4 +1,4 @@
-const db = require('../db-connection');
+const {session: db} = require('../db-connection');
 const util = require('util');
 
 const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
