@@ -7,9 +7,14 @@ const schema = require('../graphQl/schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
-    System(id: "dewey") {
-      id
-    }
+	System(id: "dewey") {
+		name
+		supportedBy {
+			name
+			slack
+			email
+		}
+	}
 }`;
 
 const graphiql = graphQlEndpoint =>
@@ -19,16 +24,16 @@ const graphiql = graphQlEndpoint =>
 	});
 
 const api = graphqlExpress(({ headers }) => ({
-    schema,
-    rootValue: {},
-    context: {
-        driver,
-        headers,
+	schema,
+	rootValue: {},
+	context: {
+		driver,
+		headers,
 	},
 	formatError(error) {
-		logger.error('GraphQL Error', {event: 'GRAPHQL_ERROR', error});
+		logger.error('GraphQL Error', { event: 'GRAPHQL_ERROR', error });
 		return formatError(error);
-	}
+	},
 }));
 
 module.exports = {
