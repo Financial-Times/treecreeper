@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
 const { ui, api } = require('./routes');
 const init = require('../scripts/init');

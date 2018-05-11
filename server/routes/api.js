@@ -44,61 +44,79 @@ module.exports = router => {
 	router.post('/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 
 	// GENERIC - Node
-	router.get('/:nodeType/:uniqueAttrName?/:uniqueAttr?/:relationships?', async (req, res) => {
-		console.log('[APP] generic GET', req.params);
-		return crud.get(
-			res,
-			req.params.nodeType,
-			req.params.uniqueAttrName,
-			req.params.uniqueAttr,
-			req.params.relationships
-		);
-	});
-	router.post('/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
-		console.log('[APP] generic POST');
-		return crud.create(
-			res,
-			req.params.nodeType,
-			req.params.uniqueAttrName,
-			req.params.uniqueAttr,
-			req.body.node,
-			req.body.relationships,
-			req.params.upsert
-		);
-	});
-	router.put('/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?', async (req, res) => {
-		console.log('[APP] generic PUT');
-		return crud.update(
-			res,
-			req.params.nodeType,
-			req.params.uniqueAttrName,
-			req.params.uniqueAttr,
-			req.body.node,
-			req.body.relationships,
-			req.params.upsert
-		);
-	});
-	router.delete('/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
-		console.log('[APP] generic DELETE');
-		return crud.remove(
-			res,
-			req.params.nodeType,
-			req.params.uniqueAttrName,
-			req.params.uniqueAttr,
-			req.body.mode
-		);
-	});
+	router.get(
+		'/:nodeType/:uniqueAttrName?/:uniqueAttr?/:relationships?',
+		async (req, res) => {
+			console.log('[APP] generic GET', req.params);
+			return crud.get(
+				res,
+				req.params.nodeType,
+				req.params.uniqueAttrName,
+				req.params.uniqueAttr,
+				req.params.relationships
+			);
+		}
+	);
+	router.post(
+		'/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?',
+		async (req, res) => {
+			console.log('[APP] generic POST');
+			return crud.create(
+				res,
+				req.params.nodeType,
+				req.params.uniqueAttrName,
+				req.params.uniqueAttr,
+				req.body.node,
+				req.body.relationships,
+				req.params.upsert
+			);
+		}
+	);
+	router.put(
+		'/:nodeType/:uniqueAttrName/:uniqueAttr/:upsert?',
+		async (req, res) => {
+			console.log('[APP] generic PUT');
+			return crud.update(
+				res,
+				req.params.nodeType,
+				req.params.uniqueAttrName,
+				req.params.uniqueAttr,
+				req.body.node,
+				req.body.relationships,
+				req.params.upsert
+			);
+		}
+	);
+	router.delete(
+		'/:nodeType/:uniqueAttrName/:uniqueAttr',
+		async (req, res) => {
+			console.log('[APP] generic DELETE');
+			return crud.remove(
+				res,
+				req.params.nodeType,
+				req.params.uniqueAttrName,
+				req.params.uniqueAttr,
+				req.body.mode
+			);
+		}
+	);
 
 	// GENERIC - Rship
-	router.post('/relationships/:upsert?', async (req, res) => {
-		console.log('[APP] generic POST - rship');
-		return crud.create(res, null, null, null, null, req.body.relationships, req.params.upsert);
-	});
+	router.post(
+		'/relationships/:upsert?',
+		async (req, res) => {
+			console.log('[APP] generic POST - rship');
+			return crud.create(res, null, null, null, null, req.body.relationships, req.params.upsert);
+		}
+	);
 
-	router.post('/cypher/', async (req, res) => {
-		console.log('[APP] generic GET CYPHER');
-		cypher(res, req.body.query);
-	});
+	router.post(
+		'/cypher/',
+		async (req, res) => {
+			console.log('[APP] generic GET CYPHER');
+			return cypher(res, req.body.query);
+		}
+	);
 
 	return router;
 };

@@ -35,10 +35,10 @@ const deleterequest = async () => request(app)
 describe('REQUESTS- SAR', () => {
 	describe('POST', () => {
 
-		after(() =>
-			deleterequest()
-				.then(() =>
-					deleteSource()));
+		after(async() => {
+			await deleterequest()
+			await deleteSource()
+		})
 
 		it('has status code 200', (done) => {
 			request(app)
