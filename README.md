@@ -57,7 +57,7 @@ Start the [neo4j](https://neo4j.com/) community edition database. This requires 
 
 ```shell
 ./scripts/neo4j-plugins
-docker compose up
+docker-compose up
 ```
 
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
