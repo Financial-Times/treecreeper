@@ -10,6 +10,8 @@ WIP
 
 ## Access
 
+### API
+
 The API endpoints for the biz-ops API are available behind [FT API Gateway](http://developer.ft.com/).
 
 The public API URLs are:
@@ -36,6 +38,17 @@ or as an `X-Api-Key` header, e.g.
 ```shell
 curl -H "X-Api-Key: ..." https://api.ft.com/biz-ops/api/__gtg
 ```
+
+### GraphQL
+
+The API exposes a [GraphQL](https://graphql.org/) API. This is available either via POSTing to the path `/api/graphql`, or using the [graphiql](https://github.com/graphql/graphiql) IDE located at `/graphiql`.
+
+This should be accessed directly as it is a UI, not through the above API gateway endpoints. Access is authenticated via s3o.
+
+| Environment   | Url                                                   |
+| ------------- | ----------------------------------------------------  |
+| Production    | `https://biz-ops.api.ft.com/graphiql`                 |
+| Test          | `https://biz-ops-staging.api.ft.com/graphiql`         |
 
 ## Endpoints
 
