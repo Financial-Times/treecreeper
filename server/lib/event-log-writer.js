@@ -12,7 +12,7 @@ const actions = {
 // Preserved for backwards compatibility
 const addLegacyAttributes = ({ code, type }, record) =>
 	Object.assign(record, {
-		key: `${type}/${code}`,
+		key: `${type.toLowerCase()}/${code}`,
 		model: 'DataItem',
 		name: 'dataItemID',
 		value: code,
@@ -40,7 +40,7 @@ class EventLogWriter {
 			addLegacyAttributes(data, {
 				event: event.toUpperCase(),
 				action,
-				code: code.toLowerCase(),
+				code: code,
 				type: type.toLowerCase(),
 				relationship,
 				link: `/api/${encodeURIComponent(type)}/${encodeURIComponent(code)}`,
