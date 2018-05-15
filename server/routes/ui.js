@@ -1,6 +1,6 @@
 'use strict';
 
-const security = require('../middleware/security')
+const security = require('../middleware/security');
 const graphQl = require('../controllers/graphQl');
 
 module.exports = router => {
@@ -12,9 +12,7 @@ module.exports = router => {
 		res.send('biz op api');
 	});
 
-    router.use(security.requireS3o);
-
-	router.get('/graphiql', graphQl.graphiql('/api/graphql'));
+	router.get('/graphiql', security.requireS3o, graphQl.graphiql('/api/graphql'));
 
 	return router;
 };
