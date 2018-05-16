@@ -222,6 +222,16 @@ type Query {
 
 input SystemInput {
     serviceTier: ServiceTier
+    name: String
+    supported: YesNo
+    primaryURL: String
+    systemType: String
+    serviceTier: ServiceTier
+    serviceType: String
+    hostPlatform: String
+    personalData: YesNo
+    sensitiveData: YesNo
+    lifecycleStage: LifeCycleStage
 }
 
 type Mutation {

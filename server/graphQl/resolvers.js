@@ -1,5 +1,6 @@
 'use strict';
 
+const util = require('util');
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
 
@@ -51,14 +52,14 @@ const queryResolvers = queries.reduce(
 
 const mutationResolvers = {
 	/*
-		Example mutation of a systems serviceTier
+		Example mutation of a systems scalar properties
 		At the time of writing this must be done programatically rather than via
 		neo4j-graphql-js
 	*/
-	System: async (_, { id, params: { serviceTier } }, context) => {
+	System: async (_, { id, params } }, context) => {
 		const result = await context.driver.run(`
 			MATCH (s:System {id: "${id}"})
-			SET s += {serviceTier: "${serviceTier}"}
+			SET s += {${util.inspect(params)}}
 			RETURN s
 		`);
 		return result.records[0].get(0).properties;
