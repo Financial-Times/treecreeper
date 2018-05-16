@@ -16,6 +16,8 @@ const queries = [
 	'Teams',
 	'Group',
 	'Groups',
+	'HealthCheck',
+	'HealthChecks',
 	'CostCentre',
 ];
 
@@ -29,7 +31,7 @@ const enumResolvers = {
         NONE: '',
     },
     Status: upperCaseResolver(['Active']),
-    YesNo: upperCaseResolver(['Yes', 'No']),
+    YesNo: upperCaseResolver(['Yes', 'No', 'Unknown']),
     LifeCycleStage: upperCaseResolver([
         'Production',
         'Requirements',
