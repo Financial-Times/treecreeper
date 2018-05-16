@@ -12,7 +12,7 @@ module.exports = router => {
 		res.send('biz op api');
 	});
 
-	router.get('/graphiql', security.requireS3o, graphQl.graphiql('/api/graphql'));
+	router.use('/graphiql', security.requireS3o, graphQl.graphiql('/api/graphql'));
 
 	return router;
 };
