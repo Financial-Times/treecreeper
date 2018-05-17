@@ -16,8 +16,8 @@
 	"scripts": {
 		"start": "nodemon -r dotenv/config server/app.js",
 		"debug": "npm start -- --inspect=0.0.0.0:9229",
-		"test": "nyc --reporter html --reporter text --reporter text-summary --reporter lcov --all mocha -- --require test-config --recursive --exit \"+(server|scripts|tests)/**/*.spec.js\"",
-		"test-dev": "NODE_ENV=test mocha -r test-config  -r dotenv/config 'tests/**/*.spec.js' --exit",
+		"test": "nyc mocha -- -r test-config \"+(server|scripts|test)/**/*.spec.js\"",
+		"test-dev": "NODE_ENV=test mocha -r test-config  -r dotenv/config 'test/**/*.spec.js'",
 		"test:debug": "npm run test-dev --  --inspect-brk=0.0.0.0:9088",
 		"init-db": "node -r dotenv/config scripts/init.js",
 		"docker:test": "docker-compose exec \"$npm_package_short\" sh -c 'npm run test'",
@@ -28,10 +28,18 @@
 	},
 	"nyc": {
 		"exclude": [
-			"**/tests/**",
+			"**/test/**",
 			"**/*.spec.js",
 			"**/node_modules/**"
-		]
+		],
+		"reporter": [
+			"html",
+			"text",
+			"text-summary",
+			"lcov"
+		],
+		"all": true,
+		"cache": true
 	},
 	"author": "",
 	"license": "ISC",
