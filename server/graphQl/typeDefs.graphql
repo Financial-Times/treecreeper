@@ -23,6 +23,7 @@ type Repository {
     system: System @relation(name: "HAS_REPO", direction: "IN")
 }
 
+# Any combination of software and technical infrastructure used by the business, engineering or operations.
 type System {
     id: String!
     # Display name of the system
@@ -60,6 +61,8 @@ type System {
         @relation(name: "KNOWS", direction: "IN")
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
+    # Healthchekcs which are used to monitor this system
+    monitoredBy: [HealthCheck] @relation(name: "MONITORED_BY", direction: "IN")
 }
 
 # A team within the organisation
@@ -96,6 +99,7 @@ type Group {
     id: String!
     # The name of the group
     name: String!
+	# 
     status: Status
     # The Cost Centre associated with the group
     hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
@@ -119,19 +123,26 @@ type CostCentre {
 # A individual within the organisation who is contactable
 type Person {
     id: String!
+	# The name of the person
     name: String!
+	# The email address of th person
     email: String
+	# The slack link for the person
     slack: String
+	# Groups the person is a technical director for
     isTechDirectorFor(first: Int = 10, offset: Int = 0): [Group]
         @relation(name: "HAS_TECH_DIRECTOR", direction: "IN")
-    isTechLeadFor(first: Int = 10, offset: Int = 0): [Person]
+	# Systems the person is a technical lead for
+    isTechLeadFor(first: Int = 10, offset: Int = 0): [System]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(system:System) RETURN system"
         )
-    isProductOwnerFor(first: Int = 10, offset: Int = 0): [Person]
+	# Systems the person is a product owner for
+    isProductOwnerFor(first: Int = 10, offset: Int = 0): [System]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(system:System) RETURN system"
         )
+	# Systems the person has knowledge of
     knows(first: Int = 10, offset: Int = 0): [System]
         @relation(name: "KNOWS", direction: "OUT")
 }
@@ -145,6 +156,17 @@ type Product {
     status: Status
 }
 
+# The configuraiton used to provide monitoring/healthchecks for a system.
+type HealthCheck {
+    id: String!
+    # Whether the monitored entity is live
+    isLive: Boolean
+    # The URL to check against
+    url: String!
+    # The systems which the healthcheck monitors
+    monitors: [System] @relation(name: "MONITORED_BY", direction: "OUT")
+}
+
 enum Status {
     ACTIVE
 }
@@ -152,6 +174,7 @@ enum Status {
 enum YesNo {
     YES
     NO
+    UNKNOWN
 }
 
 enum LifeCycleStage {
@@ -178,18 +201,20 @@ enum CircleCiVersion {
 }
 
 type Query {
-    System(id: String, serviceTier: ServiceTier): System
-    Systems(first: Int = 10, offset: Int = 0): [System]
+    System(id: String): System
+    Systems(serviceTier: ServiceTier, first: Int = 10, offset: Int = 0): [System]
     Team(id: String!): Team
     Teams(first: Int = 10, offset: Int = 0): [Team]
     Group(id: String!): Group
     Groups(first: Int = 10, offset: Int = 0): [Group]
+	HealthCheck(id: String, url: String): HealthCheck
+    HealthChecks(first: Int = 10, offset: Int = 0): [HealthCheck]
     Person(name: String, id: String): Person
     People(first: Int = 10, offset: Int = 0): [Person]
     Repository(id: String!): Repository
     Repositories(
-        first: Int = 10
-        offset: Int = 0
+        first: Int = 10,
+        offset: Int = 0,
         mostRecentCircleCIPlatform: CircleCiVersion
     ): [Repository]
     CostCentre(id: String!): CostCentre
@@ -197,6 +222,16 @@ type Query {
 
 input SystemInput {
     serviceTier: ServiceTier
+    name: String
+    supported: YesNo
+    primaryURL: String
+    systemType: String
+    serviceTier: ServiceTier
+    serviceType: String
+    hostPlatform: String
+    personalData: YesNo
+    sensitiveData: YesNo
+    lifecycleStage: LifeCycleStage
 }
 
 type Mutation {
