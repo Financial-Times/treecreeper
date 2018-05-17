@@ -62,7 +62,7 @@ type System {
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
     # Healthchekcs which are used to monitor this system
-    monitoredBy: [HealthCheck] @relation(name: "MONITORED_BY", direction: "IN")
+    monitoredBy: [Healthcheck] @relation(name: "MONITORED_BY", direction: "IN")
 }
 
 # A team within the organisation
@@ -99,7 +99,7 @@ type Group {
     id: String!
     # The name of the group
     name: String!
-	# 
+	#
     status: Status
     # The Cost Centre associated with the group
     hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
@@ -157,7 +157,7 @@ type Product {
 }
 
 # The configuraiton used to provide monitoring/healthchecks for a system.
-type HealthCheck {
+type Healthcheck {
     id: String!
     # Whether the monitored entity is live
     isLive: Boolean
@@ -207,8 +207,8 @@ type Query {
     Teams(first: Int = 10, offset: Int = 0): [Team]
     Group(id: String!): Group
     Groups(first: Int = 10, offset: Int = 0): [Group]
-	HealthCheck(id: String, url: String): HealthCheck
-    HealthChecks(first: Int = 10, offset: Int = 0): [HealthCheck]
+	Healthcheck(id: String, url: String): Healthcheck
+    Healthchecks(first: Int = 10, offset: Int = 0): [Healthcheck]
     Person(name: String, id: String): Person
     People(first: Int = 10, offset: Int = 0): [Person]
     Repository(id: String!): Repository

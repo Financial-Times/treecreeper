@@ -17,8 +17,8 @@ const queries = [
 	'Teams',
 	'Group',
 	'Groups',
-	'HealthCheck',
-	'HealthChecks',
+	'Healthcheck',
+	'Healthchecks',
 	'CostCentre',
 ];
 

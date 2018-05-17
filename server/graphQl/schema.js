@@ -30,8 +30,7 @@ module.exports.createMockSchema = (mocks) => {
 	});
     addMockFunctionsToSchema({
         schema,
-        mocks,
-		preserveResolvers: true
+        mocks
 	})
 	return schema
 }
