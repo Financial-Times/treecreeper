@@ -58,6 +58,7 @@ jobs:
       - run:
           name: Prepare neo4j database
           command: |
+            java -version
             mkdir -p neo4j
             wget -q dist.neo4j.org/neo4j-enterprise-$NEO4J_VERSION-unix.tar.gz
             tar -xzf neo4j-enterprise-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
