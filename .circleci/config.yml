@@ -3,14 +3,14 @@ version: 2
 references:
 
   default_container_config: &default_container_config
-    working_directory: ~/project/gdpr-biz-op-api
+    working_directory: ~/biz-ops-api
     docker:
       - image: circleci/node:8.11.1-browsers
     environment:
       NEO4J_VERSION: "3.2.9"
 
   workspace_root: &workspace_root
-    ~/project
+    ~/
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -46,9 +46,9 @@ jobs:
       - *cache_node_modules
 
       - persist_to_workspace:
-          root: ~/project
+          root: *workspace_root
           paths:
-            - gdpr-biz-op-api
+            - biz-ops-api
 
   test:
     <<: *default_container_config
