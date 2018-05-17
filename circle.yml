@@ -11,8 +11,8 @@ deployment:
 database:
   override:
     - mkdir -p neo4j
-    - wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
-    - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
+    - wget -q dist.neo4j.org/neo4j-enterprise-$NEO4J_VERSION-unix.tar.gz
+    - tar -xzf neo4j-enterprise-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
     - sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf
     - ./scripts/neo4j-plugins
     - neo4j/bin/neo4j start
