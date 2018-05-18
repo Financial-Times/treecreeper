@@ -212,7 +212,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -278,7 +279,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -346,7 +348,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -399,7 +402,6 @@ describe('crud', () => {
 					}
 				]
 			});
-
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -411,7 +413,7 @@ describe('crud', () => {
 					expect(stubSendEvent).to.have.callCount(7);
 					expect(
 						stubSendEvent.getCalls().map(({ args }) => args[0])
-					).to.deep.equal([
+					).to.have.deep.members([
 						{
 							action: EventLogWriter.actions.CREATE,
 							code: 'SomeUniqueAttrValue',
@@ -653,7 +655,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -709,7 +712,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -763,7 +767,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -932,7 +937,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -987,7 +993,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1053,7 +1060,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1111,7 +1119,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1304,7 +1313,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1360,7 +1370,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1406,7 +1417,7 @@ describe('crud', () => {
 					expect(stubSendEvent).to.have.callCount(10);
 					expect(
 						stubSendEvent.getCalls().map(({ args }) => args[0])
-					).to.deep.equal([
+					).to.have.deep.members([
 						{
 							event: 'UPDATED_NODE',
 							action: EventLogWriter.actions.UPDATE,
@@ -1557,7 +1568,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 	});
@@ -1599,7 +1611,8 @@ describe('crud', () => {
 					return request(app)
 						.get(`/api/${nodeType}/`)
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 
@@ -1722,7 +1735,8 @@ describe('crud', () => {
 					return request(app)
 						.get('/api/SomeNodeType/')
 						.set('API_KEY', `${process.env.API_KEY}`)
-						.expect(200, expectedNodes);
+						.expect(200)
+						.then(({body}) => expect(body).to.have.deep.members(expectedNodes));
 				});
 		});
 

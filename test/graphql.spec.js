@@ -2,6 +2,7 @@ const casual = require('casual');
 const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
 const app = require('../server/app.js');
+const { expect } = require('chai');
 const request = require('./helpers/supertest');
 const { session: db } = require('../server/db-connection');
 const security = require('../server/middleware/security');
@@ -174,7 +175,6 @@ describe('Integration - GraphQL', () => {
 
 		it('should allow access to POST /api/graphql behind s3o', () => {
 			sandbox.stub(security, 'requireApiKeyOrS3o').callsFake(stubS3o);
-
 			return request(app, { useCached: false })
 				.post('/api/graphql')
 				.send(dummyQuery)
@@ -207,15 +207,7 @@ describe('Integration - GraphQL', () => {
 					}}`
 			})
 			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, {
-				data: {
-					System: typeMocks['System'][0]
-				}
-			})
-			.expect(response => {
-				console.dir(response.body);
-				console.dir(typeMocks['System'][0]);
-			});
+			.expect(200, { data: { System: typeMocks['System'][0] } });
 	});
 
 	it('GET for systems returns a list of systems', () => {
@@ -228,10 +220,9 @@ describe('Integration - GraphQL', () => {
 					}}`
 			})
 			.set('API_KEY', `${process.env.API_KEY}`)
-			.expect(200, {
-				data: {
-					Systems: typeMocks['System']
-				}
-			});
+			.expect(200)
+			.then(({ body }) =>
+				expect(body.data.Systems).to.have.deep.members(typeMocks['System'])
+			);
 	});
 });

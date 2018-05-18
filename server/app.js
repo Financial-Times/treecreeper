@@ -1,7 +1,7 @@
 const express = require('express');
 require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
-const { ui, api } = require('./routes');
+const { ui, api, v1 } = require('./routes');
 const init = require('../scripts/init');
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -18,6 +18,7 @@ const createApp = () => {
 
 	app.use('/api', api(express.Router())); //eslint-disable-line
 	app.use('/', ui(express.Router())); //eslint-disable-line
+	app.use('/v1', v1(express.Router())); //eslint-disable-line
 
 	app.use((error, request, response, next) => {
 		logger.error(error);
