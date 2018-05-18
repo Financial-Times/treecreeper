@@ -8,18 +8,19 @@ const nodeTypes = [
 	'Survey',
 	'SurveyQuestion',
 	'SurveyQuestionOption',
-	'SurveySection',
+	'SurveySection'
 ];
 const checkNodeType = (req, res, next) => {
-
 	console.log('CHECK');
 
 	const nodeType = req.params.nodeType;
 	const relationship = req.body.relationship;
 
-	if (!nodeType ||
-		relationship && !relationship.targetNode ||
-		relationship && relationship.targetNode && !relationship.targetNode.type) {
+	if (
+		!nodeType ||
+		(relationship && !relationship.targetNode) ||
+		(relationship && relationship.targetNode && !relationship.targetNode.type)
+	) {
 		return res.status(400).end();
 	}
 
@@ -27,18 +28,18 @@ const checkNodeType = (req, res, next) => {
 		res.locals.nodeType = nodeType.toLowerCase();
 
 		if (relationship) {
-			if (nodeTypes.includes(relationship.targetNode.type)){
+			if (nodeTypes.includes(relationship.targetNode.type)) {
 				res.locals.targetNodeType = relationship.targetNode.type.toLowerCase();
 				return next();
-			}
-			else {
-				return res.status(400).end('Node type in relationship not allowed', relationship);
+			} else {
+				return res
+					.status(400)
+					.end('Node type in relationship not allowed', relationship);
 			}
 		}
 
 		return next();
-	}
-	else {
+	} else {
 		return res.status(400).end(`Node type "${nodeType}" not allowed`);
 	}
 };

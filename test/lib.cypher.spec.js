@@ -4,114 +4,126 @@ const { expect } = require('chai');
 describe('cypher query creation helpers', () => {
 	describe('stringify', () => {
 		it('serializes a simple object', () => {
-			const simple = { id: 1, name: 'mahaugha'};
-			expect(query.stringify(simple))
-				.to.be.string('{ id: 1, name: \'mahaugha\' }');
+			const simple = { id: 1, name: 'mahaugha' };
+			expect(query.stringify(simple)).to.be.string(
+				"{ id: 1, name: 'mahaugha' }"
+			);
 		});
 
 		it('serializes a complex object', () => {
-			const complex = { id: 2, update: { s3id: 'monkey', url: 'https://s3.com/monkey'} };
-			expect(query.stringify(complex))
-				.to.be.string('{ id: 2, update: { s3id: \'monkey\', url: \'https://s3.com/monkey\' }');
+			const complex = {
+				id: 2,
+				update: { s3id: 'monkey', url: 'https://s3.com/monkey' }
+			};
+			expect(query.stringify(complex)).to.be.string(
+				"{ id: 2, update: { s3id: 'monkey', url: 'https://s3.com/monkey' }"
+			);
 		});
 	});
 });
 
 describe('neo4j response helpers ', () => {
-		const data = [{
-			'keys': [
-				'supplier',
-				'submission',
-			],
-			'length': 2,
-			'_fields': [
+	const data = [
+		{
+			keys: ['supplier', 'submission'],
+			length: 2,
+			_fields: [
 				{
-					'identity': {
-						'low': 312,
-						'high': 0
+					identity: {
+						low: 312,
+						high: 0
 					},
-					'labels': [
-						'Supplier'
-					],
-					'properties': {
-						'name': 'Worker Xp Ltd',
-						'id': 'a0zL0000004cdWGIAY'
+					labels: ['Supplier'],
+					properties: {
+						name: 'Worker Xp Ltd',
+						id: 'a0zL0000004cdWGIAY'
 					}
 				},
 				{
-					'identity': {
-						'low': 313,
-						'high': 0
+					identity: {
+						low: 313,
+						high: 0
 					},
-					'labels': [
-						'Submission'
-					],
-					'properties': {
-						'contractId': '',
-						'surveyId': 'company-info',
-						'supplierId': 'a0zL0000004cdWGIAY',
-						'id': 'company-infoa0zL0000004cdWGIAY',
-						'type': 'topLevel',
-						'status': 'pending'
+					labels: ['Submission'],
+					properties: {
+						contractId: '',
+						surveyId: 'company-info',
+						supplierId: 'a0zL0000004cdWGIAY',
+						id: 'company-infoa0zL0000004cdWGIAY',
+						type: 'topLevel',
+						status: 'pending'
 					}
-				},
+				}
 			],
-			'_fieldLookup': {
-				'supplier': 0,
-				'submission': 1,
+			_fieldLookup: {
+				supplier: 0,
+				submission: 1
 			}
-		}];
+		}
+	];
 	describe('parse', () => {
 		it('returns the response in the required format', () => {
 			const result = res.parse(data);
-			const expected = [{ supplier: {
-				'identity': {
-					'low': 312,
-					'high': 0
-				},
-				'labels': [
-					'Supplier'
-				],
-				'properties': {
-					'name': 'Worker Xp Ltd',
-					'id': 'a0zL0000004cdWGIAY'
+			const expected = [
+				{
+					supplier: {
+						identity: {
+							low: 312,
+							high: 0
+						},
+						labels: ['Supplier'],
+						properties: {
+							name: 'Worker Xp Ltd',
+							id: 'a0zL0000004cdWGIAY'
+						}
+					},
+					submission: {
+						identity: {
+							low: 313,
+							high: 0
+						},
+						labels: ['Submission'],
+						properties: {
+							contractId: '',
+							surveyId: 'company-info',
+							supplierId: 'a0zL0000004cdWGIAY',
+							id: 'company-infoa0zL0000004cdWGIAY',
+							type: 'topLevel',
+							status: 'pending'
+						}
+					}
 				}
-			}, submission: {
-				'identity': {
-					'low': 313,
-					'high': 0
-				},
-				'labels': [
-					'Submission'
-				],
-				'properties': {
-					'contractId': '',
-					'surveyId': 'company-info',
-					'supplierId': 'a0zL0000004cdWGIAY',
-					'id': 'company-infoa0zL0000004cdWGIAY',
-					'type': 'topLevel',
-					'status': 'pending'
-				}
-			}}];
+			];
 			expect(result).to.deep.equal(expected);
 		});
 	});
 
 	describe('mapKeyToField', () => {
 		it('takes a neo4j response record and maps key names to field data', () => {
-			const expected = { supplier: {
-				identity: { low: 312, high: 0 },
-				labels: [ 'Supplier' ],
-				properties: { name: 'Worker Xp Ltd', id: 'a0zL0000004cdWGIAY'}
-			}
-		};
-		expect(res.mapKeyToField(data[0])({}, 'supplier')).to.deep.equal(expected);
+			const expected = {
+				supplier: {
+					identity: { low: 312, high: 0 },
+					labels: ['Supplier'],
+					properties: { name: 'Worker Xp Ltd', id: 'a0zL0000004cdWGIAY' }
+				}
+			};
+			expect(res.mapKeyToField(data[0])({}, 'supplier')).to.deep.equal(
+				expected
+			);
 		});
 	});
 	describe('uniqueRowsByKey', () => {
-		const data = [{ id: '1'}, { id: '2'}, { id: '1'}, { id: '3'}, { id: '2'}, { id: '5'}, { id: '17'}];
+		const data = [
+			{ id: '1' },
+			{ id: '2' },
+			{ id: '1' },
+			{ id: '3' },
+			{ id: '2' },
+			{ id: '5' },
+			{ id: '17' }
+		];
 		it('returns true if this is the first instance in the array', () => {
-				expect(res.uniqueRowsByKey('id')(data[0], 0, data)).to.be.true;
+			expect(res.uniqueRowsByKey('id')(data[0], 0, data)).to.be.true;
 		});
 
 		it('returns false if this is the not first instance in the array', () => {
@@ -119,7 +131,13 @@ describe('neo4j response helpers ', () => {
 		});
 
 		it('works to filter unique elements in an array', () => {
-			const expected = [{ id: '1'}, { id: '2'}, { id: '3'}, { id: '5'}, { id: '17'}];
+			const expected = [
+				{ id: '1' },
+				{ id: '2' },
+				{ id: '3' },
+				{ id: '5' },
+				{ id: '17' }
+			];
 			const result = data.filter(res.uniqueRowsByKey('id'));
 			expect(result).to.have.length(5);
 			expect(result).to.deep.equal(expected);

@@ -1,11 +1,10 @@
-'use strict';
-
+/*eslint-disable*/
 const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
 const { expect, assert } = require('chai');
 const request = require('./helpers/supertest');
 const app = require('../server/app.js');
-const {session: db} = require('../server/db-connection');
+const { session: db } = require('../server/db-connection');
 const EventLogWriter = require('../server/lib/event-log-writer');
 
 describe('crud', () => {
@@ -14,10 +13,12 @@ describe('crud', () => {
 
 	beforeEach(() => {
 		sandbox = sinon.sandbox.create();
-		stubSendEvent = sandbox.stub(EventLogWriter.prototype, 'sendEvent').callsFake((data) => {
-			logger.debug('Event log stub sendEvent called', {event: data.event});
-			return Promise.resolve();
-		})
+		stubSendEvent = sandbox
+			.stub(EventLogWriter.prototype, 'sendEvent')
+			.callsFake(data => {
+				logger.debug('Event log stub sendEvent called', { event: data.event });
+				return Promise.resolve();
+			});
 	});
 
 	afterEach(() => {
@@ -29,20 +30,20 @@ describe('crud', () => {
 
 		beforeEach(async () => {
 			nodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
-			for (let node of nodes) {
+			for (const node of nodes) {
 				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${
 					node.SomeUniqueAttr
 				}" }) DETACH DELETE a`;
 				await db.run(deleteQuery);
 			}
 			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
-			for (let node of nodes) {
+			for (const node of nodes) {
 				await db.run(createQuery, { node: node });
 			}
 		});
 
 		afterEach(async () => {
-			for (let node of nodes) {
+			for (const node of nodes) {
 				const deleteQuery = `MATCH (a:SomeNodeType { SomeUniqueAttr: "${
 					node.SomeUniqueAttr
 				}" }) DETACH DELETE a`;
@@ -80,7 +81,9 @@ describe('crud', () => {
 
 		it('GET when specified with a relationships param will include related nodes - but none for this node', () => {
 			return request(app)
-				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+				.get(
+					'/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships'
+				)
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.expect(404, {});
 		});
@@ -98,17 +101,19 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							to: 'TestNode',
 							toUniqueAttrName: 'id',
-							toUniqueAttrValue: 'testing',
-						},
-					],
-				},
+							toUniqueAttrValue: 'testing'
+						}
+					]
+				}
 			];
 			const addNodeQuery = `CREATE (t:TestNode {id:'testing'})`;
 			const addNodeResult = await db.run(addNodeQuery);
 			const addRelQuery = `MERGE (n:SomeNodeType {SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar'})-[r:TestRelationship]->(t:TestNode {id:'testing'}) RETURN r`;
 			const addRelResult = await db.run(addRelQuery);
 			return request(app)
-				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships')
+				.get(
+					'/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue/relationships'
+				)
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.expect(200, expectedNodes)
 				.then(async response => {
@@ -135,7 +140,9 @@ describe('crud', () => {
 		});
 
 		it('POST inserts the node with correct unique attribute', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -153,7 +160,9 @@ describe('crud', () => {
 			const uniqueAttributeValue = 'SomeUniqueAttrValue';
 			const uniqueAttributeName = 'SomeUniqueAttr';
 			const nodeType = 'SomeNodeType';
-			const expectedNodes = [{ [uniqueAttributeName]: uniqueAttributeValue, foo: 'bar' }];
+			const expectedNodes = [
+				{ [uniqueAttributeName]: uniqueAttributeValue, foo: 'bar' }
+			];
 			return request(app)
 				.post(`/api/${nodeType}/${uniqueAttributeName}/${uniqueAttributeValue}`)
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -164,7 +173,7 @@ describe('crud', () => {
 						action: EventLogWriter.actions.CREATE,
 						code: uniqueAttributeValue,
 						event: 'CREATED_NODE',
-						type: nodeType,
+						type: nodeType
 					});
 				});
 		});
@@ -172,7 +181,7 @@ describe('crud', () => {
 		it('POST inserts the node and links it to related node if it exists', async () => {
 			const expectedNodes = [
 				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
-				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
 			];
 			const relationship = {
 				name: 'REL',
@@ -181,7 +190,7 @@ describe('crud', () => {
 				fromUniqueAttrValue: 'SomeUniqueAttrValue',
 				toUniqueAttrName: 'OtherUniqueAttrName',
 				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType',
+				to: 'SomeNodeType'
 			};
 
 			const createTargetNode =
@@ -193,7 +202,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: [relationship],
+					relationships: [relationship]
 				})
 				.expect(200)
 				.then(async response => {
@@ -212,7 +221,7 @@ describe('crud', () => {
 				{ OneUniqueAttrName: 'OneUniqueAttrValue' },
 				{ TwoUniqueAttrName: 'TwoUniqueAttrValue' },
 				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' },
-				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
 			];
 
 			const relationships = [
@@ -223,7 +232,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OneUniqueAttrName',
 					toUniqueAttrValue: 'OneUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -232,7 +241,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'TwoUniqueAttrName',
 					toUniqueAttrValue: 'TwoUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -241,8 +250,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'ThreeUniqueAttrName',
 					toUniqueAttrValue: 'ThreeUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			const createTargetNode1 =
@@ -260,7 +269,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -277,7 +286,7 @@ describe('crud', () => {
 			const expectedNodes = [
 				{ SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue' },
 				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
-				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
 			];
 
 			const relationships = [
@@ -288,7 +297,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL2',
@@ -297,7 +306,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL3',
@@ -306,20 +315,21 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'SingleRelationUniqueAttrName',
 					toUniqueAttrValue: 'SingleRelationUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
-			const createTargetNodes = 'UNWIND {props} as map CREATE(n:SomeNodeType) SET n = map';
+			const createTargetNodes =
+				'UNWIND {props} as map CREATE(n:SomeNodeType) SET n = map';
 			await db.run(createTargetNodes, {
 				props: [
 					{
-						SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue',
+						SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue'
 					},
 					{
-						OtherUniqueAttrName: 'OtherUniqueAttrValue',
-					},
-				],
+						OtherUniqueAttrName: 'OtherUniqueAttrValue'
+					}
+				]
 			});
 
 			return request(app)
@@ -327,7 +337,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -344,7 +354,7 @@ describe('crud', () => {
 			const expectedNodes = [
 				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
 				{ SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue' },
-				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
 			];
 
 			const relationships = [
@@ -355,7 +365,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL2',
@@ -364,7 +374,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL3',
@@ -373,20 +383,21 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'SingleRelationUniqueAttrName',
 					toUniqueAttrValue: 'SingleRelationUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
-			const createTargetNodes = 'UNWIND {props} as map CREATE(n:SomeNodeType) SET n = map';
+			const createTargetNodes =
+				'UNWIND {props} as map CREATE(n:SomeNodeType) SET n = map';
 			await db.run(createTargetNodes, {
 				props: [
 					{
-						SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue',
+						SingleRelationUniqueAttrName: 'SingleRelationUniqueAttrValue'
 					},
 					{
-						OtherUniqueAttrName: 'OtherUniqueAttrValue',
-					},
-				],
+						OtherUniqueAttrName: 'OtherUniqueAttrValue'
+					}
+				]
 			});
 
 			return request(app)
@@ -394,16 +405,18 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.then(async response => {
 					expect(stubSendEvent).to.have.callCount(7);
-					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+					expect(
+						stubSendEvent.getCalls().map(({ args }) => args[0])
+					).to.deep.equal([
 						{
 							action: EventLogWriter.actions.CREATE,
 							code: 'SomeUniqueAttrValue',
 							event: 'CREATED_NODE',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -413,9 +426,9 @@ describe('crud', () => {
 								direction: 'to',
 								relatedCode: 'OtherUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL1',
+								type: 'REL1'
 							},
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -425,9 +438,9 @@ describe('crud', () => {
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL1',
+								type: 'REL1'
 							},
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -437,9 +450,9 @@ describe('crud', () => {
 								direction: 'to',
 								relatedCode: 'OtherUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL2',
+								type: 'REL2'
 							},
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -449,9 +462,9 @@ describe('crud', () => {
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL2',
+								type: 'REL2'
 							},
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -461,9 +474,9 @@ describe('crud', () => {
 								direction: 'to',
 								relatedCode: 'SingleRelationUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL3',
+								type: 'REL3'
 							},
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							action: EventLogWriter.actions.UPDATE,
@@ -473,16 +486,18 @@ describe('crud', () => {
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
 								relatedType: 'SomeNodeType',
-								type: 'REL3',
+								type: 'REL3'
 							},
-							type: 'SomeNodeType',
-						},
+							type: 'SomeNodeType'
+						}
 					]);
 				});
 		});
 
 		it('POST fails if the related node does not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -497,9 +512,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -511,7 +526,9 @@ describe('crud', () => {
 		});
 
 		it('POST fails if multiple related nodes do not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -526,7 +543,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent1',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL',
@@ -535,7 +552,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent2',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL',
@@ -544,9 +561,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent3',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -558,7 +575,9 @@ describe('crud', () => {
 		});
 
 		it('POST fails if single multiple-related node does not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -572,7 +591,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL2',
@@ -581,7 +600,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL3',
@@ -590,9 +609,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -606,7 +625,7 @@ describe('crud', () => {
 		it('POST inserts the node and links it to a related node that does not exist if using upsert', async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationship = {
@@ -616,7 +635,7 @@ describe('crud', () => {
 				fromUniqueAttrValue: 'SomeUniqueAttrValue',
 				toUniqueAttrName: 'OtherUniqueAttrName',
 				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType',
+				to: 'SomeNodeType'
 			};
 
 			return request(app)
@@ -624,7 +643,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: [relationship],
+					relationships: [relationship]
 				})
 				.expect(200)
 				.then(async response => {
@@ -643,7 +662,7 @@ describe('crud', () => {
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OneUniqueAttrName: 'OneUniqueAttrValue' },
 				{ TwoUniqueAttrName: 'TwoUniqueAttrValue' },
-				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' },
+				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -654,7 +673,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OneUniqueAttrName',
 					toUniqueAttrValue: 'OneUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -663,7 +682,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'TwoUniqueAttrName',
 					toUniqueAttrValue: 'TwoUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -672,8 +691,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'ThreeUniqueAttrName',
 					toUniqueAttrValue: 'ThreeUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			return request(app)
@@ -681,7 +700,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -697,7 +716,7 @@ describe('crud', () => {
 		it('POST inserts the node and links it to a single multiple-related node that does not exist if using upsert', async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -708,7 +727,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL2',
@@ -717,7 +736,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL3',
@@ -726,8 +745,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			return request(app)
@@ -735,7 +754,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: originalNode,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -749,9 +768,14 @@ describe('crud', () => {
 		});
 
 		it('POST creating duplicate node returns 400', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
-			const duplicateNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
+			const duplicateNode = {
+				SomeUniqueAttr: 'SomeUniqueAttrValue',
+				foo: 'bar'
+			};
 			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
 			await db.run(createQuery, { node: duplicateNode });
 
@@ -793,7 +817,11 @@ describe('crud', () => {
 		beforeEach(async () => {
 			node = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' };
 			modification = { potato: 'potah-to' };
-			modifiedNode = { SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to' };
+			modifiedNode = {
+				SomeUniqueAttr: 'SomeUniqueAttrValue',
+				foo: 'bar',
+				potato: 'potah-to'
+			};
 			const createQuery = 'CREATE (a:SomeNodeType $node) RETURN a';
 			await db.run(createQuery, { node: node });
 		});
@@ -808,7 +836,13 @@ describe('crud', () => {
 		});
 
 		it('PUT modifies an existing node', () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar', potato: 'potah-to' }];
+			const expectedNodes = [
+				{
+					SomeUniqueAttr: 'SomeUniqueAttrValue',
+					foo: 'bar',
+					potato: 'potah-to'
+				}
+			];
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -823,7 +857,9 @@ describe('crud', () => {
 		});
 
 		it('PUT returns 200 even if props updated with the same value they had before', () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -848,13 +884,15 @@ describe('crud', () => {
 						action: EventLogWriter.actions.UPDATE,
 						code: 'SomeUniqueAttrValue',
 						event: 'UPDATED_NODE',
-						type: 'SomeNodeType',
+						type: 'SomeNodeType'
 					});
 				});
 		});
 
 		it("PUT for a node that doesn't exist returns 404", () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/NonExistent')
@@ -882,7 +920,7 @@ describe('crud', () => {
 		it("PUT with upsert creates a node if it doesn't exist", () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ SomeUniqueAttr: 'NonExistent', foo: 'bar' },
+				{ SomeUniqueAttr: 'NonExistent', foo: 'bar' }
 			];
 
 			return request(app)
@@ -909,7 +947,7 @@ describe('crud', () => {
 						action: EventLogWriter.actions.CREATE,
 						code: 'NonExistent',
 						event: 'CREATED_NODE',
-						type: 'SomeNodeType',
+						type: 'SomeNodeType'
 					});
 				});
 		});
@@ -917,7 +955,7 @@ describe('crud', () => {
 		it('PUT updates the node if it exists, and links it to a related node if it exists', async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationship = {
@@ -927,7 +965,7 @@ describe('crud', () => {
 				fromUniqueAttrValue: 'SomeUniqueAttrValue',
 				toUniqueAttrName: 'OtherUniqueAttrName',
 				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType',
+				to: 'SomeNodeType'
 			};
 
 			const createTargetNode =
@@ -939,7 +977,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: [relationship],
+					relationships: [relationship]
 				})
 				.expect(200)
 				.then(async response => {
@@ -958,7 +996,7 @@ describe('crud', () => {
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OneUniqueAttrName: 'OneUniqueAttrValue' },
 				{ TwoUniqueAttrName: 'TwoUniqueAttrValue' },
-				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' },
+				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -969,7 +1007,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OneUniqueAttrName',
 					toUniqueAttrValue: 'OneUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -978,7 +1016,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'TwoUniqueAttrName',
 					toUniqueAttrValue: 'TwoUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -987,8 +1025,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'ThreeUniqueAttrName',
 					toUniqueAttrValue: 'ThreeUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			const createTargetNode1 =
@@ -1006,7 +1044,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -1022,7 +1060,7 @@ describe('crud', () => {
 		it('PUT updates the node if it exists, and links it to a single multiple-related node it exists', async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -1033,7 +1071,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL2',
@@ -1042,7 +1080,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL3',
@@ -1051,8 +1089,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			const createTargetNode =
@@ -1064,7 +1102,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -1078,7 +1116,9 @@ describe('crud', () => {
 		});
 
 		it('PUT creates the given node, but returns a 400 if the related node does not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -1093,9 +1133,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -1120,9 +1160,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(() => {
 					expect(stubSendEvent).to.have.been.calledOnce;
@@ -1130,13 +1170,15 @@ describe('crud', () => {
 						action: EventLogWriter.actions.UPDATE,
 						code: 'SomeUniqueAttrValue',
 						event: 'UPDATED_NODE',
-						type: 'SomeNodeType',
+						type: 'SomeNodeType'
 					});
 				});
 		});
 
 		it('PUT fails if the multiple related nodes do not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -1151,7 +1193,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent1',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL',
@@ -1160,7 +1202,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent2',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL',
@@ -1169,9 +1211,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent3',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -1183,7 +1225,9 @@ describe('crud', () => {
 		});
 
 		it('PUT fails if the single multiple-related node does not exist', async () => {
-			const expectedNodes = [{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }];
+			const expectedNodes = [
+				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' }
+			];
 
 			return request(app)
 				.put('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
@@ -1198,7 +1242,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL2',
@@ -1207,7 +1251,7 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
+							to: 'SomeNodeType'
 						},
 						{
 							name: 'REL3',
@@ -1216,9 +1260,9 @@ describe('crud', () => {
 							fromUniqueAttrValue: 'SomeUniqueAttrValue',
 							toUniqueAttrName: 'id',
 							toUniqueAttrValue: 'nonExistent',
-							to: 'SomeNodeType',
-						},
-					],
+							to: 'SomeNodeType'
+						}
+					]
 				})
 				.expect(400)
 				.then(async response => {
@@ -1232,7 +1276,7 @@ describe('crud', () => {
 		it("PUT creates the node if it doesn't exist, and links it to a related node even if it does not exist, with upsert", async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationship = {
@@ -1242,7 +1286,7 @@ describe('crud', () => {
 				fromUniqueAttrValue: 'SomeUniqueAttrValue',
 				toUniqueAttrName: 'OtherUniqueAttrName',
 				toUniqueAttrValue: 'OtherUniqueAttrValue',
-				to: 'SomeNodeType',
+				to: 'SomeNodeType'
 			};
 
 			return request(app)
@@ -1250,7 +1294,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: [relationship],
+					relationships: [relationship]
 				})
 				.expect(200)
 				.then(async response => {
@@ -1269,7 +1313,7 @@ describe('crud', () => {
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ OneUniqueAttrName: 'OneUniqueAttrValue' },
 				{ TwoUniqueAttrName: 'TwoUniqueAttrValue' },
-				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' },
+				{ ThreeUniqueAttrName: 'ThreeUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -1280,7 +1324,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OneUniqueAttrName',
 					toUniqueAttrValue: 'OneUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -1289,7 +1333,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'TwoUniqueAttrName',
 					toUniqueAttrValue: 'TwoUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -1298,8 +1342,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'ThreeUniqueAttrName',
 					toUniqueAttrValue: 'ThreeUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			return request(app)
@@ -1307,7 +1351,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -1329,7 +1373,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OneUniqueAttrName',
 					toUniqueAttrValue: 'OneUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -1338,7 +1382,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'TwoUniqueAttrName',
 					toUniqueAttrValue: 'TwoUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL',
@@ -1347,8 +1391,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'ThreeUniqueAttrName',
 					toUniqueAttrValue: 'ThreeUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			return request(app)
@@ -1356,22 +1400,24 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(() => {
 					expect(stubSendEvent).to.have.callCount(10);
-					expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+					expect(
+						stubSendEvent.getCalls().map(({ args }) => args[0])
+					).to.deep.equal([
 						{
 							event: 'UPDATED_NODE',
 							action: EventLogWriter.actions.UPDATE,
 							code: 'SomeUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_NODE',
 							action: EventLogWriter.actions.CREATE,
 							code: 'OneUniqueAttrName',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1380,10 +1426,10 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'to',
 								relatedCode: 'OneUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'SomeUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1392,16 +1438,16 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'OneUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_NODE',
 							action: EventLogWriter.actions.CREATE,
 							code: 'TwoUniqueAttrName',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1410,10 +1456,10 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'to',
 								relatedCode: 'TwoUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'SomeUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1422,16 +1468,16 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'TwoUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_NODE',
 							action: EventLogWriter.actions.CREATE,
 							code: 'ThreeUniqueAttrName',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1440,10 +1486,10 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'to',
 								relatedCode: 'ThreeUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'SomeUniqueAttrValue',
-							type: 'SomeNodeType',
+							type: 'SomeNodeType'
 						},
 						{
 							event: 'CREATED_RELATIONSHIP',
@@ -1452,11 +1498,11 @@ describe('crud', () => {
 								type: 'REL',
 								direction: 'from',
 								relatedCode: 'SomeUniqueAttrValue',
-								relatedType: 'SomeNodeType',
+								relatedType: 'SomeNodeType'
 							},
 							code: 'ThreeUniqueAttrValue',
-							type: 'SomeNodeType',
-						},
+							type: 'SomeNodeType'
+						}
 					]);
 				});
 		});
@@ -1464,7 +1510,7 @@ describe('crud', () => {
 		it("PUT creates the node if it doesn't exist, and links it to a single multiple-related node even it does not exist, with upsert", async () => {
 			const expectedNodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
-				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' },
+				{ OtherUniqueAttrName: 'OtherUniqueAttrValue' }
 			];
 
 			const relationships = [
@@ -1475,7 +1521,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL2',
@@ -1484,7 +1530,7 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
+					to: 'SomeNodeType'
 				},
 				{
 					name: 'REL3',
@@ -1493,8 +1539,8 @@ describe('crud', () => {
 					fromUniqueAttrValue: 'SomeUniqueAttrValue',
 					toUniqueAttrName: 'OtherUniqueAttrName',
 					toUniqueAttrValue: 'OtherUniqueAttrValue',
-					to: 'SomeNodeType',
-				},
+					to: 'SomeNodeType'
+				}
 			];
 
 			return request(app)
@@ -1502,7 +1548,7 @@ describe('crud', () => {
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
 					node: node,
-					relationships: relationships,
+					relationships: relationships
 				})
 				.expect(200)
 				.then(async response => {
@@ -1524,16 +1570,16 @@ describe('crud', () => {
 			nodes = [
 				{ SomeUniqueAttr: 'SomeUniqueAttrValue', foo: 'bar' },
 				{ SomeUniqueAttr: 'OtherUniqueAttrValue', lorem: 'ipsum' },
-				{ SomeUniqueAttr: 'ThirdUniqueAttrValue', a: 'b' },
+				{ SomeUniqueAttr: 'ThirdUniqueAttrValue', a: 'b' }
 			];
 			const createQuery = `CREATE (a:${nodeType} $node) RETURN a`;
-			for (let node of nodes) {
+			for (const node of nodes) {
 				await db.run(createQuery, { node: node });
 			}
 		});
 
 		afterEach(async () => {
-			for (let node of nodes) {
+			for (const node of nodes) {
 				const deleteQuery = `MATCH (a:${nodeType} { SomeUniqueAttr: "${
 					node.SomeUniqueAttr
 				}" }) DETACH DELETE a`;
@@ -1597,7 +1643,7 @@ describe('crud', () => {
 						action: EventLogWriter.actions.DELETE,
 						code: nodes[0].SomeUniqueAttr,
 						event: 'DELETED_NODE',
-						type: nodeType,
+						type: nodeType
 					});
 				});
 		});
@@ -1616,7 +1662,7 @@ describe('crud', () => {
 				.delete(`/api/${nodeType}/SomeUniqueAttr/${nodes[0].SomeUniqueAttr}`)
 				.set('API_KEY', `${process.env.API_KEY}`)
 				.send({
-					mode: 'detach',
+					mode: 'detach'
 				})
 				.expect(200)
 				.then(async response => {
@@ -1626,7 +1672,9 @@ describe('crud', () => {
 						.expect(200)
 						.expect(() => {
 							expect(stubSendEvent).to.have.been.calledThrice;
-							expect(stubSendEvent.getCalls().map(({ args }) => args[0])).to.deep.equal([
+							expect(
+								stubSendEvent.getCalls().map(({ args }) => args[0])
+							).to.deep.equal([
 								{
 									event: 'DELETED_RELATIONSHIP',
 									action: EventLogWriter.actions.UPDATE,
@@ -1634,10 +1682,10 @@ describe('crud', () => {
 										type: 'TestRelationship',
 										direction: 'from',
 										relatedCode: 'SomeUniqueAttrValue',
-										relatedType: 'SomeNodeType',
+										relatedType: 'SomeNodeType'
 									},
 									code: 'ThirdUniqueAttrValue',
-									type: 'SomeNodeType',
+									type: 'SomeNodeType'
 								},
 								{
 									event: 'DELETED_RELATIONSHIP',
@@ -1646,17 +1694,17 @@ describe('crud', () => {
 										type: 'TestRelationship',
 										direction: 'to',
 										relatedCode: 'SomeUniqueAttrValue',
-										relatedType: 'SomeNodeType',
+										relatedType: 'SomeNodeType'
 									},
 									code: 'OtherUniqueAttrValue',
-									type: 'SomeNodeType',
+									type: 'SomeNodeType'
 								},
 								{
 									event: 'DELETED_NODE',
 									action: EventLogWriter.actions.DELETE,
 									code: 'SomeUniqueAttrValue',
-									type: 'SomeNodeType',
-								},
+									type: 'SomeNodeType'
+								}
 							]);
 						});
 				});

@@ -10,17 +10,22 @@ const {
 	NODE_ENV: env = 'development'
 } = process.env;
 
-
-const getSignedUrlMock = (action, { Bucket, Key }) => Promise.resolve(join('/uploads', Bucket, Key));
+const getSignedUrlMock = (action, { Bucket, Key }) =>
+	Promise.resolve(join('/uploads', Bucket, Key));
 
 const s3Client = () => {
-	if(env === 'development') {
+	if (env === 'development') {
 		return { getSignedUrl: getSignedUrlMock };
 	}
-	return new S3({apiVersion: '2006-03-01', region, accessKeyId, secretAccessKey});
+	return new S3({
+		apiVersion: '2006-03-01',
+		region,
+		accessKeyId,
+		secretAccessKey
+	});
 };
 
-exports.getSignedUrl = Key  =>
+exports.getSignedUrl = Key =>
 	s3Client()
-		.getSignedUrl('getObject', { Bucket, Key, Expires }	)
-		.promise()
+		.getSignedUrl('getObject', { Bucket, Key, Expires })
+		.promise();

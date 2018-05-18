@@ -7,8 +7,7 @@ const includesObj = (array, obj) => {
 	return false;
 };
 
-module.exports = (result) => {
-
+module.exports = result => {
 	const hash = {};
 
 	// Build a hash where the key is the id of every node that is a parent
@@ -34,7 +33,12 @@ module.exports = (result) => {
 						hash[start.id].relationships[segment.relationship.type] = [];
 					}
 
-					if (!includesObj(hash[start.id].relationships[segment.relationship.type], end)) {
+					if (
+						!includesObj(
+							hash[start.id].relationships[segment.relationship.type],
+							end
+						)
+					) {
 						hash[start.id].relationships[segment.relationship.type].push(end);
 					}
 				}
@@ -48,24 +52,26 @@ module.exports = (result) => {
 	// - find it in the hash
 	// - attach it to the current node (parent)
 	// - delete it from the hash
-	for (let key in hash) {
+	for (const key in hash) {
 		if (hash.hasOwnProperty(key)) {
 			const node = hash[key];
 			const rships = node.relationships;
 
-			for (let rshipKey in rships) {
+			for (const rshipKey in rships) {
 				if (rships.hasOwnProperty(rshipKey)) {
-
 					const rshipsOfType = rships[rshipKey];
 
-					for (let nodeKey in rshipsOfType) {
+					for (const nodeKey in rshipsOfType) {
 						if (rshipsOfType.hasOwnProperty(nodeKey)) {
 							const endNode = rshipsOfType[nodeKey];
 
 							// this child node has further children
 							if (hash[endNode.id]) {
 								endNode.relationships = hash[endNode.id].relationships;
-								console.log('MOVED INSIDE PARENT, NEED TO DELETE FROM ROOT', endNode.id);
+								console.log(
+									'MOVED INSIDE PARENT, NEED TO DELETE FROM ROOT',
+									endNode.id
+								);
 								redundant.push(endNode.id);
 							}
 						}
@@ -75,7 +81,7 @@ module.exports = (result) => {
 		}
 	}
 
-	for (let id of redundant) {
+	for (const id of redundant) {
 		delete hash[id];
 	}
 

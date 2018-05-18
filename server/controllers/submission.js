@@ -1,7 +1,13 @@
-const {session: db} = require('../db-connection');
+const { session: db } = require('../db-connection');
 const util = require('util');
 
-const stringify = (object) => util.inspect(object, { showHidden: false, depth: null, colors: false, breakLength: Infinity });
+const stringify = object =>
+	util.inspect(object, {
+		showHidden: false,
+		depth: null,
+		colors: false,
+		breakLength: Infinity
+	});
 
 const addAnswerToQuery = (query, answer, index) => {
 	query += ` WITH submission
@@ -14,15 +20,18 @@ const addAnswerToQuery = (query, answer, index) => {
 };
 
 const submit = async (req, res) => {
-	const initialQuery = `MATCH (submission:Submission {id: '${req.body.node.id}'})
+	const initialQuery = `MATCH (submission:Submission {id: '${
+		req.body.node.id
+	}'})
 								SET submission += ${stringify(req.body.node)}`;
-	const submissionQuery = req.body.answers? req.body.answers.reduce(addAnswerToQuery, initialQuery) : initialQuery;
+	const submissionQuery = req.body.answers
+		? req.body.answers.reduce(addAnswerToQuery, initialQuery)
+		: initialQuery;
 	console.log('[SUBMISSION] submitQuery', submissionQuery);
-	try{
+	try {
 		const result = await db.run(submissionQuery);
 		res.send(result);
-	}
-	catch(e){
+	} catch (e) {
 		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
@@ -32,7 +41,6 @@ const getAllforOne = async (req, res) => {
 	console.log('[SUBMISSION] getAllforOne');
 
 	try {
-
 		const topLevel = req.params.topLevel === 'true';
 		const surveyId = req.params.surveyId;
 
@@ -47,59 +55,63 @@ const getAllforOne = async (req, res) => {
 		console.log('[SUBMISSION]', query);
 		const result = await db.run(query);
 
-		let submissionObj = {};
+		const submissionObj = {};
 
 		if (result.records.length) {
 			for (const record of result.records) {
 				let submissionAnswer;
 				let surveyQuestion;
 
-				const [ submissions, answers ] = record._fields;
-				const submission = submissions.segments.find((segment) => segment.relationship.type === 'SUBMITS');
+				const [submissions, answers] = record._fields;
+				const submission = submissions.segments.find(
+					segment => segment.relationship.type === 'SUBMITS'
+				);
 
 				submissionObj.status = submission.end.properties.status;
 				submissionObj.id = submission.end.properties.id;
 				for (const field of answers) {
 					for (const segment of field.segments) {
-						switch(segment.relationship.type) {
+						switch (segment.relationship.type) {
 							case 'HAS':
 								submissionAnswer = segment.end.properties;
 								if (!submissionObj[submissionAnswer.questionId]) {
 									submissionObj[submissionAnswer.questionId] = {
-										answer: submissionAnswer.value,
+										answer: submissionAnswer.value
 									};
+								} else {
+									submissionObj[submissionAnswer.questionId].answer =
+										submissionAnswer.value;
 								}
-								else {
-									submissionObj[submissionAnswer.questionId].answer = submissionAnswer.value;
-								}
-							break;
+								break;
 							case 'ANSWERS_QUESTION':
 								surveyQuestion = segment.end.properties;
 
 								if (!submissionObj[surveyQuestion.id]) {
 									submissionObj[surveyQuestion.id] = {
-										question: surveyQuestion.text,
+										question: surveyQuestion.text
 									};
+								} else {
+									submissionObj[surveyQuestion.id].question =
+										surveyQuestion.text;
 								}
-								else {
-									submissionObj[surveyQuestion.id].question = surveyQuestion.text;
-								}
-							break;
+								break;
 						}
 					}
 				}
 			}
 			res.send(submissionObj);
-		}
-		else {
+		} else {
 			console.log('404');
-			return res.status(404).end(`No ${surveyId} survey answers found for ${submitterType} ${submitterId}`);
+			return res
+				.status(404)
+				.end(
+					`No ${surveyId} survey answers found for ${submitterType} ${submitterId}`
+				);
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		console.log('error', e);
 		return res.status(500).end(e.toString());
 	}
 };
 
-module.exports = { getAllforOne, submit};
+module.exports = { getAllforOne, submit };

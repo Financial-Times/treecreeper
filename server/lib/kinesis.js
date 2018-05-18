@@ -1,12 +1,10 @@
-'use strict';
-
 const AWS = require('aws-sdk');
 const logger = require('@financial-times/n-logger').default;
 
 const {
 	KINESIS_AWS_REGION: region = 'eu-west-1',
 	KINESIS_AWS_ACCESS_KEY_ID: accessKeyId,
-	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey,
+	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey
 } = process.env;
 
 function Kinesis(streamName) {
@@ -21,13 +19,15 @@ function Kinesis(streamName) {
 		logger: {
 			log(message) {
 				logger.debug('Kinesis API call', message);
-			},
-		},
+			}
+		}
 	});
 
 	const stubInDevelopment = (action, fn) => (...args) => {
 		if (!isProduction) {
-			logger.debug(`Skipped kinesis ${action} as not in production`, { event: args[0].event });
+			logger.debug(`Skipped kinesis ${action} as not in production`, {
+				event: args[0].event
+			});
 			return Promise.resolve();
 		}
 		return fn(...args);
@@ -39,18 +39,18 @@ function Kinesis(streamName) {
 				.putRecord({
 					Data: Buffer.from(JSON.stringify(data), 'utf-8'),
 					PartitionKey: `${dyno}:${Date.now()}`,
-					StreamName: streamName,
+					StreamName: streamName
 				})
 				.promise()
 				.catch(error => {
 					logger.error('Kinesis put record failed', {
 						event: 'KINESIS_PUT_RECORD_FAILURE',
 						error,
-						data,
+						data
 					});
 					throw error;
 				});
-		}),
+		})
 	};
 }
 

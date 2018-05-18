@@ -1,12 +1,13 @@
-'use strict';
-
+/*eslint-disable*/
 const { oneLine } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
-const {session: db} = require('../db-connection');
+const { session: db } = require('../db-connection');
 const EventLogWriter = require('../lib/event-log-writer');
 const Kinesis = require('../lib/kinesis');
 
-const kinesisClient = new Kinesis(process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name');
+const kinesisClient = new Kinesis(
+	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name'
+);
 const eventLogWriter = new EventLogWriter(kinesisClient);
 
 const sendEvent = event =>
@@ -28,7 +29,7 @@ const sendRelationshipCreationEvents = ({
 	to,
 	toUniqueAttrName,
 	toUniqueAttrValue,
-	name,
+	name
 }) =>
 	Promise.all(
 		[
@@ -37,15 +38,15 @@ const sendRelationshipCreationEvents = ({
 				type: from,
 				direction: 'to',
 				relatedCode: toUniqueAttrValue,
-				relatedType: to,
+				relatedType: to
 			},
 			{
 				code: toUniqueAttrValue,
 				type: to,
 				direction: 'from',
 				relatedCode: fromUniqueAttrValue,
-				relatedType: from,
-			},
+				relatedType: from
+			}
 		].map(({ code, type, relatedCode, relatedType, direction }) =>
 			sendEvent({
 				event: 'CREATED_RELATIONSHIP',
@@ -54,10 +55,10 @@ const sendRelationshipCreationEvents = ({
 					type: name,
 					direction,
 					relatedCode,
-					relatedType,
+					relatedType
 				},
 				code,
-				type,
+				type
 			})
 		)
 	);
@@ -69,7 +70,7 @@ const _createRelationshipAndNode = async ({
 	to,
 	toUniqueAttrName,
 	toUniqueAttrValue,
-	name,
+	name
 }) => {
 	const query = oneLine`
 		MERGE (a:${from} {${fromUniqueAttrName}: '${fromUniqueAttrValue}'})
@@ -95,7 +96,7 @@ const _createRelationshipAndNode = async ({
 			event: 'CREATED_NODE',
 			action: EventLogWriter.actions.CREATE,
 			code: fromUniqueAttrName,
-			type: from,
+			type: from
 		});
 	}
 	if (createdTo) {
@@ -103,11 +104,13 @@ const _createRelationshipAndNode = async ({
 			event: 'CREATED_NODE',
 			action: EventLogWriter.actions.CREATE,
 			code: toUniqueAttrName,
-			type: to,
+			type: to
 		});
 	}
 
-	return result.records && result.records.length > 0 ? lookupField(result.records[0], 'r') : undefined;
+	return result.records && result.records.length > 0
+		? lookupField(result.records[0], 'r')
+		: undefined;
 };
 
 const _createRelationship = async ({
@@ -117,7 +120,7 @@ const _createRelationship = async ({
 	to,
 	toUniqueAttrName,
 	toUniqueAttrValue,
-	name,
+	name
 }) => {
 	const query = oneLine`
 		MATCH (a:${from}), (b:${to})
@@ -132,14 +135,17 @@ const _createRelationship = async ({
 
 	console.dir(result, { depth: null });
 
-	return result.records && result.records.length > 0 ? lookupField(result.records[0], 'r') : undefined;
+	return result.records && result.records.length > 0
+		? lookupField(result.records[0], 'r')
+		: undefined;
 };
 
 const _createRelationships = async (relationships, upsert) => {
 	let result;
-	for (let relationship of relationships) {
+	for (const relationship of relationships) {
 		try {
-			const createFunction = upsert === 'upsert' ? _createRelationshipAndNode : _createRelationship;
+			const createFunction =
+				upsert === 'upsert' ? _createRelationshipAndNode : _createRelationship;
 
 			const singleResult = await createFunction(relationship);
 
@@ -155,11 +161,26 @@ const _createRelationships = async (relationships, upsert) => {
 	return result;
 };
 
-const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => {
-	console.log('[CRUD] get', nodeType, uniqueAttrName, uniqueAttr, relationships);
+const get = async (
+	res,
+	nodeType,
+	uniqueAttrName,
+	uniqueAttr,
+	relationships
+) => {
+	console.log(
+		'[CRUD] get',
+		nodeType,
+		uniqueAttrName,
+		uniqueAttr,
+		relationships
+	);
 
 	try {
-		const filter = uniqueAttrName && uniqueAttr ? `{${uniqueAttrName}: "${uniqueAttr}"}` : '';
+		const filter =
+			uniqueAttrName && uniqueAttr
+				? `{${uniqueAttrName}: "${uniqueAttr}"}`
+				: '';
 		const related = relationships ? '-[r]-(c)' : '';
 		const returned = relationships ? 'a,r,c' : 'a';
 
@@ -170,10 +191,12 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 		const result = await db.run(query);
 
 		if (!result.records.length) {
-			return res.status(404).send(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
+			return res
+				.status(404)
+				.send(`${nodeType} ${uniqueAttr ? uniqueAttr : ''} not found`);
 		}
 
-		let formattedResult = [];
+		const formattedResult = [];
 		let previousID = null;
 		let oneResult;
 		result.records.forEach(record => {
@@ -197,7 +220,7 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 					fromUniqueAttrValue: uniqueAttr,
 					to: to.labels[0],
 					toUniqueAttrName: 'id',
-					toUniqueAttrValue: to.properties.id,
+					toUniqueAttrValue: to.properties.id
 				});
 			}
 		});
@@ -215,8 +238,24 @@ const get = async (res, nodeType, uniqueAttrName, uniqueAttr, relationships) => 
 	}
 };
 
-const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
-	console.log('[CRUD] create', nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert);
+const create = async (
+	res,
+	nodeType,
+	uniqueAttrName,
+	uniqueAttr,
+	obj,
+	relationships,
+	upsert
+) => {
+	console.log(
+		'[CRUD] create',
+		nodeType,
+		uniqueAttrName,
+		uniqueAttr,
+		obj,
+		relationships,
+		upsert
+	);
 
 	if (uniqueAttrName) {
 		const existingNode = `MATCH (a:${nodeType} {${uniqueAttrName}: "${uniqueAttr}"}) RETURN a`;
@@ -232,7 +271,11 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				'ALREADY EXISTS',
 				JSON.stringify(result.records, null, 2)
 			);
-			return res.status(400).send(`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`);
+			return res
+				.status(400)
+				.send(
+					`node with ${uniqueAttrName}=${obj[uniqueAttrName]} already exists`
+				);
 		}
 	}
 
@@ -252,7 +295,7 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				event: 'CREATED_NODE',
 				action: EventLogWriter.actions.CREATE,
 				code: uniqueAttr,
-				type: nodeType,
+				type: nodeType
 			});
 			if (!relationships) {
 				return res.send(lookupField(result.records[0], 'a').properties);
@@ -274,7 +317,15 @@ const create = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 	}
 };
 
-const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationships, upsert) => {
+const update = async (
+	res,
+	nodeType,
+	uniqueAttrName,
+	uniqueAttr,
+	obj,
+	relationships,
+	upsert
+) => {
 	console.log('[CRUD] updating', obj, nodeType, uniqueAttrName, uniqueAttr);
 	try {
 		const updateQuery = oneLine`
@@ -309,14 +360,14 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 				event: 'CREATED_NODE',
 				action: EventLogWriter.actions.CREATE,
 				code: uniqueAttr,
-				type: nodeType,
+				type: nodeType
 			});
 		} else {
 			sendEvent({
 				event: 'UPDATED_NODE',
 				action: EventLogWriter.actions.UPDATE,
 				code: uniqueAttr,
-				type: nodeType,
+				type: nodeType
 			});
 		}
 
@@ -331,7 +382,9 @@ const update = async (res, nodeType, uniqueAttrName, uniqueAttr, obj, relationsh
 		}
 
 		return res.send(
-			result.records && result.records.length ? lookupField(result.records[0], 'a').properties : result
+			result.records && result.records.length
+				? lookupField(result.records[0], 'a').properties
+				: result
 		);
 	} catch (e) {
 		console.log('[CRUD] update error', e);
@@ -375,7 +428,8 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 					relationshipType: lookupField(record, 'relationshipType'),
 					nodeId: lookupField(record, 'nodeId'),
 					nodeLabels: lookupField(record, 'nodeLabels'),
-					direction: uniqueAttr === lookupField(record, 'startNodeId') ? 'from' : 'to',
+					direction:
+						uniqueAttr === lookupField(record, 'startNodeId') ? 'from' : 'to'
 				}))
 				.filter(record => record.relationshipType)
 				.sort((recordA, recordB) => recordA.nodeId < recordB.nodeId)
@@ -387,24 +441,29 @@ const remove = async (res, nodeType, uniqueAttrName, uniqueAttr, mode) => {
 							type: relationshipType,
 							direction,
 							relatedCode: uniqueAttr,
-							relatedType: nodeType,
+							relatedType: nodeType
 						},
 						code: nodeId,
-						type: nodeLabels[0],
+						type: nodeLabels[0]
 					})
 				);
 			sendEvent({
 				event: 'DELETED_NODE',
 				action: EventLogWriter.actions.DELETE,
 				code: uniqueAttr,
-				type: nodeType,
+				type: nodeType
 			});
 
 			return res.status(200).send(`${uniqueAttr} deleted`);
-		} else if (result.records.length > 0 && lookupField(result.records[0], 'relationships')) {
+		} else if (
+			result.records.length > 0 &&
+			lookupField(result.records[0], 'relationships')
+		) {
 			return res
 				.status(400)
-				.send(`Node has existing relationships. Specify mode=detach to force deletion.`);
+				.send(
+					`Node has existing relationships. Specify mode=detach to force deletion.`
+				);
 		} else {
 			return res.status(404).send(`${uniqueAttr} not found. No nodes deleted.`);
 		}
@@ -419,9 +478,9 @@ const getAllforOne = async (res, relationship, param) => {
 		// TODO
 		// use uniqueattr value and name instead of id
 		// used by webPMA contract controller
-		const query = oneLine`MATCH p=(${relationship.from} {id: "${param}"})-[r:${relationship.name}]->(${
-			relationship.to
-		}) RETURN p`;
+		const query = oneLine`MATCH p=(${relationship.from} {id: "${param}"})-[r:${
+			relationship.name
+		}]->(${relationship.to}) RETURN p`;
 		console.log('[CRUD] all for one query', query);
 
 		const result = await db.run(query);
@@ -432,7 +491,9 @@ const getAllforOne = async (res, relationship, param) => {
 			});
 			return res.send(elements);
 		} else {
-			return res.status(404).send(`No ${relationship.to} found for ${relationship.from} ${param}`);
+			return res
+				.status(404)
+				.send(`No ${relationship.to} found for ${relationship.from} ${param}`);
 		}
 	} catch (e) {
 		return res.status(500).send(e.toString());
@@ -460,4 +521,12 @@ const getAll = async (res, nodeType, filters = '') => {
 	}
 };
 
-module.exports = { get, create, _createRelationships, update, remove, getAll, getAllforOne };
+module.exports = {
+	get,
+	create,
+	_createRelationships,
+	update,
+	remove,
+	getAll,
+	getAllforOne
+};

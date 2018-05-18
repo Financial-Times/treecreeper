@@ -1,12 +1,9 @@
-'use strict';
-
 const casual = require('casual');
 const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
 const app = require('../server/app.js');
 const request = require('./helpers/supertest');
 const { session: db } = require('../server/db-connection');
-const assert = require('chai').assert;
 const security = require('../server/middleware/security');
 const { createMockSchema } = require('../server/graphQl/schema');
 const resolvers = require('../server/graphQl/resolvers');
@@ -19,20 +16,8 @@ describe('Integration - GraphQL', () => {
 	// always seed the causal generator with a static seed so that tests are deterministic
 	casual.seed(123);
 	let sandbox;
-	let typeFields = {};
-	let typeMocks = {};
-
-	createSchemaFromFile = mocks => {
-		const schema = makeExecutableSchema({
-			typeDefs: typeDefs(),
-			resolvers: resolvers.enumResolvers,
-		});
-		addMockFunctionsToSchema({
-			schema,
-			mocks,
-		});
-		return schema;
-	};
+	const typeFields = {};
+	const typeMocks = {};
 
 	const mockGraphQlQuery = async query => {
 		const mockSchema = createMockSchema({
@@ -43,8 +28,8 @@ describe('Integration - GraphQL', () => {
 				return 'Platinum';
 			},
 			System: () => ({
-				serviceTier: () => 'Platinum',
-			}),
+				serviceTier: () => 'Platinum'
+			})
 		});
 		console.dir(query);
 		return await graphql(mockSchema, query);
@@ -76,7 +61,9 @@ describe('Integration - GraphQL', () => {
 			`)
 			.then(
 				({ data }) =>
-					data.__schema.types.find(({ name }) => name.toUpperCase() === type.toUpperCase()).fields
+					data.__schema.types.find(
+						({ name }) => name.toUpperCase() === type.toUpperCase()
+					).fields
 			)
 			.catch(error => {
 				logger.error('Given schema type did not exist', error, type);
@@ -97,7 +84,7 @@ describe('Integration - GraphQL', () => {
 
 		return {
 			mocks,
-			fields,
+			fields
 		};
 	};
 
@@ -108,21 +95,29 @@ describe('Integration - GraphQL', () => {
 		Object.entries(item).reduce((result, [key, value]) => {
 			const { type } = fieldSchema.find(({ name }) => name === key) || {};
 			if (type && type.kind === 'ENUM') {
-				return Object.assign({}, result, { [key]: resolvers.enumResolvers[type.name][value] });
+				return Object.assign({}, result, {
+					[key]: resolvers.enumResolvers[type.name][value]
+				});
 			}
 			return result;
 		}, item);
 
 	const populateDatabaseMocks = async (type, typeQuery) => {
-		const { mocks, fields } = await getMocksForType(type, typeQuery).then(result => {
-			result.mocks = Array.isArray(result.mocks) ? result.mocks : [result.mocks];
-			return result;
-		});
+		const { mocks, fields } = await getMocksForType(type, typeQuery).then(
+			result => {
+				result.mocks = Array.isArray(result.mocks)
+					? result.mocks
+					: [result.mocks];
+				return result;
+			}
+		);
 
 		typeFields[type] = fields;
 		typeMocks[type] = mocks;
 
-		const props = mocks.map(mock => mapEnumFields(mock, fields)).map(addUniqueAttributes);
+		const props = mocks
+			.map(mock => mapEnumFields(mock, fields))
+			.map(addUniqueAttributes);
 
 		logger.debug('Creating graphQL database stubs', { type, props });
 
@@ -150,12 +145,15 @@ describe('Integration - GraphQL', () => {
 				}
 			}`,
 			variables: null,
-			operationName: null,
+			operationName: null
 		};
 
 		const stubS3o = (req, res) => {
 			const cookie = req.get('Cookie');
-			const status = /s3o_username=.+?;?/.test(cookie) && /s3o_password=.+?;?/.test(cookie) ? 200 : 400;
+			const status =
+				/s3o_username=.+?;?/.test(cookie) && /s3o_password=.+?;?/.test(cookie)
+					? 200
+					: 400;
 			return res.sendStatus(status);
 		};
 
@@ -206,13 +204,13 @@ describe('Integration - GraphQL', () => {
 				query: `{
 					System(id: "${typeMocks['System'][0].id}") {
 						${listFields(typeFields['System'])}
-					}}`,
+					}}`
 			})
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.expect(200, {
 				data: {
-					System: typeMocks['System'][0],
-				},
+					System: typeMocks['System'][0]
+				}
 			})
 			.expect(response => {
 				console.dir(response.body);
@@ -227,13 +225,13 @@ describe('Integration - GraphQL', () => {
 				query: `{
 					Systems {
 						${listFields(typeFields['System'])}
-					}}`,
+					}}`
 			})
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.expect(200, {
 				data: {
-					Systems: typeMocks['System'],
-				},
+					Systems: typeMocks['System']
+				}
 			});
 	});
 });

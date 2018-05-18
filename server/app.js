@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
@@ -18,8 +16,8 @@ const createApp = () => {
 		app.get('/init', init);
 	}
 
-	app.use('/api', api(express.Router()));
-	app.use('/', ui(express.Router()));
+	app.use('/api', api(express.Router())); //eslint-disable-line
+	app.use('/', ui(express.Router())); //eslint-disable-line
 
 	app.use((error, request, response, next) => {
 		logger.error(error);

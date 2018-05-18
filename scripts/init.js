@@ -31,11 +31,14 @@ const constraints = async verb => {
 		`${verb} CONSTRAINT ON (s:System) ASSERT s.id IS UNIQUE`,
 		`${verb} CONSTRAINT ON (s:System) ASSERT exists(s.id)`,
 		`${verb} CONSTRAINT ON (s:Team) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.id)`,
+		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.id)`
 	];
 
 	const setupConstraintIfPossible = constraintQuery =>
-		db.run(constraintQuery).catch(() => Promise.resolve());
+		db.run(constraintQuery).catch(err => {
+			console.log(err);
+			return Promise.resolve();
+		});
 	const constraints = await Promise.all(
 		constraintQueries.map(setupConstraintIfPossible)
 	).then(() => db.run('CALL db.constraints'));
@@ -61,7 +64,7 @@ const dropRelationships = async () => {
 		'o:SUBMITS',
 		'o:ANSWERS',
 		'o:ANSWERS_QUESTION',
-		'o:HAS',
+		'o:HAS'
 	];
 
 	return Promise.all(
@@ -92,7 +95,7 @@ const initMiddleware = async (req, res) => {
 
 if (process.argv[1] === __filename) {
 	init()
-		.then(result => {
+		.then(() => {
 			console.log('Completed init');
 			process.exit(0);
 		})

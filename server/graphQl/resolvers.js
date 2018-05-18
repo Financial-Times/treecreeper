@@ -1,5 +1,3 @@
-'use strict';
-
 const util = require('util');
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
@@ -19,36 +17,37 @@ const queries = [
 	'Groups',
 	'Healthcheck',
 	'Healthchecks',
-	'CostCentre',
+	'CostCentre'
 ];
 
 const upperCaseResolver = keys =>
-	keys.reduce((resolver, key) => Object.assign(resolver, { [key.toUpperCase()]: key }), {});
+	keys.reduce(
+		(resolver, key) => Object.assign(resolver, { [key.toUpperCase()]: key }),
+		{}
+	);
 
 const enumResolvers = {
-    CircleCiVersion: {
-        ONE: '1.0',
-        TWO: '2.0',
-        NONE: '',
-    },
-    Status: upperCaseResolver(['Active']),
-    YesNo: upperCaseResolver(['Yes', 'No', 'Unknown']),
-    LifeCycleStage: upperCaseResolver([
-        'Production',
-        'Requirements',
-        'Retired',
-        'Testing',
-        'Analysis',
-    ]),
-    ServiceTier: upperCaseResolver(['Bronze', 'Gold', 'Silver', 'Platinum']),
+	CircleCiVersion: {
+		ONE: '1.0',
+		TWO: '2.0',
+		NONE: ''
+	},
+	Status: upperCaseResolver(['Active']),
+	YesNo: upperCaseResolver(['Yes', 'No', 'Unknown']),
+	LifeCycleStage: upperCaseResolver([
+		'Production',
+		'Requirements',
+		'Retired',
+		'Testing',
+		'Analysis'
+	]),
+	ServiceTier: upperCaseResolver(['Bronze', 'Gold', 'Silver', 'Platinum'])
 };
 
 const queryResolvers = queries.reduce(
 	(query, key) => Object.assign(query, { [key]: mapToNeo4j }),
 	{}
 );
-
-
 
 const mutationResolvers = {
 	/*
@@ -63,12 +62,17 @@ const mutationResolvers = {
 			RETURN s
 		`);
 		return result.records[0].get(0).properties;
-	},
+	}
 };
 
 module.exports = {
 	enumResolvers,
 	queryResolvers,
 	mutationResolvers,
-	all: Object.assign({}, enumResolvers, {Query: queryResolvers}, {Mutation: mutationResolvers})
+	all: Object.assign(
+		{},
+		enumResolvers,
+		{ Query: queryResolvers },
+		{ Mutation: mutationResolvers }
+	)
 };

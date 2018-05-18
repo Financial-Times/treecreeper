@@ -6,7 +6,7 @@ describe('S3 methods', () => {
 	let s3;
 	const getSignedUrlPromise = stub();
 	const getSignedUrl = stub().returns({
-		promise: getSignedUrlPromise,
+		promise: getSignedUrlPromise
 	});
 	const S3 = stub().returns({ getSignedUrl });
 	const sdk = { S3 };

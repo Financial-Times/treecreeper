@@ -1,11 +1,18 @@
-const {session: db} = require('../db-connection');
+const { session: db } = require('../db-connection');
 
-const isWriteQuery = (query) => {
+const isWriteQuery = query => {
 	// TODO refine this
 	// call is in technicallead
-	const writeClauses = ['create','detach','delete','set','remove','foreach', /*'call'*/];
+	const writeClauses = [
+		'create',
+		'detach',
+		'delete',
+		'set',
+		'remove',
+		'foreach' /*'call'*/
+	];
 
-	for (let writeClause of writeClauses) {
+	for (const writeClause of writeClauses) {
 		if (query.toLowerCase().includes(writeClause)) {
 			return true;
 		}
@@ -14,7 +21,6 @@ const isWriteQuery = (query) => {
 };
 
 module.exports = async (res, query) => {
-
 	console.log('[_CYPHER] query', query);
 
 	if (isWriteQuery(query)) {

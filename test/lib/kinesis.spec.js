@@ -1,5 +1,3 @@
-'use strict';
-
 const AWS = require('aws-sdk');
 const sinon = require('sinon');
 const { expect } = require('chai');
@@ -11,7 +9,7 @@ describe('AWS kinesis client', () => {
 	let sandbox;
 	let stubPutRecord;
 	let kinesis;
-	let storedEnv = {};
+	const storedEnv = {};
 	let clock;
 
 	beforeEach(() => {
@@ -60,7 +58,9 @@ describe('AWS kinesis client', () => {
 
 			const encodedData = stubPutRecord.getCall(0).args[0].Data;
 
-			expect(JSON.parse(Buffer.from(encodedData).toString())).to.deep.equal(givenData);
+			expect(JSON.parse(Buffer.from(encodedData).toString())).to.deep.equal(
+				givenData
+			);
 		});
 
 		it('should set the partition key to be the Heroku dyno ID plus timestamp', async () => {
@@ -68,7 +68,9 @@ describe('AWS kinesis client', () => {
 			clock.tick(givenTime);
 			await kinesis.putRecord({});
 
-			expect(stubPutRecord.getCall(0).args[0].PartitionKey).to.equal(`${dynoId}:${givenTime}`)
-		})
-	})
+			expect(stubPutRecord.getCall(0).args[0].PartitionKey).to.equal(
+				`${dynoId}:${givenTime}`
+			);
+		});
+	});
 });

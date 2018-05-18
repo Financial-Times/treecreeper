@@ -8,7 +8,7 @@ describe('Contract - API endpoints', () => {
 	const end = stub();
 	const res = {
 		send: stub(),
-		status: stub().returns({ end }),
+		status: stub().returns({ end })
 	};
 	const dbRun = stub();
 
@@ -17,18 +17,18 @@ describe('Contract - API endpoints', () => {
 		controller = proxyquire('../server/controllers/contract', {
 			'../db-connection': {
 				session: {
-					run: dbRun,
+					run: dbRun
 				}
-			},
+			}
 		});
 	});
 
-	afterEach('reset mocks',() => {
+	afterEach('reset mocks', () => {
 		end.reset();
 		res.send.reset();
 		res.status.resetHistory();
 		dbRun.reset();
-		req.params = { };
+		req.params = {};
 	});
 
 	describe('get', () => {
@@ -55,7 +55,7 @@ describe('Contract - API endpoints', () => {
 
 		it('returns a 500 for other errors ', async () => {
 			req.params = { supplierId: 'hello' };
-			const malformed = { records: {}};
+			const malformed = { records: {} };
 			dbRun.resolves(malformed);
 			await controller.get(req, res);
 			expect(res.status).to.be.calledWith(500);

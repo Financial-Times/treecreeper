@@ -1,11 +1,9 @@
-'use strict';
-
 const logger = require('@financial-times/n-logger').default;
 
 const actions = {
 	CREATE: 'CREATE',
 	UPDATE: 'UPDATE',
-	DELETE: 'DELETE',
+	DELETE: 'DELETE'
 };
 
 // Legacy attributes used by original cmdbv3 stream.
@@ -15,7 +13,7 @@ const addLegacyAttributes = ({ code, type }, record) =>
 		key: `${type.toLowerCase()}/${code}`,
 		model: 'DataItem',
 		name: 'dataItemID',
-		value: code,
+		value: code
 	});
 
 class EventLogWriter {
@@ -28,12 +26,18 @@ class EventLogWriter {
 			field => typeof data[field] === 'undefined'
 		);
 		if (missingFields.length > 0) {
-			logger.warn('Missing required fields for event log record', { fields: missingFields, data });
+			logger.warn('Missing required fields for event log record', {
+				fields: missingFields,
+				data
+			});
 		}
 		const { event, action, code, type, relationship } = data;
 
 		if (typeof actions[action] === 'undefined') {
-			logger.warn('Unrecognised event name passed to event log', { event, data });
+			logger.warn('Unrecognised event name passed to event log', {
+				event,
+				data
+			});
 		}
 
 		return this.kinesisClient.putRecord(
@@ -44,11 +48,11 @@ class EventLogWriter {
 				type: type.toLowerCase(),
 				relationship,
 				link: `/api/${encodeURIComponent(type)}/${encodeURIComponent(code)}`,
-				time: Math.floor(Date.now() / 1000),
+				time: Math.floor(Date.now() / 1000)
 			})
 		);
 	}
-};
+}
 
 module.exports = EventLogWriter;
 module.exports.actions = actions;

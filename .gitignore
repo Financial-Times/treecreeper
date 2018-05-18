@@ -1,9 +1,6 @@
 .DS_Store
 .vscode
-.editorconfig
 *.env*
-.eslintrc.js
-.scss-lint.yml
 package-lock.json
 
 /bower_components/
@@ -13,3 +10,5 @@ yarn-error.log
 
 # local neo4j docker volume mounts
 /neo4j
+.eslintcache
+/.nyc_output/

@@ -14,6 +14,8 @@
 		"npm": ">= 5.6.0"
 	},
 	"scripts": {
+		"lint": "eslint --ignore-pattern /coverage/ --cache --fix .",
+		"lint-ci": "eslint --ignore-pattern /coverage/ .",
 		"start": "nodemon -r dotenv/config server/app.js",
 		"debug": "npm start -- --inspect=0.0.0.0:9229",
 		"test": "nyc mocha -- -r test-config \"+(server|scripts|test)/**/*.spec.js\"",
@@ -64,7 +66,7 @@
 		"graphql-tools": "^3.0.1",
 		"isomorphic-fetch": "^2.2.1",
 		"neo4j-driver": "^1.6.1",
-		"neo4j-graphql-js": "0.1.17",
+		"neo4j-graphql-js": "^0.1.18",
 		"nodemon": "^1.17.4"
 	},
 	"devDependencies": {
@@ -73,11 +75,16 @@
 		"chai": "^4.1.2",
 		"dotenv": "^5.0.1",
 		"eslint": "^4.19.1",
+		"eslint-config-origami-component": "^1.0.0",
+		"eslint-config-prettier": "^2.9.0",
+		"eslint-plugin-prettier": "^2.6.0",
 		"husky": "^0.14.3",
 		"lodash": "^4.17.10",
 		"mocha": "^5.1.1",
 		"nyc": "^11.8.0",
+		"prettier": "^1.12.1",
 		"proxyquire": "^2.0.1",
+		"uuid": "^3.2.1",
 		"sinon": "^4.5.0",
 		"sinon-chai": "^3.0.0",
 		"supertest": "^3.1.0"

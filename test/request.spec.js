@@ -9,38 +9,41 @@ const dbRunStub = stub();
 const { get, getWithSources } = proxyquire('../server/controllers/request', {
 	'../db-connection': {
 		session: {
-			run: dbRunStub,
+			run: dbRunStub
 		}
-	},
+	}
 });
 
 const data = { id: 'customerEmail@test.com_1519207670717' };
-const sources = [{
-	id: 'livefyre_customerEmail@test.com_1519207670717',
-	name: 'livefyre',
-	status: 'PENDING',
-}];
+const sources = [
+	{
+		id: 'livefyre_customerEmail@test.com_1519207670717',
+		name: 'livefyre',
+		status: 'PENDING'
+	}
+];
 const type = 'Sar';
 
-const deleteSource = async () => request(app)
-	.delete('/api/Source/id/livefyre_customerEmail@test.com_1519207670717')
-	.set('API_KEY', `${process.env.API_KEY}`)
-	.send({ mode: 'detach' });
+const deleteSource = async () =>
+	request(app)
+		.delete('/api/Source/id/livefyre_customerEmail@test.com_1519207670717')
+		.set('API_KEY', `${process.env.API_KEY}`)
+		.send({ mode: 'detach' });
 
-const deleterequest = async () => request(app)
-	.delete('/api/Sar/id/customerEmail@test.com_1519207670717')
-	.set('API_KEY', `${process.env.API_KEY}`)
-	.send({ mode: 'detach' });
+const deleterequest = async () =>
+	request(app)
+		.delete('/api/Sar/id/customerEmail@test.com_1519207670717')
+		.set('API_KEY', `${process.env.API_KEY}`)
+		.send({ mode: 'detach' });
 
 describe('REQUESTS- SAR', () => {
 	describe('POST', () => {
+		after(async () => {
+			await deleterequest();
+			await deleteSource();
+		});
 
-		after(async() => {
-			await deleterequest()
-			await deleteSource()
-		})
-
-		it('has status code 200', (done) => {
+		it('has status code 200', done => {
 			request(app)
 				.post('/api/request')
 				.set('API_KEY', `${process.env.API_KEY}`)
@@ -54,111 +57,110 @@ describe('REQUESTS- SAR', () => {
 			const sendMock = stub();
 			const res = {
 				send: sendMock,
-				status: stub(),
+				status: stub()
 			};
 
 			const requests = [
 				{
 					id: 'a',
-					some: 'value',
+					some: 'value'
 				},
 				{
 					id: 'b',
-					some: 'other',
+					some: 'other'
 				},
 				{
 					id: 'c',
-					some: 'stuff',
-				},
+					some: 'stuff'
+				}
 			];
 
 			const sources = {
 				a: [
 					{
 						properties: {
-							status: 'COMPLETE',
-						},
+							status: 'COMPLETE'
+						}
 					},
 					{
 						properties: {
-							status: 'PENDING',
-						},
+							status: 'PENDING'
+						}
 					},
 					{
 						properties: {
-							status: 'COMPLETE',
-						},
-					},
+							status: 'COMPLETE'
+						}
+					}
 				],
 				b: [
 					{
 						properties: {
-							status: 'COMPLETE',
-						},
+							status: 'COMPLETE'
+						}
 					},
 					{
 						properties: {
-							status: 'COMPLETE',
-						},
-					},
+							status: 'COMPLETE'
+						}
+					}
 				],
 				c: [
 					{
 						properties: {
-							status: 'COMPLETE',
-						},
-					},
+							status: 'COMPLETE'
+						}
+					}
 				],
 				d: [
 					{
 						properties: {
-							status: 'EMPTY',
-						},
+							status: 'EMPTY'
+						}
 					},
 					{
 						properties: {
-							status: 'EMPTY',
-						},
-					},
-				],
+							status: 'EMPTY'
+						}
+					}
+				]
 			};
 
-			dbRunStub
-				.resolves({
-					records: requests.reduce((acc, request) => [
+			dbRunStub.resolves({
+				records: requests.reduce(
+					(acc, request) => [
 						...acc,
 						{
 							_fields: [
-								Object.assign(
-									{},
-									request,
-									{
-										sources: sources[request.id],
-									}
-								),
-							],
-						},
-					], []),
-				});
+								Object.assign({}, request, {
+									sources: sources[request.id]
+								})
+							]
+						}
+					],
+					[]
+				)
+			});
 
-			const expected = requests.reduce((acc, request) => [
-				...acc,
-				Object.assign(
-					{},
-					request,
-					{
+			const expected = requests.reduce(
+				(acc, request) => [
+					...acc,
+					Object.assign({}, request, {
 						sources: {
-							complete: sources[request.id].reduce((acc, { properties: { status } }) =>
-								status === 'COMPLETE'
-									? acc + 1
-									: acc
-								, 0),
+							complete: sources[request.id].reduce(
+								(acc, { properties: { status } }) =>
+									status === 'COMPLETE' ? acc + 1 : acc,
+								0
+							),
 							total: sources[request.id].length,
-							allEmpty: sources[request.id].every(({ properties: { status } }) => status === 'EMPTY'),
-						},
-					},
-				),
-			], []);
+							allEmpty: sources[request.id].every(
+								({ properties: { status } }) => status === 'EMPTY'
+							)
+						}
+					})
+				],
+				[]
+			);
 
 			await get({}, res);
 
@@ -168,11 +170,9 @@ describe('REQUESTS- SAR', () => {
 
 	describe('getWithSources', () => {
 		describe('if the request id exists', () => {
-			after(() =>
-				deleterequest()
-					.then(() => deleteSource()));
+			after(() => deleterequest().then(() => deleteSource()));
 
-			it('status code should equal 200', (done) => {
+			it('status code should equal 200', done => {
 				request(app)
 					.post('/api/request')
 					.set('API_KEY', `${process.env.API_KEY}`)
@@ -182,7 +182,7 @@ describe('REQUESTS- SAR', () => {
 		});
 
 		describe('if the request id is invalid', () => {
-			it('status code should equal 404', (done) => {
+			it('status code should equal 404', done => {
 				const invalidId = 'invalidId@test.com_1519207670717';
 				const expectedMessage = `SAR or Erasure request ${invalidId} does not exist`;
 				request(app)
@@ -196,63 +196,58 @@ describe('REQUESTS- SAR', () => {
 			const sendMock = stub();
 			const reqId = 'someId';
 			const res = {
-				send: sendMock,
+				send: sendMock
 			};
 			const req = {
 				params: {
-					id: reqId,
-				},
+					id: reqId
+				}
 			};
 
 			const requestProperties = {
 				a: 'a',
 				b: 'b',
-				c: 'c',
+				c: 'c'
 			};
 
 			const sourcesProperties = [
 				{
 					x: 'x',
 					y: 'y',
-					z: 'z',
+					z: 'z'
 				},
 				{
 					yes: 'yes',
 					no: 'no',
-					maybe: 'maybe',
-				},
+					maybe: 'maybe'
+				}
 			];
 
-			dbRunStub
-				.resolves({
-					records: [
-						{
-							_fields: [
-								{
-									request: {
-										properties: requestProperties,
-									},
-									sources: [
-										{
-											properties: sourcesProperties[0],
-										},
-										{
-											properties: sourcesProperties[1],
-										},
-									],
+			dbRunStub.resolves({
+				records: [
+					{
+						_fields: [
+							{
+								request: {
+									properties: requestProperties
 								},
-							],
-						},
-					],
-				});
+								sources: [
+									{
+										properties: sourcesProperties[0]
+									},
+									{
+										properties: sourcesProperties[1]
+									}
+								]
+							}
+						]
+					}
+				]
+			});
 
-			const expected = Object.assign(
-				{},
-				requestProperties,
-				{
-					sources: sourcesProperties,
-				}
-			);
+			const expected = Object.assign({}, requestProperties, {
+				sources: sourcesProperties
+			});
 
 			await getWithSources(req, res);
 

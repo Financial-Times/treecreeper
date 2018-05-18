@@ -1,9 +1,11 @@
 const crud = require('./_crud');
-const {session: db} = require('../db-connection');
+const { session: db } = require('../db-connection');
 
 const get = async (req, res) => {
 	try {
-		const query = `MATCH p=(a:Survey {id:'${req.params.id}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
+		const query = `MATCH p=(a:Survey {id:'${
+			req.params.id
+		}'})-[:ASKS]->(b:SurveyQuestion)-[:ALLOWS|:RAISES*0..]->() RETURN p ORDER BY b.id`;
 		console.log('[SURVEY]', query);
 
 		const result = await db.run(query);
@@ -18,12 +20,9 @@ const get = async (req, res) => {
 			const sections = [];
 
 			for (const record of result.records) {
-
 				for (const field of record._fields) {
-
 					for (const segment of field.segments) {
-
-						if (segment.relationship.type ==='ASKS') {
+						if (segment.relationship.type === 'ASKS') {
 							const sectionName = segment.relationship.properties.section;
 							const questionAsEnd = segment.end.properties;
 							questionAsEnd.section = sectionName;
@@ -35,48 +34,59 @@ const get = async (req, res) => {
 							if (!surveyObj.questions[questionAsEnd.id]) {
 								surveyObj.questions[questionAsEnd.id] = questionAsEnd;
 							}
-						}
-						else if (segment.relationship.type === 'ALLOWS') {
+						} else if (segment.relationship.type === 'ALLOWS') {
 							const questionAsStart = segment.start.properties;
 							const option = segment.end.properties;
 
 							if (surveyObj.questions[questionAsStart.id]) {
-								if (!surveyObj.questions[questionAsStart.id].options){
+								if (!surveyObj.questions[questionAsStart.id].options) {
 									surveyObj.questions[questionAsStart.id].options = [];
 								}
 								surveyObj.questions[questionAsStart.id].options.push(option);
-							}
-							else {
+							} else {
 								for (const question in surveyObj.questions) {
 									if (surveyObj.questions[question].childQuestions) {
-										for (const key in surveyObj.questions[question].childQuestions) {
-											if (questionAsStart.id === surveyObj.questions[question].childQuestions[key].id) {
-												if (surveyObj.questions[question].childQuestions[key].options) {
-													surveyObj.questions[question].childQuestions[key].options.push(option);
-												}
-												else {
-													surveyObj.questions[question].childQuestions[key].options = [option];
+										for (const key in surveyObj.questions[question]
+											.childQuestions) {
+											if (
+												questionAsStart.id ===
+												surveyObj.questions[question].childQuestions[key].id
+											) {
+												if (
+													surveyObj.questions[question].childQuestions[key]
+														.options
+												) {
+													surveyObj.questions[question].childQuestions[
+														key
+													].options.push(option);
+												} else {
+													surveyObj.questions[question].childQuestions[
+														key
+													].options = [option];
 												}
 											}
 										}
 									}
 								}
 							}
-						}
-						else if (segment.relationship.type === 'RAISES') {
-
+						} else if (segment.relationship.type === 'RAISES') {
 							const parentQuestion = segment.start.properties;
 							const childQuestion = segment.end.properties;
 							childQuestion.parent = parentQuestion.id;
 							childQuestion.trigger = segment.relationship.properties.trigger;
 
-
-							if (surveyObj.questions[parentQuestion.id])	{
+							if (surveyObj.questions[parentQuestion.id]) {
 								if (!surveyObj.questions[parentQuestion.id].childQuestions) {
 									surveyObj.questions[parentQuestion.id].childQuestions = {};
 								}
-								if (!surveyObj.questions[parentQuestion.id].childQuestions[childQuestion.id]) {
-									surveyObj.questions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
+								if (
+									!surveyObj.questions[parentQuestion.id].childQuestions[
+										childQuestion.id
+									]
+								) {
+									surveyObj.questions[parentQuestion.id].childQuestions[
+										childQuestion.id
+									] = childQuestion;
 								}
 							}
 
@@ -84,16 +94,27 @@ const get = async (req, res) => {
 							// or simplify the query altogether
 							// doing below before batery ran out:c
 							// console.log('\nALL QUESTIONS', surveyObj.questions)
-							for (let key in surveyObj.questions) {
+							for (const key in surveyObj.questions) {
 								if (surveyObj.questions.hasOwnProperty(key)) {
 									const question = surveyObj.questions[key];
-									if (question.childQuestions && question.childQuestions[parentQuestion.id]) {
-
-										if (!question.childQuestions[parentQuestion.id].childQuestions) {
-											question.childQuestions[parentQuestion.id].childQuestions = {};
+									if (
+										question.childQuestions &&
+										question.childQuestions[parentQuestion.id]
+									) {
+										if (
+											!question.childQuestions[parentQuestion.id].childQuestions
+										) {
+											question.childQuestions[
+												parentQuestion.id
+											].childQuestions = {};
 										}
-										if (!question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id]) {
-											question.childQuestions[parentQuestion.id].childQuestions[childQuestion.id] = childQuestion;
+										if (
+											!question.childQuestions[parentQuestion.id]
+												.childQuestions[childQuestion.id]
+										) {
+											question.childQuestions[parentQuestion.id].childQuestions[
+												childQuestion.id
+											] = childQuestion;
 										}
 									}
 								}
@@ -116,7 +137,6 @@ const get = async (req, res) => {
 
 				for (const i in surveyObj.questions) {
 					if (surveyObj.questions.hasOwnProperty(i)) {
-
 						const question = surveyObj.questions[i];
 
 						if (section === question.section) {
@@ -127,13 +147,11 @@ const get = async (req, res) => {
 			}
 
 			return res.send(surveyObjWithSections);
-		}
-		else {
+		} else {
 			return res.status(404).end(`Survey ${req.params.id} not found`);
 		}
-	}
-	catch (e) {
-		console.log('[SURVEY] error', e)
+	} catch (e) {
+		console.log('[SURVEY] error', e);
 		return res.status(500).end(e.toString());
 	}
 };

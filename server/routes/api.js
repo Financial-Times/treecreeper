@@ -1,7 +1,4 @@
-'use strict';
-
 const bodyParser = require('body-parser');
-const logger = require('@financial-times/n-logger').default;
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const supplier = require('../controllers/supplier');
@@ -15,13 +12,18 @@ const cypher = require('../controllers/_cypher');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
+	bodyParser.urlencoded({ limit: '8mb', extended: true })
 ];
 
 module.exports = router => {
 	router.use(timeout('65s'));
 
-	router.post('/graphql', security.requireApiKeyOrS3o, bodyParsers, graphQl.api);
+	router.post(
+		'/graphql',
+		security.requireApiKeyOrS3o,
+		bodyParsers,
+		graphQl.api
+	);
 
 	router.use(security.requireApiKey);
 	router.use(bodyParsers);
@@ -37,7 +39,10 @@ module.exports = router => {
 
 	// WEBPMA / 3SP - Specific (to phase out)
 	router.get('/contracts/:supplierId', contract.get);
-	router.get('/submissions/:contractOrSupplierId/:surveyId/:topLevel', submission.getAllforOne);
+	router.get(
+		'/submissions/:contractOrSupplierId/:surveyId/:topLevel',
+		submission.getAllforOne
+	);
 	router.get('/survey/:id', survey.get);
 	router.get('/surveys/:type', survey.getAll);
 	router.post('/supplier/', supplier.create);
@@ -87,36 +92,35 @@ module.exports = router => {
 			);
 		}
 	);
-	router.delete(
-		'/:nodeType/:uniqueAttrName/:uniqueAttr',
-		async (req, res) => {
-			console.log('[APP] generic DELETE');
-			return crud.remove(
-				res,
-				req.params.nodeType,
-				req.params.uniqueAttrName,
-				req.params.uniqueAttr,
-				req.body.mode
-			);
-		}
-	);
+	router.delete('/:nodeType/:uniqueAttrName/:uniqueAttr', async (req, res) => {
+		console.log('[APP] generic DELETE');
+		return crud.remove(
+			res,
+			req.params.nodeType,
+			req.params.uniqueAttrName,
+			req.params.uniqueAttr,
+			req.body.mode
+		);
+	});
 
 	// GENERIC - Rship
-	router.post(
-		'/relationships/:upsert?',
-		async (req, res) => {
-			console.log('[APP] generic POST - rship');
-			return crud.create(res, null, null, null, null, req.body.relationships, req.params.upsert);
-		}
-	);
+	router.post('/relationships/:upsert?', async (req, res) => {
+		console.log('[APP] generic POST - rship');
+		return crud.create(
+			res,
+			null,
+			null,
+			null,
+			null,
+			req.body.relationships,
+			req.params.upsert
+		);
+	});
 
-	router.post(
-		'/cypher/',
-		async (req, res) => {
-			console.log('[APP] generic GET CYPHER');
-			return cypher(res, req.body.query);
-		}
-	);
+	router.post('/cypher/', async (req, res) => {
+		console.log('[APP] generic GET CYPHER');
+		return cypher(res, req.body.query);
+	});
 
 	return router;
 };

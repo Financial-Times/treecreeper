@@ -1,5 +1,3 @@
-'use strict';
-
 const s3o = require('@financial-times/s3o-middleware');
 
 const hasApiKey = req => req.headers.api_key === process.env.API_KEY;
@@ -21,5 +19,5 @@ const requireApiKeyOrS3o = (req, res, next) => {
 module.exports = {
 	requireS3o: s3o,
 	requireApiKey,
-	requireApiKeyOrS3o,
+	requireApiKeyOrS3o
 };
