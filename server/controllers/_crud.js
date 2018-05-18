@@ -1,4 +1,4 @@
-/*eslint-disable*/
+/* eslint-disable */
 const { oneLine } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
 const { session: db } = require('../db-connection');
