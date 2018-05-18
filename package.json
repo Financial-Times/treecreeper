@@ -18,8 +18,8 @@
 		"lint-ci": "eslint --ignore-pattern /coverage/ .",
 		"start": "nodemon -r dotenv/config server/app.js",
 		"debug": "npm start -- --inspect=0.0.0.0:9229",
-		"test": "nyc mocha -- -r test-config \"+(server|scripts|test)/**/*.spec.js\"",
-		"test-dev": "NODE_ENV=test mocha -r test-config  -r dotenv/config 'test/**/*.spec.js'",
+		"test": "nyc mocha -- \"+(server|scripts|test)/**/*.spec.js\"",
+		"test-dev": "NODE_ENV=test mocha --require dotenv/config 'test/**/*.spec.js'",
 		"test:debug": "npm run test-dev --  --inspect-brk=0.0.0.0:9088",
 		"init-db": "node -r dotenv/config scripts/init.js",
 		"docker:test": "docker-compose exec \"$npm_package_short\" sh -c 'npm run test'",
@@ -84,9 +84,9 @@
 		"nyc": "^11.8.0",
 		"prettier": "^1.12.1",
 		"proxyquire": "^2.0.1",
-		"uuid": "^3.2.1",
 		"sinon": "^4.5.0",
 		"sinon-chai": "^3.0.0",
-		"supertest": "^3.1.0"
+		"supertest": "^3.1.0",
+		"uuid": "^3.2.1"
 	}
 }
