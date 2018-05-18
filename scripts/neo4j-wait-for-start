@@ -17,3 +17,4 @@ for i in {1..120};
         echo -n "."
 done
 echo
+sleep 5
