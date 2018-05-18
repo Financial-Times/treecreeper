@@ -197,7 +197,7 @@ describe('Integration - GraphQL', () => {
 		});
 	});
 
-	it.only('GET for a single system returns a single system', () => {
+	it('GET for a single system returns a single system', () => {
 		return request(app)
 			.post('/api/graphql')
 			.send({
