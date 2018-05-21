@@ -67,26 +67,24 @@ describe('v1', () => {
 			})
 		]);
 
-		beforeEach(async () => {
+		const cleanUp = async () => {
 			await Promise.all(
 				nodes.map(async ({ type, node }) => {
 					await db.run(
 						`MATCH (n:${type} { id: "${node.id}" }) DETACH DELETE n`
 					);
-					await db.run(`CREATE (n:${type} $node) RETURN n`, { node });
 				})
 			);
-		});
+		};
+		beforeEach(cleanUp);
+		beforeEach(() =>
+			Promise.all(
+				nodes.map(({ type, node }) =>
+					db.run(`CREATE (n:${type} $node) RETURN n`, { node })
+				)
+			));
 
-		after(async () => {
-			await Promise.all(
-				nodes.map(async ({ type, node }) => {
-					await db.run(
-						`MATCH (n:${type} { id: "${node.id}" }) DETACH DELETE n`
-					);
-				})
-			);
-		});
+		after(cleanUp);
 
 		describe('GET', () => {
 			it('gets node without relationships', async () => {
@@ -134,12 +132,11 @@ describe('v1', () => {
 			});
 
 			it('responds with 500 if query fails', async () => {
-				sinon.stub(db, 'run').throws('oh no');
+				sandbox.stub(db, 'run').throws('oh no');
 				return request(app)
 					.get('/v1/node/System/test-system')
 					.set('API_KEY', API_KEY)
-					.expect(500)
-					.then(() => db.run.restore());
+					.expect(500);
 			});
 
 			it('has case insensitive url', async () => {
@@ -151,7 +148,7 @@ describe('v1', () => {
 		});
 
 		describe('POST', () => {
-			beforeEach(async () => {
+			const cleanUp = async () => {
 				await Promise.all(
 					nodes.map(async () => {
 						await db.run(
@@ -162,26 +159,16 @@ describe('v1', () => {
 						);
 					})
 				);
-			});
+			};
 
-			after(async () => {
-				await Promise.all(
-					nodes.map(async () => {
-						await db.run(
-							`MATCH (n:System { id: "new-system" }) DETACH DELETE n`
-						);
-						await db.run(
-							`MATCH (n:Person { id: "new-test-person" }) DETACH DELETE n`
-						);
-					})
-				);
-			});
+			beforeEach(cleanUp);
+			after(cleanUp);
 
 			it('create node', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({ node: { foo: 'new' } })
 					.expect(200, {
 						node: {
@@ -196,7 +183,7 @@ describe('v1', () => {
 				expect(result.records.length).to.equal(1);
 				const record = result.records[0];
 				expect(record.get('n').properties).to.eql({
-					createdByRequest: 'test-request-id',
+					createdByRequest: 'create-request-id',
 					id: 'new-system',
 					foo: 'new'
 				});
@@ -208,7 +195,7 @@ describe('v1', () => {
 					.post('/v1/node/System/test-system')
 					.set('API_KEY', API_KEY)
 					.send({ node: { foo: 'new' } })
-					.expect(400, 'System test-system already exists');
+					.expect(409, 'System test-system already exists');
 			});
 
 			it('error when conflicting id values', async () => {
@@ -234,7 +221,7 @@ describe('v1', () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
 						relationships: [
@@ -287,29 +274,29 @@ describe('v1', () => {
 						: result.records.slice().reverse();
 
 				expect(group.get('n').properties).to.eql({
-					createdByRequest: 'test-request-id',
+					createdByRequest: 'create-request-id',
 					id: 'new-system',
 					foo: 'new'
 				});
 				expect(group.get('r').properties).to.eql({
-					createdByRequest: 'test-request-id'
+					createdByRequest: 'create-request-id'
 				});
+				expect(group.get('c').properties.createdByRequest).to.not.exist;
 				expect(group.get('c').properties).to.eql({
-					// note absence of creatByRequest prop
 					foo: 'bar3',
 					id: 'test-group'
 				});
 				expect(group.get('c').labels).to.eql(['Group']);
 				expect(person.get('n').properties).to.eql({
-					createdByRequest: 'test-request-id',
+					createdByRequest: 'create-request-id',
 					id: 'new-system',
 					foo: 'new'
 				});
 				expect(person.get('r').properties).to.eql({
-					createdByRequest: 'test-request-id'
+					createdByRequest: 'create-request-id'
 				});
+				expect(person.get('c').properties.createdByRequest).to.not.exist;
 				expect(person.get('c').properties).to.eql({
-					// note absence of creatByRequest prop
 					foo: 'bar2',
 					id: 'test-person'
 				});
@@ -320,7 +307,7 @@ describe('v1', () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
 						relationships: [
@@ -339,7 +326,7 @@ describe('v1', () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
 						relationships: [
@@ -374,16 +361,16 @@ describe('v1', () => {
 				expect(result.records.length).to.equal(1);
 				const record0 = result.records[0];
 				expect(record0.get('n').properties).to.eql({
-					createdByRequest: 'test-request-id',
+					createdByRequest: 'create-request-id',
 					id: 'new-system',
 					foo: 'new'
 				});
 				expect(record0.get('r').properties).to.eql({
-					createdByRequest: 'test-request-id'
+					createdByRequest: 'create-request-id'
 				});
 				expect(record0.get('c').properties).to.eql({
 					id: 'new-test-person',
-					createdByRequest: 'test-request-id'
+					createdByRequest: 'create-request-id'
 				});
 				expect(record0.get('c').labels).to.eql(['Person']);
 			});
@@ -392,7 +379,7 @@ describe('v1', () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
 						relationships: [
@@ -412,15 +399,15 @@ describe('v1', () => {
 				expect(result.records.length).to.equal(1);
 				const record0 = result.records[0];
 				expect(record0.get('n').properties).to.eql({
-					createdByRequest: 'test-request-id',
+					createdByRequest: 'create-request-id',
 					id: 'new-system',
 					foo: 'new'
 				});
 				expect(record0.get('r').properties).to.eql({
-					createdByRequest: 'test-request-id'
+					createdByRequest: 'create-request-id'
 				});
+				expect(record0.get('c').properties.createdByRequest).to.not.exist;
 				expect(record0.get('c').properties).to.eql({
-					// note absence of creatByRequest prop
 					foo: 'bar2',
 					id: 'test-person'
 				});
@@ -428,22 +415,21 @@ describe('v1', () => {
 			});
 
 			it('responds with 500 if query fails', async () => {
-				sinon.stub(db, 'run').throws('oh no');
+				sandbox.stub(db, 'run').throws('oh no');
 				return request(app)
 					.post('/v1/node/System/new-system')
 					.set('API_KEY', API_KEY)
 					.send({
 						node: { foo: 'new' }
 					})
-					.expect(500)
-					.then(() => db.run.restore());
+					.expect(500);
 			});
 
 			it('has case insensitive url and relationship configs', async () => {
 				await request(app)
 					.post('/v1/node/sysTem/New-sYStem')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
 						relationships: [
@@ -478,7 +464,7 @@ describe('v1', () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
 					.set('API_KEY', API_KEY)
-					.set('x-request-id', 'test-request-id')
+					.set('x-request-id', 'create-request-id')
 					.send({
 						// create a node
 						node: { foo: 'new' },
@@ -571,6 +557,175 @@ describe('v1', () => {
 							},
 							code: 'test-group',
 							type: 'Group'
+						}
+					]
+				].map(args => expect(stubSendEvent).calledWith(...args));
+			});
+		});
+
+		describe('PATCH', () => {
+			const cleanUp = async () => {
+				await Promise.all(
+					nodes.map(async () => {
+						await db.run(
+							`MATCH (n:Person { id: "new-test-person" }) DETACH DELETE n`
+						);
+					})
+				);
+			};
+
+			beforeEach(cleanUp);
+			after(cleanUp);
+
+			it('update node', async () => {
+				await request(app)
+					.patch('/v1/node/System/test-system')
+					.set('API_KEY', API_KEY)
+					.set('x-request-id', 'update-request-id')
+					.send({ node: { foo: 'updated' } })
+					.expect(200, {
+						node: {
+							foo: 'updated',
+							id: 'test-system'
+						},
+						relationships: []
+					});
+
+				const result = await db.run(
+					`MATCH (n:System { id: "test-system" }) RETURN n`
+				);
+				expect(result.records.length).to.equal(1);
+				const record = result.records[0];
+				expect(record.get('n').properties.createdByRequest).not.to.equal(
+					'update-request-id'
+				);
+				expect(record.get('n').properties.foo).to.equal('updated');
+			});
+
+			it('Create when patching non-existent node', async () => {
+				await request(app)
+					.patch('/v1/node/System/new-system')
+					.set('API_KEY', API_KEY)
+					.set('x-request-id', 'update-request-id')
+					.send({ node: { foo: 'new' } })
+					.expect(201, {
+						node: {
+							id: 'new-system',
+							foo: 'new'
+						},
+						relationships: []
+					});
+				const result = await db.run(
+					`MATCH (n:System { id: "new-system" }) RETURN n`
+				);
+				expect(result.records.length).to.equal(1);
+				const record = result.records[0];
+				expect(record.get('n').properties).to.eql({
+					createdByRequest: 'update-request-id',
+					id: 'new-system',
+					foo: 'new'
+				});
+				expect(record.get('n').labels).to.eql(['System']);
+			});
+
+			it('error when conflicting id values', async () => {
+				await request(app)
+					.patch('/v1/node/System/test-system')
+					.set('API_KEY', API_KEY)
+					.send({ node: { foo: 'updated', id: 'wrong-id' } })
+					.expect(
+						400,
+						'Conflicting id attribute `wrong-id` for System test-system'
+					);
+			});
+
+			it('not error when non-conflicting id values', async () => {
+				await request(app)
+					.patch('/v1/node/System/test-system')
+					.set('API_KEY', API_KEY)
+					.send({ node: { foo: 'updated', id: 'test-system' } })
+					.expect(200);
+			});
+
+			it('responds with 500 if query fails', async () => {
+				sandbox.stub(db, 'run').throws('oh no');
+				return request(app)
+					.patch('/v1/node/System/test-system')
+					.set('API_KEY', API_KEY)
+					.send({
+						node: { foo: 'updated' }
+					})
+					.expect(500);
+			});
+
+			it('has case insensitive url and relationship configs', async () => {
+				await request(app)
+					.patch('/v1/node/sysTem/Test-sYStem')
+					.set('API_KEY', API_KEY)
+					.set('x-request-id', 'create-request-id')
+					.send({
+						node: { foo: 'updated' }
+						// relationships: [
+						// 	{
+						// 		relType: 'HAS_TECH_LEAD',
+						// 		direction: 'outgoing',
+						// 		nodeType: 'peRson',
+						// 		nodeCode: 'TesT-peRSOn'
+						// 	}
+						// ]
+					})
+					.expect(200)
+					.then(({ body }) =>
+						checkResponse(body, {
+							node: {
+								id: 'test-system',
+								foo: 'updated'
+							},
+							relationships: []
+							// 	{
+							// 		relType: 'HAS_TECH_LEAD',
+							// 		direction: 'outgoing',
+							// 		nodeType: 'Person',
+							// 		nodeCode: 'test-person'
+							// 	}
+							// ]
+						})
+					);
+			});
+
+			it('logs creation events to kinesis', async () => {
+				await request(app)
+					.patch('/v1/node/System/test-system?upsert=true')
+					.set('API_KEY', API_KEY)
+					.set('x-request-id', 'create-request-id')
+					.send({
+						// create a node
+						node: { foo: 'updated' }
+						// relationships: [
+						// 	{
+						// 		// connect to new node
+						// 		relType: 'HAS_TECH_LEAD',
+						// 		direction: 'outgoing',
+						// 		nodeType: 'Person',
+						// 		nodeCode: 'new-test-person'
+						// 	},
+						// 	{
+						// 		//connect to existing node
+						// 		relType: 'OWNS',
+						// 		direction: 'incoming',
+						// 		nodeType: 'Group',
+						// 		nodeCode: 'test-group'
+						// 	}
+						// ]
+					});
+
+				[
+					[
+						{
+							event: 'UPDATED_NODE',
+							action: 'CREATE',
+							code: 'test-system',
+							type: 'System'
 						}
 					]
 				].map(args => expect(stubSendEvent).calledWith(...args));
