@@ -34,14 +34,6 @@ describe('v1', () => {
 		sandbox.restore();
 	});
 
-	describe.skip('auth', () => {
-		it('GET no api_key returns 400', () => {
-			request(app)
-				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-				.expect(400);
-		});
-	});
-
 	describe('node', () => {
 		const nodes = Object.freeze([
 			Object.freeze({
@@ -86,11 +78,101 @@ describe('v1', () => {
 
 		after(cleanUp);
 
+		describe('auth', () => {
+			describe('api key', () => {
+				it('GET no api_key returns 401', async () => {
+					return request(app)
+						.get('/v1/node/System/test-system')
+						.set('client-id', 'test-client-id')
+						.expect(401);
+				});
+
+				it('POST no api_key returns 401', async () => {
+					await request(app)
+						.post('/v1/node/System/new-system')
+						.send({ foo: 'bar' })
+						.set('client-id', 'test-client-id')
+						.expect(401);
+					const result = await db.run(
+						`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(0);
+				});
+
+				it('PATCH no api_key returns 401', async () => {
+					await request(app)
+						.patch('/v1/node/System/a-system')
+						.send({ foo: 'bar' })
+						.set('client-id', 'test-client-id')
+						.expect(401);
+					const result = await db.run(
+						`MATCH (n:System { id: "a-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(0);
+				});
+
+				it.skip('DELETE no api_key returns 401', async () => {
+					await request(app)
+						.delete('/v1/node/System/test-system')
+						.set('client-id', 'test-client-id')
+						.expect(401);
+					const result = await db.run(
+						`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(1);
+				});
+			});
+
+			describe('client id', () => {
+				it('GET no client-id returns 400', async () => {
+					return request(app)
+						.get('/v1/node/System/test-system')
+						.set('API_KEY', API_KEY)
+						.expect(400);
+				});
+
+				it('POST no client-id returns 400', async () => {
+					await request(app)
+						.post('/v1/node/System/new-system')
+						.send({ foo: 'bar' })
+						.set('API_KEY', API_KEY)
+						.expect(400);
+					const result = await db.run(
+						`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(0);
+				});
+
+				it('PATCH no client-id returns 400', async () => {
+					await request(app)
+						.patch('/v1/node/System/a-system')
+						.send({ foo: 'bar' })
+						.set('API_KEY', API_KEY)
+						.expect(400);
+					const result = await db.run(
+						`MATCH (n:System { id: "a-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(0);
+				});
+
+				it.skip('DELETE no client-id returns 400', async () => {
+					await request(app)
+						.delete('/v1/node/System/test-system')
+						.set('API_KEY', API_KEY)
+						.expect(400);
+					const result = await db.run(
+						`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+					);
+					expect(result.records.length).to.equal(1);
+				});
+			});
+		});
+
 		describe('GET', () => {
 			it('gets node without relationships', async () => {
 				return request(app)
 					.get('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.expect(200, { node: nodes[0].node, relationships: [] });
 			});
 
@@ -101,7 +183,7 @@ describe('v1', () => {
 											RETURN g, o, s, t, p`);
 				return request(app)
 					.get('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.expect(200)
 					.then(({ body }) =>
 						checkResponse(body, {
@@ -127,7 +209,7 @@ describe('v1', () => {
 			it('responds with 404 if no node', async () => {
 				return request(app)
 					.get('/v1/node/System/not-test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.expect(404);
 			});
 
@@ -135,14 +217,14 @@ describe('v1', () => {
 				sandbox.stub(db, 'run').throws('oh no');
 				return request(app)
 					.get('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.expect(500);
 			});
 
 			it('has case insensitive url', async () => {
 				return request(app)
 					.get('/v1/node/system/tEst-SYstem')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.expect(200);
 			});
 		});
@@ -167,7 +249,7 @@ describe('v1', () => {
 			it('create node', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({ node: { foo: 'new' } })
 					.expect(200, {
@@ -193,7 +275,7 @@ describe('v1', () => {
 			it('error when creating duplicate node', async () => {
 				await request(app)
 					.post('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({ node: { foo: 'new' } })
 					.expect(409, 'System test-system already exists');
 			});
@@ -201,7 +283,7 @@ describe('v1', () => {
 			it('error when conflicting id values', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({ node: { foo: 'new', id: 'wrong-id' } })
 					.expect(
 						400,
@@ -212,7 +294,7 @@ describe('v1', () => {
 			it('not error when non-conflicting id values', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({ node: { foo: 'new', id: 'new-system' } })
 					.expect(200);
 			});
@@ -220,7 +302,7 @@ describe('v1', () => {
 			it('create node related to existing nodes', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
@@ -306,7 +388,7 @@ describe('v1', () => {
 			it('error when creating node related to non-existent nodes', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
@@ -325,7 +407,7 @@ describe('v1', () => {
 			it('create node related to non-existent nodes when using upsert=true', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
@@ -378,7 +460,7 @@ describe('v1', () => {
 			it('not assume it created everything when using `upsert=true`', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
@@ -418,7 +500,7 @@ describe('v1', () => {
 				sandbox.stub(db, 'run').throws('oh no');
 				return request(app)
 					.post('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({
 						node: { foo: 'new' }
 					})
@@ -428,7 +510,7 @@ describe('v1', () => {
 			it('has case insensitive url and relationship configs', async () => {
 				await request(app)
 					.post('/v1/node/sysTem/New-sYStem')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
@@ -463,7 +545,7 @@ describe('v1', () => {
 			it('logs creation events to kinesis', async () => {
 				await request(app)
 					.post('/v1/node/System/new-system?upsert=true')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						// create a node
@@ -580,7 +662,7 @@ describe('v1', () => {
 			it('update node', async () => {
 				await request(app)
 					.patch('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'update-request-id')
 					.send({ node: { foo: 'updated' } })
 					.expect(200, {
@@ -605,7 +687,7 @@ describe('v1', () => {
 			it('Create when patching non-existent node', async () => {
 				await request(app)
 					.patch('/v1/node/System/new-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'update-request-id')
 					.send({ node: { foo: 'new' } })
 					.expect(201, {
@@ -631,7 +713,7 @@ describe('v1', () => {
 			it('error when conflicting id values', async () => {
 				await request(app)
 					.patch('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({ node: { foo: 'updated', id: 'wrong-id' } })
 					.expect(
 						400,
@@ -642,7 +724,7 @@ describe('v1', () => {
 			it('not error when non-conflicting id values', async () => {
 				await request(app)
 					.patch('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({ node: { foo: 'updated', id: 'test-system' } })
 					.expect(200);
 			});
@@ -651,7 +733,7 @@ describe('v1', () => {
 				sandbox.stub(db, 'run').throws('oh no');
 				return request(app)
 					.patch('/v1/node/System/test-system')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.send({
 						node: { foo: 'updated' }
 					})
@@ -661,7 +743,7 @@ describe('v1', () => {
 			it('has case insensitive url and relationship configs', async () => {
 				await request(app)
 					.patch('/v1/node/sysTem/Test-sYStem')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'updated' }
@@ -696,7 +778,7 @@ describe('v1', () => {
 			it('logs creation events to kinesis', async () => {
 				await request(app)
 					.patch('/v1/node/System/test-system?upsert=true')
-					.set('API_KEY', API_KEY)
+					.auth()
 					.set('x-request-id', 'create-request-id')
 					.send({
 						// create a node

@@ -2,6 +2,12 @@ const supertest = require('supertest');
 
 let cache;
 
+const API_KEY = process.env.API_KEY;
+
+supertest.Test.prototype.auth = function() {
+	return this.set('API_KEY', API_KEY).set('client-id', 'test-client-id');
+};
+
 const request = (app, { useCached = true } = {}) => {
 	if (useCached && typeof cache !== 'undefined') {
 		return cache;
@@ -14,6 +20,7 @@ const request = (app, { useCached = true } = {}) => {
 	} else {
 		cache = undefined;
 	}
+
 	return instance;
 };
 

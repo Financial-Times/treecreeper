@@ -24,6 +24,7 @@ module.exports = router => {
 	router.use(timeout('65s'));
 
 	router.use(security.requireApiKey);
+	router.use(security.requireClientId);
 	router.use(requestId);
 	router.use(bodyParsers);
 

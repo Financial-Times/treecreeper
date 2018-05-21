@@ -4,7 +4,20 @@ const hasApiKey = req => req.headers.api_key === process.env.API_KEY;
 
 const requireApiKey = (req, res, next) => {
 	if (!hasApiKey(req)) {
-		return res.status(400).end('Wrong API key');
+		return res
+			.status(401)
+			.send('Missing or invalid api-key header')
+			.end();
+	}
+	return next();
+};
+
+const requireClientId = (req, res, next) => {
+	if (!req.get('client-id')) {
+		return res
+			.status(400)
+			.send('Missing client-id header')
+			.end();
 	}
 	return next();
 };
@@ -19,5 +32,6 @@ const requireApiKeyOrS3o = (req, res, next) => {
 module.exports = {
 	requireS3o: s3o,
 	requireApiKey,
+	requireClientId,
 	requireApiKeyOrS3o
 };

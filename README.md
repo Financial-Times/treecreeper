@@ -39,6 +39,8 @@ or as an `X-Api-Key` header, e.g.
 curl -H "X-Api-Key: ..." https://api.ft.com/biz-ops/api/__gtg
 ```
 
+You will also need to set a `client-id` header, with the system code of the system calling the api (or some other identifier if not a recognised system).
+
 ### GraphQL
 
 The API exposes a [GraphQL](https://graphql.org/) API. This is available either via POSTing to the path `/api/graphql`, or using the [graphiql](https://github.com/graphql/graphiql) IDE located at `/graphiql`.

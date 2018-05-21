@@ -73,10 +73,10 @@ describe('crud', () => {
 				.expect(404, 'SomeNodeType JonathanTaylorThomas not found');
 		});
 
-		it('GET no api_key returns 400', () => {
+		it('GET no api_key returns 401', () => {
 			request(app)
 				.get('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
-				.expect(400);
+				.expect(401);
 		});
 
 		it('GET when specified with a relationships param will include related nodes - but none for this node', () => {
@@ -786,6 +786,7 @@ describe('crud', () => {
 
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
+				.auth()
 				.send({ node: originalNode })
 				.expect(400)
 				.then(async response => {
@@ -798,13 +799,13 @@ describe('crud', () => {
 
 		// @@ another test that proves a POST doesn't return 400 if you use upsert since it will be overwritten? @@
 
-		it('POST no api_key returns 400', () => {
+		it('POST no api_key returns 401', () => {
 			const expectedNodes = [];
 
 			return request(app)
 				.post('/api/SomeNodeType/SomeUniqueAttr/SomeUniqueAttrValue')
 				.send({ node: originalNode })
-				.expect(400)
+				.expect(401)
 				.then(async response => {
 					return request(app)
 						.get('/api/SomeNodeType/')
