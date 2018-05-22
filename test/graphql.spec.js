@@ -173,6 +173,13 @@ describe('Integration - GraphQL', () => {
 				.expect(302);
 		});
 
+		it('should redirect requests for GET /graphql to /graphiql', () => {
+			return request(app)
+				.get('/graphql')
+				.expect(302)
+				.expect('Location', "/graphiql");
+		});
+
 		it('should allow access to POST /api/graphql behind s3o', () => {
 			sandbox.stub(security, 'requireApiKeyOrS3o').callsFake(stubS3o);
 			return request(app, { useCached: false })
