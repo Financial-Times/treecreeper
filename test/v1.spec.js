@@ -111,15 +111,15 @@ describe('v1', () => {
 					expect(result.records.length).to.equal(0);
 				});
 
-				it.skip('DELETE no api_key returns 401', async () => {
+				it('DELETE no api_key returns 401', async () => {
 					await request(app)
 						.delete('/v1/node/System/test-system')
 						.set('client-id', 'test-client-id')
 						.expect(401);
 					const result = await db.run(
-						`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+						`MATCH (n:System { id: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
 					);
-					expect(result.records.length).to.equal(1);
+					expect(result.records.length).to.equal(0);
 				});
 			});
 
@@ -155,15 +155,15 @@ describe('v1', () => {
 					expect(result.records.length).to.equal(0);
 				});
 
-				it.skip('DELETE no client-id returns 400', async () => {
+				it('DELETE no client-id returns 400', async () => {
 					await request(app)
 						.delete('/v1/node/System/test-system')
 						.set('API_KEY', API_KEY)
 						.expect(400);
 					const result = await db.run(
-						`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+						`MATCH (n:System { id: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
 					);
-					expect(result.records.length).to.equal(1);
+					expect(result.records.length).to.equal(0);
 				});
 			});
 		});
@@ -574,7 +574,8 @@ describe('v1', () => {
 							event: 'CREATED_NODE',
 							action: 'CREATE',
 							code: 'new-system',
-							type: 'System'
+							type: 'System',
+							requestId: 'create-request-id'
 						}
 					],
 					[
@@ -582,7 +583,8 @@ describe('v1', () => {
 							event: 'CREATED_NODE',
 							action: 'CREATE',
 							code: 'new-test-person',
-							type: 'Person'
+							type: 'Person',
+							requestId: 'create-request-id'
 						}
 					],
 					[
@@ -596,7 +598,8 @@ describe('v1', () => {
 								nodeType: 'Person'
 							},
 							code: 'new-system',
-							type: 'System'
+							type: 'System',
+							requestId: 'create-request-id'
 						}
 					],
 					[
@@ -610,7 +613,8 @@ describe('v1', () => {
 								nodeType: 'System'
 							},
 							code: 'new-test-person',
-							type: 'Person'
+							type: 'Person',
+							requestId: 'create-request-id'
 						}
 					],
 					[
@@ -624,7 +628,8 @@ describe('v1', () => {
 								nodeType: 'Group'
 							},
 							code: 'new-system',
-							type: 'System'
+							type: 'System',
+							requestId: 'create-request-id'
 						}
 					],
 					[
@@ -638,7 +643,8 @@ describe('v1', () => {
 								nodeType: 'System'
 							},
 							code: 'test-group',
-							type: 'Group'
+							type: 'Group',
+							requestId: 'create-request-id'
 						}
 					]
 				].map(args => expect(stubSendEvent).calledWith(...args));
@@ -740,6 +746,27 @@ describe('v1', () => {
 					.expect(500);
 			});
 
+			it('deletes null attributes', async () => {
+				await request(app)
+					.patch('/v1/node/System/test-system')
+					.auth()
+					.set('x-request-id', 'update-request-id')
+					.send({ node: { foo: null } })
+					.expect(200, {
+						node: {
+							id: 'test-system'
+						},
+						relationships: []
+					});
+
+				const result = await db.run(
+					`MATCH (n:System { id: "test-system" }) RETURN n`
+				);
+				expect(result.records.length).to.equal(1);
+				const record = result.records[0];
+				expect(record.get('n').properties.foo).to.not.exist;
+			});
+
 			it('has case insensitive url and relationship configs', async () => {
 				await request(app)
 					.patch('/v1/node/sysTem/Test-sYStem')
@@ -779,7 +806,7 @@ describe('v1', () => {
 				await request(app)
 					.patch('/v1/node/System/test-system?upsert=true')
 					.auth()
-					.set('x-request-id', 'create-request-id')
+					.set('x-request-id', 'update-request-id')
 					.send({
 						// create a node
 						node: { foo: 'updated' }
@@ -805,9 +832,145 @@ describe('v1', () => {
 					[
 						{
 							event: 'UPDATED_NODE',
-							action: 'CREATE',
+							action: 'UPDATE',
 							code: 'test-system',
-							type: 'System'
+							type: 'System',
+							requestId: 'update-request-id'
+						}
+					]
+				].map(args => expect(stubSendEvent).calledWith(...args));
+			});
+		});
+
+		describe('PUT', () => {
+			it('405 Method Not Allowed', () => {
+				return request(app)
+					.put('/v1/node/System/test-system')
+					.auth()
+					.send({ foo: 'bar' })
+					.expect(405);
+			});
+		});
+
+		describe('DELETE', () => {
+			const verifyDeletion = async requestId => {
+				const result = await db.run(
+					`MATCH (n:System { id: "test-system" }) RETURN n`
+				);
+				expect(result.records.length).to.equal(1);
+				const record = result.records[0];
+				expect(record.get('n').properties.deletedByRequest).to.equal(requestId);
+				expect(record.get('n').properties.isDeleted).to.equal(true);
+			};
+
+			const verifyNotDeletion = async () => {
+				const result = await db.run(
+					`MATCH (n:System { id: "test-system" }) RETURN n`
+				);
+				expect(result.records.length).to.equal(1);
+				const record = result.records[0];
+				expect(record.get('n').properties.deletedByRequest).not.to.exist;
+				expect(record.get('n').properties.isDeleted).not.to.exist;
+			};
+
+			it('marks a detached node as deleted', async () => {
+				await request(app)
+					.delete('/v1/node/System/test-system')
+					.auth()
+					.set('x-request-id', 'delete-request-id')
+					.expect(204);
+
+				await verifyDeletion('delete-request-id');
+			});
+
+			it('404 when deleting non-existent node', async () => {
+				await request(app)
+					.delete('/v1/node/System/absent-system')
+					.auth()
+					.set('x-request-id', 'delete-request-id')
+					.expect(404);
+
+				await verifyNotDeletion('delete-request-id');
+			});
+
+			it('error informatively when attempting to delete connected node', async () => {
+				await db.run(`
+					MATCH (node:System {id: "test-system"}), (person:Person {id: "test-person"})
+					MERGE (node)-[:HAS_TECH_LEAD]->(person)
+					RETURN node`);
+
+				await request(app)
+					.delete('/v1/node/System/test-system')
+					.auth()
+					.set('x-request-id', 'delete-request-id')
+					.expect(409, 'Cannot delete - System test-system has relationships');
+
+				await verifyNotDeletion('delete-request-id');
+			});
+
+			describe('interaction with deleted nodes', () => {
+				beforeEach(async () => {
+					await request(app)
+						.delete('/v1/node/System/test-system')
+						.auth()
+						.set('x-request-id', 'delete-request-id')
+						.end();
+				});
+
+				it('GET responds with 410', async () => {
+					await request(app)
+						.get('/v1/node/System/test-system')
+						.auth()
+						.expect(410);
+				});
+
+				it('POST responds with 409', async () => {
+					await request(app)
+						.post('/v1/node/System/test-system')
+						.auth()
+						.expect(409);
+				});
+
+				it('PATCH responds with 409', async () => {
+					await request(app)
+						.post('/v1/node/System/test-system')
+						.auth()
+						.expect(409);
+				});
+
+				it('DELETE responds with 410', async () => {
+					await request(app)
+						.delete('/v1/node/System/test-system')
+						.auth()
+						.expect(410);
+				});
+			});
+
+			it('has case insensitive url', async () => {
+				await request(app)
+					.delete('/v1/node/sysTem/Test-sYStem')
+					.auth()
+					.set('x-request-id', 'delete-request-id')
+					.expect(204);
+
+				await verifyDeletion('delete-request-id');
+			});
+
+			it('logs deletion event to kinesis', async () => {
+				await request(app)
+					.delete('/v1/node/System/test-system')
+					.auth()
+					.set('x-request-id', 'delete-request-id')
+					.end();
+
+				[
+					[
+						{
+							event: 'DELETED_NODE',
+							action: 'DELETE',
+							code: 'test-system',
+							type: 'System',
+							requestId: 'delete-request-id'
 						}
 					]
 				].map(args => expect(stubSendEvent).calledWith(...args));

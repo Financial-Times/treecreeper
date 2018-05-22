@@ -1,11 +1,7 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
 const { session: db } = require('../db-connection');
-const {
-	handleUpsertError,
-	handleDuplicateNodeError,
-	handleMissingNode
-} = require('./errors');
+const errors = require('./errors');
 const { logChanges } = require('./kinesis');
 const { sanitizeInput, constructOutput } = require('./data-manipulation');
 
@@ -15,18 +11,12 @@ const {
 	createRelationshipQuery
 } = require('./cypher');
 
-const get = async input => {
-	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
+const checkIfDeleted = async (nodeType, code) => {
+	const result = await db.run(stripIndents`
+	MATCH (node:${nodeType} { id: "${code}", isDeleted: true})
+	RETURN node`);
 
-	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })
-	${RETURN_NODE_WITH_RELS}`;
-
-	logger.info({ requestId, query });
-
-	const result = await db.run(query, { code });
-	handleMissingNode({ result, nodeType, code, status: 404 });
-	return constructOutput(result);
+	return !!result.records[0];
 };
 
 const create = async input => {
@@ -38,6 +28,10 @@ const create = async input => {
 		attributes,
 		relationships
 	} = sanitizeInput(input, 'CREATE');
+
+	if (await checkIfDeleted(nodeType, code)) {
+		errors.handleDeletedNode({ nodeType, code, status: 409 });
+	}
 
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
@@ -56,17 +50,39 @@ const create = async input => {
 
 		const query = queryParts.join('\n');
 
-		logger.info({ requestId, query });
+		logger.info({
+			event: 'CREATE_NODE_QUERY',
+			requestId,
+			nodeType,
+			code,
+			query
+		});
 		const result = await db.run(query, { attributes });
 
 		logChanges(requestId, result);
 
 		return constructOutput(result);
 	} catch (err) {
-		handleDuplicateNodeError(err, nodeType, code);
-		handleUpsertError(err, relationships);
+		errors.handleDuplicateNodeError(err, nodeType, code);
+		errors.handleUpsertError(err, relationships);
 		throw err;
 	}
+};
+
+const read = async input => {
+	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
+	if (await checkIfDeleted(nodeType, code)) {
+		errors.handleDeletedNode({ nodeType, code, status: 410 });
+	}
+	const query = stripIndents`
+	MATCH (node:${nodeType} { id: $code })
+	${RETURN_NODE_WITH_RELS}`;
+
+	logger.info({ event: 'READ_NODE_QUERY', requestId, nodeType, code, query });
+
+	const result = await db.run(query, { code });
+	errors.handleMissingNode({ result, nodeType, code, status: 404 });
+	return constructOutput(result);
 };
 
 const update = async input => {
@@ -76,8 +92,13 @@ const update = async input => {
 		nodeType,
 		code,
 		attributes,
-		relationships
+		relationships,
+		deletedAttributes
 	} = sanitizeInput(input, 'UPDATE');
+
+	if (await checkIfDeleted(nodeType, code)) {
+		errors.handleDeletedNode({ nodeType, code, status: 409 });
+	}
 
 	try {
 		const queryParts = [
@@ -86,6 +107,8 @@ const update = async input => {
 			SET node += $attributes
 		`
 		];
+
+		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
 
 		if (relationships.length) {
 			throw { status: 400, message: 'PATCHing relationships not yet defined' };
@@ -112,7 +135,14 @@ const update = async input => {
 
 		const query = queryParts.join('\n');
 
-		logger.info({ requestId, query, attributes });
+		logger.info({
+			event: 'UPDATE_NODE_QUERY',
+			requestId,
+			nodeType,
+			code,
+			query,
+			attributes
+		});
 		const result = await db.run(query, { attributes });
 		logChanges(requestId, result);
 		// TODO pass on the 201
@@ -124,9 +154,33 @@ const update = async input => {
 					: 200
 		};
 	} catch (err) {
-		handleUpsertError(err, relationships);
+		errors.handleUpsertError(err, relationships);
 		throw err;
 	}
 };
 
-module.exports = { get, create, update }; //, _createRelationships, update, remove, getAll, getAllforOne };
+const remove = async input => {
+	const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
+	if (await checkIfDeleted(nodeType, code)) {
+		errors.handleDeletedNode({ nodeType, code, status: 410 });
+	}
+	const record = await read(input);
+	if (record.relationships.length) {
+		errors.handleAttachedNode({ record, nodeType, code });
+	}
+
+	const query = stripIndents`
+	MATCH (node:${nodeType} { id: $code })
+	SET node.isDeleted = true, node.deletedByRequest = "${requestId}"
+	RETURN node`;
+
+	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
+
+	const result = await db.run(query, { code });
+	errors.handleMissingNode({ result, nodeType, code, status: 404 });
+	logChanges(requestId, result);
+
+	return { data: '', status: 204 };
+};
+
+module.exports = { create, read, update, delete: remove };

@@ -2,6 +2,7 @@ const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
+	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
 	missingRelated: /Expected to find a node at related(\d+) but found nothing/
 });
 
@@ -36,8 +37,29 @@ const handleMissingNode = ({ result, nodeType, code, status }) => {
 	}
 };
 
+const handleAttachedNode = ({ record, nodeType, code }) => {
+	throw httpErrors(
+		409,
+		`Cannot delete - ${nodeType} ${code} has relationships`,
+		{ relationships: record.relationships }
+	);
+};
+
+const handleDeletedNode = ({ nodeType, code, status }) => {
+	if (status === 410) {
+		throw httpErrors(410, `${nodeType} ${code} has been deleted`);
+	} else if (status === 409) {
+		throw httpErrors(
+			409,
+			`${nodeType} ${code} has been deleted, but it's code is still reserved. Choose another code name.`
+		);
+	}
+};
+
 module.exports = {
 	handleUpsertError,
 	handleDuplicateNodeError,
-	handleMissingNode
+	handleMissingNode,
+	handleAttachedNode,
+	handleDeletedNode
 };

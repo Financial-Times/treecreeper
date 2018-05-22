@@ -18,18 +18,32 @@ const sendEvent = event =>
 
 const logChanges = (requestId, result) => {
 	const node = result.records[0].get('node');
+	let event;
+	let action;
+	if (node.properties.deletedByRequest === requestId) {
+		event = 'DELETED_NODE';
+		action = EventLogWriter.actions.DELETE;
+	} else if (node.properties.createdByRequest === requestId) {
+		event = 'CREATED_NODE';
+		action = EventLogWriter.actions.CREATE;
+	} else {
+		event = 'UPDATED_NODE';
+		action = EventLogWriter.actions.UPDATE;
+	}
 
 	sendEvent({
-		event:
-			node.properties.createdByRequest === requestId
-				? 'CREATED_NODE'
-				: 'UPDATED_NODE',
-		action: EventLogWriter.actions.CREATE,
+		event,
+		action,
 		code: node.properties.id,
-		type: node.labels[0]
+		type: node.labels[0],
+		requestId
 	});
 
-	if (result.records[0].has('related') && result.records[0].get('related')) {
+	if (
+		result.records[0] &&
+		result.records[0].has('related') &&
+		result.records[0].get('related')
+	) {
 		result.records.forEach(record => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
@@ -39,7 +53,8 @@ const logChanges = (requestId, result) => {
 					event: 'CREATED_NODE',
 					action: EventLogWriter.actions.CREATE,
 					code: target.properties.id,
-					type: target.labels[0]
+					type: target.labels[0],
+					requestId
 				});
 			}
 
@@ -56,7 +71,8 @@ const logChanges = (requestId, result) => {
 						nodeType: target.labels[0]
 					},
 					code: node.properties.id,
-					type: node.labels[0]
+					type: node.labels[0],
+					requestId
 				});
 
 				sendEvent({
@@ -71,7 +87,8 @@ const logChanges = (requestId, result) => {
 						nodeType: node.labels[0]
 					},
 					code: target.properties.id,
-					type: target.labels[0]
+					type: target.labels[0],
+					requestId
 				});
 			}
 		});

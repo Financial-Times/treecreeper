@@ -26,7 +26,15 @@ const sanitizeAttributes = ({
 		attributes.id = code;
 		attributes.createdByRequest = requestId;
 	}
-	return attributes;
+
+	return {
+		deletedAttributes: Object.entries(attributes)
+			.filter(([, val]) => val === null)
+			.map(([key]) => key),
+		writeAttributes: Object.entries(attributes)
+			.filter(([, val]) => val !== null)
+			.reduce((map, [key, val]) => Object.assign(map, { [key]: val }), {})
+	};
 };
 
 const sanitizeInput = (
@@ -58,15 +66,17 @@ const sanitizeInput = (
 	};
 
 	if (attributes) {
+		const { writeAttributes, deletedAttributes } = sanitizeAttributes({
+			nodeType,
+			attributes,
+			code,
+			requestId,
+			method
+		});
 		Object.assign(response, {
 			upsert,
-			attributes: sanitizeAttributes({
-				nodeType,
-				attributes,
-				code,
-				requestId,
-				method
-			}),
+			attributes: writeAttributes,
+			deletedAttributes,
 			// todo sanitize here
 			relationships: relationships.map(rel =>
 				Object.assign(rel, {

@@ -11,8 +11,8 @@ const bodyParsers = [
 
 const success = res => data =>
 	data.status ? res.status(data.status).json(data.data) : res.json(data);
+
 const failure = res => err => {
-	console.log(err);
 	if (!err.status) {
 		logger.info({ error: err });
 		err = { status: 500, message: err.toString() };
@@ -32,11 +32,10 @@ module.exports = router => {
 		res.send('biz op api v1');
 	});
 
-	// GENERIC - Node
 	router.get('/node/:nodeType/:code', async (req, res) => {
 		logger.info('[APP] node GET', req.params);
 		return nodeCrud
-			.get(
+			.read(
 				Object.assign(
 					{
 						requestId: res.locals.requestId
@@ -62,6 +61,12 @@ module.exports = router => {
 			.then(success(res), failure(res));
 	});
 
+	router.put('/node/:nodeType/:code', async (req, res) => {
+		logger.info('[APP] node PUT', req.params);
+
+		res.status(405).send('PUT is unimplemented. Use PATCH');
+	});
+
 	router.patch('/node/:nodeType/:code', async (req, res) => {
 		logger.info('[APP] node PATCH', req.params);
 		return nodeCrud
@@ -77,19 +82,20 @@ module.exports = router => {
 			)
 			.then(success(res), failure(res));
 	});
-	// router.delete(
-	// 	'/node/:nodeType/:uniqueAttrName/:uniqueAttr',
-	// 	async (req, res) => {
-	// 		logger.info('[APP] generic DELETE');
-	// 		return crud.remove(
-	// 			res,
-	// 			req.params.nodeType,
-	// 			req.params.uniqueAttrName,
-	// 			req.params.uniqueAttr,
-	// 			req.body.mode
-	// 		);
-	// 	}
-	// );
+
+	router.delete('/node/:nodeType/:code', async (req, res) => {
+		logger.info('[APP] node DELETE', req.params);
+		return nodeCrud
+			.delete(
+				Object.assign(
+					{
+						requestId: res.locals.requestId
+					},
+					req.params
+				)
+			)
+			.then(success(res), failure(res));
+	});
 
 	return router;
 };
