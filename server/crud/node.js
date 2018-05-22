@@ -35,7 +35,6 @@ const create = async input => {
 
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
-
 		if (relationships.length) {
 			const mapFunc = upsert
 				? upsertRelationshipQuery
@@ -165,7 +164,8 @@ const remove = async input => {
 		errors.handleDeletedNode({ nodeType, code, status: 410 });
 	}
 	const record = await read(input);
-	if (record.relationships.length) {
+
+	if (Object.keys(record.relationships).length) {
 		errors.handleAttachedNode({ record, nodeType, code });
 	}
 

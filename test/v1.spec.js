@@ -10,9 +10,19 @@ const API_KEY = process.env.API_KEY;
 const checkResponse = (actual, expected) => {
 	expect(actual.node).to.eql(expected.node);
 	if (expected.relationships) {
-		expect(actual.relationships).to.have.deep.members(expected.relationships);
+		const expectedTypes = Object.keys(expected.relationships);
+		const actualTypes = Object.keys(expected.relationships);
+		expect(actualTypes.length).to.equal(expectedTypes.length);
+		if (expectedTypes.length) {
+			expectedTypes.forEach(type => {
+				expect(actual.relationships[type]).to.have.deep.members(
+					expected.relationships[type]
+				);
+			});
+		} else {
+			expect(actual.relationships).to.eql({});
+		}
 	} else {
-		expect(actual.relationships).to.not.exist;
 	}
 };
 
@@ -188,20 +198,22 @@ describe('v1', () => {
 					.then(({ body }) =>
 						checkResponse(body, {
 							node: nodes[0].node,
-							relationships: [
-								{
-									relType: 'HAS_TECH_LEAD',
-									direction: 'outgoing',
-									nodeType: 'Person',
-									nodeCode: 'test-person'
-								},
-								{
-									relType: 'OWNS',
-									direction: 'incoming',
-									nodeType: 'Group',
-									nodeCode: 'test-group'
-								}
-							]
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										direction: 'outgoing',
+										nodeType: 'Person',
+										nodeCode: 'test-person'
+									}
+								],
+								OWNS: [
+									{
+										direction: 'incoming',
+										nodeType: 'Group',
+										nodeCode: 'test-group'
+									}
+								]
+							}
 						})
 					);
 			});
@@ -306,20 +318,22 @@ describe('v1', () => {
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
-						relationships: [
-							{
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'test-person'
-							},
-							{
-								relType: 'OWNS',
-								direction: 'incoming',
-								nodeType: 'Group',
-								nodeCode: 'test-group'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									direction: 'outgoing',
+									nodeType: 'Person',
+									nodeCode: 'test-person'
+								}
+							],
+							OWNS: [
+								{
+									direction: 'incoming',
+									nodeType: 'Group',
+									nodeCode: 'test-group'
+								}
+							]
+						}
 					})
 					.expect(200)
 					.then(({ body }) =>
@@ -328,20 +342,22 @@ describe('v1', () => {
 								id: 'new-system',
 								foo: 'new'
 							},
-							relationships: [
-								{
-									relType: 'HAS_TECH_LEAD',
-									direction: 'outgoing',
-									nodeType: 'Person',
-									nodeCode: 'test-person'
-								},
-								{
-									relType: 'OWNS',
-									direction: 'incoming',
-									nodeType: 'Group',
-									nodeCode: 'test-group'
-								}
-							]
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										direction: 'outgoing',
+										nodeType: 'Person',
+										nodeCode: 'test-person'
+									}
+								],
+								OWNS: [
+									{
+										direction: 'incoming',
+										nodeType: 'Group',
+										nodeCode: 'test-group'
+									}
+								]
+							}
 						})
 					);
 				const result = await db.run(
@@ -392,14 +408,15 @@ describe('v1', () => {
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
-						relationships: [
-							{
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'new-test-person'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									direction: 'outgoing',
+									nodeType: 'Person',
+									nodeCode: 'new-test-person'
+								}
+							]
+						}
 					})
 					.expect(400, /Missing related node Person new-test-person/);
 			});
@@ -411,14 +428,15 @@ describe('v1', () => {
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
-						relationships: [
-							{
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'new-test-person'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									direction: 'outgoing',
+									nodeType: 'Person',
+									nodeCode: 'new-test-person'
+								}
+							]
+						}
 					})
 					.expect(200)
 					.then(({ body }) =>
@@ -427,14 +445,15 @@ describe('v1', () => {
 								id: 'new-system',
 								foo: 'new'
 							},
-							relationships: [
-								{
-									relType: 'HAS_TECH_LEAD',
-									direction: 'outgoing',
-									nodeType: 'Person',
-									nodeCode: 'new-test-person'
-								}
-							]
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										direction: 'outgoing',
+										nodeType: 'Person',
+										nodeCode: 'new-test-person'
+									}
+								]
+							}
 						})
 					);
 				const result = await db.run(
@@ -464,14 +483,15 @@ describe('v1', () => {
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
-						relationships: [
-							{
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'test-person'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									direction: 'outgoing',
+									nodeType: 'Person',
+									nodeCode: 'test-person'
+								}
+							]
+						}
 					})
 					.expect(200);
 
@@ -514,14 +534,15 @@ describe('v1', () => {
 					.set('x-request-id', 'create-request-id')
 					.send({
 						node: { foo: 'new' },
-						relationships: [
-							{
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'peRson',
-								nodeCode: 'TesT-peRSOn'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									direction: 'outgoing',
+									nodeType: 'peRson',
+									nodeCode: 'TesT-peRSOn'
+								}
+							]
+						}
 					})
 					.expect(200)
 					.then(({ body }) =>
@@ -530,14 +551,15 @@ describe('v1', () => {
 								id: 'new-system',
 								foo: 'new'
 							},
-							relationships: [
-								{
-									relType: 'HAS_TECH_LEAD',
-									direction: 'outgoing',
-									nodeType: 'Person',
-									nodeCode: 'test-person'
-								}
-							]
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										direction: 'outgoing',
+										nodeType: 'Person',
+										nodeCode: 'test-person'
+									}
+								]
+							}
 						})
 					);
 			});
@@ -550,22 +572,24 @@ describe('v1', () => {
 					.send({
 						// create a node
 						node: { foo: 'new' },
-						relationships: [
-							{
-								// connect to new node
-								relType: 'HAS_TECH_LEAD',
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'new-test-person'
-							},
-							{
-								//connect to existing node
-								relType: 'OWNS',
-								direction: 'incoming',
-								nodeType: 'Group',
-								nodeCode: 'test-group'
-							}
-						]
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									// connect to new node
+									direction: 'outgoing',
+									nodeType: 'Person',
+									nodeCode: 'new-test-person'
+								}
+							],
+							OWNS: [
+								{
+									//connect to existing node
+									direction: 'incoming',
+									nodeType: 'Group',
+									nodeCode: 'test-group'
+								}
+							]
+						}
 					});
 
 				[

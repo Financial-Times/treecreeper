@@ -43,7 +43,7 @@ const sanitizeInput = (
 		nodeType,
 		code,
 		upsert,
-		body: { node: attributes = {}, relationships = [] } = {}
+		body: { node: attributes = {}, relationships = {} } = {}
 	},
 	method
 ) => {
@@ -78,10 +78,14 @@ const sanitizeInput = (
 			attributes: writeAttributes,
 			deletedAttributes,
 			// todo sanitize here
-			relationships: relationships.map(rel =>
-				Object.assign(rel, {
-					nodeType: sanitizeNodeType(rel.nodeType),
-					nodeCode: sanitizeCode(rel.nodeCode)
+			relationships: [].concat(
+				...Object.entries(relationships).map(([relType, relInstances]) => {
+					return relInstances.map(rel => ({
+						nodeType: sanitizeNodeType(rel.nodeType),
+						nodeCode: sanitizeCode(rel.nodeCode),
+						relType,
+						direction: rel.direction
+					}));
 				})
 			)
 		});
@@ -102,20 +106,22 @@ const constructOutput = result => {
 	// if related is not defined it means we've done an optional match on relationships
 	// and retrieved none
 	if (result.records[0].has('related') && result.records[0].get('related')) {
-		response.relationships = result.records.map(record => {
+		response.relationships = result.records.reduce((map, record) => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
-			return {
-				relType: rel.type,
+			map[rel.type] = map[rel.type] || [];
+
+			map[rel.type].push({
 				direction: isSameInteger(rel.start, node.identity)
 					? 'outgoing'
 					: 'incoming',
 				nodeType: target.labels[0],
 				nodeCode: target.properties.id
-			};
-		});
+			});
+			return map;
+		}, {});
 	} else {
-		response.relationships = [];
+		response.relationships = {};
 	}
 
 	return response;
