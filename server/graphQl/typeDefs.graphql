@@ -104,8 +104,8 @@ type Group {
     # The Cost Centre associated with the group
     hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
     # The teams working under the group
-    teams(first: Int = 10, offset: Int = 0): [System]
-        @relation(name: "HAS_TEAM", direction: "IN")
+    teams(first: Int = 10, offset: Int = 0): [Team]
+        @relation(name: "HAS_TEAM", direction: "OUT")
     # The tech director who owns the group
     techDirector: Person @relation(name: "HAS_TECH_DIRECTOR", direction: "OUT")
 }
