@@ -4,7 +4,7 @@ type Repository {
     # Repository URL
     url: String!
     # Display Name
-    name: String!
+    name: String
     # Repository hosts internal ID
     vcsID: Int
     # SSH URL to checkout the source
@@ -73,7 +73,7 @@ type Team {
     # The teams slack contact address
     slack: String!
     # The teams name
-    name: String!
+    name: String
     # The teams email address
     email: String!
     status: Status!
@@ -98,7 +98,7 @@ type Team {
 type Group {
     id: String!
     # The name of the group
-    name: String!
+    name: String
 	#
     status: Status
     # The Cost Centre associated with the group
@@ -114,7 +114,7 @@ type Group {
 type CostCentre {
     id: String!
     # The name of the cost centre
-    name: String!
+    name: String
     # The groups which are costed to the cost centre
     hasGroups(first: Int = 10, offset: Int = 0): [Group]
         @relation(name: "HAS_BUDGET", direction: "IN")
@@ -124,7 +124,7 @@ type CostCentre {
 type Person {
     id: String!
 	# The name of the person
-    name: String!
+    name: String
 	# The email address of th person
     email: String
 	# The slack link for the person
