@@ -177,7 +177,7 @@ describe('Integration - GraphQL', () => {
 			return request(app)
 				.get('/graphql')
 				.expect(302)
-				.expect('Location', "/graphiql");
+				.expect('Location', '/graphiql');
 		});
 
 		it('should allow access to POST /api/graphql behind s3o', () => {

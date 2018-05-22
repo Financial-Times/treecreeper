@@ -13,7 +13,7 @@ module.exports = router => {
 	// Redirect a frequent typo to correct path
 	router.get('/graphql', (req, res) => {
 		res.redirect('/graphiql');
-	})
+	});
 
 	router.use(
 		'/graphiql',
