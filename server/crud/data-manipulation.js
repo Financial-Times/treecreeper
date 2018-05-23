@@ -1,10 +1,55 @@
 const logger = require('@financial-times/n-logger').default;
 const { isSameInteger } = require('./utils');
+const httpErrors = require('http-errors');
+const { stripIndents } = require('common-tags');
 
-const sanitizeNodeType = nodeType =>
-	nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
+const sanitizeNodeType = nodeType => {
+	const sanitizedNodeType =
+		nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
+	if (!/^[A-Z][a-z]+$/.test(sanitizedNodeType)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid node type \`${nodeType}\`.
+			Must be a string containing only a-z, beginning with a capital letter`
+		);
+	}
+	return sanitizedNodeType;
+};
 
-const sanitizeCode = code => code.toLowerCase();
+const sanitizeCode = code => {
+	const sanitizedCode = code.toLowerCase();
+	if (!/^[a-z\d][a-z\d\-]+[a-z\d]$/.test(sanitizedCode)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid node identifier \`${code}\`.
+			Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
+		);
+	}
+	return sanitizedCode;
+};
+
+const sanitizeRequestId = code => {
+	if (!/^[a-z\d][a-z\d\-]+[a-z\d]$/.test(code)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid request id \`${code}\`.
+			Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
+		);
+	}
+	return code;
+};
+
+const sanitizeRelationship = relationship => {
+	const sanitizedRelationship = relationship.toUpperCase();
+	if (!/^[A-Z][A-Z_]+[A-Z]$/.test(sanitizedRelationship)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid relationship \`${relationship}\`.
+			Must be a string containing only A-Z and _, not beginning or ending with _.`
+		);
+	}
+	return sanitizedRelationship;
+};
 
 const sanitizeAttributes = ({
 	nodeType,
@@ -56,6 +101,8 @@ const sanitizeInput = (
 		method
 	});
 
+	sanitizeRequestId(requestId);
+
 	code = sanitizeCode(code);
 
 	const response = {
@@ -75,7 +122,7 @@ const sanitizeInput = (
 		Object.assign(response, query, {
 			attributes: writeAttributes,
 			deletedAttributes,
-			// todo sanitize here
+			relationshipTypes: Object.keys(relationships).map(sanitizeRelationship),
 			relationships: [].concat(
 				...Object.entries(relationships).map(([relType, relInstances]) => {
 					return relInstances.map(rel => ({
@@ -85,8 +132,7 @@ const sanitizeInput = (
 						direction: rel.direction
 					}));
 				})
-			),
-			relationshipTypes: Object.keys(relationships)
+			)
 		});
 	}
 	return response;

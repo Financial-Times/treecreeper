@@ -11,27 +11,20 @@ const relFragment = (type, direction) => {
 	return `${left}-[rel:${type}]-${right}`;
 };
 
-const upsertRelationshipQuery = ({
-	relType,
-	direction,
-	nodeType,
-	nodeCode,
-	requestId
-}) =>
+const upsertRelationshipQuery = ({ relType, direction, nodeType, nodeCode }) =>
 	stripIndents`
 	WITH node
 	MERGE (related:${nodeType} {id: "${nodeCode}"})
-		ON CREATE SET related.createdByRequest = "${requestId}"
+		ON CREATE SET related.createdByRequest = $requestId
 	WITH related, node
-	MERGE (node)${relFragment(relType, direction, requestId)}(related)
-		ON CREATE SET rel.createdByRequest = "${requestId}"`;
+	MERGE (node)${relFragment(relType, direction)}(related)
+		ON CREATE SET rel.createdByRequest = $requestId`;
 
 const createRelationshipQuery = ({
 	relType,
 	direction,
 	nodeType,
 	nodeCode,
-	requestId,
 	i
 }) =>
 	// uses OPTIONAL MATCH as this returns [null] rather than []
@@ -39,14 +32,12 @@ const createRelationshipQuery = ({
 	// at null, so we get an informative error
 	stripIndents`WITH node
 	OPTIONAL MATCH (related${i}:${nodeType} {id: "${nodeCode}"})
-	MERGE (node)${relFragment(relType, direction, requestId)}(related${i})
-		ON CREATE SET rel.createdByRequest = "${requestId}"`;
+	MERGE (node)${relFragment(relType, direction)}(related${i})
+		ON CREATE SET rel.createdByRequest = $requestId`;
 
-const createRelationships = (upsert, relationships, requestId) => {
+const createRelationships = (upsert, relationships) => {
 	const mapFunc = upsert ? upsertRelationshipQuery : createRelationshipQuery;
-	return relationships.map((rel, i) =>
-		mapFunc(Object.assign({ requestId, i }, rel))
-	);
+	return relationships.map((rel, i) => mapFunc(Object.assign({ i }, rel)));
 };
 
 module.exports = {

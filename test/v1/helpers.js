@@ -86,7 +86,5 @@ const setupMocks = state => {
 module.exports = {
 	checkResponse,
 	stubKinesis,
-	hydrateDb,
-	dropDb,
 	setupMocks
 };

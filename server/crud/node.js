@@ -7,9 +7,12 @@ const { sanitizeInput, constructOutput } = require('./data-manipulation');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
 
 const checkIfDeleted = async (nodeType, code) => {
-	const result = await db.run(stripIndents`
-	MATCH (node:${nodeType} { id: "${code}", isDeleted: true})
-	RETURN node`);
+	const result = await db.run(
+		stripIndents`
+	MATCH (node:${nodeType} { id: $code, isDeleted: true})
+	RETURN node`,
+		{ code }
+	);
 
 	return !!result.records[0];
 };
@@ -31,7 +34,7 @@ const create = async input => {
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
 		if (relationships.length) {
-			queryParts.push(...createRelationships(upsert, relationships, requestId));
+			queryParts.push(...createRelationships(upsert, relationships));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -44,7 +47,7 @@ const create = async input => {
 			code,
 			query
 		});
-		const result = await db.run(query, { attributes });
+		const result = await db.run(query, { attributes, requestId });
 
 		logChanges(requestId, result);
 
@@ -93,8 +96,8 @@ const update = async input => {
 
 	try {
 		const queryParts = [
-			stripIndents`MERGE (node:${nodeType} {id: "${code}"})
-				ON CREATE SET node.createdByRequest = "${requestId}"
+			stripIndents`MERGE (node:${nodeType} {id: $code})
+				ON CREATE SET node.createdByRequest = $requestId
 			SET node += $attributes
 		`
 		];
@@ -107,11 +110,14 @@ const update = async input => {
 			if (relationshipAction === 'replace') {
 				// If replacing we must retrieve information on existing relationships
 				// for the log stream
-				deletedRelationships = await db.run(stripIndents`
-		MATCH (node:${nodeType} {id: "${code}"})-[relationship${relationshipTypes
-					.map(type => `:${type}`)
-					.join('|')}]-(related)
-		RETURN node, relationship, related`);
+				deletedRelationships = await db.run(
+					stripIndents`
+		MATCH (node:${nodeType} {id: $code})-[relationship${relationshipTypes
+						.map(type => `:${type}`)
+						.join('|')}]-(related)
+		RETURN node, relationship, related`,
+					{ code }
+				);
 
 				if (deletedRelationships.records.length) {
 					// removal
@@ -127,7 +133,7 @@ const update = async input => {
 				}
 			}
 
-			queryParts.push(...createRelationships(upsert, relationships, requestId));
+			queryParts.push(...createRelationships(upsert, relationships));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -141,7 +147,7 @@ const update = async input => {
 			query,
 			attributes
 		});
-		const result = await db.run(query, { attributes });
+		const result = await db.run(query, { attributes, code, requestId });
 
 		logChanges(requestId, result, deletedRelationships);
 
@@ -171,12 +177,12 @@ const remove = async input => {
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} { id: $code })
-	SET node.isDeleted = true, node.deletedByRequest = "${requestId}"
+	SET node.isDeleted = true, node.deletedByRequest = $requestId
 	RETURN node`;
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code });
+	const result = await db.run(query, { code, requestId });
 	errors.handleMissingNode({ result, nodeType, code, status: 404 });
 	logChanges(requestId, result);
 
