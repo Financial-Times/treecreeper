@@ -42,7 +42,7 @@ const sanitizeInput = (
 		requestId,
 		nodeType,
 		code,
-		upsert,
+		query,
 		body: { node: attributes = {}, relationships = {} } = {}
 	},
 	method
@@ -53,7 +53,6 @@ const sanitizeInput = (
 		code,
 		attributes,
 		relationships,
-		upsert,
 		method
 	});
 
@@ -73,8 +72,7 @@ const sanitizeInput = (
 			requestId,
 			method
 		});
-		Object.assign(response, {
-			upsert,
+		Object.assign(response, query, {
 			attributes: writeAttributes,
 			deletedAttributes,
 			// todo sanitize here
@@ -87,7 +85,8 @@ const sanitizeInput = (
 						direction: rel.direction
 					}));
 				})
-			)
+			),
+			relationshipTypes: Object.keys(relationships)
 		});
 	}
 	return response;

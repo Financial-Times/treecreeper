@@ -52,10 +52,10 @@ module.exports = router => {
 				Object.assign(
 					{
 						requestId: res.locals.requestId,
-						body: req.body
+						body: req.body,
+						query: req.query
 					},
-					req.params,
-					req.query
+					req.params
 				)
 			)
 			.then(success(res), failure(res));
@@ -74,10 +74,10 @@ module.exports = router => {
 				Object.assign(
 					{
 						requestId: res.locals.requestId,
-						body: req.body
+						body: req.body,
+						query: req.query
 					},
-					req.params,
-					req.query
+					req.params
 				)
 			)
 			.then(success(res), failure(res));

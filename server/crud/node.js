@@ -4,12 +4,7 @@ const { session: db } = require('../db-connection');
 const errors = require('./errors');
 const { logChanges } = require('./kinesis');
 const { sanitizeInput, constructOutput } = require('./data-manipulation');
-
-const {
-	RETURN_NODE_WITH_RELS,
-	upsertRelationshipQuery,
-	createRelationshipQuery
-} = require('./cypher');
+const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
 
 const checkIfDeleted = async (nodeType, code) => {
 	const result = await db.run(stripIndents`
@@ -36,14 +31,7 @@ const create = async input => {
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
 		if (relationships.length) {
-			const mapFunc = upsert
-				? upsertRelationshipQuery
-				: createRelationshipQuery;
-			queryParts.push(
-				...relationships.map((rel, i) =>
-					mapFunc(Object.assign({ requestId, i }, rel))
-				)
-			);
+			queryParts.push(...createRelationships(upsert, relationships, requestId));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -87,13 +75,17 @@ const read = async input => {
 const update = async input => {
 	const {
 		requestId,
-		// upsert,
+		upsert,
 		nodeType,
 		code,
 		attributes,
 		relationships,
-		deletedAttributes
+		deletedAttributes,
+		relationshipAction,
+		relationshipTypes
 	} = sanitizeInput(input, 'UPDATE');
+
+	let deletedRelationships;
 
 	if (await checkIfDeleted(nodeType, code)) {
 		errors.handleDeletedNode({ nodeType, code, status: 409 });
@@ -101,7 +93,7 @@ const update = async input => {
 
 	try {
 		const queryParts = [
-			`MERGE (node:${nodeType} {id: "${code}"})
+			stripIndents`MERGE (node:${nodeType} {id: "${code}"})
 				ON CREATE SET node.createdByRequest = "${requestId}"
 			SET node += $attributes
 		`
@@ -110,25 +102,32 @@ const update = async input => {
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
 
 		if (relationships.length) {
-			throw { status: 400, message: 'PATCHing relationships not yet defined' };
-			// if (upsert) {
-			// 	queryParts.push(
-			// 		...relationships.map(rel =>
-			// 			upsertRelationshipQuery(Object.assign({ requestId }, rel))
-			// 		)
-			// 	);
-			// } else {
-			// 	queryParts.push(
-			// 		...relationships.map((rel, i) =>
-			// 			createRelationshipQuery(Object.assign({ requestId, i }, rel))
-			// 		)
-			// 	);
-			// }
-			// queryParts.push(
-			// 	stripIndents`WITH node
-			// 	MATCH (node)-[relationship]-(related)
-			// 	RETURN node, relationship, related`
-			// );
+			errors.handleRelationshipActionError(relationshipAction);
+
+			if (relationshipAction === 'replace') {
+				// If replacing we must retrieve information on existing relationships
+				// for the log stream
+				deletedRelationships = await db.run(stripIndents`
+		MATCH (node:${nodeType} {id: "${code}"})-[relationship${relationshipTypes
+					.map(type => `:${type}`)
+					.join('|')}]-(related)
+		RETURN node, relationship, related`);
+
+				if (deletedRelationships.records.length) {
+					// removal
+					queryParts.push(
+						...relationshipTypes.map(
+							type => stripIndents`
+						WITH node
+						OPTIONAL MATCH (node)-[rel:${type}]-(related)
+						DELETE rel
+					`
+						)
+					);
+				}
+			}
+
+			queryParts.push(...createRelationships(upsert, relationships, requestId));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -143,8 +142,9 @@ const update = async input => {
 			attributes
 		});
 		const result = await db.run(query, { attributes });
-		logChanges(requestId, result);
-		// TODO pass on the 201
+
+		logChanges(requestId, result, deletedRelationships);
+
 		return {
 			data: constructOutput(result),
 			status:

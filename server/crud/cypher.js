@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 
-const RETURN_NODE_WITH_RELS = `
+const RETURN_NODE_WITH_RELS = stripIndents`
 	WITH node
 	OPTIONAL MATCH (node)-[relationship]-(related)
 	RETURN node, relationship, related`;
@@ -42,9 +42,15 @@ const createRelationshipQuery = ({
 	MERGE (node)${relFragment(relType, direction, requestId)}(related${i})
 		ON CREATE SET rel.createdByRequest = "${requestId}"`;
 
+const createRelationships = (upsert, relationships, requestId) => {
+	const mapFunc = upsert ? upsertRelationshipQuery : createRelationshipQuery;
+	return relationships.map((rel, i) =>
+		mapFunc(Object.assign({ requestId, i }, rel))
+	);
+};
+
 module.exports = {
 	RETURN_NODE_WITH_RELS,
 	relFragment,
-	upsertRelationshipQuery,
-	createRelationshipQuery
+	createRelationships
 };

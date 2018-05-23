@@ -16,10 +16,11 @@ const sendEvent = event =>
 		);
 	});
 
-const logChanges = (requestId, result) => {
+const logChanges = (requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');
 	let event;
 	let action;
+
 	if (node.properties.deletedByRequest === requestId) {
 		event = 'DELETED_NODE';
 		action = EventLogWriter.actions.DELETE;
@@ -91,6 +92,45 @@ const logChanges = (requestId, result) => {
 					requestId
 				});
 			}
+		});
+	}
+
+	if (deletedRelationships && deletedRelationships.records.length) {
+		deletedRelationships.records.forEach(record => {
+			const target = record.get('related');
+			const rel = record.get('relationship');
+
+			sendEvent({
+				event: 'DELETED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: rel.type,
+					direction: isSameInteger(rel.start, node.identity)
+						? 'outgoing'
+						: 'incoming',
+					nodeCode: target.properties.id,
+					nodeType: target.labels[0]
+				},
+				code: node.properties.id,
+				type: node.labels[0],
+				requestId
+			});
+
+			sendEvent({
+				event: 'DELETED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: rel.type,
+					direction: isSameInteger(rel.start, node.identity)
+						? 'incoming'
+						: 'outgoing',
+					nodeCode: node.properties.id,
+					nodeType: node.labels[0]
+				},
+				code: target.properties.id,
+				type: target.labels[0],
+				requestId
+			});
 		});
 	}
 };

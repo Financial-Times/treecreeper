@@ -56,8 +56,21 @@ const handleDeletedNode = ({ nodeType, code, status }) => {
 	}
 };
 
+const handleRelationshipActionError = relationshipAction => {
+	if (
+		!relationshipAction ||
+		!['append', 'replace'].includes(relationshipAction)
+	) {
+		throw httpErrors(
+			400,
+			'PATCHing relationships requires a relationshipAction query param set to `append` or `replace`'
+		);
+	}
+};
+
 module.exports = {
 	handleUpsertError,
+	handleRelationshipActionError,
 	handleDuplicateNodeError,
 	handleMissingNode,
 	handleAttachedNode,
