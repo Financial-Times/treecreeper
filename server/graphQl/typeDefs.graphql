@@ -62,7 +62,7 @@ type System {
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
     # Healthchekcs which are used to monitor this system
-    monitoredBy: [Healthcheck] @relation(name: "MONITORED_BY", direction: "IN")
+    monitoredBy: [Healthcheck] @relation(name: "MONITORED_BY", direction: "OUT")
 }
 
 # A team within the organisation
@@ -164,7 +164,7 @@ type Healthcheck {
     # The URL to check against
     url: String!
     # The systems which the healthcheck monitors
-    monitors: [System] @relation(name: "MONITORED_BY", direction: "OUT")
+    monitors: [System] @relation(name: "MONITORED_BY", direction: "IN")
 }
 
 enum Status {
