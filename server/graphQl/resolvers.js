@@ -5,19 +5,20 @@ const { neo4jgraphql } = require('neo4j-graphql-js');
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || true);
 
 const queries = [
-	'System',
-	'Systems',
-	'Person',
-	'People',
-	'Repository',
-	'Repositories',
-	'Team',
-	'Teams',
+	'CostCentre',
+	'CostCentres',
 	'Group',
 	'Groups',
 	'Healthcheck',
 	'Healthchecks',
-	'CostCentre'
+	'People',
+	'Person',
+	'Repositories',
+	'Repository',
+	'System',
+	'Systems',
+	'Team',
+	'Teams'
 ];
 
 const upperCaseResolver = keys =>
