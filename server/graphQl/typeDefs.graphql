@@ -1,10 +1,10 @@
 # A source code repository
 type Repository {
     id: String!
-    # Repository URL
-    url: String!
     # Display Name
     name: String
+    # Repository URL
+    url: String!
     # Repository hosts internal ID
     vcsID: Int
     # SSH URL to checkout the source
@@ -49,16 +49,28 @@ type System {
     # If the system is a VCS, the repositories it stores
     stores: [Repository] @relation(name: "STORED_IN", direction: "IN")
     # The other systems the system depends on
-    dependsOn(first: Int = 10, offset: Int = 0): [System]
-        @relation(name: "DEPENDS_ON", direction: "OUT")
+    dependsOn(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System] @relation(name: "DEPENDS_ON", direction: "OUT")
     # The other systems which depend on this system
-    isDependencyOf(first: Int = 10, offset: Int = 0): [System]
-        @relation(name: "DEPENDS_ON", direction: "IN")
+    isDependencyOf(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System] @relation(name: "DEPENDS_ON", direction: "IN")
     # The team which supports the system
     supportedBy: Team @relation(name: "SUPPORTS", direction: "IN")
     # Individuals who have operational knowledge of the system
-    isKnownBy(first: Int = 10, offset: Int = 0): [Person]
-        @relation(name: "KNOWS", direction: "IN")
+    isKnownBy(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [Person] @relation(name: "KNOWS", direction: "IN")
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
     # Healthchekcs which are used to monitor this system
@@ -68,25 +80,40 @@ type System {
 # A team within the organisation
 type Team {
     id: String!
-    # The teams phone contact number
-    phone: String!
-    # The teams slack contact address
-    slack: String!
     # The teams name
     name: String
     # The teams email address
     email: String!
+    # The teams slack contact address
+    slack: String!
+    # The teams phone contact number
+    phone: String!
+    #
     status: Status!
     # The systems the team supports
-    supports(first: Int = 10, offset: Int = 0): [System]
-        @relation(name: "SUPPORTS", direction: "IN")
+    supports(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System] @relation(name: "SUPPORTS", direction: "IN")
     # The tech leads of systems supported by the team
-    techLead(first: Int = 10, offset: Int = 0): [Person]
+    techLead(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [Person]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(person:Person) RETURN person"
         )
     # The product owners of systems supported by the team
-    productOwner(first: Int = 10, offset: Int = 0): [Person]
+    productOwner(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [Person]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(person:Person) RETURN person"
         )
@@ -104,8 +131,12 @@ type Group {
     # The Cost Centre associated with the group
     hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
     # The teams working under the group
-    teams(first: Int = 10, offset: Int = 0): [Team]
-        @relation(name: "HAS_TEAM", direction: "OUT")
+    teams(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [Team] @relation(name: "HAS_TEAM", direction: "OUT")
     # The tech director who owns the group
     techDirector: Person @relation(name: "HAS_TECH_DIRECTOR", direction: "OUT")
 }
@@ -116,8 +147,12 @@ type CostCentre {
     # The name of the cost centre
     name: String
     # The groups which are costed to the cost centre
-    hasGroups(first: Int = 10, offset: Int = 0): [Group]
-        @relation(name: "HAS_BUDGET", direction: "IN")
+    hasGroups(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [Group] @relation(name: "HAS_BUDGET", direction: "IN")
 }
 
 # A individual within the organisation who is contactable
@@ -130,21 +165,39 @@ type Person {
 	# The slack link for the person
     slack: String
 	# Groups the person is a technical director for
-    isTechDirectorFor(first: Int = 10, offset: Int = 0): [Group]
-        @relation(name: "HAS_TECH_DIRECTOR", direction: "IN")
+    isTechDirectorFor(
+        # The number of records to return after the pagination offset. This uses the default neo4j ordering
+        first: Int = 10,
+        # The pagination offset to use
+        offset: Int = 0
+    ): [Group] @relation(name: "HAS_TECH_DIRECTOR", direction: "IN")
 	# Systems the person is a technical lead for
-    isTechLeadFor(first: Int = 10, offset: Int = 0): [System]
+    isTechLeadFor(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(system:System) RETURN system"
         )
 	# Systems the person is a product owner for
-    isProductOwnerFor(first: Int = 10, offset: Int = 0): [System]
+    isProductOwnerFor(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System]
         @cypher(
             statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(system:System) RETURN system"
         )
 	# Systems the person has knowledge of
-    knows(first: Int = 10, offset: Int = 0): [System]
-        @relation(name: "KNOWS", direction: "OUT")
+    knows(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+    ): [System] @relation(name: "KNOWS", direction: "OUT")
 }
 
 type Product {
@@ -201,23 +254,96 @@ enum CircleCiVersion {
 }
 
 type Query {
-    System(id: String): System
-    Systems(serviceTier: ServiceTier, first: Int = 10, offset: Int = 0): [System]
-    Team(id: String!): Team
-    Teams(first: Int = 10, offset: Int = 0): [Team]
-    Group(id: String!): Group
-    Groups(first: Int = 10, offset: Int = 0): [Group]
-	Healthcheck(id: String, url: String): Healthcheck
-    Healthchecks(first: Int = 10, offset: Int = 0): [Healthcheck]
-    Person(name: String, id: String): Person
-    People(first: Int = 10, offset: Int = 0): [Person]
-    Repository(id: String!): Repository
+    CostCentre(
+		# The ID of the cost centre to view
+		id: String!
+	): CostCentre
+
+    CostCentres(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [CostCentre]
+
+    Group(
+		# The ID of the group to view
+		id: String!
+	): Group
+
+    Groups(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [Group]
+
+	Healthcheck(
+		# The ID of the healthcheck to view
+		id: String,
+		# The exact URL of the healthcheck to view
+		url: String): Healthcheck
+
+    Healthchecks(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [Healthcheck]
+
+    Person(
+		# The full name of the person to view
+		name: String,
+		# The ID of the person to view
+		id: String
+	): Person
+
+    People(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [Person]
+
+    Repository(
+		# The ID of the repository to view. This is the internal ID, not the VCS provider's ID
+		id: String!
+	): Repository
+
     Repositories(
-        first: Int = 10,
-        offset: Int = 0,
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+		# The Circle CI version used by the repositories
         mostRecentCircleCIPlatform: CircleCiVersion
     ): [Repository]
-    CostCentre(id: String!): CostCentre
+
+    System(
+		# The ID of the system to view
+		id: String
+	): System
+
+    Systems(
+		# The service tier of the systems
+		serviceTier: ServiceTier,
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [System]
+
+    Team(
+		# The ID of the team to view
+		id: String!
+	): Team
+
+    Teams(
+		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+		first: Int = 10,
+		# The pagination offset to use
+		offset: Int = 0
+	): [Team]
 }
 
 input SystemInput {
