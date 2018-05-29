@@ -1,5 +1,4 @@
 const logger = require('@financial-times/n-logger').default;
-const { isSameInteger } = require('./utils');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 
@@ -39,7 +38,7 @@ const sanitizeRequestId = code => {
 	return code;
 };
 
-const sanitizeRelationship = relationship => {
+const sanitizeRelationshipName = relationship => {
 	const sanitizedRelationship = relationship.toUpperCase();
 	if (!/^[A-Z][A-Z_]+[A-Z]$/.test(sanitizedRelationship)) {
 		throw httpErrors(
@@ -53,8 +52,8 @@ const sanitizeRelationship = relationship => {
 
 const sanitizeAttributes = ({
 	nodeType,
-	attributes,
 	code,
+	attributes,
 	requestId,
 	method
 }) => {
@@ -82,47 +81,68 @@ const sanitizeAttributes = ({
 	};
 };
 
-const sanitizeInput = (
-	{
-		requestId,
-		nodeType,
-		code,
-		query,
-		body: { node: attributes = {}, relationships = {} } = {}
-	},
-	method
-) => {
-	logger.info({
-		requestId,
-		nodeType,
-		code,
-		attributes,
-		relationships,
-		method
-	});
+const mergeInput = (obj, method, bodyParser) => {
+	obj.method = method;
+	Object.assign(obj, bodyParser(obj.body));
+	delete obj.body;
+	return obj;
+};
 
+const sanitizeShared = ({
+	requestId,
+	nodeType,
+	code,
+	attributes = {},
+	query,
+	method
+}) => {
 	sanitizeRequestId(requestId);
 
 	code = sanitizeCode(code);
 
-	const response = {
+	const result = {
 		requestId,
 		nodeType: sanitizeNodeType(nodeType),
 		code
 	};
 
-	if (attributes) {
-		const { writeAttributes, deletedAttributes } = sanitizeAttributes({
-			nodeType,
-			attributes,
-			code,
-			requestId,
-			method
-		});
-		Object.assign(response, query, {
-			attributes: writeAttributes,
-			deletedAttributes,
-			relationshipTypes: Object.keys(relationships).map(sanitizeRelationship),
+	const { writeAttributes, deletedAttributes } = sanitizeAttributes({
+		nodeType,
+		attributes,
+		code,
+		requestId,
+		method
+	});
+
+	Object.assign(result, query, {
+		attributes: writeAttributes,
+		deletedAttributes
+	});
+
+	return result;
+};
+
+const sanitizeNode = (inputs, method) => {
+	const input = mergeInput(inputs, method, (body = {}) => ({
+		attributes: body.node,
+		relationships: body.relationships
+	}));
+	logger.info(Object.assign({ event: 'NODE_ENDPOINT_CALL' }, input));
+
+	const result = sanitizeShared(input);
+
+	input.relationships = input.relationships || {};
+
+	if (input.relationships) {
+		const relationships = Object.entries(input.relationships).reduce(
+			(map, [relType, relInstances]) =>
+				Object.assign(map, {
+					[sanitizeRelationshipName(relType)]: relInstances
+				}),
+			{}
+		);
+		Object.assign(result, {
+			relationshipTypes: Object.keys(relationships),
 			relationships: [].concat(
 				...Object.entries(relationships).map(([relType, relInstances]) => {
 					return relInstances.map(rel => ({
@@ -135,44 +155,24 @@ const sanitizeInput = (
 			)
 		});
 	}
-	return response;
+	return result;
 };
 
-const constructOutput = result => {
-	const node = result.records[0].get('node');
-	const response = {
-		node: Object.assign({}, node.properties)
-	};
-	if (response.node.createdByRequest) {
-		delete response.node.createdByRequest;
-	}
+const sanitizeRelationship = (inputs, method) => {
+	const input = mergeInput(inputs, method, (body = {}) => ({
+		attributes: body
+	}));
 
-	// check relationship key exists and is not null
-	// if related is not defined it means we've done an optional match on relationships
-	// and retrieved none
-	if (result.records[0].has('related') && result.records[0].get('related')) {
-		response.relationships = result.records.reduce((map, record) => {
-			const target = record.get('related');
-			const rel = record.get('relationship');
-			map[rel.type] = map[rel.type] || [];
+	logger.info(Object.assign({ event: 'RELATIONSHIP_ENDPOINT_CALL' }, input));
 
-			map[rel.type].push({
-				direction: isSameInteger(rel.start, node.identity)
-					? 'outgoing'
-					: 'incoming',
-				nodeType: target.labels[0],
-				nodeCode: target.properties.id
-			});
-			return map;
-		}, {});
-	} else {
-		response.relationships = {};
-	}
-
-	return response;
+	return Object.assign(sanitizeShared(input), {
+		relatedType: sanitizeNodeType(input.relatedType),
+		relatedCode: sanitizeCode(input.relatedCode),
+		relationship: sanitizeRelationshipName(input.relationship)
+	});
 };
 
 module.exports = {
-	sanitizeInput,
-	constructOutput
+	sanitizeNode,
+	sanitizeRelationship
 };

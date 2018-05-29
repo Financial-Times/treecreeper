@@ -597,7 +597,7 @@ describe('v1 - node PATCH', () => {
 			.send({
 				node: { foo: 'updated' },
 				relationships: {
-					HAS_TECH_LEAD: [
+					hAS_TeCH_LEAD: [
 						{
 							direction: 'outgoing',
 							nodeType: 'peRson',

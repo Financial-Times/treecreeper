@@ -2,7 +2,7 @@ const bodyParser = require('body-parser');
 const logger = require('@financial-times/n-logger').default;
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
-const { node: nodeCrud } = require('../crud');
+const { nodeCrud, relationshipCrud } = require('../rest');
 const requestId = require('../middleware/request-id');
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -13,6 +13,9 @@ const success = res => data =>
 	data.status ? res.status(data.status).json(data.data) : res.json(data);
 
 const failure = res => err => {
+	if (process.env.LOG_LEVEL === 'debug') {
+		console.info('CRUD_ERROR', err);
+	}
 	if (!err.status) {
 		logger.info({ error: err });
 		err = { status: 500, message: err.toString() };
@@ -45,6 +48,7 @@ module.exports = router => {
 			)
 			.then(success(res), failure(res));
 	});
+
 	router.post('/node/:nodeType/:code', async (req, res) => {
 		logger.info('[APP] node POST', req.params);
 		return nodeCrud
@@ -96,6 +100,23 @@ module.exports = router => {
 			)
 			.then(success(res), failure(res));
 	});
+
+	router.get(
+		'/relationship/:nodeType/:code/:relationship/:relatedType/:relatedCode',
+		async (req, res) => {
+			logger.info('[APP] relationship GET', req.params);
+			return relationshipCrud
+				.read(
+					Object.assign(
+						{
+							requestId: res.locals.requestId
+						},
+						req.params
+					)
+				)
+				.then(success(res), failure(res));
+		}
+	);
 
 	return router;
 };

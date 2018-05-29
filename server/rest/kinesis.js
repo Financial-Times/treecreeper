@@ -1,7 +1,7 @@
 const logger = require('@financial-times/n-logger').default;
 const EventLogWriter = require('../lib/event-log-writer');
 const Kinesis = require('../lib/kinesis');
-const { isSameInteger } = require('./utils');
+const { isSameNeo4jInteger } = require('./utils');
 
 const kinesisClient = new Kinesis(
 	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name'
@@ -65,7 +65,7 @@ const logChanges = (requestId, result, deletedRelationships) => {
 					action: EventLogWriter.actions.UPDATE,
 					relationship: {
 						relType: rel.type,
-						direction: isSameInteger(rel.start, node.identity)
+						direction: isSameNeo4jInteger(rel.start, node.identity)
 							? 'outgoing'
 							: 'incoming',
 						nodeCode: target.properties.id,
@@ -81,7 +81,7 @@ const logChanges = (requestId, result, deletedRelationships) => {
 					action: EventLogWriter.actions.UPDATE,
 					relationship: {
 						relType: rel.type,
-						direction: isSameInteger(rel.start, node.identity)
+						direction: isSameNeo4jInteger(rel.start, node.identity)
 							? 'incoming'
 							: 'outgoing',
 						nodeCode: node.properties.id,
@@ -105,7 +105,7 @@ const logChanges = (requestId, result, deletedRelationships) => {
 				action: EventLogWriter.actions.UPDATE,
 				relationship: {
 					relType: rel.type,
-					direction: isSameInteger(rel.start, node.identity)
+					direction: isSameNeo4jInteger(rel.start, node.identity)
 						? 'outgoing'
 						: 'incoming',
 					nodeCode: target.properties.id,
@@ -121,7 +121,7 @@ const logChanges = (requestId, result, deletedRelationships) => {
 				action: EventLogWriter.actions.UPDATE,
 				relationship: {
 					relType: rel.type,
-					direction: isSameInteger(rel.start, node.identity)
+					direction: isSameNeo4jInteger(rel.start, node.identity)
 						? 'incoming'
 						: 'outgoing',
 					nodeCode: node.properties.id,

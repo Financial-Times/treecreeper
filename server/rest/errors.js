@@ -1,5 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
+const { session: db } = require('../db-connection');
+
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
 	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
@@ -37,6 +39,23 @@ const handleMissingNode = ({ result, nodeType, code, status }) => {
 	}
 };
 
+const handleMissingRelationship = ({
+	result,
+	nodeType,
+	code,
+	relationship,
+	relatedType,
+	relatedCode,
+	status
+}) => {
+	if (!result.records.length) {
+		throw httpErrors(
+			status,
+			`Relationship ${relationship} from ${nodeType} ${code} to ${relatedType} ${relatedCode} does not exist`
+		);
+	}
+};
+
 const handleAttachedNode = ({ record, nodeType, code }) => {
 	throw httpErrors(
 		409,
@@ -45,7 +64,17 @@ const handleAttachedNode = ({ record, nodeType, code }) => {
 	);
 };
 
-const handleDeletedNode = ({ nodeType, code, status }) => {
+const handleDeletedNode = async ({ nodeType, code, status }) => {
+	const checkNode = await db.run(
+		stripIndents`
+	MATCH (node:${nodeType} { id: $code, isDeleted: true})
+	RETURN node`,
+		{ code }
+	);
+
+	if (!checkNode.records[0]) {
+		return;
+	}
 	if (status === 410) {
 		throw httpErrors(410, `${nodeType} ${code} has been deleted`);
 	} else if (status === 409) {
@@ -73,6 +102,7 @@ module.exports = {
 	handleRelationshipActionError,
 	handleDuplicateNodeError,
 	handleMissingNode,
+	handleMissingRelationship,
 	handleAttachedNode,
 	handleDeletedNode
 };

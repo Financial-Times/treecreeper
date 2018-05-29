@@ -52,12 +52,19 @@ const nodes = Object.freeze([
 	})
 ]);
 
-const hydrateDb = () =>
-	Promise.all(
+const hydrateDb = async withRelationships => {
+	await Promise.all(
 		nodes.map(({ type, node }) =>
 			db.run(`CREATE (n:${type} $node) RETURN n`, { node })
 		)
 	);
+	if (withRelationships) {
+		await db.run(`MATCH (s:System { id: "test-system" }), (p:Person { id: "test-person" }), (g:Group { id: "test-group" })
+									MERGE (g)-[o:OWNS]->(s)-[t:HAS_TECH_LEAD]->(p)
+									SET o.createdByRequest = "setup-script", t.createdByRequest = "setup-script"
+									RETURN g, o, s, t, p`);
+	}
+};
 
 const dropDb = async () => {
 	await Promise.all(
@@ -67,14 +74,14 @@ const dropDb = async () => {
 	);
 };
 
-const setupMocks = state => {
+const setupMocks = (state, withRelationships) => {
 	// clean up after potentially failed test runs
 	before(dropDb);
 
 	beforeEach(async () => {
 		state.sandbox = sinon.sandbox.create();
 		state.stubSendEvent = stubKinesis(state.sandbox);
-		await hydrateDb();
+		await hydrateDb(withRelationships);
 	});
 
 	afterEach(async () => {

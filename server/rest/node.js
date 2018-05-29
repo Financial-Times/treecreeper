@@ -3,19 +3,9 @@ const logger = require('@financial-times/n-logger').default;
 const { session: db } = require('../db-connection');
 const errors = require('./errors');
 const { logChanges } = require('./kinesis');
-const { sanitizeInput, constructOutput } = require('./data-manipulation');
+const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
+const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
-
-const checkIfDeleted = async (nodeType, code) => {
-	const result = await db.run(
-		stripIndents`
-	MATCH (node:${nodeType} { id: $code, isDeleted: true})
-	RETURN node`,
-		{ code }
-	);
-
-	return !!result.records[0];
-};
 
 const create = async input => {
 	const {
@@ -27,9 +17,7 @@ const create = async input => {
 		relationships
 	} = sanitizeInput(input, 'CREATE');
 
-	if (await checkIfDeleted(nodeType, code)) {
-		errors.handleDeletedNode({ nodeType, code, status: 409 });
-	}
+	await errors.handleDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
@@ -61,9 +49,9 @@ const create = async input => {
 
 const read = async input => {
 	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
-	if (await checkIfDeleted(nodeType, code)) {
-		errors.handleDeletedNode({ nodeType, code, status: 410 });
-	}
+
+	await errors.handleDeletedNode({ nodeType, code, status: 410 });
+
 	const query = stripIndents`
 	MATCH (node:${nodeType} { id: $code })
 	${RETURN_NODE_WITH_RELS}`;
@@ -90,9 +78,7 @@ const update = async input => {
 
 	let deletedRelationships;
 
-	if (await checkIfDeleted(nodeType, code)) {
-		errors.handleDeletedNode({ nodeType, code, status: 409 });
-	}
+	await errors.handleDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [
@@ -166,9 +152,9 @@ const update = async input => {
 
 const remove = async input => {
 	const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
-	if (await checkIfDeleted(nodeType, code)) {
-		errors.handleDeletedNode({ nodeType, code, status: 410 });
-	}
+
+	await errors.handleDeletedNode({ nodeType, code, status: 410 });
+
 	const record = await read(input);
 
 	if (Object.keys(record.relationships).length) {

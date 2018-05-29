@@ -23,7 +23,7 @@ const sendEvent = event =>
 	});
 
 // compare returns 0 if same integer, so this is a boolean check for equality
-const isSameInteger = (int1, int2) => !int1.compare(int2);
+const isSameNeo4jInteger = (int1, int2) => !int1.compare(int2);
 
 const sanitizeNodeType = nodeType =>
 	nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
@@ -51,7 +51,7 @@ const sendRelationshipEvents = (requestId, result) => {
 				action: EventLogWriter.actions.UPDATE,
 				relationship: {
 					relType: rel.type,
-					direction: isSameInteger(rel.start, node.identity)
+					direction: isSameNeo4jInteger(rel.start, node.identity)
 						? 'outgoing'
 						: 'incoming',
 					nodeCode: target.properties.id,
@@ -66,7 +66,7 @@ const sendRelationshipEvents = (requestId, result) => {
 				action: EventLogWriter.actions.UPDATE,
 				relationship: {
 					relType: rel.type,
-					direction: isSameInteger(rel.start, node.identity)
+					direction: isSameNeo4jInteger(rel.start, node.identity)
 						? 'incoming'
 						: 'outgoing',
 					nodeCode: node.properties.id,
@@ -98,7 +98,7 @@ const buildNode = (result, includeRelationships) => {
 				const rel = record.get('relationship');
 				return {
 					relType: rel.type,
-					direction: isSameInteger(rel.start, node.identity)
+					direction: isSameNeo4jInteger(rel.start, node.identity)
 						? 'outgoing'
 						: 'incoming',
 					nodeType: target.labels[0],

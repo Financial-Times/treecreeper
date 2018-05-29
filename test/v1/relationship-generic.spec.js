@@ -5,7 +5,7 @@ const { session: db } = require('../../server/db-connection');
 const API_KEY = process.env.API_KEY;
 const { setupMocks } = require('./helpers');
 
-describe('v1 - generic', () => {
+describe.skip('v1 - relationship generic', () => {
 	const state = {};
 
 	setupMocks(state);

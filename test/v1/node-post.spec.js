@@ -266,7 +266,7 @@ describe('v1 - node POST', () => {
 			.send({
 				node: { foo: 'new' },
 				relationships: {
-					HAS_TECH_LEAD: [
+					hAS_TeCH_LEAD: [
 						{
 							direction: 'outgoing',
 							nodeType: 'peRson',
