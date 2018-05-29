@@ -63,14 +63,16 @@ type System {
 		offset: Int = 0
     ): [System] @relation(name: "DEPENDS_ON", direction: "IN")
     # The team which supports the system
-    supportedBy: Team @relation(name: "SUPPORTS", direction: "IN")
+    ownedBy: Team @relation(name: "OWNED_BY", direction: "OUT")
+    # The team which supports the system
+    supportedBy: Team @relation(name: "SUPPORTED_BY", direction: "OUT")
     # Individuals who have operational knowledge of the system
     isKnownBy(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [Person] @relation(name: "KNOWS", direction: "IN")
+    ): [Person] @relation(name: "KNOWN_BY", direction: "OUT")
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
     # Healthchekcs which are used to monitor this system
@@ -90,33 +92,34 @@ type Team {
     phone: String!
     #
     status: Status!
+        # The systems the team owns
+        owns(
+    		# The number of records to return after the pagination offset. This uses the default neo4j ordering
+    		first: Int = 10,
+    		# The pagination offset to use
+    		offset: Int = 0
+        ): [System] @relation(name: "OWNED_BY", direction: "OUT")
     # The systems the team supports
     supports(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [System] @relation(name: "SUPPORTS", direction: "IN")
+    ): [System] @relation(name: "SUPPORTED_BY", direction: "OUT")
     # The tech leads of systems supported by the team
     techLead(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [Person]
-        @cypher(
-            statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(person:Person) RETURN person"
-        )
+    ): [Person] @relation(name: "HAS_TECH_LEAD", direction: "OUT")
     # The product owners of systems supported by the team
     productOwner(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [Person]
-        @cypher(
-            statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(person:Person) RETURN person"
-        )
+    ): [Person] @relation(name: "HAS_PRODUCT_OWNER", direction: "OUT")
     # The group the team belongs to
     group: Group @relation(name: "HAS_TEAM", direction: "IN")
 }
@@ -129,7 +132,7 @@ type Group {
 	#
     status: Status
     # The Cost Centre associated with the group
-    hasBudget: CostCentre @relation(name: "HAS_BUDGET", direction: "OUT")
+    hasBudget: CostCentre @relation(name: "FUNDED_BY", direction: "IN")
     # The teams working under the group
     teams(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
@@ -152,7 +155,7 @@ type CostCentre {
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [Group] @relation(name: "HAS_BUDGET", direction: "IN")
+    ): [Group] @relation(name: "FUNDED_BY", direction: "OUT")
 }
 
 # A individual within the organisation who is contactable
@@ -177,27 +180,21 @@ type Person {
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [System]
-        @cypher(
-            statement: "MATCH (this)-[:HAS {role:'TECH LEAD'}]->(system:System) RETURN system"
-        )
+    ): [System] @relation(name: "HAS_TECH_LEAD", direction: "IN")
 	# Systems the person is a product owner for
     isProductOwnerFor(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [System]
-        @cypher(
-            statement: "MATCH (this)-[:HAS {role:'PRODUCT OWNER'}]->(system:System) RETURN system"
-        )
+    ): [System] @relation(name: "HAS_PRODUCT_OWNER", direction: "IN")
 	# Systems the person has knowledge of
     knows(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [System] @relation(name: "KNOWS", direction: "OUT")
+    ): [System] @relation(name: "KNOWN_BY", direction: "IN")
 }
 
 type Product {
