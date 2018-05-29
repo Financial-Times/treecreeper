@@ -1,396 +1,93 @@
+# Biz Ops API Documentation
 
-### Things to be aware of:
-+ Node requests don't have a /node prefix in their url; relationship requests will have /link
-+ **id** is a field created by graphdb to hold its id - so we may want our id to be called something different
-+ We use capitalization for our types, we should be case insensitive
-+ The node API calls assume the relationships are 'from' the current node; we can easily include 'to' the current node (but we should continue to implicity reference the current node)
-+ API calls that return a json structure may need to include the node id and node type (as they are current only visible as url params)
-+ We don't have API calls to read all nodes of a type
-+ We don't have API calls to read all relationships of a type
-+ We don't have API calls to read the relationships in reverse (what links to x)
-+ We don't have API calls for defining/updating/deleting types; we assume all are valid
-+ We don't have API calls to delete attributes from a node
-+ We don't have API calls for queries; just direct reads of known keys
-+ We don't have API calls to navigate the relationships; just to return the list for each node
-+ We don't have API calls that return attributes of related data - e.g. service tier of systems I own
-+ We have not implemented PUT-as-POST for nodes or their relationships; or the nodes referenced in relationships (you have to create nodes before you can link to them)
-+ We have not fully implemented PUT/PATCH of partial details
+## /v1/node/:nodeType/:code
 
-### Recent changes
-+ Removed the need to explicitly state the origin node within the node's relationships array
-+ Proposed /link api endpoints for CRUD on relationships
+### Url parameters
 
+_These are case-insensitive and will be converted internally to the casing used in the underlying database_
 
+| parameter | description                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| nodeType  | The type of node to return. A capitalised string using the characters a-z e.g. `System`, `Person` |
+| code      | The identifier of the node. A hyphen delimited string e.g. the system code `dewey-runbooks`       |
 
-# Biz Op API Endpoints
-The interface currently supports single record actions as follows:
+### Payload structure
 
-<details>
-<summary>Read Node (and relationships)</summary>
+All requests that return or expect a body respond with/accept a json of the following structure:
 
-### To retrieve information about a node
-### GET {apiRoot}/{nodetype}/{keyname}/{keyvalue}
-#### examples:
-+ get /product/id/ftcom
-+ get /product/name/ft.com
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-#### return:
-+ **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the attributes and relationships as follows:
 ```json
 {
+  // map of attributes to assign to the primary node
+  // passed in directly to neo4j and accepts any data types compatible with it
+  // see https://neo4j.com/docs/developer-manual/current/cypher/syntax/values/
+  // Optional when using PATCH
   "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
+    "property": "value"
   },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
+  // Optional map of one or more relationship definitions
+  "relationships": {
+    // name must be a _ delimited uppercase string
+    "RELATIONSHIP_NAME": [{
+      "direction": "outgoing" // or "incoming", denoting the direction of the relationship
+      "nodeType": "System" // The valid node type of the other end of the relationship
+      "nodeCode": "system-code" // The valid node code of the other end of the relationship
+    }]
+  }
 }
 ```
-</details>
 
-<details>
-<summary>Create Node (and relationships)</summary>
+### GET
 
-## To inset new nodes and their relationships
-### POST {apiRoot}/{nodetype}/{keyname}/{keyvalue} {body}
-#### examples:
-+ post /contact/id/geoffthorpe {node:{name:"Geoff Thorpe"}}
-+ post /contact/name/Geoff%20Thorpe {node:{email:"geoff.thorpe@ft.com"}}
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **body** - a json object that defines the node and its relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-#### return:
-+ **status** - 200 for success, 409 for already exists, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the created attributes and relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-</details>
+_Note, it is not possible to omit `nodeType` and/or `code` to retrieve a list of nodes. `/api/graphql` is intended to be the primary read interface for anything other than single records._
 
-<details>
-<summary>Update Node (and relationships)</summary>
+| initial state | status | response type |
+| ------------- | ------ | ------------- |
+| absent        | 404    | none          |
+| existing      | 200    | json          |
 
-## To update an exist node and its relationships
-### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
-#### examples:
-+ put /endpoint/id/dewey {node:{base:"dewey.in.ft.com"}}
-+ put /endpoint/base/dewey.in.ft.com {node:{about:"_about"}}
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **body** - a json object that defines the fields in the node and its relationships that are to be changed as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-#### return:
-+ **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the new content of ALL the node attributes and relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-</details>
+### POST
 
-<details>
-<summary>Upsert Node (and relationships)</summary>
+Used to create a new node, optionally with relationships to other nodes.
 
-## To create a new node and relationships or update the existing node and relationships
-### PUT {apiRoot}/{nodetype}/{keyname}/{keyvalue} {partial body}
-+ put /endpoint/id/dewey {node:{base:"dewey.in.ft.com"}}
-+ put /endpoint/base/dewey.in.ft.com {node:{about:"_about"}}
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **body** - a json object that defines the fields in the node and its relationships that are to be changed as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-#### return:
-+ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the new content of ALL the node attributes and relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-</details>
+* The query string `upsert=true` allows the creation of any new nodes needed to create relationships
 
-<details>
-<summary>Delete Node (and relationships)</summary>
+| body                   | query         | initial state                            | status | response type |
+| ---------------------- | ------------- | ---------------------------------------- | ------ | ------------- |
+| node only              | none          | absent                                   | 200    | json          |
+| node only              | none          | existing                                 | 409    | none          |
+| node and relationships | none          | absent primary node, related nodes exist | 200    | json          |
+| node and relationships | none          | absent primary node and related nodes    | 400    | none          |
+| node and relationships | `upsert=true` | absent primary node and related nodes    | 200    | json          |
 
-## To remove an existing node and its relationships
-### DELETE {apiRoot}/{nodetype}/{keyname}/{keyvalue}
-+ delete /contact/id/alanturner
-+ delete /contact/name/Alan%20Turner
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-#### return:
-+ **status** - 200 for success, 404 for not found, 400 for incorrect parameters, 500 for failure
-</details>
+### PUT
 
-<details>
-<summary>Create Relationship</summary>
+Not implemented. Use `PATCH`
 
-## To inset new relationships between two nodes
-### POST {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
-#### examples:
-+ post /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
-+ post /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **reltype** - the name of the relationship to create
-#### return:
-+ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the new content of ALL the node attributes and relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-</details>
+### PATCH
 
-<details>
-<summary>Update Relationship</summary>
+Used to modify or create a node, optionally with relationships to other nodes.
 
-## To update relationships between two nodes
-### PUT {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
-#### examples:
-+ put /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
-+ put /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **reltype** - the name of the relationship to create
-#### return:
-+ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
-+ a json object that lists all the new content of ALL the node attributes and relationships as follows:
-```json
-{
-  "node": {
-    "attr1": "value1",
-    "attr2": "value2",
-    "...."
-  },
-  "relationships": [
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    {
-      "name": "relationshipType",
-      "to": "objectType",
-      "toAttrName": "id",
-      "toAttrValue": "objectID"
-    },
-    "...."
-   ]
-}
-```
-</details>
+* Passing in `null` as the value of any attribute of `node` will delete that attribute
+* The query string `upsert=true` allows the creation of any new nodes needed to create relationships
+* The query string `relationshipAction`, taking the values `replace` or `append` specifies the behaviour when modifying relationships
+  * `replace` - replaces any relationships of the same relationship type as those passed in the request body
+  * `append` - appends the specified relationships to those that already exist
 
-<details>
-<summary>Delete Relationship</summary>
+| body                   | query                               | initial state                              | status | response type |
+| ---------------------- | ----------------------------------- | ------------------------------------------ | ------ | ------------- |
+| node only              | none                                | absent                                     | 201    | json          |
+| node only              | none                                | existing                                   | 200    | json          |
+| node and relationships | none                                | anything                                   | 400    | none          |
+| node and relationships | `relationshipAction`                | existing primary node, related nodes exist | 200    | json          |
+| node and relationships | `relationshipAction`                | existing primary node and related nodes    | 400    | none          |
+| node and relationships | `relationshipAction`, `upsert=true` | existing primary node and related nodes    | 200    | json          |
 
-## To delete relationships between two nodes
-### DELETE {apiRoot}/link/{nodetype}/{keyname}/{keyvalue}/{reltype}/{nodetype}/{keyname}/{keyvalue}
-#### examples:
-+ delete /link/contact/id/geoffthorpe/worksfor/contact/id/sarahwells
-+ delete /link/contact/name/Geoff%20Thorpe/worksfor/contact/name/Sarah%20Wells
-#### params:
-+ **nodetype** - 'Product', 'System', 'Contact' or 'Endpoint'
-+ **keyname** - 'id' or the name of a unique attribute
-+ **keyvalue**
-    + if keyname = id, then this param is the unique internal graphdb ID of the record to read
-    + if keyname != id, then this param is the value of the unique attribute
-+ **reltype** - the name of the relationship to create
-#### return:
-+ **status** - 200 for success, 400 for incorrect parameters, 500 for failure
-</details>
+### DELETE
+
+Used to remove a node. Note, this will not remove the entry from the database, but will flag it as `isDeleted`. _This method should be used sparingly_
+
+| initial state                                  | status | response type |
+| ---------------------------------------------- | ------ | ------------- |
+| absent                                         | 404    | none          |
+| existing, with relationships to other nodes    | 409    | none          |
+| existing, with no relationships to other nodes | 204    | none          |
