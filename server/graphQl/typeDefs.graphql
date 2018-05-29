@@ -62,7 +62,7 @@ type System {
 		# The pagination offset to use
 		offset: Int = 0
     ): [System] @relation(name: "DEPENDS_ON", direction: "IN")
-    # The team which supports the system
+    # The team which owns the system
     ownedBy: Team @relation(name: "OWNED_BY", direction: "OUT")
     # The team which supports the system
     supportedBy: Team @relation(name: "SUPPORTED_BY", direction: "OUT")
@@ -98,14 +98,14 @@ type Team {
     		first: Int = 10,
     		# The pagination offset to use
     		offset: Int = 0
-        ): [System] @relation(name: "OWNED_BY", direction: "OUT")
+        ): [System] @relation(name: "OWNED_BY", direction: "IN")
     # The systems the team supports
     supports(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
 		first: Int = 10,
 		# The pagination offset to use
 		offset: Int = 0
-    ): [System] @relation(name: "SUPPORTED_BY", direction: "OUT")
+    ): [System] @relation(name: "SUPPORTED_BY", direction: "IN")
     # The tech leads of systems supported by the team
     techLead(
 		# The number of records to return after the pagination offset. This uses the default neo4j ordering
