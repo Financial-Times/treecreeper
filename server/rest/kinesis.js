@@ -16,6 +16,43 @@ const sendEvent = event =>
 		);
 	});
 
+const createRelationshipInfoFromNeo4jData = ({ rel, destination, origin }) => {
+	const isIncoming = !isSameNeo4jInteger(rel.start, origin.identity);
+	return {
+		relType: rel.type,
+		direction: isIncoming ? 'incoming' : 'outgoing',
+		nodeCode: destination.properties.id,
+		nodeType: destination.labels[0]
+	};
+};
+
+const sendNodeRelationshipEvent = ({
+	verb,
+	rel,
+	destination,
+	origin,
+	requestId
+}) => {
+	return sendEvent(
+		Object.assign(
+			{
+				code: origin.properties.id,
+				type: origin.labels[0]
+			},
+			{
+				event: `${verb}_RELATIONSHIP`,
+				action: EventLogWriter.actions.UPDATE,
+				relationship: createRelationshipInfoFromNeo4jData({
+					rel,
+					destination,
+					origin
+				}),
+				requestId
+			}
+		)
+	);
+};
+
 const logNodeChanges = (requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');
 	let event;
@@ -60,35 +97,19 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 			}
 
 			if (rel.properties.createdByRequest === requestId) {
-				sendEvent({
-					event: 'CREATED_RELATIONSHIP',
-					action: EventLogWriter.actions.UPDATE,
-					relationship: {
-						relType: rel.type,
-						direction: isSameNeo4jInteger(rel.start, node.identity)
-							? 'outgoing'
-							: 'incoming',
-						nodeCode: target.properties.id,
-						nodeType: target.labels[0]
-					},
-					code: node.properties.id,
-					type: node.labels[0],
+				sendNodeRelationshipEvent({
+					verb: 'CREATED',
+					rel,
+					destination: target,
+					origin: node,
 					requestId
 				});
 
-				sendEvent({
-					event: 'CREATED_RELATIONSHIP',
-					action: EventLogWriter.actions.UPDATE,
-					relationship: {
-						relType: rel.type,
-						direction: isSameNeo4jInteger(rel.start, node.identity)
-							? 'incoming'
-							: 'outgoing',
-						nodeCode: node.properties.id,
-						nodeType: node.labels[0]
-					},
-					code: target.properties.id,
-					type: target.labels[0],
+				sendNodeRelationshipEvent({
+					verb: 'CREATED',
+					rel,
+					destination: node,
+					origin: target,
 					requestId
 				});
 			}
@@ -100,132 +121,68 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
 
-			sendEvent({
-				event: 'DELETED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: rel.type,
-					direction: isSameNeo4jInteger(rel.start, node.identity)
-						? 'outgoing'
-						: 'incoming',
-					nodeCode: target.properties.id,
-					nodeType: target.labels[0]
-				},
-				code: node.properties.id,
-				type: node.labels[0],
+			sendNodeRelationshipEvent({
+				verb: 'DELETED',
+				rel,
+				destination: target,
+				origin: node,
 				requestId
 			});
 
-			sendEvent({
-				event: 'DELETED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: rel.type,
-					direction: isSameNeo4jInteger(rel.start, node.identity)
-						? 'incoming'
-						: 'outgoing',
-					nodeCode: node.properties.id,
-					nodeType: node.labels[0]
-				},
-				code: target.properties.id,
-				type: target.labels[0],
+			sendNodeRelationshipEvent({
+				verb: 'DELETED',
+				rel,
+				destination: node,
+				origin: target,
 				requestId
 			});
 		});
 	}
 };
 
-const logRelationshipChanges = (
+const sendRelationshipEvents = (
+	verb,
 	requestId,
-	result,
 	{ nodeType, code, relatedType, relatedCode, relationshipType }
 ) => {
-	if (!result.records[0]) {
-		sendEvent({
-			event: 'DELETED_RELATIONSHIP',
-			action: EventLogWriter.actions.UPDATE,
-			relationship: {
-				relType: relationshipType,
-				direction: 'outgoing',
-				nodeCode: relatedCode,
-				nodeType: relatedType
-			},
-			code: code,
-			type: nodeType,
-			requestId
-		});
+	sendEvent({
+		event: `${verb}_RELATIONSHIP`,
+		action: EventLogWriter.actions.UPDATE,
+		relationship: {
+			relType: relationshipType,
+			direction: 'outgoing',
+			nodeCode: relatedCode,
+			nodeType: relatedType
+		},
+		code,
+		type: nodeType,
+		requestId
+	});
 
-		sendEvent({
-			event: 'DELETED_RELATIONSHIP',
-			action: EventLogWriter.actions.UPDATE,
-			relationship: {
-				relType: relationshipType,
-				direction: 'incoming',
-				nodeCode: code,
-				nodeType: nodeType
-			},
-			code: relatedCode,
-			type: relatedType,
-			requestId
-		});
+	sendEvent({
+		event: `${verb}_RELATIONSHIP`,
+		action: EventLogWriter.actions.UPDATE,
+		relationship: {
+			relType: relationshipType,
+			direction: 'incoming',
+			nodeCode: code,
+			nodeType: nodeType
+		},
+		code: relatedCode,
+		type: relatedType,
+		requestId
+	});
+};
+
+const logRelationshipChanges = (requestId, result, params) => {
+	if (!result.records[0]) {
+		sendRelationshipEvents('DELETED', requestId, params);
 	} else {
 		const relationshipRecord = result.records[0].get('relationship');
 		if (relationshipRecord.properties.createdByRequest === requestId) {
-			sendEvent({
-				event: 'CREATED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: relationshipType,
-					direction: 'outgoing',
-					nodeCode: relatedCode,
-					nodeType: relatedType
-				},
-				code: code,
-				type: nodeType,
-				requestId
-			});
-
-			sendEvent({
-				event: 'CREATED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: relationshipType,
-					direction: 'incoming',
-					nodeCode: code,
-					nodeType: nodeType
-				},
-				code: relatedCode,
-				type: relatedType,
-				requestId
-			});
+			sendRelationshipEvents('CREATED', requestId, params);
 		} else {
-			sendEvent({
-				event: 'UPDATED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: relationshipType,
-					direction: 'outgoing',
-					nodeCode: relatedCode,
-					nodeType: relatedType
-				},
-				code: code,
-				type: nodeType,
-				requestId
-			});
-
-			sendEvent({
-				event: 'UPDATED_RELATIONSHIP',
-				action: EventLogWriter.actions.UPDATE,
-				relationship: {
-					relType: relationshipType,
-					direction: 'incoming',
-					nodeCode: code,
-					nodeType: nodeType
-				},
-				code: relatedCode,
-				type: relatedType,
-				requestId
-			});
+			sendRelationshipEvents('UPDATED', requestId, params);
 		}
 	}
 };
