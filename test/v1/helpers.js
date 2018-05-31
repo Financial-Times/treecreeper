@@ -74,7 +74,7 @@ const dropDb = async () => {
 	);
 };
 
-const setupMocks = (state, withRelationships) => {
+const setupMocks = (state, { withRelationships } = {}) => {
 	// clean up after potentially failed test runs
 	before(dropDb);
 
@@ -90,8 +90,14 @@ const setupMocks = (state, withRelationships) => {
 	});
 };
 
+const getRelationship = (relType = 'HAS_TECH_LEAD') =>
+	db.run(`
+			MATCH (node:System { id: 'test-system' })-[relationship:${relType}]->(relatedNode:Person { id: 'test-person' })
+			RETURN relationship`);
+
 module.exports = {
 	checkResponse,
 	stubKinesis,
-	setupMocks
+	setupMocks,
+	getRelationship
 };

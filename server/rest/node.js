@@ -1,8 +1,12 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
 const { session: db } = require('../db-connection');
-const errors = require('./errors');
-const { logChanges } = require('./kinesis');
+const {
+	dbErrorHandlers,
+	queryResultHandlers,
+	preflightChecks
+} = require('./errors');
+const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
@@ -17,7 +21,7 @@ const create = async input => {
 		relationships
 	} = sanitizeInput(input, 'CREATE');
 
-	await errors.handleDeletedNode({ nodeType, code, status: 409 });
+	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
@@ -41,8 +45,8 @@ const create = async input => {
 
 		return constructOutput(result);
 	} catch (err) {
-		errors.handleDuplicateNodeError(err, nodeType, code);
-		errors.handleUpsertError(err, relationships);
+		dbErrorHandlers.duplicateNode(err, nodeType, code);
+		dbErrorHandlers.nodeUpsert(err, relationships);
 		throw err;
 	}
 };
@@ -50,7 +54,7 @@ const create = async input => {
 const read = async input => {
 	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
-	await errors.handleDeletedNode({ nodeType, code, status: 410 });
+	await preflightChecks.bailOnDeletedNode({ nodeType, code });
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} { id: $code })
@@ -59,7 +63,7 @@ const read = async input => {
 	logger.info({ event: 'READ_NODE_QUERY', requestId, nodeType, code, query });
 
 	const result = await db.run(query, { code });
-	errors.handleMissingNode({ result, nodeType, code, status: 404 });
+	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
 	return constructOutput(result);
 };
 
@@ -78,20 +82,19 @@ const update = async input => {
 
 	let deletedRelationships;
 
-	await errors.handleDeletedNode({ nodeType, code, status: 409 });
+	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} {id: $code})
 				ON CREATE SET node.createdByRequest = $requestId
-			SET node += $attributes
-		`
+			SET node += $attributes`
 		];
 
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
 
 		if (relationships.length) {
-			errors.handleRelationshipActionError(relationshipAction);
+			preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 
 			if (relationshipAction === 'replace') {
 				// If replacing we must retrieve information on existing relationships
@@ -145,7 +148,7 @@ const update = async input => {
 					: 200
 		};
 	} catch (err) {
-		errors.handleUpsertError(err, relationships);
+		dbErrorHandlers.nodeUpsert(err, relationships);
 		throw err;
 	}
 };
@@ -153,13 +156,11 @@ const update = async input => {
 const remove = async input => {
 	const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
 
-	await errors.handleDeletedNode({ nodeType, code, status: 410 });
-
+	// note - this calls bailOnDeletedNode, which is why it isn't done explicitly
+	// in this function
 	const record = await read(input);
 
-	if (Object.keys(record.relationships).length) {
-		errors.handleAttachedNode({ record, nodeType, code });
-	}
+	queryResultHandlers.attachedNode({ record, nodeType, code });
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} { id: $code })
@@ -169,10 +170,10 @@ const remove = async input => {
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
 	const result = await db.run(query, { code, requestId });
-	errors.handleMissingNode({ result, nodeType, code, status: 404 });
+	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
 	logChanges(requestId, result);
 
-	return { data: '', status: 204 };
+	return { status: 204 };
 };
 
 module.exports = { create, read, update, delete: remove };

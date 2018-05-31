@@ -1,51 +1,70 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
 const { session: db } = require('../db-connection');
-const errors = require('./errors');
-// const { logChanges } = require('./kinesis');
+const {
+	dbErrorHandlers,
+	queryResultHandlers,
+	preflightChecks
+} = require('./errors');
+const { logRelationshipChanges: logChanges } = require('./kinesis');
 const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
 const {
 	constructRelationship: constructOutput
 } = require('./construct-output');
-// const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
 
-// const create = async input => {
-// const {
-// 	requestId,
-// 	upsert,
-// 	nodeType,
-// 	code,
-// 	attributes,
-// 	relatedType,
-// 	relatedCode,
-// 	relationship
-// } = sanitizeInput(input, 'CREATE');
-// if (await checkIfDeleted(nodeType, code)) {
-// 	errors.handleDeletedNode({ nodeType, code, status: 409 });
-// }
-// try {
-// 	const queryParts = [`CREATE (node:${nodeType} $attributes)`];
-// 	if (relationships.length) {
-// 		queryParts.push(...createRelationships(upsert, relationships));
-// 	}
-// 	queryParts.push(RETURN_NODE_WITH_RELS);
-// 	const query = queryParts.join('\n');
-// 	logger.info({
-// 		event: 'CREATE_NODE_QUERY',
-// 		requestId,
-// 		nodeType,
-// 		code,
-// 		query
-// 	});
-// 	const result = await db.run(query, { attributes, requestId });
-// 	logChanges(requestId, result);
-// 	return constructOutput(result);
-// } catch (err) {
-// 	errors.handleDuplicateNodeError(err, nodeType, code);
-// 	errors.handleUpsertError(err, relationships);
-// 	throw err;
-// }
-// };
+const create = async input => {
+	const sanitizedInput = sanitizeInput(input, 'CREATE');
+
+	const {
+		requestId,
+		nodeType,
+		code,
+		attributes,
+		relatedType,
+		relatedCode,
+		relationshipType
+	} = sanitizedInput;
+
+	await Promise.all([
+		preflightChecks.bailOnDeletedNode({ nodeType, code }),
+		preflightChecks.bailOnDeletedNode({
+			nodeType: relatedType,
+			code: relatedCode
+		})
+	]);
+
+	await preflightChecks.bailOnDuplicateRelationship(sanitizedInput);
+
+	try {
+		const query = stripIndents`
+			OPTIONAL MATCH (node:${nodeType} { id: $code }), (relatedNode:${relatedType} { id: $relatedCode })
+			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
+			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
+			RETURN relationship`;
+
+		logger.info(
+			Object.assign(
+				{
+					event: 'CREATE_RELATIONSHIP_QUERY',
+					query
+				},
+				input
+			)
+		);
+
+		const result = await db.run(query, {
+			attributes,
+			requestId,
+			code,
+			relatedCode
+		});
+		logChanges(requestId, result, sanitizedInput);
+		return constructOutput(result);
+	} catch (err) {
+		dbErrorHandlers.missingRelationshipNode(err, sanitizedInput);
+		throw err;
+	}
+};
 
 const read = async input => {
 	const {
@@ -54,129 +73,129 @@ const read = async input => {
 		code,
 		relatedType,
 		relatedCode,
-		relationship
+		relationshipType
 	} = sanitizeInput(input, 'READ');
 	await Promise.all([
-		errors.handleDeletedNode({ nodeType, code, status: 410 }),
-		errors.handleDeletedNode({
+		preflightChecks.bailOnDeletedNode({ nodeType, code }),
+		preflightChecks.bailOnDeletedNode({
 			nodeType: relatedType,
-			code: relatedCode,
-			status: 410
+			code: relatedCode
 		})
 	]);
 
 	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })-[relationship:${relationship}]->(related:${relatedType} { id: $relatedCode })
+	MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(related:${relatedType} { id: $relatedCode })
 	RETURN relationship`;
 
 	logger.info({ event: 'READ_RELATIONSHIP_QUERY', requestId, query });
 	const result = await db.run(query, { code, relatedCode });
-	errors.handleMissingRelationship(
+	queryResultHandlers.missingRelationship(
 		Object.assign({ result, status: 404 }, input)
 	);
 	return constructOutput(result);
 };
 
-// const update = async input => {
-// const {
-// 	requestId,
-// 	upsert,
-// 	nodeType,
-// 	code,
-// 	attributes,
-// 	relationships,
-// 	deletedAttributes,
-// 	relationshipAction,
-// 	relationshipTypes
-// } = sanitizeInput(input, 'UPDATE');
-// let deletedRelationships;
-// if (await checkIfDeleted(nodeType, code)) {
-// 	errors.handleDeletedNode({ nodeType, code, status: 409 });
-// }
-// try {
-// 	const queryParts = [
-// 		stripIndents`MERGE (node:${nodeType} {id: $code})
-// 			ON CREATE SET node.createdByRequest = $requestId
-// 		SET node += $attributes
-// 	`
-// 	];
-// 	queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
-// 	if (relationships.length) {
-// 		errors.handleRelationshipActionError(relationshipAction);
-// 		if (relationshipAction === 'replace') {
-// 			// If replacing we must retrieve information on existing relationships
-// 			// for the log stream
-// 			deletedRelationships = await db.run(
-// 				stripIndents`
-// 	MATCH (node:${nodeType} {id: $code})-[relationship${relationshipTypes
-// 					.map(type => `:${type}`)
-// 					.join('|')}]-(related)
-// 	RETURN node, relationship, related`,
-// 				{ code }
-// 			);
-// 			if (deletedRelationships.records.length) {
-// 				// removal
-// 				queryParts.push(
-// 					...relationshipTypes.map(
-// 						type => stripIndents`
-// 					WITH node
-// 					OPTIONAL MATCH (node)-[rel:${type}]-(related)
-// 					DELETE rel
-// 				`
-// 					)
-// 				);
-// 			}
-// 		}
-// 		queryParts.push(...createRelationships(upsert, relationships));
-// 	}
-// 	queryParts.push(RETURN_NODE_WITH_RELS);
-// 	const query = queryParts.join('\n');
-// 	logger.info({
-// 		event: 'UPDATE_NODE_QUERY',
-// 		requestId,
-// 		nodeType,
-// 		code,
-// 		query,
-// 		attributes
-// 	});
-// 	const result = await db.run(query, { attributes, code, requestId });
-// 	logChanges(requestId, result, deletedRelationships);
-// 	return {
-// 		data: constructOutput(result),
-// 		status:
-// 			result.records[0].get('node').properties.createdByRequest === requestId
-// 				? 201
-// 				: 200
-// 	};
-// } catch (err) {
-// 	errors.handleUpsertError(err, relationships);
-// 	throw err;
-// }
-// };
+const update = async input => {
+	const sanitizedInput = sanitizeInput(input, 'UPDATE');
+	const {
+		requestId,
+		nodeType,
+		code,
+		attributes,
+		deletedAttributes,
+		relatedType,
+		relatedCode,
+		relationshipType
+	} = sanitizedInput;
 
-// const remove = async input => {
-// const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
-// if (await checkIfDeleted(nodeType, code)) {
-// 	errors.handleDeletedNode({ nodeType, code, status: 410 });
-// }
-// const record = await read(input);
-// if (Object.keys(record.relationships).length) {
-// 	errors.handleAttachedNode({ record, nodeType, code });
-// }
-// const query = stripIndents`
-// MATCH (node:${nodeType} { id: $code })
-// SET node.isDeleted = true, node.deletedByRequest = $requestId
-// RETURN node`;
-// logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
-// const result = await db.run(query, { code, requestId });
-// errors.handleMissingNode({ result, nodeType, code, status: 404 });
-// logChanges(requestId, result);
-// return { data: '', status: 204 };
-// };
+	await Promise.all([
+		preflightChecks.bailOnDeletedNode({ nodeType, code }),
+		preflightChecks.bailOnDeletedNode({
+			nodeType: relatedType,
+			code: relatedCode
+		})
+	]);
+
+	try {
+		const queryParts = [
+			// OPTIONAL MATCH needed in order to throw error which will help us
+			// identify which, if any, node is missing
+			stripIndents`OPTIONAL MATCH (node:${nodeType} { id: $code }), (relatedNode:${relatedType} { id: $relatedCode })
+			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
+			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
+			ON MATCH SET relationship += $attributes`
+		];
+		if (deletedAttributes.length) {
+			queryParts.push(
+				...deletedAttributes.map(attr => `REMOVE relationship.${attr}`)
+			);
+			queryParts.push('WITH relationship');
+		}
+		queryParts.push('RETURN relationship');
+
+		const query = queryParts.join('\n');
+		logger.info(
+			Object.assign(
+				{
+					event: 'UPDATE_RELATIONSHIP_QUERY',
+					query
+				},
+				input
+			)
+		);
+
+		const result = await db.run(query, {
+			attributes,
+			requestId,
+			code,
+			relatedCode
+		});
+
+		logChanges(requestId, result, sanitizedInput);
+
+		return {
+			data: constructOutput(result),
+			status:
+				result.records[0].get('relationship').properties.createdByRequest ===
+				requestId
+					? 201
+					: 200
+		};
+	} catch (err) {
+		dbErrorHandlers.missingRelationshipNode(err, sanitizedInput);
+		throw err;
+	}
+};
+
+const remove = async input => {
+	const sanitizedInput = sanitizeInput(input, 'DELETE');
+	const {
+		requestId,
+		nodeType,
+		code,
+		relatedType,
+		relatedCode,
+		relationshipType
+	} = sanitizedInput;
+
+	// this will error with a 404 if the node does not exist
+	// note - this calls bailOnDeletedNode, which is why it isn't done explicitly
+	// in this function
+	await read(input);
+
+	const query = stripIndents`
+	MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(related:${relatedType} { id: $relatedCode })
+	DELETE relationship`;
+
+	logger.info({ event: 'REMOVE_RELATIONSHIP_QUERY', requestId, query });
+	const result = await db.run(query, { code, relatedCode });
+	logChanges(requestId, result, sanitizedInput);
+	return { status: 204 };
+};
 
 module.exports = {
-	// create,
-	read
-	// update,
-	// delete: remove
+	create,
+	read,
+	update,
+	delete: remove
 };

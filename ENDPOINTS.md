@@ -1,6 +1,6 @@
 # Biz Ops API Documentation
 
-## /v1/node/:nodeType/:code
+## Node - /v1/node/:nodeType/:code
 
 ### Url parameters
 
@@ -13,15 +13,16 @@ _These are case-insensitive and will be converted internally to the casing used 
 
 ### Payload structure
 
-All requests that return or expect a body respond with/accept a json of the following structure:
+All requests that return or expect a body respond with/accept a JSON of the following structure:
 
-```json
+```json5
 {
   // map of attributes to assign to the primary node
   // passed in directly to neo4j and accepts any data types compatible with it
   // see https://neo4j.com/docs/developer-manual/current/cypher/syntax/values/
   // Optional when using PATCH
   "node": {
+    // property names must be camelCase
     "property": "value"
   },
   // Optional map of one or more relationship definitions
@@ -91,3 +92,63 @@ Used to remove a node. Note, this will not remove the entry from the database, b
 | absent                                         | 404    | none          |
 | existing, with relationships to other nodes    | 409    | none          |
 | existing, with no relationships to other nodes | 204    | none          |
+
+## Relationship - /v1/node/:nodeType/:code/:relationshipType/:relatedType/:relatedCode
+
+### Url parameters
+
+_These are case-insensitive and will be converted internally to the casing used in the underlying database_
+
+| parameter        | description                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| nodeType         | The type of node to return. A capitalised string using the characters a-z e.g. `System`, `Person` |
+| code             | The identifier of the node. A hyphen delimited string e.g. the system code `dewey-runbooks`       |
+| relationshipType | The type of relationship between the nodes. A `_` delimited uppercase string e.g. `HAS_TECH_LEAD` |
+| relatedType      | The type of node to return. A capitalised string using the characters a-z e.g. `System`, `Person` |
+| relatedCode      | The identifier of the node. A hyphen delimited string e.g. the system code `dewey-runbooks`       |  |
+
+### Payload structure
+
+All requests that return or expect a body respond with/accept a JSON of attributes, one level deep. These can use any [data types compatible with neo4j](https://neo4j.com/docs/developer-manual/current/cypher/syntax/values/). Property names must be camelCase.
+
+### GET
+
+_Note, it is not possible to omit any url parameters to retrieve a list of relationships. `/api/graphql` is intended to be the primary read interface for anything other than single records._
+
+| initial state                    | status | response type |
+| -------------------------------- | ------ | ------------- |
+| absent end nodes or relationship | 404    | none          |
+| existing                         | 200    | json          |
+
+### POST
+
+Used to create a new relationship between two existing nodes. Optionally send a JSON of attributes to add to the relationship in the request body.
+
+| initial state       | status | response type |
+| ------------------- | ------ | ------------- |
+| absent end node     | 400    | none          |
+| absent relationship | 200    | json          |
+| existing            | 409    | none          |
+
+### PUT
+
+Not implemented. Use `PATCH`
+
+### PATCH
+
+Used to create or modify a relatiosnhip between two existing nodes. Optionally send a JSON of attributes to add to the relationship in teh request body. Passing in `null` as the value of any attribute will delete that attribute
+
+| initial state       | status | response type |
+| ------------------- | ------ | ------------- |
+| absent end node     | 400    | none          |
+| absent relationship | 201    | json          |
+| existing            | 200    | json          |
+
+### DELETE
+
+Used to remove a relationship.
+
+| initial state | status | response type |
+| ------------- | ------ | ------------- |
+| absent        | 404    | none          |
+| existing      | 204    | none          |

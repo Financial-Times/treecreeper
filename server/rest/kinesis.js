@@ -16,7 +16,7 @@ const sendEvent = event =>
 		);
 	});
 
-const logChanges = (requestId, result, deletedRelationships) => {
+const logNodeChanges = (requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');
 	let event;
 	let action;
@@ -135,4 +135,99 @@ const logChanges = (requestId, result, deletedRelationships) => {
 	}
 };
 
-module.exports = { logChanges };
+const logRelationshipChanges = (
+	requestId,
+	result,
+	{ nodeType, code, relatedType, relatedCode, relationshipType }
+) => {
+	if (!result.records[0]) {
+		sendEvent({
+			event: 'DELETED_RELATIONSHIP',
+			action: EventLogWriter.actions.UPDATE,
+			relationship: {
+				relType: relationshipType,
+				direction: 'outgoing',
+				nodeCode: relatedCode,
+				nodeType: relatedType
+			},
+			code: code,
+			type: nodeType,
+			requestId
+		});
+
+		sendEvent({
+			event: 'DELETED_RELATIONSHIP',
+			action: EventLogWriter.actions.UPDATE,
+			relationship: {
+				relType: relationshipType,
+				direction: 'incoming',
+				nodeCode: code,
+				nodeType: nodeType
+			},
+			code: relatedCode,
+			type: relatedType,
+			requestId
+		});
+	} else {
+		const relationshipRecord = result.records[0].get('relationship');
+		if (relationshipRecord.properties.createdByRequest === requestId) {
+			sendEvent({
+				event: 'CREATED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: relationshipType,
+					direction: 'outgoing',
+					nodeCode: relatedCode,
+					nodeType: relatedType
+				},
+				code: code,
+				type: nodeType,
+				requestId
+			});
+
+			sendEvent({
+				event: 'CREATED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: relationshipType,
+					direction: 'incoming',
+					nodeCode: code,
+					nodeType: nodeType
+				},
+				code: relatedCode,
+				type: relatedType,
+				requestId
+			});
+		} else {
+			sendEvent({
+				event: 'UPDATED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: relationshipType,
+					direction: 'outgoing',
+					nodeCode: relatedCode,
+					nodeType: relatedType
+				},
+				code: code,
+				type: nodeType,
+				requestId
+			});
+
+			sendEvent({
+				event: 'UPDATED_RELATIONSHIP',
+				action: EventLogWriter.actions.UPDATE,
+				relationship: {
+					relType: relationshipType,
+					direction: 'incoming',
+					nodeCode: code,
+					nodeType: nodeType
+				},
+				code: relatedCode,
+				type: relatedType,
+				requestId
+			});
+		}
+	}
+};
+
+module.exports = { logNodeChanges, logRelationshipChanges };

@@ -5,7 +5,7 @@ const { session: db } = require('../../server/db-connection');
 const API_KEY = process.env.API_KEY;
 const { setupMocks } = require('./helpers');
 
-describe.skip('v1 - relationship generic', () => {
+describe('v1 - relationship generic', () => {
 	const state = {};
 
 	setupMocks(state);
@@ -14,7 +14,9 @@ describe.skip('v1 - relationship generic', () => {
 		describe('PUT', () => {
 			it('405 Method Not Allowed', () => {
 				return request(app)
-					.put('/v1/node/System/test-system')
+					.put(
+						'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+					)
 					.auth()
 					.send({ foo: 'bar' })
 					.expect(405);
@@ -24,14 +26,18 @@ describe.skip('v1 - relationship generic', () => {
 	describe('api key auth', () => {
 		it('GET no api_key returns 401', async () => {
 			return request(app)
-				.get('/v1/node/System/test-system')
+				.get(
+					'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+				)
 				.set('client-id', 'test-client-id')
 				.expect(401);
 		});
 
 		it('POST no api_key returns 401', async () => {
 			await request(app)
-				.post('/v1/node/System/new-system')
+				.post(
+					'/v1/relationship/System/test-system/HAS_TEAM_MEMBER/Person/test-person'
+				)
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
@@ -43,7 +49,9 @@ describe.skip('v1 - relationship generic', () => {
 
 		it('PATCH no api_key returns 401', async () => {
 			await request(app)
-				.patch('/v1/node/System/a-system')
+				.patch(
+					'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+				)
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
@@ -55,7 +63,9 @@ describe.skip('v1 - relationship generic', () => {
 
 		it('DELETE no api_key returns 401', async () => {
 			await request(app)
-				.delete('/v1/node/System/test-system')
+				.delete(
+					'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+				)
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await db.run(
@@ -67,14 +77,18 @@ describe.skip('v1 - relationship generic', () => {
 		describe('client id', () => {
 			it('GET no client-id returns 400', async () => {
 				return request(app)
-					.get('/v1/node/System/test-system')
+					.get(
+						'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+					)
 					.set('API_KEY', API_KEY)
 					.expect(400);
 			});
 
 			it('POST no client-id returns 400', async () => {
 				await request(app)
-					.post('/v1/node/System/new-system')
+					.post(
+						'/v1/relationship/System/test-system/HAS_TEAM_MEMBER/Person/test-person'
+					)
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
@@ -86,7 +100,9 @@ describe.skip('v1 - relationship generic', () => {
 
 			it('PATCH no client-id returns 400', async () => {
 				await request(app)
-					.patch('/v1/node/System/a-system')
+					.patch(
+						'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+					)
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
@@ -98,7 +114,9 @@ describe.skip('v1 - relationship generic', () => {
 
 			it('DELETE no client-id returns 400', async () => {
 				await request(app)
-					.delete('/v1/node/System/test-system')
+					.delete(
+						'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+					)
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await db.run(
@@ -114,7 +132,9 @@ describe.skip('v1 - relationship generic', () => {
 			describe('security checks', () => {
 				it('should error when node type is suspicious', async () => {
 					await request(app)
-						[method]('/v1/node/DROP ALL/test-system')
+						[method](
+							'/v1/relationship/DROP ALL/test-system/HAS_TECH_LEAD/Person/test-person'
+						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
 						.expect(
@@ -125,7 +145,48 @@ describe.skip('v1 - relationship generic', () => {
 
 				it('should error when node code is suspicious', async () => {
 					await request(app)
-						[method]('/v1/node/System/DROP ALL')
+						[method](
+							'/v1/relationship/System/DROP ALL/HAS_TECH_LEAD/Person/test-person'
+						)
+						.auth()
+						.set('x-request-id', 'security-request-id')
+						.expect(
+							400,
+							'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
+						);
+				});
+
+				it('should error when relationship type is suspicious', async () => {
+					await request(app)
+						[method](
+							'/v1/relationship/System/test-system/DROP ALL/Person/test-person'
+						)
+						.auth()
+						.set('x-request-id', 'security-request-id')
+						.expect(
+							400,
+							'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'
+						);
+				});
+
+				it('should error when related node type is suspicious', async () => {
+					await request(app)
+						[method](
+							'/v1/relationship/System/test-system/HAS_TECH_LEAD/DROP ALL/test-person'
+						)
+						.auth()
+						.set('x-request-id', 'security-request-id')
+						.expect(
+							400,
+							'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
+						);
+				});
+
+				it('should error when related node code is suspicious', async () => {
+					await request(app)
+						[method](
+							'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/DROP ALL'
+						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
 						.expect(
@@ -136,7 +197,9 @@ describe.skip('v1 - relationship generic', () => {
 
 				it('should error when request id is suspicious', async () => {
 					await request(app)
-						[method]('/v1/node/System/test-system')
+						[method](
+							'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+						)
 						.auth()
 						.set('x-request-id', 'DROP ALL')
 						.expect(
@@ -156,91 +219,38 @@ describe.skip('v1 - relationship generic', () => {
 
 						it('should save injected cypher statements in attributes as strings', async () => {
 							await request(app)
-								[method]('/v1/node/System/security-system')
+								[method](
+									'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+								)
 								.auth()
 								.set('x-request-id', 'security-request-id')
 								.send({
-									node: {
-										prop: 'MATCH (n) DELETE n'
-									}
+									prop: 'MATCH (n) DELETE n'
 								})
 								.expect(({ status }) => /20(0|1)/.test(String(status)));
 
 							const result = await db.run(
-								'MATCH (s:System {id: "security-system"}) RETURN s'
+								'MATCH (s:System {id: "test-system"})-[r:HAS_TECH_LEAD]->(p:Person {id: "test-person"}) RETURN s, r, p'
 							);
-							expect(result.records[0].get('s').properties.prop).to.equal(
+							expect(result.records[0].get('r').properties.prop).to.equal(
 								'MATCH (n) DELETE n'
 							);
 						});
 
+						it('should error when attribute name is suspicious', async () => {
+							await request(app)
+								[method](
+									'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+								)
+								.auth()
+								.set('x-request-id', 'security-request-id')
+								.send({
+									'MATCH (n) DELETE n': 'value'
+								})
+								.expect(400);
+						});
+
 						it.skip('TODO: write a test that is a better test of cypher injection', () => {});
-
-						it('should error when relationship node type is suspicious', async () => {
-							await request(app)
-								[method]('/v1/node/System/test-system')
-								.auth()
-								.set('x-request-id', 'security-request-id')
-								.send({
-									relationships: {
-										HAS_TECH_LEAD: [
-											{
-												direction: 'outgoing',
-												nodeType: 'DROP ALL',
-												nodeCode: 'test-person'
-											}
-										]
-									}
-								})
-								.expect(
-									400,
-									'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
-								);
-						});
-
-						it('should error when relationship node code is suspicious', async () => {
-							await request(app)
-								[method]('/v1/node/System/test-system')
-								.auth()
-								.set('x-request-id', 'security-request-id')
-								.send({
-									relationships: {
-										HAS_TECH_LEAD: [
-											{
-												direction: 'outgoing',
-												nodeType: 'Person',
-												nodeCode: 'DROP ALL'
-											}
-										]
-									}
-								})
-								.expect(
-									400,
-									'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
-								);
-						});
-
-						it('should error when relationship type is suspicious', async () => {
-							await request(app)
-								[method]('/v1/node/System/test-system')
-								.auth()
-								.set('x-request-id', 'security-request-id')
-								.send({
-									relationships: {
-										'DROP ALL': [
-											{
-												direction: 'outgoing',
-												nodeType: 'Person',
-												nodeCode: 'test-person'
-											}
-										]
-									}
-								})
-								.expect(
-									400,
-									'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'
-								);
-						});
 					});
 				}
 			});

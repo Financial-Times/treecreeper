@@ -7,7 +7,7 @@ const { setupMocks } = require('./helpers');
 describe('v1 - relationship GET', () => {
 	const state = {};
 
-	setupMocks(state, true);
+	setupMocks(state, { withRelationships: true });
 
 	it('gets a relationship', async () => {
 		return request(app)

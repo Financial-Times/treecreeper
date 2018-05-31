@@ -2,10 +2,17 @@ const logger = require('@financial-times/n-logger').default;
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 
+const stringPatterns = {
+	CAPITAL_CASE: /^[A-Z][a-z]+$/,
+	KEBAB_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/,
+	CAPITALISED_SNAKE_CASE: /^[A-Z][A-Z_]+[A-Z]$/,
+	CAMEL_CASE: /^[a-z][a-zA-Z\d]+$/
+};
+
 const sanitizeNodeType = nodeType => {
 	const sanitizedNodeType =
 		nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
-	if (!/^[A-Z][a-z]+$/.test(sanitizedNodeType)) {
+	if (!stringPatterns.CAPITAL_CASE.test(sanitizedNodeType)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid node type \`${nodeType}\`.
@@ -17,7 +24,7 @@ const sanitizeNodeType = nodeType => {
 
 const sanitizeCode = code => {
 	const sanitizedCode = code.toLowerCase();
-	if (!/^[a-z\d][a-z\d\-]+[a-z\d]$/.test(sanitizedCode)) {
+	if (!stringPatterns.KEBAB_CASE.test(sanitizedCode)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid node identifier \`${code}\`.
@@ -28,7 +35,7 @@ const sanitizeCode = code => {
 };
 
 const sanitizeRequestId = code => {
-	if (!/^[a-z\d][a-z\d\-]+[a-z\d]$/.test(code)) {
+	if (!stringPatterns.KEBAB_CASE.test(code)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid request id \`${code}\`.
@@ -40,7 +47,7 @@ const sanitizeRequestId = code => {
 
 const sanitizeRelationshipName = relationship => {
 	const sanitizedRelationship = relationship.toUpperCase();
-	if (!/^[A-Z][A-Z_]+[A-Z]$/.test(sanitizedRelationship)) {
+	if (!stringPatterns.CAPITALISED_SNAKE_CASE.test(sanitizedRelationship)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid relationship \`${relationship}\`.
@@ -48,6 +55,21 @@ const sanitizeRelationshipName = relationship => {
 		);
 	}
 	return sanitizedRelationship;
+};
+
+const sanitizeAttributeNames = attributes => {
+	const nonCamelCaseAttributeName = Object.keys(attributes).find(
+		name => !stringPatterns.CAMEL_CASE.test(name)
+	);
+
+	if (nonCamelCaseAttributeName) {
+		throw httpErrors(
+			400,
+			`Invalid attribute ${nonCamelCaseAttributeName}. Must be a camelCase string, i.e.
+			beginning with a lower case letter, and only containing upper and lower case letters
+			and digits`
+		);
+	}
 };
 
 const sanitizeAttributes = ({
@@ -58,16 +80,15 @@ const sanitizeAttributes = ({
 	method
 }) => {
 	if (attributes.id && sanitizeCode(attributes.id) !== code) {
-		throw {
-			status: 400,
-			message: `Conflicting id attribute \`${
-				attributes.id
-			}\` for ${nodeType} ${code}`
-		};
+		throw httpErrors(
+			400,
+			`Conflicting id attribute \`${attributes.id}\` for ${nodeType} ${code}`
+		);
 	}
 
+	sanitizeAttributeNames(attributes);
+
 	if (method === 'CREATE') {
-		attributes.id = code;
 		attributes.createdByRequest = requestId;
 	}
 
@@ -131,6 +152,10 @@ const sanitizeNode = (inputs, method) => {
 
 	const result = sanitizeShared(input);
 
+	if (method === 'CREATE') {
+		result.attributes.id = result.code;
+	}
+
 	input.relationships = input.relationships || {};
 
 	if (input.relationships) {
@@ -168,7 +193,7 @@ const sanitizeRelationship = (inputs, method) => {
 	return Object.assign(sanitizeShared(input), {
 		relatedType: sanitizeNodeType(input.relatedType),
 		relatedCode: sanitizeCode(input.relatedCode),
-		relationship: sanitizeRelationshipName(input.relationship)
+		relationshipType: sanitizeRelationshipName(input.relationshipType)
 	});
 };
 

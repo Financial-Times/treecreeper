@@ -174,6 +174,19 @@ describe('v1 - node generic', () => {
 							);
 						});
 
+						it('should error when attribute name is suspicious', async () => {
+							await request(app)
+								[method]('/v1/node/System/security-system')
+								.auth()
+								.set('x-request-id', 'security-request-id')
+								.send({
+									node: {
+										'MATCH (n) DELETE n': 'value'
+									}
+								})
+								.expect(400);
+						});
+
 						it.skip('TODO: write a test that is a better test of cypher injection', () => {});
 
 						it('should error when relationship node type is suspicious', async () => {

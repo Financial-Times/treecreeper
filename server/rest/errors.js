@@ -5,8 +5,30 @@ const { session: db } = require('../db-connection');
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
 	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
-	missingRelated: /Expected to find a node at related(\d+) but found nothing/
+	missingRelated: /Expected to find a node at related(\d+) but found nothing/,
+	missingRelationshipEndpoint: /Expected to find a node at ([a-zA-Z]+) but found nothing/
 });
+
+const handleMissingRelationshipNode = (
+	err,
+	{ nodeType, code, relatedCode, relatedType }
+) => {
+	const missingProperty = (ERROR_RX.missingRelationshipEndpoint.exec(
+		err.message
+	) || [])[1];
+
+	if (missingProperty === 'node') {
+		throw httpErrors(
+			400,
+			`Cannot create relationship: start node ${nodeType} ${code} does not exist.`
+		);
+	} else if (missingProperty === 'relatedNode') {
+		throw httpErrors(
+			400,
+			`Cannot create relationship: start node ${relatedType} ${relatedCode} does not exist.`
+		);
+	}
+};
 
 const handleUpsertError = (err, relationships) => {
 	const missingRelatedIndex = (ERROR_RX.missingRelated.exec(err.message) ||
@@ -30,6 +52,29 @@ const handleUpsertError = (err, relationships) => {
 const handleDuplicateNodeError = (err, nodeType, code) => {
 	if (ERROR_RX.nodeExists.test(err.message)) {
 		throw httpErrors(409, `${nodeType} ${code} already exists`);
+	}
+};
+
+const handleDuplicateRelationship = async ({
+	relationshipType,
+	nodeType,
+	code,
+	relatedType,
+	relatedCode
+}) => {
+	const existingRelationship = await db.run(
+		`
+			MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(relatedNode:${relatedType} { id: $relatedCode })
+			RETURN relationship
+		`,
+		{ code, relatedCode }
+	);
+
+	if (existingRelationship.records.length) {
+		throw httpErrors(
+			409,
+			`relationship ${relationshipType} from ${nodeType} ${code} to ${relatedType} ${relatedCode} already exists`
+		);
 	}
 };
 
@@ -57,14 +102,16 @@ const handleMissingRelationship = ({
 };
 
 const handleAttachedNode = ({ record, nodeType, code }) => {
-	throw httpErrors(
-		409,
-		`Cannot delete - ${nodeType} ${code} has relationships`,
-		{ relationships: record.relationships }
-	);
+	if (Object.keys(record.relationships).length) {
+		throw httpErrors(
+			409,
+			`Cannot delete - ${nodeType} ${code} has relationships`,
+			{ relationships: record.relationships }
+		);
+	}
 };
 
-const handleDeletedNode = async ({ nodeType, code, status }) => {
+const handleDeletedNode = async ({ nodeType, code, status = 410 }) => {
 	const checkNode = await db.run(
 		stripIndents`
 	MATCH (node:${nodeType} { id: $code, isDeleted: true})
@@ -98,11 +145,19 @@ const handleRelationshipActionError = relationshipAction => {
 };
 
 module.exports = {
-	handleUpsertError,
-	handleRelationshipActionError,
-	handleDuplicateNodeError,
-	handleMissingNode,
-	handleMissingRelationship,
-	handleAttachedNode,
-	handleDeletedNode
+	preflightChecks: {
+		bailOnDeletedNode: handleDeletedNode,
+		bailOnDuplicateRelationship: handleDuplicateRelationship,
+		bailOnMissingRelationshipAction: handleRelationshipActionError
+	},
+	queryResultHandlers: {
+		missingNode: handleMissingNode,
+		attachedNode: handleAttachedNode,
+		missingRelationship: handleMissingRelationship
+	},
+	dbErrorHandlers: {
+		nodeUpsert: handleUpsertError,
+		duplicateNode: handleDuplicateNodeError,
+		missingRelationshipNode: handleMissingRelationshipNode
+	}
 };

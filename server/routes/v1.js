@@ -102,11 +102,75 @@ module.exports = router => {
 	});
 
 	router.get(
-		'/relationship/:nodeType/:code/:relationship/:relatedType/:relatedCode',
+		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
 			logger.info('[APP] relationship GET', req.params);
 			return relationshipCrud
 				.read(
+					Object.assign(
+						{
+							requestId: res.locals.requestId
+						},
+						req.params
+					)
+				)
+				.then(success(res), failure(res));
+		}
+	);
+
+	router.post(
+		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
+		async (req, res) => {
+			logger.info('[APP] relationship POST', req.params);
+			return relationshipCrud
+				.create(
+					Object.assign(
+						{
+							requestId: res.locals.requestId,
+							body: req.body,
+							query: req.query
+						},
+						req.params
+					)
+				)
+				.then(success(res), failure(res));
+		}
+	);
+
+	router.put(
+		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
+		async (req, res) => {
+			logger.info('[APP] node PUT', req.params);
+
+			res.status(405).send('PUT is unimplemented. Use PATCH');
+		}
+	);
+
+	router.patch(
+		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
+		async (req, res) => {
+			logger.info('[APP] relationship PATCH', req.params);
+			return relationshipCrud
+				.update(
+					Object.assign(
+						{
+							requestId: res.locals.requestId,
+							body: req.body,
+							query: req.query
+						},
+						req.params
+					)
+				)
+				.then(success(res), failure(res));
+		}
+	);
+
+	router.delete(
+		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
+		async (req, res) => {
+			logger.info('[APP] relationship DELETE', req.params);
+			return relationshipCrud
+				.delete(
 					Object.assign(
 						{
 							requestId: res.locals.requestId
