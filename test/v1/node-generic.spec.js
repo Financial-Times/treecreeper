@@ -130,7 +130,7 @@ describe('v1 - node generic', () => {
 						.set('x-request-id', 'security-request-id')
 						.expect(
 							400,
-							'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
+							'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
 						);
 				});
 
@@ -229,7 +229,7 @@ describe('v1 - node generic', () => {
 								})
 								.expect(
 									400,
-									'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
+									'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
 								);
 						});
 

@@ -3,17 +3,17 @@ const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 
 const stringPatterns = {
-	CAPITAL_CASE: /^[A-Z][a-z]+$/,
-	KEBAB_LOWER_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/,
-	KEBAB_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/i,
-	CAPITALISED_SNAKE_CASE: /^[A-Z][A-Z_]+[A-Z]$/,
-	CAMEL_CASE: /^[a-z][a-zA-Z\d]+$/
+	NODE_TYPE: /^[A-Z][a-z]+$/, // NodeType
+	CODE: /^[a-z\d][a-z\d\-\.]+[a-z\d]$/, // system-code.1
+	REQUEST_ID: /^[a-z\d][a-z\d\-]+[a-z\d]$/i, //5aFG-y7 ...
+	RELATIONSHIP_NAME: /^[A-Z][A-Z_]+[A-Z]$/, // HAS_A_RELATIONSHIP
+	ATTRIBUTE_NAME: /^[a-z][a-zA-Z\d]+$/ // attributeName
 };
 
 const sanitizeNodeType = nodeType => {
 	const sanitizedNodeType =
 		nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
-	if (!stringPatterns.CAPITAL_CASE.test(sanitizedNodeType)) {
+	if (!stringPatterns.NODE_TYPE.test(sanitizedNodeType)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid node type \`${nodeType}\`.
@@ -25,18 +25,18 @@ const sanitizeNodeType = nodeType => {
 
 const sanitizeCode = code => {
 	const sanitizedCode = code.toLowerCase();
-	if (!stringPatterns.KEBAB_LOWER_CASE.test(sanitizedCode)) {
+	if (!stringPatterns.CODE.test(sanitizedCode)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid node identifier \`${code}\`.
-			Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
+			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .`
 		);
 	}
 	return sanitizedCode;
 };
 
 const sanitizeRequestId = code => {
-	if (!stringPatterns.KEBAB_CASE.test(code)) {
+	if (!stringPatterns.REQUEST_ID.test(code)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid request id \`${code}\`.
@@ -48,7 +48,7 @@ const sanitizeRequestId = code => {
 
 const sanitizeRelationshipName = relationship => {
 	const sanitizedRelationship = relationship.toUpperCase();
-	if (!stringPatterns.CAPITALISED_SNAKE_CASE.test(sanitizedRelationship)) {
+	if (!stringPatterns.RELATIONSHIP_NAME.test(sanitizedRelationship)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid relationship \`${relationship}\`.
@@ -62,7 +62,7 @@ const sanitizeAttributeNames = attributes => {
 	const nonCamelCaseAttributeName = Object.keys(attributes).find(
 		// FIXME: allow SF_ID as, at least for a while, we need this to exist so that
 		// salesforce sync works during the transition to the new architecture
-		name => name !== 'SF_ID' && !stringPatterns.CAMEL_CASE.test(name)
+		name => name !== 'SF_ID' && !stringPatterns.ATTRIBUTE_NAME.test(name)
 	);
 
 	if (nonCamelCaseAttributeName) {
