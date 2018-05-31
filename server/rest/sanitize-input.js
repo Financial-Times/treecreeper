@@ -4,7 +4,8 @@ const { stripIndents } = require('common-tags');
 
 const stringPatterns = {
 	CAPITAL_CASE: /^[A-Z][a-z]+$/,
-	KEBAB_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/,
+	KEBAB_LOWER_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/,
+	KEBAB_CASE: /^[a-z\d][a-z\d\-]+[a-z\d]$/i,
 	CAPITALISED_SNAKE_CASE: /^[A-Z][A-Z_]+[A-Z]$/,
 	CAMEL_CASE: /^[a-z][a-zA-Z\d]+$/
 };
@@ -24,7 +25,7 @@ const sanitizeNodeType = nodeType => {
 
 const sanitizeCode = code => {
 	const sanitizedCode = code.toLowerCase();
-	if (!stringPatterns.KEBAB_CASE.test(sanitizedCode)) {
+	if (!stringPatterns.KEBAB_LOWER_CASE.test(sanitizedCode)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid node identifier \`${code}\`.
@@ -59,7 +60,9 @@ const sanitizeRelationshipName = relationship => {
 
 const sanitizeAttributeNames = attributes => {
 	const nonCamelCaseAttributeName = Object.keys(attributes).find(
-		name => !stringPatterns.CAMEL_CASE.test(name)
+		// FIXME: allow SF_ID as, at least for a while, we need this to exist so that
+		// salesforce sync works during the transition to the new architecture
+		name => name !== 'SF_ID' && !stringPatterns.CAMEL_CASE.test(name)
 	);
 
 	if (nonCamelCaseAttributeName) {
