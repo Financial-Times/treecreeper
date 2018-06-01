@@ -1,11 +1,6 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
-const supplier = require('../controllers/supplier');
-const survey = require('../controllers/survey');
-const contract = require('../controllers/contract');
-const request = require('../controllers/request');
-const submission = require('../controllers/submission');
 const crud = require('../controllers/_crud');
 const graphQl = require('../controllers/graphQl');
 const cypher = require('../controllers/_cypher');
@@ -31,22 +26,6 @@ module.exports = router => {
 	router.get('/', (req, res) => {
 		res.send('biz op api');
 	});
-
-	// SAR HUB - Specific (to phase out)
-	router.post('/request', request.create);
-	router.get('/request', request.get);
-	router.get('/request/:id', request.getWithSources);
-
-	// WEBPMA / 3SP - Specific (to phase out)
-	router.get('/contracts/:supplierId', contract.get);
-	router.get(
-		'/submissions/:contractOrSupplierId/:surveyId/:topLevel',
-		submission.getAllforOne
-	);
-	router.get('/survey/:id', survey.get);
-	router.get('/surveys/:type', survey.getAll);
-	router.post('/supplier/', supplier.create);
-	router.post('/submission/id/:submissionId', submission.submit); // TODO can be abstracted - add relationships
 
 	// GENERIC - Node
 	router.get(

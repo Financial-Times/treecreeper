@@ -82,10 +82,12 @@ const sanitizeAttributes = ({
 	requestId,
 	method
 }) => {
-	if (attributes.id && sanitizeCode(attributes.id) !== code) {
+	if (attributes.code && sanitizeCode(attributes.code) !== code) {
 		throw httpErrors(
 			400,
-			`Conflicting id attribute \`${attributes.id}\` for ${nodeType} ${code}`
+			`Conflicting code attribute \`${
+				attributes.code
+			}\` for ${nodeType} ${code}`
 		);
 	}
 
@@ -156,7 +158,7 @@ const sanitizeNode = (inputs, method) => {
 	const result = sanitizeShared(input);
 
 	if (method === 'CREATE') {
-		result.attributes.id = result.code;
+		result.attributes.code = result.code;
 	}
 
 	input.relationships = input.relationships || {};

@@ -11,7 +11,7 @@ describe('v1 - node PATCH', () => {
 
 	const cleanUp = async () => {
 		await db.run(
-			`MATCH (n:Person { id: "other-test-person" }) DETACH DELETE n`
+			`MATCH (n:Person { code: "other-test-person" }) DETACH DELETE n`
 		);
 	};
 
@@ -27,13 +27,13 @@ describe('v1 - node PATCH', () => {
 			.expect(200, {
 				node: {
 					foo: 'updated',
-					id: 'test-system'
+					code: 'test-system'
 				},
 				relationships: []
 			});
 
 		const result = await db.run(
-			`MATCH (n:System { id: "test-system" }) RETURN n`
+			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -51,40 +51,40 @@ describe('v1 - node PATCH', () => {
 			.send({ node: { foo: 'new' } })
 			.expect(201, {
 				node: {
-					id: 'new-system',
+					code: 'new-system',
 					foo: 'new'
 				},
 				relationships: []
 			});
 		const result = await db.run(
-			`MATCH (n:System { id: "new-system" }) RETURN n`
+			`MATCH (n:System { code: "new-system" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
 			createdByRequest: 'update-request-id',
-			id: 'new-system',
+			code: 'new-system',
 			foo: 'new'
 		});
 		expect(record.get('n').labels).to.eql(['System']);
 	});
 
-	it('error when conflicting id values', async () => {
+	it('error when conflicting code values', async () => {
 		await request(app)
 			.patch('/v1/node/System/test-system')
 			.auth()
-			.send({ node: { foo: 'updated', id: 'wrong-id' } })
+			.send({ node: { foo: 'updated', code: 'wrong-code' } })
 			.expect(
 				400,
-				'Conflicting id attribute `wrong-id` for System test-system'
+				'Conflicting code attribute `wrong-code` for System test-system'
 			);
 	});
 
-	it('not error when non-conflicting id values', async () => {
+	it('not error when non-conflicting code values', async () => {
 		await request(app)
 			.patch('/v1/node/System/test-system')
 			.auth()
-			.send({ node: { foo: 'updated', id: 'test-system' } })
+			.send({ node: { foo: 'updated', code: 'test-system' } })
 			.expect(200);
 	});
 
@@ -107,13 +107,13 @@ describe('v1 - node PATCH', () => {
 			.send({ node: { foo: null } })
 			.expect(200, {
 				node: {
-					id: 'test-system'
+					code: 'test-system'
 				},
 				relationships: []
 			});
 
 		const result = await db.run(
-			`MATCH (n:System { id: "test-system" }) RETURN n`
+			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -122,7 +122,7 @@ describe('v1 - node PATCH', () => {
 
 	describe('relationship patching', () => {
 		const cleanUp = () =>
-			db.run(`MATCH (p:Person {id: 'other-test-person'}) DETACH DELETE p`);
+			db.run(`MATCH (p:Person {code: 'other-test-person'}) DETACH DELETE p`);
 		beforeEach(cleanUp);
 		after(cleanUp);
 
@@ -148,7 +148,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {id: 'test-system'})-[]-() RETURN s`
+				`MATCH (s:System {code: 'test-system'})-[]-() RETURN s`
 			);
 			// i.e. no relationships created
 			expect(result.records.length).to.equal(0);
@@ -175,7 +175,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships
@@ -183,7 +183,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {id: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -193,15 +193,15 @@ describe('v1 - node PATCH', () => {
 			expect(record0.get('c').properties.createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
-				id: 'test-person'
+				code: 'test-person'
 			});
 		});
 
 		it('can append to relationships if relationshipAction=append', async () => {
 			await db.run(
-				`CREATE (p:Person { id: "other-test-person" })
+				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {id: "test-system"})
+			MATCH (s: System {code: "test-system"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
@@ -225,7 +225,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships: {
@@ -245,25 +245,25 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 			const result = await db.run(
-				`MATCH (s:System {id: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
 
 			const [existing, added] =
-				result.records[0].get('c').properties.id === 'other-test-person'
+				result.records[0].get('c').properties.code === 'other-test-person'
 					? result.records
 					: result.records.slice().reverse();
 			expect(existing.get('r').properties.createdByRequest).not.to.equal(
 				'update-request-id'
 			);
 			expect(existing.get('c').properties.createdByRequest).to.not.exist;
-			expect(existing.get('c').properties.id).to.equal('other-test-person');
+			expect(existing.get('c').properties.code).to.equal('other-test-person');
 
 			expect(added.get('r').properties.createdByRequest).to.equal(
 				'update-request-id'
 			);
 			expect(added.get('c').properties.createdByRequest).to.not.exist;
-			expect(added.get('c').properties.id).to.equal('test-person');
+			expect(added.get('c').properties.code).to.equal('test-person');
 		});
 
 		it('can replace an empty relationship set if relationshipAction=replace', async () => {
@@ -286,7 +286,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships: {
@@ -302,7 +302,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {id: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -312,15 +312,15 @@ describe('v1 - node PATCH', () => {
 			expect(record0.get('c').properties.createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
-				id: 'test-person'
+				code: 'test-person'
 			});
 		});
 
 		it('can replace relationships if relationshipAction=replace', async () => {
 			await db.run(
-				`CREATE (p:Person { id: "other-test-person" })
+				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {id: "test-system"})
+			MATCH (s: System {code: "test-system"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
@@ -344,7 +344,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships: {
@@ -360,7 +360,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {id: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -370,15 +370,15 @@ describe('v1 - node PATCH', () => {
 			expect(record0.get('c').properties.createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
-				id: 'test-person'
+				code: 'test-person'
 			});
 		});
 
 		it('leaves relationships of other types untouched when replacing', async () => {
 			await db.run(
-				`CREATE (p:Person { id: "other-test-person" })
+				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {id: "test-system"})
+			MATCH (s: System {code: "test-system"})
 			MERGE (s)-[:HAS_TEAM_MEMBER]->(p)
 			RETURN s, p
 			`
@@ -402,7 +402,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships: {
@@ -425,7 +425,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {id: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
 			expect(result.records.map(r => r.get('r').type)).to.have.members([
@@ -477,27 +477,27 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships
 					})
 				);
 			const result = await db.run(
-				`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 
 			expect(record0.get('n').properties).to.eql({
-				id: 'test-system',
+				code: 'test-system',
 				foo: 'bar1'
 			});
 			expect(record0.get('r').properties).to.eql({
 				createdByRequest: 'update-request-id'
 			});
 			expect(record0.get('c').properties).to.eql({
-				id: 'other-test-person',
+				code: 'other-test-person',
 				createdByRequest: 'update-request-id'
 			});
 		});
@@ -526,27 +526,27 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							id: 'test-system',
+							code: 'test-system',
 							foo: 'bar1'
 						},
 						relationships
 					})
 				);
 			const result = await db.run(
-				`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 
 			expect(record0.get('n').properties).to.eql({
-				id: 'test-system',
+				code: 'test-system',
 				foo: 'bar1'
 			});
 			expect(record0.get('r').properties).to.eql({
 				createdByRequest: 'update-request-id'
 			});
 			expect(record0.get('c').properties).to.eql({
-				id: 'other-test-person',
+				code: 'other-test-person',
 				createdByRequest: 'update-request-id'
 			});
 		});
@@ -571,7 +571,7 @@ describe('v1 - node PATCH', () => {
 				.expect(200);
 
 			const result = await db.run(
-				`MATCH (n:System { id: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records[0].get('c').properties.createdByRequest).to.not
 				.exist;
@@ -610,7 +610,7 @@ describe('v1 - node PATCH', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						id: 'test-system',
+						code: 'test-system',
 						foo: 'updated'
 					},
 					relationships: {
@@ -628,9 +628,9 @@ describe('v1 - node PATCH', () => {
 
 	it('logs modification events to kinesis', async () => {
 		await db.run(
-			`CREATE (p:Person { id: "other-test-person" })
+			`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {id: "test-system"})
+			MATCH (s: System {code: "test-system"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
@@ -774,5 +774,7 @@ describe('v1 - node PATCH', () => {
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
+
+		return db.run('MATCH (g:Group {code: "new-test-group"}) DETACH DELETE g');
 	});
 });

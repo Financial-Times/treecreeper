@@ -56,9 +56,9 @@ const mutationResolvers = {
 		At the time of writing this must be done programatically rather than via
 		neo4j-graphql-js
 	*/
-	System: async (_, { id, params }, context) => {
+	System: async (_, { code, params }, context) => {
 		const result = await context.driver.run(`
-			MATCH (s:System {id: "${id}"})
+			MATCH (s:System {code: "${code}"})
 			SET s += {${util.inspect(params)}}
 			RETURN s
 		`);

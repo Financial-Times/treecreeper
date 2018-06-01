@@ -37,7 +37,7 @@ const create = async input => {
 
 	try {
 		const query = stripIndents`
-			OPTIONAL MATCH (node:${nodeType} { id: $code }), (relatedNode:${relatedType} { id: $relatedCode })
+			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
 			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
 			RETURN relationship`;
@@ -84,7 +84,7 @@ const read = async input => {
 	]);
 
 	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(related:${relatedType} { id: $relatedCode })
+	MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(related:${relatedType} { code: $relatedCode })
 	RETURN relationship`;
 
 	logger.info({ event: 'READ_RELATIONSHIP_QUERY', requestId, query });
@@ -120,7 +120,7 @@ const update = async input => {
 		const queryParts = [
 			// OPTIONAL MATCH needed in order to throw error which will help us
 			// identify which, if any, node is missing
-			stripIndents`OPTIONAL MATCH (node:${nodeType} { id: $code }), (relatedNode:${relatedType} { id: $relatedCode })
+			stripIndents`OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
 			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
 			ON MATCH SET relationship += $attributes`
@@ -184,7 +184,7 @@ const remove = async input => {
 	await read(input);
 
 	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(related:${relatedType} { id: $relatedCode })
+	MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(related:${relatedType} { code: $relatedCode })
 	DELETE relationship`;
 
 	logger.info({ event: 'REMOVE_RELATIONSHIP_QUERY', requestId, query });

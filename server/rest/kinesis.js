@@ -21,7 +21,7 @@ const createRelationshipInfoFromNeo4jData = ({ rel, destination, origin }) => {
 	return {
 		relType: rel.type,
 		direction: isIncoming ? 'incoming' : 'outgoing',
-		nodeCode: destination.properties.id,
+		nodeCode: destination.properties.code,
 		nodeType: destination.labels[0]
 	};
 };
@@ -36,7 +36,7 @@ const sendNodeRelationshipEvent = ({
 	return sendEvent(
 		Object.assign(
 			{
-				code: origin.properties.id,
+				code: origin.properties.code,
 				type: origin.labels[0]
 			},
 			{
@@ -72,7 +72,7 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 	sendEvent({
 		event,
 		action,
-		code: node.properties.id,
+		code: node.properties.code,
 		type: node.labels[0],
 		requestId
 	});
@@ -85,12 +85,12 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 		result.records.forEach(record => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
-
+			console.log(target.properties.createdByRequest, requestId);
 			if (target.properties.createdByRequest === requestId) {
 				sendEvent({
 					event: 'CREATED_NODE',
 					action: EventLogWriter.actions.CREATE,
-					code: target.properties.id,
+					code: target.properties.code,
 					type: target.labels[0],
 					requestId
 				});

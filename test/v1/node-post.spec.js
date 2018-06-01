@@ -10,8 +10,10 @@ describe('v1 - node POST', () => {
 	setupMocks(state);
 
 	const cleanUp = async () => {
-		await db.run(`MATCH (n:System { id: "new-system" }) DETACH DELETE n`);
-		await db.run(`MATCH (n:Person { id: "new-test-person" }) DETACH DELETE n`);
+		await db.run(`MATCH (n:System { code: "new-system" }) DETACH DELETE n`);
+		await db.run(
+			`MATCH (n:Person { code: "new-test-person" }) DETACH DELETE n`
+		);
 	};
 
 	before(cleanUp);
@@ -25,19 +27,19 @@ describe('v1 - node POST', () => {
 			.send({ node: { foo: 'new' } })
 			.expect(200, {
 				node: {
-					id: 'new-system',
+					code: 'new-system',
 					foo: 'new'
 				},
 				relationships: []
 			});
 		const result = await db.run(
-			`MATCH (n:System { id: "new-system" }) RETURN n`
+			`MATCH (n:System { code: "new-system" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			id: 'new-system',
+			code: 'new-system',
 			foo: 'new'
 		});
 		expect(record.get('n').labels).to.eql(['System']);
@@ -51,19 +53,22 @@ describe('v1 - node POST', () => {
 			.expect(409, 'System test-system already exists');
 	});
 
-	it('error when conflicting id values', async () => {
+	it('error when conflicting code values', async () => {
 		await request(app)
 			.post('/v1/node/System/new-system')
 			.auth()
-			.send({ node: { foo: 'new', id: 'wrong-id' } })
-			.expect(400, 'Conflicting id attribute `wrong-id` for System new-system');
+			.send({ node: { foo: 'new', code: 'wrong-code' } })
+			.expect(
+				400,
+				'Conflicting code attribute `wrong-code` for System new-system'
+			);
 	});
 
-	it('not error when non-conflicting id values', async () => {
+	it('not error when non-conflicting code values', async () => {
 		await request(app)
 			.post('/v1/node/System/new-system')
 			.auth()
-			.send({ node: { foo: 'new', id: 'new-system' } })
+			.send({ node: { foo: 'new', code: 'new-system' } })
 			.expect(200);
 	});
 
@@ -96,7 +101,7 @@ describe('v1 - node POST', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						id: 'new-system',
+						code: 'new-system',
 						foo: 'new'
 					},
 					relationships
@@ -104,14 +109,14 @@ describe('v1 - node POST', () => {
 			);
 
 		const result = await db.run(
-			`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
 		);
 
 		expect(result.records.length).to.equal(2);
 
 		expect(result.records[0].get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			id: 'new-system',
+			code: 'new-system',
 			foo: 'new'
 		});
 
@@ -126,7 +131,7 @@ describe('v1 - node POST', () => {
 		expect(group.get('c').properties.createdByRequest).to.not.exist;
 		expect(group.get('c').properties).to.eql({
 			foo: 'bar3',
-			id: 'test-group'
+			code: 'test-group'
 		});
 
 		expect(person.get('r').properties).to.eql({
@@ -135,7 +140,7 @@ describe('v1 - node POST', () => {
 		expect(person.get('c').properties.createdByRequest).to.not.exist;
 		expect(person.get('c').properties).to.eql({
 			foo: 'bar2',
-			id: 'test-person'
+			code: 'test-person'
 		});
 	});
 
@@ -182,28 +187,28 @@ describe('v1 - node POST', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						id: 'new-system',
+						code: 'new-system',
 						foo: 'new'
 					},
 					relationships
 				})
 			);
 		const result = await db.run(
-			`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 
 		expect(record0.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			id: 'new-system',
+			code: 'new-system',
 			foo: 'new'
 		});
 		expect(record0.get('r').properties).to.eql({
 			createdByRequest: 'create-request-id'
 		});
 		expect(record0.get('c').properties).to.eql({
-			id: 'new-test-person',
+			code: 'new-test-person',
 			createdByRequest: 'create-request-id'
 		});
 	});
@@ -228,13 +233,13 @@ describe('v1 - node POST', () => {
 			.expect(200);
 
 		const result = await db.run(
-			`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 		expect(record0.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			id: 'new-system',
+			code: 'new-system',
 			foo: 'new'
 		});
 		expect(record0.get('r').properties).to.eql({
@@ -243,7 +248,7 @@ describe('v1 - node POST', () => {
 		expect(record0.get('c').properties.createdByRequest).to.not.exist;
 		expect(record0.get('c').properties).to.eql({
 			foo: 'bar2',
-			id: 'test-person'
+			code: 'test-person'
 		});
 	});
 
@@ -279,7 +284,7 @@ describe('v1 - node POST', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						id: 'new-system',
+						code: 'new-system',
 						foo: 'new'
 					},
 					relationships: {
@@ -403,5 +408,7 @@ describe('v1 - node POST', () => {
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
+
+		return db.run('MATCH (g:Person {code: "new-test-person"}) DETACH DELETE g');
 	});
 });

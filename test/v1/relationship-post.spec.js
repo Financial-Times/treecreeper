@@ -28,7 +28,7 @@ describe('v1 - relationship POST', () => {
 
 	it('error when creating duplicate relationship', async () => {
 		await db.run(
-			`MATCH (node:System { id: 'test-system' }), (relatedNode:Person { id: 'test-person' })
+			`MATCH (node:System { code: 'test-system' }), (relatedNode:Person { code: 'test-person' })
 			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {createdByRequest: 'setup-query'}]->(relatedNode)
 			RETURN relationship`
 		);

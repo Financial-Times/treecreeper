@@ -42,7 +42,7 @@ describe('v1 - relationship generic', () => {
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await db.run(
-				`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
@@ -56,7 +56,7 @@ describe('v1 - relationship generic', () => {
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await db.run(
-				`MATCH (n:System { id: "a-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "a-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
@@ -69,12 +69,12 @@ describe('v1 - relationship generic', () => {
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await db.run(
-				`MATCH (n:System { id: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
 
-		describe('client id', () => {
+		describe('client code', () => {
 			it('GET no client-id returns 400', async () => {
 				return request(app)
 					.get(
@@ -93,7 +93,7 @@ describe('v1 - relationship generic', () => {
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await db.run(
-					`MATCH (n:System { id: "new-system" })-[r]-(c) RETURN n, r, c`
+					`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -107,7 +107,7 @@ describe('v1 - relationship generic', () => {
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await db.run(
-					`MATCH (n:System { id: "a-system" })-[r]-(c) RETURN n, r, c`
+					`MATCH (n:System { code: "a-system" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -120,7 +120,7 @@ describe('v1 - relationship generic', () => {
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await db.run(
-					`MATCH (n:System { id: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
+					`MATCH (n:System { code: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -213,7 +213,7 @@ describe('v1 - relationship generic', () => {
 						// only needed for the first test below, but putting it in a before/after
 						// is a more robust cleanup than doing in the test body
 						const cleanUp = () =>
-							db.run('MATCH (s:System {id: "security-system"}) DELETE s');
+							db.run('MATCH (s:System {code: "security-system"}) DELETE s');
 						before(cleanUp);
 						after(cleanUp);
 
@@ -230,7 +230,7 @@ describe('v1 - relationship generic', () => {
 								.expect(({ status }) => /20(0|1)/.test(String(status)));
 
 							const result = await db.run(
-								'MATCH (s:System {id: "test-system"})-[r:HAS_TECH_LEAD]->(p:Person {id: "test-person"}) RETURN s, r, p'
+								'MATCH (s:System {code: "test-system"})-[r:HAS_TECH_LEAD]->(p:Person {code: "test-person"}) RETURN s, r, p'
 							);
 							expect(result.records[0].get('r').properties.prop).to.equal(
 								'MATCH (n) DELETE n'

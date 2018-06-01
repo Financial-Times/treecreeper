@@ -64,7 +64,7 @@ const handleDuplicateRelationship = async ({
 }) => {
 	const existingRelationship = await db.run(
 		`
-			MATCH (node:${nodeType} { id: $code })-[relationship:${relationshipType}]->(relatedNode:${relatedType} { id: $relatedCode })
+			MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(relatedNode:${relatedType} { code: $relatedCode })
 			RETURN relationship
 		`,
 		{ code, relatedCode }
@@ -114,7 +114,7 @@ const handleAttachedNode = ({ record, nodeType, code }) => {
 const handleDeletedNode = async ({ nodeType, code, status = 410 }) => {
 	const checkNode = await db.run(
 		stripIndents`
-	MATCH (node:${nodeType} { id: $code, isDeleted: true})
+	MATCH (node:${nodeType} { code: $code, isDeleted: true})
 	RETURN node`,
 		{ code }
 	);

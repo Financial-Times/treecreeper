@@ -142,7 +142,7 @@ describe('Integration - GraphQL', () => {
 		const dummyQuery = {
 			query: `{
 				Systems {
-					id
+					code
 				}
 			}`,
 			variables: null,
@@ -209,7 +209,7 @@ describe('Integration - GraphQL', () => {
 			.post('/api/graphql')
 			.send({
 				query: `{
-					System(id: "${typeMocks['System'][0].id}") {
+					System(code: "${typeMocks['System'][0].code}") {
 						${listFields(typeFields['System'])}
 					}}`
 			})

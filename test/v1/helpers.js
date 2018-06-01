@@ -32,21 +32,21 @@ const nodes = Object.freeze([
 	Object.freeze({
 		type: 'System',
 		node: Object.freeze({
-			id: 'test-system',
+			code: 'test-system',
 			foo: 'bar1'
 		})
 	}),
 	Object.freeze({
 		type: 'Person',
 		node: Object.freeze({
-			id: 'test-person',
+			code: 'test-person',
 			foo: 'bar2'
 		})
 	}),
 	Object.freeze({
 		type: 'Group',
 		node: Object.freeze({
-			id: 'test-group',
+			code: 'test-group',
 			foo: 'bar3'
 		})
 	})
@@ -59,7 +59,7 @@ const hydrateDb = async withRelationships => {
 		)
 	);
 	if (withRelationships) {
-		await db.run(`MATCH (s:System { id: "test-system" }), (p:Person { id: "test-person" }), (g:Group { id: "test-group" })
+		await db.run(`MATCH (s:System { code: "test-system" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[o:OWNS]->(s)-[t:HAS_TECH_LEAD]->(p)
 									SET o.createdByRequest = "setup-script", t.createdByRequest = "setup-script"
 									RETURN g, o, s, t, p`);
@@ -69,7 +69,9 @@ const hydrateDb = async withRelationships => {
 const dropDb = async () => {
 	await Promise.all(
 		nodes.map(async ({ type, node }) => {
-			await db.run(`MATCH (n:${type} { id: "${node.id}" }) DETACH DELETE n`);
+			await db.run(
+				`MATCH (n:${type} { code: "${node.code}" }) DETACH DELETE n`
+			);
 		})
 	);
 };
@@ -92,7 +94,7 @@ const setupMocks = (state, { withRelationships } = {}) => {
 
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>
 	db.run(`
-			MATCH (node:System { id: 'test-system' })-[relationship:${relType}]->(relatedNode:Person { id: 'test-person' })
+			MATCH (node:System { code: 'test-system' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
 			RETURN relationship`);
 
 module.exports = {

@@ -15,7 +15,7 @@ describe('v1 - node GET', () => {
 			.auth()
 			.expect(200, {
 				node: {
-					id: 'test-system',
+					code: 'test-system',
 					foo: 'bar1'
 				},
 				relationships: []
@@ -24,7 +24,7 @@ describe('v1 - node GET', () => {
 
 	it('gets node with relationships', async () => {
 		// create the relationships
-		await db.run(`MATCH (s:System { id: "test-system" }), (p:Person { id: "test-person" }), (g:Group { id: "test-group" })
+		await db.run(`MATCH (s:System { code: "test-system" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[o:OWNS]->(s)-[t:HAS_TECH_LEAD]->(p)
 									RETURN g, o, s, t, p`);
 
@@ -35,7 +35,7 @@ describe('v1 - node GET', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						id: 'test-system',
+						code: 'test-system',
 						foo: 'bar1'
 					},
 					relationships: {

@@ -57,7 +57,7 @@ const read = async input => {
 	await preflightChecks.bailOnDeletedNode({ nodeType, code });
 
 	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })
+	MATCH (node:${nodeType} {code: $code})
 	${RETURN_NODE_WITH_RELS}`;
 
 	logger.info({ event: 'READ_NODE_QUERY', requestId, nodeType, code, query });
@@ -86,7 +86,7 @@ const update = async input => {
 
 	try {
 		const queryParts = [
-			stripIndents`MERGE (node:${nodeType} {id: $code})
+			stripIndents`MERGE (node:${nodeType} {code: $code})
 				ON CREATE SET node.createdByRequest = $requestId
 			SET node += $attributes`
 		];
@@ -101,7 +101,7 @@ const update = async input => {
 				// for the log stream
 				deletedRelationships = await db.run(
 					stripIndents`
-		MATCH (node:${nodeType} {id: $code})-[relationship${relationshipTypes
+		MATCH (node:${nodeType} {code: $code})-[relationship${relationshipTypes
 						.map(type => `:${type}`)
 						.join('|')}]-(related)
 		RETURN node, relationship, related`,
@@ -115,8 +115,7 @@ const update = async input => {
 							type => stripIndents`
 						WITH node
 						OPTIONAL MATCH (node)-[rel:${type}]-(related)
-						DELETE rel
-					`
+						DELETE rel`
 						)
 					);
 				}
@@ -137,7 +136,6 @@ const update = async input => {
 			attributes
 		});
 		const result = await db.run(query, { attributes, code, requestId });
-
 		logChanges(requestId, result, deletedRelationships);
 
 		return {
@@ -163,7 +161,7 @@ const remove = async input => {
 	queryResultHandlers.attachedNode({ record, nodeType, code });
 
 	const query = stripIndents`
-	MATCH (node:${nodeType} { id: $code })
+	MATCH (node:${nodeType} {code: $code})
 	SET node.isDeleted = true, node.deletedByRequest = $requestId
 	RETURN node`;
 

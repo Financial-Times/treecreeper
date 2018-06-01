@@ -1,37 +1,36 @@
 const { session: db } = require('../server/db-connection');
 const nodeTypes = require('../server/lib/checks').nodeTypes;
-const createSurveys = require('./surveys/create');
 
 const constraints = async verb => {
 	console.log(`Running ${verb} constraints...`);
 
 	const constraintQueries = [
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (c:Contract) ASSERT c.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (c:Contract) ASSERT exists(c.id)`,
-		`${verb} CONSTRAINT ON (r:Submission) ASSERT r.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (r:Submission) ASSERT exists(r.id)`,
-		`${verb} CONSTRAINT ON (s:Survey) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.id)`,
+		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Supplier) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (c:Contract) ASSERT c.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (c:Contract) ASSERT exists(c.code)`,
+		`${verb} CONSTRAINT ON (r:Submission) ASSERT r.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (r:Submission) ASSERT exists(r.code)`,
+		`${verb} CONSTRAINT ON (s:Survey) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.code)`,
 		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.version)`,
 		// cmdb constainsts
-		`${verb} CONSTRAINT ON (s:Domain) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Domain) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (c:Endpoint) ASSERT c.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (c:Endpoint) ASSERT exists(c.id)`,
-		`${verb} CONSTRAINT ON (r:Group) ASSERT r.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (r:Group) ASSERT exists(r.id)`,
-		`${verb} CONSTRAINT ON (s:Person) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Person) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:Product) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Product) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:Repository) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Repository) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:System) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:System) ASSERT exists(s.id)`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT s.id IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.id)`
+		`${verb} CONSTRAINT ON (s:Domain) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Domain) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (c:Endpoint) ASSERT c.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (c:Endpoint) ASSERT exists(c.code)`,
+		`${verb} CONSTRAINT ON (r:Group) ASSERT r.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (r:Group) ASSERT exists(r.code)`,
+		`${verb} CONSTRAINT ON (s:Person) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Person) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (s:Product) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Product) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (s:Repository) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Repository) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (s:System) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:System) ASSERT exists(s.code)`,
+		`${verb} CONSTRAINT ON (s:Team) ASSERT s.code IS UNIQUE`,
+		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.code)`
 	];
 
 	const setupConstraintIfPossible = constraintQuery =>
@@ -83,7 +82,6 @@ const init = async () => {
 
 		// CREATE
 		await constraints('CREATE');
-		await createSurveys(db);
 	}
 };
 

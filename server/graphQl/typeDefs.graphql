@@ -1,6 +1,6 @@
 # A source code repository
 type Repository {
-    id: String!
+    code: String!
     # Display Name
     name: String
     # Repository URL
@@ -25,7 +25,7 @@ type Repository {
 
 # Any combination of software and technical infrastructure used by the business, engineering or operations.
 type System {
-    id: String!
+    code: String!
     # Display name of the system
     name: String
     # Whether the system is supported
@@ -81,7 +81,7 @@ type System {
 
 # A team within the organisation
 type Team {
-    id: String!
+    code: String!
     # The teams name
     name: String
     # The teams email address
@@ -126,7 +126,7 @@ type Team {
 
 # An overarching group which contains teams and is costed separately
 type Group {
-    id: String!
+    code: String!
     # The name of the group
     name: String
 	#
@@ -146,7 +146,7 @@ type Group {
 
 # A cost centre which groups are costed to
 type CostCentre {
-    id: String!
+    code: String!
     # The name of the cost centre
     name: String
     # The groups which are costed to the cost centre
@@ -160,7 +160,7 @@ type CostCentre {
 
 # A individual within the organisation who is contactable
 type Person {
-    id: String!
+    code: String!
 	# The name of the person
     name: String
 	# The email address of th person
@@ -198,7 +198,7 @@ type Person {
 }
 
 type Product {
-    id: String!
+    code: String!
     purpose: String
     name: String
     serviceTier: ServiceTier!
@@ -208,7 +208,7 @@ type Product {
 
 # The configuraiton used to provide monitoring/healthchecks for a system.
 type Healthcheck {
-    id: String!
+    code: String!
     # Whether the monitored entity is live
     isLive: Boolean
     # The URL to check against
@@ -252,8 +252,8 @@ enum CircleCiVersion {
 
 type Query {
     CostCentre(
-		# The ID of the cost centre to view
-		id: String!
+		# The CODE of the cost centre to view
+		code: String!
 	): CostCentre
 
     CostCentres(
@@ -264,8 +264,8 @@ type Query {
 	): [CostCentre]
 
     Group(
-		# The ID of the group to view
-		id: String!
+		# The CODE of the group to view
+		code: String!
 	): Group
 
     Groups(
@@ -276,8 +276,8 @@ type Query {
 	): [Group]
 
 	Healthcheck(
-		# The ID of the healthcheck to view
-		id: String,
+		# The CODE of the healthcheck to view
+		code: String,
 		# The exact URL of the healthcheck to view
 		url: String): Healthcheck
 
@@ -291,8 +291,8 @@ type Query {
     Person(
 		# The full name of the person to view
 		name: String,
-		# The ID of the person to view
-		id: String
+		# The CODE of the person to view
+		code: String
 	): Person
 
     People(
@@ -303,8 +303,8 @@ type Query {
 	): [Person]
 
     Repository(
-		# The ID of the repository to view. This is the internal ID, not the VCS provider's ID
-		id: String!
+		# The CODE of the repository to view. This is the internal ID, not the VCS provider's ID
+		code: String!
 	): Repository
 
     Repositories(
@@ -317,8 +317,8 @@ type Query {
     ): [Repository]
 
     System(
-		# The ID of the system to view
-		id: String
+		# The CODE of the system to view
+		code: String
 	): System
 
     Systems(
@@ -331,8 +331,8 @@ type Query {
 	): [System]
 
     Team(
-		# The ID of the team to view
-		id: String!
+		# The CODE of the team to view
+		code: String!
 	): Team
 
     Teams(
@@ -358,5 +358,5 @@ input SystemInput {
 }
 
 type Mutation {
-    System(id: String, params: SystemInput): System!
+    System(code: String, params: SystemInput): System!
 }

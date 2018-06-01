@@ -13,7 +13,7 @@ describe('v1 - relationship - handling deleted nodes', () => {
 	describe('deleted start', () => {
 		beforeEach(() =>
 			db.run(`
-			MATCH (s:System {id: 'test-system'})
+			MATCH (s:System {code: 'test-system'})
 			SET s.isDeleted = true
 			RETURN s`));
 
@@ -66,7 +66,7 @@ describe('v1 - relationship - handling deleted nodes', () => {
 	describe('deleted end', () => {
 		beforeEach(() =>
 			db.run(`
-			MATCH (p:Person {id: 'test-person'})
+			MATCH (p:Person {code: 'test-person'})
 			SET p.isDeleted = true
 			RETURN p`));
 

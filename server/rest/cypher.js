@@ -14,7 +14,7 @@ const relFragment = (type, direction) => {
 const upsertRelationshipQuery = ({ relType, direction, nodeType, nodeCode }) =>
 	stripIndents`
 	WITH node
-	MERGE (related:${nodeType} {id: "${nodeCode}"})
+	MERGE (related:${nodeType} {code: "${nodeCode}"})
 		ON CREATE SET related.createdByRequest = $requestId
 	WITH related, node
 	MERGE (node)${relFragment(relType, direction)}(related)
@@ -31,7 +31,7 @@ const createRelationshipQuery = ({
 	// this means the next line tries to create a relationship pointing
 	// at null, so we get an informative error
 	stripIndents`WITH node
-	OPTIONAL MATCH (related${i}:${nodeType} {id: "${nodeCode}"})
+	OPTIONAL MATCH (related${i}:${nodeType} {code: "${nodeCode}"})
 	MERGE (node)${relFragment(relType, direction)}(related${i})
 		ON CREATE SET rel.createdByRequest = $requestId`;
 

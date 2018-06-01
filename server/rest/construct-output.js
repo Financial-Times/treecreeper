@@ -23,7 +23,7 @@ const constructNode = result => {
 					? 'outgoing'
 					: 'incoming',
 				nodeType: target.labels[0],
-				nodeCode: target.properties.id
+				nodeCode: target.properties.code
 			});
 			return map;
 		}, {});

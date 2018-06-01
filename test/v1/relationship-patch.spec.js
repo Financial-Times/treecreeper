@@ -11,7 +11,7 @@ describe('v1 - relationship PATCH', () => {
 
 	beforeEach(() =>
 		db.run(`
-			MATCH (node:System { id: 'test-system' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { id: 'test-person' })
+			MATCH (node:System { code: 'test-system' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { code: 'test-person' })
 			SET relationship.foo = 'bar'
 			RETURN relationship`));
 
