@@ -157,7 +157,7 @@ const sanitizeNode = (inputs, method) => {
 
 	const result = sanitizeShared(input);
 
-	if (method === 'CREATE') {
+	if (method === 'CREATE' || (method === 'UPDATE' && result.attributes.code)) {
 		result.attributes.code = result.code;
 	}
 

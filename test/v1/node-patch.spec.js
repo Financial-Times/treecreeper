@@ -595,7 +595,7 @@ describe('v1 - node PATCH', () => {
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
-				node: { foo: 'updated' },
+				node: { foo: 'updated', code: 'Test-sYStem' },
 				relationships: {
 					hAS_TeCH_LEAD: [
 						{
