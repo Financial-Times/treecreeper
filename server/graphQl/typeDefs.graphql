@@ -46,6 +46,8 @@ type System {
     sensitiveData: YesNo
     # The lifecycle stage of the system
     lifecycleStage: LifeCycleStage
+    # ID of the system in salesforce (required for change-logging as of june 2018)
+    SF_ID: String
     # If the system is a VCS, the repositories it stores
     stores: [Repository] @relation(name: "STORED_IN", direction: "IN")
     # The other systems the system depends on
@@ -75,7 +77,7 @@ type System {
     ): [Person] @relation(name: "KNOWN_BY", direction: "OUT")
     # The repository which stores the systems source code
     repository: Repository @relation(name: "HAS_REPO", direction: "OUT")
-    # Healthchekcs which are used to monitor this system
+    # Healthchecks which are used to monitor this system
     monitoredBy: [Healthcheck] @relation(name: "MONITORED_BY", direction: "OUT")
 }
 
