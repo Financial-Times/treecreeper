@@ -10,7 +10,6 @@ describe('v1 - relationship - handling absent nodes', () => {
 	setupMocks(state, { withRelationships: true });
 
 	describe('absent start', () => {
-
 		it('GET responds with 404 if start node is absent', async () => {
 			return request(app)
 				.get(
@@ -58,7 +57,6 @@ describe('v1 - relationship - handling absent nodes', () => {
 	});
 
 	describe('absent end', () => {
-
 		it('GET responds with 404 if end node is absent', async () => {
 			return request(app)
 				.get(
