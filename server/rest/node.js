@@ -159,12 +159,15 @@ const remove = async input => {
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
-	DELETE node`;
+	WITH {properties: properties(node), labels: labels(node)} AS deletedNode, node
+	DELETE node
+	RETURN deletedNode as node`;
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	await db.run(query, { code, requestId });
-	logDeletes(requestId, { code: code, labels: [nodeType] });
+	result = await db.run(query, { code, requestId });
+	result.records[0].get('node').properties.deletedByRequest = requestId // ensure requestID is present
+	logChanges(requestId, result);
 
 	return { status: 204 };
 };
