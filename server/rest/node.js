@@ -24,6 +24,8 @@ const create = async input => {
 		relationships
 	} = sanitizeInput(input, 'CREATE');
 
+	await preflightChecks.bailOnExistingNode({ nodeType, code, status: 409 });
+
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
 		if (relationships.length) {
@@ -54,8 +56,6 @@ const create = async input => {
 const read = async input => {
 	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
-	await preflightChecks.bailOnDeletedNode({ nodeType, code });
-
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
 	${RETURN_NODE_WITH_RELS}`;
@@ -81,8 +81,6 @@ const update = async input => {
 	} = sanitizeInput(input, 'UPDATE');
 
 	let deletedRelationships;
-
-	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [

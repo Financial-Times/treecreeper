@@ -111,10 +111,10 @@ const handleAttachedNode = ({ record, nodeType, code }) => {
 	}
 };
 
-const handleDeletedNode = async ({ nodeType, code, status = 410 }) => {
+const handleExistingNode = async ({ nodeType, code, status = 404 }) => {
 	const checkNode = await db.run(
 		stripIndents`
-	MATCH (node:${nodeType} { code: $code, isDeleted: true})
+	MATCH (node:${nodeType} { code: $code})
 	RETURN node`,
 		{ code }
 	);
@@ -122,12 +122,12 @@ const handleDeletedNode = async ({ nodeType, code, status = 410 }) => {
 	if (!checkNode.records[0]) {
 		return;
 	}
-	if (status === 410) {
-		throw httpErrors(410, `${nodeType} ${code} has been deleted`);
+	if (status === 404) {
+		throw httpErrors(404, `${nodeType} ${code} does not exist`);
 	} else if (status === 409) {
 		throw httpErrors(
 			409,
-			`${nodeType} ${code} has been deleted, but it's code is still reserved. Choose another code name.`
+			`${nodeType} ${code} already exists. Choose another code name.`
 		);
 	}
 };
@@ -146,7 +146,7 @@ const handleRelationshipActionError = relationshipAction => {
 
 module.exports = {
 	preflightChecks: {
-		bailOnDeletedNode: handleDeletedNode,
+		bailOnExistingNode: handleExistingNode,
 		bailOnDuplicateRelationship: handleDuplicateRelationship,
 		bailOnMissingRelationshipAction: handleRelationshipActionError
 	},

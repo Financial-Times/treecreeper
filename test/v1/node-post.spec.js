@@ -50,18 +50,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/test-system')
 			.auth()
 			.send({ node: { foo: 'new-again' } })
-			.expect(200, {
-				node: {
-					code: 'test-system',
-					foo: 'new-again'
-				},
-				relationships: []
-			});
-		await request(app)
-			.post('/v1/node/System/test-system')
-			.auth()
-			.send({ node: { foo: 'new-again' } })
-			.expect(409, 'System test-system already exists');
+			.expect(409, 'System test-system already exists. Choose another code name.');
 	});
 
 	it('error when conflicting code values', async () => {
