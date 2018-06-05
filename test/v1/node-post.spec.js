@@ -52,7 +52,7 @@ describe('v1 - node POST', () => {
 			.send({ node: { foo: 'new-again' } })
 			.expect(
 				409,
-				'System test-system already exists. Choose another code name.'
+				'System test-system already exists'
 			);
 	});
 

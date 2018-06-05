@@ -5,15 +5,6 @@ const constraints = async verb => {
 	console.log(`Running ${verb} constraints...`);
 
 	const constraintQueries = [
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (c:Contract) ASSERT c.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (c:Contract) ASSERT exists(c.code)`,
-		`${verb} CONSTRAINT ON (r:Submission) ASSERT r.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (r:Submission) ASSERT exists(r.code)`,
-		`${verb} CONSTRAINT ON (s:Survey) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Survey) ASSERT exists(s.version)`,
 		// cmdb constainsts
 		`${verb} CONSTRAINT ON (s:Domain) ASSERT s.code IS UNIQUE`,
 		`${verb} CONSTRAINT ON (s:Domain) ASSERT exists(s.code)`,

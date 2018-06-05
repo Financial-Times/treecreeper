@@ -23,7 +23,6 @@ describe('v1 - node DELETE', () => {
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties.deletedByRequest).not.to.exist;
-		expect(record.get('n').properties.isDeleted).not.to.exist;
 	};
 
 	it('deletes a detached node', async () => {

@@ -111,27 +111,6 @@ const handleAttachedNode = ({ record, nodeType, code }) => {
 	}
 };
 
-const handleExistingNode = async ({ nodeType, code, status = 404 }) => {
-	const checkNode = await db.run(
-		stripIndents`
-	MATCH (node:${nodeType} { code: $code})
-	RETURN node`,
-		{ code }
-	);
-
-	if (!checkNode.records[0]) {
-		return;
-	}
-	if (status === 404) {
-		throw httpErrors(404, `${nodeType} ${code} does not exist`);
-	} else if (status === 409) {
-		throw httpErrors(
-			409,
-			`${nodeType} ${code} already exists. Choose another code name.`
-		);
-	}
-};
-
 const handleRelationshipActionError = relationshipAction => {
 	if (
 		!relationshipAction ||
@@ -146,7 +125,6 @@ const handleRelationshipActionError = relationshipAction => {
 
 module.exports = {
 	preflightChecks: {
-		bailOnExistingNode: handleExistingNode,
 		bailOnDuplicateRelationship: handleDuplicateRelationship,
 		bailOnMissingRelationshipAction: handleRelationshipActionError
 	},

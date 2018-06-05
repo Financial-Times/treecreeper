@@ -24,8 +24,6 @@ const create = async input => {
 		relationships
 	} = sanitizeInput(input, 'CREATE');
 
-	await preflightChecks.bailOnExistingNode({ nodeType, code, status: 409 });
-
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
 		if (relationships.length) {
@@ -42,6 +40,7 @@ const create = async input => {
 			code,
 			query
 		});
+
 		const result = await db.run(query, { attributes, requestId });
 
 		logChanges(requestId, result);
@@ -164,9 +163,7 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code, requestId });
-	console.log(result);
-	// queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
+	await db.run(query, { code, requestId });
 	logDeletes(requestId, { code: code, labels: [nodeType] });
 
 	return { status: 204 };
