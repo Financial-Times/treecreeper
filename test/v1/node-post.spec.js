@@ -50,10 +50,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/test-system')
 			.auth()
 			.send({ node: { foo: 'new-again' } })
-			.expect(
-				409,
-				'System test-system already exists'
-			);
+			.expect(409, 'System test-system already exists');
 	});
 
 	it('error when conflicting code values', async () => {
