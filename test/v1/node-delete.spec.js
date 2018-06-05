@@ -13,7 +13,7 @@ describe('v1 - node DELETE', () => {
 		const result = await db.run(
 			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
-		expect(result.records.length).to.equal(0); // its really gone, not marked as deleted
+		expect(result.records.length).to.equal(0);
 	};
 
 	const verifyNotDeletion = async () => {
@@ -32,7 +32,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(204);
 
-		await verifyDeletion('delete-request-id');
+		await verifyDeletion();
 	});
 
 	it('404 when deleting non-existent node', async () => {
@@ -42,7 +42,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(404);
 
-		await verifyNotDeletion('delete-request-id');
+		await verifyNotDeletion();
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
@@ -57,7 +57,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(409, 'Cannot delete - System test-system has relationships');
 
-		await verifyNotDeletion('delete-request-id');
+		await verifyNotDeletion();
 	});
 
 	describe('interaction with deleted nodes', () => {
@@ -105,7 +105,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(204);
 
-		await verifyDeletion('delete-request-id');
+		await verifyDeletion();
 	});
 
 	it('logs deletion event to kinesis', async () => {
