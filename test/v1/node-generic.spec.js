@@ -64,7 +64,7 @@ describe('v1 - node generic', () => {
 			expect(result.records.length).to.equal(0);
 		});
 
-		describe('client code', () => {
+		describe('client id', () => {
 			it('GET no client-id returns 400', async () => {
 				return request(app)
 					.get('/v1/node/System/test-system')
