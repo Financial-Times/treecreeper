@@ -169,7 +169,7 @@ const remove = async input => {
 	const result = await db.run(query, { code, requestId });
 	console.log(result);
 	// queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
-	logDeletes(requestId, {code: code, labels: [nodeType] });
+	logDeletes(requestId, { code: code, labels: [nodeType] });
 
 	return { status: 204 };
 };
