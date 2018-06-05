@@ -54,8 +54,8 @@ const sendNodeRelationshipEvent = ({
 };
 
 const logNodeDeletes = (requestId, record) => {
-	event = 'DELETED_NODE';
-	action = EventLogWriter.actions.DELETE;
+	const event = 'DELETED_NODE';
+	const action = EventLogWriter.actions.DELETE;
 	sendEvent({
 		event,
 		action,
@@ -63,7 +63,7 @@ const logNodeDeletes = (requestId, record) => {
 		type: record.labels[0],
 		requestId
 	});
-}
+};
 
 const logNodeChanges = (requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');

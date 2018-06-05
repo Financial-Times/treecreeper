@@ -9,14 +9,11 @@ describe('v1 - node DELETE', () => {
 
 	setupMocks(state);
 
-	const verifyDeletion = async requestId => {
+	const verifyDeletion = async () => {
 		const result = await db.run(
 			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(0); // its really gone, not marked as deleted
-		// const record = result.records[0];
-		// expect(record.get('n').properties.deletedByRequest).to.equal(requestId);
-		// expect(record.get('n').properties.isDeleted).to.equal(true);
 	};
 
 	const verifyNotDeletion = async () => {
