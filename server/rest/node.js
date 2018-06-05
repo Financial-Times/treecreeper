@@ -6,7 +6,7 @@ const {
 	queryResultHandlers,
 	preflightChecks
 } = require('./errors');
-const { logNodeChanges: logChanges } = require('./kinesis');
+const { logNodeChanges: logChanges, logNodeDeletes: logDeletes } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
@@ -20,8 +20,6 @@ const create = async input => {
 		attributes,
 		relationships
 	} = sanitizeInput(input, 'CREATE');
-
-	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
@@ -42,7 +40,6 @@ const create = async input => {
 		const result = await db.run(query, { attributes, requestId });
 
 		logChanges(requestId, result);
-
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
@@ -162,14 +159,13 @@ const remove = async input => {
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
-	SET node.isDeleted = true, node.deletedByRequest = $requestId
-	RETURN node`;
+	DELETE node`;
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
 	const result = await db.run(query, { code, requestId });
-	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
-	logChanges(requestId, result);
+	// queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
+	logDeletes(requestId, {code:code, labels:[nodeType]});
 
 	return { status: 204 };
 };
