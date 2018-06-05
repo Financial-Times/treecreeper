@@ -144,7 +144,7 @@ describe('v1 - node PATCH', () => {
 				})
 				.expect(
 					400,
-					'PATCHing relationships requires a relationshipAction query param set to `append` or `replace`'
+					'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
 				);
 
 			const result = await db.run(
@@ -154,7 +154,7 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(0);
 		});
 
-		it('can append to empty relationship set if relationshipAction=append', async () => {
+		it('can merge with empty relationship set if relationshipAction=merge', async () => {
 			const relationships = {
 				HAS_TECH_LEAD: [
 					{
@@ -165,7 +165,7 @@ describe('v1 - node PATCH', () => {
 				]
 			};
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=append')
+				.patch('/v1/node/System/test-system?relationshipAction=merge')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.send({
@@ -197,7 +197,7 @@ describe('v1 - node PATCH', () => {
 			});
 		});
 
-		it('can append to relationships if relationshipAction=append', async () => {
+		it('can merge with relationships if relationshipAction=merge', async () => {
 			await db.run(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
@@ -207,7 +207,7 @@ describe('v1 - node PATCH', () => {
 			`
 			);
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=append')
+				.patch('/v1/node/System/test-system?relationshipAction=merge')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.send({
@@ -453,7 +453,7 @@ describe('v1 - node PATCH', () => {
 				.expect(400, /Missing related node Person other-test-person/);
 		});
 
-		it('create node related to non-existent nodes when using upsert=true & relationshipAction=append', async () => {
+		it('create node related to non-existent nodes when using upsert=true & relationshipAction=merge', async () => {
 			const relationships = {
 				HAS_TECH_LEAD: [
 					{
@@ -466,7 +466,7 @@ describe('v1 - node PATCH', () => {
 
 			await request(app)
 				.patch(
-					'/v1/node/System/test-system?relationshipAction=append&upsert=true'
+					'/v1/node/System/test-system?relationshipAction=merge&upsert=true'
 				)
 				.auth()
 				.set('x-request-id', 'update-request-id')

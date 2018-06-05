@@ -114,11 +114,11 @@ const handleAttachedNode = ({ record, nodeType, code }) => {
 const handleRelationshipActionError = relationshipAction => {
 	if (
 		!relationshipAction ||
-		!['append', 'replace'].includes(relationshipAction)
+		!['merge', 'replace'].includes(relationshipAction)
 	) {
 		throw httpErrors(
 			400,
-			'PATCHing relationships requires a relationshipAction query param set to `append` or `replace`'
+			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
 		);
 	}
 };
