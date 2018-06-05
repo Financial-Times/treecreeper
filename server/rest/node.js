@@ -6,10 +6,7 @@ const {
 	queryResultHandlers,
 	preflightChecks
 } = require('./errors');
-const {
-	logNodeChanges: logChanges,
-	logNodeDeletes: logDeletes
-} = require('./kinesis');
+const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
@@ -165,8 +162,8 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	result = await db.run(query, { code, requestId });
-	result.records[0].get('node').properties.deletedByRequest = requestId // ensure requestID is present
+	let result = await db.run(query, { code, requestId });
+	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
 	logChanges(requestId, result);
 
 	return { status: 204 };
