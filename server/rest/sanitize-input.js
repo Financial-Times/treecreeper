@@ -35,6 +35,18 @@ const sanitizeCode = code => {
 	return sanitizedCode;
 };
 
+const sanitizeClientId = code => {
+	const sanitizedClientId = code.toLowerCase();
+	if (!stringPatterns.CODE.test(sanitizedClientId)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid node identifier \`${code}\`.
+			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .`
+		);
+	}
+	return sanitizedClientId;
+};
+
 const sanitizeRequestId = code => {
 	if (!stringPatterns.REQUEST_ID.test(code)) {
 		throw httpErrors(
@@ -115,6 +127,7 @@ const mergeInput = (obj, method, bodyParser) => {
 };
 
 const sanitizeShared = ({
+	clientId,
 	requestId,
 	nodeType,
 	code,
@@ -122,11 +135,13 @@ const sanitizeShared = ({
 	query,
 	method
 }) => {
+	sanitizeClientId(clientId);
 	sanitizeRequestId(requestId);
 
 	code = sanitizeCode(code);
 
 	const result = {
+		clientId,
 		requestId,
 		nodeType: sanitizeNodeType(nodeType),
 		code
@@ -136,6 +151,7 @@ const sanitizeShared = ({
 		nodeType,
 		attributes,
 		code,
+		clientId,
 		requestId,
 		method
 	});

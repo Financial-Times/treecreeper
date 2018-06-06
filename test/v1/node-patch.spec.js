@@ -52,7 +52,8 @@ describe('v1 - node PATCH', () => {
 			.expect(201, {
 				node: {
 					code: 'new-system',
-					foo: 'new'
+					foo: 'new',
+					createdByRequest: 'update-request-id'
 				},
 				relationships: []
 			});

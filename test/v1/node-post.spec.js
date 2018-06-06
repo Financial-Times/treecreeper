@@ -3,11 +3,14 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { checkResponse, setupMocks } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - node POST', () => {
 	const state = {};
-
 	setupMocks(state);
+
+	let clock;
+	const timestamp = 1517415243;
 
 	const cleanUp = async () => {
 		await db.run(`MATCH (n:System { code: "new-system" }) DETACH DELETE n`);
@@ -16,31 +19,45 @@ describe('v1 - node POST', () => {
 		);
 	};
 
-	before(cleanUp);
-	afterEach(cleanUp);
+	beforeEach(() => {
+		cleanUp();
+		clock = lolex.install({ now: timestamp });
+	});
+
+	afterEach(() => {
+		cleanUp();
+		clock = clock.uninstall();
+	});
 
 	it('create node', async () => {
 		await request(app)
 			.post('/v1/node/System/new-system')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({ node: { foo: 'new' } })
 			.expect(200, {
 				node: {
 					code: 'new-system',
-					foo: 'new'
+					foo: 'new',
+					createdByClient: 'create-client-id',
+					createdByRequest: 'create-request-id',
+					createdByTimestamp: timestamp
 				},
 				relationships: []
 			});
 		const result = await db.run(
 			`MATCH (n:System { code: "new-system" }) RETURN n`
 		);
+
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-system',
-			foo: 'new'
+			foo: 'new',
+			createdByClient: 'create-client-id',
+			createdByRequest: 'create-request-id',
+			createdByTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record.get('n').labels).to.eql(['System']);
 	});
@@ -93,6 +110,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/new-system')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -102,7 +120,10 @@ describe('v1 - node POST', () => {
 				checkResponse(body, {
 					node: {
 						code: 'new-system',
-						foo: 'new'
+						foo: 'new',
+						createdByClient: 'create-client-id',
+						createdByRequest: 'create-request-id',
+						createdByTimestamp: timestamp
 					},
 					relationships
 				})
@@ -115,9 +136,11 @@ describe('v1 - node POST', () => {
 		expect(result.records.length).to.equal(2);
 
 		expect(result.records[0].get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-system',
-			foo: 'new'
+			foo: 'new',
+			createdByClient: 'create-client-id',
+			createdByRequest: 'create-request-id',
+			createdByTimestamp: { low: timestamp, high: 0 }
 		});
 
 		const [person, group] =
@@ -179,6 +202,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/new-system?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -188,7 +212,10 @@ describe('v1 - node POST', () => {
 				checkResponse(body, {
 					node: {
 						code: 'new-system',
-						foo: 'new'
+						foo: 'new',
+						createdByClient: 'create-client-id',
+						createdByRequest: 'create-request-id',
+						createdByTimestamp: timestamp
 					},
 					relationships
 				})
@@ -200,9 +227,11 @@ describe('v1 - node POST', () => {
 		const record0 = result.records[0];
 
 		expect(record0.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-system',
-			foo: 'new'
+			foo: 'new',
+			createdByClient: 'create-client-id',
+			createdByRequest: 'create-request-id',
+			createdByTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record0.get('r').properties).to.eql({
 			createdByRequest: 'create-request-id'
@@ -218,6 +247,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/new-system?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships: {
@@ -238,9 +268,11 @@ describe('v1 - node POST', () => {
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 		expect(record0.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-system',
-			foo: 'new'
+			foo: 'new',
+			createdByClient: 'create-client-id',
+			createdByRequest: 'create-request-id',
+			createdByTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record0.get('r').properties).to.eql({
 			createdByRequest: 'create-request-id'
@@ -268,6 +300,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/sysTem/New-sYStem')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new', code: 'New-sYStem' },
 				relationships: {
@@ -285,7 +318,10 @@ describe('v1 - node POST', () => {
 				checkResponse(body, {
 					node: {
 						code: 'new-system',
-						foo: 'new'
+						foo: 'new',
+						createdByClient: 'create-client-id',
+						createdByRequest: 'create-request-id',
+						createdByTimestamp: timestamp
 					},
 					relationships: {
 						HAS_TECH_LEAD: [

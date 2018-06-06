@@ -13,6 +13,7 @@ const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
 
 const create = async input => {
 	const {
+		clientId,
 		requestId,
 		upsert,
 		nodeType,
@@ -24,25 +25,33 @@ const create = async input => {
 	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
-		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
+		const timestamp = new Date().getTime();
+
+		const queryParts = [
+			`CREATE (node:${nodeType} $attributes)
+				SET node.createdByRequest = $requestId,
+					node.createdByTimestamp = ${timestamp},
+					node.createdByClient = $clientId
+				REMOVE node.requestId
+			WITH node`
+		];
 		if (relationships.length) {
 			queryParts.push(...createRelationships(upsert, relationships));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
 		const query = queryParts.join('\n');
-
 		logger.info({
 			event: 'CREATE_NODE_QUERY',
+			clientId,
 			requestId,
 			nodeType,
 			code,
 			query
 		});
-		const result = await db.run(query, { attributes, requestId });
+		const result = await db.run(query, { attributes, clientId, requestId });
 
 		logChanges(requestId, result);
-
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
@@ -52,7 +61,7 @@ const create = async input => {
 };
 
 const read = async input => {
-	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
+	const { clientId, requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
 	await preflightChecks.bailOnDeletedNode({ nodeType, code });
 
@@ -60,7 +69,14 @@ const read = async input => {
 	MATCH (node:${nodeType} {code: $code})
 	${RETURN_NODE_WITH_RELS}`;
 
-	logger.info({ event: 'READ_NODE_QUERY', requestId, nodeType, code, query });
+	logger.info({
+		event: 'READ_NODE_QUERY',
+		clientId,
+		requestId,
+		nodeType,
+		code,
+		query
+	});
 
 	const result = await db.run(query, { code });
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
@@ -69,6 +85,7 @@ const read = async input => {
 
 const update = async input => {
 	const {
+		clientId,
 		requestId,
 		upsert,
 		nodeType,
@@ -129,13 +146,19 @@ const update = async input => {
 
 		logger.info({
 			event: 'UPDATE_NODE_QUERY',
+			clientId,
 			requestId,
 			nodeType,
 			code,
 			query,
 			attributes
 		});
-		const result = await db.run(query, { attributes, code, requestId });
+		const result = await db.run(query, {
+			attributes,
+			code,
+			requestId,
+			clientId
+		});
 		logChanges(requestId, result, deletedRelationships);
 
 		return {
