@@ -49,7 +49,7 @@ describe('v1 - node POST', () => {
 		await request(app)
 			.post('/v1/node/System/test-system')
 			.auth()
-			.send({ node: { foo: 'new' } })
+			.send({ node: { foo: 'new-again' } })
 			.expect(409, 'System test-system already exists');
 	});
 

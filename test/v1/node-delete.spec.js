@@ -9,14 +9,11 @@ describe('v1 - node DELETE', () => {
 
 	setupMocks(state);
 
-	const verifyDeletion = async requestId => {
+	const verifyDeletion = async () => {
 		const result = await db.run(
 			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
-		expect(result.records.length).to.equal(1);
-		const record = result.records[0];
-		expect(record.get('n').properties.deletedByRequest).to.equal(requestId);
-		expect(record.get('n').properties.isDeleted).to.equal(true);
+		expect(result.records.length).to.equal(0);
 	};
 
 	const verifyNotDeletion = async () => {
@@ -26,17 +23,16 @@ describe('v1 - node DELETE', () => {
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties.deletedByRequest).not.to.exist;
-		expect(record.get('n').properties.isDeleted).not.to.exist;
 	};
 
-	it('marks a detached node as deleted', async () => {
+	it('deletes a detached node', async () => {
 		await request(app)
 			.delete('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
 			.expect(204);
 
-		await verifyDeletion('delete-request-id');
+		await verifyDeletion();
 	});
 
 	it('404 when deleting non-existent node', async () => {
@@ -46,7 +42,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(404);
 
-		await verifyNotDeletion('delete-request-id');
+		await verifyNotDeletion();
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
@@ -61,7 +57,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(409, 'Cannot delete - System test-system has relationships');
 
-		await verifyNotDeletion('delete-request-id');
+		await verifyNotDeletion();
 	});
 
 	describe('interaction with deleted nodes', () => {
@@ -73,32 +69,32 @@ describe('v1 - node DELETE', () => {
 				.end();
 		});
 
-		it('GET responds with 410', async () => {
+		it('GET responds with 404', async () => {
 			await request(app)
 				.get('/v1/node/System/test-system')
 				.auth()
-				.expect(410);
+				.expect(404);
 		});
 
-		it('POST responds with 409', async () => {
+		it('POST responds with 200', async () => {
 			await request(app)
 				.post('/v1/node/System/test-system')
 				.auth()
-				.expect(409);
+				.expect(200);
 		});
 
-		it('PATCH responds with 409', async () => {
+		it('PATCH responds with 200', async () => {
 			await request(app)
 				.post('/v1/node/System/test-system')
 				.auth()
-				.expect(409);
+				.expect(200);
 		});
 
-		it('DELETE responds with 410', async () => {
+		it('DELETE responds with 404', async () => {
 			await request(app)
 				.delete('/v1/node/System/test-system')
 				.auth()
-				.expect(410);
+				.expect(404);
 		});
 	});
 
@@ -109,7 +105,7 @@ describe('v1 - node DELETE', () => {
 			.set('x-request-id', 'delete-request-id')
 			.expect(204);
 
-		await verifyDeletion('delete-request-id');
+		await verifyDeletion();
 	});
 
 	it('logs deletion event to kinesis', async () => {
