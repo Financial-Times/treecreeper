@@ -87,13 +87,7 @@ const sanitizeAttributeNames = attributes => {
 	}
 };
 
-const sanitizeAttributes = ({
-	nodeType,
-	code,
-	attributes,
-	requestId,
-	method
-}) => {
+const sanitizeAttributes = ({ nodeType, code, attributes }) => {
 	if (attributes.code && sanitizeCode(attributes.code) !== code) {
 		throw httpErrors(
 			400,
@@ -104,10 +98,6 @@ const sanitizeAttributes = ({
 	}
 
 	sanitizeAttributeNames(attributes);
-
-	if (method === 'CREATE') {
-		attributes.createdByRequest = requestId;
-	}
 
 	return {
 		deletedAttributes: Object.entries(attributes)

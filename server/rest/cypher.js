@@ -15,10 +15,10 @@ const upsertRelationshipQuery = ({ relType, direction, nodeType, nodeCode }) =>
 	stripIndents`
 	WITH node
 	MERGE (related:${nodeType} {code: "${nodeCode}"})
-		ON CREATE SET related.createdByRequest = $requestId
+		ON CREATE SET related._createdByRequest = $requestId
 	WITH related, node
 	MERGE (node)${relFragment(relType, direction)}(related)
-		ON CREATE SET rel.createdByRequest = $requestId`;
+		ON CREATE SET rel._createdByRequest = $requestId`;
 
 const createRelationshipQuery = ({
 	relType,
@@ -33,7 +33,7 @@ const createRelationshipQuery = ({
 	stripIndents`WITH node
 	OPTIONAL MATCH (related${i}:${nodeType} {code: "${nodeCode}"})
 	MERGE (node)${relFragment(relType, direction)}(related${i})
-		ON CREATE SET rel.createdByRequest = $requestId`;
+		ON CREATE SET rel._createdByRequest = $requestId`;
 
 const createRelationships = (upsert, relationships) => {
 	const mapFunc = upsert ? upsertRelationshipQuery : createRelationshipQuery;

@@ -68,6 +68,7 @@ describe('v1 - relationship DELETE', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'delete-relationship-request')
+			.set('x-client-id', 'delete-relationship-client')
 			.auth()
 			.expect(204);
 		[
@@ -83,7 +84,8 @@ describe('v1 - relationship DELETE', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'delete-relationship-request'
+					requestId: 'delete-relationship-request',
+					clientId: 'delete-relationship-client'
 				}
 			],
 			[
@@ -98,7 +100,8 @@ describe('v1 - relationship DELETE', () => {
 					},
 					code: 'test-person',
 					type: 'Person',
-					requestId: 'delete-relationship-request'
+					requestId: 'delete-relationship-request',
+					clientId: 'delete-relationship-client'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

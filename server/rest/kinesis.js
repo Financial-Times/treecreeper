@@ -31,7 +31,8 @@ const sendNodeRelationshipEvent = ({
 	rel,
 	destination,
 	origin,
-	requestId
+	requestId,
+	clientId
 }) => {
 	return sendEvent(
 		Object.assign(
@@ -47,21 +48,21 @@ const sendNodeRelationshipEvent = ({
 					destination,
 					origin
 				}),
-				requestId
+				requestId,
+				clientId
 			}
 		)
 	);
 };
 
-const logNodeChanges = (requestId, result, deletedRelationships) => {
+const logNodeChanges = (clientId, requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');
 	let event;
 	let action;
-
 	if (node.properties.deletedByRequest === requestId) {
 		event = 'DELETED_NODE';
 		action = EventLogWriter.actions.DELETE;
-	} else if (node.properties.createdByRequest === requestId) {
+	} else if (node.properties._createdByRequest === requestId) {
 		event = 'CREATED_NODE';
 		action = EventLogWriter.actions.CREATE;
 	} else {
@@ -74,7 +75,8 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 		action,
 		code: node.properties.code,
 		type: node.labels[0],
-		requestId
+		requestId,
+		clientId
 	});
 
 	if (
@@ -85,24 +87,26 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 		result.records.forEach(record => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
-			console.log(target.properties.createdByRequest, requestId);
-			if (target.properties.createdByRequest === requestId) {
+
+			if (target.properties._createdByRequest === requestId) {
 				sendEvent({
 					event: 'CREATED_NODE',
 					action: EventLogWriter.actions.CREATE,
 					code: target.properties.code,
 					type: target.labels[0],
-					requestId
+					requestId,
+					clientId
 				});
 			}
 
-			if (rel.properties.createdByRequest === requestId) {
+			if (rel.properties._createdByRequest === requestId) {
 				sendNodeRelationshipEvent({
 					verb: 'CREATED',
 					rel,
 					destination: target,
 					origin: node,
-					requestId
+					requestId,
+					clientId
 				});
 
 				sendNodeRelationshipEvent({
@@ -110,7 +114,8 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 					rel,
 					destination: node,
 					origin: target,
-					requestId
+					requestId,
+					clientId
 				});
 			}
 		});
@@ -126,7 +131,8 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 				rel,
 				destination: target,
 				origin: node,
-				requestId
+				requestId,
+				clientId
 			});
 
 			sendNodeRelationshipEvent({
@@ -134,7 +140,8 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 				rel,
 				destination: node,
 				origin: target,
-				requestId
+				requestId,
+				clientId
 			});
 		});
 	}
@@ -143,6 +150,7 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 const sendRelationshipEvents = (
 	verb,
 	requestId,
+	clientId,
 	{ nodeType, code, relatedType, relatedCode, relationshipType }
 ) => {
 	sendEvent({
@@ -156,9 +164,9 @@ const sendRelationshipEvents = (
 		},
 		code,
 		type: nodeType,
-		requestId
+		requestId,
+		clientId
 	});
-
 	sendEvent({
 		event: `${verb}_RELATIONSHIP`,
 		action: EventLogWriter.actions.UPDATE,
@@ -170,19 +178,20 @@ const sendRelationshipEvents = (
 		},
 		code: relatedCode,
 		type: relatedType,
-		requestId
+		requestId,
+		clientId
 	});
 };
 
-const logRelationshipChanges = (requestId, result, params) => {
+const logRelationshipChanges = (requestId, clientId, result, params) => {
 	if (!result.records[0]) {
-		sendRelationshipEvents('DELETED', requestId, params);
+		sendRelationshipEvents('DELETED', requestId, clientId, params);
 	} else {
 		const relationshipRecord = result.records[0].get('relationship');
-		if (relationshipRecord.properties.createdByRequest === requestId) {
-			sendRelationshipEvents('CREATED', requestId, params);
+		if (relationshipRecord.properties._createdByRequest === requestId) {
+			sendRelationshipEvents('CREATED', requestId, clientId, params);
 		} else {
-			sendRelationshipEvents('UPDATED', requestId, params);
+			sendRelationshipEvents('UPDATED', requestId, clientId, params);
 		}
 	}
 };

@@ -19,13 +19,13 @@ describe('v1 - node POST', () => {
 		);
 	};
 
-	beforeEach(() => {
-		cleanUp();
+	beforeEach(async () => {
+		await cleanUp();
 		clock = lolex.install({ now: timestamp });
 	});
 
-	afterEach(() => {
-		cleanUp();
+	afterEach(async () => {
+		await cleanUp();
 		clock = clock.uninstall();
 	});
 
@@ -40,9 +40,12 @@ describe('v1 - node POST', () => {
 				node: {
 					code: 'new-system',
 					foo: 'new',
-					createdByClient: 'create-client-id',
-					createdByRequest: 'create-request-id',
-					createdByTimestamp: timestamp
+					_createdByClient: 'create-client-id',
+					_createdByRequest: 'create-request-id',
+					_createdTimestamp: timestamp,
+					_updatedByClient: 'create-client-id',
+					_updatedByRequest: 'create-request-id',
+					_updatedTimestamp: timestamp
 				},
 				relationships: []
 			});
@@ -55,9 +58,12 @@ describe('v1 - node POST', () => {
 		expect(record.get('n').properties).to.eql({
 			code: 'new-system',
 			foo: 'new',
-			createdByClient: 'create-client-id',
-			createdByRequest: 'create-request-id',
-			createdByTimestamp: { low: timestamp, high: 0 }
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record.get('n').labels).to.eql(['System']);
 	});
@@ -121,9 +127,12 @@ describe('v1 - node POST', () => {
 					node: {
 						code: 'new-system',
 						foo: 'new',
-						createdByClient: 'create-client-id',
-						createdByRequest: 'create-request-id',
-						createdByTimestamp: timestamp
+						_createdByClient: 'create-client-id',
+						_createdByRequest: 'create-request-id',
+						_createdTimestamp: timestamp,
+						_updatedByClient: 'create-client-id',
+						_updatedByRequest: 'create-request-id',
+						_updatedTimestamp: timestamp
 					},
 					relationships
 				})
@@ -138,9 +147,12 @@ describe('v1 - node POST', () => {
 		expect(result.records[0].get('n').properties).to.eql({
 			code: 'new-system',
 			foo: 'new',
-			createdByClient: 'create-client-id',
-			createdByRequest: 'create-request-id',
-			createdByTimestamp: { low: timestamp, high: 0 }
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 
 		const [person, group] =
@@ -149,18 +161,18 @@ describe('v1 - node POST', () => {
 				: result.records.slice().reverse();
 
 		expect(group.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(group.get('c').properties.createdByRequest).to.not.exist;
+		expect(group.get('c').properties._createdByRequest).to.not.exist;
 		expect(group.get('c').properties).to.eql({
 			foo: 'bar3',
 			code: 'test-group'
 		});
 
 		expect(person.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(person.get('c').properties.createdByRequest).to.not.exist;
+		expect(person.get('c').properties._createdByRequest).to.not.exist;
 		expect(person.get('c').properties).to.eql({
 			foo: 'bar2',
 			code: 'test-person'
@@ -213,9 +225,12 @@ describe('v1 - node POST', () => {
 					node: {
 						code: 'new-system',
 						foo: 'new',
-						createdByClient: 'create-client-id',
-						createdByRequest: 'create-request-id',
-						createdByTimestamp: timestamp
+						_createdByClient: 'create-client-id',
+						_createdByRequest: 'create-request-id',
+						_createdTimestamp: timestamp,
+						_updatedByClient: 'create-client-id',
+						_updatedByRequest: 'create-request-id',
+						_updatedTimestamp: timestamp
 					},
 					relationships
 				})
@@ -229,16 +244,19 @@ describe('v1 - node POST', () => {
 		expect(record0.get('n').properties).to.eql({
 			code: 'new-system',
 			foo: 'new',
-			createdByClient: 'create-client-id',
-			createdByRequest: 'create-request-id',
-			createdByTimestamp: { low: timestamp, high: 0 }
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record0.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
 		expect(record0.get('c').properties).to.eql({
 			code: 'new-test-person',
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
 	});
 
@@ -270,14 +288,17 @@ describe('v1 - node POST', () => {
 		expect(record0.get('n').properties).to.eql({
 			code: 'new-system',
 			foo: 'new',
-			createdByClient: 'create-client-id',
-			createdByRequest: 'create-request-id',
-			createdByTimestamp: { low: timestamp, high: 0 }
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 		expect(record0.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(record0.get('c').properties.createdByRequest).to.not.exist;
+		expect(record0.get('c').properties._createdByRequest).to.not.exist;
 		expect(record0.get('c').properties).to.eql({
 			foo: 'bar2',
 			code: 'test-person'
@@ -319,9 +340,12 @@ describe('v1 - node POST', () => {
 					node: {
 						code: 'new-system',
 						foo: 'new',
-						createdByClient: 'create-client-id',
-						createdByRequest: 'create-request-id',
-						createdByTimestamp: timestamp
+						_createdByClient: 'create-client-id',
+						_createdByRequest: 'create-request-id',
+						_createdTimestamp: timestamp,
+						_updatedByClient: 'create-client-id',
+						_updatedByRequest: 'create-request-id',
+						_updatedTimestamp: timestamp
 					},
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -341,6 +365,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/new-system?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				// create a node
 				node: { foo: 'new' },
@@ -371,7 +396,8 @@ describe('v1 - node POST', () => {
 					action: 'CREATE',
 					code: 'new-system',
 					type: 'System',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -380,7 +406,8 @@ describe('v1 - node POST', () => {
 					action: 'CREATE',
 					code: 'new-test-person',
 					type: 'Person',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -395,7 +422,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-system',
 					type: 'System',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -410,7 +438,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-test-person',
 					type: 'Person',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -425,7 +454,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-system',
 					type: 'System',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -440,7 +470,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'test-group',
 					type: 'Group',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

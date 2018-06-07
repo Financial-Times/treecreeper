@@ -21,15 +21,16 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
-			.expect(200, { createdByRequest: 'setup-script', foo: 'baz' });
+			.expect(200, { _createdByRequest: 'setup-script', foo: 'baz' });
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'setup-script',
+			_createdByRequest: 'setup-script',
 			foo: 'baz'
 		});
 	});
@@ -40,10 +41,11 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/test-system/HAS_TEAM_MEMBER/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
 			.expect(201, {
-				createdByRequest: 'update-relationship-request',
+				_createdByRequest: 'update-relationship-request',
 				foo: 'baz'
 			});
 
@@ -51,7 +53,7 @@ describe('v1 - relationship PATCH', () => {
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'update-relationship-request',
+			_createdByRequest: 'update-relationship-request',
 			foo: 'baz'
 		});
 	});
@@ -62,15 +64,16 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: null, baz: null })
 			.auth()
-			.expect(200, { createdByRequest: 'setup-script' });
+			.expect(200, { _createdByRequest: 'setup-script' });
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'setup-script'
+			_createdByRequest: 'setup-script'
 		});
 	});
 
@@ -80,6 +83,7 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.auth()
 			.expect(400);
 	});
@@ -90,6 +94,7 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.auth()
 			.expect(400);
 	});
@@ -110,15 +115,16 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/sYstem/tESt-System/haS_TeCH_LEAD/pERson/TesT-PErson'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
-			.expect(200, { createdByRequest: 'setup-script', foo: 'baz' });
+			.expect(200, { _createdByRequest: 'setup-script', foo: 'baz' });
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'setup-script',
+			_createdByRequest: 'setup-script',
 			foo: 'baz'
 		});
 	});
@@ -129,6 +135,7 @@ describe('v1 - relationship PATCH', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
+			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
 			.expect(200);
@@ -146,7 +153,8 @@ describe('v1 - relationship PATCH', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'update-relationship-request'
+					requestId: 'update-relationship-request',
+					clientId: 'update-relationship-client'
 				}
 			],
 			[
@@ -161,7 +169,8 @@ describe('v1 - relationship PATCH', () => {
 					},
 					code: 'test-person',
 					type: 'Person',
-					requestId: 'update-relationship-request'
+					requestId: 'update-relationship-request',
+					clientId: 'update-relationship-client'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

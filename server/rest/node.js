@@ -23,16 +23,18 @@ const create = async input => {
 	} = sanitizeInput(input, 'CREATE');
 
 	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
-
+	console.log('CREATE IS CALLED')
 	try {
 		const timestamp = new Date().getTime();
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
-				SET node.createdByRequest = $requestId,
-					node.createdByTimestamp = ${timestamp},
-					node.createdByClient = $clientId
-				REMOVE node.requestId
+				SET node._createdByRequest = $requestId, node._createdByClient = $clientId,
+					node._createdTimestamp = ${timestamp},
+					node._updatedByRequest = $requestId,
+					node._updatedByClient = $clientId,
+					node._updatedTimestamp = ${timestamp}
+				DELETE node.requestId, node.clientId
 			WITH node`
 		];
 		if (relationships.length) {
@@ -51,7 +53,7 @@ const create = async input => {
 		});
 		const result = await db.run(query, { attributes, clientId, requestId });
 
-		logChanges(requestId, result);
+		logChanges(clientId, requestId, result);
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
@@ -102,12 +104,24 @@ const update = async input => {
 	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
+		const timestamp = new Date().getTime();
 		const queryParts = [
-			stripIndents`MERGE (node:${nodeType} {code: $code})
-				ON CREATE SET node.createdByRequest = $requestId
-			SET node += $attributes`
+			stripIndents`MERGE (node:${nodeType} { code: $code })
+					ON CREATE SET
+						node._createdByRequest = $requestId,
+						node._createdByClient = $clientId,
+						node._createdTimestamp = ${timestamp},
+						node._updatedByRequest = $requestId,
+						node._updatedByClient = $clientId,
+						node._updatedTimestamp = ${timestamp}
+					ON MATCH SET
+						node._updatedByRequest = $requestId,
+						node._updatedByClient = $clientId,
+						node._updatedTimestamp = ${timestamp}
+				SET node += $attributes
+				DELETE node.requestId, node.clientId
+				`
 		];
-
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
 
 		if (relationships.length) {
@@ -159,12 +173,12 @@ const update = async input => {
 			requestId,
 			clientId
 		});
-		logChanges(requestId, result, deletedRelationships);
 
+		logChanges(clientId, requestId, result, deletedRelationships);
 		return {
 			data: constructOutput(result),
 			status:
-				result.records[0].get('node').properties.createdByRequest === requestId
+				result.records[0].get('node').properties._createdByRequest === requestId
 					? 201
 					: 200
 		};
@@ -175,8 +189,10 @@ const update = async input => {
 };
 
 const remove = async input => {
-	const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
-
+	const { clientId, requestId, nodeType, code } = sanitizeInput(
+		input,
+		'DELETE'
+	);
 	// note - this calls bailOnDeletedNode, which is why it isn't done explicitly
 	// in this function
 	const record = await read(input);
@@ -190,9 +206,9 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code, requestId });
+	const result = await db.run(query, { code, clientId, requestId });
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
-	logChanges(requestId, result);
+	logChanges(clientId, requestId, result);
 
 	return { status: 204 };
 };

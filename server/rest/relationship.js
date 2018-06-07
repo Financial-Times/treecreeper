@@ -14,9 +14,9 @@ const {
 
 const create = async input => {
 	const sanitizedInput = sanitizeInput(input, 'CREATE');
-
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		attributes,
@@ -24,7 +24,6 @@ const create = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizedInput;
-
 	await Promise.all([
 		preflightChecks.bailOnDeletedNode({ nodeType, code }),
 		preflightChecks.bailOnDeletedNode({
@@ -39,9 +38,8 @@ const create = async input => {
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
+			ON CREATE SET relationship._createdByRequest = $requestId, relationship += $attributes
 			RETURN relationship`;
-
 		logger.info(
 			Object.assign(
 				{
@@ -51,14 +49,14 @@ const create = async input => {
 				input
 			)
 		);
-
 		const result = await db.run(query, {
 			attributes,
 			requestId,
 			code,
 			relatedCode
 		});
-		logChanges(requestId, result, sanitizedInput);
+		console.log(result.records[0]._fields, 'result');
+		logChanges(requestId, clientId, result, sanitizedInput);
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.missingRelationshipNode(err, sanitizedInput);
@@ -99,6 +97,7 @@ const update = async input => {
 	const sanitizedInput = sanitizeInput(input, 'UPDATE');
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		attributes,
@@ -107,7 +106,6 @@ const update = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizedInput;
-
 	await Promise.all([
 		preflightChecks.bailOnDeletedNode({ nodeType, code }),
 		preflightChecks.bailOnDeletedNode({
@@ -122,7 +120,7 @@ const update = async input => {
 			// identify which, if any, node is missing
 			stripIndents`OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
+			ON CREATE SET relationship._createdByRequest = $requestId, relationship += $attributes
 			ON MATCH SET relationship += $attributes`
 		];
 		if (deletedAttributes.length) {
@@ -151,12 +149,12 @@ const update = async input => {
 			relatedCode
 		});
 
-		logChanges(requestId, result, sanitizedInput);
+		logChanges(requestId, clientId, result, sanitizedInput);
 
 		return {
 			data: constructOutput(result),
 			status:
-				result.records[0].get('relationship').properties.createdByRequest ===
+				result.records[0].get('relationship').properties._createdByRequest ===
 				requestId
 					? 201
 					: 200
@@ -171,6 +169,7 @@ const remove = async input => {
 	const sanitizedInput = sanitizeInput(input, 'DELETE');
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		relatedType,
@@ -189,7 +188,7 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_RELATIONSHIP_QUERY', requestId, query });
 	const result = await db.run(query, { code, relatedCode });
-	logChanges(requestId, result, sanitizedInput);
+	logChanges(requestId, clientId, result, sanitizedInput);
 	return { status: 204 };
 };
 

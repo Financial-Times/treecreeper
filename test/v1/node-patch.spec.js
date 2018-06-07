@@ -3,11 +3,14 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { checkResponse, setupMocks } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - node PATCH', () => {
 	const state = {};
 
 	setupMocks(state);
+	let clock;
+	const timestamp = 1517415243;
 
 	const cleanUp = async () => {
 		await db.run(
@@ -15,19 +18,33 @@ describe('v1 - node PATCH', () => {
 		);
 	};
 
-	before(cleanUp);
-	afterEach(cleanUp);
+	beforeEach(async () => {
+		await cleanUp();
+		clock = lolex.install({ now: timestamp });
+	});
+	afterEach(async () => {
+		await cleanUp();
+		clock.uninstall();
+	});
 
 	it('update node', async () => {
 		await request(app)
 			.patch('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'update-request-id')
-			.send({ node: { foo: 'updated' } })
+			.set('x-client-id', 'update-client-id')
+			.send({
+				node: {
+					foo: 'updated'
+				}
+			})
 			.expect(200, {
 				node: {
 					foo: 'updated',
-					code: 'test-system'
+					code: 'test-system',
+					_updatedByRequest: 'update-request-id',
+					_updatedByClient: 'update-client-id',
+					_updatedTimestamp: timestamp
 				},
 				relationships: []
 			});
@@ -37,7 +54,7 @@ describe('v1 - node PATCH', () => {
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
-		expect(record.get('n').properties.createdByRequest).not.to.equal(
+		expect(record.get('n').properties._createdByRequest).not.to.equal(
 			'update-request-id'
 		);
 		expect(record.get('n').properties.foo).to.equal('updated');
@@ -48,12 +65,22 @@ describe('v1 - node PATCH', () => {
 			.patch('/v1/node/System/new-system')
 			.auth()
 			.set('x-request-id', 'update-request-id')
-			.send({ node: { foo: 'new' } })
+			.set('x-client-id', 'update-client-id')
+			.send({
+				node: {
+					foo: 'new'
+				}
+			})
 			.expect(201, {
 				node: {
 					code: 'new-system',
 					foo: 'new',
-					createdByRequest: 'update-request-id'
+					_createdByRequest: 'update-request-id',
+					_createdByClient: 'update-client-id',
+					_createdTimestamp: timestamp,
+					_updatedByRequest: 'update-request-id',
+					_updatedByClient: 'update-client-id',
+					_updatedTimestamp: timestamp
 				},
 				relationships: []
 			});
@@ -63,7 +90,12 @@ describe('v1 - node PATCH', () => {
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
-			createdByRequest: 'update-request-id',
+			_createdByRequest: 'update-request-id',
+			_createdByClient: 'update-client-id',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByRequest: 'update-request-id',
+			_updatedByClient: 'update-client-id',
+			_updatedTimestamp: { low: timestamp, high: 0 },
 			code: 'new-system',
 			foo: 'new'
 		});
@@ -105,10 +137,14 @@ describe('v1 - node PATCH', () => {
 			.patch('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'update-request-id')
+			.set('x-client-id', 'update-client-id')
 			.send({ node: { foo: null } })
 			.expect(200, {
 				node: {
-					code: 'test-system'
+					code: 'test-system',
+					_updatedByRequest: 'update-request-id',
+					_updatedByClient: 'update-client-id',
+					_updatedTimestamp: timestamp
 				},
 				relationships: []
 			});
@@ -132,6 +168,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -169,6 +206,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=append')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -177,7 +215,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships
 					})
@@ -189,9 +230,9 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
-			expect(record0.get('c').properties.createdByRequest).to.not.exist;
+			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
 				code: 'test-person'
@@ -211,6 +252,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=append')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -227,7 +269,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -254,16 +299,16 @@ describe('v1 - node PATCH', () => {
 				result.records[0].get('c').properties.code === 'other-test-person'
 					? result.records
 					: result.records.slice().reverse();
-			expect(existing.get('r').properties.createdByRequest).not.to.equal(
+			expect(existing.get('r').properties._createdByRequest).not.to.equal(
 				'update-request-id'
 			);
-			expect(existing.get('c').properties.createdByRequest).to.not.exist;
+			expect(existing.get('c').properties._createdByRequest).to.not.exist;
 			expect(existing.get('c').properties.code).to.equal('other-test-person');
 
-			expect(added.get('r').properties.createdByRequest).to.equal(
+			expect(added.get('r').properties._createdByRequest).to.equal(
 				'update-request-id'
 			);
-			expect(added.get('c').properties.createdByRequest).to.not.exist;
+			expect(added.get('c').properties._createdByRequest).to.not.exist;
 			expect(added.get('c').properties.code).to.equal('test-person');
 		});
 
@@ -272,6 +317,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -288,7 +334,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -308,9 +357,9 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
-			expect(record0.get('c').properties.createdByRequest).to.not.exist;
+			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
 				code: 'test-person'
@@ -330,6 +379,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -346,7 +396,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -366,9 +419,9 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
-			expect(record0.get('c').properties.createdByRequest).to.not.exist;
+			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
 				foo: 'bar2',
 				code: 'test-person'
@@ -388,6 +441,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -404,7 +458,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -440,6 +497,7 @@ describe('v1 - node PATCH', () => {
 				.patch('/v1/node/System/test-system?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -471,6 +529,7 @@ describe('v1 - node PATCH', () => {
 				)
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -479,7 +538,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships
 					})
@@ -492,14 +554,17 @@ describe('v1 - node PATCH', () => {
 
 			expect(record0.get('n').properties).to.eql({
 				code: 'test-system',
-				foo: 'bar1'
+				foo: 'bar1',
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: { low: timestamp, high: 0 }
 			});
 			expect(record0.get('r').properties).to.eql({
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
 			expect(record0.get('c').properties).to.eql({
 				code: 'other-test-person',
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
 		});
 
@@ -520,6 +585,7 @@ describe('v1 - node PATCH', () => {
 				)
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -528,7 +594,10 @@ describe('v1 - node PATCH', () => {
 					checkResponse(body, {
 						node: {
 							code: 'test-system',
-							foo: 'bar1'
+							foo: 'bar1',
+							_updatedByClient: 'update-client-id',
+							_updatedByRequest: 'update-request-id',
+							_updatedTimestamp: timestamp
 						},
 						relationships
 					})
@@ -541,14 +610,17 @@ describe('v1 - node PATCH', () => {
 
 			expect(record0.get('n').properties).to.eql({
 				code: 'test-system',
-				foo: 'bar1'
+				foo: 'bar1',
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: { low: timestamp, high: 0 }
 			});
 			expect(record0.get('r').properties).to.eql({
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
 			expect(record0.get('c').properties).to.eql({
 				code: 'other-test-person',
-				createdByRequest: 'update-request-id'
+				_createdByRequest: 'update-request-id'
 			});
 		});
 		it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {
@@ -558,6 +630,7 @@ describe('v1 - node PATCH', () => {
 				)
 				.auth()
 				.set('x-request-id', 'update-request-id')
+				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -574,7 +647,7 @@ describe('v1 - node PATCH', () => {
 			const result = await db.run(
 				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
-			expect(result.records[0].get('c').properties.createdByRequest).to.not
+			expect(result.records[0].get('c').properties._createdByRequest).to.not
 				.exist;
 		});
 	});
@@ -594,7 +667,8 @@ describe('v1 - node PATCH', () => {
 		await request(app)
 			.patch('/v1/node/sysTem/Test-sYStem?relationshipAction=replace')
 			.auth()
-			.set('x-request-id', 'create-request-id')
+			.set('x-request-id', 'update-request-id')
+			.set('x-client-id', 'update-client-id')
 			.send({
 				node: { foo: 'updated', code: 'Test-sYStem' },
 				relationships: {
@@ -612,7 +686,10 @@ describe('v1 - node PATCH', () => {
 				checkResponse(body, {
 					node: {
 						code: 'test-system',
-						foo: 'updated'
+						foo: 'updated',
+						_updatedByClient: 'update-client-id',
+						_updatedByRequest: 'update-request-id',
+						_updatedTimestamp: timestamp
 					},
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -643,6 +720,7 @@ describe('v1 - node PATCH', () => {
 			)
 			.auth()
 			.set('x-request-id', 'update-request-id')
+			.set('x-client-id', 'update-client-id')
 			.send({
 				node: { foo: 'updated' },
 				relationships: {
@@ -672,7 +750,8 @@ describe('v1 - node PATCH', () => {
 					action: 'UPDATE',
 					code: 'test-system',
 					type: 'System',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -687,7 +766,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -702,7 +782,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'other-test-person',
 					type: 'Person',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -717,7 +798,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -732,7 +814,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'test-person',
 					type: 'Person',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -741,7 +824,8 @@ describe('v1 - node PATCH', () => {
 					action: 'CREATE',
 					code: 'new-test-group',
 					type: 'Group',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -756,7 +840,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			],
 			[
@@ -771,7 +856,8 @@ describe('v1 - node PATCH', () => {
 					},
 					code: 'new-test-group',
 					type: 'Group',
-					requestId: 'update-request-id'
+					requestId: 'update-request-id',
+					clientId: 'update-client-id'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

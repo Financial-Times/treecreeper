@@ -15,7 +15,7 @@ describe('v1 - relationship GET', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.auth()
-			.expect(200, { createdByRequest: 'setup-script' });
+			.expect(200, { _createdByRequest: 'setup-script' });
 	});
 
 	it("responds with 404 if relationship doesn't exist", async () => {

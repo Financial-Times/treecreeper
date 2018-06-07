@@ -13,6 +13,7 @@ describe('v1 - node DELETE', () => {
 		const result = await db.run(
 			`MATCH (n:System { code: "test-system" }) RETURN n`
 		);
+		console.log(result, 'result');
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties.deletedByRequest).to.equal(requestId);
@@ -34,6 +35,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(204);
 
 		await verifyDeletion('delete-request-id');
@@ -44,6 +46,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/System/absent-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(404);
 
 		await verifyNotDeletion('delete-request-id');
@@ -59,6 +62,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(409, 'Cannot delete - System test-system has relationships');
 
 		await verifyNotDeletion('delete-request-id');
@@ -70,6 +74,7 @@ describe('v1 - node DELETE', () => {
 				.delete('/v1/node/System/test-system')
 				.auth()
 				.set('x-request-id', 'delete-request-id')
+				.set('x-client-id', 'delete-client-id')
 				.end();
 		});
 
@@ -107,6 +112,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/sysTem/Test-sYStem')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(204);
 
 		await verifyDeletion('delete-request-id');
@@ -117,6 +123,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.end();
 
 		[
@@ -126,7 +133,8 @@ describe('v1 - node DELETE', () => {
 					action: 'DELETE',
 					code: 'test-system',
 					type: 'System',
-					requestId: 'delete-request-id'
+					requestId: 'delete-request-id',
+					clientId: 'delete-client-id'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

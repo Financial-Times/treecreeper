@@ -16,7 +16,6 @@ const constructNode = result => {
 	const response = {
 		node: Object.assign({}, node.properties)
 	};
-
 	// check relationship key exists and is not null
 	// if related is not defined it means we've done an optional match on relationships
 	// and retrieved none

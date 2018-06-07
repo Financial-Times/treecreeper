@@ -15,21 +15,22 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
-			.expect(200, { createdByRequest: 'create-relationship-request' });
+			.expect(200, { _createdByRequest: 'create-relationship-request' });
 
 		const result = await getRelationship();
-
+		console.log(result, 'result');
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request'
+			_createdByRequest: 'create-relationship-request'
 		});
 	});
 
 	it('error when creating duplicate relationship', async () => {
 		await db.run(
 			`MATCH (node:System { code: 'test-system' }), (relatedNode:Person { code: 'test-person' })
-			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {createdByRequest: 'setup-query'}]->(relatedNode)
+			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {_createdByRequest: 'setup-query'}]->(relatedNode)
 			RETURN relationship`
 		);
 
@@ -38,6 +39,7 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(409);
 
@@ -51,17 +53,18 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.send({ foo: 'bar' })
 			.auth()
 			.expect(200, {
-				createdByRequest: 'create-relationship-request',
+				_createdByRequest: 'create-relationship-request',
 				foo: 'bar'
 			});
 
 		const result = await getRelationship();
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request',
+			_createdByRequest: 'create-relationship-request',
 			foo: 'bar'
 		});
 	});
@@ -72,6 +75,7 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(400);
 
@@ -85,6 +89,7 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(400);
 
@@ -108,23 +113,25 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/sYstem/tESt-System/haS_TeCH_LEAD/pERson/TesT-PErson'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
-			.expect(200, { createdByRequest: 'create-relationship-request' });
+			.expect(200, { _createdByRequest: 'create-relationship-request' });
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request'
+			_createdByRequest: 'create-relationship-request'
 		});
 	});
 
-	it('logs creation events to kinesis', async () => {
+	it.only('logs creation events to kinesis', async () => {
 		await request(app)
 			.post(
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(200);
 
@@ -141,7 +148,8 @@ describe('v1 - relationship POST', () => {
 					},
 					code: 'test-system',
 					type: 'System',
-					requestId: 'create-relationship-request'
+					requestId: 'create-relationship-request',
+					clientId: 'create-relationship-client'
 				}
 			],
 			[
@@ -156,7 +164,8 @@ describe('v1 - relationship POST', () => {
 					},
 					code: 'test-person',
 					type: 'Person',
-					requestId: 'create-relationship-request'
+					requestId: 'create-relationship-request',
+					clientId: 'create-relationship-client'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
