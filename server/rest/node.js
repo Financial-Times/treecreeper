@@ -38,7 +38,6 @@ const create = async input => {
 					node._updatedTimestamp = '${formattedDate}'
 			WITH node`
 		];
-		console.log(queryParts, 'queryParts');
 
 		if (relationships.length) {
 			queryParts.push(...createRelationships(upsert, relationships));
