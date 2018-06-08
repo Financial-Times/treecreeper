@@ -3,11 +3,21 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { setupMocks, getRelationship } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - relationship POST', () => {
 	const state = {};
+	let clock;
+	const timestamp = 1517415243;
 
 	setupMocks(state);
+	beforeEach(() => {
+		clock = lolex.install({ now: timestamp });
+	});
+
+	afterEach(() => {
+		clock.uninstall();
+	});
 
 	it('creates a relationship', async () => {
 		await request(app)
@@ -17,13 +27,24 @@ describe('v1 - relationship POST', () => {
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.auth()
-			.expect(200, { _createdByRequest: 'create-relationship-request' });
+			.expect(200, {
+				_createdByRequest: 'create-relationship-request',
+				_createdByClient: 'create-relationship-client',
+				_createdTimestamp: timestamp,
+				_updatedByRequest: 'create-relationship-request',
+				_updatedByClient: 'create-relationship-client',
+				_updatedTimestamp: timestamp
+			});
 
 		const result = await getRelationship();
-		console.log(result, 'result');
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			_createdByRequest: 'create-relationship-request'
+			_createdByRequest: 'create-relationship-request',
+			_createdByClient: 'create-relationship-client',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByRequest: 'create-relationship-request',
+			_updatedByClient: 'create-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 	});
 
@@ -58,6 +79,11 @@ describe('v1 - relationship POST', () => {
 			.auth()
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
+				_createdByClient: 'create-relationship-client',
+				_createdTimestamp: timestamp,
+				_updatedByRequest: 'create-relationship-request',
+				_updatedByClient: 'create-relationship-client',
+				_updatedTimestamp: timestamp,
 				foo: 'bar'
 			});
 
@@ -65,6 +91,11 @@ describe('v1 - relationship POST', () => {
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'create-relationship-request',
+			_createdByClient: 'create-relationship-client',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByRequest: 'create-relationship-request',
+			_updatedByClient: 'create-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 },
 			foo: 'bar'
 		});
 	});
@@ -115,17 +146,29 @@ describe('v1 - relationship POST', () => {
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.auth()
-			.expect(200, { _createdByRequest: 'create-relationship-request' });
+			.expect(200, {
+				_createdByRequest: 'create-relationship-request',
+				_createdByClient: 'create-relationship-client',
+				_createdTimestamp: timestamp,
+				_updatedByRequest: 'create-relationship-request',
+				_updatedByClient: 'create-relationship-client',
+				_updatedTimestamp: timestamp
+			});
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			_createdByRequest: 'create-relationship-request'
+			_createdByRequest: 'create-relationship-request',
+			_createdByClient: 'create-relationship-client',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByRequest: 'create-relationship-request',
+			_updatedByClient: 'create-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 	});
 
-	it.only('logs creation events to kinesis', async () => {
+	it('logs creation events to kinesis', async () => {
 		await request(app)
 			.post(
 				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'

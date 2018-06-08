@@ -35,10 +35,18 @@ const create = async input => {
 	await preflightChecks.bailOnDuplicateRelationship(sanitizedInput);
 
 	try {
+		const timestamp = new Date().getTime();
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship._createdByRequest = $requestId, relationship += $attributes
+			ON CREATE SET
+				relationship._createdByRequest = $requestId,
+				relationship._createdByClient = $clientId,
+				relationship._createdTimestamp = ${timestamp},
+				relationship._updatedByRequest = $requestId,
+				relationship._updatedByClient = $clientId,
+				relationship._updatedTimestamp = ${timestamp},
+				relationship += $attributes
 			RETURN relationship`;
 		logger.info(
 			Object.assign(
@@ -51,11 +59,11 @@ const create = async input => {
 		);
 		const result = await db.run(query, {
 			attributes,
+			clientId,
 			requestId,
 			code,
 			relatedCode
 		});
-		console.log(result.records[0]._fields, 'result');
 		logChanges(requestId, clientId, result, sanitizedInput);
 		return constructOutput(result);
 	} catch (err) {
@@ -115,13 +123,25 @@ const update = async input => {
 	]);
 
 	try {
+		const timestamp = new Date().getTime();
 		const queryParts = [
 			// OPTIONAL MATCH needed in order to throw error which will help us
 			// identify which, if any, node is missing
 			stripIndents`OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship._createdByRequest = $requestId, relationship += $attributes
-			ON MATCH SET relationship += $attributes`
+			ON CREATE SET
+				relationship._createdByRequest = $requestId,
+				relationship._createdByClient = $clientId,
+				relationship._createdTimestamp = ${timestamp},
+				relationship._updatedByRequest = $requestId,
+				relationship._updatedByClient = $clientId,
+				relationship._updatedTimestamp = ${timestamp},
+				relationship += $attributes
+			ON MATCH SET
+				relationship._updatedByRequest = $requestId,
+				relationship._updatedByClient = $clientId,
+				relationship._updatedTimestamp = ${timestamp},
+				relationship += $attributes`
 		];
 		if (deletedAttributes.length) {
 			queryParts.push(
@@ -144,6 +164,7 @@ const update = async input => {
 
 		const result = await db.run(query, {
 			attributes,
+			clientId,
 			requestId,
 			code,
 			relatedCode

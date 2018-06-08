@@ -23,13 +23,13 @@ const create = async input => {
 	} = sanitizeInput(input, 'CREATE');
 
 	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
-	console.log('CREATE IS CALLED')
 	try {
 		const timestamp = new Date().getTime();
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
-				SET node._createdByRequest = $requestId, node._createdByClient = $clientId,
+				SET node._createdByRequest = $requestId,
+				 	node._createdByClient = $clientId,
 					node._createdTimestamp = ${timestamp},
 					node._updatedByRequest = $requestId,
 					node._updatedByClient = $clientId,

@@ -184,6 +184,7 @@ const sendRelationshipEvents = (
 };
 
 const logRelationshipChanges = (requestId, clientId, result, params) => {
+	console.log('LOG RELATIONSHIP CHANGES');
 	if (!result.records[0]) {
 		sendRelationshipEvents('DELETED', requestId, clientId, params);
 	} else {

@@ -3,17 +3,32 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { setupMocks, getRelationship } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - relationship PATCH', () => {
 	const state = {};
-
+	let clock;
+	const timestamp = 76252144;
 	setupMocks(state, { withRelationships: true });
 
-	beforeEach(() =>
-		db.run(`
+	const cleanUp = async () => {
+		await db.run(`MATCH (n:System { code: "test-system" }) DETACH DELETE n`);
+		await db.run(`MATCH (n:Person { code: "test-person" }) DETACH DELETE n`);
+		await db.run(`MATCH (n:Group { code: "test-group" }) DETACH DELETE n`);
+	};
+
+	beforeEach(async () => {
+		await db.run(`
 			MATCH (node:System { code: 'test-system' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { code: 'test-person' })
 			SET relationship.foo = 'bar'
-			RETURN relationship`));
+			RETURN relationship`);
+		clock = lolex.install({ now: timestamp });
+	});
+
+	afterEach(async () => {
+		await cleanUp();
+		clock.uninstall();
+	});
 
 	it('updates a relationship', async () => {
 		await request(app)
@@ -24,13 +39,25 @@ describe('v1 - relationship PATCH', () => {
 			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
-			.expect(200, { _createdByRequest: 'setup-script', foo: 'baz' });
+			.expect(200, {
+				_createdByRequest: 'setup-script',
+				_createdByClient: 'setup-client-script',
+				_createdTimestamp: '12345',
+				_updatedByRequest: 'update-relationship-request',
+				_updatedByClient: 'update-relationship-client',
+				_updatedTimestamp: timestamp,
+				foo: 'baz'
+			});
 
 		const result = await getRelationship();
-
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'setup-script',
+			_createdByClient: 'setup-client-script',
+			_createdTimestamp: '12345',
+			_updatedByRequest: 'update-relationship-request',
+			_updatedByClient: 'update-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 },
 			foo: 'baz'
 		});
 	});
@@ -46,6 +73,11 @@ describe('v1 - relationship PATCH', () => {
 			.auth()
 			.expect(201, {
 				_createdByRequest: 'update-relationship-request',
+				_createdByClient: 'update-relationship-client',
+				_createdTimestamp: timestamp,
+				_updatedByRequest: 'update-relationship-request',
+				_updatedByClient: 'update-relationship-client',
+				_updatedTimestamp: timestamp,
 				foo: 'baz'
 			});
 
@@ -54,6 +86,11 @@ describe('v1 - relationship PATCH', () => {
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'update-relationship-request',
+			_createdByClient: 'update-relationship-client',
+			_createdTimestamp: { low: timestamp, high: 0 },
+			_updatedByRequest: 'update-relationship-request',
+			_updatedByClient: 'update-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 },
 			foo: 'baz'
 		});
 	});
@@ -67,13 +104,25 @@ describe('v1 - relationship PATCH', () => {
 			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: null, baz: null })
 			.auth()
-			.expect(200, { _createdByRequest: 'setup-script' });
+			.expect(200, {
+				_createdByRequest: 'setup-script',
+				_createdByClient: 'setup-client-script',
+				_createdTimestamp: '12345',
+				_updatedByRequest: 'update-relationship-request',
+				_updatedByClient: 'update-relationship-client',
+				_updatedTimestamp: timestamp
+			});
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			_createdByRequest: 'setup-script'
+			_createdByRequest: 'setup-script',
+			_createdByClient: 'setup-client-script',
+			_createdTimestamp: '12345',
+			_updatedByRequest: 'update-relationship-request',
+			_updatedByClient: 'update-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 }
 		});
 	});
 
@@ -118,13 +167,26 @@ describe('v1 - relationship PATCH', () => {
 			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
 			.auth()
-			.expect(200, { _createdByRequest: 'setup-script', foo: 'baz' });
+			.expect(200, {
+				_createdByRequest: 'setup-script',
+				_createdByClient: 'setup-client-script',
+				_createdTimestamp: '12345',
+				_updatedByRequest: 'update-relationship-request',
+				_updatedByClient: 'update-relationship-client',
+				_updatedTimestamp: timestamp,
+				foo: 'baz'
+			});
 
 		const result = await getRelationship();
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'setup-script',
+			_createdByClient: 'setup-client-script',
+			_createdTimestamp: '12345',
+			_updatedByRequest: 'update-relationship-request',
+			_updatedByClient: 'update-relationship-client',
+			_updatedTimestamp: { low: timestamp, high: 0 },
 			foo: 'baz'
 		});
 	});

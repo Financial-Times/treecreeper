@@ -42,7 +42,9 @@ const constructNode = result => {
 };
 
 const constructRelationship = result => {
-	return result.records[0].get('relationship').properties;
+	const relationship = result.records[0].get('relationship');
+	convertIntegerToNumber(relationship);
+	return relationship.properties;
 };
 
 module.exports = {
