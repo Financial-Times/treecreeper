@@ -8,7 +8,8 @@ const lolex = require('lolex');
 describe('v1 - relationship POST', () => {
 	const state = {};
 	let clock;
-	const timestamp = 1517415243;
+	const timestamp = 1528458548930;
+	const formattedTimestamp = 'Fri Jun 08 2018 12:49:08 GMT+0100 (BST)';
 
 	setupMocks(state);
 	beforeEach(() => {
@@ -30,10 +31,10 @@ describe('v1 - relationship POST', () => {
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
 				_createdByClient: 'create-relationship-client',
-				_createdTimestamp: timestamp,
+				_createdTimestamp: formattedTimestamp,
 				_updatedByRequest: 'create-relationship-request',
 				_updatedByClient: 'create-relationship-client',
-				_updatedTimestamp: timestamp
+				_updatedTimestamp: formattedTimestamp
 			});
 
 		const result = await getRelationship();
@@ -41,10 +42,10 @@ describe('v1 - relationship POST', () => {
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'create-relationship-request',
 			_createdByClient: 'create-relationship-client',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByRequest: 'create-relationship-request',
 			_updatedByClient: 'create-relationship-client',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 	});
 
@@ -80,10 +81,10 @@ describe('v1 - relationship POST', () => {
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
 				_createdByClient: 'create-relationship-client',
-				_createdTimestamp: timestamp,
+				_createdTimestamp: formattedTimestamp,
 				_updatedByRequest: 'create-relationship-request',
 				_updatedByClient: 'create-relationship-client',
-				_updatedTimestamp: timestamp,
+				_updatedTimestamp: formattedTimestamp,
 				foo: 'bar'
 			});
 
@@ -92,10 +93,10 @@ describe('v1 - relationship POST', () => {
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'create-relationship-request',
 			_createdByClient: 'create-relationship-client',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByRequest: 'create-relationship-request',
 			_updatedByClient: 'create-relationship-client',
-			_updatedTimestamp: { low: timestamp, high: 0 },
+			_updatedTimestamp: formattedTimestamp,
 			foo: 'bar'
 		});
 	});
@@ -149,10 +150,10 @@ describe('v1 - relationship POST', () => {
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
 				_createdByClient: 'create-relationship-client',
-				_createdTimestamp: timestamp,
+				_createdTimestamp: formattedTimestamp,
 				_updatedByRequest: 'create-relationship-request',
 				_updatedByClient: 'create-relationship-client',
-				_updatedTimestamp: timestamp
+				_updatedTimestamp: formattedTimestamp
 			});
 
 		const result = await getRelationship();
@@ -161,10 +162,10 @@ describe('v1 - relationship POST', () => {
 		expect(result.records[0].get('relationship').properties).to.eql({
 			_createdByRequest: 'create-relationship-request',
 			_createdByClient: 'create-relationship-client',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByRequest: 'create-relationship-request',
 			_updatedByClient: 'create-relationship-client',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 	});
 

@@ -10,8 +10,8 @@ describe('v1 - node PATCH', () => {
 
 	setupMocks(state);
 	let clock;
-	const timestamp = 1517415243;
-
+	const timestamp = 1528458548930;
+	const formattedTimestamp = 'Fri Jun 08 2018 12:49:08 GMT+0100 (BST)';
 	const cleanUp = async () => {
 		await db.run(
 			`MATCH (n:Person { code: "other-test-person" }) DETACH DELETE n`
@@ -44,7 +44,7 @@ describe('v1 - node PATCH', () => {
 					code: 'test-system',
 					_updatedByRequest: 'update-request-id',
 					_updatedByClient: 'update-client-id',
-					_updatedTimestamp: timestamp
+					_updatedTimestamp: formattedTimestamp
 				},
 				relationships: []
 			});
@@ -77,10 +77,10 @@ describe('v1 - node PATCH', () => {
 					foo: 'new',
 					_createdByRequest: 'update-request-id',
 					_createdByClient: 'update-client-id',
-					_createdTimestamp: timestamp,
+					_createdTimestamp: formattedTimestamp,
 					_updatedByRequest: 'update-request-id',
 					_updatedByClient: 'update-client-id',
-					_updatedTimestamp: timestamp
+					_updatedTimestamp: formattedTimestamp
 				},
 				relationships: []
 			});
@@ -92,10 +92,10 @@ describe('v1 - node PATCH', () => {
 		expect(record.get('n').properties).to.eql({
 			_createdByRequest: 'update-request-id',
 			_createdByClient: 'update-client-id',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByRequest: 'update-request-id',
 			_updatedByClient: 'update-client-id',
-			_updatedTimestamp: { low: timestamp, high: 0 },
+			_updatedTimestamp: formattedTimestamp,
 			code: 'new-system',
 			foo: 'new'
 		});
@@ -144,7 +144,7 @@ describe('v1 - node PATCH', () => {
 					code: 'test-system',
 					_updatedByRequest: 'update-request-id',
 					_updatedByClient: 'update-client-id',
-					_updatedTimestamp: timestamp
+					_updatedTimestamp: formattedTimestamp
 				},
 				relationships: []
 			});
@@ -218,7 +218,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships
 					})
@@ -272,7 +272,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -337,7 +337,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -399,7 +399,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -461,7 +461,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships: {
 							HAS_TECH_LEAD: [
@@ -541,7 +541,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships
 					})
@@ -557,7 +557,7 @@ describe('v1 - node PATCH', () => {
 				foo: 'bar1',
 				_updatedByClient: 'update-client-id',
 				_updatedByRequest: 'update-request-id',
-				_updatedTimestamp: { low: timestamp, high: 0 }
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('r').properties).to.eql({
 				_createdByRequest: 'update-request-id'
@@ -597,7 +597,7 @@ describe('v1 - node PATCH', () => {
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
-							_updatedTimestamp: timestamp
+							_updatedTimestamp: formattedTimestamp
 						},
 						relationships
 					})
@@ -613,7 +613,7 @@ describe('v1 - node PATCH', () => {
 				foo: 'bar1',
 				_updatedByClient: 'update-client-id',
 				_updatedByRequest: 'update-request-id',
-				_updatedTimestamp: { low: timestamp, high: 0 }
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('r').properties).to.eql({
 				_createdByRequest: 'update-request-id'
@@ -689,7 +689,7 @@ describe('v1 - node PATCH', () => {
 						foo: 'updated',
 						_updatedByClient: 'update-client-id',
 						_updatedByRequest: 'update-request-id',
-						_updatedTimestamp: timestamp
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships: {
 						HAS_TECH_LEAD: [

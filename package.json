@@ -60,6 +60,7 @@
 		"body-parser": "^1.18.3",
 		"common-tags": "^1.7.2",
 		"connect-timeout": "^1.9.0",
+		"date-fns": "^1.29.0",
 		"express": "^4.16.3",
 		"express-async-errors": "^2.1.2",
 		"graphql": "^0.13.2",

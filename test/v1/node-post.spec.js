@@ -10,7 +10,8 @@ describe('v1 - node POST', () => {
 	setupMocks(state);
 
 	let clock;
-	const timestamp = 1517415243;
+	const timestamp = 1528458548930;
+	const formattedTimestamp = 'Fri Jun 08 2018 12:49:08 GMT+0100 (BST)';
 
 	const cleanUp = async () => {
 		await db.run(`MATCH (n:System { code: "new-system" }) DETACH DELETE n`);
@@ -42,10 +43,10 @@ describe('v1 - node POST', () => {
 					foo: 'new',
 					_createdByClient: 'create-client-id',
 					_createdByRequest: 'create-request-id',
-					_createdTimestamp: timestamp,
+					_createdTimestamp: formattedTimestamp,
 					_updatedByClient: 'create-client-id',
 					_updatedByRequest: 'create-request-id',
-					_updatedTimestamp: timestamp
+					_updatedTimestamp: formattedTimestamp
 				},
 				relationships: []
 			});
@@ -60,10 +61,10 @@ describe('v1 - node POST', () => {
 			foo: 'new',
 			_createdByClient: 'create-client-id',
 			_createdByRequest: 'create-request-id',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByClient: 'create-client-id',
 			_updatedByRequest: 'create-request-id',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record.get('n').labels).to.eql(['System']);
 	});
@@ -129,10 +130,10 @@ describe('v1 - node POST', () => {
 						foo: 'new',
 						_createdByClient: 'create-client-id',
 						_createdByRequest: 'create-request-id',
-						_createdTimestamp: timestamp,
+						_createdTimestamp: formattedTimestamp,
 						_updatedByClient: 'create-client-id',
 						_updatedByRequest: 'create-request-id',
-						_updatedTimestamp: timestamp
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships
 				})
@@ -149,10 +150,10 @@ describe('v1 - node POST', () => {
 			foo: 'new',
 			_createdByClient: 'create-client-id',
 			_createdByRequest: 'create-request-id',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByClient: 'create-client-id',
 			_updatedByRequest: 'create-request-id',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 
 		const [person, group] =
@@ -227,10 +228,10 @@ describe('v1 - node POST', () => {
 						foo: 'new',
 						_createdByClient: 'create-client-id',
 						_createdByRequest: 'create-request-id',
-						_createdTimestamp: timestamp,
+						_createdTimestamp: formattedTimestamp,
 						_updatedByClient: 'create-client-id',
 						_updatedByRequest: 'create-request-id',
-						_updatedTimestamp: timestamp
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships
 				})
@@ -246,10 +247,10 @@ describe('v1 - node POST', () => {
 			foo: 'new',
 			_createdByClient: 'create-client-id',
 			_createdByRequest: 'create-request-id',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByClient: 'create-client-id',
 			_updatedByRequest: 'create-request-id',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
 			_createdByRequest: 'create-request-id'
@@ -290,10 +291,10 @@ describe('v1 - node POST', () => {
 			foo: 'new',
 			_createdByClient: 'create-client-id',
 			_createdByRequest: 'create-request-id',
-			_createdTimestamp: { low: timestamp, high: 0 },
+			_createdTimestamp: formattedTimestamp,
 			_updatedByClient: 'create-client-id',
 			_updatedByRequest: 'create-request-id',
-			_updatedTimestamp: { low: timestamp, high: 0 }
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
 			_createdByRequest: 'create-request-id'
@@ -342,10 +343,10 @@ describe('v1 - node POST', () => {
 						foo: 'new',
 						_createdByClient: 'create-client-id',
 						_createdByRequest: 'create-request-id',
-						_createdTimestamp: timestamp,
+						_createdTimestamp: formattedTimestamp,
 						_updatedByClient: 'create-client-id',
 						_updatedByRequest: 'create-request-id',
-						_updatedTimestamp: timestamp
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships: {
 						HAS_TECH_LEAD: [

@@ -10,6 +10,7 @@ const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
+const parse = require('date-fns/parse');
 
 const create = async input => {
 	const {
@@ -24,18 +25,21 @@ const create = async input => {
 
 	try {
 		const timestamp = new Date().getTime();
+		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
+		const formattedDate = parse(timestamp, DATE_FORMAT);
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
 				SET node._createdByRequest = $requestId,
 				 	node._createdByClient = $clientId,
-					node._createdTimestamp = ${timestamp},
+					node._createdTimestamp = '${formattedDate}',
 					node._updatedByRequest = $requestId,
 					node._updatedByClient = $clientId,
-					node._updatedTimestamp = ${timestamp}
-				DELETE node.requestId, node.clientId
+					node._updatedTimestamp = '${formattedDate}'
 			WITH node`
 		];
+		console.log(queryParts, 'queryParts');
+
 		if (relationships.length) {
 			queryParts.push(...createRelationships(upsert, relationships));
 		}
@@ -51,7 +55,6 @@ const create = async input => {
 			query
 		});
 		const result = await db.run(query, { attributes, clientId, requestId });
-
 		logChanges(clientId, requestId, result);
 		return constructOutput(result);
 	} catch (err) {
@@ -100,21 +103,22 @@ const update = async input => {
 
 	try {
 		const timestamp = new Date().getTime();
+		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
+		const formattedDate = parse(timestamp, DATE_FORMAT);
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
 						node._createdByRequest = $requestId,
 						node._createdByClient = $clientId,
-						node._createdTimestamp = ${timestamp},
+						node._createdTimestamp = '${formattedDate}',
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = ${timestamp}
+						node._updatedTimestamp = '${formattedDate}'
 					ON MATCH SET
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = ${timestamp}
+						node._updatedTimestamp = '${formattedDate}'
 				SET node += $attributes
-				DELETE node.requestId, node.clientId
 				`
 		];
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
