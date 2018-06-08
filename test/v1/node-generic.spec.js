@@ -59,12 +59,12 @@ describe('v1 - node generic', () => {
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await db.run(
-				`MATCH (n:System { code: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
 
-		describe('client code', () => {
+		describe('client id', () => {
 			it('GET no client-id returns 400', async () => {
 				return request(app)
 					.get('/v1/node/System/test-system')
@@ -102,7 +102,7 @@ describe('v1 - node generic', () => {
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await db.run(
-					`MATCH (n:System { code: "test-system" })-[r]-(c) WHERE n.isDeleted = true RETURN n, r, c`
+					`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});

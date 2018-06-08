@@ -85,7 +85,7 @@ Used to modify or create a node, optionally with relationships to other nodes.
 
 ### DELETE
 
-Used to remove a node. Note, this will not remove the entry from the database, but will flag it as `isDeleted`. _This method should be used sparingly_
+Used to remove a node. _This method should be used sparingly_
 
 | initial state                                  | status | response type |
 | ---------------------------------------------- | ------ | ------------- |

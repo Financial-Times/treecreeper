@@ -22,7 +22,6 @@ const create = async input => {
 		relationships
 	} = sanitizeInput(input, 'CREATE');
 
-	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 	try {
 		const timestamp = new Date().getTime();
 
@@ -65,8 +64,6 @@ const create = async input => {
 const read = async input => {
 	const { clientId, requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
-	await preflightChecks.bailOnDeletedNode({ nodeType, code });
-
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
 	${RETURN_NODE_WITH_RELS}`;
@@ -100,8 +97,6 @@ const update = async input => {
 	} = sanitizeInput(input, 'UPDATE');
 
 	let deletedRelationships;
-
-	await preflightChecks.bailOnDeletedNode({ nodeType, code, status: 409 });
 
 	try {
 		const timestamp = new Date().getTime();
@@ -201,13 +196,14 @@ const remove = async input => {
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
-	SET node.isDeleted = true, node.deletedByRequest = $requestId
-	RETURN node`;
+	WITH {properties: properties(node), labels: labels(node)} AS deletedNode, node
+	DELETE node
+	RETURN deletedNode as node`;
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code, clientId, requestId });
-	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
+	let result = await db.run(query, { code, clientId, requestId });
+	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
 	logChanges(clientId, requestId, result);
 
 	return { status: 204 };

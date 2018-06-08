@@ -24,13 +24,6 @@ const create = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizedInput;
-	await Promise.all([
-		preflightChecks.bailOnDeletedNode({ nodeType, code }),
-		preflightChecks.bailOnDeletedNode({
-			nodeType: relatedType,
-			code: relatedCode
-		})
-	]);
 
 	await preflightChecks.bailOnDuplicateRelationship(sanitizedInput);
 
@@ -81,13 +74,6 @@ const read = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizeInput(input, 'READ');
-	await Promise.all([
-		preflightChecks.bailOnDeletedNode({ nodeType, code }),
-		preflightChecks.bailOnDeletedNode({
-			nodeType: relatedType,
-			code: relatedCode
-		})
-	]);
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(related:${relatedType} { code: $relatedCode })
@@ -114,6 +100,7 @@ const update = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizedInput;
+<<<<<<< HEAD
 	await Promise.all([
 		preflightChecks.bailOnDeletedNode({ nodeType, code }),
 		preflightChecks.bailOnDeletedNode({
@@ -121,6 +108,8 @@ const update = async input => {
 			code: relatedCode
 		})
 	]);
+=======
+>>>>>>> origin/master
 
 	try {
 		const timestamp = new Date().getTime();
