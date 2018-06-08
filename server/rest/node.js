@@ -10,7 +10,7 @@ const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
-const parse = require('date-fns/parse');
+const { parse, format } = require('date-fns');
 
 const create = async input => {
 	const {
@@ -26,7 +26,8 @@ const create = async input => {
 	try {
 		const timestamp = new Date().getTime();
 		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = parse(timestamp, DATE_FORMAT);
+		const formattedDate = format(parse(timestamp), DATE_FORMAT);
+		console.log(formattedDate, 'formattedDate');
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
@@ -103,7 +104,7 @@ const update = async input => {
 	try {
 		const timestamp = new Date().getTime();
 		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = parse(timestamp, DATE_FORMAT);
+		const formattedDate = format(parse(timestamp), DATE_FORMAT);
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET

@@ -11,7 +11,7 @@ describe('v1 - node PATCH', () => {
 	setupMocks(state);
 	let clock;
 	const timestamp = 1528458548930;
-	const formattedTimestamp = 'Fri Jun 08 2018 12:49:08 GMT+0100 (BST)';
+	const formattedTimestamp = '08-06-2018, 12:49:08';
 	const cleanUp = async () => {
 		await db.run(
 			`MATCH (n:Person { code: "other-test-person" }) DETACH DELETE n`

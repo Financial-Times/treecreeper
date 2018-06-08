@@ -9,7 +9,7 @@ describe('v1 - relationship PATCH', () => {
 	const state = {};
 	let clock;
 	const timestamp = 1528458548930;
-	const formattedTimestamp = 'Fri Jun 08 2018 12:49:08 GMT+0100 (BST)';
+	const formattedTimestamp = '08-06-2018, 12:49:08';
 	setupMocks(state, { withRelationships: true });
 
 	const cleanUp = async () => {

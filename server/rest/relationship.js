@@ -11,7 +11,7 @@ const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
 const {
 	constructRelationship: constructOutput
 } = require('./construct-output');
-const parse = require('date-fns/parse');
+const { format, parse } = require('date-fns');
 
 const create = async input => {
 	const sanitizedInput = sanitizeInput(input, 'CREATE');
@@ -31,7 +31,7 @@ const create = async input => {
 	try {
 		const timestamp = new Date().getTime();
 		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = parse(timestamp, DATE_FORMAT);
+		const formattedDate = format(parse(timestamp), DATE_FORMAT);
 
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
@@ -108,7 +108,7 @@ const update = async input => {
 	try {
 		const timestamp = new Date().getTime();
 		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = parse(timestamp, DATE_FORMAT);
+		const formattedDate = format(parse(timestamp), DATE_FORMAT);
 
 		const queryParts = [
 			// OPTIONAL MATCH needed in order to throw error which will help us
