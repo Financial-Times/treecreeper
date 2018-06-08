@@ -5,7 +5,7 @@ const security = require('../middleware/security');
 const { nodeCrud, relationshipCrud } = require('../rest');
 const requestId = require('../middleware/request-id');
 const clientId = require('../middleware/client-id');
-console.log(clientId, 'clientid');
+
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
 	bodyParser.urlencoded({ limit: '8mb', extended: true })

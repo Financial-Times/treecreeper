@@ -40,7 +40,7 @@ const sanitizeClientId = code => {
 	if (!stringPatterns.CODE.test(sanitizedClientId)) {
 		throw httpErrors(
 			400,
-			stripIndents`Invalid node identifier \`${code}\`.
+			stripIndents`Invalid client id \`${code}\`.
 			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .`
 		);
 	}
