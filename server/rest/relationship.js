@@ -100,16 +100,6 @@ const update = async input => {
 		relatedCode,
 		relationshipType
 	} = sanitizedInput;
-<<<<<<< HEAD
-	await Promise.all([
-		preflightChecks.bailOnDeletedNode({ nodeType, code }),
-		preflightChecks.bailOnDeletedNode({
-			nodeType: relatedType,
-			code: relatedCode
-		})
-	]);
-=======
->>>>>>> origin/master
 
 	try {
 		const timestamp = new Date().getTime();

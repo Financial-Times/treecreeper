@@ -202,7 +202,7 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	let result = await db.run(query, { code, clientId, requestId });
+	const result = await db.run(query, { code, clientId, requestId });
 	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
 	logChanges(clientId, requestId, result);
 
