@@ -10,7 +10,6 @@ const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
-const { parse, format } = require('date-fns');
 
 const create = async input => {
 	const {
@@ -24,19 +23,16 @@ const create = async input => {
 	} = sanitizeInput(input, 'CREATE');
 
 	try {
-		const timestamp = new Date().getTime();
-		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = format(parse(timestamp), DATE_FORMAT);
-		console.log(formattedDate, 'formattedDate');
+		const date = new Date().toUTCString();
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
 				SET node._createdByRequest = $requestId,
 				 	node._createdByClient = $clientId,
-					node._createdTimestamp = '${formattedDate}',
+					node._createdTimestamp = '${date}',
 					node._updatedByRequest = $requestId,
 					node._updatedByClient = $clientId,
-					node._updatedTimestamp = '${formattedDate}'
+					node._updatedTimestamp = '${date}'
 			WITH node`
 		];
 
@@ -102,22 +98,21 @@ const update = async input => {
 	let deletedRelationships;
 
 	try {
-		const timestamp = new Date().getTime();
-		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = format(parse(timestamp), DATE_FORMAT);
+		const date = new Date().toUTCString();
+
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
 						node._createdByRequest = $requestId,
 						node._createdByClient = $clientId,
-						node._createdTimestamp = '${formattedDate}',
+						node._createdTimestamp = '${date}',
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = '${formattedDate}'
+						node._updatedTimestamp = '${date}'
 					ON MATCH SET
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = '${formattedDate}'
+						node._updatedTimestamp = '${date}'
 				SET node += $attributes
 				`
 		];

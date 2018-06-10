@@ -11,7 +11,7 @@ describe('v1 - node POST', () => {
 
 	let clock;
 	const timestamp = 1528458548930;
-	const formattedTimestamp = '08-06-2018, 12:49:08';
+	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 
 	const cleanUp = async () => {
 		await db.run(`MATCH (n:System { code: "new-system" }) DETACH DELETE n`);

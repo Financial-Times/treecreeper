@@ -11,7 +11,6 @@ const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
 const {
 	constructRelationship: constructOutput
 } = require('./construct-output');
-const { format, parse } = require('date-fns');
 
 const create = async input => {
 	const sanitizedInput = sanitizeInput(input, 'CREATE');
@@ -29,9 +28,7 @@ const create = async input => {
 	await preflightChecks.bailOnDuplicateRelationship(sanitizedInput);
 
 	try {
-		const timestamp = new Date().getTime();
-		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = format(parse(timestamp), DATE_FORMAT);
+		const date = new Date().toUTCString();
 
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
@@ -39,10 +36,10 @@ const create = async input => {
 			ON CREATE SET
 				relationship._createdByRequest = $requestId,
 				relationship._createdByClient = $clientId,
-				relationship._createdTimestamp = '${formattedDate}',
+				relationship._createdTimestamp = '${date}',
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${formattedDate}',
+				relationship._updatedTimestamp = '${date}',
 				relationship += $attributes
 			RETURN relationship`;
 		logger.info(
@@ -106,9 +103,7 @@ const update = async input => {
 	} = sanitizedInput;
 
 	try {
-		const timestamp = new Date().getTime();
-		const DATE_FORMAT = 'DD-MM-YYYY, HH:mm:ss';
-		const formattedDate = format(parse(timestamp), DATE_FORMAT);
+		const date = new Date().toUTCString();
 
 		const queryParts = [
 			// OPTIONAL MATCH needed in order to throw error which will help us
@@ -118,15 +113,15 @@ const update = async input => {
 			ON CREATE SET
 				relationship._createdByRequest = $requestId,
 				relationship._createdByClient = $clientId,
-				relationship._createdTimestamp = '${formattedDate}',
+				relationship._createdTimestamp = '${date}',
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${formattedDate}',
+				relationship._updatedTimestamp = '${date}',
 				relationship += $attributes
 			ON MATCH SET
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${formattedDate}',
+				relationship._updatedTimestamp = '${date}',
 				relationship += $attributes`
 		];
 		if (deletedAttributes.length) {
