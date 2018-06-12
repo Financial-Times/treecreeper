@@ -117,7 +117,7 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/DROP ALL/test-system')
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect( 400, {
+						.expect(400, {
 							error:
 								'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
 						});
@@ -128,7 +128,7 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/System/DROP ALL')
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect( 400, {
+						.expect(400, {
 							error:
 								'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
 						});
@@ -139,7 +139,7 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/System/test-system')
 						.auth()
 						.set('x-request-id', 'DROP ALL')
-						.expect( 400, {
+						.expect(400, {
 							error:
 								'Invalid request id `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
 						});
