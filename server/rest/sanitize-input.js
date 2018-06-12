@@ -7,7 +7,7 @@ const stringPatterns = {
 	CODE: /^[a-z\d][a-z\d\-\.]+[a-z\d]$/, // system-code.1
 	REQUEST_ID: /^[a-z\d][a-z\d\-]+[a-z\d]$/i, //5aFG-y7 ...
 	RELATIONSHIP_NAME: /^[A-Z][A-Z_]+[A-Z]$/, // HAS_A_RELATIONSHIP
-	ATTRIBUTE_NAME: /^[a-z][a-zA-Z\d]+$/ // attributeName
+	ATTRIBUTE_NAME: /^([a-z][a-zA-Z\d]+|SF_ID)$/ // attributeName
 };
 
 const sanitizeNodeType = nodeType => {
