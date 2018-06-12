@@ -76,7 +76,7 @@ describe('v1 - node PATCH', () => {
 			.send({ node: { foo: 'updated', code: 'wrong-code' } })
 			.expect(
 				400,
-				'Conflicting code attribute `wrong-code` for System test-system'
+				{ error: 'Conflicting code attribute `wrong-code` for System test-system' }
 			);
 	});
 
@@ -144,7 +144,7 @@ describe('v1 - node PATCH', () => {
 				})
 				.expect(
 					400,
-					'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+					{error: 'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`' }
 				);
 
 			const result = await db.run(

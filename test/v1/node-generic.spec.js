@@ -119,7 +119,7 @@ describe('v1 - node generic', () => {
 						.set('x-request-id', 'security-request-id')
 						.expect(
 							400,
-							'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
+							{error: 'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'}
 						);
 				});
 
@@ -130,7 +130,7 @@ describe('v1 - node generic', () => {
 						.set('x-request-id', 'security-request-id')
 						.expect(
 							400,
-							'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
+							{error: 'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'}
 						);
 				});
 
@@ -141,7 +141,7 @@ describe('v1 - node generic', () => {
 						.set('x-request-id', 'DROP ALL')
 						.expect(
 							400,
-							'Invalid request id `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
+							{error: 'Invalid request id `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'}
 						);
 				});
 
@@ -207,7 +207,7 @@ describe('v1 - node generic', () => {
 								})
 								.expect(
 									400,
-									'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
+									{error: 'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'}
 								);
 						});
 
@@ -229,7 +229,7 @@ describe('v1 - node generic', () => {
 								})
 								.expect(
 									400,
-									'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
+									{error: 'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'}
 								);
 						});
 
@@ -251,7 +251,7 @@ describe('v1 - node generic', () => {
 								})
 								.expect(
 									400,
-									'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'
+									{error: 'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'}
 								);
 						});
 					});
