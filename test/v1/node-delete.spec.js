@@ -55,7 +55,9 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/System/test-system')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
-			.expect(409, {error: 'Cannot delete - System test-system has relationships'});
+			.expect(409, {
+				error: 'Cannot delete - System test-system has relationships'
+			});
 
 		await verifyNotDeletion();
 	});

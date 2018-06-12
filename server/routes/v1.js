@@ -20,7 +20,7 @@ const failure = res => err => {
 		logger.info({ error: err });
 		err = { status: 500, message: err.toString() };
 	}
-	res.status(err.status).json({error: err.message});
+	res.status(err.status).json({ error: err.message });
 };
 
 module.exports = router => {

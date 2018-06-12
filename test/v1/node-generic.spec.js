@@ -117,10 +117,10 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/DROP ALL/test-system')
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(
-							400,
-							{error: 'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'}
-						);
+						.expect( 400, {
+							error:
+								'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
+						});
 				});
 
 				it('should error when node code is suspicious', async () => {
@@ -128,10 +128,10 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/System/DROP ALL')
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(
-							400,
-							{error: 'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'}
-						);
+						.expect( 400, {
+							error:
+								'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
+						});
 				});
 
 				it('should error when request id is suspicious', async () => {
@@ -139,10 +139,10 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/System/test-system')
 						.auth()
 						.set('x-request-id', 'DROP ALL')
-						.expect(
-							400,
-							{error: 'Invalid request id `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'}
-						);
+						.expect( 400, {
+							error:
+								'Invalid request id `DROP ALL`.\nMust be a string containing only a-z, 0-9 and -, not beginning or ending with -.'
+						});
 				});
 
 				if (checkBody) {
@@ -205,10 +205,10 @@ describe('v1 - node generic', () => {
 										]
 									}
 								})
-								.expect(
-									400,
-									{error: 'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'}
-								);
+								.expect(400, {
+									error:
+										'Invalid node type `DROP ALL`.\nMust be a string containing only a-z, beginning with a capital letter'
+								});
 						});
 
 						it('should error when relationship node code is suspicious', async () => {
@@ -227,10 +227,10 @@ describe('v1 - node generic', () => {
 										]
 									}
 								})
-								.expect(
-									400,
-									{error: 'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'}
-								);
+								.expect(400, {
+									error:
+										'Invalid node identifier `DROP ALL`.\nMust be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .'
+								});
 						});
 
 						it('should error when relationship type is suspicious', async () => {
@@ -249,10 +249,10 @@ describe('v1 - node generic', () => {
 										]
 									}
 								})
-								.expect(
-									400,
-									{error: 'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'}
-								);
+								.expect(400, {
+									error:
+										'Invalid relationship `DROP ALL`.\nMust be a string containing only A-Z and _, not beginning or ending with _.'
+								});
 						});
 					});
 				}

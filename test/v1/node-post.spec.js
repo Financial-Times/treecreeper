@@ -50,7 +50,9 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/test-system')
 			.auth()
 			.send({ node: { foo: 'new-again' } })
-			.expect(409, {error: 'System test-system already exists'});
+			.expect(409, {
+				error: 'System test-system already exists'
+			});
 	});
 
 	it('error when conflicting code values', async () => {
@@ -58,10 +60,9 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/System/new-system')
 			.auth()
 			.send({ node: { foo: 'new', code: 'wrong-code' } })
-			.expect(
-				400,
-				{error: 'Conflicting code attribute `wrong-code` for System new-system'}
-			);
+			.expect(400, {
+				error: 'Conflicting code attribute `wrong-code` for System new-system'
+			});
 	});
 
 	it('not error when non-conflicting code values', async () => {
