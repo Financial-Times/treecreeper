@@ -1,64 +1,20 @@
 const logger = require('@financial-times/n-logger').default;
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const schemaCompliance = require('./schema-compliance');
+const { stringPatterns } = require('../../schema');
 
-const stringPatterns = {
-	NODE_TYPE: /^[A-Z][a-z]+$/, // NodeType
-	CODE: /^[a-z\d][a-z\d\-\.]+[a-z\d]$/, // system-code.1
-	REQUEST_ID: /^[a-z\d][a-z\d\-]+[a-z\d]$/i, //5aFG-y7 ...
-	RELATIONSHIP_NAME: /^[A-Z][A-Z_]+[A-Z]$/, // HAS_A_RELATIONSHIP
-	ATTRIBUTE_NAME: /^([a-z][a-zA-Z\d]+|SF_ID)$/ // attributeName
-};
-
-const sanitizeNodeType = nodeType => {
-	const sanitizedNodeType =
-		nodeType.charAt(0).toUpperCase() + nodeType.substr(1).toLowerCase();
-	if (!stringPatterns.NODE_TYPE.test(sanitizedNodeType)) {
+const validateRequestId = id => {
+	if (!stringPatterns.REQUEST_ID.test(id)) {
 		throw httpErrors(
 			400,
-			stripIndents`Invalid node type \`${nodeType}\`.
-			Must be a string containing only a-z, beginning with a capital letter`
-		);
-	}
-	return sanitizedNodeType;
-};
-
-const sanitizeCode = code => {
-	const sanitizedCode = code.toLowerCase();
-	if (!stringPatterns.CODE.test(sanitizedCode)) {
-		throw httpErrors(
-			400,
-			stripIndents`Invalid node identifier \`${code}\`.
-			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with - or .`
-		);
-	}
-	return sanitizedCode;
-};
-
-const sanitizeRequestId = code => {
-	if (!stringPatterns.REQUEST_ID.test(code)) {
-		throw httpErrors(
-			400,
-			stripIndents`Invalid request id \`${code}\`.
+			stripIndents`Invalid request id \`${id}\`.
 			Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
 		);
 	}
-	return code;
 };
 
-const sanitizeRelationshipName = relationship => {
-	const sanitizedRelationship = relationship.toUpperCase();
-	if (!stringPatterns.RELATIONSHIP_NAME.test(sanitizedRelationship)) {
-		throw httpErrors(
-			400,
-			stripIndents`Invalid relationship \`${relationship}\`.
-			Must be a string containing only A-Z and _, not beginning or ending with _.`
-		);
-	}
-	return sanitizedRelationship;
-};
-
-const sanitizeAttributeNames = attributes => {
+const validateAttributeNames = attributes => {
 	const nonCamelCaseAttributeName = Object.keys(attributes).find(
 		// FIXME: allow SF_ID as, at least for a while, we need this to exist so that
 		// salesforce sync works during the transition to the new architecture
@@ -75,14 +31,14 @@ const sanitizeAttributeNames = attributes => {
 	}
 };
 
-const sanitizeAttributes = ({
+const categorizeAttributes = ({
 	nodeType,
 	code,
 	attributes,
 	requestId,
 	method
 }) => {
-	if (attributes.code && sanitizeCode(attributes.code) !== code) {
+	if (attributes.code && attributes.code !== code) {
 		throw httpErrors(
 			400,
 			`Conflicting code attribute \`${
@@ -91,7 +47,8 @@ const sanitizeAttributes = ({
 		);
 	}
 
-	sanitizeAttributeNames(attributes);
+	validateAttributeNames(attributes);
+	schemaCompliance.validateNodeAttributes(nodeType, attributes);
 
 	if (method === 'CREATE') {
 		attributes.createdByRequest = requestId;
@@ -122,17 +79,17 @@ const sanitizeShared = ({
 	query,
 	method
 }) => {
-	sanitizeRequestId(requestId);
-
-	code = sanitizeCode(code);
+	validateRequestId(requestId);
+	schemaCompliance.validateNodeType(nodeType);
+	schemaCompliance.validateCode(nodeType, code);
 
 	const result = {
 		requestId,
-		nodeType: sanitizeNodeType(nodeType),
+		nodeType,
 		code
 	};
 
-	const { writeAttributes, deletedAttributes } = sanitizeAttributes({
+	const { writeAttributes, deletedAttributes } = categorizeAttributes({
 		nodeType,
 		attributes,
 		code,
@@ -167,7 +124,7 @@ const sanitizeNode = (inputs, method) => {
 		const relationships = Object.entries(input.relationships).reduce(
 			(map, [relType, relInstances]) =>
 				Object.assign(map, {
-					[sanitizeRelationshipName(relType)]: relInstances
+					[relType]: relInstances
 				}),
 			{}
 		);
@@ -175,12 +132,22 @@ const sanitizeNode = (inputs, method) => {
 			relationshipTypes: Object.keys(relationships),
 			relationships: [].concat(
 				...Object.entries(relationships).map(([relType, relInstances]) => {
-					return relInstances.map(rel => ({
-						nodeType: sanitizeNodeType(rel.nodeType),
-						nodeCode: sanitizeCode(rel.nodeCode),
-						relType,
-						direction: rel.direction
-					}));
+					return relInstances.map(({ direction, nodeCode, nodeType }) => {
+						schemaCompliance.validateRelationship({
+							nodeType: direction === 'outgoing' ? result.nodeType : nodeType,
+							relatedType:
+								direction === 'outgoing' ? nodeType : result.nodeType,
+							relationshipType: relType,
+							relatedCode: direction === 'outgoing' ? nodeCode : result.code
+						});
+
+						return {
+							nodeType,
+							nodeCode,
+							relType,
+							direction
+						};
+					});
 				})
 			)
 		});
@@ -195,11 +162,15 @@ const sanitizeRelationship = (inputs, method) => {
 
 	logger.info(Object.assign({ event: 'RELATIONSHIP_ENDPOINT_CALL' }, input));
 
-	return Object.assign(sanitizeShared(input), {
-		relatedType: sanitizeNodeType(input.relatedType),
-		relatedCode: sanitizeCode(input.relatedCode),
-		relationshipType: sanitizeRelationshipName(input.relationshipType)
+	const completedInput = Object.assign(sanitizeShared(input), {
+		relatedType: input.relatedType,
+		relatedCode: input.relatedCode,
+		relationshipType: input.relationshipType
 	});
+
+	schemaCompliance.validateRelationship(completedInput);
+
+	return completedInput;
 };
 
 module.exports = {

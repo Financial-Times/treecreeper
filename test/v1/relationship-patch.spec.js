@@ -11,15 +11,13 @@ describe('v1 - relationship PATCH', () => {
 
 	beforeEach(() =>
 		db.run(`
-			MATCH (node:System { code: 'test-system' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { code: 'test-person' })
+			MATCH (node:Team { code: 'test-team' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { code: 'test-person' })
 			SET relationship.foo = 'bar'
 			RETURN relationship`));
 
 	it('updates a relationship', async () => {
 		await request(app)
-			.patch(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'update-relationship-request')
 			.send({ foo: 'baz' })
 			.auth()
@@ -37,7 +35,7 @@ describe('v1 - relationship PATCH', () => {
 	it('Creates when patching non-existent relationship', async () => {
 		await request(app)
 			.patch(
-				'/v1/relationship/System/test-system/HAS_TEAM_MEMBER/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
 			.send({ foo: 'baz' })
@@ -47,7 +45,7 @@ describe('v1 - relationship PATCH', () => {
 				foo: 'baz'
 			});
 
-		const result = await getRelationship('HAS_TEAM_MEMBER');
+		const result = await getRelationship('HAS_DELIVERY_LEAD');
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
@@ -58,9 +56,7 @@ describe('v1 - relationship PATCH', () => {
 
 	it("deletes attributes which are provided as 'null'", async () => {
 		await request(app)
-			.patch(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'update-relationship-request')
 			.send({ foo: null, baz: null })
 			.auth()
@@ -77,7 +73,7 @@ describe('v1 - relationship PATCH', () => {
 	it('error when updating relationship from non-existent node', async () => {
 		await request(app)
 			.patch(
-				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
 			.auth()
@@ -87,7 +83,7 @@ describe('v1 - relationship PATCH', () => {
 	it('error when updating relationship to non-existent node', async () => {
 		await request(app)
 			.patch(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'update-relationship-request')
 			.auth()
@@ -97,37 +93,14 @@ describe('v1 - relationship PATCH', () => {
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.patch(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()
 			.expect(500);
 	});
 
-	it('has case insensitive url', async () => {
-		await request(app)
-			.patch(
-				'/v1/relationship/sYstem/tESt-System/haS_TeCH_LEAD/pERson/TesT-PErson'
-			)
-			.set('x-request-id', 'update-relationship-request')
-			.send({ foo: 'baz' })
-			.auth()
-			.expect(200, { createdByRequest: 'setup-script', foo: 'baz' });
-
-		const result = await getRelationship();
-
-		expect(result.records.length).to.equal(1);
-		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'setup-script',
-			foo: 'baz'
-		});
-	});
-
 	it('logs update events to kinesis', async () => {
 		await request(app)
-			.patch(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'update-relationship-request')
 			.send({ foo: 'baz' })
 			.auth()
@@ -144,8 +117,8 @@ describe('v1 - relationship PATCH', () => {
 						nodeCode: 'test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'update-relationship-request'
 				}
 			],
@@ -156,8 +129,8 @@ describe('v1 - relationship PATCH', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'test-person',
 					type: 'Person',

@@ -1,0 +1,42 @@
+name: Repository
+pluralName: Repositories
+description: A source code repository
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
+    canIdentify: true
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    description: Display Name
+  url:
+    type: String
+    required: true
+    canIdentify: true
+    description: Repository URL
+  vcsID:
+    type: Int
+    description: Repository hosts internal ID
+  sshUrl:
+    type: String
+    required: true
+    canIdentify: true
+    description: SSH URL to checkout the source
+  isPrivate:
+    type: Boolean
+    canFilter: true
+    description: Is the repository private
+  isArchived:
+    type: Boolean
+    canFilter: true
+    description: Is the repository archived
+  description:
+    type: String
+    description: Repository description field
+  mostRecentCircleCIPlatform:
+    type: CircleCiVersion
+    canFilter: true
+    description: Most recently indexed CircleCI version used

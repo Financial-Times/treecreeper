@@ -10,7 +10,7 @@ describe('v1 - node POST', () => {
 	setupMocks(state);
 
 	const cleanUp = async () => {
-		await db.run(`MATCH (n:System { code: "new-system" }) DETACH DELETE n`);
+		await db.run(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
 		await db.run(
 			`MATCH (n:Person { code: "new-test-person" }) DETACH DELETE n`
 		);
@@ -21,55 +21,49 @@ describe('v1 - node POST', () => {
 
 	it('create node', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({ node: { foo: 'new' } })
 			.expect(200, {
 				node: {
-					code: 'new-system',
+					code: 'new-team',
 					foo: 'new'
 				},
 				relationships: []
 			});
-		const result = await db.run(
-			`MATCH (n:System { code: "new-system" }) RETURN n`
-		);
+		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			code: 'new-system',
+			code: 'new-team',
 			foo: 'new'
 		});
-		expect(record.get('n').labels).to.eql(['System']);
+		expect(record.get('n').labels).to.eql(['Team']);
 	});
 
 	it('error when creating duplicate node', async () => {
 		await request(app)
-			.post('/v1/node/System/test-system')
+			.post('/v1/node/Team/test-team')
 			.auth()
 			.send({ node: { foo: 'new-again' } })
-			.expect(409, {
-				error: 'System test-system already exists'
-			});
+			.expect(409, /Team test-team already exists/);
 	});
 
 	it('error when conflicting code values', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
 			.send({ node: { foo: 'new', code: 'wrong-code' } })
-			.expect(400, {
-				error: 'Conflicting code attribute `wrong-code` for System new-system'
-			});
+			.expect(400, /Conflicting code attribute `wrong-code` for Team new-team/);
 	});
 
 	it('not error when non-conflicting code values', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
-			.send({ node: { foo: 'new', code: 'new-system' } })
+			.send({ node: { foo: 'new', code: 'new-team' } })
 			.expect(200);
 	});
 
@@ -82,7 +76,7 @@ describe('v1 - node POST', () => {
 					nodeCode: 'test-person'
 				}
 			],
-			OWNS: [
+			HAS_TEAM: [
 				{
 					direction: 'incoming',
 					nodeType: 'Group',
@@ -91,7 +85,7 @@ describe('v1 - node POST', () => {
 			]
 		};
 		await request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
@@ -102,7 +96,7 @@ describe('v1 - node POST', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						code: 'new-system',
+						code: 'new-team',
 						foo: 'new'
 					},
 					relationships
@@ -110,14 +104,14 @@ describe('v1 - node POST', () => {
 			);
 
 		const result = await db.run(
-			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 
 		expect(result.records.length).to.equal(2);
 
 		expect(result.records[0].get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			code: 'new-system',
+			code: 'new-team',
 			foo: 'new'
 		});
 
@@ -147,7 +141,7 @@ describe('v1 - node POST', () => {
 
 	it('error when creating node related to non-existent nodes', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
@@ -177,7 +171,7 @@ describe('v1 - node POST', () => {
 		};
 
 		await request(app)
-			.post('/v1/node/System/new-system?upsert=true')
+			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
@@ -188,21 +182,21 @@ describe('v1 - node POST', () => {
 			.then(({ body }) =>
 				checkResponse(body, {
 					node: {
-						code: 'new-system',
+						code: 'new-team',
 						foo: 'new'
 					},
 					relationships
 				})
 			);
 		const result = await db.run(
-			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 
 		expect(record0.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			code: 'new-system',
+			code: 'new-team',
 			foo: 'new'
 		});
 		expect(record0.get('r').properties).to.eql({
@@ -216,7 +210,7 @@ describe('v1 - node POST', () => {
 
 	it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system?upsert=true')
+			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
@@ -234,13 +228,13 @@ describe('v1 - node POST', () => {
 			.expect(200);
 
 		const result = await db.run(
-			`MATCH (n:System { code: "new-system" })-[r]-(c) RETURN n, r, c`
+			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 		expect(record0.get('n').properties).to.eql({
 			createdByRequest: 'create-request-id',
-			code: 'new-system',
+			code: 'new-team',
 			foo: 'new'
 		});
 		expect(record0.get('r').properties).to.eql({
@@ -256,7 +250,7 @@ describe('v1 - node POST', () => {
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.post('/v1/node/System/new-system')
+			.post('/v1/node/Team/new-team')
 			.auth()
 			.send({
 				node: { foo: 'new' }
@@ -264,46 +258,9 @@ describe('v1 - node POST', () => {
 			.expect(500);
 	});
 
-	it('has case insensitive url and relationship configs', async () => {
-		await request(app)
-			.post('/v1/node/sysTem/New-sYStem')
-			.auth()
-			.set('x-request-id', 'create-request-id')
-			.send({
-				node: { foo: 'new', code: 'New-sYStem' },
-				relationships: {
-					hAS_TeCH_LEAD: [
-						{
-							direction: 'outgoing',
-							nodeType: 'peRson',
-							nodeCode: 'TesT-peRSOn'
-						}
-					]
-				}
-			})
-			.expect(200)
-			.then(({ body }) =>
-				checkResponse(body, {
-					node: {
-						code: 'new-system',
-						foo: 'new'
-					},
-					relationships: {
-						HAS_TECH_LEAD: [
-							{
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'test-person'
-							}
-						]
-					}
-				})
-			);
-	});
-
 	it('logs creation events to kinesis', async () => {
 		await request(app)
-			.post('/v1/node/System/new-system?upsert=true')
+			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
 			.send({
@@ -318,7 +275,7 @@ describe('v1 - node POST', () => {
 							nodeCode: 'new-test-person'
 						}
 					],
-					OWNS: [
+					HAS_TEAM: [
 						{
 							//connect to existing node
 							direction: 'incoming',
@@ -334,8 +291,8 @@ describe('v1 - node POST', () => {
 				{
 					event: 'CREATED_NODE',
 					action: 'CREATE',
-					code: 'new-system',
-					type: 'System',
+					code: 'new-team',
+					type: 'Team',
 					requestId: 'create-request-id'
 				}
 			],
@@ -358,8 +315,8 @@ describe('v1 - node POST', () => {
 						nodeCode: 'new-test-person',
 						nodeType: 'Person'
 					},
-					code: 'new-system',
-					type: 'System',
+					code: 'new-team',
+					type: 'Team',
 					requestId: 'create-request-id'
 				}
 			],
@@ -370,8 +327,8 @@ describe('v1 - node POST', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'new-system',
-						nodeType: 'System'
+						nodeCode: 'new-team',
+						nodeType: 'Team'
 					},
 					code: 'new-test-person',
 					type: 'Person',
@@ -383,13 +340,13 @@ describe('v1 - node POST', () => {
 					event: 'CREATED_RELATIONSHIP',
 					action: 'UPDATE',
 					relationship: {
-						relType: 'OWNS',
+						relType: 'HAS_TEAM',
 						direction: 'incoming',
 						nodeCode: 'test-group',
 						nodeType: 'Group'
 					},
-					code: 'new-system',
-					type: 'System',
+					code: 'new-team',
+					type: 'Team',
 					requestId: 'create-request-id'
 				}
 			],
@@ -398,10 +355,10 @@ describe('v1 - node POST', () => {
 					event: 'CREATED_RELATIONSHIP',
 					action: 'UPDATE',
 					relationship: {
-						relType: 'OWNS',
+						relType: 'HAS_TEAM',
 						direction: 'outgoing',
-						nodeCode: 'new-system',
-						nodeType: 'System'
+						nodeCode: 'new-team',
+						nodeType: 'Team'
 					},
 					code: 'test-group',
 					type: 'Group',

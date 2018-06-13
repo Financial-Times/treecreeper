@@ -5,7 +5,7 @@ const schema = require('../graphQl/schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
-  	System(id: "dewey") {
+  	System(code: "dewey") {
 		name
 		serviceTier
 		primaryURL

@@ -1,32 +1,28 @@
 const { session: db } = require('../server/db-connection');
-const nodeTypes = require('../server/lib/checks').nodeTypes;
+
+const { typesSchema } = require('../schema');
 
 const constraints = async verb => {
 	console.log(`Running ${verb} constraints...`);
 
-	const constraintQueries = [
-		// cmdb constainsts
-		`${verb} CONSTRAINT ON (s:CostCentre) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:CostCentre) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Domain) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Domain) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Group) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Group) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Healthcheck) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Healthcheck) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Person) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Person) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Product) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Product) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Repository) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Repository) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Supplier) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:System) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:System) ASSERT exists(s.code)`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT s.code IS UNIQUE`,
-		`${verb} CONSTRAINT ON (s:Team) ASSERT exists(s.code)`
-	];
+	const constraintQueries = []
+		.concat(
+			...typesSchema.map(({ name: typeName, properties }) => {
+				return [].concat(
+					...Object.entries(properties).map(
+						([propName, { required, unique }]) => {
+							return [
+								unique &&
+									`${verb} CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
+								required &&
+									`${verb} CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+							];
+						}
+					)
+				);
+			})
+		)
+		.filter(query => !!query);
 
 	const setupConstraintIfPossible = constraintQuery =>
 		db.run(constraintQuery).catch(err => {
@@ -40,31 +36,13 @@ const constraints = async verb => {
 	console.log('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
-const dropNodes = async nodeTypes => {
+const dropNodes = async () => {
+	const nodeTypes = typesSchema.map(type => type.name);
+
 	console.log(`dropping nodes ${nodeTypes.join(' ')}...`);
+
 	return await Promise.all(
-		nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DELETE a`))
-	);
-};
-
-const dropRelationships = async () => {
-	console.log('dropping relationships...');
-	const relationships = [
-		'o:OWNEDBY',
-		'o:ASKS',
-		'o:RAISES',
-		'o:ALLOWS',
-		'o:SIGNS',
-		'o:SUBMITS',
-		'o:ANSWERS',
-		'o:ANSWERS_QUESTION',
-		'o:HAS'
-	];
-
-	return Promise.all(
-		relationships.map(relationship =>
-			db.run(`MATCH ()-[${relationship}]->() DELETE o`)
-		)
+		nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DETACH DELETE a`))
 	);
 };
 
@@ -72,12 +50,11 @@ const init = async () => {
 	if (process.env.NODE_ENV !== 'production') {
 		// DROP
 		await constraints('DROP');
-		await dropRelationships();
-		await dropNodes(nodeTypes);
-
-		// CREATE
-		await constraints('CREATE');
+		await dropNodes();
 	}
+
+	// CREATE
+	await constraints('CREATE');
 };
 
 const initMiddleware = async (req, res) => {

@@ -1,0 +1,18 @@
+name: Group
+description: An overarching group which contains teams and is costed separately
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    pattern: STRICT_CODE
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    canIdentify: true
+    description: The name of the group
+  status:
+    type: Status
+    canFilter: true
+    description: Whether or not the group is still in existence

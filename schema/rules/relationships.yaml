@@ -1,0 +1,214 @@
+PAYS_FOR:
+  type: ONE_TO_MANY
+  fromType:
+    CostCentre:
+      graphql:
+        name: hasGroups
+        description: The groups which are costed to the cost centre
+  toType:
+    Group:
+      graphql:
+        name: hasBudget
+        description: The Cost Centre associated with the group
+
+HAS_TECH_DIRECTOR:
+  type: MANY_TO_ONE
+  fromType:
+    Group:
+      graphql:
+        name: techDirector
+        description: The tech director who owns the group
+  toType:
+    Person:
+      graphql:
+        name: isTechDirectorFor
+        description: Groups the person is a technical director for
+
+HAS_PRODUCT_OWNER:
+  type: MANY_TO_MANY
+  fromType:
+    Group:
+      graphql:
+        name: productOwner
+        description: The product owners of systems or products within the Group
+  toType:
+    Person:
+      graphql:
+        name: isProductOwnerFor
+        description: Groups the person is a product owner for
+
+HAS_TECH_LEAD:
+  type: MANY_TO_MANY
+  fromType:
+    Team:
+      graphql:
+        name: techLead
+        description: The tech leads of the team
+  toType:
+    Person:
+      graphql:
+        name: isTechLeadFor
+        description: Teams the person is a technical lead for
+
+HAS_DELIVERY_LEAD:
+  type: MANY_TO_MANY
+  fromType:
+    Team:
+      graphql:
+        name: deliveryLead
+        description: The delivery/product leads of the team
+  toType:
+    Person:
+      graphql:
+        name: isDeliveryLeadFor
+        description: Teams the person is a delivery/product lead for
+
+HAS_TEAM:
+  -
+    type: ONE_TO_MANY
+    fromType:
+      Group:
+        graphql:
+          name: teams
+          description: The teams working under the group
+          # depth: '*0..'
+    toType:
+      Team:
+        graphql:
+          name: group
+          description: The group the team belongs to
+  -
+    type: ONE_TO_MANY
+    fromType:
+      Team:
+        graphql:
+          name: subTeams
+          description: This team's subteams
+    toType:
+      Team:
+        graphql:
+          name: parentTeam
+          description: The team this team is a subteam of
+
+HAS_REPO:
+  type: ONE_TO_ONE
+  fromType:
+    System:
+      graphql:
+        name: repository
+        description: The repository which stores the systems source code
+  toType:
+    Repository:
+      graphql:
+        name: system
+        description: System which the repository holds the source code of
+
+MONITORED_BY:
+  type: MANY_TO_MANY
+  fromType:
+    System:
+      graphql:
+        name: monitoredBy
+        description: Healthchecks which are used to monitor this system
+  toType:
+    Healthcheck:
+      graphql:
+        name: monitors
+        description: The systems which the healthcheck monitors
+
+
+OWNED_BY:
+  -
+    type: MANY_TO_ONE
+    fromType:
+      System:
+        graphql:
+          name: ownedBy
+          description: The team which owns the system
+    toType:
+      Team:
+        graphql:
+          name: owns
+          description: The systems the team owns
+  -
+    type: MANY_TO_ONE
+    fromType:
+      Product:
+        graphql:
+          name: ownedBy
+          description: The group which owns the product
+    toType:
+      Group:
+        graphql:
+          name: owns
+          description: The products the group owns
+
+SUPPORTED_BY:
+  type: MANY_TO_ONE
+  fromType:
+    System:
+      graphql:
+        name: supportedBy
+        description: The team which supports the system
+  toType:
+    Team:
+      graphql:
+        name: supports
+        description: The systems the team supports
+
+KNOWN_BY:
+  type: MANY_TO_MANY
+  fromType:
+    System:
+      graphql:
+        name: isKnownBy
+        description: Individuals who have operational knowledge of the system
+  toType:
+    Person:
+      graphql:
+        name: knows
+        description: Systems the person has knowledge of
+
+DEPENDS_ON:
+  -
+    type: MANY_TO_MANY
+    fromType:
+      System:
+        graphql:
+          name: dependencies
+          description: The other systems the system depends on
+    toType:
+      System:
+        graphql:
+          name: dependents
+          description: The other systems which depend on this system
+  -
+    type: MANY_TO_MANY
+    fromType:
+      Product:
+        graphql:
+          name: dependencies
+          description: The systems the product depends on
+          # depth: '*0..'
+    toType:
+      System:
+        graphql:
+          name: dependentProducts
+          description: Products which depend on this system
+          # depth: '*0..'
+
+STORED_IN:
+  type: MANY_TO_ONE
+  fromType:
+    Repository:
+      graphql:
+        name: storedIn
+        description: VCS provider that the repository is hosted by
+  toType:
+    System:
+      graphql:
+        name: stores
+        description: If the system is a VCS, the repositories it stores
+
+
+

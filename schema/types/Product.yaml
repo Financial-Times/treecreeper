@@ -1,0 +1,33 @@
+name: Product
+description: Anything sold by the FT for use by an external entity, OR produced by an area of FT technology to be used by another internal area.
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    pattern: STRICT_CODE
+    description: 'Unique code/id for this item'
+  purpose:
+    type: String
+    description: Brief description of what the product does
+  name:
+    type: String
+    canIdentify: true
+    description: The name generally used to refer to the product
+  serviceTier:
+    type: ServiceTier
+    required: true
+    canFilter: true
+    description: The product's service tier level
+  primaryURL:
+    type: String
+    canIdentify: true
+    description: The main url the product is served on
+  lifecycleStage:
+    type: ProductLifecycle
+    canFilter: true
+    description: Lifecycle stage of the product
+
+
+

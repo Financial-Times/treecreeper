@@ -11,9 +11,7 @@ describe('v1 - relationship POST', () => {
 
 	it('creates a relationship', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.auth()
 			.expect(200, { createdByRequest: 'create-relationship-request' });
@@ -28,15 +26,13 @@ describe('v1 - relationship POST', () => {
 
 	it('error when creating duplicate relationship', async () => {
 		await db.run(
-			`MATCH (node:System { code: 'test-system' }), (relatedNode:Person { code: 'test-person' })
+			`MATCH (node:Team { code: 'test-team' }), (relatedNode:Person { code: 'test-person' })
 			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {createdByRequest: 'setup-query'}]->(relatedNode)
 			RETURN relationship`
 		);
 
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.auth()
 			.expect(409);
@@ -47,9 +43,7 @@ describe('v1 - relationship POST', () => {
 
 	it('add attributes to created relationship', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.send({ foo: 'bar' })
 			.auth()
@@ -69,7 +63,7 @@ describe('v1 - relationship POST', () => {
 	it('error when creating relationship from non-existent node', async () => {
 		await request(app)
 			.post(
-				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
 			.auth()
@@ -82,7 +76,7 @@ describe('v1 - relationship POST', () => {
 	it('error when creating relationship to non-existent node', async () => {
 		await request(app)
 			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
 			.auth()
@@ -95,35 +89,14 @@ describe('v1 - relationship POST', () => {
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()
 			.expect(500);
 	});
 
-	it('has case insensitive url', async () => {
-		await request(app)
-			.post(
-				'/v1/relationship/sYstem/tESt-System/haS_TeCH_LEAD/pERson/TesT-PErson'
-			)
-			.set('x-request-id', 'create-relationship-request')
-			.auth()
-			.expect(200, { createdByRequest: 'create-relationship-request' });
-
-		const result = await getRelationship();
-
-		expect(result.records.length).to.equal(1);
-		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request'
-		});
-	});
-
 	it('logs creation events to kinesis', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.auth()
 			.expect(200);
@@ -139,8 +112,8 @@ describe('v1 - relationship POST', () => {
 						nodeCode: 'test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'create-relationship-request'
 				}
 			],
@@ -151,8 +124,8 @@ describe('v1 - relationship POST', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'test-person',
 					type: 'Person',

@@ -1,0 +1,14 @@
+name: CostCentre
+description: A cost centre which groups are costed to
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    description: 'Unique code/id for this item'
+    pattern: PERMISSIVE
+  name:
+    type: String
+    canIdentify: true
+    description: The name of the cost centre

@@ -1,0 +1,38 @@
+CircleCiVersion:
+  description: The Circle CI version which is running
+  options:
+    ONE: '1.0'
+    TWO: '2.0'
+    NONE: ''
+Status:
+  description: The status of the system
+  options:
+    - Active
+    - Inactive
+YesNo:
+  description: For questions where the answer is yes or no
+  options:
+    - Yes
+    - No
+SystemLifecycle:
+  description: The lifecycle stage of a system
+  options:
+    - Production
+    - Requirements
+    - Retired
+    - Testing
+    - Analysis
+ServiceTier:
+  description: A system's support level
+  options:
+    - Bronze
+    - Gold
+    - Silver
+    - Platinum
+ProductLifecycle:
+  description: The lifecycle stage of a product
+  options:
+    - Incubate
+    - Sustain
+    - Grow
+    - Sunset

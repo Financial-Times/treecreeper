@@ -1,0 +1,22 @@
+name: Person
+pluralName: People
+description: A individual within the organisation who is contactable
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    canIdentify: true
+    description: The name of the person
+  email:
+    type: String
+    canIdentify: true
+    description: The email address of the person
+  slack:
+    type: String
+    canIdentify: true
+    description: The slack link for the person

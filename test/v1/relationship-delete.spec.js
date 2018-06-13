@@ -12,7 +12,7 @@ describe('v1 - relationship DELETE', () => {
 	it('deletes a relationship', async () => {
 		await request(app)
 			.delete(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.auth()
 			.expect(204);
@@ -25,7 +25,7 @@ describe('v1 - relationship DELETE', () => {
 	it("responds with 404 if relationship doesn't exist", async () => {
 		return request(app)
 			.delete(
-				'/v1/relationship/System/test-system/HAS_PARROT/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
 			)
 			.auth()
 			.expect(404);
@@ -34,7 +34,7 @@ describe('v1 - relationship DELETE', () => {
 	it("responds with 404 if start node doesn't exist", async () => {
 		return request(app)
 			.delete(
-				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.auth()
 			.expect(404);
@@ -43,29 +43,16 @@ describe('v1 - relationship DELETE', () => {
 	it("responds with 404 if end node doesn't exist", async () => {
 		return request(app)
 			.delete(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.auth()
 			.expect(404);
 	});
 
-	it('has case insensitive url', async () => {
-		await request(app)
-			.delete(
-				'/v1/relationship/sYstem/teSt-sYstem/Has_tECH_LEAD/pErson/tESt-person'
-			)
-			.auth()
-			.expect(204);
-
-		const result = await getRelationship();
-
-		expect(result.records.length).to.equal(0);
-	});
-
 	it('logs deletion event to kinesis', async () => {
 		await request(app)
 			.delete(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'delete-relationship-request')
 			.auth()
@@ -81,8 +68,8 @@ describe('v1 - relationship DELETE', () => {
 						nodeCode: 'test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'delete-relationship-request'
 				}
 			],
@@ -93,8 +80,8 @@ describe('v1 - relationship DELETE', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'test-person',
 					type: 'Person',

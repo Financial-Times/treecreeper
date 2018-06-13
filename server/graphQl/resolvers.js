@@ -3,23 +3,9 @@ const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || true);
+const { getNeo4jResolverNames, enumsSchema } = require('../../schema');
 
-const queries = [
-	'CostCentre',
-	'CostCentres',
-	'Group',
-	'Groups',
-	'Healthcheck',
-	'Healthchecks',
-	'People',
-	'Person',
-	'Repositories',
-	'Repository',
-	'System',
-	'Systems',
-	'Team',
-	'Teams'
-];
+const queries = getNeo4jResolverNames();
 
 const upperCaseResolver = keys =>
 	keys.reduce(
@@ -27,23 +13,13 @@ const upperCaseResolver = keys =>
 		{}
 	);
 
-const enumResolvers = {
-	CircleCiVersion: {
-		ONE: '1.0',
-		TWO: '2.0',
-		NONE: ''
-	},
-	Status: upperCaseResolver(['Active']),
-	YesNo: upperCaseResolver(['Yes', 'No', 'Unknown']),
-	LifeCycleStage: upperCaseResolver([
-		'Production',
-		'Requirements',
-		'Retired',
-		'Testing',
-		'Analysis'
-	]),
-	ServiceTier: upperCaseResolver(['Bronze', 'Gold', 'Silver', 'Platinum'])
-};
+const enumResolvers = Object.entries(enumsSchema).reduce(
+	(map, [key, { options }]) =>
+		Object.assign(map, {
+			[key]: Array.isArray(options) ? upperCaseResolver(options) : options
+		}),
+	{}
+);
 
 const queryResolvers = queries.reduce(
 	(query, key) => Object.assign(query, { [key]: mapToNeo4j }),

@@ -85,7 +85,6 @@ const logNodeChanges = (requestId, result, deletedRelationships) => {
 		result.records.forEach(record => {
 			const target = record.get('related');
 			const rel = record.get('relationship');
-			console.log(target.properties.createdByRequest, requestId);
 			if (target.properties.createdByRequest === requestId) {
 				sendEvent({
 					event: 'CREATED_NODE',

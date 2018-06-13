@@ -1,0 +1,54 @@
+name: System
+description: Any combination of software and technical infrastructure used by the business, engineering or operations
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    pattern: NO_SPACES
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    canIdentify: true
+    description: Display name of the system
+  supported:
+    type: YesNo
+    canFilter: true
+    description: Whether the system is supported
+  primaryURL:
+    type: String
+    canIdentify: true
+    description: The primary URL of the system
+  systemType:
+    type: String
+    canFilter: true
+    description: The system type
+  serviceTier:
+    type: ServiceTier
+    canFilter: true
+    description: The system's service tier level
+  serviceType:
+    type: String
+    canFilter: true
+    description: The type of service the system provides
+  hostPlatform:
+    type: String
+    canFilter: true
+    description: The platform the service is hosted on, e.g. Heroku
+  personalData:
+    type: YesNo
+    canFilter: true
+    description: Whether the system contains personal PI2 data
+  sensitiveData:
+    type: YesNo
+    canFilter: true
+    description: Whether the system contains sensitive data
+  lifecycleStage:
+    type: SystemLifecycle
+    canFilter: true
+    description: The lifecycle stage of the system
+  SF_ID:
+    type: String
+    canFilter: true
+    description: ID of the system in salesforce (required for change-logging as of june 2018)

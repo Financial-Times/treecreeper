@@ -30,9 +30,9 @@ const stubKinesis = sandbox =>
 
 const nodes = Object.freeze([
 	Object.freeze({
-		type: 'System',
+		type: 'Team',
 		node: Object.freeze({
-			code: 'test-system',
+			code: 'test-team',
 			foo: 'bar1'
 		})
 	}),
@@ -59,10 +59,10 @@ const hydrateDb = async withRelationships => {
 		)
 	);
 	if (withRelationships) {
-		await db.run(`MATCH (s:System { code: "test-system" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
-									MERGE (g)-[o:OWNS]->(s)-[t:HAS_TECH_LEAD]->(p)
-									SET o.createdByRequest = "setup-script", t.createdByRequest = "setup-script"
-									RETURN g, o, s, t, p`);
+		await db.run(`MATCH (t:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
+									MERGE (g)-[ht:HAS_TEAM]->(t)-[htl:HAS_TECH_LEAD]->(p)
+									SET ht.createdByRequest = "setup-script", htl.createdByRequest = "setup-script"
+									RETURN g, ht, t, htl, p`);
 	}
 };
 
@@ -94,7 +94,7 @@ const setupMocks = (state, { withRelationships } = {}) => {
 
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>
 	db.run(`
-			MATCH (node:System { code: 'test-system' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
+			MATCH (node:Team { code: 'test-team' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
 			RETURN relationship`);
 
 module.exports = {
