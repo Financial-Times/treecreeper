@@ -180,16 +180,6 @@ describe('v1 - relationship generic', () => {
 						.expect(400, /Invalid node identifier `DROP ALL`/);
 				});
 
-				it('should error when request id is suspicious', async () => {
-					await request(app)
-						[method](
-							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
-						)
-						.auth()
-						.set('x-request-id', 'DROP ALL')
-						.expect(400, /Invalid request id `DROP ALL`/);
-				});
-
 				it('should error when client id is suspicious', async () => {
 					await request(app)
 						[method](
@@ -198,6 +188,16 @@ describe('v1 - relationship generic', () => {
 						.auth()
 						.set('x-client-id', 'DROP ALL')
 						.expect(400, /Invalid client id `DROP ALL`/);
+				});
+
+				it('should error when request id is suspicious', async () => {
+					await request(app)
+						[method](
+							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						)
+						.auth()
+						.set('x-request-id', 'DROP ALL')
+						.expect(400, /Invalid request id `DROP ALL`/);
 				});
 
 				if (checkBody) {
