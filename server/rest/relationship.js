@@ -6,7 +6,10 @@ const {
 	queryResultHandlers,
 	preflightChecks
 } = require('./errors');
-const { createAttributes, updateAttributes } = require('./cypher');
+const {
+	metaAttributesForCreate,
+	metaAttributesForUpdate
+} = require('./cypher');
 const { logRelationshipChanges: logChanges } = require('./kinesis');
 const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
 const {
@@ -34,7 +37,7 @@ const create = async input => {
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
 			ON CREATE SET
-				${createAttributes('relationship')},
+				${metaAttributesForCreate('relationship')},
 				relationship += $attributes
 			RETURN relationship`;
 		logger.info(
@@ -107,10 +110,10 @@ const update = async input => {
 			stripIndents`OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
 			ON CREATE SET
-				${createAttributes('relationship')},
+				${metaAttributesForCreate('relationship')},
 				relationship += $attributes
 			ON MATCH SET
-				${updateAttributes('relationship')},
+				${metaAttributesForUpdate('relationship')},
 				relationship += $attributes`
 		];
 		if (deletedAttributes.length) {

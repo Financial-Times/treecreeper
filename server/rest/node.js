@@ -10,8 +10,8 @@ const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
 const {
-	createAttributes,
-	updateAttributes,
+	metaAttributesForCreate,
+	metaAttributesForUpdate,
 	RETURN_NODE_WITH_RELS,
 	createRelationships
 } = require('./cypher');
@@ -33,7 +33,7 @@ const create = async input => {
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
 				SET
-				${createAttributes('node')}
+				${metaAttributesForCreate('node')}
 			WITH node`
 		];
 
@@ -109,9 +109,9 @@ const update = async input => {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
-						${createAttributes('node')}
+						${metaAttributesForCreate('node')}
 					ON MATCH SET
-						${updateAttributes('node')}
+						${metaAttributesForUpdate('node')}
 					SET node += $attributes
 				`
 		];

@@ -128,6 +128,14 @@ describe('v1 - node generic', () => {
 						.expect(400, /Invalid node identifier `DROP ALL`/);
 				});
 
+				it('should error when client id is suspicious', async () => {
+					await request(app)
+						[method]('/v1/node/Team/test-team')
+						.auth()
+						.set('x-client-id', 'DROP ALL')
+						.expect(400, /Invalid client id `DROP ALL`/);
+				});
+
 				it('should error when request id is suspicious', async () => {
 					await request(app)
 						[method]('/v1/node/Team/test-team')

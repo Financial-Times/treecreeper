@@ -4,6 +4,16 @@ const { stripIndents } = require('common-tags');
 const schemaCompliance = require('./schema-compliance');
 const { stringPatterns } = require('../../schema');
 
+const validateClientId = id => {
+	if (!stringPatterns.CODE.test(id)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid client id \`${id}\`.
+			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with -.`
+		);
+	}
+};
+
 const validateRequestId = id => {
 	if (!stringPatterns.REQUEST_ID.test(id)) {
 		throw httpErrors(
@@ -70,6 +80,7 @@ const sanitizeShared = ({
 	query,
 	method
 }) => {
+	validateClientId(clientId);
 	validateRequestId(requestId);
 	schemaCompliance.validateNodeType(nodeType);
 	schemaCompliance.validateCode(nodeType, code);

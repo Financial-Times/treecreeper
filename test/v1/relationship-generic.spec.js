@@ -190,6 +190,16 @@ describe('v1 - relationship generic', () => {
 						.expect(400, /Invalid request id `DROP ALL`/);
 				});
 
+				it('should error when client id is suspicious', async () => {
+					await request(app)
+						[method](
+							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						)
+						.auth()
+						.set('x-client-id', 'DROP ALL')
+						.expect(400, /Invalid client id `DROP ALL`/);
+				});
+
 				if (checkBody) {
 					describe('values in body', () => {
 						// only needed for the first test below, but putting it in a before/after
