@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const logger = require('@financial-times/n-logger').default;
+const logger = require('../lib/multiline-logger');
 const { session: db } = require('../db-connection');
 const {
 	dbErrorHandlers,
