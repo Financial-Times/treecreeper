@@ -1,4 +1,4 @@
-const logger = require('../lib/multiline-logger');
+const logger = require('@financial-times/n-logger').default;
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const schemaCompliance = require('./schema-compliance');

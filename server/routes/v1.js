@@ -1,5 +1,5 @@
 const bodyParser = require('body-parser');
-const logger = require('../lib/multiline-logger');
+const logger = require('@financial-times/n-logger').default;
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const { nodeCrud, relationshipCrud } = require('../rest');
@@ -39,7 +39,7 @@ module.exports = router => {
 	});
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
-		logger.info({ event: 'node GET', params: req.params });
+		logger.info('[APP] node GET', req.params);
 		return nodeCrud
 			.read(
 				Object.assign(
@@ -54,7 +54,7 @@ module.exports = router => {
 	});
 
 	router.post('/node/:nodeType/:code', async (req, res) => {
-		logger.info({ event: 'node POST', params: req.params });
+		logger.info('[APP] node POST', req.params);
 		return nodeCrud
 			.create(
 				Object.assign(
@@ -71,13 +71,13 @@ module.exports = router => {
 	});
 
 	router.put('/node/:nodeType/:code', async (req, res) => {
-		logger.info({ event: 'node PUT', params: req.params });
+		logger.info('[APP] node PUT', req.params);
 
 		res.status(405).send('PUT is unimplemented. Use PATCH');
 	});
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
-		logger.info({ event: 'node PATCH', params: req.params });
+		logger.info('[APP] node PATCH', req.params);
 		return nodeCrud
 			.update(
 				Object.assign(
@@ -94,7 +94,7 @@ module.exports = router => {
 	});
 
 	router.delete('/node/:nodeType/:code', async (req, res) => {
-		logger.info({ event: 'node DELETE', params: req.params });
+		logger.info('[APP] node DELETE', req.params);
 		return nodeCrud
 			.delete(
 				Object.assign(
@@ -111,7 +111,7 @@ module.exports = router => {
 	router.get(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info({ event: 'relationship GET', params: req.params });
+			logger.info('[APP] relationship GET', req.params);
 			return relationshipCrud
 				.read(
 					Object.assign(
@@ -129,7 +129,7 @@ module.exports = router => {
 	router.post(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info({ event: 'relationship POST', params: req.params });
+			logger.info('[APP] relationship POST', req.params);
 			return relationshipCrud
 				.create(
 					Object.assign(
@@ -149,7 +149,7 @@ module.exports = router => {
 	router.put(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info({ event: 'node PUT', params: req.params });
+			logger.info('[APP] node PUT', req.params);
 
 			res.status(405).send('PUT is unimplemented. Use PATCH');
 		}
@@ -158,7 +158,7 @@ module.exports = router => {
 	router.patch(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info({ event: 'relationship PATCH', params: req.params });
+			logger.info('[APP] relationship PATCH', req.params);
 			return relationshipCrud
 				.update(
 					Object.assign(
@@ -178,7 +178,7 @@ module.exports = router => {
 	router.delete(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info({ event: 'relationship DELETE', params: req.params });
+			logger.info('[APP] relationship DELETE', req.params);
 			return relationshipCrud
 				.delete(
 					Object.assign(

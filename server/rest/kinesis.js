@@ -1,4 +1,4 @@
-const logger = require('../lib/multiline-logger');
+const logger = require('@financial-times/n-logger').default;
 const EventLogWriter = require('../lib/event-log-writer');
 const Kinesis = require('../lib/kinesis');
 const { isSameNeo4jInteger } = require('./utils');
