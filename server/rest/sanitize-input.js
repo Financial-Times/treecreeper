@@ -31,14 +31,7 @@ const validateAttributeNames = attributes => {
 	}
 };
 
-const categorizeAttributes = ({
-	nodeType,
-	code,
-	attributes,
-	clientId,
-	requestId,
-	method
-}) => {
+const categorizeAttributes = ({ nodeType, code, attributes }) => {
 	if (attributes.code && attributes.code !== code) {
 		throw httpErrors(
 			400,

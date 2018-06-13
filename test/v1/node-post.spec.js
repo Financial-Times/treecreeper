@@ -50,9 +50,7 @@ describe('v1 - node POST', () => {
 				},
 				relationships: []
 			});
-		const result = await db.run(
-			`MATCH (n:Team { code: "new-team" }) RETURN n`
-		);
+		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
 
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
