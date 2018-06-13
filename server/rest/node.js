@@ -9,7 +9,12 @@ const {
 const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
-const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
+const {
+	createAttributes,
+	updateAttributes,
+	RETURN_NODE_WITH_RELS,
+	createRelationships
+} = require('./cypher');
 
 const create = async input => {
 	const {
@@ -27,12 +32,8 @@ const create = async input => {
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
-				SET node._createdByRequest = $requestId,
-				 	node._createdByClient = $clientId,
-					node._createdTimestamp = $date,
-					node._updatedByRequest = $requestId,
-					node._updatedByClient = $clientId,
-					node._updatedTimestamp = $date
+				SET
+				${createAttributes('node')}
 			WITH node`
 		];
 
@@ -108,17 +109,10 @@ const update = async input => {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
-						node._createdByRequest = $requestId,
-						node._createdByClient = $clientId,
-						node._createdTimestamp = $date,
-						node._updatedByRequest = $requestId,
-						node._updatedByClient = $clientId,
-						node._updatedTimestamp = $date
+						${createAttributes('node')}
 					ON MATCH SET
-						node._updatedByRequest = $requestId,
-						node._updatedByClient = $clientId,
-						node._updatedTimestamp = $date
-				SET node += $attributes
+						${updateAttributes('node')}
+					SET node += $attributes
 				`
 		];
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));

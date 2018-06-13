@@ -40,7 +40,24 @@ const createRelationships = (upsert, relationships) => {
 	return relationships.map((rel, i) => mapFunc(Object.assign({ i }, rel)));
 };
 
+const createAttributes = type => stripIndents`
+	${type}._createdByRequest = $requestId,
+	${type}._createdByClient = $clientId,
+	${type}._createdTimestamp = $date,
+	${type}._updatedByRequest = $requestId,
+	${type}._updatedByClient = $clientId,
+	${type}._updatedTimestamp = $date
+`;
+
+const updateAttributes = type => stripIndents`
+	${type}._updatedByRequest = $requestId,
+	${type}._updatedByClient = $clientId,
+	${type}._updatedTimestamp = $date
+`;
+
 module.exports = {
+	createAttributes,
+	updateAttributes,
 	RETURN_NODE_WITH_RELS,
 	relFragment,
 	createRelationships
