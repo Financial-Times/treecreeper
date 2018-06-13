@@ -29,7 +29,7 @@ describe('v1 - node PATCH', () => {
 
 	it('update node', async () => {
 		await request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'update-request-id')
 			.set('x-client-id', 'update-client-id')
@@ -41,7 +41,7 @@ describe('v1 - node PATCH', () => {
 			.expect(200, {
 				node: {
 					foo: 'updated',
-					code: 'test-system',
+					code: 'test-team',
 					_updatedByRequest: 'update-request-id',
 					_updatedByClient: 'update-client-id',
 					_updatedTimestamp: formattedTimestamp
@@ -50,7 +50,7 @@ describe('v1 - node PATCH', () => {
 			});
 
 		const result = await db.run(
-			`MATCH (n:System { code: "test-system" }) RETURN n`
+			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -62,7 +62,7 @@ describe('v1 - node PATCH', () => {
 
 	it('Create when patching non-existent node', async () => {
 		await request(app)
-			.patch('/v1/node/System/new-system')
+			.patch('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'update-request-id')
 			.set('x-client-id', 'update-client-id')
@@ -73,7 +73,7 @@ describe('v1 - node PATCH', () => {
 			})
 			.expect(201, {
 				node: {
-					code: 'new-system',
+					code: 'new-team',
 					foo: 'new',
 					_createdByRequest: 'update-request-id',
 					_createdByClient: 'update-client-id',
@@ -84,9 +84,7 @@ describe('v1 - node PATCH', () => {
 				},
 				relationships: []
 			});
-		const result = await db.run(
-			`MATCH (n:System { code: "new-system" }) RETURN n`
-		);
+		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
@@ -96,35 +94,35 @@ describe('v1 - node PATCH', () => {
 			_updatedByRequest: 'update-request-id',
 			_updatedByClient: 'update-client-id',
 			_updatedTimestamp: formattedTimestamp,
-			code: 'new-system',
+			code: 'new-team',
 			foo: 'new'
 		});
-		expect(record.get('n').labels).to.eql(['System']);
+		expect(record.get('n').labels).to.eql(['Team']);
 	});
 
 	it('error when conflicting code values', async () => {
 		await request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
 			.send({ node: { foo: 'updated', code: 'wrong-code' } })
 			.expect(
 				400,
-				'Conflicting code attribute `wrong-code` for System test-system'
+				/Conflicting code attribute `wrong-code` for Team test-team/
 			);
 	});
 
 	it('not error when non-conflicting code values', async () => {
 		await request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
-			.send({ node: { foo: 'updated', code: 'test-system' } })
+			.send({ node: { foo: 'updated', code: 'test-team' } })
 			.expect(200);
 	});
 
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
 			.send({
 				node: { foo: 'updated' }
@@ -134,14 +132,14 @@ describe('v1 - node PATCH', () => {
 
 	it("deletes attributes which are provided as 'null'", async () => {
 		await request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'update-request-id')
 			.set('x-client-id', 'update-client-id')
 			.send({ node: { foo: null } })
 			.expect(200, {
 				node: {
-					code: 'test-system',
+					code: 'test-team',
 					_updatedByRequest: 'update-request-id',
 					_updatedByClient: 'update-client-id',
 					_updatedTimestamp: formattedTimestamp
@@ -150,7 +148,7 @@ describe('v1 - node PATCH', () => {
 			});
 
 		const result = await db.run(
-			`MATCH (n:System { code: "test-system" }) RETURN n`
+			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -165,7 +163,7 @@ describe('v1 - node PATCH', () => {
 
 		it('errors if updating relationships without relationshipAction query string', async () => {
 			await request(app)
-				.patch('/v1/node/System/test-system')
+				.patch('/v1/node/Team/test-team')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -180,13 +178,13 @@ describe('v1 - node PATCH', () => {
 						]
 					}
 				})
-				.expect(
-					400,
-					'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
-				);
+				.expect(400, {
+					error:
+						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+				});
 
 			const result = await db.run(
-				`MATCH (s:System {code: 'test-system'})-[]-() RETURN s`
+				`MATCH (s:Team {code: 'test-team'})-[]-() RETURN s`
 			);
 			// i.e. no relationships created
 			expect(result.records.length).to.equal(0);
@@ -203,7 +201,7 @@ describe('v1 - node PATCH', () => {
 				]
 			};
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=merge')
+				.patch('/v1/node/Team/test-team?relationshipAction=merge')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -214,7 +212,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -225,7 +223,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -243,13 +241,13 @@ describe('v1 - node PATCH', () => {
 			await db.run(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {code: "test-system"})
+			MATCH (s: Team {code: "test-team"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
 			);
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=merge')
+				.patch('/v1/node/Team/test-team?relationshipAction=merge')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -268,7 +266,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -291,7 +289,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 			const result = await db.run(
-				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
 
@@ -314,7 +312,7 @@ describe('v1 - node PATCH', () => {
 
 		it('can replace an empty relationship set if relationshipAction=replace', async () => {
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=replace')
+				.patch('/v1/node/Team/test-team?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -333,7 +331,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -352,7 +350,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -370,13 +368,13 @@ describe('v1 - node PATCH', () => {
 			await db.run(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {code: "test-system"})
+			MATCH (s: Team {code: "test-team"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
 			);
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=replace')
+				.patch('/v1/node/Team/test-team?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -395,7 +393,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -414,7 +412,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
@@ -432,13 +430,13 @@ describe('v1 - node PATCH', () => {
 			await db.run(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {code: "test-system"})
+			MATCH (s: Team {code: "test-team"})
 			MERGE (s)-[:HAS_TEAM_MEMBER]->(p)
 			RETURN s, p
 			`
 			);
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=replace')
+				.patch('/v1/node/Team/test-team?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -457,7 +455,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -483,7 +481,7 @@ describe('v1 - node PATCH', () => {
 				);
 
 			const result = await db.run(
-				`MATCH (s:System {code: "test-system"})-[r]-(c) RETURN s, r, c`
+				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
 			expect(result.records.map(r => r.get('r').type)).to.have.members([
@@ -494,7 +492,7 @@ describe('v1 - node PATCH', () => {
 
 		it('error when creating relationship to non-existent node', async () => {
 			await request(app)
-				.patch('/v1/node/System/test-system?relationshipAction=replace')
+				.patch('/v1/node/Team/test-team?relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -524,9 +522,7 @@ describe('v1 - node PATCH', () => {
 			};
 
 			await request(app)
-				.patch(
-					'/v1/node/System/test-system?relationshipAction=merge&upsert=true'
-				)
+				.patch('/v1/node/Team/test-team?relationshipAction=merge&upsert=true')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -537,7 +533,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -547,13 +543,13 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 			const result = await db.run(
-				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 
 			expect(record0.get('n').properties).to.eql({
-				code: 'test-system',
+				code: 'test-team',
 				foo: 'bar1',
 				_updatedByClient: 'update-client-id',
 				_updatedByRequest: 'update-request-id',
@@ -580,9 +576,7 @@ describe('v1 - node PATCH', () => {
 			};
 
 			await request(app)
-				.patch(
-					'/v1/node/System/test-system?relationshipAction=replace&upsert=true'
-				)
+				.patch('/v1/node/Team/test-team?relationshipAction=replace&upsert=true')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -593,7 +587,7 @@ describe('v1 - node PATCH', () => {
 				.then(({ body }) =>
 					checkResponse(body, {
 						node: {
-							code: 'test-system',
+							code: 'test-team',
 							foo: 'bar1',
 							_updatedByClient: 'update-client-id',
 							_updatedByRequest: 'update-request-id',
@@ -603,13 +597,13 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 			const result = await db.run(
-				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 
 			expect(record0.get('n').properties).to.eql({
-				code: 'test-system',
+				code: 'test-team',
 				foo: 'bar1',
 				_updatedByClient: 'update-client-id',
 				_updatedByRequest: 'update-request-id',
@@ -625,9 +619,7 @@ describe('v1 - node PATCH', () => {
 		});
 		it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {
 			await request(app)
-				.patch(
-					'/v1/node/System/test-system?upsert=true&relationshipAction=replace'
-				)
+				.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=replace')
 				.auth()
 				.set('x-request-id', 'update-request-id')
 				.set('x-client-id', 'update-client-id')
@@ -645,7 +637,7 @@ describe('v1 - node PATCH', () => {
 				.expect(200);
 
 			const result = await db.run(
-				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records[0].get('c').properties._createdByRequest).to.not
 				.exist;
@@ -655,7 +647,7 @@ describe('v1 - node PATCH', () => {
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.patch('/v1/node/System/test-system')
+			.patch('/v1/node/Team/test-team')
 			.auth()
 			.send({
 				node: { foo: 'new' }
@@ -663,68 +655,25 @@ describe('v1 - node PATCH', () => {
 			.expect(500);
 	});
 
-	it('has case insensitive url and relationship configs', async () => {
-		await request(app)
-			.patch('/v1/node/sysTem/Test-sYStem?relationshipAction=replace')
-			.auth()
-			.set('x-request-id', 'update-request-id')
-			.set('x-client-id', 'update-client-id')
-			.send({
-				node: { foo: 'updated', code: 'Test-sYStem' },
-				relationships: {
-					hAS_TeCH_LEAD: [
-						{
-							direction: 'outgoing',
-							nodeType: 'peRson',
-							nodeCode: 'TesT-peRSOn'
-						}
-					]
-				}
-			})
-			.expect(200)
-			.then(({ body }) =>
-				checkResponse(body, {
-					node: {
-						code: 'test-system',
-						foo: 'updated',
-						_updatedByClient: 'update-client-id',
-						_updatedByRequest: 'update-request-id',
-						_updatedTimestamp: formattedTimestamp
-					},
-					relationships: {
-						HAS_TECH_LEAD: [
-							{
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'test-person'
-							}
-						]
-					}
-				})
-			);
-	});
-
 	it('logs modification events to kinesis', async () => {
 		await db.run(
 			`CREATE (p:Person { code: "other-test-person" })
 			WITH p
-			MATCH (s: System {code: "test-system"})
+			MATCH (s: Team {code: "test-team"})
 			MERGE (s)-[:HAS_TECH_LEAD]->(p)
 			RETURN s, p
 			`
 		);
 		await request(app)
 			// we test with replace as this will delete some stuff too
-			.patch(
-				'/v1/node/System/test-system?upsert=true&relationshipAction=replace'
-			)
+			.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=replace')
 			.auth()
 			.set('x-request-id', 'update-request-id')
 			.set('x-client-id', 'update-client-id')
 			.send({
 				node: { foo: 'updated' },
 				relationships: {
-					OWNS: [
+					HAS_TEAM: [
 						{
 							//connect to new node
 							direction: 'incoming',
@@ -748,8 +697,8 @@ describe('v1 - node PATCH', () => {
 				{
 					event: 'UPDATED_NODE',
 					action: 'UPDATE',
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'update-request-id',
 					clientId: 'update-client-id'
 				}
@@ -764,8 +713,8 @@ describe('v1 - node PATCH', () => {
 						nodeCode: 'other-test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'update-request-id',
 					clientId: 'update-client-id'
 				}
@@ -777,8 +726,8 @@ describe('v1 - node PATCH', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'other-test-person',
 					type: 'Person',
@@ -796,8 +745,8 @@ describe('v1 - node PATCH', () => {
 						nodeCode: 'test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'update-request-id',
 					clientId: 'update-client-id'
 				}
@@ -809,8 +758,8 @@ describe('v1 - node PATCH', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'test-person',
 					type: 'Person',
@@ -833,13 +782,13 @@ describe('v1 - node PATCH', () => {
 					event: 'CREATED_RELATIONSHIP',
 					action: 'UPDATE',
 					relationship: {
-						relType: 'OWNS',
+						relType: 'HAS_TEAM',
 						direction: 'incoming',
 						nodeCode: 'new-test-group',
 						nodeType: 'Group'
 					},
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'update-request-id',
 					clientId: 'update-client-id'
 				}
@@ -849,10 +798,10 @@ describe('v1 - node PATCH', () => {
 					event: 'CREATED_RELATIONSHIP',
 					action: 'UPDATE',
 					relationship: {
-						relType: 'OWNS',
+						relType: 'HAS_TEAM',
 						direction: 'outgoing',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'new-test-group',
 					type: 'Group',

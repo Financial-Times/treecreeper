@@ -22,9 +22,7 @@ describe('v1 - relationship POST', () => {
 
 	it('creates a relationship', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.auth()
@@ -51,15 +49,13 @@ describe('v1 - relationship POST', () => {
 
 	it('error when creating duplicate relationship', async () => {
 		await db.run(
-			`MATCH (node:System { code: 'test-system' }), (relatedNode:Person { code: 'test-person' })
-			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {_createdByRequest: 'setup-query'}]->(relatedNode)
+			`MATCH (node:Team { code: 'test-team' }), (relatedNode:Person { code: 'test-person' })
+			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {createdByRequest: 'setup-query'}]->(relatedNode)
 			RETURN relationship`
 		);
 
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.auth()
@@ -71,9 +67,7 @@ describe('v1 - relationship POST', () => {
 
 	it('add attributes to created relationship', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.send({ foo: 'bar' })
@@ -104,7 +98,7 @@ describe('v1 - relationship POST', () => {
 	it('error when creating relationship from non-existent node', async () => {
 		await request(app)
 			.post(
-				'/v1/relationship/System/not-test-system/HAS_TECH_LEAD/Person/test-person'
+				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
@@ -118,7 +112,7 @@ describe('v1 - relationship POST', () => {
 	it('error when creating relationship to non-existent node', async () => {
 		await request(app)
 			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/not-test-person'
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
@@ -132,48 +126,14 @@ describe('v1 - relationship POST', () => {
 	it('responds with 500 if query fails', async () => {
 		state.sandbox.stub(db, 'run').throws('oh no');
 		return request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()
 			.expect(500);
 	});
 
-	it('has case insensitive url', async () => {
-		await request(app)
-			.post(
-				'/v1/relationship/sYstem/tESt-System/haS_TeCH_LEAD/pERson/TesT-PErson'
-			)
-			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
-			.expect(200, {
-				_createdByRequest: 'create-relationship-request',
-				_createdByClient: 'create-relationship-client',
-				_createdTimestamp: formattedTimestamp,
-				_updatedByRequest: 'create-relationship-request',
-				_updatedByClient: 'create-relationship-client',
-				_updatedTimestamp: formattedTimestamp
-			});
-
-		const result = await getRelationship();
-
-		expect(result.records.length).to.equal(1);
-		expect(result.records[0].get('relationship').properties).to.eql({
-			_createdByRequest: 'create-relationship-request',
-			_createdByClient: 'create-relationship-client',
-			_createdTimestamp: formattedTimestamp,
-			_updatedByRequest: 'create-relationship-request',
-			_updatedByClient: 'create-relationship-client',
-			_updatedTimestamp: formattedTimestamp
-		});
-	});
-
 	it('logs creation events to kinesis', async () => {
 		await request(app)
-			.post(
-				'/v1/relationship/System/test-system/HAS_TECH_LEAD/Person/test-person'
-			)
+			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
 			.set('x-client-id', 'create-relationship-client')
 			.auth()
@@ -190,10 +150,10 @@ describe('v1 - relationship POST', () => {
 						nodeCode: 'test-person',
 						nodeType: 'Person'
 					},
-					code: 'test-system',
-					type: 'System',
-					requestId: 'create-relationship-request',
-					clientId: 'create-relationship-client'
+					code: 'test-team',
+					type: 'Team',
+					clientId: 'create-relationship-client',
+					requestId: 'create-relationship-request'
 				}
 			],
 			[
@@ -203,8 +163,8 @@ describe('v1 - relationship POST', () => {
 					relationship: {
 						relType: 'HAS_TECH_LEAD',
 						direction: 'incoming',
-						nodeCode: 'test-system',
-						nodeType: 'System'
+						nodeCode: 'test-team',
+						nodeType: 'Team'
 					},
 					code: 'test-person',
 					type: 'Person',

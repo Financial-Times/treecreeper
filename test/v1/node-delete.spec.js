@@ -11,14 +11,14 @@ describe('v1 - node DELETE', () => {
 
 	const verifyDeletion = async () => {
 		const result = await db.run(
-			`MATCH (n:System { code: "test-system" }) RETURN n`
+			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(0);
 	};
 
 	const verifyNotDeletion = async () => {
 		const result = await db.run(
-			`MATCH (n:System { code: "test-system" }) RETURN n`
+			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -27,7 +27,7 @@ describe('v1 - node DELETE', () => {
 
 	it('deletes a detached node', async () => {
 		await request(app)
-			.delete('/v1/node/System/test-system')
+			.delete('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
 			.set('x-client-id', 'delete-client-id')
@@ -38,7 +38,7 @@ describe('v1 - node DELETE', () => {
 
 	it('404 when deleting non-existent node', async () => {
 		await request(app)
-			.delete('/v1/node/System/absent-system')
+			.delete('/v1/node/Team/absent-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
 			.set('x-client-id', 'delete-client-id')
@@ -49,16 +49,15 @@ describe('v1 - node DELETE', () => {
 
 	it('error informatively when attempting to delete connected node', async () => {
 		await db.run(`
-			MATCH (node:System {code: "test-system"}), (person:Person {code: "test-person"})
+			MATCH (node:Team {code: "test-team"}), (person:Person {code: "test-person"})
 			MERGE (node)-[:HAS_TECH_LEAD]->(person)
 			RETURN node`);
 
 		await request(app)
-			.delete('/v1/node/System/test-system')
+			.delete('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
-			.set('x-client-id', 'delete-client-id')
-			.expect(409, 'Cannot delete - System test-system has relationships');
+			.expect(409, /Cannot delete - Team test-team has relationships/);
 
 		await verifyNotDeletion();
 	});
@@ -66,7 +65,7 @@ describe('v1 - node DELETE', () => {
 	describe('interaction with deleted nodes', () => {
 		beforeEach(async () => {
 			await request(app)
-				.delete('/v1/node/System/test-system')
+				.delete('/v1/node/Team/test-team')
 				.auth()
 				.set('x-request-id', 'delete-request-id')
 				.set('x-client-id', 'delete-client-id')
@@ -75,47 +74,36 @@ describe('v1 - node DELETE', () => {
 
 		it('GET responds with 404', async () => {
 			await request(app)
-				.get('/v1/node/System/test-system')
+				.get('/v1/node/Team/test-team')
 				.auth()
 				.expect(404);
 		});
 
 		it('POST responds with 200', async () => {
 			await request(app)
-				.post('/v1/node/System/test-system')
+				.post('/v1/node/Team/test-team')
 				.auth()
 				.expect(200);
 		});
 
 		it('PATCH responds with 200', async () => {
 			await request(app)
-				.post('/v1/node/System/test-system')
+				.post('/v1/node/Team/test-team')
 				.auth()
 				.expect(200);
 		});
 
 		it('DELETE responds with 404', async () => {
 			await request(app)
-				.delete('/v1/node/System/test-system')
+				.delete('/v1/node/Team/test-team')
 				.auth()
 				.expect(404);
 		});
 	});
 
-	it('has case insensitive url', async () => {
-		await request(app)
-			.delete('/v1/node/sysTem/Test-sYStem')
-			.auth()
-			.set('x-request-id', 'delete-request-id')
-			.set('x-client-id', 'delete-client-id')
-			.expect(204);
-
-		await verifyDeletion();
-	});
-
 	it('logs deletion event to kinesis', async () => {
 		await request(app)
-			.delete('/v1/node/System/test-system')
+			.delete('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
 			.set('x-client-id', 'delete-client-id')
@@ -126,8 +114,8 @@ describe('v1 - node DELETE', () => {
 				{
 					event: 'DELETED_NODE',
 					action: 'DELETE',
-					code: 'test-system',
-					type: 'System',
+					code: 'test-team',
+					type: 'Team',
 					requestId: 'delete-request-id',
 					clientId: 'delete-client-id'
 				}

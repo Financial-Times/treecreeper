@@ -15,6 +15,7 @@ module.exports = {
 	strings: {
 		deny: [],
 		denyOverrides: [
+			'getNeo4jResolverNames',
 			'integrity[\'"]:\\s*?[\'"]sha(512|1)-.+', // package-lock.json shas
 			'32e6ad1a-210f-11e8-89cc-978cb917c4e7', // doc/MODEL.md:5
 			'396e2a98-1d16-11e8-87fd-7f7eb4f8a221', // doc/MODEL.md:11

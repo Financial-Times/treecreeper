@@ -1,0 +1,30 @@
+name: Team
+description: A team within the organisation
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    pattern: NO_SPACES
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    canIdentify: true
+    description: The team's name
+  email:
+    type: String
+    canIdentify: true
+    description: The teams email address
+  slack:
+    type: String
+    canIdentify: true
+    description: The teams slack contact address
+  phone:
+    type: String
+    canIdentify: true
+    description: The teams phone contact number
+  status:
+    type: Status
+    canFilter: true
+    description: Whether or not the team is still in existence

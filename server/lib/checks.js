@@ -1,15 +1,6 @@
-const nodeTypes = [
-	'Contract',
-	'Risk',
-	'SAR',
-	'Submission',
-	'SubmissionAnswer',
-	'Supplier',
-	'Survey',
-	'SurveyQuestion',
-	'SurveyQuestionOption',
-	'SurveySection'
-];
+const { typesSchema } = require('../../schema');
+const nodeTypes = typesSchema.map(type => type.name);
+
 const checkNodeType = (req, res, next) => {
 	console.log('CHECK');
 

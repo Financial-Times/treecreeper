@@ -3,15 +3,14 @@ const {
 	makeExecutableSchema,
 	addMockFunctionsToSchema
 } = require('graphql-tools');
-const fs = require('fs');
-const path = require('path');
-const resolvers = require('./resolvers');
 
-const typeDefs = () =>
-	fs.readFileSync(path.join(__dirname, './typeDefs.graphql'), 'utf-8');
+const resolvers = require('./resolvers');
+const schema = require('../../schema');
+
+const generateGraphqlDefs = require('./generate-graphql-defs');
 
 module.exports = makeExecutableSchema({
-	typeDefs: typeDefs(),
+	typeDefs: generateGraphqlDefs(schema),
 	resolvers: resolvers.all,
 	logger: {
 		log(message) {
@@ -23,13 +22,13 @@ module.exports = makeExecutableSchema({
 });
 
 module.exports.createMockSchema = mocks => {
-	const schema = makeExecutableSchema({
-		typeDefs: typeDefs(),
+	const mockSchema = makeExecutableSchema({
+		typeDefs: generateGraphqlDefs(schema),
 		resolvers: resolvers.enumResolvers
 	});
 	addMockFunctionsToSchema({
-		schema,
+		schema: mockSchema,
 		mocks
 	});
-	return schema;
+	return mockSchema;
 };
