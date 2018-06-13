@@ -40,7 +40,7 @@ const createRelationships = (upsert, relationships) => {
 	return relationships.map((rel, i) => mapFunc(Object.assign({ i }, rel)));
 };
 
-const metaAttributesForCreate= type => stripIndents`
+const metaAttributesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
 	${type}._createdTimestamp = $date,
