@@ -4,6 +4,16 @@ const { stripIndents } = require('common-tags');
 const schemaCompliance = require('./schema-compliance');
 const { stringPatterns } = require('../../schema');
 
+const validateClientId = id => {
+	if (!stringPatterns.CODE.test(id)) {
+		throw httpErrors(
+			400,
+			stripIndents`Invalid client id \`${id}\`.
+			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with -.`
+		);
+	}
+};
+
 const validateRequestId = id => {
 	if (!stringPatterns.REQUEST_ID.test(id)) {
 		throw httpErrors(
@@ -31,13 +41,7 @@ const validateAttributeNames = attributes => {
 	}
 };
 
-const categorizeAttributes = ({
-	nodeType,
-	code,
-	attributes,
-	requestId,
-	method
-}) => {
+const categorizeAttributes = ({ nodeType, code, attributes }) => {
 	if (attributes.code && attributes.code !== code) {
 		throw httpErrors(
 			400,
@@ -49,10 +53,6 @@ const categorizeAttributes = ({
 
 	validateAttributeNames(attributes);
 	schemaCompliance.validateNodeAttributes(nodeType, attributes);
-
-	if (method === 'CREATE') {
-		attributes.createdByRequest = requestId;
-	}
 
 	return {
 		deletedAttributes: Object.entries(attributes)
@@ -72,6 +72,7 @@ const mergeInput = (obj, method, bodyParser) => {
 };
 
 const sanitizeShared = ({
+	clientId,
 	requestId,
 	nodeType,
 	code,
@@ -79,11 +80,13 @@ const sanitizeShared = ({
 	query,
 	method
 }) => {
+	validateClientId(clientId);
 	validateRequestId(requestId);
 	schemaCompliance.validateNodeType(nodeType);
 	schemaCompliance.validateCode(nodeType, code);
 
 	const result = {
+		clientId,
 		requestId,
 		nodeType,
 		code
@@ -93,6 +96,7 @@ const sanitizeShared = ({
 		nodeType,
 		attributes,
 		code,
+		clientId,
 		requestId,
 		method
 	});

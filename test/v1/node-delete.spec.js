@@ -30,6 +30,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(204);
 
 		await verifyDeletion();
@@ -40,6 +41,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/Team/absent-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.expect(404);
 
 		await verifyNotDeletion();
@@ -66,6 +68,7 @@ describe('v1 - node DELETE', () => {
 				.delete('/v1/node/Team/test-team')
 				.auth()
 				.set('x-request-id', 'delete-request-id')
+				.set('x-client-id', 'delete-client-id')
 				.end();
 		});
 
@@ -103,6 +106,7 @@ describe('v1 - node DELETE', () => {
 			.delete('/v1/node/Team/test-team')
 			.auth()
 			.set('x-request-id', 'delete-request-id')
+			.set('x-client-id', 'delete-client-id')
 			.end();
 
 		[
@@ -112,7 +116,8 @@ describe('v1 - node DELETE', () => {
 					action: 'DELETE',
 					code: 'test-team',
 					type: 'Team',
-					requestId: 'delete-request-id'
+					requestId: 'delete-request-id',
+					clientId: 'delete-client-id'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

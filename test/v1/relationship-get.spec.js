@@ -13,7 +13,11 @@ describe('v1 - relationship GET', () => {
 		return request(app)
 			.get('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()
-			.expect(200, { createdByRequest: 'setup-script' });
+			.expect(200, {
+				_createdByRequest: 'setup-script',
+				_createdByClient: 'setup-client-script',
+				_createdTimestamp: '12345'
+			});
 	});
 
 	it("responds with 404 if relationship doesn't exist", async () => {

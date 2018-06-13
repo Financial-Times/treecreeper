@@ -15,10 +15,10 @@ const upsertRelationshipQuery = ({ relType, direction, nodeType, nodeCode }) =>
 	stripIndents`
 	WITH node
 	MERGE (related:${nodeType} {code: "${nodeCode}"})
-		ON CREATE SET related.createdByRequest = $requestId
+		ON CREATE SET related._createdByRequest = $requestId
 	WITH related, node
 	MERGE (node)${relFragment(relType, direction)}(related)
-		ON CREATE SET rel.createdByRequest = $requestId`;
+		ON CREATE SET rel._createdByRequest = $requestId`;
 
 const createRelationshipQuery = ({
 	relType,
@@ -33,14 +33,31 @@ const createRelationshipQuery = ({
 	stripIndents`WITH node
 	OPTIONAL MATCH (related${i}:${nodeType} {code: "${nodeCode}"})
 	MERGE (node)${relFragment(relType, direction)}(related${i})
-		ON CREATE SET rel.createdByRequest = $requestId`;
+		ON CREATE SET rel._createdByRequest = $requestId`;
 
 const createRelationships = (upsert, relationships) => {
 	const mapFunc = upsert ? upsertRelationshipQuery : createRelationshipQuery;
 	return relationships.map((rel, i) => mapFunc(Object.assign({ i }, rel)));
 };
 
+const metaAttributesForCreate = type => stripIndents`
+	${type}._createdByRequest = $requestId,
+	${type}._createdByClient = $clientId,
+	${type}._createdTimestamp = $date,
+	${type}._updatedByRequest = $requestId,
+	${type}._updatedByClient = $clientId,
+	${type}._updatedTimestamp = $date
+`;
+
+const metaAttributesForUpdate = type => stripIndents`
+	${type}._updatedByRequest = $requestId,
+	${type}._updatedByClient = $clientId,
+	${type}._updatedTimestamp = $date
+`;
+
 module.exports = {
+	metaAttributesForCreate,
+	metaAttributesForUpdate,
 	RETURN_NODE_WITH_RELS,
 	relFragment,
 	createRelationships

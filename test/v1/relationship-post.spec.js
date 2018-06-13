@@ -3,24 +3,47 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { setupMocks, getRelationship } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - relationship POST', () => {
 	const state = {};
+	let clock;
+	const timestamp = 1528458548930;
+	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 
 	setupMocks(state);
+	beforeEach(() => {
+		clock = lolex.install({ now: timestamp });
+	});
+
+	afterEach(() => {
+		clock.uninstall();
+	});
 
 	it('creates a relationship', async () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
-			.expect(200, { createdByRequest: 'create-relationship-request' });
+			.expect(200, {
+				_createdByRequest: 'create-relationship-request',
+				_createdByClient: 'create-relationship-client',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByRequest: 'create-relationship-request',
+				_updatedByClient: 'create-relationship-client',
+				_updatedTimestamp: formattedTimestamp
+			});
 
 		const result = await getRelationship();
-
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request'
+			_createdByRequest: 'create-relationship-request',
+			_createdByClient: 'create-relationship-client',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByRequest: 'create-relationship-request',
+			_updatedByClient: 'create-relationship-client',
+			_updatedTimestamp: formattedTimestamp
 		});
 	});
 
@@ -34,6 +57,7 @@ describe('v1 - relationship POST', () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(409);
 
@@ -45,17 +69,28 @@ describe('v1 - relationship POST', () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.send({ foo: 'bar' })
 			.auth()
 			.expect(200, {
-				createdByRequest: 'create-relationship-request',
+				_createdByRequest: 'create-relationship-request',
+				_createdByClient: 'create-relationship-client',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByRequest: 'create-relationship-request',
+				_updatedByClient: 'create-relationship-client',
+				_updatedTimestamp: formattedTimestamp,
 				foo: 'bar'
 			});
 
 		const result = await getRelationship();
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({
-			createdByRequest: 'create-relationship-request',
+			_createdByRequest: 'create-relationship-request',
+			_createdByClient: 'create-relationship-client',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByRequest: 'create-relationship-request',
+			_updatedByClient: 'create-relationship-client',
+			_updatedTimestamp: formattedTimestamp,
 			foo: 'bar'
 		});
 	});
@@ -66,6 +101,7 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(400);
 
@@ -79,6 +115,7 @@ describe('v1 - relationship POST', () => {
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(400);
 
@@ -98,6 +135,7 @@ describe('v1 - relationship POST', () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.set('x-request-id', 'create-relationship-request')
+			.set('x-client-id', 'create-relationship-client')
 			.auth()
 			.expect(200);
 
@@ -114,6 +152,7 @@ describe('v1 - relationship POST', () => {
 					},
 					code: 'test-team',
 					type: 'Team',
+					clientId: 'create-relationship-client',
 					requestId: 'create-relationship-request'
 				}
 			],
@@ -129,7 +168,8 @@ describe('v1 - relationship POST', () => {
 					},
 					code: 'test-person',
 					type: 'Person',
-					requestId: 'create-relationship-request'
+					requestId: 'create-relationship-request',
+					clientId: 'create-relationship-client'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

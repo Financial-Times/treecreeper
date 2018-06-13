@@ -6,6 +6,10 @@ const {
 	queryResultHandlers,
 	preflightChecks
 } = require('./errors');
+const {
+	metaAttributesForCreate,
+	metaAttributesForUpdate
+} = require('./cypher');
 const { logRelationshipChanges: logChanges } = require('./kinesis');
 const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
 const {
@@ -14,9 +18,9 @@ const {
 
 const create = async input => {
 	const sanitizedInput = sanitizeInput(input, 'CREATE');
-
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		attributes,
@@ -28,12 +32,14 @@ const create = async input => {
 	await preflightChecks.bailOnDuplicateRelationship(sanitizedInput);
 
 	try {
+		const date = new Date().toUTCString();
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
+			ON CREATE SET
+				${metaAttributesForCreate('relationship')},
+				relationship += $attributes
 			RETURN relationship`;
-
 		logger.info(
 			Object.assign(
 				{
@@ -43,14 +49,15 @@ const create = async input => {
 				input
 			)
 		);
-
 		const result = await db.run(query, {
 			attributes,
+			clientId,
 			requestId,
 			code,
-			relatedCode
+			relatedCode,
+			date
 		});
-		logChanges(requestId, result, sanitizedInput);
+		logChanges(requestId, clientId, result, sanitizedInput);
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.missingRelationshipNode(err, sanitizedInput);
@@ -84,6 +91,7 @@ const update = async input => {
 	const sanitizedInput = sanitizeInput(input, 'UPDATE');
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		attributes,
@@ -94,13 +102,19 @@ const update = async input => {
 	} = sanitizedInput;
 
 	try {
+		const date = new Date().toUTCString();
+
 		const queryParts = [
 			// OPTIONAL MATCH needed in order to throw error which will help us
 			// identify which, if any, node is missing
 			stripIndents`OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
-			ON CREATE SET relationship.createdByRequest = $requestId, relationship += $attributes
-			ON MATCH SET relationship += $attributes`
+			ON CREATE SET
+				${metaAttributesForCreate('relationship')},
+				relationship += $attributes
+			ON MATCH SET
+				${metaAttributesForUpdate('relationship')},
+				relationship += $attributes`
 		];
 		if (deletedAttributes.length) {
 			queryParts.push(
@@ -123,17 +137,19 @@ const update = async input => {
 
 		const result = await db.run(query, {
 			attributes,
+			clientId,
 			requestId,
 			code,
-			relatedCode
+			relatedCode,
+			date
 		});
 
-		logChanges(requestId, result, sanitizedInput);
+		logChanges(requestId, clientId, result, sanitizedInput);
 
 		return {
 			data: constructOutput(result),
 			status:
-				result.records[0].get('relationship').properties.createdByRequest ===
+				result.records[0].get('relationship').properties._createdByRequest ===
 				requestId
 					? 201
 					: 200
@@ -148,6 +164,7 @@ const remove = async input => {
 	const sanitizedInput = sanitizeInput(input, 'DELETE');
 	const {
 		requestId,
+		clientId,
 		nodeType,
 		code,
 		relatedType,
@@ -166,7 +183,7 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_RELATIONSHIP_QUERY', requestId, query });
 	const result = await db.run(query, { code, relatedCode });
-	logChanges(requestId, result, sanitizedInput);
+	logChanges(requestId, clientId, result, sanitizedInput);
 	return { status: 204 };
 };
 

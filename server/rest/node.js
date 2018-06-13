@@ -9,10 +9,16 @@ const {
 const { logNodeChanges: logChanges } = require('./kinesis');
 const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
 const { constructNode: constructOutput } = require('./construct-output');
-const { RETURN_NODE_WITH_RELS, createRelationships } = require('./cypher');
+const {
+	metaAttributesForCreate,
+	metaAttributesForUpdate,
+	RETURN_NODE_WITH_RELS,
+	createRelationships
+} = require('./cypher');
 
 const create = async input => {
 	const {
+		clientId,
 		requestId,
 		upsert,
 		nodeType,
@@ -22,25 +28,36 @@ const create = async input => {
 	} = sanitizeInput(input, 'CREATE');
 
 	try {
-		const queryParts = [`CREATE (node:${nodeType} $attributes)`];
+		const date = new Date().toUTCString();
+
+		const queryParts = [
+			`CREATE (node:${nodeType} $attributes)
+				SET
+				${metaAttributesForCreate('node')}
+			WITH node`
+		];
+
 		if (relationships.length) {
 			queryParts.push(...createRelationships(upsert, relationships));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
 		const query = queryParts.join('\n');
-
 		logger.info({
 			event: 'CREATE_NODE_QUERY',
+			clientId,
 			requestId,
 			nodeType,
 			code,
 			query
 		});
-
-		const result = await db.run(query, { attributes, requestId });
-
-		logChanges(requestId, result);
+		const result = await db.run(query, {
+			attributes,
+			clientId,
+			date,
+			requestId
+		});
+		logChanges(clientId, requestId, result);
 		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
@@ -50,13 +67,20 @@ const create = async input => {
 };
 
 const read = async input => {
-	const { requestId, nodeType, code } = sanitizeInput(input, 'READ');
+	const { clientId, requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
 	${RETURN_NODE_WITH_RELS}`;
 
-	logger.info({ event: 'READ_NODE_QUERY', requestId, nodeType, code, query });
+	logger.info({
+		event: 'READ_NODE_QUERY',
+		clientId,
+		requestId,
+		nodeType,
+		code,
+		query
+	});
 
 	const result = await db.run(query, { code });
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
@@ -65,6 +89,7 @@ const read = async input => {
 
 const update = async input => {
 	const {
+		clientId,
 		requestId,
 		upsert,
 		nodeType,
@@ -79,12 +104,17 @@ const update = async input => {
 	let deletedRelationships;
 
 	try {
-		const queryParts = [
-			stripIndents`MERGE (node:${nodeType} {code: $code})
-				ON CREATE SET node.createdByRequest = $requestId
-			SET node += $attributes`
-		];
+		const date = new Date().toUTCString();
 
+		const queryParts = [
+			stripIndents`MERGE (node:${nodeType} { code: $code })
+					ON CREATE SET
+						${metaAttributesForCreate('node')}
+					ON MATCH SET
+						${metaAttributesForUpdate('node')}
+					SET node += $attributes
+				`
+		];
 		queryParts.push(...deletedAttributes.map(attr => `REMOVE node.${attr}`));
 
 		if (relationships.length) {
@@ -123,19 +153,27 @@ const update = async input => {
 
 		logger.info({
 			event: 'UPDATE_NODE_QUERY',
+			clientId,
 			requestId,
 			nodeType,
 			code,
 			query,
-			attributes
+			attributes,
+			date
 		});
-		const result = await db.run(query, { attributes, code, requestId });
-		logChanges(requestId, result, deletedRelationships);
+		const result = await db.run(query, {
+			attributes,
+			code,
+			requestId,
+			clientId,
+			date
+		});
 
+		logChanges(clientId, requestId, result, deletedRelationships);
 		return {
 			data: constructOutput(result),
 			status:
-				result.records[0].get('node').properties.createdByRequest === requestId
+				result.records[0].get('node').properties._createdByRequest === requestId
 					? 201
 					: 200
 		};
@@ -146,8 +184,10 @@ const update = async input => {
 };
 
 const remove = async input => {
-	const { requestId, nodeType, code } = sanitizeInput(input, 'DELETE');
-
+	const { clientId, requestId, nodeType, code } = sanitizeInput(
+		input,
+		'DELETE'
+	);
 	// note - this calls bailOnDeletedNode, which is why it isn't done explicitly
 	// in this function
 	const record = await read(input);
@@ -162,9 +202,9 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code, requestId });
+	const result = await db.run(query, { code, clientId, requestId });
 	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
-	logChanges(requestId, result);
+	logChanges(clientId, requestId, result);
 
 	return { status: 204 };
 };

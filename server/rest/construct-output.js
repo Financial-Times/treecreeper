@@ -1,14 +1,21 @@
 const { isSameNeo4jInteger } = require('./utils');
+const Integer = require('neo4j-driver/lib/v1/integer.js');
+
+const convertIntegersToNumbers = node => {
+	for (const key in node.properties) {
+		if (Integer.isInt(node.properties[key])) {
+			node.properties[key] = node.properties[key].toNumber();
+		}
+	}
+	return node;
+};
 
 const constructNode = result => {
 	const node = result.records[0].get('node');
+	convertIntegersToNumbers(node);
 	const response = {
 		node: Object.assign({}, node.properties)
 	};
-	if (response.node.createdByRequest) {
-		delete response.node.createdByRequest;
-	}
-
 	// check relationship key exists and is not null
 	// if related is not defined it means we've done an optional match on relationships
 	// and retrieved none
@@ -35,7 +42,9 @@ const constructNode = result => {
 };
 
 const constructRelationship = result => {
-	return result.records[0].get('relationship').properties;
+	const relationship = result.records[0].get('relationship');
+	convertIntegersToNumbers(relationship);
+	return relationship.properties;
 };
 
 module.exports = {

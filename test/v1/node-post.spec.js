@@ -3,11 +3,15 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { session: db } = require('../../server/db-connection');
 const { checkResponse, setupMocks } = require('./helpers');
+const lolex = require('lolex');
 
 describe('v1 - node POST', () => {
 	const state = {};
-
 	setupMocks(state);
+
+	let clock;
+	const timestamp = 1528458548930;
+	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 
 	const cleanUp = async () => {
 		await db.run(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
@@ -16,29 +20,49 @@ describe('v1 - node POST', () => {
 		);
 	};
 
-	before(cleanUp);
-	afterEach(cleanUp);
+	beforeEach(async () => {
+		await cleanUp();
+		clock = lolex.install({ now: timestamp });
+	});
+
+	afterEach(async () => {
+		await cleanUp();
+		clock = clock.uninstall();
+	});
 
 	it('create node', async () => {
 		await request(app)
 			.post('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({ node: { foo: 'new' } })
 			.expect(200, {
 				node: {
 					code: 'new-team',
-					foo: 'new'
+					foo: 'new',
+					_createdByClient: 'create-client-id',
+					_createdByRequest: 'create-request-id',
+					_createdTimestamp: formattedTimestamp,
+					_updatedByClient: 'create-client-id',
+					_updatedByRequest: 'create-request-id',
+					_updatedTimestamp: formattedTimestamp
 				},
 				relationships: []
 			});
 		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
+
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-team',
-			foo: 'new'
+			foo: 'new',
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record.get('n').labels).to.eql(['Team']);
 	});
@@ -88,6 +112,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/Team/new-team')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -97,7 +122,13 @@ describe('v1 - node POST', () => {
 				checkResponse(body, {
 					node: {
 						code: 'new-team',
-						foo: 'new'
+						foo: 'new',
+						_createdByClient: 'create-client-id',
+						_createdByRequest: 'create-request-id',
+						_createdTimestamp: formattedTimestamp,
+						_updatedByClient: 'create-client-id',
+						_updatedByRequest: 'create-request-id',
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships
 				})
@@ -110,9 +141,14 @@ describe('v1 - node POST', () => {
 		expect(result.records.length).to.equal(2);
 
 		expect(result.records[0].get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-team',
-			foo: 'new'
+			foo: 'new',
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 
 		const [person, group] =
@@ -121,18 +157,18 @@ describe('v1 - node POST', () => {
 				: result.records.slice().reverse();
 
 		expect(group.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(group.get('c').properties.createdByRequest).to.not.exist;
+		expect(group.get('c').properties._createdByRequest).to.not.exist;
 		expect(group.get('c').properties).to.eql({
 			foo: 'bar3',
 			code: 'test-group'
 		});
 
 		expect(person.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(person.get('c').properties.createdByRequest).to.not.exist;
+		expect(person.get('c').properties._createdByRequest).to.not.exist;
 		expect(person.get('c').properties).to.eql({
 			foo: 'bar2',
 			code: 'test-person'
@@ -174,6 +210,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -183,7 +220,13 @@ describe('v1 - node POST', () => {
 				checkResponse(body, {
 					node: {
 						code: 'new-team',
-						foo: 'new'
+						foo: 'new',
+						_createdByClient: 'create-client-id',
+						_createdByRequest: 'create-request-id',
+						_createdTimestamp: formattedTimestamp,
+						_updatedByClient: 'create-client-id',
+						_updatedByRequest: 'create-request-id',
+						_updatedTimestamp: formattedTimestamp
 					},
 					relationships
 				})
@@ -195,16 +238,21 @@ describe('v1 - node POST', () => {
 		const record0 = result.records[0];
 
 		expect(record0.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-team',
-			foo: 'new'
+			foo: 'new',
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
 		expect(record0.get('c').properties).to.eql({
 			code: 'new-test-person',
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
 	});
 
@@ -213,6 +261,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships: {
@@ -233,14 +282,19 @@ describe('v1 - node POST', () => {
 		expect(result.records.length).to.equal(1);
 		const record0 = result.records[0];
 		expect(record0.get('n').properties).to.eql({
-			createdByRequest: 'create-request-id',
 			code: 'new-team',
-			foo: 'new'
+			foo: 'new',
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
-			createdByRequest: 'create-request-id'
+			_createdByRequest: 'create-request-id'
 		});
-		expect(record0.get('c').properties.createdByRequest).to.not.exist;
+		expect(record0.get('c').properties._createdByRequest).to.not.exist;
 		expect(record0.get('c').properties).to.eql({
 			foo: 'bar2',
 			code: 'test-person'
@@ -263,6 +317,7 @@ describe('v1 - node POST', () => {
 			.post('/v1/node/Team/new-team?upsert=true')
 			.auth()
 			.set('x-request-id', 'create-request-id')
+			.set('x-client-id', 'create-client-id')
 			.send({
 				// create a node
 				node: { foo: 'new' },
@@ -293,7 +348,8 @@ describe('v1 - node POST', () => {
 					action: 'CREATE',
 					code: 'new-team',
 					type: 'Team',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -302,7 +358,8 @@ describe('v1 - node POST', () => {
 					action: 'CREATE',
 					code: 'new-test-person',
 					type: 'Person',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -317,7 +374,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-team',
 					type: 'Team',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -332,7 +390,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-test-person',
 					type: 'Person',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -347,7 +406,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'new-team',
 					type: 'Team',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			],
 			[
@@ -362,7 +422,8 @@ describe('v1 - node POST', () => {
 					},
 					code: 'test-group',
 					type: 'Group',
-					requestId: 'create-request-id'
+					requestId: 'create-request-id',
+					clientId: 'create-client-id'
 				}
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));

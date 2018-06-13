@@ -61,7 +61,13 @@ const hydrateDb = async withRelationships => {
 	if (withRelationships) {
 		await db.run(`MATCH (t:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[ht:HAS_TEAM]->(t)-[htl:HAS_TECH_LEAD]->(p)
-									SET ht.createdByRequest = "setup-script", htl.createdByRequest = "setup-script"
+									SET
+										ht._createdByRequest = "setup-script",
+										ht._createdByClient = "setup-client-script",
+										ht._createdTimestamp = "12345",
+										htl._createdByRequest = "setup-script",
+										htl._createdByClient = "setup-client-script",
+										htl._createdTimestamp = '12345'
 									RETURN g, ht, t, htl, p`);
 	}
 };

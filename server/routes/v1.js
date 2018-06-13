@@ -4,6 +4,8 @@ const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const { nodeCrud, relationshipCrud } = require('../rest');
 const requestId = require('../middleware/request-id');
+const clientId = require('../middleware/client-id');
+
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
 	bodyParser.urlencoded({ limit: '8mb', extended: true })
@@ -29,6 +31,7 @@ module.exports = router => {
 	router.use(security.requireApiKey);
 	router.use(security.requireClientId);
 	router.use(requestId);
+	router.use(clientId);
 	router.use(bodyParsers);
 
 	router.get('/', (req, res) => {
@@ -41,7 +44,8 @@ module.exports = router => {
 			.read(
 				Object.assign(
 					{
-						requestId: res.locals.requestId
+						requestId: res.locals.requestId,
+						clientId: res.locals.clientId
 					},
 					req.params
 				)
@@ -56,6 +60,7 @@ module.exports = router => {
 				Object.assign(
 					{
 						requestId: res.locals.requestId,
+						clientId: res.locals.clientId,
 						body: req.body,
 						query: req.query
 					},
@@ -78,6 +83,7 @@ module.exports = router => {
 				Object.assign(
 					{
 						requestId: res.locals.requestId,
+						clientId: res.locals.clientId,
 						body: req.body,
 						query: req.query
 					},
@@ -93,7 +99,8 @@ module.exports = router => {
 			.delete(
 				Object.assign(
 					{
-						requestId: res.locals.requestId
+						requestId: res.locals.requestId,
+						clientId: res.locals.clientId
 					},
 					req.params
 				)
@@ -109,7 +116,8 @@ module.exports = router => {
 				.read(
 					Object.assign(
 						{
-							requestId: res.locals.requestId
+							requestId: res.locals.requestId,
+							clientId: res.locals.clientId
 						},
 						req.params
 					)
@@ -127,6 +135,7 @@ module.exports = router => {
 					Object.assign(
 						{
 							requestId: res.locals.requestId,
+							clientId: res.locals.clientId,
 							body: req.body,
 							query: req.query
 						},
@@ -155,6 +164,7 @@ module.exports = router => {
 					Object.assign(
 						{
 							requestId: res.locals.requestId,
+							clientId: res.locals.clientId,
 							body: req.body,
 							query: req.query
 						},
@@ -173,7 +183,8 @@ module.exports = router => {
 				.delete(
 					Object.assign(
 						{
-							requestId: res.locals.requestId
+							requestId: res.locals.requestId,
+							clientId: res.locals.clientId
 						},
 						req.params
 					)
