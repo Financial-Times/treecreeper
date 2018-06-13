@@ -29,10 +29,10 @@ const create = async input => {
 			`CREATE (node:${nodeType} $attributes)
 				SET node._createdByRequest = $requestId,
 				 	node._createdByClient = $clientId,
-					node._createdTimestamp = '${date}',
+					node._createdTimestamp = $date,
 					node._updatedByRequest = $requestId,
 					node._updatedByClient = $clientId,
-					node._updatedTimestamp = '${date}'
+					node._updatedTimestamp = $date
 			WITH node`
 		];
 
@@ -50,7 +50,12 @@ const create = async input => {
 			code,
 			query
 		});
-		const result = await db.run(query, { attributes, clientId, requestId });
+		const result = await db.run(query, {
+			attributes,
+			clientId,
+			date,
+			requestId
+		});
 		logChanges(clientId, requestId, result);
 		return constructOutput(result);
 	} catch (err) {
@@ -105,14 +110,14 @@ const update = async input => {
 					ON CREATE SET
 						node._createdByRequest = $requestId,
 						node._createdByClient = $clientId,
-						node._createdTimestamp = '${date}',
+						node._createdTimestamp = $date,
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = '${date}'
+						node._updatedTimestamp = $date
 					ON MATCH SET
 						node._updatedByRequest = $requestId,
 						node._updatedByClient = $clientId,
-						node._updatedTimestamp = '${date}'
+						node._updatedTimestamp = $date
 				SET node += $attributes
 				`
 		];
@@ -159,13 +164,15 @@ const update = async input => {
 			nodeType,
 			code,
 			query,
-			attributes
+			attributes,
+			date
 		});
 		const result = await db.run(query, {
 			attributes,
 			code,
 			requestId,
-			clientId
+			clientId,
+			date
 		});
 
 		logChanges(clientId, requestId, result, deletedRelationships);

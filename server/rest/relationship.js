@@ -29,17 +29,16 @@ const create = async input => {
 
 	try {
 		const date = new Date().toUTCString();
-
 		const query = stripIndents`
 			OPTIONAL MATCH (node:${nodeType} { code: $code }), (relatedNode:${relatedType} { code: $relatedCode })
 			MERGE (node)-[relationship:${relationshipType}]->(relatedNode)
 			ON CREATE SET
 				relationship._createdByRequest = $requestId,
 				relationship._createdByClient = $clientId,
-				relationship._createdTimestamp = '${date}',
+				relationship._createdTimestamp = $date,
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${date}',
+				relationship._updatedTimestamp = $date,
 				relationship += $attributes
 			RETURN relationship`;
 		logger.info(
@@ -56,7 +55,8 @@ const create = async input => {
 			clientId,
 			requestId,
 			code,
-			relatedCode
+			relatedCode,
+			date
 		});
 		logChanges(requestId, clientId, result, sanitizedInput);
 		return constructOutput(result);
@@ -113,15 +113,15 @@ const update = async input => {
 			ON CREATE SET
 				relationship._createdByRequest = $requestId,
 				relationship._createdByClient = $clientId,
-				relationship._createdTimestamp = '${date}',
+				relationship._createdTimestamp = $date,
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${date}',
+				relationship._updatedTimestamp = $date,
 				relationship += $attributes
 			ON MATCH SET
 				relationship._updatedByRequest = $requestId,
 				relationship._updatedByClient = $clientId,
-				relationship._updatedTimestamp = '${date}',
+				relationship._updatedTimestamp = $date,
 				relationship += $attributes`
 		];
 		if (deletedAttributes.length) {
@@ -148,7 +148,8 @@ const update = async input => {
 			clientId,
 			requestId,
 			code,
-			relatedCode
+			relatedCode,
+			date
 		});
 
 		logChanges(requestId, clientId, result, sanitizedInput);

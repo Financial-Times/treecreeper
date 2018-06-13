@@ -1,7 +1,7 @@
 const { isSameNeo4jInteger } = require('./utils');
 const Integer = require('neo4j-driver/lib/v1/integer.js');
 
-const convertIntegerToNumber = node => {
+const convertIntegersToNumbers = node => {
 	for (const key in node.properties) {
 		if (Integer.isInt(node.properties[key])) {
 			node.properties[key] = node.properties[key].toNumber();
@@ -12,7 +12,7 @@ const convertIntegerToNumber = node => {
 
 const constructNode = result => {
 	const node = result.records[0].get('node');
-	convertIntegerToNumber(node);
+	convertIntegersToNumbers(node);
 	const response = {
 		node: Object.assign({}, node.properties)
 	};
@@ -43,7 +43,7 @@ const constructNode = result => {
 
 const constructRelationship = result => {
 	const relationship = result.records[0].get('relationship');
-	convertIntegerToNumber(relationship);
+	convertIntegersToNumbers(relationship);
 	return relationship.properties;
 };
 
