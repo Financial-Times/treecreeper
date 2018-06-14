@@ -9,5 +9,21 @@ const driver = neo4j.driver(
 
 module.exports = {
 	driver,
-	session: driver.session()
+	safeQuery: async (...args) => {
+		const session = driver.session();
+		try {
+			return await session.run(...args);
+		} finally {
+			session.close();
+		}
+	},
+	safeQueryWithSharedSession: (session = driver.session()) => async (
+		...args
+	) => {
+		try {
+			return await session.run(...args);
+		} finally {
+			session.close();
+		}
+	}
 };

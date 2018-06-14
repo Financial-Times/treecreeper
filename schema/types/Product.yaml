@@ -17,7 +17,7 @@ properties:
     description: The name generally used to refer to the product
   serviceTier:
     type: ServiceTier
-    required: true
+    # required: true
     canFilter: true
     description: The product's service tier level
   primaryURL:

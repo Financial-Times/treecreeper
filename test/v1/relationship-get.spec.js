@@ -1,8 +1,6 @@
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-
-const { setupMocks } = require('./helpers');
+const { setupMocks, stubDbUnavailable } = require('./helpers');
 
 describe('v1 - relationship GET', () => {
 	const state = {};
@@ -48,7 +46,7 @@ describe('v1 - relationship GET', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.get('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()

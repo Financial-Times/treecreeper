@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-const { setupMocks, getRelationship } = require('./helpers');
+const { safeQuery } = require('../../server/db-connection');
+const { setupMocks, getRelationship, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
 describe('v1 - relationship PATCH', () => {
@@ -13,13 +13,13 @@ describe('v1 - relationship PATCH', () => {
 	setupMocks(state, { withRelationships: true });
 
 	const cleanUp = async () => {
-		await db.run(`MATCH (n: Team { code: "test-team" }) DETACH DELETE n`);
-		await db.run(`MATCH (n:Person { code: "test-person" }) DETACH DELETE n`);
-		await db.run(`MATCH (n:Group { code: "test-group" }) DETACH DELETE n`);
+		await safeQuery(`MATCH (n: Team { code: "test-team" }) DETACH DELETE n`);
+		await safeQuery(`MATCH (n:Person { code: "test-person" }) DETACH DELETE n`);
+		await safeQuery(`MATCH (n:Group { code: "test-group" }) DETACH DELETE n`);
 	};
 
 	beforeEach(async () => {
-		await db.run(`
+		await safeQuery(`
 			MATCH (node:Team { code: 'test-team' })-[relationship:HAS_TECH_LEAD]->(relatedNode:Person { code: 'test-person' })
 			SET relationship.foo = 'bar'
 			RETURN relationship
@@ -147,7 +147,7 @@ describe('v1 - relationship PATCH', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()

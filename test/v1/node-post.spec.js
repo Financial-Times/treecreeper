@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-const { checkResponse, setupMocks } = require('./helpers');
+const { safeQuery } = require('../../server/db-connection');
+const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
 describe('v1 - node POST', () => {
@@ -14,8 +14,8 @@ describe('v1 - node POST', () => {
 	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 
 	const cleanUp = async () => {
-		await db.run(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
-		await db.run(
+		await safeQuery(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
+		await safeQuery(
 			`MATCH (n:Person { code: "new-test-person" }) DETACH DELETE n`
 		);
 	};
@@ -50,7 +50,9 @@ describe('v1 - node POST', () => {
 				},
 				relationships: []
 			});
-		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
+		const result = await safeQuery(
+			`MATCH (n:Team { code: "new-team" }) RETURN n`
+		);
 
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
@@ -134,7 +136,7 @@ describe('v1 - node POST', () => {
 				})
 			);
 
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 
@@ -231,7 +233,7 @@ describe('v1 - node POST', () => {
 					relationships
 				})
 			);
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
@@ -276,7 +278,7 @@ describe('v1 - node POST', () => {
 			})
 			.expect(200);
 
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
@@ -302,7 +304,7 @@ describe('v1 - node POST', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.post('/v1/node/Team/new-team')
 			.auth()
@@ -428,6 +430,8 @@ describe('v1 - node POST', () => {
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
 
-		return db.run('MATCH (g:Person {code: "new-test-person"}) DETACH DELETE g');
+		return safeQuery(
+			'MATCH (g:Person {code: "new-test-person"}) DETACH DELETE g'
+		);
 	});
 });

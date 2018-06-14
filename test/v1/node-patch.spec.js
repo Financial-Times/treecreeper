@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-const { checkResponse, setupMocks } = require('./helpers');
+const { safeQuery } = require('../../server/db-connection');
+const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
 describe('v1 - node PATCH', () => {
@@ -13,7 +13,7 @@ describe('v1 - node PATCH', () => {
 	const timestamp = 1528458548930;
 	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 	const cleanUp = async () => {
-		await db.run(
+		await safeQuery(
 			`MATCH (n:Person { code: "other-test-person" }) DETACH DELETE n`
 		);
 	};
@@ -49,7 +49,7 @@ describe('v1 - node PATCH', () => {
 				relationships: []
 			});
 
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -84,7 +84,9 @@ describe('v1 - node PATCH', () => {
 				},
 				relationships: []
 			});
-		const result = await db.run(`MATCH (n:Team { code: "new-team" }) RETURN n`);
+		const result = await safeQuery(
+			`MATCH (n:Team { code: "new-team" }) RETURN n`
+		);
 		expect(result.records.length).to.equal(1);
 		const record = result.records[0];
 		expect(record.get('n').properties).to.eql({
@@ -120,7 +122,7 @@ describe('v1 - node PATCH', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.patch('/v1/node/Team/test-team')
 			.auth()
@@ -147,7 +149,7 @@ describe('v1 - node PATCH', () => {
 				relationships: []
 			});
 
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -157,7 +159,7 @@ describe('v1 - node PATCH', () => {
 
 	describe('relationship patching', () => {
 		const cleanUp = () =>
-			db.run(`MATCH (p:Person {code: 'other-test-person'}) DETACH DELETE p`);
+			safeQuery(`MATCH (p:Person {code: 'other-test-person'}) DETACH DELETE p`);
 		beforeEach(cleanUp);
 		after(cleanUp);
 
@@ -183,7 +185,7 @@ describe('v1 - node PATCH', () => {
 						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
 				});
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: 'test-team'})-[]-() RETURN s`
 			);
 			// i.e. no relationships created
@@ -222,7 +224,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -238,7 +240,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('can merge with relationships if relationshipAction=merge', async () => {
-			await db.run(
+			await safeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -288,7 +290,7 @@ describe('v1 - node PATCH', () => {
 						}
 					})
 				);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
@@ -349,7 +351,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -365,7 +367,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('can replace relationships if relationshipAction=replace', async () => {
-			await db.run(
+			await safeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -411,7 +413,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -427,7 +429,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('leaves relationships of other types untouched when replacing', async () => {
-			await db.run(
+			await safeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -480,7 +482,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
@@ -542,7 +544,7 @@ describe('v1 - node PATCH', () => {
 						relationships
 					})
 				);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -596,7 +598,7 @@ describe('v1 - node PATCH', () => {
 						relationships
 					})
 				);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -636,7 +638,7 @@ describe('v1 - node PATCH', () => {
 				})
 				.expect(200);
 
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records[0].get('c').properties._createdByRequest).to.not
@@ -645,7 +647,7 @@ describe('v1 - node PATCH', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.patch('/v1/node/Team/test-team')
 			.auth()
@@ -656,7 +658,7 @@ describe('v1 - node PATCH', () => {
 	});
 
 	it('logs modification events to kinesis', async () => {
-		await db.run(
+		await safeQuery(
 			`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -811,6 +813,8 @@ describe('v1 - node PATCH', () => {
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
 
-		return db.run('MATCH (g:Group {code: "new-test-group"}) DETACH DELETE g');
+		return safeQuery(
+			'MATCH (g:Group {code: "new-test-group"}) DETACH DELETE g'
+		);
 	});
 });

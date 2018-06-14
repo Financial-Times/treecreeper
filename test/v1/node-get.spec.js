@@ -1,8 +1,8 @@
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
+const { safeQuery } = require('../../server/db-connection');
 
-const { checkResponse, setupMocks } = require('./helpers');
+const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 
 describe('v1 - node GET', () => {
 	const state = {};
@@ -24,7 +24,7 @@ describe('v1 - node GET', () => {
 
 	it('gets node with relationships', async () => {
 		// create the relationships
-		await db.run(`MATCH (s:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
+		await safeQuery(`MATCH (s:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[o:HAS_TEAM]->(s)-[t:HAS_TECH_LEAD]->(p)
 									RETURN g, o, s, t, p`);
 
@@ -66,7 +66,7 @@ describe('v1 - node GET', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.get('/v1/node/Team/test-team')
 			.auth()

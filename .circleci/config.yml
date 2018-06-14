@@ -41,7 +41,7 @@ jobs:
           name: Install dependencies
           command: |
             npm install --no-save
-            npm update
+            npm update --no-save
 
       - *cache_node_modules
 

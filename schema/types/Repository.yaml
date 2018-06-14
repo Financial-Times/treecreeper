@@ -14,7 +14,7 @@ properties:
     description: Display Name
   url:
     type: String
-    required: true
+    # required: true
     canIdentify: true
     description: Repository URL
   vcsID:
@@ -22,7 +22,7 @@ properties:
     description: Repository hosts internal ID
   sshUrl:
     type: String
-    required: true
+    # required: true
     canIdentify: true
     description: SSH URL to checkout the source
   isPrivate:

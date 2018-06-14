@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-const { setupMocks } = require('./helpers');
+const { safeQuery } = require('../../server/db-connection');
+const { setupMocks, stubDbUnavailable } = require('./helpers');
 
 describe('v1 - node DELETE', () => {
 	const state = {};
@@ -10,14 +10,14 @@ describe('v1 - node DELETE', () => {
 	setupMocks(state);
 
 	const verifyDeletion = async () => {
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(0);
 	};
 
 	const verifyNotDeletion = async () => {
-		const result = await db.run(
+		const result = await safeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -48,7 +48,7 @@ describe('v1 - node DELETE', () => {
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
-		await db.run(`
+		await safeQuery(`
 			MATCH (node:Team {code: "test-team"}), (person:Person {code: "test-person"})
 			MERGE (node)-[:HAS_TECH_LEAD]->(person)
 			RETURN node`);
@@ -62,43 +62,12 @@ describe('v1 - node DELETE', () => {
 		await verifyNotDeletion();
 	});
 
-	describe('interaction with deleted nodes', () => {
-		beforeEach(async () => {
-			await request(app)
-				.delete('/v1/node/Team/test-team')
-				.auth()
-				.set('x-request-id', 'delete-request-id')
-				.set('x-client-id', 'delete-client-id')
-				.end();
-		});
-
-		it('GET responds with 404', async () => {
-			await request(app)
-				.get('/v1/node/Team/test-team')
-				.auth()
-				.expect(404);
-		});
-
-		it('POST responds with 200', async () => {
-			await request(app)
-				.post('/v1/node/Team/test-team')
-				.auth()
-				.expect(200);
-		});
-
-		it('PATCH responds with 200', async () => {
-			await request(app)
-				.post('/v1/node/Team/test-team')
-				.auth()
-				.expect(200);
-		});
-
-		it('DELETE responds with 404', async () => {
-			await request(app)
-				.delete('/v1/node/Team/test-team')
-				.auth()
-				.expect(404);
-		});
+	it('responds with 500 if query fails', async () => {
+		stubDbUnavailable(state);
+		return request(app)
+			.delete('/v1/node/Team/test-team')
+			.auth()
+			.expect(500);
 	});
 
 	it('logs deletion event to kinesis', async () => {

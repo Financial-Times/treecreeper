@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
-const { session: db } = require('../db-connection');
+const { safeQuery } = require('../db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,
@@ -51,7 +51,7 @@ const create = async input => {
 			code,
 			query
 		});
-		const result = await db.run(query, {
+		const result = await safeQuery(query, {
 			attributes,
 			clientId,
 			date,
@@ -82,7 +82,7 @@ const read = async input => {
 		query
 	});
 
-	const result = await db.run(query, { code });
+	const result = await safeQuery(query, { code });
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
 	return constructOutput(result);
 };
@@ -123,7 +123,7 @@ const update = async input => {
 			if (relationshipAction === 'replace') {
 				// If replacing we must retrieve information on existing relationships
 				// for the log stream
-				deletedRelationships = await db.run(
+				deletedRelationships = await safeQuery(
 					stripIndents`
 		MATCH (node:${nodeType} {code: $code})-[relationship${relationshipTypes
 						.map(type => `:${type}`)
@@ -161,7 +161,7 @@ const update = async input => {
 			attributes,
 			date
 		});
-		const result = await db.run(query, {
+		const result = await safeQuery(query, {
 			attributes,
 			code,
 			requestId,
@@ -202,7 +202,7 @@ const remove = async input => {
 
 	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
 
-	const result = await db.run(query, { code, clientId, requestId });
+	const result = await safeQuery(query, { code, clientId, requestId });
 	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
 	logChanges(clientId, requestId, result);
 

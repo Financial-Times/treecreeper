@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
-const { setupMocks, getRelationship } = require('./helpers');
+const { safeQuery } = require('../../server/db-connection');
+const { setupMocks, getRelationship, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
 describe('v1 - relationship POST', () => {
@@ -48,7 +48,7 @@ describe('v1 - relationship POST', () => {
 	});
 
 	it('error when creating duplicate relationship', async () => {
-		await db.run(
+		await safeQuery(
 			`MATCH (node:Team { code: 'test-team' }), (relatedNode:Person { code: 'test-person' })
 			CREATE UNIQUE (node)-[relationship:HAS_TECH_LEAD {createdByRequest: 'setup-query'}]->(relatedNode)
 			RETURN relationship`
@@ -124,7 +124,7 @@ describe('v1 - relationship POST', () => {
 	});
 
 	it('responds with 500 if query fails', async () => {
-		state.sandbox.stub(db, 'run').throws('oh no');
+		stubDbUnavailable(state);
 		return request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
 			.auth()

@@ -13,6 +13,6 @@ properties:
     description: Whether the monitored entity is live
   url:
     type: String
-    required: true
+    # required: true
     canIdentify: true
     description: The URL to check against

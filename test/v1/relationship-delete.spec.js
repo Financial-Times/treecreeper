@@ -2,7 +2,7 @@ const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { expect } = require('chai');
 
-const { setupMocks, getRelationship } = require('./helpers');
+const { setupMocks, getRelationship, stubDbUnavailable } = require('./helpers');
 
 describe('v1 - relationship DELETE', () => {
 	const state = {};
@@ -47,6 +47,16 @@ describe('v1 - relationship DELETE', () => {
 			)
 			.auth()
 			.expect(404);
+	});
+
+	it('responds with 500 if query fails', async () => {
+		stubDbUnavailable(state);
+		return request(app)
+			.delete(
+				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+			)
+			.auth()
+			.expect(500);
 	});
 
 	it('logs deletion event to kinesis', async () => {

@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { session: db } = require('../../server/db-connection');
+const { safeQuery } = require('../../server/db-connection');
 const API_KEY = process.env.API_KEY;
 const { setupMocks } = require('./helpers');
 
@@ -35,7 +35,7 @@ describe('v1 - node generic', () => {
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
@@ -47,7 +47,7 @@ describe('v1 - node generic', () => {
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "a-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
@@ -58,7 +58,7 @@ describe('v1 - node generic', () => {
 				.delete('/v1/node/Team/test-team')
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			const result = await db.run(
+			const result = await safeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
@@ -78,7 +78,7 @@ describe('v1 - node generic', () => {
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				const result = await db.run(
+				const result = await safeQuery(
 					`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
@@ -90,7 +90,7 @@ describe('v1 - node generic', () => {
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				const result = await db.run(
+				const result = await safeQuery(
 					`MATCH (n:Team { code: "a-team" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
@@ -101,7 +101,7 @@ describe('v1 - node generic', () => {
 					.delete('/v1/node/Team/test-team')
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				const result = await db.run(
+				const result = await safeQuery(
 					`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
@@ -149,7 +149,7 @@ describe('v1 - node generic', () => {
 						// only needed for the first test below, but putting it in a before/after
 						// is a more robust cleanup than doing in the test body
 						const cleanUp = () =>
-							db.run('MATCH (s:Team {code: "security-team"}) DELETE s');
+							safeQuery('MATCH (s:Team {code: "security-team"}) DELETE s');
 						before(cleanUp);
 						after(cleanUp);
 
@@ -165,7 +165,7 @@ describe('v1 - node generic', () => {
 								})
 								.expect(({ status }) => /20(0|1)/.test(String(status)));
 
-							const result = await db.run(
+							const result = await safeQuery(
 								'MATCH (s:Team {code: "security-team"}) RETURN s'
 							);
 							expect(result.records[0].get('s').properties.prop).to.equal(

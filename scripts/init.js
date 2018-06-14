@@ -1,9 +1,12 @@
-const { session: db } = require('../server/db-connection');
-
+const {
+	safeQueryWithSharedSession,
+	safeQuery
+} = require('../server/db-connection');
 const { typesSchema } = require('../schema');
+const logger = require('@financial-times/n-logger').default;
 
 const constraints = async verb => {
-	console.log(`Running ${verb} constraints...`);
+	logger.info(`Running ${verb} constraints...`);
 
 	const constraintQueries = []
 		.concat(
@@ -24,25 +27,31 @@ const constraints = async verb => {
 		)
 		.filter(query => !!query);
 
+	const safeQuery = safeQueryWithSharedSession();
+
 	const setupConstraintIfPossible = constraintQuery =>
-		db.run(constraintQuery).catch(err => {
-			console.log(err);
+		safeQuery(constraintQuery).catch(err => {
+			logger.warn({ err: err.message, constraintQuery });
 			return Promise.resolve();
 		});
-	const constraints = await Promise.all(
-		constraintQueries.map(setupConstraintIfPossible)
-	).then(() => db.run('CALL db.constraints'));
 
-	console.log('CALL db.constraints ok?', verb, constraints.records.length);
+	for (const constraint of constraintQueries) {
+		await setupConstraintIfPossible(constraint);
+	}
+	const constraints = await safeQuery('CALL db.constraints');
+
+	logger.info('CALL db.constraints ok?', verb, constraints.records.length);
 };
 
 const dropNodes = async () => {
 	const nodeTypes = typesSchema.map(type => type.name);
 
-	console.log(`dropping nodes ${nodeTypes.join(' ')}...`);
+	logger.info(`dropping nodes ${nodeTypes.join(' ')}...`);
 
 	return await Promise.all(
-		nodeTypes.map(nodeType => db.run(`MATCH (a:${nodeType}) DETACH DELETE a`))
+		nodeTypes.map(nodeType => {
+			return safeQuery(`MATCH (a:${nodeType}) DETACH DELETE a`);
+		})
 	);
 };
 
@@ -66,11 +75,11 @@ const initMiddleware = async (req, res) => {
 if (process.argv[1] === __filename) {
 	init()
 		.then(() => {
-			console.log('Completed init');
+			logger.info('Completed init');
 			process.exit(0);
 		})
 		.catch(error => {
-			console.error('Init failed, ', error);
+			logger.error('Init failed, ', error);
 			process.exit(1);
 		});
 }

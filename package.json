@@ -14,8 +14,8 @@
 		"npm": ">= 5.6.0"
 	},
 	"scripts": {
-		"lint": "eslint --ignore-pattern /coverage/ --cache --fix .",
-		"lint-ci": "eslint --ignore-pattern /coverage/ .",
+		"lint": "eslint --cache --fix .",
+		"lint-ci": "eslint .",
 		"start": "nodemon -r dotenv/config server/app.js",
 		"debug": "npm start -- --inspect=0.0.0.0:9229",
 		"test:debug": "npm run test-dev --  --inspect-brk",
@@ -43,7 +43,7 @@
 		"all": true,
 		"cache": true
 	},
-	"author": "",
+	"author": "reliability engineering <reliability.engineering@ft.com>",
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/Financial-Times/biz-ops-api/issues"
@@ -80,13 +80,13 @@
 		"dotenv": "^5.0.1",
 		"eslint": "^4.19.1",
 		"eslint-config-origami-component": "^1.0.0",
-		"eslint-config-prettier": "^2.9.0",
-		"eslint-plugin-prettier": "^2.6.0",
+		"eslint-config-prettier": "~2.9.0",
+		"eslint-plugin-prettier": "~2.6.0",
 		"husky": "^0.14.3",
 		"lodash": "^4.17.10",
 		"mocha": "^5.1.1",
 		"nyc": "^11.8.0",
-		"prettier": "^1.12.1",
+		"prettier": "~1.12.1",
 		"proxyquire": "^2.0.1",
 		"sinon": "^4.5.0",
 		"sinon-chai": "^3.0.0",
