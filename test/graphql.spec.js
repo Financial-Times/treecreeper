@@ -183,30 +183,30 @@ describe('Integration - GraphQL', () => {
 		it('should allow access to POST /api/graphql behind s3o', () => {
 			sandbox.stub(security, 'requireApiKeyOrS3o').callsFake(stubS3o);
 			return request(app, { useCached: false })
-				.post('/api/graphql')
+				.post('/graphql')
 				.send(dummyQuery)
 				.set('Cookie', 's3o_username=test; s3o_password=test')
 				.expect(200);
 		});
 
-		it('should allow access to POST /api/graphql with an API key header', () => {
+		it('should allow access to POST /graphql with an API key header', () => {
 			return request(app)
-				.post('/api/graphql')
+				.post('/graphql')
 				.send(dummyQuery)
 				.set('API_KEY', process.env.API_KEY)
 				.expect(200);
 		});
 
-		it('should not access to POST /api/graphql if there is no valid s3o auth or API key header', () => {
+		it('should not access to POST /graphql if there is no valid s3o auth or API key header', () => {
 			return request(app)
-				.post('/api/graphql', dummyQuery)
+				.post('/graphql', dummyQuery)
 				.expect(403);
 		});
 	});
 
 	it('GET for a single system returns a single system', () => {
 		return request(app)
-			.post('/api/graphql')
+			.post('/graphql')
 			.send({
 				query: `{
 					System(code: "${typeMocks['System'][0].code}") {
@@ -219,7 +219,7 @@ describe('Integration - GraphQL', () => {
 
 	it('GET for systems returns a list of systems', () => {
 		return request(app)
-			.post('/api/graphql')
+			.post('/graphql')
 			.send({
 				query: `{
 					Systems {

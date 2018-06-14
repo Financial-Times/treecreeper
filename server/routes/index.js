@@ -1,9 +1,9 @@
-const apiRoutes = require('./api');
+const graphqlRoutes = require('./graphql');
 const uiRoutes = require('./ui');
 const v1Routes = require('./v1');
 
 module.exports = {
-	api: apiRoutes,
+	graphql: graphqlRoutes,
 	ui: uiRoutes,
 	v1: v1Routes
 };

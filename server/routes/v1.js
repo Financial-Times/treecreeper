@@ -2,7 +2,7 @@ const bodyParser = require('body-parser');
 const logger = require('@financial-times/n-logger').default;
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
-const { nodeCrud, relationshipCrud } = require('../rest');
+const { nodeCrud, relationshipCrud } = require('../crud');
 const requestId = require('../middleware/request-id');
 const clientId = require('../middleware/client-id');
 

@@ -10,16 +10,7 @@ module.exports = router => {
 		res.send('biz op api');
 	});
 
-	// Redirect a frequent typo to correct path
-	router.get('/graphql', (req, res) => {
-		res.redirect('/graphiql');
-	});
-
-	router.use(
-		'/graphiql',
-		security.requireS3o,
-		graphQl.graphiql('/api/graphql')
-	);
+	router.use('/graphiql', security.requireS3o, graphQl.graphiql('/graphql'));
 
 	return router;
 };

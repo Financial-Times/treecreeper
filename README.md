@@ -12,14 +12,14 @@ WIP
 
 ### API
 
-The API endpoints for the biz-ops API are available behind [FT API Gateway](http://developer.ft.com/).
+The REST API endpoints for the biz-ops API are available behind [FT API Gateway](http://developer.ft.com/). See the [API documentation](https://github.com/Financial-Times/biz-ops-api/blob/master/ENDPOINTS.md) for details of available endpoints and methods.
 
 The public API URLs are:
 
 | Environment   | Url                                |
 | ------------- | --------------------------------   |
-| Production    | `https://api.ft.com/biz-ops/api`   |
-| Test          | `https://api-t.ft.com/biz-ops/api` |
+| Production    | `https://api.ft.com/biz-ops/v1`   |
+| Test          | `https://api-t.ft.com/biz-ops/v1` |
 
 To get access you will need to acquire an API key.
 To get one, either:
@@ -41,9 +41,19 @@ curl -H "X-Api-Key: ..." https://api.ft.com/biz-ops/api/__gtg
 
 You will also need to set a `client-id` header, with the system code of the system calling the api (or some other identifier if not a recognised system).
 
+Passing a request id using the `x-request-id` header is also recommended for auditing purposes.
+
 ### GraphQL
 
-The API exposes a [GraphQL](https://graphql.org/) API. This is available either via POSTing to the path `/api/graphql`, or using the [graphiql](https://github.com/graphql/graphiql) IDE located at `/graphiql`.
+The API exposes a [GraphQL](https://graphql.org/) API, which allows querying the underlying graph nodes and relationships in a single request. The read api is available by POSTing queries to the path `/biz-ops/graphql`. At present, there is no write api for graphql.
+
+| Environment   | Url                                                   |
+| ------------- | ----------------------------------------------------  |
+| Production    | `https://api.ft.com/biz-ops/graphql`                 |
+| Test          | `https://api-t.ft.com/biz-ops/graphql`         |
+
+#### GraphiQL
+To complement graphql, the api exposes the [graphiql](https://github.com/graphql/graphiql) IDE, which supports autocomplete and is the recommended way to explore the underlying data.
 
 This should be accessed directly as it is a UI, not through the above API gateway endpoints. Access is authenticated via s3o.
 
