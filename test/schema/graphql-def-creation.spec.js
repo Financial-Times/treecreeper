@@ -109,6 +109,7 @@ type Group {
 			`type Query {
     CostCentre(
 
+
     # Unique code/id for this item
     code: String
     # The name of the cost centre
@@ -117,11 +118,17 @@ type Group {
 
   Group(
 
+
     # Unique code/id for this item
     code: String
   ): Group
 
   Groups(
+
+    # The pagination offset to use
+    offset: Int = 0
+    # The number of records to return after the pagination offset. This uses the default neo4j ordering
+    first: Int = 20000
 
     # The name of the group
     lifecycleStage: Lifecycle

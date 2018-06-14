@@ -61,14 +61,33 @@ const generateRelationshipField = definition => {
 const generateRelationshipFields = definitions =>
 	(definitions || []).map(generateRelationshipField).join('');
 
-const generateQuery = ({ name, type, properties }) => {
+const PAGINATE = indentMultiline(
+	generatePropertyFields(
+		Object.entries({
+			offset: {
+				type: 'Int = 0',
+				description: 'The pagination offset to use'
+			},
+			first: {
+				type: 'Int = 20000',
+				description:
+					'The number of records to return after the pagination offset. This uses the default neo4j ordering'
+			}
+		})
+	),
+	4,
+	true
+);
+
+const generateQuery = ({ name, type, properties, paginate }) => {
 	if (!properties.length) {
 		return '';
 	}
 
 	return `
   ${name}(
-    ${indentMultiline(generatePropertyFields(properties), 4, true)}
+  	${paginate ? PAGINATE : ''}
+  	${indentMultiline(generatePropertyFields(properties), 4, true)}
   ): ${type}`;
 };
 
@@ -107,7 +126,8 @@ type ${config.name} {
       ${generateQuery({
 				name: getPlural(config),
 				type: `[${config.name}]`,
-				properties: getFilteringFields(config)
+				properties: getFilteringFields(config),
+				paginate: true
 			})}`;
 	});
 
