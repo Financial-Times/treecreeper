@@ -36,9 +36,9 @@ const createApp = () => {
 
 if (require.main === module) {
 	const PORT = process.env.PORT || 8888;
+	const app = createApp();
 
-	createApp().then(async app => {
-		await initConstraints();
+	initConstraints().then(() => {
 		app.listen(PORT, () => {
 			logger.info(`Listening on ${PORT}`);
 		});
