@@ -1,7 +1,8 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
-const graphQl = require('../controllers/graphQl');
+const graphql = require('../graphql/controllers');
+const logger = require('@financial-times/n-logger').default;
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -10,9 +11,18 @@ const bodyParsers = [
 
 module.exports = router => {
 	router.use(timeout('65s'));
-	router.use(security.requireApiKeyOrS3o);
+	router.use(security.requireApiAuthOrS3o);
 	router.use(bodyParsers);
-	router.post('/', graphQl.api);
+	router.use((req, res, next) => {
+		logger.info({
+			event: 'GRAPHQL_REQUEST',
+			clientId: req.get('client-id'),
+			requestId: req.get('x-request-id'),
+			body: req.body
+		});
+		next();
+	});
+	router.post('/', graphql.api);
 
 	return router;
 };

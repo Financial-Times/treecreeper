@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const generateGraphqlDefs = require('../../server/graphQl/generate-graphql-defs');
+const generateGraphqlDefs = require('../../server/graphql/generate-graphql-defs');
 const schema = require('../../schema');
 
 describe('creating graphql schema', () => {

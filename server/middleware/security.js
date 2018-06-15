@@ -22,8 +22,8 @@ const requireClientId = (req, res, next) => {
 	return next();
 };
 
-const requireApiKeyOrS3o = (req, res, next) => {
-	if (!hasApiKey(req)) {
+const requireApiAuthOrS3o = (req, res, next) => {
+	if (!(hasApiKey(req) && req.get('client-id'))) {
 		return s3o.authS3ONoRedirect(req, res, next);
 	}
 	return next();
@@ -33,5 +33,5 @@ module.exports = {
 	requireS3o: s3o,
 	requireApiKey,
 	requireClientId,
-	requireApiKeyOrS3o
+	requireApiAuthOrS3o
 };

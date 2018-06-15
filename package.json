@@ -19,7 +19,7 @@
 		"start": "nodemon -r dotenv/config server/app.js",
 		"debug": "npm start -- --inspect=0.0.0.0:9229",
 		"test:debug": "npm run test-dev --  --inspect-brk",
-		"test": "nyc mocha -- \"+(server|scripts|test)/**/*.spec.js\"",
+		"test": "nyc mocha -- \"+(server|test|schema)/**/*.spec.js\"",
 		"test-dev": "NODE_ENV=test mocha --require dotenv/config 'test/**/*.spec.js'",
 		"init-db": "node -r dotenv/config scripts/init.js",
 		"docker:test": "docker-compose exec \"$npm_package_short\" sh -c 'npm run test'",

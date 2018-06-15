@@ -6,8 +6,8 @@ const { expect } = require('chai');
 const request = require('./helpers/supertest');
 const { safeQuery } = require('../server/db-connection');
 const security = require('../server/middleware/security');
-const { createMockSchema } = require('../server/graphQl/schema');
-const resolvers = require('../server/graphQl/resolvers');
+const { createMockSchema } = require('../server/graphql/schema');
+const resolvers = require('../server/graphql/resolvers');
 const { graphql } = require('graphql');
 
 const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';
@@ -43,7 +43,7 @@ describe('Integration - GraphQL', () => {
 			.join('\n');
 
 	const getMocksForType = async (type, typeQuery) => {
-		logger.debug('Fetching graphQL schema for type', { type });
+		logger.debug('Fetching graphql schema for type', { type });
 		const fields = await mockGraphQlQuery(`
 				query getTypes {
 					__schema {
@@ -71,7 +71,7 @@ describe('Integration - GraphQL', () => {
 				throw error;
 			});
 
-		logger.debug('Fetching graphQL fields for type', { type, typeQuery });
+		logger.debug('Fetching graphql fields for type', { type, typeQuery });
 
 		const mocks = await mockGraphQlQuery(`
 				query get${typeQuery} {
@@ -120,7 +120,7 @@ describe('Integration - GraphQL', () => {
 			.map(mock => mapEnumFields(mock, fields))
 			.map(addUniqueAttributes);
 
-		logger.debug('Creating graphQL database stubs', { type, props });
+		logger.debug('Creating graphql database stubs', { type, props });
 
 		const createQuery = `UNWIND $props AS map CREATE (n:${type}) SET n = map`;
 		return safeQuery(createQuery, { props });
@@ -181,7 +181,7 @@ describe('Integration - GraphQL', () => {
 		});
 
 		it('should allow access to POST /api/graphql behind s3o', () => {
-			sandbox.stub(security, 'requireApiKeyOrS3o').callsFake(stubS3o);
+			sandbox.stub(security, 'requireApiAuthOrS3o').callsFake(stubS3o);
 			return request(app, { useCached: false })
 				.post('/graphql')
 				.send(dummyQuery)
@@ -189,11 +189,12 @@ describe('Integration - GraphQL', () => {
 				.expect(200);
 		});
 
-		it('should allow access to POST /graphql with an API key header', () => {
+		it('should allow access to POST /graphql with an API key header and client id', () => {
 			return request(app)
 				.post('/graphql')
 				.send(dummyQuery)
 				.set('API_KEY', process.env.API_KEY)
+				.set('client-id', 'graphql-client')
 				.expect(200);
 		});
 
@@ -213,7 +214,8 @@ describe('Integration - GraphQL', () => {
 						${listFields(typeFields['System'])}
 					}}`
 			})
-			.set('API_KEY', `${process.env.API_KEY}`)
+			.set('client-id', 'graphql-client')
+			.set('API_KEY', process.env.API_KEY)
 			.expect(200, { data: { System: typeMocks['System'][0] } });
 	});
 
@@ -226,7 +228,8 @@ describe('Integration - GraphQL', () => {
 						${listFields(typeFields['System'])}
 					}}`
 			})
-			.set('API_KEY', `${process.env.API_KEY}`)
+			.set('client-id', 'graphql-client')
+			.set('API_KEY', process.env.API_KEY)
 			.expect(200)
 			.then(({ body }) =>
 				expect(body.data.Systems).to.have.deep.members(typeMocks['System'])

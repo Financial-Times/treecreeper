@@ -1,7 +1,7 @@
 const logger = require('@financial-times/n-logger').default;
 const { formatError } = require('graphql');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
-const schema = require('../graphQl/schema');
+const schema = require('./schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
@@ -35,10 +35,11 @@ const DEFAULT_QUERY = `{
 	}
 }`;
 
-const graphiql = graphQlEndpoint =>
+const graphiql = graphqlEndpoint =>
 	graphiqlExpress({
-		endpointURL: graphQlEndpoint,
-		query: DEFAULT_QUERY
+		endpointURL: graphqlEndpoint,
+		query: DEFAULT_QUERY,
+		editorTheme: 'duotone-light'
 	});
 
 const api = graphqlExpress(({ headers }) => ({
