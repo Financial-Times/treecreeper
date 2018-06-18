@@ -144,17 +144,30 @@ OWNED_BY:
           description: The products the group owns
 
 SUPPORTED_BY:
-  type: MANY_TO_ONE
-  fromType:
-    System:
-      graphql:
-        name: supportedBy
-        description: The team which supports the system
-  toType:
-    Team:
-      graphql:
-        name: supports
-        description: The systems the team supports
+  -
+    type: MANY_TO_ONE
+    fromType:
+      System:
+        graphql:
+          name: supportedByTeam
+          description: The team which supports the system
+    toType:
+      Team:
+        graphql:
+          name: supports
+          description: The systems the team supports
+  -
+    type: MANY_TO_ONE
+    fromType:
+      System:
+        graphql:
+          name: supportedBySupplier
+          description: The supplier which supports the system
+    toType:
+      Supplier:
+        graphql:
+          name: supports
+          description: The systems the supplier supports
 
 KNOWN_BY:
   type: MANY_TO_MANY
@@ -210,5 +223,17 @@ STORED_IN:
         name: stores
         description: If the system is a VCS, the repositories it stores
 
+KONSTRUCTOR:
+  type: MANY_TO_ONE
+  fromType:
+    Konstructor:
+      graphql:
+        name: konstructed
+        description: Dummy relationship
+  toType:
+    Konstructor:
+      graphql:
+        name: konstructor
+        description: Dummy relationship
 
 

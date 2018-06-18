@@ -1,0 +1,41 @@
+name: Konstructor
+description: An interface provided by the Konstructor tooling
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    description: 'Unique code/id for this item'
+  name:
+    type: String
+    canIdentify: true
+    description: The name of the interface
+  tags:
+    type: String
+    canIdentify: true
+    description: The tags of the interface
+  type:
+    type: String
+    canIdentify: true
+    description: The type of the interface
+  status:
+    type: String
+    canIdentify: true
+    description: The tags of the interface
+  version:
+    type: String
+    canIdentify: true
+    description: The version of the interface
+  serviceUrl:
+    type: String
+    canIdentify: true
+    description: The url of the interface
+  description:
+    type: String
+    canIdentify: true
+    description: The description of the interface
+  locationUrl:
+    type: String
+    canIdentify: true
+    description: The url of the interface
