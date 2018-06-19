@@ -6,7 +6,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    pattern: NO_SPACES
+    pattern: CODE
     description: 'Unique code/id for this item'
   name:
     type: String
