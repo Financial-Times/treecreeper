@@ -181,8 +181,9 @@ describe('v1 - node PATCH', () => {
 					}
 				})
 				.expect(400, {
-					error:
+					errors: [
 						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+					]
 				});
 
 			const result = await safeQuery(
