@@ -116,6 +116,15 @@ type Group {
     name: String
   ): CostCentre
 
+  CostCentres(
+
+    # The pagination offset to use
+    offset: Int = 0
+    # The number of records to return after the pagination offset. This uses the default neo4j ordering
+    first: Int = 20000
+
+  ): [CostCentre]
+
   Group(
 
 
