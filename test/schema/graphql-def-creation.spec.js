@@ -75,7 +75,7 @@ describe('creating graphql schema', () => {
 			enumsSchema: {
 				Lifecycle: {
 					description: 'The lifecycle stage of a product',
-					options: ['INCUBATE', 'SUSTAIN', 'GROW', 'SUNSET']
+					options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
 				}
 			}
 		});
@@ -155,10 +155,10 @@ type Group {
 			`
 # The lifecycle stage of a product
 enum Lifecycle {
-  INCUBATE
-  SUSTAIN
-  GROW
-  SUNSET
+  Incubate
+  Sustain
+  Grow
+  Sunset
 }`,
 			`
 input SystemInput {
