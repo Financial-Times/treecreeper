@@ -182,7 +182,10 @@ describe('v1 - node PATCH', () => {
 				})
 				.expect(400, {
 					errors: [
-						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+						{
+							message:
+								'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+						}
 					]
 				});
 
