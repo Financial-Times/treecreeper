@@ -138,9 +138,7 @@ type Query {
 
 	const enumDefinitions = Object.entries(enumsSchema).map(
 		([key, { description, options }]) => {
-			options = Array.isArray(options)
-				? options.map(str => str.toUpperCase())
-				: Object.keys(options);
+			options = Array.isArray(options) ? options : Object.keys(options);
 			return `
 # ${description}
 enum ${key} {

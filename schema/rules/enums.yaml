@@ -7,33 +7,33 @@ CircleCiVersion:
 YesNo:
   description: For questions where the answer is yes or no
   options:
-    - Yes
-    - No
+    - YES
+    - NO
 YesNoUnknown:
     description: For questions where the answer is yes, no or unknown
     options:
-    - Yes
-    - No
-    - Unknown
+    - YES
+    - NO
+    - UNKNOWN
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:
-    - Production
-    - Requirements
-    - Retired
-    - Testing
-    - Analysis
+    - PRODUCTION
+    - REQUIREMENTS
+    - RETIRED
+    - TESTING
+    - ANALYSIS
 ServiceTier:
   description: A system's support level
   options:
-    - Bronze
-    - Gold
-    - Silver
-    - Platinum
+    - BRONZE
+    - GOLD
+    - SILVER
+    - PLATINUM
 ProductLifecycle:
   description: The lifecycle stage of a product
   options:
-    - Incubate
-    - Sustain
-    - Grow
-    - Sunset
+    - INCUBATE
+    - SUSTAIN
+    - GROW
+    - SUNSET

@@ -75,7 +75,7 @@ describe('creating graphql schema', () => {
 			enumsSchema: {
 				Lifecycle: {
 					description: 'The lifecycle stage of a product',
-					options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
+					options: ['INCUBATE', 'SUSTAIN', 'GROW', 'SUNSET']
 				}
 			}
 		});
