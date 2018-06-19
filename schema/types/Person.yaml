@@ -7,7 +7,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this person'
   name:
     type: String
     canIdentify: true
@@ -20,3 +20,7 @@ properties:
     type: String
     canIdentify: true
     description: The slack link for the person
+  isActive:
+    type: Boolean
+    canFilter: true
+    description: Whether or not the person is still working at the FT

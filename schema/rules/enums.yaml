@@ -4,11 +4,6 @@ CircleCiVersion:
     ONE: '1.0'
     TWO: '2.0'
     NONE: ''
-Status:
-  description: The status of the system
-  options:
-    - Active
-    - Inactive
 YesNo:
   description: For questions where the answer is yes or no
   options:

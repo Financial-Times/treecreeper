@@ -24,7 +24,7 @@ properties:
     type: String
     canIdentify: true
     description: The teams phone contact number
-  status:
-    type: Status
+  isActive:
+    type: Boolean
     canFilter: true
     description: Whether or not the team is still in existence
