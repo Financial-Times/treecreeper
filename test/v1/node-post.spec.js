@@ -159,7 +159,12 @@ describe('v1 - node POST', () => {
 				: result.records.slice().reverse();
 
 		expect(group.get('r').properties).to.eql({
-			_createdByRequest: 'create-request-id'
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(group.get('c').properties._createdByRequest).to.not.exist;
 		expect(group.get('c').properties).to.eql({
@@ -168,7 +173,12 @@ describe('v1 - node POST', () => {
 		});
 
 		expect(person.get('r').properties).to.eql({
-			_createdByRequest: 'create-request-id'
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(person.get('c').properties._createdByRequest).to.not.exist;
 		expect(person.get('c').properties).to.eql({
@@ -250,11 +260,21 @@ describe('v1 - node POST', () => {
 			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
-			_createdByRequest: 'create-request-id'
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('c').properties).to.eql({
 			code: 'new-test-person',
-			_createdByRequest: 'create-request-id'
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 	});
 
@@ -294,7 +314,12 @@ describe('v1 - node POST', () => {
 			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('r').properties).to.eql({
-			_createdByRequest: 'create-request-id'
+			_createdByClient: 'create-client-id',
+			_createdByRequest: 'create-request-id',
+			_createdTimestamp: formattedTimestamp,
+			_updatedByClient: 'create-client-id',
+			_updatedByRequest: 'create-request-id',
+			_updatedTimestamp: formattedTimestamp
 		});
 		expect(record0.get('c').properties._createdByRequest).to.not.exist;
 		expect(record0.get('c').properties).to.eql({
