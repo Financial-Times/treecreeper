@@ -9,6 +9,12 @@ YesNo:
   options:
     - Yes
     - No
+YesNoUnknown:
+    description: For questions where the answer is yes, no or unknown
+    options:
+    - Yes
+    - No
+    - Unknown
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:
