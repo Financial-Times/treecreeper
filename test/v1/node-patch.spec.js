@@ -230,7 +230,12 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
@@ -357,7 +362,12 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
@@ -419,7 +429,12 @@ describe('v1 - node PATCH', () => {
 			expect(result.records.length).to.equal(1);
 			const record0 = result.records[0];
 			expect(record0.get('r').properties).to.eql({
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('c').properties._createdByRequest).to.not.exist;
 			expect(record0.get('c').properties).to.eql({
@@ -558,11 +573,21 @@ describe('v1 - node PATCH', () => {
 				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('r').properties).to.eql({
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('c').properties).to.eql({
 				code: 'other-test-person',
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 		});
 
@@ -612,11 +637,21 @@ describe('v1 - node PATCH', () => {
 				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('r').properties).to.eql({
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 			expect(record0.get('c').properties).to.eql({
 				code: 'other-test-person',
-				_createdByRequest: 'update-request-id'
+				_createdByClient: 'update-client-id',
+				_createdByRequest: 'update-request-id',
+				_createdTimestamp: formattedTimestamp,
+				_updatedByClient: 'update-client-id',
+				_updatedByRequest: 'update-request-id',
+				_updatedTimestamp: formattedTimestamp
 			});
 		});
 		it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {

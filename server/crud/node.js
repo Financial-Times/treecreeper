@@ -28,7 +28,12 @@ const create = async input => {
 	} = sanitizeInput(input, 'CREATE');
 
 	try {
-		const date = new Date().toUTCString();
+		const parameters = {
+			attributes,
+			clientId,
+			date: new Date().toUTCString(),
+			requestId
+		};
 
 		const queryParts = [
 			`CREATE (node:${nodeType} $attributes)
@@ -38,7 +43,9 @@ const create = async input => {
 		];
 
 		if (relationships.length) {
-			queryParts.push(...createRelationships(upsert, relationships));
+			queryParts.push(
+				...createRelationships(upsert, relationships, parameters)
+			);
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -51,12 +58,7 @@ const create = async input => {
 			code,
 			query
 		});
-		const result = await safeQuery(query, {
-			attributes,
-			clientId,
-			date,
-			requestId
-		});
+		const result = await safeQuery(query, parameters);
 		logChanges(clientId, requestId, result);
 		return constructOutput(result);
 	} catch (err) {
@@ -104,7 +106,13 @@ const update = async input => {
 	let deletedRelationships;
 
 	try {
-		const date = new Date().toUTCString();
+		const parameters = {
+			attributes,
+			code,
+			requestId,
+			clientId,
+			date: new Date().toUTCString()
+		};
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
@@ -144,8 +152,9 @@ const update = async input => {
 					);
 				}
 			}
-
-			queryParts.push(...createRelationships(upsert, relationships));
+			queryParts.push(
+				...createRelationships(upsert, relationships, parameters)
+			);
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -158,16 +167,9 @@ const update = async input => {
 			nodeType,
 			code,
 			query,
-			attributes,
-			date
+			attributes
 		});
-		const result = await safeQuery(query, {
-			attributes,
-			code,
-			requestId,
-			clientId,
-			date
-		});
+		const result = await safeQuery(query, parameters);
 
 		logChanges(clientId, requestId, result, deletedRelationships);
 		return {
