@@ -41,7 +41,8 @@ properties:
     canFilter: true
     description: Most recently indexed CircleCI version used
   createdAt:
-    type: The UTC time when the repository was created in the VCS system
+	  type: String
+    description: The UTC time when the repository was created in the VCS system
   pushedAt:
     type: String
     description: The UTC time when the repository was last pushed to
