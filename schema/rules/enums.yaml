@@ -15,6 +15,7 @@ SystemLifecycle:
 ServiceTier:
   description: A system's support level
   options:
+    - Unsupported
     - Bronze
     - Gold
     - Silver
