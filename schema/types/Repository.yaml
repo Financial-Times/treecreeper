@@ -18,7 +18,7 @@ properties:
     canIdentify: true
     description: Repository URL
   vcsID:
-    type: Int
+    type: String
     description: Repository hosts internal ID
   sshUrl:
     type: String
