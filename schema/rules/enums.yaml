@@ -4,17 +4,6 @@ CircleCiVersion:
     ONE: '1.0'
     TWO: '2.0'
     NONE: ''
-YesNo:
-  description: For questions where the answer is yes or no
-  options:
-    - YES
-    - NO
-YesNoUnknown:
-    description: For questions where the answer is yes, no or unknown
-    options:
-    - YES
-    - NO
-    - UNKNOWN
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:

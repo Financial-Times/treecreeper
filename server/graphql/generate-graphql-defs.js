@@ -6,14 +6,14 @@ const customGraphql = `
 input SystemInput {
     serviceTier: ServiceTier
     name: String
-    supported: YesNo
+    supported: Boolean
     primaryURL: String
     systemType: String
     serviceTier: ServiceTier
     serviceType: String
     hostPlatform: String
-    personalData: YesNo
-    sensitiveData: YesNo
+    personalData: Boolean
+    sensitiveData: Boolean
     lifecycleStage: SystemLifecycle
 }
 
