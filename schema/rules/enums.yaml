@@ -7,22 +7,22 @@ CircleCiVersion:
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:
-    - PRODUCTION
-    - REQUIREMENTS
-    - RETIRED
-    - TESTING
-    - ANALYSIS
+    - Production
+    - Requirements
+    - Retired
+    - Testing
+    - Analysis
 ServiceTier:
   description: A system's support level
   options:
-    - BRONZE
-    - GOLD
-    - SILVER
-    - PLATINUM
+    - Bronze
+    - Gold
+    - Silver
+    - Platinum
 ProductLifecycle:
   description: The lifecycle stage of a product
   options:
-    - INCUBATE
-    - SUSTAIN
-    - GROW
-    - SUNSET
+    - Incubate
+    - Sustain
+    - Grow
+    - Sunset
