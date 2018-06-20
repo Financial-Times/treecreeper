@@ -43,9 +43,7 @@ const create = async input => {
 		];
 
 		if (relationships.length) {
-			queryParts.push(
-				...createRelationships(upsert, relationships, parameters)
-			);
+			queryParts.push(createRelationships(upsert, relationships, parameters));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
@@ -143,18 +141,14 @@ const update = async input => {
 				if (deletedRelationships.records.length) {
 					// removal
 					queryParts.push(
-						...relationshipTypes.map(
-							type => stripIndents`
+						stripIndents`
 						WITH node
-						OPTIONAL MATCH (node)-[rel:${type}]-(related)
-						DELETE rel`
-						)
+						OPTIONAL MATCH (node)-[deletableRel:${relationshipTypes.join('|')}]-(related)
+						DELETE deletableRel`
 					);
 				}
 			}
-			queryParts.push(
-				...createRelationships(upsert, relationships, parameters)
-			);
+			queryParts.push(createRelationships(upsert, relationships, parameters));
 		}
 		queryParts.push(RETURN_NODE_WITH_RELS);
 
