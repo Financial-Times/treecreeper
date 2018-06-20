@@ -222,18 +222,3 @@ STORED_IN:
       graphql:
         name: stores
         description: If the system is a VCS, the repositories it stores
-
-KONSTRUCTOR:
-  type: MANY_TO_ONE
-  fromType:
-    Konstructor:
-      graphql:
-        name: konstructed
-        description: Dummy relationship
-  toType:
-    Konstructor:
-      graphql:
-        name: konstructor
-        description: Dummy relationship
-
-

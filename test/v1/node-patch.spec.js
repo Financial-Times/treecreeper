@@ -180,10 +180,10 @@ describe('v1 - node PATCH', () => {
 						]
 					}
 				})
-				.expect(400, {
-					error:
-						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
-				});
+				.expect(
+					400,
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+				);
 
 			const result = await safeQuery(
 				`MATCH (s:Team {code: 'test-team'})-[]-() RETURN s`
