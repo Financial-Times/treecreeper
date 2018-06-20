@@ -126,8 +126,9 @@ describe('Integration - GraphQL', () => {
 		return safeQuery(createQuery, { props });
 	};
 
-	beforeEach(async () => {
+	beforeEach(async function() {
 		sandbox = sinon.sandbox.create();
+		this.timeout(4000);
 
 		await populateDatabaseMocks('System', 'Systems');
 	});
