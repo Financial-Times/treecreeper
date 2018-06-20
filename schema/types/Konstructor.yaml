@@ -20,8 +20,9 @@ properties:
     type: String
     canIdentify: true
     description: The type of the interface
-  status:
-    type: String
+  isActive:
+    type: Boolean
+    canFilter: true
     canIdentify: true
     description: The tags of the interface
   version:

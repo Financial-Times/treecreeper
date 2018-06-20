@@ -38,10 +38,15 @@ describe('creating graphql schema', () => {
 							description: 'Unique code/id for this item',
 							pattern: 'COST_CENTRE'
 						},
-						lifecycleStage: {
-							type: 'Lifecycle',
-							canFilter: true,
+						name: {
+							type: 'String',
+							canIdentify: true,
 							description: 'The name of the group'
+						},
+						isActive: {
+							type: 'Boolean',
+							canFilter: true,
+							description: 'Whether or not the group is still in existence'
 						}
 					}
 				}
@@ -103,7 +108,9 @@ type Group {
   # Unique code/id for this item
   code: String
   # The name of the group
-  lifecycleStage: Lifecycle
+  name: String
+  # Whether or not the group is still in existence
+  isActive: Boolean
 
 }`,
 			`type Query {
@@ -130,6 +137,8 @@ type Group {
 
     # Unique code/id for this item
     code: String
+    # The name of the group
+    name: String
   ): Group
 
   Groups(
@@ -139,30 +148,30 @@ type Group {
     # The number of records to return after the pagination offset. This uses the default neo4j ordering
     first: Int = 20000
 
-    # The name of the group
-    lifecycleStage: Lifecycle
+    # Whether or not the group is still in existence
+    isActive: Boolean
   ): [Group]
 }`,
 			`
 # The lifecycle stage of a product
 enum Lifecycle {
-  INCUBATE
-  SUSTAIN
-  GROW
-  SUNSET
+  Incubate
+  Sustain
+  Grow
+  Sunset
 }`,
 			`
 input SystemInput {
     serviceTier: ServiceTier
     name: String
-    supported: YesNo
+    supported: Boolean
     primaryURL: String
     systemType: String
     serviceTier: ServiceTier
     serviceType: String
     hostPlatform: String
-    personalData: YesNo
-    sensitiveData: YesNo
+    personalData: Boolean
+    sensitiveData: Boolean
     lifecycleStage: SystemLifecycle
 }
 

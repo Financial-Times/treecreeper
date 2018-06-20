@@ -7,16 +7,13 @@ const { getNeo4jResolverNames, enumsSchema } = require('../../schema');
 
 const queries = getNeo4jResolverNames();
 
-const upperCaseResolver = keys =>
-	keys.reduce(
-		(resolver, key) => Object.assign(resolver, { [key.toUpperCase()]: key }),
-		{}
-	);
+const mapToObjectResolver = keys =>
+	keys.reduce((resolver, key) => Object.assign(resolver, { [key]: key }), {});
 
 const enumResolvers = Object.entries(enumsSchema).reduce(
 	(map, [key, { options }]) =>
 		Object.assign(map, {
-			[key]: Array.isArray(options) ? upperCaseResolver(options) : options
+			[key]: Array.isArray(options) ? mapToObjectResolver(options) : options
 		}),
 	{}
 );

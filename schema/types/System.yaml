@@ -13,7 +13,7 @@ properties:
     canIdentify: true
     description: Display name of the system
   supported:
-    type: YesNo
+    type: Boolean
     canFilter: true
     description: Whether the system is supported
   primaryURL:
@@ -37,11 +37,11 @@ properties:
     canFilter: true
     description: The platform the service is hosted on, e.g. Heroku
   personalData:
-    type: YesNo
+    type: Boolean
     canFilter: true
     description: Whether the system contains personal PI2 data
   sensitiveData:
-    type: YesNo
+    type: Boolean
     canFilter: true
     description: Whether the system contains sensitive data
   lifecycleStage:
