@@ -7,6 +7,7 @@ properties:
     unique: true
     canIdentify: true
     description: 'Unique code/id for this item'
+    pattern: NO_SPACES
   name:
     type: String
     canIdentify: true
