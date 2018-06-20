@@ -82,8 +82,8 @@ const PAGINATE = indentMultiline(
 const generateQuery = ({ name, type, properties, paginate }) => {
 	return `
   ${name}(
-  	${paginate ? PAGINATE : ''}
-  	${indentMultiline(generatePropertyFields(properties), 4, true)}
+    ${paginate ? PAGINATE : ''}
+    ${indentMultiline(generatePropertyFields(properties), 4, true)}
   ): ${type}`;
 };
 

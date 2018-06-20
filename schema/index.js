@@ -23,18 +23,7 @@ const getFilteringFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canFilter);
 
 const getNeo4jResolverNames = () => {
-	return [].concat(
-		...typesSchema.map(type => {
-			const arr = [];
-			if (getIdentifyingFields(type).length) {
-				arr.push(type.name);
-			}
-			if (getFilteringFields(type).length) {
-				arr.push(getPlural(type));
-			}
-			return arr;
-		})
-	);
+	return [].concat(...typesSchema.map(type => [type.name, getPlural(type)]));
 };
 
 typesSchema.forEach(type => {
