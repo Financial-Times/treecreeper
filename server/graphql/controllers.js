@@ -38,7 +38,7 @@ const DEFAULT_QUERY = `{
 const graphiql = graphqlEndpoint =>
 	graphiqlExpress({
 		endpointURL: graphqlEndpoint,
-		query: DEFAULT_QUERY,
+		query: DEFAULT_QUERY
 	});
 
 const api = graphqlExpress(({ headers }) => ({

@@ -15,8 +15,7 @@ describe('schema - types', () => {
 		'Boolean'
 	]);
 	describe('raw data', () => {
-		fs
-			.readdirSync(path.join(process.cwd(), 'schema/types'))
+		fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 			.filter(fileName => /\.yaml$/.test(fileName))
 			.map(fileName => {
 				it(`${fileName} has consistent name property`, () => {
