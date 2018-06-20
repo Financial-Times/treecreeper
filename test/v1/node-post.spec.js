@@ -33,9 +33,8 @@ describe('v1 - node POST', () => {
 	it('create node', async () => {
 		await request(app)
 			.post('/v1/node/Team/new-team')
-			.auth()
+			.auth('create-client-id')
 			.set('x-request-id', 'create-request-id')
-			.set('x-client-id', 'create-client-id')
 			.send({ node: { foo: 'new' } })
 			.expect(200, {
 				node: {
@@ -112,9 +111,8 @@ describe('v1 - node POST', () => {
 		};
 		await request(app)
 			.post('/v1/node/Team/new-team')
-			.auth()
+			.auth('create-client-id')
 			.set('x-request-id', 'create-request-id')
-			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -220,9 +218,8 @@ describe('v1 - node POST', () => {
 
 		await request(app)
 			.post('/v1/node/Team/new-team?upsert=true')
-			.auth()
+			.auth('create-client-id')
 			.set('x-request-id', 'create-request-id')
-			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships
@@ -281,9 +278,8 @@ describe('v1 - node POST', () => {
 	it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {
 		await request(app)
 			.post('/v1/node/Team/new-team?upsert=true')
-			.auth()
+			.auth('create-client-id')
 			.set('x-request-id', 'create-request-id')
-			.set('x-client-id', 'create-client-id')
 			.send({
 				node: { foo: 'new' },
 				relationships: {
@@ -342,9 +338,8 @@ describe('v1 - node POST', () => {
 	it('logs creation events to kinesis', async () => {
 		await request(app)
 			.post('/v1/node/Team/new-team?upsert=true')
-			.auth()
+			.auth('create-client-id')
 			.set('x-request-id', 'create-request-id')
-			.set('x-client-id', 'create-client-id')
 			.send({
 				// create a node
 				node: { foo: 'new' },

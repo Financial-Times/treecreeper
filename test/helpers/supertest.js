@@ -4,8 +4,11 @@ let cache;
 
 const API_KEY = process.env.API_KEY;
 
-supertest.Test.prototype.auth = function() {
-	return this.set('API_KEY', API_KEY).set('client-id', 'test-client-id');
+supertest.Test.prototype.auth = function(clientId) {
+	return this.set('API_KEY', API_KEY).set(
+		'client-id',
+		clientId || 'test-client-id'
+	);
 };
 
 const request = (app, { useCached = true } = {}) => {

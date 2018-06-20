@@ -23,9 +23,8 @@ describe('v1 - relationship POST', () => {
 	it('creates a relationship', async () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
 				_createdByClient: 'create-relationship-client',
@@ -56,9 +55,8 @@ describe('v1 - relationship POST', () => {
 
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
 			.expect(409);
 
 		const result = await getRelationship();
@@ -68,10 +66,9 @@ describe('v1 - relationship POST', () => {
 	it('add attributes to created relationship', async () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
 			.send({ foo: 'bar' })
-			.auth()
 			.expect(200, {
 				_createdByRequest: 'create-relationship-request',
 				_createdByClient: 'create-relationship-client',
@@ -100,9 +97,8 @@ describe('v1 - relationship POST', () => {
 			.post(
 				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
 			.expect(400);
 
 		const result = await getRelationship();
@@ -114,9 +110,8 @@ describe('v1 - relationship POST', () => {
 			.post(
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
 			.expect(400);
 
 		const result = await getRelationship();
@@ -127,16 +122,15 @@ describe('v1 - relationship POST', () => {
 		stubDbUnavailable(state);
 		return request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
-			.auth()
+			.auth('create-relationship-client')
 			.expect(500);
 	});
 
 	it('logs creation events to kinesis', async () => {
 		await request(app)
 			.post('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('create-relationship-client')
 			.set('x-request-id', 'create-relationship-request')
-			.set('x-client-id', 'create-relationship-client')
-			.auth()
 			.expect(200);
 
 		[

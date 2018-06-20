@@ -126,8 +126,7 @@ describe('v1 - relationship generic', () => {
 		});
 	});
 
-	[['post', true]].forEach(
-		//, ['patch', true], ['get', false], ['delete', false]].forEach(
+	[['post', true], ['patch', true], ['get', false], ['delete', false]].forEach(
 		([method, checkBody]) => {
 			describe(`security checks - ${method}`, () => {
 				it('should error when node type is suspicious', async () => {
@@ -186,7 +185,7 @@ describe('v1 - relationship generic', () => {
 							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 						)
 						.auth()
-						.set('x-client-id', 'DROP ALL')
+						.set('client-id', 'DROP ALL')
 						.expect(400, /Invalid client id `DROP ALL`/);
 				});
 
