@@ -20,3 +20,7 @@ properties:
     type: String
     canIdentify: true
     description: The slack link for the person
+  phone:
+    type: String
+    canIdentify: true
+    description: The phone contact number for the person
