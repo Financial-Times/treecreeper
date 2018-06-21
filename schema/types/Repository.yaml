@@ -40,3 +40,18 @@ properties:
     type: CircleCiVersion
     canFilter: true
     description: Most recently indexed CircleCI version used
+  createdAt:
+    type: String
+    description: The UTC time when the repository was created in the VCS system
+  pushedAt:
+    type: String
+    description: The UTC time when the repository was last pushed to
+  shortDescriptionHTML:
+    type: String
+    description: A short description of the repository on Github
+  projectName:
+    type: String
+    description: The project name on FT Bitbucket
+  projectUrl:
+    type: String
+    description: The URL of the project on FT Bitbucket
