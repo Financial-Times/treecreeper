@@ -49,13 +49,46 @@ const generatePropertyFields = properties => {
 		.join('');
 };
 
+const relFragment = (type, direction, depth = '') => {
+	const left = direction === 'IN' ? '<' : '';
+	const right = direction === 'OUT' ? '>' : '';
+	return `${left}-[:${type}${depth}]-${right}`;
+};
+
+const maybePluralType = definition =>
+	definition.hasMany ? `[${definition.type}]` : definition.type;
+
+const maybePaginate = definition =>
+	definition.hasMany ? '(first: Int, offset: Int)' : '';
+
+const generateDirectRelationshipField = definition =>
+	definition.description && definition.name
+		? `# ${definition.description}
+        ${definition.name}${maybePaginate(definition)}: ${maybePluralType(
+				definition
+		  )} @relation(name: "${definition.underlyingRelationship}", direction: "${
+				definition.direction
+		  }")`
+		: '';
+
+const generateRecursiveRelationshipField = definition =>
+	definition.recursiveDescription && definition.recursiveName
+		? `# ${definition.recursiveDescription}
+        ${definition.recursiveName}${maybePaginate(
+				definition
+		  )}: ${maybePluralType(definition)} @cypher(
+      statement: "MATCH (this)${relFragment(
+				definition.underlyingRelationship,
+				definition.direction,
+				'*1..20'
+			)}(related:${definition.type}) RETURN DISTINCT related"
+    )`
+		: '';
+
 const generateRelationshipField = definition => {
-	const type = definition.hasMany ? `[${definition.type}]` : definition.type;
 	return stripEmptyFirstLine`
-        # ${definition.description}
-        ${definition.name}: ${type} @relation(name: "${
-		definition.underlyingRelationship
-	}${definition.depth || ''}", direction: "${definition.direction}")`;
+        ${generateDirectRelationshipField(definition)}
+        ${generateRecursiveRelationshipField(definition)}`;
 };
 
 const generateRelationshipFields = definitions =>
@@ -82,8 +115,8 @@ const PAGINATE = indentMultiline(
 const generateQuery = ({ name, type, properties, paginate }) => {
 	return `
   ${name}(
-  	${paginate ? PAGINATE : ''}
-  	${indentMultiline(generatePropertyFields(properties), 4, true)}
+    ${paginate ? PAGINATE : ''}
+    ${indentMultiline(generatePropertyFields(properties), 4, true)}
   ): ${type}`;
 };
 

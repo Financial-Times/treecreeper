@@ -1,6 +1,11 @@
 const readYaml = require('./lib/read-yaml');
 const typesSchema = readYaml.directory('schema/types');
-const relationshipsSchema = require('./lib/construct-relationships');
+const relationshipsRaw = readYaml.file('schema/rules/relationships.yaml');
+
+const {
+	byNodeType: relationshipNodeBuilder
+} = require('./lib/construct-relationships');
+
 const stringPatternsRaw = readYaml.file('schema/rules/string-patterns.yaml');
 
 const stringPatterns = Object.entries(stringPatternsRaw).reduce(
@@ -23,18 +28,7 @@ const getFilteringFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canFilter);
 
 const getNeo4jResolverNames = () => {
-	return [].concat(
-		...typesSchema.map(type => {
-			const arr = [];
-			if (getIdentifyingFields(type).length) {
-				arr.push(type.name);
-			}
-			if (getFilteringFields(type).length) {
-				arr.push(getPlural(type));
-			}
-			return arr;
-		})
-	);
+	return [].concat(...typesSchema.map(type => [type.name, getPlural(type)]));
 };
 
 typesSchema.forEach(type => {
@@ -53,7 +47,7 @@ module.exports = {
 	getFilteringFields,
 	getPlural,
 	typesSchema,
-	relationshipsSchema,
+	relationshipsSchema: relationshipNodeBuilder(relationshipsRaw),
 	enumsSchema: readYaml.file('schema/rules/enums.yaml'),
 	stringPatterns
 };

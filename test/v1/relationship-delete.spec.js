@@ -14,7 +14,7 @@ describe('v1 - relationship DELETE', () => {
 			.delete(
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 			)
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(204);
 
 		const result = await getRelationship();
@@ -27,7 +27,7 @@ describe('v1 - relationship DELETE', () => {
 			.delete(
 				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
 			)
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(404);
 	});
 
@@ -36,7 +36,7 @@ describe('v1 - relationship DELETE', () => {
 			.delete(
 				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(404);
 	});
 
@@ -45,7 +45,7 @@ describe('v1 - relationship DELETE', () => {
 			.delete(
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(404);
 	});
 
@@ -55,7 +55,7 @@ describe('v1 - relationship DELETE', () => {
 			.delete(
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 			)
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(500);
 	});
 
@@ -65,8 +65,7 @@ describe('v1 - relationship DELETE', () => {
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
 			)
 			.set('x-request-id', 'delete-relationship-request')
-			.set('x-client-id', 'delete-relationship-client')
-			.auth()
+			.auth('delete-relationship-client')
 			.expect(204);
 		[
 			[

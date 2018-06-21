@@ -17,13 +17,11 @@ module.exports = {
 			session.close();
 		}
 	},
-	safeQueryWithSharedSession: (session = driver.session()) => async (
-		...args
-	) => {
-		try {
+	safeQueryWithSharedSession: (session = driver.session()) => {
+		const safeQuery = async (...args) => {
 			return await session.run(...args);
-		} finally {
-			session.close();
-		}
+		};
+		safeQuery.close = () => session.close();
+		return safeQuery;
 	}
 };

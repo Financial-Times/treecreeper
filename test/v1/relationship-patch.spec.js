@@ -35,10 +35,9 @@ describe('v1 - relationship PATCH', () => {
 	it('updates a relationship', async () => {
 		await request(app)
 			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
-			.auth()
 			.expect(200, {
 				_createdByRequest: 'setup-script',
 				_createdByClient: 'setup-client-script',
@@ -67,10 +66,9 @@ describe('v1 - relationship PATCH', () => {
 			.patch(
 				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
 			)
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
-			.auth()
 			.expect(201, {
 				_createdByRequest: 'update-relationship-request',
 				_createdByClient: 'update-relationship-client',
@@ -98,10 +96,9 @@ describe('v1 - relationship PATCH', () => {
 	it("deletes attributes which are provided as 'null'", async () => {
 		await request(app)
 			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: null, baz: null })
-			.auth()
 			.expect(200, {
 				_createdByRequest: 'setup-script',
 				_createdByClient: 'setup-client-script',
@@ -129,9 +126,8 @@ describe('v1 - relationship PATCH', () => {
 			.patch(
 				'/v1/relationship/Team/not-test-team/HAS_TECH_LEAD/Person/test-person'
 			)
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
-			.auth()
 			.expect(400);
 	});
 
@@ -140,9 +136,8 @@ describe('v1 - relationship PATCH', () => {
 			.patch(
 				'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/not-test-person'
 			)
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
-			.auth()
 			.expect(400);
 	});
 
@@ -150,17 +145,16 @@ describe('v1 - relationship PATCH', () => {
 		stubDbUnavailable(state);
 		return request(app)
 			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
-			.auth()
+			.auth('update-relationship-client')
 			.expect(500);
 	});
 
 	it('logs update events to kinesis', async () => {
 		await request(app)
 			.patch('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
-			.set('x-client-id', 'update-relationship-client')
 			.send({ foo: 'baz' })
-			.auth()
 			.expect(200);
 
 		[

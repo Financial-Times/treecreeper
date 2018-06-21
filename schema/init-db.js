@@ -7,58 +7,64 @@ const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 const initConstraints = async () => {
 	const safeQuery = safeQueryWithSharedSession();
 
-	const setupConstraintIfPossible = constraintQuery =>
-		safeQuery(constraintQuery).catch(err =>
-			logger.warn({
-				event: 'CONSTRAINT_SETUP_FAILURE',
-				err: err.message,
-				constraintQuery
-			})
+	try {
+		const setupConstraintIfPossible = constraintQuery =>
+			safeQuery(constraintQuery).catch(err =>
+				logger.warn({
+					event: 'CONSTRAINT_SETUP_FAILURE',
+					err: err.message,
+					constraintQuery
+				})
+			);
+
+		const retrieveConstraints = async () => {
+			const constraints = await safeQuery('CALL db.constraints');
+			return constraints.records.map(constraint =>
+				constraint.get('description')
+			);
+		};
+
+		const existingConstraints = await retrieveConstraints();
+		const desiredConstraints = []
+			.concat(
+				...schemas.typesSchema.map(({ name: typeName, properties }) => {
+					return [].concat(
+						...Object.entries(properties).map(
+							([propName, { required, unique }]) => {
+								return [
+									unique &&
+										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
+									required &&
+										`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+								];
+							}
+						)
+					);
+				})
+			)
+			.filter(statement => !!statement);
+
+		const dropConstraints = exclusion(
+			existingConstraints,
+			desiredConstraints
+		).map(constraint => `DROP ${constraint}`);
+		const createConstraints = exclusion(
+			desiredConstraints,
+			existingConstraints
+		).map(constraint => `CREATE ${constraint}`);
+
+		for (const constraint of dropConstraints.concat(createConstraints)) {
+			await setupConstraintIfPossible(constraint);
+		}
+
+		const constraints = await retrieveConstraints();
+
+		logger.info(
+			`db.constraints updated. ${constraints.length} constraints exist`
 		);
-
-	const retrieveConstraints = async () => {
-		const constraints = await safeQuery('CALL db.constraints');
-		return constraints.records.map(constraint => constraint.get('description'));
-	};
-
-	const existingConstraints = await retrieveConstraints();
-	const desiredConstraints = []
-		.concat(
-			...schemas.typesSchema.map(({ name: typeName, properties }) => {
-				return [].concat(
-					...Object.entries(properties).map(
-						([propName, { required, unique }]) => {
-							return [
-								unique &&
-									`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
-								required &&
-									`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-							];
-						}
-					)
-				);
-			})
-		)
-		.filter(statement => !!statement);
-
-	const dropConstraints = exclusion(
-		existingConstraints,
-		desiredConstraints
-	).map(constraint => `DROP ${constraint}`);
-	const createConstraints = exclusion(
-		desiredConstraints,
-		existingConstraints
-	).map(constraint => `CREATE ${constraint}`);
-
-	for (const constraint of dropConstraints.concat(createConstraints)) {
-		await setupConstraintIfPossible(constraint);
+	} finally {
+		safeQuery.close();
 	}
-
-	const constraints = await retrieveConstraints();
-
-	logger.info(
-		`db.constraints updated. ${constraints.length} constraints exist`
-	);
 };
 
 module.exports = {

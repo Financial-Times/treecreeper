@@ -28,9 +28,8 @@ describe('v1 - node DELETE', () => {
 	it('deletes a detached node', async () => {
 		await request(app)
 			.delete('/v1/node/Team/test-team')
-			.auth()
+			.auth('delete-client-id')
 			.set('x-request-id', 'delete-request-id')
-			.set('x-client-id', 'delete-client-id')
 			.expect(204);
 
 		await verifyDeletion();
@@ -39,9 +38,8 @@ describe('v1 - node DELETE', () => {
 	it('404 when deleting non-existent node', async () => {
 		await request(app)
 			.delete('/v1/node/Team/absent-team')
-			.auth()
+			.auth('delete-client-id')
 			.set('x-request-id', 'delete-request-id')
-			.set('x-client-id', 'delete-client-id')
 			.expect(404);
 
 		await verifyNotDeletion();
@@ -73,9 +71,8 @@ describe('v1 - node DELETE', () => {
 	it('logs deletion event to kinesis', async () => {
 		await request(app)
 			.delete('/v1/node/Team/test-team')
-			.auth()
+			.auth('delete-client-id')
 			.set('x-request-id', 'delete-request-id')
-			.set('x-client-id', 'delete-client-id')
 			.end();
 
 		[

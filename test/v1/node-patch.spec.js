@@ -30,9 +30,8 @@ describe('v1 - node PATCH', () => {
 	it('update node', async () => {
 		await request(app)
 			.patch('/v1/node/Team/test-team')
-			.auth()
+			.auth('update-client-id')
 			.set('x-request-id', 'update-request-id')
-			.set('x-client-id', 'update-client-id')
 			.send({
 				node: {
 					foo: 'updated'
@@ -63,9 +62,8 @@ describe('v1 - node PATCH', () => {
 	it('Create when patching non-existent node', async () => {
 		await request(app)
 			.patch('/v1/node/Team/new-team')
-			.auth()
+			.auth('update-client-id')
 			.set('x-request-id', 'update-request-id')
-			.set('x-client-id', 'update-client-id')
 			.send({
 				node: {
 					foo: 'new'
@@ -135,9 +133,8 @@ describe('v1 - node PATCH', () => {
 	it("deletes attributes which are provided as 'null'", async () => {
 		await request(app)
 			.patch('/v1/node/Team/test-team')
-			.auth()
+			.auth('update-client-id')
 			.set('x-request-id', 'update-request-id')
-			.set('x-client-id', 'update-client-id')
 			.send({ node: { foo: null } })
 			.expect(200, {
 				node: {
@@ -166,9 +163,8 @@ describe('v1 - node PATCH', () => {
 		it('errors if updating relationships without relationshipAction query string', async () => {
 			await request(app)
 				.patch('/v1/node/Team/test-team')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -204,9 +200,8 @@ describe('v1 - node PATCH', () => {
 			};
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=merge')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -255,9 +250,8 @@ describe('v1 - node PATCH', () => {
 			);
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=merge')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -320,9 +314,8 @@ describe('v1 - node PATCH', () => {
 		it('can replace an empty relationship set if relationshipAction=replace', async () => {
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=replace')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -387,9 +380,8 @@ describe('v1 - node PATCH', () => {
 			);
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=replace')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -454,9 +446,8 @@ describe('v1 - node PATCH', () => {
 			);
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=replace')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -510,9 +501,8 @@ describe('v1 - node PATCH', () => {
 		it('error when creating relationship to non-existent node', async () => {
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=replace')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -540,9 +530,8 @@ describe('v1 - node PATCH', () => {
 
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=merge&upsert=true')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -604,9 +593,8 @@ describe('v1 - node PATCH', () => {
 
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=replace&upsert=true')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships
 				})
@@ -657,9 +645,8 @@ describe('v1 - node PATCH', () => {
 		it('not set `createdByRequest` on things that already existed when using `upsert=true`', async () => {
 			await request(app)
 				.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=replace')
-				.auth()
+				.auth('update-client-id')
 				.set('x-request-id', 'update-request-id')
-				.set('x-client-id', 'update-client-id')
 				.send({
 					relationships: {
 						HAS_TECH_LEAD: [
@@ -704,9 +691,8 @@ describe('v1 - node PATCH', () => {
 		await request(app)
 			// we test with replace as this will delete some stuff too
 			.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=replace')
-			.auth()
+			.auth('update-client-id')
 			.set('x-request-id', 'update-request-id')
-			.set('x-client-id', 'update-client-id')
 			.send({
 				node: { foo: 'updated' },
 				relationships: {

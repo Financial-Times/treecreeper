@@ -132,7 +132,7 @@ describe('v1 - node generic', () => {
 					await request(app)
 						[method]('/v1/node/Team/test-team')
 						.auth()
-						.set('x-client-id', 'DROP ALL')
+						.set('client-id', 'DROP ALL')
 						.expect(400, /Invalid client id `DROP ALL`/);
 				});
 

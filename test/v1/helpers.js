@@ -102,7 +102,8 @@ const stubDbUnavailable = state =>
 	state.sandbox.stub(driver, 'session').returns({
 		run: () => {
 			throw 'oh no';
-		}
+		},
+		close: () => {}
 	});
 
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>

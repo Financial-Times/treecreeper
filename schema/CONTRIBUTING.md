@@ -45,6 +45,8 @@ PAYS_FOR: // name of the relationship type
         description: The Cost Centre associated with the group // graphql description
 ```
 
+In addition to the above, if a relationship is recursive in nature (e.g. a dependency tree for a system), the result of traversing this tree can be assigned, as a flattened list (or single node if traversing from many to many to ... to one), to a property by adding `recursiveName` and `recursiveDescription` to the graphql entries. If appropriate, when these recursive definitions are present then `name` and `description` may be omitted.
+
 ### What if the relationship can exist between lots of different types?
 
 These must be added in pairs. Use an array to define a list of different pairs:
