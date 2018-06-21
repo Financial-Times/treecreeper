@@ -3,8 +3,7 @@ require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
 const { ui, graphql, v1 } = require('./routes');
 const { initConstraints } = require('../schema/init-db');
-
-const health = require('./health/');
+const health = require('./health');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -38,10 +37,10 @@ const createApp = () => {
 			return res.sendStatus(404).end();
 		}
 		const healthConstraints = health.constraints;
-		const healthcheckOutput = healthConstraints.map(check => {
+		const healthcheckStatus = healthConstraints.map(check => {
 			return check.getStatus();
 		});
-		return res.json(healthcheckOutput);
+		return res.json(healthcheckStatus);
 	});
 
 	return app;
