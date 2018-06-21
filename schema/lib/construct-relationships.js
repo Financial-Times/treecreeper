@@ -1,12 +1,8 @@
-const readYaml = require('./read-yaml');
-
-const relationships = readYaml.file('schema/rules/relationships.yaml');
-
 const defineRelationshipOnNode = ({
 	nodeType,
 	cypherName,
 	direction,
-	graphql: { name, description, depth },
+	graphql: { name, description, recursiveName, recursiveDescription },
 	hasMany
 }) => ({
 	name,
@@ -15,7 +11,8 @@ const defineRelationshipOnNode = ({
 	underlyingRelationship: cypherName,
 	direction,
 	description,
-	depth
+	recursiveName,
+	recursiveDescription
 });
 
 const buildTwinRelationships = ({
@@ -59,8 +56,8 @@ const buildTwinRelationships = ({
 	});
 };
 
-const byNodeType = Object.entries(relationships).reduce(
-	(map, [cypherName, definitions]) => {
+const byNodeType = relationships =>
+	Object.entries(relationships).reduce((map, [cypherName, definitions]) => {
 		if (!Array.isArray(definitions)) {
 			definitions = [definitions];
 		}
@@ -75,8 +72,6 @@ const byNodeType = Object.entries(relationships).reduce(
 			});
 		});
 		return map;
-	},
-	{}
-);
+	}, {});
 
-module.exports = byNodeType;
+module.exports = { byNodeType };

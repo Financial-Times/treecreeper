@@ -1,6 +1,11 @@
 const readYaml = require('./lib/read-yaml');
 const typesSchema = readYaml.directory('schema/types');
-const relationshipsSchema = require('./lib/construct-relationships');
+const relationshipsRaw = readYaml.file('schema/rules/relationships.yaml');
+
+const {
+	byNodeType: relationshipNodeBuilder
+} = require('./lib/construct-relationships');
+
 const stringPatternsRaw = readYaml.file('schema/rules/string-patterns.yaml');
 
 const stringPatterns = Object.entries(stringPatternsRaw).reduce(
@@ -42,7 +47,7 @@ module.exports = {
 	getFilteringFields,
 	getPlural,
 	typesSchema,
-	relationshipsSchema,
+	relationshipsSchema: relationshipNodeBuilder(relationshipsRaw),
 	enumsSchema: readYaml.file('schema/rules/enums.yaml'),
 	stringPatterns
 };

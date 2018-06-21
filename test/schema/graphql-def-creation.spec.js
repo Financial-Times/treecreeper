@@ -1,5 +1,8 @@
 const { expect } = require('chai');
 const generateGraphqlDefs = require('../../server/graphql/generate-graphql-defs');
+const {
+	byNodeType: relationshipNodeBuilder
+} = require('../../schema/lib/construct-relationships');
 const schema = require('../../schema');
 
 describe('creating graphql schema', () => {
@@ -51,14 +54,17 @@ describe('creating graphql schema', () => {
 					}
 				}
 			],
-			relationshipsSchema: {
+			relationshipsSchema: relationshipNodeBuilder({
 				PAYS_FOR: {
 					type: 'ONE_TO_MANY',
 					fromType: {
 						CostCentre: {
 							graphql: {
 								name: 'hasGroups',
-								description: 'The groups which are costed to the cost centre'
+								description: 'The groups which are costed to the cost centre',
+								recursiveName: 'hasNestedGroups',
+								recursiveDescription:
+									'The recursive groups which are costed to the cost centre'
 							}
 						}
 					},
@@ -66,12 +72,15 @@ describe('creating graphql schema', () => {
 						Group: {
 							graphql: {
 								name: 'hasBudget',
-								description: 'The Cost Centre associated with the group'
+								description: 'The Cost Centre associated with the group',
+								recursiveName: 'hasEventualBudget',
+								recursiveDescription:
+									'The Cost Centre associated with the group in the end'
 							}
 						}
 					}
 				}
-			},
+			}),
 			enumsSchema: {
 				Lifecycle: {
 					description: 'The lifecycle stage of a product',
@@ -80,18 +89,19 @@ describe('creating graphql schema', () => {
 			}
 		});
 
-		const generated = generateGraphqlDefs(mockSchema)
-			// trim trailing whitespace from empty lines
-			// (an artefact of the graphql definition generator which text editors may strip when writing fixtures)
-			.map(str =>
-				str
-					.split('\n')
-					.map(str => (/^\s+$/.test(str) ? '' : str))
-					.join('\n')
-			);
+		const explodeString = str =>
+			str
+				.split('\n')
+				.filter(str => !/^[\s]*$/.test(str))
+				.map(str => str.trim());
 
-		expect(generated).to.have.members([
-			`
+		const generated = [].concat(
+			...generateGraphqlDefs(mockSchema).map(explodeString)
+		);
+
+		expect(generated).to.eql(
+			explodeString(
+				`
 # A cost centre which groups are costed to
 type CostCentre {
 
@@ -99,9 +109,14 @@ type CostCentre {
   code: String
   # The name of the cost centre
   name: String
+	# The groups which are costed to the cost centre
+	hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
+	# The recursive groups which are costed to the cost centre
+	hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
+	statement: \"MATCH (this)-[:PAYS_FOR*0..20]->(related:Group) RETURN DISTINCT related\"
+	)
+}
 
-}`,
-			`
 # An overarching group which contains teams and is costed separately
 type Group {
 
@@ -112,8 +127,15 @@ type Group {
   # Whether or not the group is still in existence
   isActive: Boolean
 
-}`,
-			`type Query {
+	# The Cost Centre associated with the group
+	hasBudget(first: Int, offset: Int): CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
+	# The Cost Centre associated with the group in the end
+	hasEventualBudget(first: Int, offset: Int): CostCentre @cypher(
+	statement: \"MATCH (this)<-[:PAYS_FOR*0..20]-(related:CostCentre) RETURN DISTINCT related\"
+	)
+
+}
+type Query {
     CostCentre(
 
 
@@ -151,16 +173,15 @@ type Group {
     # Whether or not the group is still in existence
     isActive: Boolean
   ): [Group]
-}`,
-			`
+}
 # The lifecycle stage of a product
 enum Lifecycle {
   Incubate
   Sustain
   Grow
   Sunset
-}`,
-			`
+}
+
 input SystemInput {
     serviceTier: ServiceTier
     name: String
@@ -178,6 +199,7 @@ input SystemInput {
 type Mutation {
     System(code: String, params: SystemInput): System!
 }`
-		]);
+			)
+		);
 	});
 });

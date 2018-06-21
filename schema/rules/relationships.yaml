@@ -69,14 +69,15 @@ HAS_TEAM:
     fromType:
       Group:
         graphql:
-          name: teams
-          description: The teams working under the group
-          # depth: '*0..'
+          name: topLevelTeams
+          description: The top level teams working under the group
+          recursiveName: allTeams
+          recursiveDescription: The teams working under the group
     toType:
       Team:
         graphql:
-          name: group
-          description: The group the team belongs to
+          recursiveName: group
+          recursiveDescription: The group the team belongs to
   -
     type: ONE_TO_MANY
     fromType:
@@ -89,6 +90,7 @@ HAS_TEAM:
         graphql:
           name: parentTeam
           description: The team this team is a subteam of
+
 
 HAS_REPO:
   type: ONE_TO_ONE
@@ -189,26 +191,32 @@ DEPENDS_ON:
       System:
         graphql:
           name: dependencies
-          description: The other systems the system depends on
+          description: The other systems the system directly depends on
+          recursiveName: recursiveDependencies
+          recursiveDescription: The other systems the system depends on, either directly or indirectly
     toType:
       System:
         graphql:
           name: dependents
-          description: The other systems which depend on this system
+          description: The other systems which directly depend on this system
+          recursiveName: recursiveDependents
+          recursiveDescription: The other systems which depend on this system, either directly or indirectly
   -
     type: MANY_TO_MANY
     fromType:
       Product:
         graphql:
           name: dependencies
-          description: The systems the product depends on
-          # depth: '*0..'
+          description: The systems the product directly depends on
+          recursiveName: recursiveDependencies
+          recursiveDescription: The systems the product depends on, either directly or indirectly
     toType:
       System:
         graphql:
           name: dependentProducts
           description: Products which depend on this system
-          # depth: '*0..'
+          recursiveName: recursiveDependentProducts
+          recursiveDescription: The products which depend on this system, either directly or indirectly
 
 STORED_IN:
   type: MANY_TO_ONE
