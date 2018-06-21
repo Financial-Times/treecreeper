@@ -53,7 +53,7 @@ const generateRelationshipField = definition => {
 	const type = definition.hasMany ? `[${definition.type}]` : definition.type;
 	return stripEmptyFirstLine`
         # ${definition.description}
-        ${definition.name}: ${type} @relation(name: "${
+        ${definition.name}(first: Int, offset: Int): ${type} @relation(name: "${
 		definition.underlyingRelationship
 	}${definition.depth || ''}", direction: "${definition.direction}")`;
 };

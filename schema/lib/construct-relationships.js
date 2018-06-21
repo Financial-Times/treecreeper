@@ -37,7 +37,7 @@ const buildTwinRelationships = ({
 					cypherName,
 					direction: 'OUT',
 					graphql: obj.graphql,
-					hasMany: /^MANY/.test(type)
+					hasMany: /MANY$/.test(type)
 				})
 			);
 		});
@@ -52,7 +52,7 @@ const buildTwinRelationships = ({
 					cypherName,
 					direction: 'IN',
 					graphql: obj.graphql,
-					hasMany: /MANY$/.test(type)
+					hasMany: /^MANY/.test(type)
 				})
 			);
 		});
