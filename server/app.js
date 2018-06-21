@@ -4,7 +4,7 @@ const logger = require('@financial-times/n-logger').default;
 const { ui, graphql, v1 } = require('./routes');
 const { initConstraints } = require('../schema/init-db');
 
-const health = require('./health');
+const health = require('./health/');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -37,7 +37,11 @@ const createApp = () => {
 		if (!health) {
 			return res.sendStatus(404).end();
 		}
-		return res.json(health);
+		const healthConstraints = health.constraints;
+		const healthcheckOutput = healthConstraints.map(check => {
+			return check.getStatus();
+		});
+		return res.json(healthcheckOutput);
 	});
 
 	return app;
