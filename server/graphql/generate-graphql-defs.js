@@ -58,10 +58,13 @@ const relFragment = (type, direction, depth = '') => {
 const maybePluralType = definition =>
 	definition.hasMany ? `[${definition.type}]` : definition.type;
 
+const maybePaginate = definition =>
+	definition.hasMany ? '(first: Int, offset: Int)' : '';
+
 const generateDirectRelationshipField = definition =>
 	definition.description && definition.name
 		? `# ${definition.description}
-        ${definition.name}(first: Int, offset: Int): ${maybePluralType(
+        ${definition.name}${maybePaginate(definition)}: ${maybePluralType(
 				definition
 		  )} @relation(name: "${definition.underlyingRelationship}", direction: "${
 				definition.direction
@@ -71,13 +74,13 @@ const generateDirectRelationshipField = definition =>
 const generateRecursiveRelationshipField = definition =>
 	definition.recursiveDescription && definition.recursiveName
 		? `# ${definition.recursiveDescription}
-        ${definition.recursiveName}(first: Int, offset: Int): ${maybePluralType(
+        ${definition.recursiveName}${maybePaginate(
 				definition
-		  )} @cypher(
+		  )}: ${maybePluralType(definition)} @cypher(
       statement: "MATCH (this)${relFragment(
 				definition.underlyingRelationship,
 				definition.direction,
-				'*0..20'
+				'*1..20'
 			)}(related:${definition.type}) RETURN DISTINCT related"
     )`
 		: '';

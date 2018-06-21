@@ -113,7 +113,7 @@ type CostCentre {
 	hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
 	# The recursive groups which are costed to the cost centre
 	hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
-	statement: \"MATCH (this)-[:PAYS_FOR*0..20]->(related:Group) RETURN DISTINCT related\"
+	statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
 	)
 }
 
@@ -128,10 +128,10 @@ type Group {
   isActive: Boolean
 
 	# The Cost Centre associated with the group
-	hasBudget(first: Int, offset: Int): CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
+	hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
 	# The Cost Centre associated with the group in the end
-	hasEventualBudget(first: Int, offset: Int): CostCentre @cypher(
-	statement: \"MATCH (this)<-[:PAYS_FOR*0..20]-(related:CostCentre) RETURN DISTINCT related\"
+	hasEventualBudget: CostCentre @cypher(
+	statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
 	)
 
 }
