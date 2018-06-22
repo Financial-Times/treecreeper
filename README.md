@@ -1,6 +1,9 @@
 # Business Operations API
 
-WIP
+Modelling our business' operations
+![image](https://user-images.githubusercontent.com/447559/41767528-bf2e19d8-7601-11e8-864d-61e3701df193.png)
+
+
 
 ## Architecture
 
