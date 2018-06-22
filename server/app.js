@@ -32,16 +32,7 @@ const createApp = () => {
 		next(error);
 	});
 
-	app.get('/__health', (req, res) => {
-		if (!health) {
-			return res.sendStatus(404).end();
-		}
-		const healthConstraints = health.constraints;
-		const healthcheckStatus = healthConstraints.map(check => {
-			return check.getStatus();
-		});
-		return res.json(healthcheckStatus);
-	});
+	app.get('/__health', health);
 
 	return app;
 };
