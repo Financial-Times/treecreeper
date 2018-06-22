@@ -514,7 +514,7 @@ describe('v1 - node PATCH', () => {
 						]
 					}
 				})
-				.expect(400, /Missing related node Person other-test-person/);
+				.expect(400, /Missing related node/);
 		});
 
 		it('create node related to non-existent nodes when using upsert=true & relationshipAction=merge', async () => {
