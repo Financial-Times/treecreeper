@@ -1,5 +1,6 @@
 const neo4j = require('neo4j-driver').v1;
 const fetch = require('isomorphic-fetch');
+const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
 const typesSchema = readYaml.directory('./schema/types');
 
@@ -80,19 +81,30 @@ const constraintsCheck = async () => {
 			if (missingUniqueConstraints.length > 0) {
 				lastCheckOk = false;
 				lastCheckTime = currentDate;
-				lastCheckOutput = `Database is missing unique constraints for:
+				lastCheckOutput = stripIndents`Database is missing unique constraints for:
 								 ${missingUniqueConstraints}`;
-				panicGuide = `Create the missing unique constraints`;
+				panicGuide = missingUniqueConstraints.map(missingConstraint => {
+					return stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
+						to the grapheneDB instance. Launch the Neo4j browser and run CREATE CONSTRAINT ON ( n:${
+							missingConstraint.label
+						} ) ASSERT n.code IS UNIQUE`;
+				});
 			}
 
 			if (missingPropertyConstraints.length > 0) {
 				lastCheckOk = false;
 				lastCheckTime = currentDate;
-				lastCheckOutput = `Database is missing the following property constraints:
+				lastCheckOutput = stripIndents`Database is missing the following property constraints:
 								 ${missingPropertyConstraints}`;
-				panicGuide = `Create the missing property constraints`;
+				panicGuide = missingPropertyConstraints.map(missingConstraint => {
+					return stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
+						to the grapheneDB instance. Launch the Neo4j browser and run CREATE CONSTRAINT ON ( n:${
+							missingConstraint.label
+						} ) ASSERT exists(n.code)`;
+				});
 			}
 		}
+
 		lastCheckOk = 'true';
 		lastCheckTime = currentDate;
 		lastCheckOutput = 'Successfully retrieved database constraints';
@@ -100,7 +112,7 @@ const constraintsCheck = async () => {
 	} catch (err) {
 		lastCheckOk = false;
 		lastCheckTime = currentDate;
-		lastCheckOutput = `Error retrieving database constraints: ${
+		lastCheckOutput = stripIndents`Error retrieving database constraints: ${
 			err.message ? err.message : err
 		}`;
 		panicGuide = '';
