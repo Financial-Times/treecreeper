@@ -64,7 +64,7 @@ describe('v1 - relationship PATCH', () => {
 	it('Creates when patching non-existent relationship', async () => {
 		await request(app)
 			.patch(
-				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_PRODUCT_OWNER/Person/test-person'
 			)
 			.auth('update-relationship-client')
 			.set('x-request-id', 'update-relationship-request')
@@ -79,7 +79,7 @@ describe('v1 - relationship PATCH', () => {
 				foo: 'baz'
 			});
 
-		const result = await getRelationship('HAS_DELIVERY_LEAD');
+		const result = await getRelationship('HAS_PRODUCT_OWNER');
 
 		expect(result.records.length).to.equal(1);
 		expect(result.records[0].get('relationship').properties).to.eql({

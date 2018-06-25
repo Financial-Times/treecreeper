@@ -21,7 +21,7 @@ describe('v1 - relationship GET', () => {
 	it("responds with 404 if relationship doesn't exist", async () => {
 		return request(app)
 			.get(
-				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_PRODUCT_OWNER/Person/test-person'
 			)
 			.auth()
 			.expect(404);
