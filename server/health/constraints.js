@@ -123,6 +123,8 @@ const constraintsCheck = async () => {
 	}
 };
 
+constraintsCheck();
+
 setInterval(async () => {
 	await constraintsCheck();
 }, FIVE_MINUTES).unref();

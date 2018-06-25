@@ -44,6 +44,8 @@ const runQueryCheck = async () => {
 	}
 };
 
+runQueryCheck();
+
 setInterval(async () => {
 	await runQueryCheck();
 }, FIVE_MINUTES).unref();
