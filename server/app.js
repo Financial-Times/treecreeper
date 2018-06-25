@@ -3,6 +3,7 @@ require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
 const { ui, graphql, v1 } = require('./routes');
 const { initConstraints } = require('../schema/init-db');
+const health = require('./health');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -30,6 +31,8 @@ const createApp = () => {
 		logger.error(error);
 		next(error);
 	});
+
+	app.get('/__health', health);
 
 	return app;
 };
