@@ -5,35 +5,36 @@ const schema = require('./schema');
 const { driver } = require('../db-connection');
 
 const DEFAULT_QUERY = `{
-  	System(code: "dewey") {
-		name
-		serviceTier
-		primaryURL
-		supportedBy {
-			name
-			slack
-			email
-			techLead {
-				name
-				email
-			}
-			productOwner {
-				name
-				email
-			}
-		}
-		isKnownBy {
-			name
-		}
-		repository {
-			url
-			mostRecentCircleCIPlatform
-			storedIn {
-				name
-			}
-		}
-	}
-}`;
+  System(code: "dewey") {
+    name
+    serviceTier
+    primaryURL
+    supportedByTeam {
+      name
+      slack
+      email
+      techLead {
+        name
+        email
+      }
+      deliveryLead {
+        name
+        email
+      }
+    }
+    isKnownBy {
+      name
+    }
+    repository {
+      url
+      mostRecentCircleCIPlatform
+      storedIn {
+        name
+      }
+    }
+  }
+}
+`;
 
 const graphiql = graphqlEndpoint =>
 	graphiqlExpress({

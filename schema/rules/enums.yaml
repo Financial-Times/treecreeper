@@ -3,7 +3,6 @@ CircleCiVersion:
   options:
     ONE: '1.0'
     TWO: '2.0'
-    NONE: ''
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:

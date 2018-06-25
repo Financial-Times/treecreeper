@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { safeQueryWithSharedSession } = require('../server/db-connection');
 const schemas = require('./index');
 const logger = require('@financial-times/n-logger').default;
