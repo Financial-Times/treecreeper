@@ -1,15 +1,9 @@
 const neo4j = require('neo4j-driver').v1;
 const logger = require('@financial-times/n-logger');
 const { stripIndents } = require('common-tags');
-const driver = neo4j.driver(
-	process.env.GRAPHENEDB_CHARCOAL_BOLT_URL,
-	neo4j.auth.basic(
-		process.env.GRAPHENEDB_CHARCOAL_BOLT_USER,
-		process.env.GRAPHENEDB_CHARCOAL_BOLT_PASSWORD
-	)
-);
+const { safeQuery } = require('../db-connection');
 
-const FIVE_MINUTES = 5 * 60 * 1000;
+const FIVE_MINUTES = 1 * 60 * 1000;
 
 let lastCheckOk;
 let lastCheckTime;
@@ -18,13 +12,13 @@ let panicGuide;
 
 const runQueryCheck = async () => {
 	const currentDate = new Date().toUTCString();
-	const session = driver.session();
+
 	try {
-		const result = await session.run(
+		const result = await safeQuery(
 			stripIndents`MATCH (node:System)-[relationship:HAS_REPO]->(relatedNode:Repository)
 			RETURN node,relatedNode,relationship LIMIT 10`
 		);
-		session.close();
+
 		if (result) {
 			lastCheckOk = true;
 			lastCheckTime = currentDate;
