@@ -1,9 +1,9 @@
 const util = require('util');
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
+const { getNeo4jResolverNames, enumsSchema } = require('../../schema');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || true);
-const { getNeo4jResolverNames, enumsSchema } = require('../../schema');
 
 const queries = getNeo4jResolverNames();
 
