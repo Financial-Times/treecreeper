@@ -1,9 +1,8 @@
-const neo4j = require('neo4j-driver').v1;
 const logger = require('@financial-times/n-logger');
 const { stripIndents } = require('common-tags');
 const { safeQuery } = require('../db-connection');
 
-const FIVE_MINUTES = 1 * 60 * 1000;
+const FIVE_MINUTES = 5 * 60 * 1000;
 
 let lastCheckOk;
 let lastCheckTime;
