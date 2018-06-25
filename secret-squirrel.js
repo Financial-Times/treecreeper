@@ -25,7 +25,8 @@ module.exports = {
 			'abcaB4L00000008TU1KAM', // test/fixtures/contract.get.js:337|795
 			'tddaB4L00000008TStKAM', // test/fixtures/contract.get.js:407|814
 			'pciaB4L00000008TStKAM', // test/fixtures/contract.get.js:477|821
-			'abcaB4L00000008TStKAM' // test/fixtures/contract.get.js:687|842
+			'abcaB4L00000008TStKAM', // test/fixtures/contract.get.js:687|842
+			'41767528-bf2e19d8-7601-11e8-864d-61e3701df193' // schema diagram image id
 		]
 	}
 };

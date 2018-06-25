@@ -24,19 +24,6 @@ HAS_TECH_DIRECTOR:
         name: isTechDirectorFor
         description: Groups the person is a technical director for
 
-HAS_PRODUCT_OWNER:
-  type: MANY_TO_MANY
-  fromType:
-    Group:
-      graphql:
-        name: productOwner
-        description: The product owners of systems or products within the Group
-  toType:
-    Person:
-      graphql:
-        name: isProductOwnerFor
-        description: Groups the person is a product owner for
-
 HAS_TECH_LEAD:
   type: MANY_TO_MANY
   fromType:
@@ -50,18 +37,18 @@ HAS_TECH_LEAD:
         name: isTechLeadFor
         description: Teams the person is a technical lead for
 
-HAS_DELIVERY_LEAD:
+HAS_PRODUCT_OWNER:
   type: MANY_TO_MANY
   fromType:
     Team:
       graphql:
-        name: deliveryLead
-        description: The delivery/product leads of the team
+        name: productOwner
+        description: The product owner of the team
   toType:
     Person:
       graphql:
-        name: isDeliveryLeadFor
-        description: Teams the person is a delivery/product lead for
+        name: isProductOwnerFor
+        description: Teams the person is a product owner for
 
 HAS_TEAM:
   -
@@ -138,12 +125,12 @@ OWNED_BY:
       Product:
         graphql:
           name: ownedBy
-          description: The group which owns the product
+          description: The person who owns the product
     toType:
-      Group:
+      Person:
         graphql:
           name: owns
-          description: The products the group owns
+          description: The products the person owns
 
 SUPPORTED_BY:
   -

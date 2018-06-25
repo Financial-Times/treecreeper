@@ -199,10 +199,17 @@ describe('v1 - node POST', () => {
 							nodeType: 'Person',
 							nodeCode: 'new-test-person'
 						}
+					],
+					HAS_TEAM: [
+						{
+							direction: 'incoming',
+							nodeType: 'Group',
+							nodeCode: 'test-group'
+						}
 					]
 				}
 			})
-			.expect(400, /Missing related node Person new-test-person/);
+			.expect(400, /Missing related node/);
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {

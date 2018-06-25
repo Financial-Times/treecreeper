@@ -5,7 +5,7 @@ const { safeQuery } = require('../db-connection');
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
 	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
-	missingRelated: /Expected to find a node at related(\d+) but found nothing/,
+	missingRelated: /Expected to find a node at   related@(\d+) but found nothing/,
 	missingRelationshipEndpoint: /Expected to find a node at ([a-zA-Z]+) but found nothing/
 });
 
@@ -30,14 +30,11 @@ const handleMissingRelationshipNode = (
 	}
 };
 
-const handleUpsertError = (err, relationships) => {
-	const missingRelatedIndex = (ERROR_RX.missingRelated.exec(err.message) ||
-		[])[1];
-	if (missingRelatedIndex) {
-		const missing = relationships[missingRelatedIndex];
+const handleUpsertError = err => {
+	if (ERROR_RX.missingRelated.test(err.message)) {
 		throw httpErrors(
 			400,
-			stripIndents`Missing related node ${missing.nodeType} ${missing.nodeCode}.
+			stripIndents`Missing related node.
 			If you need to create multiple things which depend on each other,
 			use the \`upsert=true\` query string to create placeholder entries for
 			related things which can be populated with attributes with subsequent
