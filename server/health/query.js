@@ -43,7 +43,7 @@ const runQueryCheck = async () => {
 		);
 		lastCheckOk = false;
 		lastCheckTime = currentDate;
-		lastCheckOutput = `Bad response when trying to run a cypher query to the database: ${
+		lastCheckOutput = `Bad response when trying to run a cypher query to the biz-ops-api's neo4j instance: ${
 			err.message ? err.message : err
 		}`;
 		panicGuide =
@@ -61,10 +61,11 @@ module.exports = {
 			ok: lastCheckOk,
 			checkOutput: lastCheckOutput,
 			lastUpdated: lastCheckTime,
-			businessImpact: 'Unable to retrieve data from Biz-Ops API',
+			businessImpact:
+				'Unable to retrieve data from Biz-Ops API. As a result, it will not be possible to read information from Biz-Ops API about our systems, contacts, teams or products',
 			severity: '1',
 			technicalSummary:
-				'Runs a cypher query to check that a successful response comes back',
+				'Runs a cypher read query to check that a successful response comes back from the Biz-Ops API',
 			panicGuide: panicGuide
 		};
 	}
