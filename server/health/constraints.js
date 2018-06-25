@@ -1,4 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
+const logger = require('@financial-times/n-logger');
 const fetch = require('isomorphic-fetch');
 const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
@@ -14,23 +15,8 @@ let lastCheckOutput;
 let panicGuide;
 let lastCheckTime;
 
-const isUnique = (actualConstraint, type) => {
-	return (
-		actualConstraint.type === 'UNIQUENESS' &&
-		actualConstraint.property_keys[0] === 'code' &&
-		type.properties.code.unique === true
-	);
-};
-
-const codePropertyExists = (actualConstraint, type) => {
-	return (
-		actualConstraint.type === 'NODE_PROPERTY_EXISTENCE' &&
-		type.properties.code.required === true
-	);
-};
-
 const constraintsCheck = async () => {
-	const currentDate = new Date();
+	const currentDate = new Date().toUTCString();
 
 	try {
 		const response = await fetch(
@@ -44,9 +30,9 @@ const constraintsCheck = async () => {
 			}
 		);
 
-		const responseJson = await response.json();
+		const dbConstraints = await response.json();
 
-		if (!responseJson) {
+		if (!dbConstraints) {
 			lastCheckOk = false;
 			lastCheckTime = currentDate;
 			lastCheckOutput =
@@ -55,79 +41,91 @@ const constraintsCheck = async () => {
 			return;
 		}
 
-		responseJson.map(actualConstraint => {
-			typesSchema.map(type => {
-				if (type.name === actualConstraint.label) {
-					if (
-						!isUnique(actualConstraint, type) &&
-						actualConstraint.type !== 'NODE_PROPERTY_EXISTENCE'
-					) {
-						missingUniqueConstraints.push({
-							label: actualConstraint.label
-						});
-					}
-					if (
-						!codePropertyExists(actualConstraint, type) &&
-						actualConstraint.type !== 'UNIQUENESS'
-					) {
-						missingPropertyConstraints.push({
-							label: actualConstraint.label,
-							type: actualConstraint.type
-						});
-					}
+		typesSchema.map(type => {
+			if (type.properties.code.unique === true) {
+				const uniqueConstraint = dbConstraints.filter(
+					actualConstraint =>
+						actualConstraint.label === type.name &&
+						actualConstraint.type === 'UNIQUENESS'
+				);
+
+				if (uniqueConstraint.length === 0) {
+					missingUniqueConstraints.push({
+						name: type.name
+					});
 				}
-			});
+			}
+			if (type.properties.code.required === true) {
+				const propertyConstraint = dbConstraints.filter(
+					actualConstraint =>
+						actualConstraint.label === type.name &&
+						actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
+				);
+				if (propertyConstraint.length === 0) {
+					missingPropertyConstraints.push({
+						name: type.name
+					});
+				}
+			}
 		});
 
 		if (
-			missingPropertyConstraints.length === 0 &&
-			missingUniqueConstraints.length === 0
+			missingUniqueConstraints.length === 0 &&
+			missingPropertyConstraints.length === 0
 		) {
-			lastCheckOk = 'true';
+			lastCheckOk = true;
 			lastCheckTime = currentDate;
 			lastCheckOutput = 'Successfully retrieved all database constraints';
 			panicGuide = "Don't panic";
 		} else {
-			if (missingUniqueConstraints.length > 0) {
+			if (
+				missingUniqueConstraints.length > 0 ||
+				missingPropertyConstraints.length > 0
+			) {
 				const uniqueConstraintQueries = missingUniqueConstraints.map(
 					missingConstraint => {
 						return stripIndents`CREATE CONSTRAINT ON ( n:${
-							missingConstraint.label
+							missingConstraint.name
 						} ) ASSERT n.code IS UNIQUE`;
 					}
 				);
-				lastCheckOk = false;
-				lastCheckTime = currentDate;
-				lastCheckOutput = stripIndents`Database is missing unique constraints`;
-				panicGuide = stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
-						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries}`;
-			} else if (missingPropertyConstraints.length > 0) {
+
 				const propertyConstraintQueries = missingPropertyConstraints.map(
 					missingConstraint => {
 						return stripIndents`CREATE CONSTRAINT ON ( n:${
-							missingConstraint.label
+							missingConstraint.name
 						} ) ASSERT exists(n.code)`;
 					}
 				);
+
 				lastCheckOk = false;
 				lastCheckTime = currentDate;
-				lastCheckOutput = stripIndents`Database is missing constraints for the code property`;
+				lastCheckOutput = stripIndents`Database is missing required constraints`;
 				panicGuide = stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
-						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${propertyConstraintQueries}`;
+						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`;
 			}
 		}
 	} catch (err) {
+		logger.error(
+			{
+				event: 'BIZ_OPS_HEALTHCHECK_CONSTRAINTS_FAILURE',
+				err
+			},
+			'Healthcheck failed'
+		);
 		lastCheckOk = false;
 		lastCheckTime = currentDate;
 		lastCheckOutput = stripIndents`Error retrieving database constraints: ${
 			err.message ? err.message : err
 		}`;
-		panicGuide = '';
+		panicGuide =
+			'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_CONSTRAINTS_FAILURE"`';
 	}
 };
 
-constraintsCheck();
-setInterval(constraintsCheck, 1000);
+setInterval(async () => {
+	await constraintsCheck();
+}, FIVE_MINUTES).unref();
 
 module.exports = {
 	getStatus: () => {
@@ -135,12 +133,12 @@ module.exports = {
 			ok: lastCheckOk,
 			checkOutput: lastCheckOutput,
 			lastUpdated: lastCheckTime,
-			panicGuide: panicGuide,
-
-			severity: '',
 			businessImpact: 'Biz-Ops API may contain duplicated data',
+			severity: '2',
 			technicalSummary:
-				'Makes an API call which checks that all the required constraints exist.'
+				'Makes an API call which checks that all the required constraints exist.',
+			panicGuide: panicGuide,
+			_dependencies: ['grapheneDB']
 		};
 	}
 };

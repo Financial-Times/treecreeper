@@ -1,20 +1,21 @@
-const constraintsCheck = require('./constraints.js');
+const constraintsCheck = require('./constraints');
+const queryCheck = require('./query');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
+	const healthCheckStatus = [constraintsCheck, queryCheck].map(check => {
+		return check.getStatus();
+	});
 	const health = {
-		name: 'Biz-Ops API (v1)',
+		schemaVersion: '1',
+		name: 'Biz-Ops API',
+		systemCode: 'biz-ops-api',
 		description:
-			'Checks to make sure that the correct constraints exist in the database',
-		checks: [{ constraints: constraintsCheck }]
+			'The Business Operations API. Stores infromation (systems/contacts/teams/products) in a graph datastore (Neo4j) and exposes this for queries.',
+		checks: healthCheckStatus
 	};
 
 	if (!health) {
 		return res.sendStatus(404).end();
 	}
-
-	const healthchecks = health.checks;
-	const healthcheckStatus = healthchecks.map(check => {
-		return check.constraints.getStatus();
-	});
-	return res.json(healthcheckStatus);
+	return res.json(health);
 };
