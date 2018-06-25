@@ -25,7 +25,7 @@ describe('v1 - relationship DELETE', () => {
 	it("responds with 404 if relationship doesn't exist", async () => {
 		return request(app)
 			.delete(
-				'/v1/relationship/Team/test-team/HAS_DELIVERY_LEAD/Person/test-person'
+				'/v1/relationship/Team/test-team/HAS_PRODUCT_OWNER/Person/test-person'
 			)
 			.auth('delete-relationship-client')
 			.expect(404);
