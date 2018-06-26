@@ -16,10 +16,6 @@ properties:
     type: String
     canIdentify: true
     description: Description of the system
-  supported:
-    type: Boolean
-    canFilter: true
-    description: Whether the system is supported by operations
   primaryURL:
     type: String
     canIdentify: true
