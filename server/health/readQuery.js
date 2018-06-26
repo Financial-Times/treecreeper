@@ -1,4 +1,4 @@
-const logger = require('@financial-times/n-logger');
+const logger = require('@financial-times/n-logger').default;
 const { stripIndents } = require('common-tags');
 const { safeQuery } = require('../db-connection');
 
@@ -44,6 +44,7 @@ const runQueryCheck = async () => {
 	}
 };
 
+runQueryCheck();
 setInterval(async () => {
 	await runQueryCheck();
 }, FIVE_MINUTES).unref();

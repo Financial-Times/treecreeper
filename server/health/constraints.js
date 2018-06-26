@@ -1,5 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
-const logger = require('@financial-times/n-logger');
+const logger = require('@financial-times/n-logger').default;
 const fetch = require('isomorphic-fetch');
 const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
@@ -122,6 +122,8 @@ const constraintsCheck = async () => {
 			'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_CONSTRAINTS_FAILURE"`';
 	}
 };
+
+constraintsCheck();
 
 setInterval(async () => {
 	await constraintsCheck();
