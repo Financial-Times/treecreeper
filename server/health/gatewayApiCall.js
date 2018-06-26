@@ -22,9 +22,9 @@ const callApiGatewayCheck = async () => {
 			lastCheckOk = true;
 			lastCheckTime = currentDate;
 			lastCheckOutput =
-				'Successful API Gateway call to the Biz-Ops API with a status code equal to 200.';
+				'Successful call to the Biz-Ops API via API Gateway with a status code equal to 200.';
 		} else {
-			throw `Unsuccessful API Gateway call to Biz-Ops API with status code equal to ${
+			throw `Unsuccessful call to Biz-Ops API via API Gateway with status code equal to ${
 				response.status
 			} `;
 		}
@@ -38,7 +38,7 @@ const callApiGatewayCheck = async () => {
 		);
 		lastCheckOk = false;
 		lastCheckTime = currentDate;
-		lastCheckOutput = `Bad response when trying to make a call to the Biz-Ops API via API GATEWAY ${
+		lastCheckOutput = `Bad response when trying to make a call to the Biz-Ops API via API Gateway ${
 			err.message ? err.message : err
 		}`;
 		panicGuide =

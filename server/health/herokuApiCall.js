@@ -22,9 +22,9 @@ const callApiHerokuCheck = async () => {
 			lastCheckOk = true;
 			lastCheckTime = currentDate;
 			lastCheckOutput =
-				'Successful API Heroku call to the Biz-Ops API with a status code equal to 200.';
+				'Successful API call to the Biz-Ops API via Heroku with a status code equal to 200.';
 		} else {
-			throw `Unsuccessful API Heroku call to Biz-Ops API with status code equal to ${
+			throw `Unsuccessful API call to Biz-Ops API via Heroku with status code equal to ${
 				response.status
 			} `;
 		}
