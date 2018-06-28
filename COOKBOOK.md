@@ -1,39 +1,91 @@
-# Biz Ops API Cypher Cookbook
+# Biz Ops API Query Cookbook
 
-A place to keep examples of what we can do with this API.
+A place to keep examples of what we can do with this API and the underlying database
 
-## Recipes
+## GraphQl Recipes
 
 #### Show me all the systems that @dan.murley is tech lead of,
-```
-MATCH m=(s:System)-[:technicalLead]->(c:Contact) WHERE c.id = 'danielmurley' return m
+```graphql
+{
+	Person (slack: "@dan.murley") {
+		isTechLeadFor {
+			code
+		}
+	}
+}
 ```
 
 #### Show me people with a lot of technical systems assigned,
-```
-MATCH (c:Contact)<-[:technicalLead]-(s:System) WITH c, count(c) as r, collect(s) AS a
-  WHERE r > 20 RETURN c, r, a
+The following will retrieve all people and list what they are tech leads for - it's left to the consumer to filter based on these
+# Coming soon: ability to filter people by `isTechLead`
+```graphql
+{
+	People {
+		name
+		isTechLeadFor {
+			code
+		}
+	}
+}
 ```
 
 #### Show me the name of a system's (upp-mccm) product owner
-```
-MATCH (s:System)-[:productOwner]->(c:Contact) where s.id='upp-mccm' RETURN c.name
+```graphql
+{
+	System (code: "upp-mccm") {
+		supportedByTeam {
+      deliveryLead {
+        name
+      }
+    }
+	}
+}
 ```
 
 #### Show me the list of systems product owned by an individual (geoffthorpe)
-```
-MATCH (s:System)-[:productOwner]->(c:Contact) where c.id='geoffthorpe' RETURN s
+```graphql
+{
+	Person (code: "geoffthorpe") {
+    isDeliveryLeadFor {
+      owns {
+        code
+      }
+    }
+	}
+}
+
+#### Show me a list of the platinum system's system codes with support contacts
+```graphql
+{
+	Systems (serviceTier: Platinum) {
+		code
+		name
+    supportedByTeam {
+      name
+      email
+      phone
+      slack
+    }
+    supportedBySupplier {
+      name
+      email
+      phone
+    }
+    ownedBy {
+      deliveryLead {
+        name
+      }
+      techLead {
+        name
+      }
+    }
+	}
+}
+
 ```
 
-#### Show me a list of the platinum system's system codes and names
-```
-MATCH (s:System) where s.serviceTier='Platinum' RETURN s.id, s.name
-```
+## Cypher Recipes
 
-#### Remove an unwanted legacy attribute (due to it being replaced by a relationship)
-```
-MATCH (s:System) remove s.productOwnerName RETURN s.id
-```
 
 #### Show me high level counters for the population of critical system fields
 ```
@@ -45,8 +97,7 @@ MATCH (s:System) RETURN count(*) as systems, count(s.name) as names, count(s.ser
 MATCH (s:System) RETURN count(*) as systems, count(*)-count(s.name) as missing_names, count(*)-count(s.serviceTier) as missing_tiers, count(*)-count(s.description) as missing_descriptions
 ```
 
-#### Show me a table of platinum system contacts
-Still neeeds some work since we are trying to count multiple relationships. The current output is a count of each combination of relationships
+### Show me which platinum service have missing contacts
 ```
 MATCH (s:System) where s.serviceTier='Platinum'
 optional match (s)-[:programme]->(p:Contact)
@@ -54,24 +105,13 @@ optional match (s)-[:productOwner]->(po:Contact)
 optional match (s)-[:technicalLead]->(tl:Contact)
 optional match (s)-[:primaryContact]->(pc:Contact)
 optional match (s)-[:secondaryContact]->(sc:Contact)
-return s.id, s.serviceTier, p.name, po.name, tl.name, pc.name, sc.name
-```
-
-### Show me which platinum service have missing contacts
-```
-MATCH (s:System) where s.serviceTier='Platinum'
-optional match (s)-[:programme]->(p:Contact) 
-optional match (s)-[:productOwner]->(po:Contact) 
-optional match (s)-[:technicalLead]->(tl:Contact)
-optional match (s)-[:primaryContact]->(pc:Contact) 
-optional match (s)-[:secondaryContact]->(sc:Contact) 
 with s, p, po, tl, pc, sc
 where p.name is null or po.name is null or tl.name is null or pc.name is null or sc.name is null
 return distinct s.id, s.serviceTier, p.name, po.name, tl.name, pc.name, sc.name
 order by s.id
 ```
 
-#### Show me all the platinum systems with their product owners 
+#### Show me all the platinum systems with their product owners
 ```
 MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
 ```

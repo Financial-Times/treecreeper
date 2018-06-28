@@ -9,6 +9,12 @@ const DEFAULT_QUERY = `{
     name
     serviceTier
     primaryURL
+    ownedBy {
+      code
+      name
+      email
+      slack
+    }
     supportedByTeam {
       name
       slack
@@ -17,7 +23,7 @@ const DEFAULT_QUERY = `{
         name
         email
       }
-      deliveryLead {
+      productOwner {
         name
         email
       }
@@ -33,8 +39,7 @@ const DEFAULT_QUERY = `{
       }
     }
   }
-}
-`;
+}`;
 
 const graphiql = graphqlEndpoint =>
 	graphiqlExpress({
