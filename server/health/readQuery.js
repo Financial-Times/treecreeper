@@ -10,7 +10,7 @@ const runQueryCheck = async () => {
 			RETURN node,relatedNode,relationship LIMIT 10`
 		);
 
-		if (result) {
+		if (result.records.length > 0) {
 			return {
 				lastCheckOk: true,
 				lastCheckTime: new Date().toUTCString(),
