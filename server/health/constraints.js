@@ -4,20 +4,13 @@ const fetch = require('isomorphic-fetch');
 const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
 const typesSchema = readYaml.directory('./schema/types');
+const healthcheck = require('./healthcheck');
+const outputs = require('./output');
 
 const missingUniqueConstraints = [];
 const missingPropertyConstraints = [];
 
-const FIVE_MINUTES = 5 * 60 * 1000;
-
-let lastCheckOk;
-let lastCheckOutput;
-let panicGuide;
-let lastCheckTime;
-
 const constraintsCheck = async () => {
-	const currentDate = new Date().toUTCString();
-
 	try {
 		const response = await fetch(
 			`http://localhost:7474/db/data/schema/constraint`,
@@ -33,12 +26,13 @@ const constraintsCheck = async () => {
 		const dbConstraints = await response.json();
 
 		if (!dbConstraints) {
-			lastCheckOk = false;
-			lastCheckTime = currentDate;
-			lastCheckOutput =
-				'Error retrieving database constraints: no constraints found!';
-			panicGuide = 'Create all constraints!';
-			return;
+			return {
+				lastCheckOk: false,
+				lastCheckTime: new Date().toUTCString(),
+				lastCheckOutput:
+					'Error retrieving database constraints: no constraints found!',
+				panicGuide: "Don't panic"
+			};
 		}
 
 		typesSchema.map(type => {
@@ -73,10 +67,12 @@ const constraintsCheck = async () => {
 			missingUniqueConstraints.length === 0 &&
 			missingPropertyConstraints.length === 0
 		) {
-			lastCheckOk = true;
-			lastCheckTime = currentDate;
-			lastCheckOutput = 'Successfully retrieved all database constraints';
-			panicGuide = "Don't panic";
+			return {
+				lastCheckOk: true,
+				lastCheckTime: new Date().toUTCString(),
+				lastCheckOutput: 'Successfully retrieved all database constraints',
+				panicGuide: "Don't panic"
+			};
 		} else {
 			if (
 				missingUniqueConstraints.length > 0 ||
@@ -97,50 +93,34 @@ const constraintsCheck = async () => {
 						} ) ASSERT exists(n.code)`;
 					}
 				);
-
-				lastCheckOk = false;
-				lastCheckTime = currentDate;
-				lastCheckOutput = stripIndents`Database is missing required constraints`;
-				panicGuide = stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
-						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`;
+				return {
+					lastCheckOk: false,
+					lastCheckTime: new Date().toUTCString(),
+					lastCheckOutput: stripIndents`Database is missing required constraints`,
+					panicGuide: stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
+						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`
+				};
 			}
 		}
 	} catch (err) {
 		logger.error(
 			{
-				event: 'BIZ_OPS_HEALTHCHECK_CONSTRAINTS_FAILURE',
+				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
+				healthCheckName: 'CONSTRAINTS',
 				err
 			},
 			'Healthcheck failed'
 		);
-		lastCheckOk = false;
-		lastCheckTime = currentDate;
-		lastCheckOutput = stripIndents`Error retrieving database constraints: ${
-			err.message ? err.message : err
-		}`;
-		panicGuide =
-			'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_CONSTRAINTS_FAILURE"`';
-	}
-};
-
-constraintsCheck();
-
-setInterval(async () => {
-	await constraintsCheck();
-}, FIVE_MINUTES).unref();
-
-module.exports = {
-	getStatus: () => {
 		return {
-			ok: lastCheckOk,
-			checkOutput: lastCheckOutput,
-			lastUpdated: lastCheckTime,
-			businessImpact: 'Biz-Ops API may contain duplicated data',
-			severity: '2',
-			technicalSummary:
-				'Makes an API call which checks that all the required constraints exist.',
-			panicGuide: panicGuide,
-			_dependencies: ['grapheneDB']
+			lastCheckOk: false,
+			lastCheckTime: new Date().toUTCString(),
+			lastCheckOutput: stripIndents`Error retrieving database constraints: ${
+				err.message ? err.message : err
+			}`,
+			panicGuide:
+				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName: "CONSTRAINTS"`'
 		};
 	}
 };
+
+module.exports = healthcheck(constraintsCheck, outputs.constraints);
