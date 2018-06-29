@@ -5,10 +5,10 @@ const outputs = require('./output');
 const callApiGatewayCheck = async () => {
 	const result = await callApiCheck({
 		headers: {
-			'x-api-key': process.env.API_GATEWAY_KEY,
+			'x-api-key': process.env.FT_API_GATEWAY_KEY,
 			'client-id': `HEALTHCHECK_FT_API_GATEWAY`
 		},
-		url: 'https://api.ft.com/biz-ops/v1',
+		url: process.env.FT_API_GATEWAY_URL,
 		type: 'FT Api Gateway'
 	});
 
