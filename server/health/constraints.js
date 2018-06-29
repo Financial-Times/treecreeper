@@ -16,6 +16,7 @@ const constraintsCheck = async () => {
 			`http://localhost:7474/db/data/schema/constraint`,
 			{
 				method: 'GET',
+				timeout: 20000,
 				Authorization: neo4j.auth.basic(
 					process.env.GRAPHENEDB_CHARCOAL_BOLT_USER,
 					process.env.GRAPHENEDB_CHARCOAL_BOLT_PASSWORD
@@ -36,29 +37,26 @@ const constraintsCheck = async () => {
 		}
 
 		typesSchema.map(type => {
-			if (type.properties.code.unique === true) {
-				const uniqueConstraint = dbConstraints.filter(
-					actualConstraint =>
-						actualConstraint.label === type.name &&
-						actualConstraint.type === 'UNIQUENESS'
+			const hasUniqueConstraint = actualConstraint => {
+				return (
+					actualConstraint.label === type.name &&
+					actualConstraint.type === 'UNIQUENESS'
 				);
+			};
 
-				if (uniqueConstraint.length === 0) {
-					missingUniqueConstraints.push({
-						name: type.name
-					});
-				}
-			}
-			if (type.properties.code.required === true) {
-				const propertyConstraint = dbConstraints.filter(
-					actualConstraint =>
-						actualConstraint.label === type.name &&
-						actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
+			const hasPropertyConstraint = actualConstraint => {
+				return (
+					actualConstraint.label === type.name &&
+					actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
 				);
-				if (propertyConstraint.length === 0) {
-					missingPropertyConstraints.push({
-						name: type.name
-					});
+			};
+			if (type.properties.code && type.properties.code.unique === true) {
+				if (!dbConstraints.some(hasUniqueConstraint)) {
+					missingUniqueConstraints.push({ name: type.name });
+				}
+
+				if (!dbConstraints.some(hasPropertyConstraint)) {
+					missingPropertyConstraints.push({ name: type.name });
 				}
 			}
 		});
