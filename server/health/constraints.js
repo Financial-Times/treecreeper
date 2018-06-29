@@ -44,20 +44,22 @@ const constraintsCheck = async () => {
 				);
 			};
 
-			const hasPropertyConstraint = actualConstraint => {
-				return (
-					actualConstraint.label === type.name &&
-					actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
-				);
-			};
 			if (type.properties.code && type.properties.code.unique === true) {
 				if (!dbConstraints.some(hasUniqueConstraint)) {
 					missingUniqueConstraints.push({ name: type.name });
 				}
 
-				if (!dbConstraints.some(hasPropertyConstraint)) {
-					missingPropertyConstraints.push({ name: type.name });
-				}
+				//TODO hasPropertyConstraint will need to be added back into the healthcheck if we get a license for Neo4j Enterprise
+				// const hasPropertyConstraint = actualConstraint => {
+				// 	return (
+				// 		actualConstraint.label === type.name &&
+				// 		actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
+				// 	);
+				// };
+
+				// if (!dbConstraints.some(hasPropertyConstraint)) {
+				// 	missingPropertyConstraints.push({ name: type.name });
+				// }
 			}
 		});
 
