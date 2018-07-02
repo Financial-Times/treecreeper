@@ -7,7 +7,7 @@ const callApiHerokuCheck = async () => {
 			api_key: process.env.API_KEY,
 			'client-id': `HEALTHCHECK_HEROKU`
 		},
-		url: 'https://biz-ops.api.ft.com/v1',
+		url: process.env.HEROKU_API_URL,
 		type: 'Heroku'
 	});
 	return {
