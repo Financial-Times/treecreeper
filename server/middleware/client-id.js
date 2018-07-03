@@ -21,7 +21,7 @@ const disableWrites = (req, res, next) => {
 const disableReads = (req, res, next) => {
 	if (
 		req.method === 'GET' &&
-		!/^(cmdb-to-bizop|DROP ALL|(read)-client-id|(read)-relationship-client)$/.test(
+		!/^(cmdb-to-bizop|DROP ALL|(read|test)-client-id|(read|test)-relationship-client)$/.test(
 			res.locals.clientId
 		)
 	) {
