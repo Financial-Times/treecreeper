@@ -1,6 +1,16 @@
 # Biz Ops API Documentation
 
-## Node - /v1/node/:nodeType/:code
+The following provides details of the available endpoints. You must use the correct prefix for the url.
+When calling through API gateway use the folowing:
+| environment | prefix value                 |
+| ----------- | -----------------------------|
+|   test      | https://api-t.ft.com/biz-ops |
+|   prod      | https://api.ft.com/biz-ops   |
+
+Example:
+https://api-t.ft.com/biz-ops/v1/node/Group/<groupid>?upsert=true&relationshipAction=merge
+
+## Node - {prefix}/v1/node/:nodeType/:code
 
 ### Url parameters
 
@@ -93,7 +103,7 @@ Used to remove a node. _This method should be used sparingly_
 | existing, with relationships to other nodes    | 409    | none          |
 | existing, with no relationships to other nodes | 204    | none          |
 
-## Relationship - /v1/node/:nodeType/:code/:relationshipType/:relatedType/:relatedCode
+## Relationship - {prefix}/v1/node/:nodeType/:code/:relationshipType/:relatedType/:relatedCode
 
 ### Url parameters
 
