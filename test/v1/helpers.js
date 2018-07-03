@@ -1,7 +1,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const logger = require('@financial-times/n-logger').default;
-const { safeQuery, driver } = require('../../server/db-connection');
+const { executeQuery, driver } = require('../../server/db-connection');
 const EventLogWriter = require('../../server/lib/event-log-writer');
 
 const checkResponse = (actual, expected) => {
@@ -55,11 +55,11 @@ const nodes = Object.freeze([
 const hydrateDb = async withRelationships => {
 	await Promise.all(
 		nodes.map(({ type, node }) =>
-			safeQuery(`CREATE (n:${type} $node) RETURN n`, { node })
+			executeQuery(`CREATE (n:${type} $node) RETURN n`, { node })
 		)
 	);
 	if (withRelationships) {
-		await safeQuery(`MATCH (t:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
+		await executeQuery(`MATCH (t:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[ht:HAS_TEAM]->(t)-[htl:HAS_TECH_LEAD]->(p)
 									SET
 										ht._createdByRequest = "setup-script",
@@ -75,7 +75,7 @@ const hydrateDb = async withRelationships => {
 const dropDb = async () => {
 	await Promise.all(
 		nodes.map(async ({ type, node }) => {
-			await safeQuery(
+			await executeQuery(
 				`MATCH (n:${type} { code: "${node.code}" }) DETACH DELETE n`
 			);
 		})
@@ -107,7 +107,7 @@ const stubDbUnavailable = state =>
 	});
 
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>
-	safeQuery(`
+	executeQuery(`
 			MATCH (node:Team { code: 'test-team' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
 			RETURN relationship`);
 

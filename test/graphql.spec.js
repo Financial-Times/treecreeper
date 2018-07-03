@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const app = require('../server/app.js');
 const { expect } = require('chai');
 const request = require('./helpers/supertest');
-const { safeQuery } = require('../server/db-connection');
+const { executeQuery } = require('../server/db-connection');
 const security = require('../server/middleware/security');
 const { createMockSchema } = require('../server/graphql/schema');
 const resolvers = require('../server/graphql/resolvers');
@@ -123,7 +123,7 @@ describe('Integration - GraphQL', () => {
 		logger.debug('Creating graphql database stubs', { type, props });
 
 		const createQuery = `UNWIND $props AS map CREATE (n:${type}) SET n = map`;
-		return safeQuery(createQuery, { props });
+		return executeQuery(createQuery, { props });
 	};
 
 	beforeEach(async function() {
@@ -136,7 +136,7 @@ describe('Integration - GraphQL', () => {
 	afterEach(async () => {
 		sandbox.restore();
 		const deleteQuery = `MATCH (a {${UNIQUE_ATTRIBUTE_KEY}: "${UNIQUE_ATTRIBUTE_VALUE}"}) DELETE a`;
-		await safeQuery(deleteQuery);
+		await executeQuery(deleteQuery);
 	});
 
 	describe('access control', () => {

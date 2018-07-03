@@ -9,26 +9,20 @@ const DEFAULT_QUERY = `{
     name
     serviceTier
     primaryURL
-    ownedBy {
-      code
-      name
-      email
-      slack
-    }
     supportedByTeam {
       name
       slack
       email
-      techLead {
+      techLeads {
         name
         email
       }
-      productOwner {
+      productOwners {
         name
         email
       }
     }
-    isKnownBy {
+    knownAboutBy {
       name
     }
     repository {

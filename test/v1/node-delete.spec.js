@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { safeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/db-connection');
 const { setupMocks, stubDbUnavailable } = require('./helpers');
 
 describe('v1 - node DELETE', () => {
@@ -10,14 +10,14 @@ describe('v1 - node DELETE', () => {
 	setupMocks(state);
 
 	const verifyDeletion = async () => {
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(0);
 	};
 
 	const verifyNotDeletion = async () => {
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -46,7 +46,7 @@ describe('v1 - node DELETE', () => {
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
-		await safeQuery(`
+		await executeQuery(`
 			MATCH (node:Team {code: "test-team"}), (person:Person {code: "test-person"})
 			MERGE (node)-[:HAS_TECH_LEAD]->(person)
 			RETURN node`);
