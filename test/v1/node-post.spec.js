@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { safeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/db-connection');
 const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
@@ -14,8 +14,8 @@ describe('v1 - node POST', () => {
 	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 
 	const cleanUp = async () => {
-		await safeQuery(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
-		await safeQuery(
+		await executeQuery(`MATCH (n:Team { code: "new-team" }) DETACH DELETE n`);
+		await executeQuery(
 			`MATCH (n:Person { code: "new-test-person" }) DETACH DELETE n`
 		);
 	};
@@ -49,7 +49,7 @@ describe('v1 - node POST', () => {
 				},
 				relationships: []
 			});
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" }) RETURN n`
 		);
 
@@ -134,7 +134,7 @@ describe('v1 - node POST', () => {
 				})
 			);
 
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 
@@ -247,7 +247,7 @@ describe('v1 - node POST', () => {
 					relationships
 				})
 			);
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
@@ -301,7 +301,7 @@ describe('v1 - node POST', () => {
 			})
 			.expect(200);
 
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
 		);
 		expect(result.records.length).to.equal(1);
@@ -457,7 +457,7 @@ describe('v1 - node POST', () => {
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
 
-		return safeQuery(
+		return executeQuery(
 			'MATCH (g:Person {code: "new-test-person"}) DETACH DELETE g'
 		);
 	});

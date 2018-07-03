@@ -136,13 +136,25 @@ DELIVERED_BY:
     fromType:
       System:
         graphql:
-          name: deliveredBy
-          description: The team which owns the system
+          name: deliveredByTeam
+          description: The team which delivers the system
     toType:
       Team:
         graphql:
           name: delivers
-          description: The systems the team owns
+          description: The systems the team delivers
+  -
+    type: MANY_TO_ONE
+    fromType:
+      System:
+        graphql:
+          name: deliveredBySupplier
+          description: The supplier which delivers the system
+    toType:
+      Supplier:
+        graphql:
+          name: delivers
+          description: The systems the supplier delivers
 
 SUPPORTED_BY:
   -

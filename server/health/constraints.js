@@ -1,30 +1,18 @@
-const neo4j = require('neo4j-driver').v1;
 const logger = require('@financial-times/n-logger').default;
-const fetch = require('isomorphic-fetch');
 const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
 const typesSchema = readYaml.directory('./schema/types');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
+const { executeQuery } = require('../db-connection');
 
 const missingUniqueConstraints = [];
 const missingPropertyConstraints = [];
 
 const constraintsCheck = async () => {
 	try {
-		const response = await fetch(
-			`http://localhost:7474/db/data/schema/constraint`,
-			{
-				method: 'GET',
-				timeout: 20000,
-				Authorization: neo4j.auth.basic(
-					process.env.GRAPHENEDB_CHARCOAL_BOLT_USER,
-					process.env.GRAPHENEDB_CHARCOAL_BOLT_PASSWORD
-				)
-			}
-		);
-
-		const dbConstraints = await response.json();
+		const dbResults = await executeQuery(`CALL db.constraints`);
+		const dbConstraints = dbResults.records;
 
 		if (!dbConstraints) {
 			return {
@@ -37,30 +25,28 @@ const constraintsCheck = async () => {
 		}
 
 		typesSchema.map(type => {
+			const node = type.name.toLowerCase();
+			const uniqueConstraintQuery = `CONSTRAINT ON ( ${node}:${
+				type.name
+			} ) ASSERT ${node}.code IS UNIQUE`;
+
 			const hasUniqueConstraint = actualConstraint => {
-				return (
-					actualConstraint.label === type.name &&
-					actualConstraint.type === 'UNIQUENESS'
-				);
+				return actualConstraint._fields[0] === uniqueConstraintQuery;
 			};
-
-			if (type.properties.code && type.properties.code.unique === true) {
-				if (!dbConstraints.some(hasUniqueConstraint)) {
-					missingUniqueConstraints.push({ name: type.name });
-				}
-
-				//TODO hasPropertyConstraint will need to be added back into the healthcheck if we get a license for Neo4j Enterprise
-				// const hasPropertyConstraint = actualConstraint => {
-				// 	return (
-				// 		actualConstraint.label === type.name &&
-				// 		actualConstraint.type === 'NODE_PROPERTY_EXISTENCE'
-				// 	);
-				// };
-
-				// if (!dbConstraints.some(hasPropertyConstraint)) {
-				// 	missingPropertyConstraints.push({ name: type.name });
-				// }
+			if (!dbConstraints.some(hasUniqueConstraint)) {
+				missingUniqueConstraints.push({ name: type.name });
 			}
+			//TODO hasPropertyConstraint will need to be added back into the healthcheck if we get a license for Neo4j Enterprise
+			// const propertyConstraintQuery = `CONSTRAINT ON ( ${node}:${
+			// 	type.name
+			// } ) ASSERT exists(${node}.code)`;
+			// const hasPropertyConstraint = actualConstraint => {
+			// 	return actualConstraint._fields[0] === propertyConstraintQuery;
+			// };
+			//
+			// if (!dbConstraints.some(hasPropertyConstraint)) {
+			// 	missingPropertyConstraints.push({ name: type.name });
+			// }
 		});
 
 		if (

@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
-const { safeQuery } = require('../db-connection');
+const { executeQuery } = require('../db-connection');
 
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
@@ -59,7 +59,7 @@ const handleDuplicateRelationship = async ({
 	relatedType,
 	relatedCode
 }) => {
-	const existingRelationship = await safeQuery(
+	const existingRelationship = await executeQuery(
 		`
 			MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(relatedNode:${relatedType} { code: $relatedCode })
 			RETURN relationship
