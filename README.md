@@ -75,6 +75,8 @@ Sample [queries/output](COOKBOOK.md)
 
 ## Run
 
+This app uses Node 8.
+
 Install dependencies:
 
 ```shell
@@ -88,9 +90,15 @@ Start the [neo4j](https://neo4j.com/) community edition database. This requires 
 docker-compose up
 ```
 
+*Troubleshooting*
+* You may need to install `wget` in order to run `./scripts/neo4j-plugins`. You can do this with `brew` by running `brew install wget`
+* The `docker-compose up` command requires you to have an account with docker, (you should be able to do that [here](https://hub.docker.com/)) and download the the docker application (you should be able to do that [here](https://www.docker.com/get-docker))).
+
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
-Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). This allows you to populate environment variables, including secrets, from vault by running the following:
+Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). You will also need to have permission to read the `internal-products` Vault secrets. Ask in the [`#internal-products`](https://financialtimes.slack.com/messages/C40J2GPB6/team/) slack channel and someone should be able to help you.
+
+This allows you to populate environment variables, including secrets, from vault by running the following:
 
 ```shell
 npm run vault:env
