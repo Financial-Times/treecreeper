@@ -31,7 +31,7 @@ module.exports = router => {
 	router.use(security.requireApiKey);
 	router.use(security.requireClientId);
 	router.use(requestId);
-	router.use(clientId.hasClientId);
+	router.use(clientId.getClientId);
 	router.use(clientId.disableWrites);
 	router.use(clientId.disableReads);
 

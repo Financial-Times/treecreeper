@@ -1,4 +1,4 @@
-const hasClientId = (req, res, next) => {
+const getClientId = (req, res, next) => {
 	res.locals.clientId = req.get('client-id');
 	next();
 };
@@ -21,6 +21,7 @@ const disableWrites = (req, res, next) => {
 const disableReads = (req, res, next) => {
 	if (
 		req.method === 'GET' &&
+		process.env.DATA_REPOPULATION === true &&
 		!/^(cmdb-to-bizop|DROP ALL|(read|test)-client-id|(read|test)-relationship-client)$/.test(
 			res.locals.clientId
 		)
@@ -34,7 +35,7 @@ const disableReads = (req, res, next) => {
 };
 
 module.exports = {
-	hasClientId,
+	getClientId,
 	disableWrites,
 	disableReads
 };
