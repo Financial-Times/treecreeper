@@ -4,14 +4,14 @@ const readYaml = require('../../schema/lib/read-yaml');
 const typesSchema = readYaml.directory('./schema/types');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
-const { safeQuery } = require('../db-connection');
+const { executeQuery } = require('../db-connection');
 
 const missingUniqueConstraints = [];
 const missingPropertyConstraints = [];
 
 const constraintsCheck = async () => {
 	try {
-		const dbResults = await safeQuery(`CALL db.constraints`);
+		const dbResults = await executeQuery(`CALL db.constraints`);
 		const dbConstraints = dbResults.records;
 
 		if (!dbConstraints) {

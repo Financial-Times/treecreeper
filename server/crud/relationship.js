@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
-const { safeQuery } = require('../db-connection');
+const { executeQuery } = require('../db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,
@@ -49,7 +49,7 @@ const create = async input => {
 				input
 			)
 		);
-		const result = await safeQuery(query, {
+		const result = await executeQuery(query, {
 			attributes,
 			clientId,
 			requestId,
@@ -80,7 +80,7 @@ const read = async input => {
 	RETURN relationship`;
 
 	logger.info({ event: 'READ_RELATIONSHIP_QUERY', requestId, query });
-	const result = await safeQuery(query, { code, relatedCode });
+	const result = await executeQuery(query, { code, relatedCode });
 	queryResultHandlers.missingRelationship(
 		Object.assign({ result, status: 404 }, input)
 	);
@@ -135,7 +135,7 @@ const update = async input => {
 			)
 		);
 
-		const result = await safeQuery(query, {
+		const result = await executeQuery(query, {
 			attributes,
 			clientId,
 			requestId,
@@ -182,7 +182,7 @@ const remove = async input => {
 	DELETE relationship`;
 
 	logger.info({ event: 'REMOVE_RELATIONSHIP_QUERY', requestId, query });
-	const result = await safeQuery(query, { code, relatedCode });
+	const result = await executeQuery(query, { code, relatedCode });
 	logChanges(requestId, clientId, result, sanitizedInput);
 	return { status: 204 };
 };

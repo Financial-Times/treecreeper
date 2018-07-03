@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-const { safeQueryWithSharedSession } = require('../server/db-connection');
+const { executeQueryWithSharedSession } = require('../server/db-connection');
 const schemas = require('./index');
 const logger = require('@financial-times/n-logger').default;
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
 const initConstraints = async () => {
-	const safeQuery = safeQueryWithSharedSession();
+	const executeQuery = executeQueryWithSharedSession();
 
 	try {
 		const setupConstraintIfPossible = constraintQuery =>
-			safeQuery(constraintQuery).catch(err =>
+			executeQuery(constraintQuery).catch(err =>
 				logger.warn({
 					event: 'CONSTRAINT_SETUP_FAILURE',
 					err: err.message,
@@ -20,7 +20,7 @@ const initConstraints = async () => {
 			);
 
 		const retrieveConstraints = async () => {
-			const constraints = await safeQuery('CALL db.constraints');
+			const constraints = await executeQuery('CALL db.constraints');
 			return constraints.records.map(constraint =>
 				constraint.get('description')
 			);
@@ -65,7 +65,7 @@ const initConstraints = async () => {
 			`db.constraints updated. ${constraints.length} constraints exist`
 		);
 	} finally {
-		safeQuery.close();
+		executeQuery.close();
 	}
 };
 

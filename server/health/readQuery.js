@@ -1,11 +1,11 @@
 const logger = require('@financial-times/n-logger').default;
 const { stripIndents } = require('common-tags');
-const { safeQuery } = require('../db-connection');
+const { executeQuery } = require('../db-connection');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
 const runQueryCheck = async () => {
 	try {
-		const result = await safeQuery(
+		const result = await executeQuery(
 			stripIndents`MATCH (node:System)-[relationship:HAS_REPO]->(relatedNode:Repository)
 			RETURN node,relatedNode,relationship LIMIT 10`
 		);
