@@ -2,13 +2,14 @@
 
 The following provides details of the available endpoints. You must use the correct prefix for the url.
 When calling through API gateway use the folowing:
+
 | environment | prefix value                 |
 | ----------- | -----------------------------|
 |   test      | https://api-t.ft.com/biz-ops |
 |   prod      | https://api.ft.com/biz-ops   |
 
 Example:
-https://api-t.ft.com/biz-ops/v1/node/Group/<groupid>?upsert=true&relationshipAction=merge
+https://api-t.ft.com/biz-ops/v1/node/Group/groupid?upsert=true&relationshipAction=merge
 
 ## Node - {prefix}/v1/node/:nodeType/:code
 
