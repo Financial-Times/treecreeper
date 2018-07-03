@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { safeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/db-connection');
 const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 const lolex = require('lolex');
 
@@ -13,7 +13,7 @@ describe('v1 - node PATCH', () => {
 	const timestamp = 1528458548930;
 	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
 	const cleanUp = async () => {
-		await safeQuery(
+		await executeQuery(
 			`MATCH (n:Person { code: "other-test-person" }) DETACH DELETE n`
 		);
 	};
@@ -48,7 +48,7 @@ describe('v1 - node PATCH', () => {
 				relationships: []
 			});
 
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -82,7 +82,7 @@ describe('v1 - node PATCH', () => {
 				},
 				relationships: []
 			});
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -146,7 +146,7 @@ describe('v1 - node PATCH', () => {
 				relationships: []
 			});
 
-		const result = await safeQuery(
+		const result = await executeQuery(
 			`MATCH (n:Team { code: "test-team" }) RETURN n`
 		);
 		expect(result.records.length).to.equal(1);
@@ -156,7 +156,9 @@ describe('v1 - node PATCH', () => {
 
 	describe('relationship patching', () => {
 		const cleanUp = () =>
-			safeQuery(`MATCH (p:Person {code: 'other-test-person'}) DETACH DELETE p`);
+			executeQuery(
+				`MATCH (p:Person {code: 'other-test-person'}) DETACH DELETE p`
+			);
 		beforeEach(cleanUp);
 		after(cleanUp);
 
@@ -181,7 +183,7 @@ describe('v1 - node PATCH', () => {
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
 				);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: 'test-team'})-[]-() RETURN s`
 			);
 			// i.e. no relationships created
@@ -219,7 +221,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -240,7 +242,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('can merge with relationships if relationshipAction=merge', async () => {
-			await safeQuery(
+			await executeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -289,7 +291,7 @@ describe('v1 - node PATCH', () => {
 						}
 					})
 				);
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
@@ -349,7 +351,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -370,7 +372,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('can replace relationships if relationshipAction=replace', async () => {
-			await safeQuery(
+			await executeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -415,7 +417,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -436,7 +438,7 @@ describe('v1 - node PATCH', () => {
 		});
 
 		it('leaves relationships of other types untouched when replacing', async () => {
-			await safeQuery(
+			await executeQuery(
 				`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -488,7 +490,7 @@ describe('v1 - node PATCH', () => {
 					})
 				);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (s:Team {code: "test-team"})-[r]-(c) RETURN s, r, c`
 			);
 			expect(result.records.length).to.equal(2);
@@ -548,7 +550,7 @@ describe('v1 - node PATCH', () => {
 						relationships
 					})
 				);
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -611,7 +613,7 @@ describe('v1 - node PATCH', () => {
 						relationships
 					})
 				);
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(1);
@@ -660,7 +662,7 @@ describe('v1 - node PATCH', () => {
 				})
 				.expect(200);
 
-			const result = await safeQuery(
+			const result = await executeQuery(
 				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records[0].get('c').properties._createdByRequest).to.not
@@ -680,7 +682,7 @@ describe('v1 - node PATCH', () => {
 	});
 
 	it('logs modification events to kinesis', async () => {
-		await safeQuery(
+		await executeQuery(
 			`CREATE (p:Person { code: "other-test-person" })
 			WITH p
 			MATCH (s: Team {code: "test-team"})
@@ -834,7 +836,7 @@ describe('v1 - node PATCH', () => {
 			]
 		].map(args => expect(state.stubSendEvent).calledWith(...args));
 
-		return safeQuery(
+		return executeQuery(
 			'MATCH (g:Group {code: "new-test-group"}) DETACH DELETE g'
 		);
 	});
