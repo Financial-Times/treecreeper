@@ -31,21 +31,10 @@ module.exports = router => {
 	router.use(security.requireApiKey);
 	router.use(security.requireClientId);
 	router.use(requestId);
-	router.use(clientId);
-	router.use((req, res, next) => {
-		if (
-			req.method !== 'GET' &&
-			!/^(cmdb-to-bizop|DROP ALL|(delete|update|create|test)-client-id|(create|delete|update)-relationship-client)$/.test(
-				res.locals.clientId
-			)
-		) {
-			return res.status(405).send({
-				message:
-					"Before migration from cmdb is complete, writes to biz-ops-api are restricted to avoid data inconsistencies. Please speak to #reliability-eng to discuss what you need to do - we're here to help"
-			});
-		}
-		next();
-	});
+	router.use(clientId.hasClientId);
+	router.use(clientId.disableWrites);
+	router.use(clientId.disableReads);
+
 	router.use(bodyParsers);
 
 	router.get('/', (req, res) => {
