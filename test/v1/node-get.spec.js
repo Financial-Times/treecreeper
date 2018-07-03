@@ -1,6 +1,6 @@
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { safeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/db-connection');
 
 const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 
@@ -24,7 +24,7 @@ describe('v1 - node GET', () => {
 
 	it('gets node with relationships', async () => {
 		// create the relationships
-		await safeQuery(`MATCH (s:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
+		await executeQuery(`MATCH (s:Team { code: "test-team" }), (p:Person { code: "test-person" }), (g:Group { code: "test-group" })
 									MERGE (g)-[o:HAS_TEAM]->(s)-[t:HAS_TECH_LEAD]->(p)
 									RETURN g, o, s, t, p`);
 
