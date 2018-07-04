@@ -1,15 +1,12 @@
+const { writeRestriction, readRestriction } = require('./helpers');
+
 const getClientId = (req, res, next) => {
 	res.locals.clientId = req.get('client-id');
 	next();
 };
 
 const disableWrites = (req, res, next) => {
-	if (
-		req.method !== 'GET' &&
-		!/^(cmdb-to-bizop|DROP ALL|(delete|update|create|test)-client-id|(create|delete|update)-relationship-client)$/.test(
-			res.locals.clientId
-		)
-	) {
+	if (req.method !== 'GET' && writeRestriction(res)) {
 		return res.status(405).send({
 			message:
 				"Before migration from cmdb is complete, writes to biz-ops-api are restricted to avoid data inconsistencies. Please speak to #reliability-eng to discuss what you need to do - we're here to help"
@@ -21,14 +18,12 @@ const disableWrites = (req, res, next) => {
 const disableReads = (req, res, next) => {
 	if (
 		req.method === 'GET' &&
-		process.env.DATA_REPOPULATION === true &&
-		!/^(cmdb-to-bizop|DROP ALL|(read|test)-client-id|(read|test)-relationship-client)$/.test(
-			res.locals.clientId
-		)
+		process.env.DISABLE_READS === true &&
+		readRestriction(res)
 	) {
 		return res.status(500).send({
 			message:
-				"Before migration from cmdb is complete, reads to biz-ops-api are restricted to avoid incomplete data. Please speak to #reliability-eng to discuss what you need to do - we're here to help "
+				"Biz-ops-api is undergoing vital maintenance. Therefore, reads to the biz-ops-api are restricted at this time to avoid retrieving incomplete data. Please speak to #reliability-eng to discuss what you need to do - we're here to help "
 		});
 	}
 	next();
