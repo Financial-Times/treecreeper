@@ -23,5 +23,32 @@ module.exports = {
 		};
 		executeQuery.close = () => session.close();
 		return executeQuery;
+	},
+	writeTransaction: async steps => {
+		const session = driver.session();
+		const transactionFunction = async transaction => {
+			let step;
+			let results = [];
+			while ((step = steps.shift())) {
+				if (Array.isArray(step)) {
+					results = results.concat(
+						await Promise.all(
+							step.map(({ query, params }) =>
+								transaction.run(query, params || {})
+							)
+						)
+					);
+				} else {
+					results.push(await transaction.run(step.query, step.params || {}));
+				}
+			}
+			return results;
+		};
+
+		try {
+			return await session.writeTransaction(transactionFunction);
+		} finally {
+			session.close();
+		}
 	}
 };

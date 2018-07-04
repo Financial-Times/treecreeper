@@ -106,6 +106,25 @@ const stubDbUnavailable = state =>
 		close: () => {}
 	});
 
+const stubDbTransaction = (state, properties = {}) => {
+	const runStub = state.sandbox.stub();
+	runStub.resolves({
+		records: [
+			{
+				get: () => ({ properties, labels: [] }),
+				has: () => false
+			}
+		]
+	});
+	const stubSession = {
+		run: runStub,
+		writeTransaction: func => func(stubSession),
+		close: () => {}
+	};
+	state.sandbox.stub(driver, 'session').returns(stubSession);
+	return runStub;
+};
+
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>
 	executeQuery(`
 			MATCH (node:Team { code: 'test-team' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
@@ -115,6 +134,7 @@ module.exports = {
 	checkResponse,
 	stubKinesis,
 	setupMocks,
+	stubDbTransaction,
 	stubDbUnavailable,
 	getRelationship
 };

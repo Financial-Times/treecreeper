@@ -14,7 +14,7 @@ const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';
 const UNIQUE_ATTRIBUTE_VALUE = 'GRAPHQL_INT_TESTS';
 
 describe('Integration - GraphQL', () => {
-	// always seed the causal generator with a static seed so that tests are deterministic
+	// always seed the casual generator with a static seed so that tests are deterministic
 	casual.seed(123);
 	let sandbox;
 	const typeFields = {};
@@ -232,8 +232,11 @@ describe('Integration - GraphQL', () => {
 			.set('client-id', 'graphql-client')
 			.set('API_KEY', process.env.API_KEY)
 			.expect(200)
-			.then(({ body }) =>
-				expect(body.data.Systems).to.have.deep.members(typeMocks['System'])
-			);
+			.then(({ body }) => {
+				const codes = typeMocks['System'].map(s => s.code);
+				expect(
+					body.data.Systems.filter(s => codes.includes(s.code))
+				).to.have.deep.members(typeMocks['System']);
+			});
 	});
 });

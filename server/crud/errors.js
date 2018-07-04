@@ -98,12 +98,17 @@ const handleMissingRelationship = ({
 	}
 };
 
-const handleAttachedNode = ({ record, nodeType, code }) => {
-	if (Object.keys(record.relationships).length) {
+const handleAttachedNode = ({ result, nodeType, code }) => {
+	// use has so that get doesn't error, and get to check if null or not
+	if (
+		result.records.length &&
+		result.records[0].has('related') &&
+		result.records[0].get('related')
+	) {
 		throw httpErrors(
 			409,
 			`Cannot delete - ${nodeType} ${code} has relationships`,
-			{ relationships: record.relationships }
+			{ relationships: result.records }
 		);
 	}
 };
