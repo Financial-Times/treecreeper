@@ -23,6 +23,5 @@ module.exports = router => {
 		next();
 	});
 	router.post('/', graphql.api);
-
 	return router;
 };

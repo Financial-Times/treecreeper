@@ -1,4 +1,4 @@
 module.exports = {
-	nodeCrud: require('./node'),
-	relationshipCrud: require('./relationship')
+	nodeCrud: require('./node-crud'),
+	relationshipCrud: require('./relationship-crud')
 };

@@ -5,10 +5,10 @@ const RETURN_NODE_WITH_RELS = stripIndents`
 	OPTIONAL MATCH (node)-[relationship]-(related)
 	RETURN node, relationship, related`;
 
-const relFragment = (type, direction, i = '') => {
+const relFragment = (type, direction) => {
 	const left = direction === 'incoming' ? '<' : '';
 	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[rel${i}:${type}]-${right}`;
+	return `${left}-[relationship:${type}]-${right}`;
 };
 
 const metaAttributesForCreate = type => stripIndents`
@@ -42,7 +42,7 @@ MERGE (related:${nodeType} {code: nodeCodes} )
 
 const writeRelationships = ({ relType, direction }) => `
 MERGE (node)${relFragment(relType, direction)}(related)
-	ON CREATE SET ${metaAttributesForCreate(`rel`)}
+	ON CREATE SET ${metaAttributesForCreate('relationship')}
 `;
 
 const groupSimilarRelationships = relationships =>

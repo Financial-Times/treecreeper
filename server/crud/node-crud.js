@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const logger = require('@financial-times/n-logger').default;
-const { executeQuery } = require('../db-connection');
+const { executeQuery, writeTransaction } = require('../db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,
@@ -16,23 +16,97 @@ const {
 	createRelationships
 } = require('./cypher');
 
-const create = async input => {
-	const {
+const {
+	batchRelationships,
+	constructRelationshipMergeQueries
+} = require('./relationship-batcher');
+
+const getNodeWithRelationships = async (nodeType, code) => {
+	const query = stripIndents`
+	MATCH (node:${nodeType} {code: $code})
+	${RETURN_NODE_WITH_RELS}`;
+	return executeQuery(query, { code });
+};
+
+const executeWriteWithRelationships = async ({
+	input: {
 		clientId,
 		requestId,
-		upsert,
 		nodeType,
+		upsert,
 		code,
 		attributes,
 		relationships
-	} = sanitizeInput(input, 'CREATE');
+	},
+	queryParts,
+	eventName,
+	baseParameters,
+	deletedRelationships
+}) => {
+	const parameters = Object.assign(
+		{
+			attributes
+		},
+		baseParameters
+	);
+
+	const batchedRelationships = batchRelationships(relationships);
+
+	const supplementaryQueries = constructRelationshipMergeQueries(
+		upsert,
+		batchedRelationships.slice(1),
+		nodeType,
+		baseParameters
+	);
+
+	queryParts.push(
+		createRelationships(upsert, batchedRelationships[0], parameters)
+	);
+
+	queryParts.push(RETURN_NODE_WITH_RELS);
+
+	const query = queryParts.join('\n');
+
+	logger.info({
+		event: eventName,
+		clientId,
+		requestId,
+		nodeType,
+		code,
+		attributes
+	});
+
+	let result;
+
+	if (supplementaryQueries.length) {
+		await writeTransaction([
+			{
+				query,
+				params: parameters
+			},
+			// nested array rather than concatenated because supplementaryQueries
+			// can all run in parallel
+			supplementaryQueries || []
+		]);
+		result = await getNodeWithRelationships(nodeType, code);
+	} else {
+		result = await executeQuery(query, parameters);
+	}
+
+	logChanges(clientId, requestId, result, deletedRelationships);
+	return constructOutput(result);
+};
+
+const create = async input => {
+	const sanitizedInput = sanitizeInput(input, 'CREATE');
+	const { clientId, requestId, nodeType, code, relationships } = sanitizedInput;
 
 	try {
-		const parameters = {
-			attributes,
+		const baseParameters = {
 			clientId,
 			date: new Date().toUTCString(),
-			requestId
+			requestId,
+			code
 		};
 
 		const queryParts = [
@@ -42,23 +116,12 @@ const create = async input => {
 			WITH node`
 		];
 
-		if (relationships.length) {
-			queryParts.push(createRelationships(upsert, relationships, parameters));
-		}
-		queryParts.push(RETURN_NODE_WITH_RELS);
-
-		const query = queryParts.join('\n');
-		logger.info({
-			event: 'CREATE_NODE_QUERY',
-			clientId,
-			requestId,
-			nodeType,
-			code,
-			query
+		return await executeWriteWithRelationships({
+			input: sanitizedInput,
+			queryParts,
+			eventName: 'CREATE_NODE_QUERY',
+			baseParameters
 		});
-		const result = await executeQuery(query, parameters);
-		logChanges(clientId, requestId, result);
-		return constructOutput(result);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
 		dbErrorHandlers.nodeUpsert(err, relationships);
@@ -69,47 +132,41 @@ const create = async input => {
 const read = async input => {
 	const { clientId, requestId, nodeType, code } = sanitizeInput(input, 'READ');
 
-	const query = stripIndents`
-	MATCH (node:${nodeType} {code: $code})
-	${RETURN_NODE_WITH_RELS}`;
-
 	logger.info({
 		event: 'READ_NODE_QUERY',
 		clientId,
 		requestId,
 		nodeType,
-		code,
-		query
+		code
 	});
 
-	const result = await executeQuery(query, { code });
+	const result = await getNodeWithRelationships(nodeType, code);
+
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
 	return constructOutput(result);
 };
 
 const update = async input => {
+	const sanitizedInput = sanitizeInput(input, 'UPDATE');
 	const {
 		clientId,
 		requestId,
-		upsert,
 		nodeType,
 		code,
-		attributes,
 		relationships,
 		deletedAttributes,
 		relationshipAction,
 		relationshipTypes
-	} = sanitizeInput(input, 'UPDATE');
+	} = sanitizedInput;
 
 	let deletedRelationships;
 
 	try {
-		const parameters = {
-			attributes,
-			code,
-			requestId,
+		const baseParameters = {
 			clientId,
-			date: new Date().toUTCString()
+			date: new Date().toUTCString(),
+			requestId,
+			code
 		};
 
 		const queryParts = [
@@ -148,30 +205,19 @@ const update = async input => {
 					);
 				}
 			}
-			queryParts.push(createRelationships(upsert, relationships, parameters));
 		}
-		queryParts.push(RETURN_NODE_WITH_RELS);
 
-		const query = queryParts.join('\n');
-
-		logger.info({
-			event: 'UPDATE_NODE_QUERY',
-			clientId,
-			requestId,
-			nodeType,
-			code,
-			query,
-			attributes
+		const data = await executeWriteWithRelationships({
+			input: sanitizedInput,
+			queryParts,
+			eventName: 'UPDATE_NODE_QUERY',
+			baseParameters,
+			deletedRelationships
 		});
-		const result = await executeQuery(query, parameters);
 
-		logChanges(clientId, requestId, result, deletedRelationships);
 		return {
-			data: constructOutput(result),
-			status:
-				result.records[0].get('node').properties._createdByRequest === requestId
-					? 201
-					: 200
+			data,
+			status: data.node._createdByRequest === requestId ? 201 : 200
 		};
 	} catch (err) {
 		dbErrorHandlers.nodeUpsert(err, relationships);
@@ -184,11 +230,15 @@ const remove = async input => {
 		input,
 		'DELETE'
 	);
-	// note - this calls bailOnDeletedNode, which is why it isn't done explicitly
-	// in this function
-	const record = await read(input);
+	const existingRecord = await getNodeWithRelationships(nodeType, code);
 
-	queryResultHandlers.attachedNode({ record, nodeType, code });
+	queryResultHandlers.missingNode({
+		result: existingRecord,
+		nodeType,
+		code,
+		status: 404
+	});
+	queryResultHandlers.attachedNode({ result: existingRecord, nodeType, code });
 
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
@@ -196,7 +246,7 @@ const remove = async input => {
 	DELETE node
 	RETURN deletedNode as node`;
 
-	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code, query });
+	logger.info({ event: 'REMOVE_NODE_QUERY', requestId, nodeType, code });
 
 	const result = await executeQuery(query, { code, clientId, requestId });
 	result.records[0].get('node').properties.deletedByRequest = requestId; // ensure requestID is present
