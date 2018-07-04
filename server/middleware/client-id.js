@@ -1,6 +1,6 @@
 const { writeRestriction, readRestriction } = require('./helpers');
 
-const getClientId = (req, res, next) => {
+const setClientIdFromHeadersToLocals = (req, res, next) => {
 	res.locals.clientId = req.get('client-id');
 	next();
 };
@@ -30,7 +30,7 @@ const disableReads = (req, res, next) => {
 };
 
 module.exports = {
-	getClientId,
+	setClientIdFromHeadersToLocals,
 	disableWrites,
 	disableReads
 };
