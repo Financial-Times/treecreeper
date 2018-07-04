@@ -18,7 +18,7 @@ const disableWrites = (req, res, next) => {
 const disableReads = (req, res, next) => {
 	if (
 		req.method === 'GET' &&
-		process.env.DISABLE_READS === true &&
+		process.env.DISABLE_READS === 'true' &&
 		readRestriction(res)
 	) {
 		return res.status(500).send({
