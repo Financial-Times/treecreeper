@@ -6,10 +6,6 @@ module.exports = router => {
 		res.status(200).end();
 	});
 
-	router.get('/', (req, res) => {
-		res.send('biz op api');
-	});
-
 	router.use('/graphiql', security.requireS3o, graphql.graphiql('/graphql'));
 
 	return router;

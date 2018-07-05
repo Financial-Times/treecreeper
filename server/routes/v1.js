@@ -15,14 +15,22 @@ const success = res => data =>
 	data.status ? res.status(data.status).json(data.data) : res.json(data);
 
 const failure = res => err => {
-	if (process.env.LOG_LEVEL === 'debug') {
-		console.info('CRUD_ERROR', err);
-	}
+	logger.debug({ event: 'CRUD_ERROR', error: err });
+
 	if (!err.status) {
-		logger.info({ error: err });
+		logger.error({ error: err });
 		err = { status: 500, message: err.toString() };
 	}
 	res.status(err.status).json({ errors: [{ message: err.message }] });
+};
+
+const unimplemented = (logMessage, errorMessage) => (req, res) => {
+	logger.info(`[APP] ${logMessage}`, req.params);
+	return failure(res)(
+		Object.assign(new Error(errorMessage), {
+			status: 405
+		})
+	);
 };
 
 module.exports = router => {
@@ -34,12 +42,7 @@ module.exports = router => {
 	router.use(clientId.setClientIdFromHeadersToLocals);
 	router.use(clientId.disableWrites);
 	router.use(clientId.disableReads);
-
 	router.use(bodyParsers);
-
-	router.get('/', (req, res) => {
-		res.send('biz op api v1');
-	});
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
 		logger.info('[APP] node GET', req.params);
@@ -73,11 +76,10 @@ module.exports = router => {
 			.then(success(res), failure(res));
 	});
 
-	router.put('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node PUT', req.params);
-
-		res.status(405).send('PUT is unimplemented. Use PATCH');
-	});
+	router.put(
+		'/node/:nodeType/:code',
+		unimplemented('node PUT', 'PUT is unimplemented. Use PATCH')
+	);
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
 		logger.info('[APP] node PATCH', req.params);
@@ -151,11 +153,7 @@ module.exports = router => {
 
 	router.put(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
-		async (req, res) => {
-			logger.info('[APP] node PUT', req.params);
-
-			res.status(405).send('PUT is unimplemented. Use PATCH');
-		}
+		unimplemented('node PUT', 'PUT is unimplemented. Use PATCH')
 	);
 
 	router.patch(

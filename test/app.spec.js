@@ -2,11 +2,24 @@ const app = require('../server/app.js');
 const request = require('./helpers/supertest');
 
 describe('generic app settings', () => {
-	it('GET root - status code 200', async () => {
+	it('GET gtg - status code 200', async () => {
 		return request(app)
-			.get('/')
+			.get('/__gtg')
 			.set('API_KEY', `${process.env.API_KEY}`)
 			.expect(200);
+	});
+
+	it('GET undefined route - status code 404', async () => {
+		return request(app)
+			.get('/irrelevant-albatross')
+			.set('API_KEY', `${process.env.API_KEY}`)
+			.expect(404, {
+				errors: [
+					{
+						message: 'Not Found'
+					}
+				]
+			});
 	});
 
 	it('GET v1 can be disabled', async () => {

@@ -23,12 +23,24 @@ const createApp = () => {
 		res.redirect('/graphql');
 	});
 
-	app.use('/graphql', graphql(express.Router())); //eslint-disable-line
-	app.use('/v1', v1(express.Router())); //eslint-disable-line
-	app.use('/', ui(express.Router())); //eslint-disable-line
+	app.use('/graphql', graphql(new express.Router()));
+	app.use('/v1', v1(new express.Router()));
+	app.use('/', ui(new express.Router()));
+
+	app.use(({ path }, res) => {
+		logger.info({ path, event: 'PATH_NOT_FOUND_ERROR' }, 'Not found');
+
+		return res.status(404).json({
+			errors: [
+				{
+					message: 'Not Found'
+				}
+			]
+		});
+	});
 
 	app.use((error, request, response, next) => {
-		logger.error(error);
+		logger.error({ error, event: 'UNHANDLED_ERROR' }, 'Unhandled server error');
 		next(error);
 	});
 
