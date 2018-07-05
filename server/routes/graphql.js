@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
+const clientId = require('../middleware/client-id');
 const graphql = require('../graphql/controllers');
 const logger = require('@financial-times/n-logger').default;
 
@@ -12,7 +13,9 @@ const bodyParsers = [
 module.exports = router => {
 	router.use(timeout('65s'));
 	router.use(security.requireApiAuthOrS3o);
+	router.use(clientId.disableReads);
 	router.use(bodyParsers);
+
 	router.use((req, res, next) => {
 		logger.info({
 			event: 'GRAPHQL_REQUEST',
