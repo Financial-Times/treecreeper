@@ -12,6 +12,9 @@ properties:
     type: String
     canIdentify: true
     description: The name of the group
+  description:
+    type: String
+    description: What the group does
   isActive:
     type: Boolean
     canFilter: true
