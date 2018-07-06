@@ -26,6 +26,7 @@ const createApp = () => {
 	app.use('/graphql', graphql(new express.Router()));
 	app.use('/v1', v1(new express.Router()));
 	app.use('/', ui(new express.Router()));
+	app.get('/__health', health);
 
 	app.use(({ path }, res) => {
 		logger.info({ path, event: 'PATH_NOT_FOUND_ERROR' }, 'Not found');
@@ -43,8 +44,6 @@ const createApp = () => {
 		logger.error({ error, event: 'UNHANDLED_ERROR' }, 'Unhandled server error');
 		next(error);
 	});
-
-	app.get('/__health', health);
 
 	return app;
 };
