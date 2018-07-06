@@ -8,7 +8,7 @@ const callApiGatewayCheck = async () => {
 			'x-api-key': process.env.FT_API_GATEWAY_KEY,
 			'client-id': `HEALTHCHECK_FT_API_GATEWAY`
 		},
-		url: process.env.FT_API_GATEWAY_URL,
+		url: `${process.env.FT_API_GATEWAY_URL}/__gtg`,
 		type: 'FT Api Gateway'
 	});
 

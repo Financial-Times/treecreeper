@@ -7,7 +7,7 @@ const callApiHerokuCheck = async () => {
 			api_key: process.env.API_KEY,
 			'client-id': `HEALTHCHECK_HEROKU`
 		},
-		url: process.env.HEROKU_API_URL,
+		url: `${process.env.HEROKU_API_URL}/__gtg`,
 		type: 'Heroku'
 	});
 	return {
