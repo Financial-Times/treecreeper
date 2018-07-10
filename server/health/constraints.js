@@ -79,21 +79,30 @@ const constraintsCheck = async () => {
 						} ) ASSERT exists(n.code)`;
 					}
 				);
+				logger.error(
+					{
+						event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
+						healthCheckName: 'CONSTRAINTS',
+						uniqueConstraintQueries,
+						propertyConstraintQueries
+					},
+					'Constraints healthcheck ok'
+				);
 				return {
 					lastCheckOk: false,
 					lastCheckTime: new Date().toUTCString(),
-					lastCheckOutput: stripIndents`Database is missing required constraints`,
+					lastCheckOutput: 'Database is missing required constraints',
 					panicGuide: stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
 						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`
 				};
 			}
 		}
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
 				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
 				healthCheckName: 'CONSTRAINTS',
-				err
+				error
 			},
 			'Healthcheck failed'
 		);
@@ -101,7 +110,7 @@ const constraintsCheck = async () => {
 			lastCheckOk: false,
 			lastCheckTime: new Date().toUTCString(),
 			lastCheckOutput: stripIndents`Error retrieving database constraints: ${
-				err.message ? err.message : err
+				error.message ? error.message : error
 			}`,
 			panicGuide:
 				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName: "CONSTRAINTS"`'

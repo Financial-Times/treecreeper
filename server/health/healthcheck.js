@@ -14,8 +14,8 @@ module.exports = async (check, func, type) => {
 	return {
 		getStatus: () => ({
 			ok: lastStatus.lastCheckOk,
-			checkOutput: lastStatus.lastCheckTime,
-			lastUpdated: lastStatus.lastCheckOutput,
+			checkOutput: lastStatus.lastCheckOutput,
+			lastUpdated: lastStatus.lastCheckTime,
 			id: lastStatus.id,
 			name: lastStatus.name,
 			businessImpact: lastStatus.businessImpact,

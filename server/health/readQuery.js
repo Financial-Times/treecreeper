@@ -20,12 +20,12 @@ const runQueryCheck = async () => {
 		} else {
 			throw `Error retrieving database results: no results found!`;
 		}
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
 				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
 				healthCheckName: 'READ_QUERY',
-				err
+				error
 			},
 			'Healthcheck failed'
 		);
@@ -33,7 +33,7 @@ const runQueryCheck = async () => {
 			lastCheckOk: false,
 			lastCheckTime: new Date().toUTCString(),
 			lastCheckOutput: `Bad response when trying to run a cypher query to the biz-ops-api's neo4j instance: ${
-				err.message ? err.message : err
+				error.message ? error.message : error
 			}`,
 			panicGuide:
 				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="READ_QUERY'

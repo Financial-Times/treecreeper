@@ -19,12 +19,12 @@ module.exports = async ({ headers, url, type }) => {
 				response.status
 			} `;
 		}
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
 				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
 				healthCheckName: 'API_CALL',
-				err
+				error
 			},
 			'Healthcheck failed'
 		);
@@ -32,7 +32,7 @@ module.exports = async ({ headers, url, type }) => {
 			lastCheckOk: false,
 			lastCheckTime: new Date().toUTCString(),
 			lastCheckOutput: `Bad response when trying to make a call to the Biz-Ops API via ${type} ${
-				err.message ? err.message : err
+				error.message ? error.message : error
 			}`,
 			panicGuide:
 				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="API_CALL"`'
