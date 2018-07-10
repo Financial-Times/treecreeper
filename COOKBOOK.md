@@ -17,7 +17,8 @@ A place to keep examples of what we can do with this API and the underlying data
 
 #### Show me people with a lot of technical systems assigned,
 The following will retrieve all people and list what they are tech leads for - it's left to the consumer to filter based on these
-# Coming soon: ability to filter people by `isTechLead`
+*Coming soon: ability to filter people by `isTechLead`*
+
 ```graphql
 {
 	People {
@@ -53,7 +54,7 @@ The following will retrieve all people and list what they are tech leads for - i
     }
 	}
 }
-
+```
 #### Show me a list of the platinum system's system codes with support contacts
 ```graphql
 {
@@ -79,13 +80,12 @@ The following will retrieve all people and list what they are tech leads for - i
         name
       }
     }
-	}
+  }
 }
 
 ```
 
 ## Cypher Recipes
-
 
 #### Show me high level counters for the population of critical system fields
 ```
