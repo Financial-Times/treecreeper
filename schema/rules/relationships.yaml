@@ -104,12 +104,12 @@ HAS_TEAM:
 
 
 HAS_REPO:
-  type: ONE_TO_ONE
+  type: ONE_TO_MANY
   fromType:
     System:
       graphql:
-        name: repository
-        description: The repository which stores the systems source code
+        name: repositories
+        description: The repositories which store the system's source code
   toType:
     Repository:
       graphql:
