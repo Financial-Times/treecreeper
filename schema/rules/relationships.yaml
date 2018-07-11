@@ -109,7 +109,7 @@ HAS_REPO:
     System:
       graphql:
         name: repositories
-        description: The repositories which stores the systems source code
+        description: The repositories which store the system's source code
   toType:
     Repository:
       graphql:
