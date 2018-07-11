@@ -7,7 +7,6 @@ const outputs = require('./output');
 const { executeQuery } = require('../db-connection');
 
 const constraintsCheck = async () => {
-
 	//FIXME: Could this be done better using arr.reduce or map and filter
 	const missingUniqueConstraints = [];
 	const missingPropertyConstraints = [];
