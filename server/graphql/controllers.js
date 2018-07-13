@@ -9,6 +9,11 @@ const DEFAULT_QUERY = `{
     name
     serviceTier
     primaryURL
+    stakeholders {
+      name
+      slack
+      email
+    }
     supportedByTeam {
       name
       slack
