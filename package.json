@@ -26,7 +26,8 @@
 		"vault:read": "vault read --format json  /secret/teams/$npm_package_team/$npm_package_name/development",
 		"vault:env": "node -pe 'const { data } = JSON.parse(process.argv[1]); Object.keys(data).reduce((env, key) => { env += `${key}=${data[key]}\n`; return env}, \"\")' \"$(npm --silent run vault:read)\" > .env",
 		"precommit": "node_modules/.bin/secret-squirrel",
-		"commitmsg": "node_modules/.bin/secret-squirrel-commitmsg"
+		"commitmsg": "node_modules/.bin/secret-squirrel-commitmsg",
+		"test:perfomance": "docker-compose -f scripts/load-testing/statsd/docker-compose.yaml up -d && DEBUG=plugins:statsd artillery run -v '{\"api_key\": \"$LOAD_TEST_API_KEY\"}' scripts/load-testing/readQueries/heroku-rampup.yaml && docker-compose -f scripts/load-testing/statsd/docker-compose.yaml down"
 	},
 	"nyc": {
 		"exclude": [
@@ -77,6 +78,7 @@
 	},
 	"devDependencies": {
 		"@financial-times/secret-squirrel": "^2.8.0",
+		"artillery": "^1.6.0-22",
 		"casual": "^1.5.19",
 		"chai": "^4.1.2",
 		"dotenv": "^5.0.1",

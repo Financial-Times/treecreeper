@@ -2,8 +2,8 @@ config:
   target: 'https://biz-ops-staging.api.ft.com'
   plugins:
       statsd:
-          host: graphite.ft.com
-          port: 2003
+          host: localhost
+          port: 8125
           prefix: biz-ops-api.load.
   phases:
     - duration: 120
