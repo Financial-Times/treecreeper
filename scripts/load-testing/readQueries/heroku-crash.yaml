@@ -1,0 +1,55 @@
+config:
+  target: 'https://biz-ops-staging.api.ft.com'
+  phases:
+    - duration: 60
+      arrivalRate: 1000
+      name: 'Crash application'
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      api_key: {{api_key}}
+      client-id: "load-testing"
+scenarios:
+  - name: "GraphQL query that returns a list of all the systems and their corresponding properties."
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Systems { code name description primaryURL systemType serviceTier serviceType hostPlatform containsPersonalData containsSensitiveData lifecycleStage SF_ID } }"
+  - name: "GraphQL query that returns the url of all the healthchecks that are live."
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{Healthchecks (isLive: true) { url }}"
+  - name: "GraphQL query that returns a list of all the teams that are active and their corresponding properties."
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Teams (isActive:true) { code name email slack phone isActive supportRota contactPref }}"
+  - name: "GraphQL query that finds the team 'Service Desk' by name and returns all of its properties."
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Team (name: \"Service Desk\") { email slack phone isActive supportRota contactPref }}"
+  - name: "GraphQL query that returns a list of all products that have a Bronze serviceTier level."
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Products (serviceTier: Bronze) { code purpose name serviceTier primaryURL lifecycleStage } }"
+  - name: "GraphQL query that returns a list of repositories that are set to private."
+    weight: 2
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Repositories (isPrivate: true) { code name url vcsID sshUrl isPrivate isArchived description mostRecentCircleCIPlatform createdAt pushedAt shortDescriptionHTML projectName projectUrl } }"
+  - name: "GraphQL query that returns a list of platinum system's system codes with support contacts"
+    flow:
+    - post:
+        url: "/graphql"
+        json:
+            query: "{ Systems (serviceTier: Platinum) { code name supportedByTeam { name email phone slack } supportedBySupplier { name email phone } } }"
