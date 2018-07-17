@@ -1,2 +1,2 @@
-web: n-cluster server/app.js
+web: nodemon server/app.js
 snapshot: node scripts/snapshot.js
