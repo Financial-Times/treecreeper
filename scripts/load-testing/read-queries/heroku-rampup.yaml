@@ -4,56 +4,59 @@ config:
       statsd:
           host: localhost
           port: 8125
-          prefix: biz-ops-api.load.
+          prefix: load.
   phases:
     - duration: 120
       arrivalRate: 25
       name: 'Ramp up application'
-  defaults:
-    headers:
-      Content-Type: "application/json"
-      api_key: {{api_key}}
-      client-id: "load-testing"
+  processor: "../before-request.js"
 scenarios:
   - name: "GraphQL query returns a list of all the systems and their corresponding properties."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Systems { code name description primaryURL systemType serviceTier serviceType hostPlatform containsPersonalData containsSensitiveData lifecycleStage SF_ID } }"
   - name: "GraphQL query that returns the url of all the healthchecks that are live."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{Healthchecks (isLive: true) { url }}"
   - name: "GraphQL query that returns a list of all the teams that are active and their corresponding properties."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Teams (isActive:true) { code name email slack phone isActive supportRota contactPref }}"
   - name: "GraphQL query that finds the team 'Service Desk' by name and returns all of its properties."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Team (name: \"Service Desk\") { email slack phone isActive supportRota contactPref }}"
   - name: "GraphQL query that returns a list of all products that have a serviceTier level equal to Bronze."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Products (serviceTier: Bronze) { code purpose name serviceTier primaryURL lifecycleStage } }"
   - name: "GraphQL query that returns a list of repositories that are set to private."
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Repositories (isPrivate: true) { code name url vcsID } }"
   - name: "GraphQL query that returns a list of platinum system's system codes with support contacts"
     flow:
     - post:
         url: "/graphql"
+        beforeRequest: "setHeaders"
         json:
             query: "{ Systems (serviceTier: Platinum) { code name supportedByTeam { name email phone slack } supportedBySupplier { name email phone } } }"
