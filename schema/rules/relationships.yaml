@@ -61,18 +61,19 @@ HAS_PRODUCT_OWNER:
         graphql:
           name: ownedProducts
           description: Products the person is a product owner for
-  - type: MANY_TO_MANY
-    fromType:
-      System:
-        graphql:
-          name: productOwners
-          description: The system's product owner
-    toType:
-      Person:
-        graphql:
-          name: ownedSystems
-          description: Systems the person is a product owner for
 
+HAS_STAKEHOLDER:
+  type: MANY_TO_MANY
+  fromType:
+    System:
+      graphql:
+        name: stakeholders
+        description: The system's stakeholders
+  toType:
+    Person:
+      graphql:
+        name: stakeholderFor
+        description: Systems the person is a stakeholder for
 
 HAS_TEAM:
   -
