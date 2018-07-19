@@ -130,58 +130,31 @@ MONITORED_BY:
         name: monitors
         description: The systems which the healthcheck monitors
 
-
 DELIVERED_BY:
-  -
-    type: MANY_TO_ONE
-    fromType:
-      System:
-        graphql:
-          name: deliveredByTeam
-          description: The team which delivers the system
-    toType:
-      Team:
-        graphql:
-          name: delivers
-          description: The systems the team delivers
-  -
-    type: MANY_TO_ONE
-    fromType:
-      System:
-        graphql:
-          name: deliveredBySupplier
-          description: The supplier which delivers the system
-    toType:
-      Supplier:
-        graphql:
-          name: delivers
-          description: The systems the supplier delivers
+  type: MANY_TO_ONE
+  fromType:
+    System:
+      graphql:
+        name: deliveredBy
+        description: The team which delivers the system
+  toType:
+    Team:
+      graphql:
+        name: delivers
+        description: The systems the team delivers
 
 SUPPORTED_BY:
-  -
-    type: MANY_TO_ONE
-    fromType:
-      System:
-        graphql:
-          name: supportedByTeam
-          description: The team which supports the system
-    toType:
-      Team:
-        graphql:
-          name: supports
-          description: The systems the team supports
-  -
-    type: MANY_TO_ONE
-    fromType:
-      System:
-        graphql:
-          name: supportedBySupplier
-          description: The supplier which supports the system
-    toType:
-      Supplier:
-        graphql:
-          name: supports
-          description: The systems the supplier supports
+  type: MANY_TO_ONE
+  fromType:
+    System:
+      graphql:
+        name: supportedBy
+        description: The team which supports the system
+  toType:
+    Team:
+      graphql:
+        name: supports
+        description: The systems the team supports
 
 KNOWN_ABOUT_BY:
   type: MANY_TO_MANY
