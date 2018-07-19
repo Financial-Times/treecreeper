@@ -202,6 +202,14 @@ DEPENDS_ON:
           description: Products which depend on this system
           recursiveName: recursiveDependentProducts
           recursiveDescription: The products which depend on this system, either directly or indirectly
+  -
+    type: MANY_TO_MANY
+    fromType:
+      # deliberately hidden from graphql
+      Product:
+    toType:
+      # deliberately hidden from graphql
+      Product:
 
 STORED_IN:
   type: MANY_TO_ONE
