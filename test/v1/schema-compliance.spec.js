@@ -189,21 +189,38 @@ describe('node attributes schema compliance', () => {
 				properties: {
 					prop: {
 						type: 'MyEnum'
+					},
+					prop2: {
+						type: 'MyMappingEnum'
 					}
 				}
 			},
 			{
 				MyEnum: {
 					options: ['kittiwake', 'guillemot']
+				},
+				MyMappingEnum: {
+					options: {
+						bear: 'grylls',
+						ray: 'winstone'
+					}
 				}
 			}
 		);
-		it('accept value defined in the enum', () => {
+		it('accept value defined in a simple enum', () => {
 			expect(() => validator('Thing', { prop: 'kittiwake' })).not.to.throw();
 		});
 
-		it('not accept value not defined in the enum', () => {
+		it('not accept value not defined in a simple enum', () => {
 			expect(() => validator('Thing', { prop: 'fulmar' })).to.throw();
+		});
+
+		it('accept value defined in a mapping enum', () => {
+			expect(() => validator('Thing', { prop2: 'bear' })).not.to.throw();
+		});
+
+		it('not accept value not defined in a mapping enum', () => {
+			expect(() => validator('Thing', { prop2: 'fulmar' })).to.throw();
 		});
 	});
 });
