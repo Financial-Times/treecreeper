@@ -1,4 +1,8 @@
-const { relationshipsSchema, typesSchema } = require('../../schema');
+const {
+	relationshipsSchema,
+	typesSchema,
+	enumsSchema
+} = require('../../schema');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const typesSchemaMap = typesSchema.reduce(
@@ -50,24 +54,64 @@ const validateNodeType = type => {
 
 const validateNodeAttributes = (type, attributes, throwInfo) => {
 	const typeSchema = typesSchemaMap[type];
-	Object.entries(typeSchema.properties).forEach(([propName, { pattern }]) => {
-		if (
-			pattern &&
-			attributes[propName] &&
-			!pattern.test(attributes[propName])
-		) {
-			if (throwInfo) {
-				throw { pattern };
+	Object.entries(typeSchema.properties).forEach(
+		([propName, { pattern, type }]) => {
+			if (propName in attributes) {
+				const val = attributes[propName];
+				if (type === 'Boolean') {
+					if (typeof val !== 'boolean') {
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must be a Boolean`
+						);
+					}
+				} else if (type === 'Float') {
+					if (!Number.isFinite(val)) {
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must be a finite floating point number`
+						);
+					}
+				} else if (type === 'Int') {
+					if (!Number.isFinite(val) || Math.round(val) !== val) {
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must be a finite integer`
+						);
+					}
+				} else if (type === 'String') {
+					if (typeof val !== 'string') {
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must be a string`
+						);
+					}
+					if (pattern && !pattern.test(val)) {
+						if (throwInfo) {
+							throw { pattern };
+						}
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must match pattern ${pattern}`
+						);
+					}
+				} else if (type in enumsSchema) {
+					if (!enumsSchema[type].options.includes(val)) {
+						throw httpErrors(
+							400,
+							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
+						Must be a valid enum: ${enumsSchema[type].options.join(', ')}`
+						);
+					}
+				}
 			}
-			throw httpErrors(
-				400,
-				`Invalid value \`${
-					attributes[propName]
-				}\` for property \`${propName}\` on type \`${type}\`.
-				Must match pattern ${pattern}`
-			);
 		}
-	});
+	);
 };
 
 const validateCode = (type, code) => {
