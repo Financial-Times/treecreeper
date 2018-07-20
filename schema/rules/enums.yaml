@@ -1,6 +1,7 @@
 CircleCiVersion:
   description: The Circle CI version which is running
   options:
+    # because enum values cannot begin with a number in graphQL
     ONE: '1.0'
     TWO: '2.0'
 SystemLifecycle:

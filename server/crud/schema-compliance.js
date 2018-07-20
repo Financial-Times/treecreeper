@@ -101,14 +101,14 @@ const validateNodeAttributes = (type, attributes, throwInfo) => {
 						);
 					}
 				} else if (type in enumsSchema) {
-					const validKeys = Array.isArray(enumsSchema[type].options)
+					const validVals = Array.isArray(enumsSchema[type].options)
 						? enumsSchema[type].options
-						: Object.keys(enumsSchema[type].options);
-					if (!validKeys.includes(val)) {
+						: Object.values(enumsSchema[type].options);
+					if (!validVals.includes(val)) {
 						throw httpErrors(
 							400,
 							`Invalid value \`${val}\` for property \`${propName}\` on type \`${type}\`.
-						Must be a valid enum: ${enumsSchema[type].options.join(', ')}`
+						Must be a valid enum: ${validVals.join(', ')}`
 						);
 					}
 				}

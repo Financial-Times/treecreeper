@@ -216,11 +216,11 @@ describe('node attributes schema compliance', () => {
 		});
 
 		it('accept value defined in a mapping enum', () => {
-			expect(() => validator('Thing', { prop2: 'bear' })).not.to.throw();
+			expect(() => validator('Thing', { prop2: 'grylls' })).not.to.throw();
 		});
 
 		it('not accept value not defined in a mapping enum', () => {
-			expect(() => validator('Thing', { prop2: 'fulmar' })).to.throw();
+			expect(() => validator('Thing', { prop2: 'ban' })).to.throw();
 		});
 	});
 });
