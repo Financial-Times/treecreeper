@@ -105,17 +105,17 @@ HAS_TEAM:
 
 
 HAS_REPO:
-  type: ONE_TO_ONE
+  type: MANY_TO_MANY
   fromType:
     System:
       graphql:
-        name: repository
-        description: The repository which stores the systems source code
+        name: repositories
+        description: The repositories which store the system's source code
   toType:
     Repository:
       graphql:
-        name: system
-        description: System which the repository holds the source code of
+        name: systems
+        description: Systems which the repository holds source code for
 
 MONITORED_BY:
   type: MANY_TO_MANY
