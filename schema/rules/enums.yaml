@@ -7,11 +7,14 @@ CircleCiVersion:
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:
+    - Requirements #deprecated
+    - Analysis #deprecated
+    - Testing #deprecated
+    - Preproduction
     - Production
-    - Requirements
-    - Retired
-    - Testing
-    - Analysis
+    - Dormant
+    - Retired #deprecated
+    - Decommissioned
 ServiceTier:
   description: A system's support level
   options:
