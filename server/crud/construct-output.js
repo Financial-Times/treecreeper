@@ -10,7 +10,7 @@ const convertIntegersToNumbers = node => {
 	return node;
 };
 
-const constructNode = result => {
+const constructNode = (result, includeRelNames) => {
 	const node = result.records[0].get('node');
 	convertIntegersToNumbers(node);
 	const response = {
@@ -25,14 +25,18 @@ const constructNode = result => {
 			const rel = record.get('relationship');
 			map[rel.type] = map[rel.type] || [];
 
-			map[rel.type].push({
+			const relInstance = {
 				direction: isSameNeo4jInteger(rel.start, node.identity)
 					? 'outgoing'
 					: 'incoming',
 				nodeType: target.labels[0],
-				nodeCode: target.properties.code,
-				nodeName: target.properties.name
-			});
+				nodeCode: target.properties.code
+			};
+			if (includeRelNames) {
+				relInstance.nodeName = target.properties.name;
+			}
+
+			map[rel.type].push({ relInstance });
 			return map;
 		}, {});
 	} else {
