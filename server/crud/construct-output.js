@@ -30,14 +30,14 @@ const constructNode = result => {
 					? 'outgoing'
 					: 'incoming',
 				nodeType: target.labels[0],
-				nodeCode: target.properties.code
+				nodeCode: target.properties.code,
+				nodeName: target.properties.name
 			});
 			return map;
 		}, {});
 	} else {
 		response.relationships = {};
 	}
-
 	return response;
 };
 

@@ -116,6 +116,8 @@ Run the server:
 npm start
 ```
 
+Which will run the app on port 8888. To visit the local version of the api replace `https://api-t.ft.com/biz-ops/...` with `http://local.in.ft.com:8888/...` and set the api_key from the app's environment variables as a header.
+
 Run tests locally:
 
 ```shell
