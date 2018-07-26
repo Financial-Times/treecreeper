@@ -131,14 +131,6 @@ const create = async input => {
 
 const read = async input => {
 	const includeRelNames = input.query.includeRelNames;
-	if (includeRelNames) {
-		logger.info({
-			clientId,
-			date: new Date().toUTCString(),
-			requestId,
-			event: 'REL_NAMES_REQUESTED'
-		});
-	}
 	const { clientId, requestId, nodeType, code, queryParams } = sanitizeInput(
 		input,
 		'READ'
@@ -152,6 +144,14 @@ const read = async input => {
 		code,
 		queryParams
 	});
+	if (includeRelNames) {
+		logger.info({
+			clientId,
+			date: new Date().toUTCString(),
+			requestId,
+			event: 'REL_NAMES_REQUESTED'
+		});
+	}
 
 	const result = await getNodeWithRelationships(nodeType, code);
 

@@ -45,6 +45,7 @@ module.exports = router => {
 	router.use(bodyParsers);
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
+		console.log('--- v1 GET used');
 		logger.info('[APP] node GET', req.params);
 		return nodeCrud
 			.read(
