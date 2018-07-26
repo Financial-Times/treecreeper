@@ -36,7 +36,7 @@ const constructNode = (result, includeRelNames) => {
 				relInstance.nodeName = target.properties.name;
 			}
 
-			map[rel.type].push({ relInstance });
+			map[rel.type].push(relInstance);
 			return map;
 		}, {});
 	} else {
