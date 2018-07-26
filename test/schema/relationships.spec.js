@@ -33,35 +33,36 @@ describe('schema - relationships', () => {
 						expect(Object.keys(node)[0]).to.be.oneOf(validTypes);
 					});
 
-					it('defines recursive or single level graphql properties', () => {
-						const conf = Object.values(node)[0].graphql;
+					if (Object.values(node)[0]) {
+						it('defines recursive or single level graphql properties', () => {
+							const conf = Object.values(node)[0].graphql;
+							expect(!!(conf.name || conf.recursiveName)).to.be.true;
+						});
 
-						expect(!!(conf.name || conf.recursiveName)).to.be.true;
-					});
-
-					if (Object.values(node)[0].graphql.recursiveName) {
-						it('uses valid graphql recursive property name', () => {
-							expect(Object.values(node)[0].graphql.recursiveName).to.match(
-								ATTRIBUTE_NAME
-							);
-						});
-						it('has graphql recursiveDescription', () => {
-							expect(
-								Object.values(node)[0].graphql.recursiveDescription
-							).to.be.a('string');
-						});
-					}
-					if (Object.values(node)[0].graphql.name) {
-						it('uses valid graphql property name', () => {
-							expect(Object.values(node)[0].graphql.name).to.match(
-								ATTRIBUTE_NAME
-							);
-						});
-						it('has graphql description', () => {
-							expect(Object.values(node)[0].graphql.description).to.be.a(
-								'string'
-							);
-						});
+						if (Object.values(node)[0].graphql.recursiveName) {
+							it('uses valid graphql recursive property name', () => {
+								expect(Object.values(node)[0].graphql.recursiveName).to.match(
+									ATTRIBUTE_NAME
+								);
+							});
+							it('has graphql recursiveDescription', () => {
+								expect(
+									Object.values(node)[0].graphql.recursiveDescription
+								).to.be.a('string');
+							});
+						}
+						if (Object.values(node)[0].graphql.name) {
+							it('uses valid graphql property name', () => {
+								expect(Object.values(node)[0].graphql.name).to.match(
+									ATTRIBUTE_NAME
+								);
+							});
+							it('has graphql description', () => {
+								expect(Object.values(node)[0].graphql.description).to.be.a(
+									'string'
+								);
+							});
+						}
 					}
 				};
 				normalisedDefinitions.forEach(({ type, fromType, toType }) => {
