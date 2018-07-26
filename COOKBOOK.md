@@ -34,8 +34,8 @@ The following will retrieve all people and list what they are tech leads for - i
 ```graphql
 {
 	System (code: "upp-mccm") {
-		supportedByTeam {
-      deliveryLead {
+		deliveredBy {
+      productOwner {
         name
       }
     }
@@ -61,19 +61,17 @@ The following will retrieve all people and list what they are tech leads for - i
 	Systems (serviceTier: Platinum) {
 		code
 		name
-    supportedByTeam {
+    supportedBy {
       name
+      isThirdParty
       email
       phone
       slack
     }
-    supportedBySupplier {
+    deliveredBy {
       name
-      email
-      phone
-    }
-    ownedBy {
-      deliveryLead {
+      isThirdParty
+      productOwner {
         name
       }
       techLead {

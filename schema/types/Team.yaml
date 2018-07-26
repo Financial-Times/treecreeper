@@ -28,6 +28,10 @@ properties:
     type: Boolean
     canFilter: true
     description: Whether or not the team is still in existence
+  isThirdParty:
+    type: Boolean
+    canFilter: true
+    description: Whether or not the team is a supplier
   supportRota:
     type: String
     description: Url linking to details of the system's support rota
