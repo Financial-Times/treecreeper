@@ -42,10 +42,10 @@ class EventLogWriter {
 
 		return this.kinesisClient.putRecord(
 			addLegacyAttributes(data, {
-				event: event.toUpperCase(),
+				event: event,
 				action,
 				code: code,
-				type: type.toLowerCase(),
+				type: type,
 				relationship,
 				link: `/api/${encodeURIComponent(type)}/${encodeURIComponent(code)}`,
 				time: Math.floor(Date.now() / 1000)

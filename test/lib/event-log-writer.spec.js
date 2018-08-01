@@ -54,7 +54,7 @@ describe('Event log writer', () => {
 		expect(call).to.have.property('value', givenCode);
 	});
 
-	it('should add the upper cased event', async () => {
+	it('should add the event', async () => {
 		const givenValue = 'updated_thing';
 		await eventLogWriter.sendEvent(
 			Object.assign({}, defaultEvent, {
@@ -62,9 +62,7 @@ describe('Event log writer', () => {
 			})
 		);
 
-		expect(stubKinesis.putRecord.getCall(0).args[0].event).to.equal(
-			'UPDATED_THING'
-		);
+		expect(stubKinesis.putRecord.getCall(0).args[0].event).to.equal(givenValue);
 	});
 
 	it('should add the action', async () => {
@@ -91,7 +89,7 @@ describe('Event log writer', () => {
 		expect(stubKinesis.putRecord.getCall(0).args[0].code).to.equal(givenValue);
 	});
 
-	it('should add the type in lower case', async () => {
+	it('should add the type', async () => {
 		const givenValue = 'RepositorY';
 		await eventLogWriter.sendEvent(
 			Object.assign({}, defaultEvent, {
@@ -100,7 +98,7 @@ describe('Event log writer', () => {
 		);
 
 		expect(stubKinesis.putRecord.getCall(0).args[0].type).to.equal(
-			'repository'
+			'RepositorY'
 		);
 	});
 
