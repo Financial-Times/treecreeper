@@ -32,7 +32,7 @@ const DEFAULT_QUERY = `{
     knownAboutBy {
       name
     }
-    repository {
+    repositories {
       url
       mostRecentCircleCIPlatform
       storedIn {
