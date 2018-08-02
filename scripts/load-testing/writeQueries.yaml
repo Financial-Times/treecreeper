@@ -1,0 +1,60 @@
+config:
+  target: 'http://localhost:8888'
+  plugins:
+      statsd:
+          host: localhost
+          port: 8125
+          prefix: load.
+  phases:
+    - duration: 120
+      arrivalRate: 10
+      name: 'Warm up application'
+  processor: "./before-request.js"
+  payload:
+    -
+      path: "./lib/exportToCSV/system.csv"
+      fields:
+          - "primaryNode"
+          - "code"
+          - "url"
+          - "serviceTier"
+          - "lifecycleStage"
+          - "relationshipName"
+          - "direction"
+          - "nodeType"
+          - "nodeCode"
+      order: "sequence"
+    -
+      path: "./lib/exportToCSV/team.csv"
+      fields:
+          - "primaryNode"
+          - "code"
+          - "contactType"
+          - "url"
+          - "isThirdParty"
+          - "isActive"
+          - "email"
+          - "slack"
+          - "relationshipName"
+          - "direction"
+          - "nodeType"
+          - "nodeCode"
+      order: "sequence"
+    -
+      path: "./lib/exportToCSV/group.csv"
+      fields:
+          - "primaryNode"
+          - "code"
+          - "url"
+          - "isActive"
+          - "relationshipName"
+          - "direction"
+          - "nodeType"
+          - "nodeCode"
+      order: "sequence"
+scenarios:
+  - name: "Request to create a new system node with properties."
+    flow:
+    - post:
+        url: "{{ url }}"
+        beforeRequest: ["setHeaders", "setCSVToJSONBody"]
