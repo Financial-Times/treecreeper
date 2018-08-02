@@ -49,6 +49,30 @@ const nodes = Object.freeze([
 			code: 'test-group',
 			foo: 'bar3'
 		})
+	}),
+	Object.freeze({
+		type: 'Team',
+		node: Object.freeze({
+			code: 'test-team-nodename',
+			foo: 'bar1',
+			name: 'Test Team'
+		})
+	}),
+	Object.freeze({
+		type: 'Person',
+		node: Object.freeze({
+			code: 'test-person-nodename',
+			foo: 'bar2',
+			name: 'Test Person'
+		})
+	}),
+	Object.freeze({
+		type: 'Group',
+		node: Object.freeze({
+			code: 'test-group-nodename',
+			foo: 'bar3',
+			name: 'Test Group'
+		})
 	})
 ]);
 

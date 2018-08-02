@@ -130,20 +130,33 @@ const create = async input => {
 };
 
 const read = async input => {
-	const { clientId, requestId, nodeType, code } = sanitizeInput(input, 'READ');
+	const includeRelNames = input.query.includeRelNames;
+	const { clientId, requestId, nodeType, code, queryParams } = sanitizeInput(
+		input,
+		'READ'
+	);
 
 	logger.info({
 		event: 'READ_NODE_QUERY',
 		clientId,
 		requestId,
 		nodeType,
-		code
+		code,
+		queryParams
 	});
+	if (includeRelNames) {
+		logger.info({
+			clientId,
+			date: new Date().toUTCString(),
+			requestId,
+			event: 'REL_NAMES_REQUESTED'
+		});
+	}
 
 	const result = await getNodeWithRelationships(nodeType, code);
 
 	queryResultHandlers.missingNode({ result, nodeType, code, status: 404 });
-	return constructOutput(result);
+	return constructOutput(result, includeRelNames);
 };
 
 const update = async input => {

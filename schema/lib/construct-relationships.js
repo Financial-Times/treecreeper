@@ -33,7 +33,7 @@ const buildTwinRelationships = ({
 					nodeType: endNode,
 					cypherName,
 					direction: 'OUT',
-					graphql: obj.graphql,
+					graphql: obj ? obj.graphql : {},
 					hasMany: /MANY$/.test(type)
 				})
 			);
@@ -48,7 +48,7 @@ const buildTwinRelationships = ({
 					nodeType: startNode,
 					cypherName,
 					direction: 'IN',
-					graphql: obj.graphql,
+					graphql: obj ? obj.graphql : {},
 					hasMany: /^MANY/.test(type)
 				})
 			);

@@ -1,16 +1,16 @@
 CircleCiVersion:
   description: The Circle CI version which is running
   options:
+    # because enum values cannot begin with a number in graphQL
     ONE: '1.0'
     TWO: '2.0'
 SystemLifecycle:
   description: The lifecycle stage of a system
   options:
+    - Preproduction
     - Production
-    - Requirements
-    - Retired
-    - Testing
-    - Analysis
+    - Dormant
+    - Decommissioned
 ServiceTier:
   description: A system's support level
   options:

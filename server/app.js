@@ -1,3 +1,4 @@
+const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
 const logger = require('@financial-times/n-logger').default;
@@ -48,7 +49,7 @@ const createApp = () => {
 	return app;
 };
 
-if (require.main === module) {
+if (require.main === module || cluster.isWorker) {
 	const PORT = process.env.PORT || 8888;
 	const app = createApp();
 
