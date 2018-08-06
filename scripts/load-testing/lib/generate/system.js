@@ -1,14 +1,7 @@
 const faker = require('faker');
 
 const generateSystemData = () => {
-	const serviceTier = [
-		'Bronze',
-		'Silver',
-		'Gold',
-		'Platinum',
-		'Retired',
-		'Unsupported'
-	];
+	const serviceTier = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Unsupported'];
 	const lifecycleStage = [
 		'Preproduction',
 		'Production',
