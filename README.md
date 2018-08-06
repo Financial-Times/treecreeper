@@ -132,11 +132,11 @@ npm run test-dev
 
 You do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
 
-If you have not yet retrieved the environment variables from Vault,[Go to the Vault Setup section](#vault-setup).
+If you have not yet retrieved the environment variables from Vault,[please visit the Vault Setup section](#vault-setup).
 
 # Read Queries
 
-Run the following:
+To start the performance test, run the following:
 
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
