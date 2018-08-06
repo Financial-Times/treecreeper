@@ -22,6 +22,7 @@ module.exports = {
 			return await session.run(...args);
 		};
 		executeQuery.close = () => session.close();
+
 		return executeQuery;
 	},
 	writeTransaction: async steps => {

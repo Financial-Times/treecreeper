@@ -96,6 +96,7 @@ docker-compose up
 
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
+# Vault Setup
 Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). You will also need to have permission to read the `internal-products` Vault secrets. Ask in the [`#internal-products`](https://financialtimes.slack.com/messages/C40J2GPB6/team/) slack channel and someone should be able to help you.
 
 This allows you to populate environment variables, including secrets, from vault by running the following:
@@ -122,4 +123,86 @@ Run tests locally:
 
 ```shell
 npm run test-dev
+```
+
+
+## Load Testing
+
+# API Key
+
+You do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
+
+If you have not yet retrieved the environment variables from Vault,[Go to the Vault Setup section](#vault-setup).
+
+# Read Queries
+
+Run the following:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
+```
+
+There will be 3 phases to complete:
+ * Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
+ * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+ * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests).
+
+# Write Queries
+
+First, you will need to run:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:generateData
+```
+This will generate the random data that you will need to run your performance test.
+
+Please note that there are separate write scripts for System, Group and Team nodes.
+
+## Systems
+
+In order to start the performance test for system nodes and their corresponding relationships you will need to run:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForSystems
+```
+Again, there will be 3 phases to complete:
+* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
+* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+## Groups
+
+In order to start the performance test for group nodes and their corresponding relationships you will need to run:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForGroups
+```
+Again, there will be 3 phases to complete:
+* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds
+* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+
+## Teams
+
+In order to start the performance test for system nodes and their corresponding relationships you will need to run:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForTeams
+```
+Again, there will be 3 phases to complete:
+* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds
+* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+## Clean Database After Performance Tests
+
+Once the performance test has completed, you will then need to delete all the dummy data created in the database from your write scripts.
+
+To do this, run the following:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:cleanUp
 ```

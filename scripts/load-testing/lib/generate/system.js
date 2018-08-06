@@ -10,11 +10,10 @@ const generateSystemData = () => {
 		'Unsupported'
 	];
 	const lifecycleStage = [
-		'requirements',
-		'analysis',
-		'testing',
-		'production',
-		'retired'
+		'Preproduction',
+		'Production',
+		'Dormant',
+		'Decommissioned'
 	];
 	const relationshipType = [
 		'SUPPORTED_BY',
@@ -37,7 +36,7 @@ const generateSystemData = () => {
 	};
 
 	const generateDataArray = [];
-	const length = 1000;
+	const length = 1500;
 
 	for (let i = 0; i < length; i++) {
 		const code = faker.lorem.word();
@@ -48,7 +47,7 @@ const generateSystemData = () => {
 		generateDataArray.push({
 			primaryNode: 'System',
 			code,
-			url: `/v1/node/System/${code}?upsert=true`,
+			url: `/v1/node/System/${code}?upsert=true&relationshipAction=merge`,
 			serviceTier: serviceTier[Math.floor(Math.random() * serviceTier.length)],
 			lifecyclestage:
 				lifecycleStage[Math.floor(Math.random() * lifecycleStage.length)],

@@ -5,7 +5,7 @@ const writeRestriction = req =>
 
 const readRestriction = req =>
 	!req.get('client-id') ||
-	!/^(cmdb-to-bizop|DROP ALL|(read|test|load-testing)-client-id|(read|test)-relationship-client)$/.test(
+	!/^(cmdb-to-bizop|DROP ALL|(read|test|load-testing)-client-id|(read|test|load-testing)-relationship-client)$/.test(
 		req.get('client-id')
 	);
 

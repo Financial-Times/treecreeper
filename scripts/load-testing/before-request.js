@@ -28,8 +28,6 @@ const setCSVToJSONBody = (requestParams, context, ee, next) => {
 		requestParams.body = JSON.stringify({
 			node: {
 				contactType: context.vars.contactType,
-				isThirdParty: context.vars.isThirdParty,
-				isActive: context.vars.isActive,
 				email: context.vars.email,
 				slack: context.vars.slack
 			},
@@ -46,7 +44,7 @@ const setCSVToJSONBody = (requestParams, context, ee, next) => {
 	} else {
 		requestParams.body = JSON.stringify({
 			node: {
-				isActive: context.vars.isActive
+				code: context.vars.code
 			},
 			relationships: {
 				[context.vars.relationshipName]: [

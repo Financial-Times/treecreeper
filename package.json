@@ -30,8 +30,10 @@
 		"test:load:run": "docker-compose -f scripts/load-testing/statsd/docker-compose.yaml up -d && artillery run scripts/load-testing/$TEST_NAME.yaml && docker-compose -f scripts/load-testing/statsd/docker-compose.yaml down",
 		"test:load:generateData": "node scripts/load-testing/lib/generate/index.js",
 		"test:load:readQueries": "TEST_NAME=readQueries npm run test:load:run",
-		"test:load:writeQueries": "TEST_NAME=writeQueries npm run test:load:run",
-		"test:load:deleteWrites": "node scripts/load-testing/after-request.js"
+		"test:load:writeQueriesForGroups": "TEST_NAME=writeQueriesForGroups npm run test:load:run",
+		"test:load:writeQueriesForSystems": "TEST_NAME=writeQueriesForSystems npm run test:load:run",
+		"test:load:writeQueriesForTeams": "TEST_NAME=writeQueriesForTeams npm run test:load:run",
+		"test:load:cleanUp": "node scripts/load-testing/after-request.js"
 	},
 	"nyc": {
 		"exclude": [

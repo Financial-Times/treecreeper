@@ -1,0 +1,39 @@
+config:
+  target: 'https://biz-ops-staging.api.ft.com'
+  plugins:
+      statsd:
+          host: localhost
+          port: 8125
+          prefix: load.
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: 'Warm up'
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 25
+      name: 'Ramp up'
+    - duration: 1200
+      arrivalRate: 10
+      name: 'Cruise'
+  processor: "./before-request.js"
+  payload:
+    -
+      path: "./lib/exportToCSV/system.csv"
+      fields:
+          - "primaryNode"
+          - "code"
+          - "url"
+          - "serviceTier"
+          - "lifecycleStage"
+          - "relationshipName"
+          - "direction"
+          - "nodeType"
+          - "nodeCode"
+      order: "sequence"
+scenarios:
+  - name: "Request to create a system node with a relationship to another node"
+    flow:
+      - patch:
+          url: "{{ url }}"
+          beforeRequest: ["setHeaders", "setCSVToJSONBody"]

@@ -46,6 +46,6 @@ When increasing the script to 25 RPS, we got the following metrics:
 - We have now narrowed down the issue. It is either to do with the number of cores on the server that causes the CPU to be hitting 100% or, it is a network I/O bound issue so when the DB results are queued for processing by the CPU, if i/o is limited this queue will back up, eventually causing [what looks like] a struggling CPU.
 
 # Discovery- 31/08/2018
-- This performance issue has now disappeared both in staging and production.
-- GrapheneDB support also ran the same performance test and could not replicate the performance issue.
 - We are now able to make 25 RPS and the median latency has significantly decreased from 30000ms to 999ms.
+- This performance issue has disappeared both in staging and production.
+- GrapheneDB support were also unable to replicate the issue.
