@@ -128,76 +128,48 @@ npm run test-dev
 
 ## Load Testing
 
-# API Key
+### API Key
 
 You do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
 
 If you have not yet retrieved the environment variables from Vault,[please visit the Vault Setup section](#vault-setup).
 
-# Read Queries
-
-To start the performance test, run the following:
-
-```shell
- LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
-```
-
-There will be 3 phases to complete:
- * Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
- * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
- * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
-
-Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests).
-
-# Write Queries
+### Setup for Load Testing
 
 First, you will need to run:
 
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:generateData
 ```
-This will generate the random data that you will need to run your performance test.
+This will generate the random data that you will need to run your performance tests.
 
-Please note that there are separate write scripts for System, Group and Team nodes.
+### Running Load Tests
 
-## Systems
+There are 4 different types of load test that can be run - use one of the following commands:
 
-In order to start the performance test for system nodes and their corresponding relationships you will need to run:
+```shell
+LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
+```
 
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForSystems
 ```
-Again, there will be 3 phases to complete:
-* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
-* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
-* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
-
-## Groups
-
-In order to start the performance test for group nodes and their corresponding relationships you will need to run:
 
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForGroups
 ```
-Again, there will be 3 phases to complete:
-* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds
-* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
-* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
-
-
-## Teams
-
-In order to start the performance test for system nodes and their corresponding relationships you will need to run:
 
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForTeams
 ```
-Again, there will be 3 phases to complete:
-* Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds
-* Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
-* Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+There will be 3 phases to complete for each test:
+ * Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
+ * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+ * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
 
-## Clean Database After Performance Tests
+Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests).
+
+### Clean Database After Load Testing Writes
 
 Once the performance test has completed, you will then need to delete all the dummy data created in the database from your write scripts.
 

@@ -33,7 +33,7 @@ config:
           - "nodeCode"
      order: "sequence"
 scenarios:
-  - name: "Request to create a system node with a relationship to another node"
+  - name: "Request to create a team node with a relationship to another node"
     flow:
       - patch:
           url: "{{ url }}"
