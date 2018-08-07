@@ -130,7 +130,7 @@ npm run test-dev
 
 ### API Key
 
-You do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
+The load tests are currently setup to run against the staging ENV and that's the API key required. Please note that you do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
 
 If you have not yet retrieved the environment variables from Vault,[please visit the Vault Setup section](#vault-setup).
 
@@ -167,11 +167,9 @@ There will be 3 phases to complete for each test:
  * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
  * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
 
-Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests).
+Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests). The config for the grafana setup can be found in scripts/load-testing/lib/statsd/docker-compose.yaml file.
 
-### Clean Database After Load Testing Writes
-
-Once the performance test has completed, you will then need to delete all the dummy data created in the database from your write scripts.
+After completing the performance test for write scripts, all the dummy data created in the database will be deleted as part of the command you ran above. However, if this fails and you would like to run the cleanUp script separate from the performance test, you can run the following:
 
 To do this, run the following:
 
