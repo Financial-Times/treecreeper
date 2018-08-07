@@ -30,10 +30,10 @@
 		"test:load:run": "docker-compose -f scripts/load-testing/statsd/docker-compose.yaml up -d && artillery run scripts/load-testing/$TEST_NAME.yaml && docker-compose -f scripts/load-testing/statsd/docker-compose.yaml down",
 		"test:load:generateData": "node scripts/load-testing/lib/generate/index.js",
 		"test:load:readQueries": "TEST_NAME=readQueries npm run test:load:run",
-		"test:load:writeQueriesForGroups": "TEST_NAME=writeQueriesForGroups npm run test:load:run",
-		"test:load:writeQueriesForSystems": "TEST_NAME=writeQueriesForSystems npm run test:load:run",
-		"test:load:writeQueriesForTeams": "TEST_NAME=writeQueriesForTeams npm run test:load:run",
-		"test:load:cleanUp": "node scripts/load-testing/after-request.js"
+		"test:load:writeQueriesForGroups": "TEST_NAME=writeQueriesForGroups npm run test:load:run && node scripts/load-testing/clean-up.js",
+		"test:load:writeQueriesForSystems": "TEST_NAME=writeQueriesForSystems npm run test:load:run && node scripts/load-testing/clean-up.js",
+		"test:load:writeQueriesForTeams": "TEST_NAME=writeQueriesForTeams npm run test:load:run && node scripts/load-testing/clean-up.js",
+		"test:load:cleanUp": "node scripts/load-testing/clean-up.js"
 	},
 	"nyc": {
 		"exclude": [
@@ -71,8 +71,6 @@
 		"date-fns": "^1.29.0",
 		"express": "^4.16.3",
 		"express-async-errors": "^3.0.0",
-		"faker": "^4.1.0",
-		"fs": "0.0.1-security",
 		"graphql": "^0.13.2",
 		"graphql-server-express": "^1.4.0",
 		"graphql-tools": "^3.0.1",
@@ -95,6 +93,7 @@
 		"eslint-config-origami-component": "^1.0.0",
 		"eslint-config-prettier": "~2.9.0",
 		"eslint-plugin-prettier": "~2.6.1",
+		"faker": "^4.1.0",
 		"husky": "^0.14.3",
 		"mocha": "^5.1.1",
 		"nodemon": "^1.17.4",
