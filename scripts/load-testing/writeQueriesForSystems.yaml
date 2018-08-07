@@ -19,7 +19,7 @@ config:
   processor: "./setup.js"
   payload:
     -
-      path: "./lib/exportToCSV/system.csv"
+      path: "./lib/exportToCSV/System.csv"
       fields:
           - "primaryNode"
           - "code"

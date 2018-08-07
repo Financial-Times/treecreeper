@@ -19,7 +19,7 @@ config:
   processor: "./setup.js"
   payload:
     -
-      path: "./lib/exportToCSV/team.csv"
+      path: "./lib/exportToCSV/Team.csv"
       fields:
           - "primaryNode"
           - "code"
