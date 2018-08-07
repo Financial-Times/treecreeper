@@ -16,11 +16,10 @@ const exportToCSV = () => {
 			console.log('file already exists');
 		} else {
 			const array = generateData[nodeType];
-			const header = Object.keys(array[0]).join(',');
 			const data = array.map(object => {
 				return Object.values(object).join(',');
 			});
-			const dataToCSV = [header, ...data].join('\n');
+			const dataToCSV = [...data].join('\n');
 			fs.writeFileSync(fileName, dataToCSV, err => {
 				if (err) throw err;
 			});

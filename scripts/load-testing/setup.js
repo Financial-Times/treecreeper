@@ -2,7 +2,7 @@ const setHeaders = (requestParams, context, ee, next) => {
 	requestParams.headers = {
 		'Content-Type': 'application/json',
 		api_key: process.env.LOAD_TEST_API_KEY,
-		'client-id': 'biz-ops-load-test'
+		'client-id': 'test-client-id'
 	};
 	return next();
 };
