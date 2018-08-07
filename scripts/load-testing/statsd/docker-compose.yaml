@@ -8,7 +8,7 @@ services:
       - "8126:8126"
     environment:
       GRAPHITE_PORT_2003_TCP_PORT: 2003
-      GRAPHITE_PORT_2003_TCP_ADDR: graphite.ft.com
+      GRAPHITE_PORT_2003_TCP_ADDR: graphitev2.ft.com
       STATSD_PORT: 8125
       GRAPHITE_GLOBAL_PREFIX: 'biz-ops-api.'
       STATSD_DEBUG: 'true'
