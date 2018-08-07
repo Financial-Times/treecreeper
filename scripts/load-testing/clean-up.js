@@ -3,7 +3,7 @@ const logger = require('@financial-times/n-logger').default;
 
 const cleanUp = async () => {
 	const session = driver.session();
-	const cleanDBQuery = `MATCH (n { _createdByClient: "load-testing-client-id" }) DETACH DELETE n`;
+	const cleanDBQuery = `MATCH (n { _createdByClient: "biz-ops-load-test" }) DETACH DELETE n`;
 	try {
 		return await session.run(cleanDBQuery);
 	} catch (err) {
@@ -20,4 +20,3 @@ const cleanUp = async () => {
 };
 
 cleanUp();
-module.exports = cleanUp;

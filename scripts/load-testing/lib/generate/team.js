@@ -21,7 +21,6 @@ const generateTeamData = () => {
 		generateDataArray.push({
 			primaryNode: 'Team',
 			code,
-			contactType: 'Team',
 			url: `/v1/node/Team/${code}?upsert=true&relationshipAction=merge`,
 			isThirdParty: faker.random.boolean,
 			isActive: faker.random.boolean,

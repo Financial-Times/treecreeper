@@ -16,14 +16,13 @@ config:
     - duration: 1200
       arrivalRate: 10
       name: 'Cruise'
-  processor: "./before-request.js"
+  processor: "./setup.js"
   payload:
     -
       path: "./lib/exportToCSV/team.csv"
       fields:
           - "primaryNode"
           - "code"
-          - "contactType"
           - "url"
           - "email"
           - "slack"

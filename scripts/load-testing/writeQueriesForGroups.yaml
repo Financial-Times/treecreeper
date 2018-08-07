@@ -16,8 +16,7 @@ config:
     - duration: 1200
       arrivalRate: 10
       name: 'Cruise'
-      name: 'Warm up application'
-  processor: "./before-request.js"
+  processor: "./setup.js"
   payload:
     -
       path: "./lib/exportToCSV/group.csv"

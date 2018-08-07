@@ -16,7 +16,7 @@ config:
     - duration: 1200
       arrivalRate: 10
       name: 'Cruise'
-  processor: "./before-request.js"
+  processor: "./setup"
 scenarios:
   - name: "GraphQL query that returns a list of all the systems and their corresponding properties."
     flow:
@@ -54,7 +54,6 @@ scenarios:
         json:
             query: "{ Products (serviceTier: Bronze) { code purpose name serviceTier primaryURL lifecycleStage } }"
   - name: "GraphQL query that returns a list of repositories that are set to private."
-    weight: 2
     flow:
     - post:
         url: "/graphql"
