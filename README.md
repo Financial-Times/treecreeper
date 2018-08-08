@@ -96,6 +96,7 @@ docker-compose up
 
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
+# Vault Setup
 Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). You will also need to have permission to read the `internal-products` Vault secrets. Ask in the [`#internal-products`](https://financialtimes.slack.com/messages/C40J2GPB6/team/) slack channel and someone should be able to help you.
 
 This allows you to populate environment variables, including secrets, from vault by running the following:
@@ -122,4 +123,56 @@ Run tests locally:
 
 ```shell
 npm run test-dev
+```
+
+
+## Load Testing
+
+### API Key
+
+The load tests are currently setup to run against the staging ENV and that's the API key required. Please note that you do not need to generate this API key. The LOAD_TEST_API_KEY will be the same as the API_KEY value you pulled down from Vault.
+
+If you have not yet retrieved the environment variables from Vault,[please visit the Vault Setup section](#vault-setup).
+
+### Setup for Load Testing
+
+First, you will need to run:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:generateData
+```
+This will generate the random data that you will need to run your performance tests.
+
+### Running Load Tests
+
+There are 4 different types of load test that can be run - use one of the following commands:
+
+```shell
+LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
+```
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForSystems
+```
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForGroups
+```
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForTeams
+```
+There will be 3 phases to complete for each test:
+ * Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
+ * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+ * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests). The config for the grafana setup can be found in scripts/load-testing/lib/statsd/docker-compose.yaml file.
+
+After completing the performance test for write scripts, all the dummy data created in the database will be deleted as part of the command you ran above. However, if this fails and you would like to run the cleanUp script separate from the performance test, you can run the following:
+
+To do this, run the following:
+
+```shell
+ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:cleanUp
 ```
