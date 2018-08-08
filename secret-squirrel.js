@@ -114,21 +114,21 @@ module.exports = {
 			'LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA', // package-lock.json:8723
 			'eEQ97k66aiEVpNnapVj90', // package-lock.json:8743
 			'j4tCjkF/n89iBNGBMJcR\\+dMUqxgPNgoSs6fVygPi', // package-lock.json:8766
-			"\\+\\+wLYcrP\\+ZK7Zhb63olXZQO8Kb1oSv1Vvpm10yG0",
-			"/TaTFH0B8qNmn\\+6NbI6crLkQonbedViVz7O2w8QV", // package-lock.json
-			"kyEyQEagBC5mBEFlIYvdg", // package-lock.json
-			"69XqVH7D53Vnfgf6mgKO5bp1HVFpWfTJ", // package-lock.json
-			"\\+uITPY0989iXVfKvhwtmJocTaYoc/3khEHmEmvfY", // package-lock.json
-			"SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB", // package-lock.json
-			"gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB", // package-lock.json
-			"\\+Q/GWH5wIG60bpt8CTwBklCSzQdEHmRUgAdEQKxw", // package-lock.json
-			"gUbWqG4dIpJedwwOhe1cvGUq5tGmcTTIRkPiAbyh", // package-lock.json
-			"gUbWqG4dIpJedwwOhe1cvGUq5tGmcTTIRkPiAbyh", // package-lock.json
-			"P1tKYHVSZ6uFo26mtnve4HQFE3koh1UWVkp8YUC\\+", // package-lock.json
-			"y\\+MqvmuHq7TxtkQQQI57bZ/hAU8ZYWBTM74XSmcQ", // package-lock.json
-			"XdVfAjGlDKU2nqoGgycxTndkJ5fdwvWJ", // package-lock.json
-			"5erio2h9jp5CHGwcybmxmVqHmnCBZeewlfJ0pex\\+", // package-lock.json
-			"Y9kPzjGvIZ5jchSlqlCpBW3I82zBBL4z", // package-lock.json
+			'\\+\\+wLYcrP\\+ZK7Zhb63olXZQO8Kb1oSv1Vvpm10yG0',
+			'/TaTFH0B8qNmn\\+6NbI6crLkQonbedViVz7O2w8QV', // package-lock.json
+			'kyEyQEagBC5mBEFlIYvdg', // package-lock.json
+			'69XqVH7D53Vnfgf6mgKO5bp1HVFpWfTJ', // package-lock.json
+			'\\+uITPY0989iXVfKvhwtmJocTaYoc/3khEHmEmvfY', // package-lock.json
+			'SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB', // package-lock.json
+			'gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB', // package-lock.json
+			'\\+Q/GWH5wIG60bpt8CTwBklCSzQdEHmRUgAdEQKxw', // package-lock.json
+			'gUbWqG4dIpJedwwOhe1cvGUq5tGmcTTIRkPiAbyh', // package-lock.json
+			'gUbWqG4dIpJedwwOhe1cvGUq5tGmcTTIRkPiAbyh', // package-lock.json
+			'P1tKYHVSZ6uFo26mtnve4HQFE3koh1UWVkp8YUC\\+', // package-lock.json
+			'y\\+MqvmuHq7TxtkQQQI57bZ/hAU8ZYWBTM74XSmcQ', // package-lock.json
+			'XdVfAjGlDKU2nqoGgycxTndkJ5fdwvWJ', // package-lock.json
+			'5erio2h9jp5CHGwcybmxmVqHmnCBZeewlfJ0pex\\+', // package-lock.json
+			'Y9kPzjGvIZ5jchSlqlCpBW3I82zBBL4z', // package-lock.json
 			'getNeo4jResolverNames', // schema/index.js:30|45, server/graphql/resolvers.js:4|8
 			'tech@lt\\.com' // scripts/load-testing/lib/generate/team.js:28
 		]
