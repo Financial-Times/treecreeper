@@ -33,6 +33,18 @@ const unimplemented = (logMessage, errorMessage) => (req, res) => {
 	);
 };
 
+const requestLog = (type, req, res) =>
+	logger.info(
+		`[APP] ${type}`,
+		Object.assign(
+			{
+				requestId: res.locals.requestId,
+				clientId: res.locals.clientId
+			},
+			req.params
+		)
+	);
+
 module.exports = router => {
 	router.use(timeout('65s'));
 
@@ -45,8 +57,7 @@ module.exports = router => {
 	router.use(bodyParsers);
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
-		console.log('--- v1 GET used');
-		logger.info('[APP] node GET', req.params);
+		requestLog('node GET', req, res);
 		return nodeCrud
 			.read(
 				Object.assign(
@@ -62,7 +73,7 @@ module.exports = router => {
 	});
 
 	router.post('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node POST', req.params);
+		requestLog('node POST', req, res);
 		return nodeCrud
 			.create(
 				Object.assign(
@@ -84,7 +95,7 @@ module.exports = router => {
 	);
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node PATCH', req.params);
+		requestLog('node PATCH', req, res);
 		return nodeCrud
 			.update(
 				Object.assign(
@@ -101,7 +112,7 @@ module.exports = router => {
 	});
 
 	router.delete('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node DELETE', req.params);
+		requestLog('node DELETE', req, res);
 		return nodeCrud
 			.delete(
 				Object.assign(
@@ -118,7 +129,7 @@ module.exports = router => {
 	router.get(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship GET', req.params);
+			requestLog('relationship GET', req, res);
 			return relationshipCrud
 				.read(
 					Object.assign(
@@ -136,7 +147,7 @@ module.exports = router => {
 	router.post(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship POST', req.params);
+			requestLog('relationship POST', req, res);
 			return relationshipCrud
 				.create(
 					Object.assign(
@@ -161,7 +172,7 @@ module.exports = router => {
 	router.patch(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship PATCH', req.params);
+			requestLog('relationship PATCH', req, res);
 			return relationshipCrud
 				.update(
 					Object.assign(
@@ -181,7 +192,7 @@ module.exports = router => {
 	router.delete(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship DELETE', req.params);
+			requestLog('relationship DELETE', req, res);
 			return relationshipCrud
 				.delete(
 					Object.assign(
