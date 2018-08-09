@@ -81,9 +81,7 @@ Used to modify or create a node, optionally with relationships to other nodes.
 
 * Passing in `null` as the value of any attribute of `node` will delete that attribute
 * The query string `upsert=true` allows the creation of any new nodes needed to create relationships
-* The query string `relationshipAction`, taking the values `replace` or `append` specifies the behaviour when modifying relationships
-  * `replace` - replaces any relationships of the same relationship type as those passed in the request body
-  * `append` - appends the specified relationships to those that already exist
+* The query string `relationshipAction=merge`, allows existing values to be overwritten with new data
 
 | body                   | query                               | initial state                              | status | response type |
 | ---------------------- | ----------------------------------- | ------------------------------------------ | ------ | ------------- |
