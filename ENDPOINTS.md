@@ -83,14 +83,14 @@ Used to modify or create a node, optionally with relationships to other nodes.
 * The query string `upsert=true` allows the creation of any new nodes needed to create relationships
 * The query string `relationshipAction=merge`, allows existing values to be overwritten with new data
 
-| body                   | query                               | initial state                              | status | response type |
-| ---------------------- | ----------------------------------- | ------------------------------------------ | ------ | ------------- |
-| node only              | none                                | absent                                     | 201    | json          |
-| node only              | none                                | existing                                   | 200    | json          |
-| node and relationships | none                                | anything                                   | 400    | none          |
-| node and relationships | `relationshipAction`                | existing primary node, related nodes exist | 200    | json          |
-| node and relationships | `relationshipAction`                | existing primary node and related nodes    | 400    | none          |
-| node and relationships | `relationshipAction`, `upsert=true` | existing primary node and related nodes    | 200    | json          |
+| body                   | query                                     | initial state                              | status | response type |
+| ---------------------- | ----------------------------------------- | ------------------------------------------ | ------ | ------------- |
+| node only              | none                                      | absent                                     | 201    | json          |
+| node only              | none                                      | existing                                   | 200    | json          |
+| node and relationships | none                                      | anything                                   | 400    | none          |
+| node and relationships | `relationshipAction=merge`                | existing primary node, related nodes exist | 200    | json          |
+| node and relationships | `relationshipAction=merge`                | existing primary node and related nodes    | 400    | none          |
+| node and relationships | `relationshipAction=merge`, `upsert=true` | existing primary node and related nodes    | 200    | json          |
 
 ### DELETE
 
