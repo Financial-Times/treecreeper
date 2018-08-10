@@ -81,16 +81,18 @@ Used to modify or create a node, optionally with relationships to other nodes.
 
 * Passing in `null` as the value of any attribute of `node` will delete that attribute
 * The query string `upsert=true` allows the creation of any new nodes needed to create relationships
-* The query string `relationshipAction=merge`, allows existing values to be overwritten with new data
+* The query string `relationshipAction`, taking the values `merge` or `replace` specifies the behaviour when modifying relationships
+  * `replace` - replaces any relationships of the same relationship type as those passed in the request body
+  * `append` - appends the specified relationships to those that already exist
 
-| body                   | query                                     | initial state                              | status | response type |
-| ---------------------- | ----------------------------------------- | ------------------------------------------ | ------ | ------------- |
-| node only              | none                                      | absent                                     | 201    | json          |
-| node only              | none                                      | existing                                   | 200    | json          |
-| node and relationships | none                                      | anything                                   | 400    | none          |
-| node and relationships | `relationshipAction=merge`                | existing primary node, related nodes exist | 200    | json          |
-| node and relationships | `relationshipAction=merge`                | existing primary node and related nodes    | 400    | none          |
-| node and relationships | `relationshipAction=merge`, `upsert=true` | existing primary node and related nodes    | 200    | json          |
+| body                   | query                               | initial state                              | status | response type |
+| ---------------------- | ----------------------------------- | ------------------------------------------ | ------ | ------------- |
+| node only              | none                                | absent                                     | 201    | json          |
+| node only              | none                                | existing                                   | 200    | json          |
+| node and relationships | none                                | anything                                   | 400    | none          |
+| node and relationships | `relationshipAction`                | existing primary node, related nodes exist | 200    | json          |
+| node and relationships | `relationshipAction`                | existing primary node and related nodes    | 400    | none          |
+| node and relationships | `relationshipAction`, `upsert=true` | existing primary node and related nodes    | 200    | json          |
 
 ### DELETE
 
