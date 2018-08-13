@@ -10,6 +10,7 @@ const bodyParsers = [
 ];
 
 module.exports = router => {
+	setContext('endpoint', 'graphql');
 	router.use(timeout('65s'));
 	router.use(security.requireApiAuthOrS3o);
 	router.use(maintenance.disableReads);
