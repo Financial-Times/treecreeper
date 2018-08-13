@@ -24,7 +24,6 @@ const requireClientId = (req, res, next) => {
 
 const requireApiAuthOrS3o = (req, res, next) => {
 	if (!(hasApiKey(req) && req.get('client-id'))) {
-		res.locals.clientId = 's30-user';
 		return s3o.authS3ONoRedirect(req, res, next);
 	}
 	return next();

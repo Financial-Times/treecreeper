@@ -1,8 +1,8 @@
-const logger = require('@financial-times/n-logger').default;
+const { logger } = require('../lib/request-context');
 const { formatError } = require('graphql');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const schema = require('./schema');
-const { driver } = require('../db-connection');
+const { driver } = require('../lib/db-connection');
 
 const DEFAULT_QUERY = `{
   System(code: "dewey") {

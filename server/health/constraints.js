@@ -1,10 +1,10 @@
-const logger = require('@financial-times/n-logger').default;
+const { logger } = require('../lib/request-context');
 const { stripIndents } = require('common-tags');
 const readYaml = require('../../schema/lib/read-yaml');
 const typesSchema = readYaml.directory('./schema/types');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
-const { executeQuery } = require('../db-connection');
+const { executeQuery } = require('../lib/db-connection');
 
 const constraintsCheck = async () => {
 	//FIXME: Could this be done better using arr.reduce or map and filter

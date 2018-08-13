@@ -1,4 +1,4 @@
-const logger = require('@financial-times/n-logger').default;
+const { logger } = require('../lib/request-context');
 const {
 	makeExecutableSchema,
 	addMockFunctionsToSchema

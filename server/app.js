@@ -1,16 +1,22 @@
 const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
-const logger = require('@financial-times/n-logger').default;
 const { ui, graphql, v1 } = require('./routes');
 const { initConstraints } = require('../schema/init-db');
 const health = require('./health');
-
+const {
+	middleware: contextMiddleware,
+	logger
+} = require('./lib/request-context');
+const requestId = require('./middleware/request-id');
+const clientId = require('./middleware/client-id');
 const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
 	const app = express();
-
+	app.use(contextMiddleware);
+	app.use(requestId);
+	app.use(clientId);
 	app.set('case sensitive routing', true);
 	app.set('s3o-cookie-ttl', ONE_HOUR);
 

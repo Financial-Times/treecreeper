@@ -1,10 +1,9 @@
 const bodyParser = require('body-parser');
-const logger = require('@financial-times/n-logger').default;
+const { logger, setContext } = require('../lib/request-context');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const { nodeCrud, relationshipCrud } = require('../crud');
-const requestId = require('../middleware/request-id');
-const clientId = require('../middleware/client-id');
+const maintenance = require('../middleware/maintenance');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -33,31 +32,22 @@ const unimplemented = (logMessage, errorMessage) => (req, res) => {
 	);
 };
 
-const requestLog = (type, req, res) =>
-	logger.info(
-		`[APP] ${type}`,
-		Object.assign(
-			{
-				requestId: res.locals.requestId,
-				clientId: res.locals.clientId
-			},
-			req.params
-		)
-	);
+const requestLog = (endpoint, method, req) => {
+	setContext({ endpoint, method, params: req.params });
+	logger.info(`[APP] ${endpoint} ${method}`);
+};
 
 module.exports = router => {
 	router.use(timeout('65s'));
 
 	router.use(security.requireApiKey);
 	router.use(security.requireClientId);
-	router.use(requestId);
-	router.use(clientId.setClientIdFromHeadersToLocals);
-	router.use(clientId.disableWrites);
-	router.use(clientId.disableReads);
+	router.use(maintenance.disableWrites);
+	router.use(maintenance.disableReads);
 	router.use(bodyParsers);
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node GET', req, res);
+		requestLog('node', 'GET', req, res);
 		return nodeCrud
 			.read(
 				Object.assign(
@@ -73,7 +63,7 @@ module.exports = router => {
 	});
 
 	router.post('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node POST', req, res);
+		requestLog('node', 'POST', req, res);
 		return nodeCrud
 			.create(
 				Object.assign(
@@ -95,7 +85,7 @@ module.exports = router => {
 	);
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node PATCH', req, res);
+		requestLog('node', 'PATCH', req, res);
 		return nodeCrud
 			.update(
 				Object.assign(
@@ -112,7 +102,7 @@ module.exports = router => {
 	});
 
 	router.delete('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node DELETE', req, res);
+		requestLog('node', 'DELETE', req, res);
 		return nodeCrud
 			.delete(
 				Object.assign(
@@ -129,7 +119,7 @@ module.exports = router => {
 	router.get(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship GET', req, res);
+			requestLog('relationship', 'GET', req, res);
 			return relationshipCrud
 				.read(
 					Object.assign(
@@ -147,7 +137,7 @@ module.exports = router => {
 	router.post(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship POST', req, res);
+			requestLog('relationship', 'POST', req, res);
 			return relationshipCrud
 				.create(
 					Object.assign(
@@ -172,7 +162,7 @@ module.exports = router => {
 	router.patch(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship PATCH', req, res);
+			requestLog('relationship', 'PATCH', req, res);
 			return relationshipCrud
 				.update(
 					Object.assign(
@@ -192,7 +182,7 @@ module.exports = router => {
 	router.delete(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship DELETE', req, res);
+			requestLog('relationship', 'DELETE', req, res);
 			return relationshipCrud
 				.delete(
 					Object.assign(

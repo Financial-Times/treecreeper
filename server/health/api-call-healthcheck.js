@@ -1,4 +1,4 @@
-const logger = require('@financial-times/n-logger').default;
+const { logger } = require('../lib/request-context');
 const fetch = require('isomorphic-fetch');
 
 module.exports = async ({ headers, url, type }) => {
