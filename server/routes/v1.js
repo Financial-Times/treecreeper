@@ -47,7 +47,7 @@ module.exports = router => {
 	router.use(bodyParsers);
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node', 'GET', req, res);
+		requestLog('node', 'GET', req);
 		return nodeCrud
 			.read(
 				Object.assign(
@@ -63,7 +63,7 @@ module.exports = router => {
 	});
 
 	router.post('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node', 'POST', req, res);
+		requestLog('node', 'POST', req);
 		return nodeCrud
 			.create(
 				Object.assign(
@@ -85,7 +85,7 @@ module.exports = router => {
 	);
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node', 'PATCH', req, res);
+		requestLog('node', 'PATCH', req);
 		return nodeCrud
 			.update(
 				Object.assign(
@@ -102,7 +102,7 @@ module.exports = router => {
 	});
 
 	router.delete('/node/:nodeType/:code', async (req, res) => {
-		requestLog('node', 'DELETE', req, res);
+		requestLog('node', 'DELETE', req);
 		return nodeCrud
 			.delete(
 				Object.assign(
@@ -119,7 +119,7 @@ module.exports = router => {
 	router.get(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship', 'GET', req, res);
+			requestLog('relationship', 'GET', req);
 			return relationshipCrud
 				.read(
 					Object.assign(
@@ -137,7 +137,7 @@ module.exports = router => {
 	router.post(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship', 'POST', req, res);
+			requestLog('relationship', 'POST', req);
 			return relationshipCrud
 				.create(
 					Object.assign(
@@ -162,7 +162,7 @@ module.exports = router => {
 	router.patch(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship', 'PATCH', req, res);
+			requestLog('relationship', 'PATCH', req);
 			return relationshipCrud
 				.update(
 					Object.assign(
@@ -182,7 +182,7 @@ module.exports = router => {
 	router.delete(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			requestLog('relationship', 'DELETE', req, res);
+			requestLog('relationship', 'DELETE', req);
 			return relationshipCrud
 				.delete(
 					Object.assign(
