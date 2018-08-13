@@ -5,7 +5,7 @@ const schema = require('./schema');
 const { driver } = require('../lib/db-connection');
 
 const DEFAULT_QUERY = `{
-  System(code: "dewey") {
+  System(code: "biz-ops-api") {
     name
     serviceTier
     primaryURL
