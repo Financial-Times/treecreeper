@@ -1,10 +1,9 @@
 const bodyParser = require('body-parser');
-const logger = require('@financial-times/n-logger').default;
+const { logger, setContext } = require('../lib/request-context');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const { nodeCrud, relationshipCrud } = require('../crud');
-const requestId = require('../middleware/request-id');
-const clientId = require('../middleware/client-id');
+const maintenance = require('../middleware/maintenance');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -33,20 +32,22 @@ const unimplemented = (logMessage, errorMessage) => (req, res) => {
 	);
 };
 
+const requestLog = (endpoint, method, req) => {
+	setContext({ endpoint, method, params: req.params });
+	logger.info(`[APP] ${endpoint} ${method}`);
+};
+
 module.exports = router => {
 	router.use(timeout('65s'));
 
 	router.use(security.requireApiKey);
 	router.use(security.requireClientId);
-	router.use(requestId);
-	router.use(clientId.setClientIdFromHeadersToLocals);
-	router.use(clientId.disableWrites);
-	router.use(clientId.disableReads);
+	router.use(maintenance.disableWrites);
+	router.use(maintenance.disableReads);
 	router.use(bodyParsers);
 
 	router.get('/node/:nodeType/:code', async (req, res) => {
-		console.log('--- v1 GET used');
-		logger.info('[APP] node GET', req.params);
+		requestLog('node', 'GET', req);
 		return nodeCrud
 			.read(
 				Object.assign(
@@ -62,7 +63,7 @@ module.exports = router => {
 	});
 
 	router.post('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node POST', req.params);
+		requestLog('node', 'POST', req);
 		return nodeCrud
 			.create(
 				Object.assign(
@@ -84,7 +85,7 @@ module.exports = router => {
 	);
 
 	router.patch('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node PATCH', req.params);
+		requestLog('node', 'PATCH', req);
 		return nodeCrud
 			.update(
 				Object.assign(
@@ -101,7 +102,7 @@ module.exports = router => {
 	});
 
 	router.delete('/node/:nodeType/:code', async (req, res) => {
-		logger.info('[APP] node DELETE', req.params);
+		requestLog('node', 'DELETE', req);
 		return nodeCrud
 			.delete(
 				Object.assign(
@@ -118,7 +119,7 @@ module.exports = router => {
 	router.get(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship GET', req.params);
+			requestLog('relationship', 'GET', req);
 			return relationshipCrud
 				.read(
 					Object.assign(
@@ -136,7 +137,7 @@ module.exports = router => {
 	router.post(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship POST', req.params);
+			requestLog('relationship', 'POST', req);
 			return relationshipCrud
 				.create(
 					Object.assign(
@@ -161,7 +162,7 @@ module.exports = router => {
 	router.patch(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship PATCH', req.params);
+			requestLog('relationship', 'PATCH', req);
 			return relationshipCrud
 				.update(
 					Object.assign(
@@ -181,7 +182,7 @@ module.exports = router => {
 	router.delete(
 		'/relationship/:nodeType/:code/:relationshipType/:relatedType/:relatedCode',
 		async (req, res) => {
-			logger.info('[APP] relationship DELETE', req.params);
+			requestLog('relationship', 'DELETE', req);
 			return relationshipCrud
 				.delete(
 					Object.assign(

@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
-const logger = require('@financial-times/n-logger').default;
-const { executeQuery } = require('../db-connection');
+const { logger } = require('../lib/request-context');
+const { executeQuery } = require('../lib/db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,

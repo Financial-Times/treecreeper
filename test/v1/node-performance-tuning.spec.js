@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { executeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/lib/db-connection');
 const { checkResponse, setupMocks, stubDbTransaction } = require('./helpers');
 const lolex = require('lolex');
 

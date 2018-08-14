@@ -1,6 +1,6 @@
-const logger = require('@financial-times/n-logger').default;
+const { logger } = require('../lib/request-context');
 const { stripIndents } = require('common-tags');
-const { executeQuery } = require('../db-connection');
+const { executeQuery } = require('../lib/db-connection');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
 const runQueryCheck = async () => {

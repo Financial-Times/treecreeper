@@ -1,7 +1,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const logger = require('@financial-times/n-logger').default;
-const { executeQuery, driver } = require('../../server/db-connection');
+const { executeQuery, driver } = require('../../server/lib/db-connection');
 const EventLogWriter = require('../../server/lib/event-log-writer');
 
 const checkResponse = (actual, expected) => {

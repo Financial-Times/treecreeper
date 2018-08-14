@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { setupMocks } = require('./helpers');
 const request = require('../helpers/supertest');
 const sinon = require('sinon');
-const { executeQuery } = require('../../server/db-connection');
+const { executeQuery } = require('../../server/lib/db-connection');
 
 const getValidatorWithSchema = (types, enums) => {
 	return proxyquire('../../server/crud/schema-compliance', {

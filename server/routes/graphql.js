@@ -1,10 +1,9 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
-const clientId = require('../middleware/client-id');
+const maintenance = require('../middleware/maintenance');
 const graphql = require('../graphql/controllers');
-const logger = require('@financial-times/n-logger').default;
-
+const { logger, setContext } = require('../lib/request-context');
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
 	bodyParser.urlencoded({ limit: '8mb', extended: true })
@@ -13,14 +12,13 @@ const bodyParsers = [
 module.exports = router => {
 	router.use(timeout('65s'));
 	router.use(security.requireApiAuthOrS3o);
-	router.use(clientId.disableReads);
+	router.use(maintenance.disableReads);
 	router.use(bodyParsers);
 
 	router.use((req, res, next) => {
+		setContext({ endpoint: 'graphql', method: req.method });
 		logger.info({
 			event: 'GRAPHQL_REQUEST',
-			clientId: req.get('client-id'),
-			requestId: req.get('x-request-id'),
 			body: req.body
 		});
 		next();
