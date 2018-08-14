@@ -52,7 +52,8 @@ const middleware = (req, res, next) => {
 	const eid = asyncHooks.executionAsyncId();
 	contextStore[eid] = {
 		start: Date.now(),
-		path: req.originalUrl
+		path: req.originalUrl,
+		environment: process.env.DEPLOYMENT_STAGE
 	};
 	// must pass the context as the finish event is in (begins?) a
 	// different async execution context
