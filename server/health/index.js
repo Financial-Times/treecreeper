@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
 	});
 
 	const health = {
-		schemaVersion: '1',
+		schemaVersion: 1,
 		name: 'Biz-Ops API',
 		systemCode: 'biz-ops-api',
 		description:
