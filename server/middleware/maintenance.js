@@ -1,5 +1,5 @@
 const writeRestriction = req =>
-	!/^(cmdb-to-bizop|DROP ALL|(delete|update|create|test|biz-ops-load-test)-client-id|(create|delete|update)-relationship-client)$/.test(
+	!/^(cmdb-to-bizop|DROP ALL|(delete|update|create|test|biz-ops-load-test|biz-ops-admin)-client-id|(create|delete|update)-relationship-client)$/.test(
 		req.get('client-id')
 	);
 
