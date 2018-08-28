@@ -37,30 +37,30 @@ properties:
   serviceType:
     type: String
     canFilter: true
-    label: 'Service type'
+    label: Service type
     description: The type of service the system provides
   hostPlatform:
     type: String
     canFilter: true
-    label: 'Host platform'
+    label: Host platform
     description: The platform the service is hosted on, e.g. Heroku
   containsPersonalData:
     type: Boolean
     canFilter: true
-    label: 'Contains personal data'
+    label: Contains personal data
     description: Whether the system contains personal PI2 data
   containsSensitiveData:
     type: Boolean
     canFilter: true
-    label: 'Contains sensitive data'
+    label: Contains sensitive data
     description: Whether the system contains sensitive data
   lifecycleStage:
     type: SystemLifecycle
     canFilter: true
-    label: 'Lifecylce stage'
+    label: Lifecylce stage
     description: The lifecycle stage of the system
   SF_ID:
     type: String
     canFilter: true
-    label: 'Salesforce ID'
+    label: Salesforce ID
     description: ID of the system in salesforce (required for change-logging as of june 2018)
