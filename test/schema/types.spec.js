@@ -49,6 +49,7 @@ describe('schema - types', () => {
 										'required',
 										'canIdentify',
 										'canFilter',
+										'label',
 										'description',
 										'pattern'
 									]);
