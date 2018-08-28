@@ -6,38 +6,47 @@ properties:
     required: true
     unique: true
     canIdentify: true
+    label: 'Code'
     description: 'Unique code/id for this item'
     pattern: NO_SPACES
   name:
     type: String
     canIdentify: true
+    label: 'Name'
     description: The name of the interface
   tags:
     type: String
     canIdentify: true
+    label: 'Tags'
     description: The tags of the interface
   type:
     type: String
     canIdentify: true
+    label: 'Type'
     description: The type of the interface
   isActive:
     type: Boolean
     canFilter: true
     canIdentify: true
+    label: 'Active'
     description: The tags of the interface
   version:
     type: String
     canIdentify: true
+    label: 'Version'
     description: The version of the interface
   serviceUrl:
     type: String
     canIdentify: true
+    label: 'Service URL'
     description: The url of the interface
   description:
     type: String
     canIdentify: true
+    label: 'Description'
     description: The description of the interface
   locationUrl:
     type: String
     canIdentify: true
+    label: 'Location URL'
     description: The url of the interface

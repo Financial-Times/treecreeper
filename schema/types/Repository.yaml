@@ -8,50 +8,64 @@ properties:
     unique: true
     pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
     canIdentify: true
+    label: 'Code'
     description: 'Unique code/id for this item'
   name:
     type: String
+    label: 'Name'
     description: Display Name
   url:
     type: String
     # required: true
     canIdentify: true
+    label: 'URL'
     description: Repository URL
   vcsID:
     type: String
+    label: 'VCS ID'
     description: Repository hosts internal ID
   sshUrl:
     type: String
     # required: true
     canIdentify: true
+    label: 'SSH URL'
     description: SSH URL to checkout the source
   isPrivate:
     type: Boolean
     canFilter: true
+    label: 'Private'
     description: Is the repository private
   isArchived:
     type: Boolean
     canFilter: true
+    label: 'Archived'
     description: Is the repository archived
   description:
     type: String
+    label: 'Description'
     description: Repository description field
   mostRecentCircleCIPlatform:
     type: CircleCiVersion
     canFilter: true
+    label: 'CircleCI version'
     description: Most recently indexed CircleCI version used
   createdAt:
     type: String
+    label: 'Created'
     description: The UTC time when the repository was created in the VCS system
   pushedAt:
     type: String
+    label: 'Updated'
     description: The UTC time when the repository was last pushed to
   shortDescriptionHTML:
     type: String
+    label: 'Short description'
     description: A short description of the repository on Github
   projectName:
     type: String
+    label: 'Project name'
     description: The project name on FT Bitbucket
   projectUrl:
     type: String
+    label: 'Project URL'
     description: The URL of the project on FT Bitbucket

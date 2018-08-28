@@ -7,34 +7,43 @@ properties:
     unique: true
     canIdentify: true
     pattern: NO_SPACES
+    label: 'Code'
     description: 'Unique code/id for this item'
   name:
     type: String
     canIdentify: true
+    label: 'Name'
     description: The team's name
   email:
     type: String
     canIdentify: true
+    label: 'Email'
     description: The teams email address
   slack:
     type: String
     canIdentify: true
+    label: 'Slack'
     description: The teams slack contact address
   phone:
     type: String
     canIdentify: true
+    label: 'Phone'
     description: The teams phone contact number
   isActive:
     type: Boolean
     canFilter: true
+    label: 'Active'
     description: Whether or not the team is still in existence
   isThirdParty:
     type: Boolean
     canFilter: true
+    label: 'Third party'
     description: Whether or not the team is a supplier
   supportRota:
     type: String
+    label: 'Support rota'
     description: Url linking to details of the system's support rota
   contactPref:
     type: String
+    label: 'Preferred contact method'
     description: Preferred contact method
