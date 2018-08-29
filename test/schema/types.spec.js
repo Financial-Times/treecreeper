@@ -63,6 +63,9 @@ describe('schema - types', () => {
 							it('has valid description', () => {
 								expect(config.description).to.be.a('string');
 							});
+							it('has valid label', () => {
+								expect(config.label).to.be.a('string');
+							});
 							it('has valid type', () => {
 								expect(config.type).to.exist;
 								expect(config.type).to.be.oneOf(validPropTypes);
