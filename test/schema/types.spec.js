@@ -49,6 +49,7 @@ describe('schema - types', () => {
 										'required',
 										'canIdentify',
 										'canFilter',
+										'label',
 										'description',
 										'pattern'
 									]);
@@ -61,6 +62,9 @@ describe('schema - types', () => {
 							});
 							it('has valid description', () => {
 								expect(config.description).to.be.a('string');
+							});
+							it('has valid label', () => {
+								expect(config.label).to.be.a('string');
 							});
 							it('has valid type', () => {
 								expect(config.type).to.exist;
