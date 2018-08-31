@@ -1,4 +1,4 @@
-const getType = require('../../').getType;
+const {getType} = require('../../');
 const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
 const cache = require('../../lib/cache');

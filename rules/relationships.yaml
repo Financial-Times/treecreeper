@@ -1,225 +1,191 @@
 PAYS_FOR:
   type: ONE_TO_MANY
   fromType:
-    CostCentre:
-      graphql:
-        name: groups
-        description: The groups which are costed to the cost centre
+    type: CostCentre
+    name: groups
+    description: The groups which are costed to the cost centre
   toType:
-    Group:
-      graphql:
-        name: costCentre
-        description: The Cost Centre associated with the group
+    type: Group
+    name: costCentre
+    description: The Cost Centre associated with the group
 
 HAS_TECH_DIRECTOR:
   type: MANY_TO_ONE
   fromType:
-    Group:
-      graphql:
-        name: techDirector
-        description: The tech director who owns the group
+    type: Group
+    name: techDirector
+    description: The tech director who owns the group
   toType:
-    Person:
-      graphql:
-        name: techDirectorFor
-        description: Groups the person is a technical director for
+    type: Person
+    name: techDirectorFor
+    description: Groups the person is a technical director for
 
 HAS_TECH_LEAD:
   type: MANY_TO_MANY
   fromType:
-    Team:
-      graphql:
-        name: techLeads
-        description: The tech leads of the team
+    type: Team
+    name: techLeads
+    description: The tech leads of the team
   toType:
-    Person:
-      graphql:
-        name: techLeadFor
-        description: Teams the person is a technical lead for
+    type: Person
+    name: techLeadFor
+    description: Teams the person is a technical lead for
 
 HAS_PRODUCT_OWNER:
   -
     type: MANY_TO_MANY
     fromType:
-      Team:
-        graphql:
-          name: productOwners
-          description: The product owner of the team
+      type: Team
+      name: productOwners
+      description: The product owner of the team
     toType:
-      Person:
-        graphql:
-          name: ownedTeams
-          description: Teams the person is a product owner for
+      type: Person
+      name: ownedTeams
+      description: Teams the person is a product owner for
   - type: MANY_TO_MANY
     fromType:
-      Product:
-        graphql:
-          name: productOwners
-          description: The product's owner
+      type: Product
+      name: productOwners
+      description: The product's owner
     toType:
-      Person:
-        graphql:
-          name: ownedProducts
-          description: Products the person is a product owner for
+      type: Person
+      name: ownedProducts
+      description: Products the person is a product owner for
 
 HAS_STAKEHOLDER:
   type: MANY_TO_MANY
   fromType:
-    System:
-      graphql:
-        name: stakeholders
-        description: The system's stakeholders
+    type: System
+    name: stakeholders
+    description: The system's stakeholders
   toType:
-    Person:
-      graphql:
-        name: stakeholderFor
-        description: Systems the person is a stakeholder for
+    type: Person
+    name: stakeholderFor
+    description: Systems the person is a stakeholder for
 
 HAS_TEAM:
   -
     type: ONE_TO_MANY
     fromType:
-      Group:
-        graphql:
-          name: topLevelTeams
-          description: The top level teams working under the group
-          recursiveName: allTeams
-          recursiveDescription: The teams working under the group
+      type: Group
+      name: topLevelTeams
+      description: The top level teams working under the group
+      recursiveName: allTeams
+      recursiveDescription: The teams working under the group
     toType:
-      Team:
-        graphql:
-          recursiveName: group
-          recursiveDescription: The group the team belongs to
+      type: Team
+    recursiveName: group
+    recursiveDescription: The group the team belongs to
   -
     type: ONE_TO_MANY
     fromType:
-      Team:
-        graphql:
-          name: subTeams
-          description: This team's subteams
+      type: Team
+      name: subTeams
+      description: This team's subteams
     toType:
-      Team:
-        graphql:
-          name: parentTeam
-          description: The team this team is a subteam of
+      type: Team
+      name: parentTeam
+      description: The team this team is a subteam of
 
 
 HAS_REPO:
   type: MANY_TO_MANY
   fromType:
-    System:
-      graphql:
-        name: repositories
-        description: The repositories which store the system's source code
+    type: System
+    name: repositories
+    description: The repositories which store the system's source code
   toType:
-    Repository:
-      graphql:
-        name: systems
-        description: Systems which the repository holds source code for
+    type: Repository
+    name: systems
+    description: Systems which the repository holds source code for
 
 MONITORED_BY:
   type: MANY_TO_MANY
   fromType:
-    System:
-      graphql:
-        name: monitoredBy
-        description: Healthchecks which are used to monitor this system
+    type: System
+    name: monitoredBy
+    description: Healthchecks which are used to monitor this system
   toType:
-    Healthcheck:
-      graphql:
-        name: monitors
-        description: The systems which the healthcheck monitors
+    type: Healthcheck
+    name: monitors
+    description: The systems which the healthcheck monitors
 
 DELIVERED_BY:
   type: MANY_TO_ONE
   fromType:
-    System:
-      graphql:
-        name: deliveredBy
-        description: The team which delivers the system
+    type: System
+    name: deliveredBy
+    description: The team which delivers the system
   toType:
-    Team:
-      graphql:
-        name: delivers
-        description: The systems the team delivers
+    type: Team
+    name: delivers
+    description: The systems the team delivers
 
 SUPPORTED_BY:
   type: MANY_TO_ONE
   fromType:
-    System:
-      graphql:
-        name: supportedBy
-        description: The team which supports the system
+    type: System
+    name: supportedBy
+    description: The team which supports the system
   toType:
-    Team:
-      graphql:
-        name: supports
-        description: The systems the team supports
+    type: Team
+    name: supports
+    description: The systems the team supports
 
 KNOWN_ABOUT_BY:
   type: MANY_TO_MANY
   fromType:
-    System:
-      graphql:
-        name: knownAboutBy
-        description: People who know about the system
+    type: System
+    name: knownAboutBy
+    description: People who know about the system
   toType:
-    Person:
-      graphql:
-        name: knowsAbout
-        description: Systems the person knows about
+    type: Person
+    name: knowsAbout
+    description: Systems the person knows about
 
 DEPENDS_ON:
   -
     type: MANY_TO_MANY
     fromType:
-      System:
-        graphql:
-          name: dependencies
-          description: The other systems the system directly depends on
-          recursiveName: recursiveDependencies
-          recursiveDescription: The other systems the system depends on, either directly or indirectly
+      type: System
+      name: dependencies
+      description: The other systems the system directly depends on
+      recursiveName: recursiveDependencies
+      recursiveDescription: The other systems the system depends on, either directly or indirectly
     toType:
-      System:
-        graphql:
-          name: dependents
-          description: The other systems which directly depend on this system
-          recursiveName: recursiveDependents
-          recursiveDescription: The other systems which depend on this system, either directly or indirectly
+      type: System
+      name: dependents
+      description: The other systems which directly depend on this system
+      recursiveName: recursiveDependents
+      recursiveDescription: The other systems which depend on this system, either directly or indirectly
   -
     type: MANY_TO_MANY
     fromType:
-      Product:
-        graphql:
-          name: dependencies
-          description: The systems the product directly depends on
-          recursiveName: recursiveDependencies
-          recursiveDescription: The systems the product depends on, either directly or indirectly
+      type: Product
+      name: dependencies
+      description: The systems the product directly depends on
+      recursiveName: recursiveDependencies
+      recursiveDescription: The systems the product depends on, either directly or indirectly
     toType:
-      System:
-        graphql:
-          name: dependentProducts
-          description: Products which depend on this system
-          recursiveName: recursiveDependentProducts
-          recursiveDescription: The products which depend on this system, either directly or indirectly
+      type: System
+      name: dependentProducts
+      description: Products which depend on this system
+      recursiveName: recursiveDependentProducts
+      recursiveDescription: The products which depend on this system, either directly or indirectly
   -
     type: MANY_TO_MANY
     fromType:
-      # deliberately hidden from graphql
-      Product:
+      type: Product # deliberately hidden from graphql
     toType:
-      # deliberately hidden from graphql
-      Product:
+      type: Product # deliberately hidden from graphql
 
 STORED_IN:
   type: MANY_TO_ONE
   fromType:
-    Repository:
-      graphql:
-        name: storedIn
-        description: VCS provider that the repository is hosted by
+    type: Repository
+    name: storedIn
+    description: VCS provider that the repository is hosted by
   toType:
-    System:
-      graphql:
-        name: stores
-        description: If the system is a VCS, the repositories it stores
+    type: System
+    name: stores
+    description: If the system is a VCS, the repositories it stores
