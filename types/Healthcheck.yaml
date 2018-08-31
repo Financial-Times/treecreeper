@@ -1,0 +1,21 @@
+name: Healthcheck
+description: The configuration used to provide monitoring/healthchecks for a system.
+properties:
+  code:
+    type: String
+    required: true
+    unique: true
+    canIdentify: true
+    label: Code
+    description: 'Unique code/id for this item'
+  isLive:
+    type: Boolean
+    canFilter: true
+    label: Live
+    description: Whether the monitored entity is live
+  url:
+    type: String
+    # required: true
+    canIdentify: true
+    label: URL
+    description: The URL to check against
