@@ -26,6 +26,10 @@ Retrieves an array of key:value object defining the acceptable values of an enum
 ### getRelationship(name, type = undefined, direction = undefined)
 Gets a relationship definition, possibly filtered by end node type or direction
 
+### getRelationships(type = undefined, direction = undefined)
+Gets a relationship definition, possibly filtered by end node type or direction
+
+
 ### getGraphQLSchema()
 Retrieves a schema to be used to power a graphql api // note, may not be much use without being compiled
 

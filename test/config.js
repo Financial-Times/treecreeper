@@ -1,6 +1,6 @@
 const chai = require('chai');
-// const sinonChai = require('sinon-chai');
+const sinonChai = require('sinon-chai');
 
-// chai.use(sinonChai);
+chai.use(sinonChai);
 
 global.expect = chai.expect;

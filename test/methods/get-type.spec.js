@@ -1,7 +1,8 @@
 const getType = require('../../').getType;
 const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
-
+const cache = require('../../lib/cache');
+const getRelationships = require('../../methods/get-relationships');
 describe('get-type', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
@@ -9,7 +10,10 @@ describe('get-type', () => {
 		sandbox.stub(rawData, 'getStringPatterns');
 	});
 
-	afterEach(() => sandbox.restore())
+	afterEach(() => {
+		cache.clear()
+		sandbox.restore()
+	})
 
 	it('returns all properties of a type', async () => {
 		const type1 ={
@@ -63,9 +67,9 @@ describe('get-type', () => {
 		});
 		const type = getType('Type1');
 		const validator = type.properties.code.pattern
-		expect(validator('ay')).to.be.false;
-		expect(validator('zb')).to.be.false;
-		expect(validator('ab')).to.be.true;
+		expect(validator.test('ay')).to.be.false;
+		expect(validator.test('zb')).to.be.false;
+		expect(validator.test('ab')).to.be.true;
 	});
 
 	it('converts string patterns with regex flags to regex based function', async () => {
@@ -86,7 +90,22 @@ describe('get-type', () => {
 		});
 		const type = getType('Type1');
 		const validator = type.properties.code.pattern
-		expect(validator('AB')).to.be.true;
+		expect(validator.test('AB')).to.be.true;
+	});
+
+	describe('withNeo4jRelationships', () => {
+		it('it includes relationship definitions', async () => {
+			sandbox.stub(getRelationships, 'method');
+
+			rawData.getTypes.returns([{
+				name: 'Type1',
+			}]);
+
+			getRelationships.method.returns(['dummy relationship structure']);
+			const type = getType('Type1', {withNeo4jRelationships: true});
+			expect(getRelationships.method).calledWith('Type1')
+			expect(type.relationships).to.eql(['dummy relationship structure']);
+		});
 	});
 
 	describe.skip('withGraphQLRelationships', () => {
@@ -99,11 +118,6 @@ describe('get-type', () => {
 		});
 
 		it('it includes recursive graphql properties', async () => {
-
-		});
-	});
-	describe.skip('withNeo4jRelationships', () => {
-		it('it includes relationship definitions', async () => {
 
 		});
 	});

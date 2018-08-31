@@ -1,7 +1,6 @@
 const rawData = require('../lib/raw-data')
 const cache = require('../lib/cache')
-
-
+const getRelationships = require('./get-relationships');
 const dummyRegExp = {test: () => true};
 
 const getValidator = patternName => {
@@ -12,6 +11,10 @@ const getValidator = patternName => {
 
 	if (!validator) {
 		let patternDef = rawData.getStringPatterns()[patternName];
+		if (!patternDef) {
+			cache.set('stringPatterns', patternName, dummyRegExp);
+			return dummyRegExp;
+		}
 		if (typeof patternDef === 'string') {
 			patternDef = { pattern: patternDef };
 		}
@@ -23,6 +26,7 @@ const getValidator = patternName => {
 	return validator;
 }
 
+
 module.exports.method = (typeName, {
 	withGraphQLRelationships = false,
 	withNeo4jRelationships = false,
@@ -31,7 +35,6 @@ module.exports.method = (typeName, {
 	const cacheKey = `${typeName}:${withGraphQLRelationships}:${withNeo4jRelationships}:${groupProperties}`
 	let type = cache.get('types', cacheKey);
 	if (!type) {
-		console.log(typeName, cacheKey)
 		type = rawData.getTypes().find(type => type.name == typeName);
 		if (!type) {
 			cache.set('types', cacheKey, null);
@@ -47,6 +50,10 @@ module.exports.method = (typeName, {
 			})
 		}
 		cache.set('types', cacheKey, type);
+
+		if (withNeo4jRelationships) {
+			type.relationships = getRelationships.method(type.name)
+		}
 	}
 	return type;
 }
