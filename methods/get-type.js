@@ -23,7 +23,6 @@ const getValidator = patternName => {
 		const regEx = new RegExp(patternDef.pattern, patternDef.flags);
 		validator = regEx;
 
-		console.log({ validator });
 		cache.set('stringPatterns', patternName, validator);
 	}
 
