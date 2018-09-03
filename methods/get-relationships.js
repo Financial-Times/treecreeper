@@ -112,14 +112,8 @@ const getNormalizedRawData = () => {
 	return normalizedRelationships;
 };
 
-module.exports.method = (
-	typeName = undefined,
-	{ structure = 'flat' } = {}
-) => {
-	let relationships = cache.get(
-		'relationships',
-		`${typeName}:${structure}`
-	);
+module.exports.method = (typeName = undefined, { structure = 'flat' } = {}) => {
+	let relationships = cache.get('relationships', `${typeName}:${structure}`);
 
 	if (!relationships) {
 		relationships = getNormalizedRawData()
@@ -140,11 +134,7 @@ module.exports.method = (
 			relationships = graphqlRelationships(relationships);
 		}
 
-		cache.set(
-			'relationships',
-			`${typeName}:${structure}`,
-			relationships
-		);
+		cache.set('relationships', `${typeName}:${structure}`, relationships);
 	}
 
 	return relationships;

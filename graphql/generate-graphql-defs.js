@@ -153,7 +153,7 @@ type Query {
   ${indentMultiline(queries.join('\n\n'), 2)}
 }`;
 
-	const enumDefinitions = Object.entries(getEnums({withMeta: true})).map(
+	const enumDefinitions = Object.entries(getEnums({ withMeta: true })).map(
 		([name, { description, options }]) => {
 			return `
 # ${description}

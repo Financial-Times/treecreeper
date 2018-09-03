@@ -26,6 +26,16 @@ const getValidator = patternName => {
 	return validator;
 };
 
+const clone = type => {
+	type = Object.assign({}, type);
+	type.properties = Object.entries(type.properties).reduce(
+		(target, [propName, def]) =>
+			Object.assign(target, { [propName]: Object.assign({}, def) }),
+		{}
+	);
+	return type;
+};
+
 module.exports.method = (
 	typeName,
 	{
@@ -41,14 +51,12 @@ module.exports.method = (
 			cache.set('types', cacheKey, null);
 			return;
 		}
-
-		type = Object.assign({}, type)
-		type.properties = Object.assign({}, type.properties || {});
+		type = clone(type);
 
 		if (!type.pluralName) {
 			type.pluralName = `${type.name}s`;
 		}
-
+		typeName === 'Team' && console.log(type.properties.code);
 		Object.values(type.properties).forEach(prop => {
 			prop.pattern = getValidator(prop.pattern);
 		});
