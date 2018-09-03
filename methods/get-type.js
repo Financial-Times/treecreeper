@@ -37,12 +37,17 @@ const getType = (
 	}
 	type = clone(type);
 
+	if (!('properties' in type)) {
+		type.properties = {}
+	}
 	if (!type.pluralName) {
 		type.pluralName = `${type.name}s`;
 	}
 
 	Object.values(type.properties).forEach(prop => {
-		prop.pattern = getValidator(prop.pattern);
+		if (prop.pattern) {
+			prop.pattern = getValidator(prop.pattern);
+		}
 	});
 
 	if (relationshipStructure) {
