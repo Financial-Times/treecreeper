@@ -1,5 +1,6 @@
 const rawData = require('../lib/raw-data');
 const cache = require('../lib/cache');
+const deepFreeze = require('deep-freeze');
 
 const restRelationships = relationships => {
 	return relationships.reduce(
@@ -133,6 +134,7 @@ module.exports.method = (typeName = undefined, { structure = 'flat' } = {}) => {
 		if (structure === 'graphql') {
 			relationships = graphqlRelationships(relationships);
 		}
+		relationships = deepFreeze(relationships);
 
 		cache.set('relationships', `${typeName}:${structure}`, relationships);
 	}

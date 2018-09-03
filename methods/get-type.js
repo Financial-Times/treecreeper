@@ -2,13 +2,15 @@ const rawData = require('../lib/raw-data');
 const cache = require('../lib/cache');
 const getRelationships = require('./get-relationships');
 const dummyRegExp = { test: () => true };
+const deepFreeze = require('deep-freeze');
+const clone = require('clone');
 
 const getValidator = patternName => {
 	if (!patternName) {
 		return dummyRegExp;
 	}
-	let validator = cache.get('stringPatterns', patternName);
 
+	let validator = cache.get('stringPatterns', patternName);
 	if (!validator) {
 		let patternDef = rawData.getStringPatterns()[patternName];
 		if (!patternDef) {
@@ -20,20 +22,12 @@ const getValidator = patternName => {
 		}
 		const regEx = new RegExp(patternDef.pattern, patternDef.flags);
 		validator = regEx;
+
+		console.log({ validator });
 		cache.set('stringPatterns', patternName, validator);
 	}
 
 	return validator;
-};
-
-const clone = type => {
-	type = Object.assign({}, type);
-	type.properties = Object.entries(type.properties).reduce(
-		(target, [propName, def]) =>
-			Object.assign(target, { [propName]: Object.assign({}, def) }),
-		{}
-	);
-	return type;
 };
 
 module.exports.method = (
@@ -56,7 +50,7 @@ module.exports.method = (
 		if (!type.pluralName) {
 			type.pluralName = `${type.name}s`;
 		}
-		typeName === 'Team' && console.log(type.properties.code);
+
 		Object.values(type.properties).forEach(prop => {
 			prop.pattern = getValidator(prop.pattern);
 		});
@@ -73,7 +67,7 @@ module.exports.method = (
 				type.relationships = relationships;
 			}
 		}
-
+		type = deepFreeze(type);
 		cache.set('types', cacheKey, type);
 	}
 
