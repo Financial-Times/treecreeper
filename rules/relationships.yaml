@@ -42,7 +42,8 @@ HAS_PRODUCT_OWNER:
       type: Person
       name: ownedTeams
       description: Teams the person is a product owner for
-  - cardinality: MANY_TO_MANY
+  -
+    cardinality: MANY_TO_MANY
     fromType:
       type: Product
       name: productOwners
@@ -74,8 +75,8 @@ HAS_TEAM:
       recursiveDescription: The teams working under the group
     toType:
       type: Team
-    recursiveName: group
-    recursiveDescription: The group the team belongs to
+      recursiveName: group
+      recursiveDescription: The group the team belongs to
   -
     cardinality: ONE_TO_MANY
     fromType:
@@ -174,10 +175,12 @@ DEPENDS_ON:
       recursiveDescription: The products which depend on this system, either directly or indirectly
   -
     cardinality: MANY_TO_MANY
+    hideFromGraphql: true
     fromType:
-      type: Product # deliberately hidden from graphql
+      type: Product
     toType:
-      type: Product # deliberately hidden from graphql
+      type: Product
+
 
 STORED_IN:
   cardinality: MANY_TO_ONE

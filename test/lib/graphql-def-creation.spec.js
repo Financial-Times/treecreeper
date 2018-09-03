@@ -138,7 +138,6 @@
 // type Query {
 //     CostCentre(
 
-
 //     # Unique code/id for this item
 //     code: String
 //     # The name of the cost centre
@@ -155,7 +154,6 @@
 //   ): [CostCentre]
 
 //   Group(
-
 
 //     # Unique code/id for this item
 //     code: String

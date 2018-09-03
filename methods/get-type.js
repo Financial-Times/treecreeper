@@ -4,25 +4,7 @@ const getRelationships = require('./get-relationships');
 const dummyRegExp = { test: () => true };
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
-
-const getValidator = cache.cacheify(
-	patternName => {
-		if (!patternName) {
-			return dummyRegExp;
-		}
-
-		let patternDef = rawData.getStringPatterns()[patternName];
-		if (!patternDef) {
-			cache.set('stringPatterns', patternName, dummyRegExp);
-			return dummyRegExp;
-		}
-		if (typeof patternDef === 'string') {
-			patternDef = { pattern: patternDef };
-		}
-		return new RegExp(patternDef.pattern, patternDef.flags);
-	},
-	patternName => `stringPatterns:${patternName}`
-);
+const getStringPatterns = require('./get-string-patterns');
 
 const getType = (
 	typeName,
@@ -38,7 +20,7 @@ const getType = (
 	type = clone(type);
 
 	if (!('properties' in type)) {
-		type.properties = {}
+		type.properties = {};
 	}
 	if (!type.pluralName) {
 		type.pluralName = `${type.name}s`;
@@ -46,7 +28,7 @@ const getType = (
 
 	Object.values(type.properties).forEach(prop => {
 		if (prop.pattern) {
-			prop.pattern = getValidator(prop.pattern);
+			prop.pattern = getStringPatterns.method(prop.pattern);
 		}
 	});
 

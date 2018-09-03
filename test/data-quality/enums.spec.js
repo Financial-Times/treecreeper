@@ -1,1 +1,3 @@
-describe.skip('enum spec', () => {})
+describe.skip('enum spec', () => {
+	it('is not tested yet', () => {});
+});
