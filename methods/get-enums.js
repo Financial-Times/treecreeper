@@ -1,9 +1,8 @@
 const rawData = require('../lib/raw-data');
-const cache = require('../lib/cache')
+const cache = require('../lib/cache');
 
 const mapToObjectResolver = keys =>
 	keys.reduce((resolver, key) => Object.assign(resolver, { [key]: key }), {});
-
 
 module.exports.method = () => {
 	let enums = cache.get('enums', 'all');
@@ -18,5 +17,4 @@ module.exports.method = () => {
 		cache.set('enums', 'all', enums);
 	}
 	return enums;
-}
-
+};

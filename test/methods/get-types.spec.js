@@ -1,5 +1,3 @@
 const getTypes = require('../../').getTypes;
 
-describe('get-types', () => {
-
-})
+describe('get-types', () => {});

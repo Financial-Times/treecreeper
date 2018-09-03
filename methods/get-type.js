@@ -1,7 +1,7 @@
-const rawData = require('../lib/raw-data')
-const cache = require('../lib/cache')
+const rawData = require('../lib/raw-data');
+const cache = require('../lib/cache');
 const getRelationships = require('./get-relationships');
-const dummyRegExp = {test: () => true};
+const dummyRegExp = { test: () => true };
 
 const getValidator = patternName => {
 	if (!patternName) {
@@ -19,40 +19,44 @@ const getValidator = patternName => {
 			patternDef = { pattern: patternDef };
 		}
 		const regEx = new RegExp(patternDef.pattern, patternDef.flags);
-		validator = regEx
+		validator = regEx;
 		cache.set('stringPatterns', patternName, validator);
 	}
 
 	return validator;
-}
+};
 
-
-module.exports.method = (typeName, {
-	relationshipsStructure = false, // flat, structured
-	groupProperties = false
-} = {}) => {
-	const cacheKey = `${typeName}:${relationshipsStructure}:${groupProperties}`
+module.exports.method = (
+	typeName,
+	{
+		relationshipStructure = false, // flat, grouped, graphql
+		groupProperties = false
+	} = {}
+) => {
+	const cacheKey = `${typeName}:${relationshipStructure}:${groupProperties}`;
 	let type = cache.get('types', cacheKey);
 	if (!type) {
-		type = rawData.getTypes().find(type => type.name == typeName);
+		type = rawData.getTypes().find(type => type.name === typeName);
 		if (!type) {
 			cache.set('types', cacheKey, null);
 			return;
 		}
 		if (!type.pluralName) {
-			type.pluralName = `${type.name}s`
-		};
+			type.pluralName = `${type.name}s`;
+		}
 
 		if (type.properties) {
 			Object.values(type.properties).forEach(prop => {
 				prop.pattern = getValidator(prop.pattern);
-			})
+			});
 		}
 		cache.set('types', cacheKey, type);
 
-		if (relationshipsStructure) {
-			type.relationships = getRelationships.method(type.name, {structure: relationshipsStructure})
+		if (relationshipStructure) {
+			type.relationships = getRelationships.method(type.name, {
+				structure: relationshipStructure
+			});
 		}
 	}
 	return type;
-}
+};

@@ -112,13 +112,11 @@ const PAGINATE = indentMultiline(
 	true
 );
 
-
 const getIdentifyingFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canIdentify);
 
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canFilter);
-
 
 const generateQuery = ({ name, type, properties, paginate }) => {
 	return `
@@ -128,7 +126,7 @@ const generateQuery = ({ name, type, properties, paginate }) => {
   ): ${type}`;
 };
 
-const getTypes = require('../methods/get-types').method
+const getTypes = require('../methods/get-types').method;
 const rawData = require('../lib/raw-data');
 
 const generateGraphqlDefs = () => {
@@ -141,13 +139,13 @@ type ${config.name} {
 		2,
 		true
 	)}
-}`
-//   ${indentMultiline(
-// 		generateRelationshipFields(relationshipsSchema[config.name]),
-// 		2,
-// 		true
-// 	)}
-// }`;
+}
+		  ${indentMultiline(
+				generateRelationshipFields(relationshipsSchema[config.name]),
+				2,
+				true
+			)}
+		}`;
 	});
 
 	const queries = getTypes().map(config => {
