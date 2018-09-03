@@ -93,7 +93,7 @@ describe('get-type', () => {
 		expect(validator.test('AB')).to.be.true;
 	});
 
-	describe('withNeo4jRelationships', () => {
+	describe('with grouped relationships', () => {
 		it('it includes relationship definitions', async () => {
 			sandbox.stub(getRelationships, 'method');
 
@@ -102,8 +102,8 @@ describe('get-type', () => {
 			}]);
 
 			getRelationships.method.returns(['dummy relationship structure']);
-			const type = getType('Type1', {withNeo4jRelationships: true});
-			expect(getRelationships.method).calledWith('Type1')
+			const type = getType('Type1', {relationshipsStructure: 'grouped'});
+			expect(getRelationships.method).calledWith('Type1', {structure: 'grouped'})
 			expect(type.relationships).to.eql(['dummy relationship structure']);
 		});
 	});

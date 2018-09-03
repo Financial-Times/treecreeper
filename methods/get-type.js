@@ -28,11 +28,10 @@ const getValidator = patternName => {
 
 
 module.exports.method = (typeName, {
-	withGraphQLRelationships = false,
-	withNeo4jRelationships = false,
+	relationshipsStructure = false, // flat, structured
 	groupProperties = false
 } = {}) => {
-	const cacheKey = `${typeName}:${withGraphQLRelationships}:${withNeo4jRelationships}:${groupProperties}`
+	const cacheKey = `${typeName}:${relationshipsStructure}:${groupProperties}`
 	let type = cache.get('types', cacheKey);
 	if (!type) {
 		type = rawData.getTypes().find(type => type.name == typeName);
@@ -51,8 +50,8 @@ module.exports.method = (typeName, {
 		}
 		cache.set('types', cacheKey, type);
 
-		if (withNeo4jRelationships) {
-			type.relationships = getRelationships.method(type.name)
+		if (relationshipsStructure) {
+			type.relationships = getRelationships.method(type.name, {structure: relationshipsStructure})
 		}
 	}
 	return type;

@@ -4,7 +4,7 @@ module.exports = Object.assign({
 	getRelationships: require('./methods/get-relationships').method,
 	getStringPattern: name => RegExp,
 	getEnum: enumType => ({}),
-	getEnums: () => [],
+	getEnums: require('./methods/get-enums').method,
 	getFilterFields: type => [],
 	getIdentifierFields: type => [],
 	getGraphQLSchema: () => '',

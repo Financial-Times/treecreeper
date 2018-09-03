@@ -13,12 +13,16 @@ describe('get-relationships', () => {
 		cache.clear()
 		sandbox.restore()
 	})
-	context('rest api (default) style', () => {
+	context('flat style', () => {
+
+	});
+
+	context('rest api style', () => {
 
 
 		it('returns an object', () => {
 			rawData.getRelationships.returns({})
-			expect(getRelationships('Type')).to.eql({})
+			expect(getRelationships('Type', {structure: 'grouped'})).to.eql({})
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
@@ -29,7 +33,7 @@ describe('get-relationships', () => {
 				  toType: { type: 'Type2' }
 				}
 			});
-			expect(getRelationships('Type1')).to.eql({ HAS:
+			expect(getRelationships('Type1', {structure: 'grouped'})).to.eql({ HAS:
 	   [ { direction: 'outgoing',
 	       nodeType: 'Type2',
 	       hasMany: false,
@@ -47,7 +51,7 @@ describe('get-relationships', () => {
 				  toType: { type: 'Type2', name: 'test-name', description: 'test description', label: 'test label' }
 				}
 			});
-			expect(getRelationships('Type2')).to.eql({ HAS:
+			expect(getRelationships('Type2', {structure: 'grouped'})).to.eql({ HAS:
 	   [ { direction: 'incoming',
 	       nodeType: 'Type1',
 	       hasMany: false,
@@ -68,7 +72,7 @@ describe('get-relationships', () => {
 				  toType: { type: 'Type1'}
 				}]
 			});
-			expect(getRelationships('Type1')).to.eql({
+			expect(getRelationships('Type1', {structure: 'grouped'})).to.eql({
         "HAS": [
           {
             "description": undefined,
@@ -99,7 +103,7 @@ describe('get-relationships', () => {
 				  toType: { type: 'Type1'}
 				}]
 			});
-			expect(getRelationships('Type1')).to.eql({ HAS:
+			expect(getRelationships('Type1', {structure: 'grouped'})).to.eql({ HAS:
    [ { direction: 'outgoing',
        nodeType: 'Type1',
        hasMany: false,
@@ -126,11 +130,9 @@ describe('get-relationships', () => {
 							}]
 						});
 						const hasMany = /(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
-						expect(getRelationships('Type1').HAS[0].hasMany).to.equal(hasMany	)
+						expect(getRelationships('Type1', {structure: 'grouped'}).HAS[0].hasMany).to.equal(hasMany	)
 					})
 				})
 		})
-
 	})
-
 });

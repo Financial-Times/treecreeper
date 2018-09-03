@@ -1,7 +1,7 @@
 const rawData = require('../lib/raw-data')
 const cache = require('../lib/cache')
 
-const restify = relationships => {
+const groupRelationships = relationships => {
 	return relationships
 		.reduce((obj, {
 			neo4jName,
@@ -47,7 +47,10 @@ const buildTwinRelationships = ({
 		neo4jName,
 		direction: 'incoming',
 		hasMany: /^MANY/.test(type)
-	})]
+	})].map(obj => {
+		delete obj.type;
+		return obj;
+	})
 };
 
 const getNormalizedRawData = () => {
@@ -70,9 +73,9 @@ const getNormalizedRawData = () => {
 }
 module.exports.method = (typeName = undefined, {
 	direction = undefined,
-	style = 'rest'
+	structure = 'flat'
 } = {}) => {
-	let relationships = cache.get('relationships', `${typeName}:${direction}:${style}`);
+	let relationships = cache.get('relationships', `${typeName}:${direction}:${structure}`);
 
 	if (!relationships) {
 		relationships = getNormalizedRawData()
@@ -80,7 +83,7 @@ module.exports.method = (typeName = undefined, {
 			.reduce((list, definition) => list.concat(buildTwinRelationships(definition)), [])
 			.filter(({startNode}) => startNode === typeName)
 
-		relationships = style === 'graphql' ? graphqlify(relationships) : restify(relationships)
+		relationships = structure === 'flat' ? relationships : groupRelationships(relationships);
 	}
 
 	return relationships;
