@@ -71,28 +71,28 @@ const generateDirectRelationshipField = definition =>
 		  }")`
 		: '';
 
-const generateRecursiveRelationshipField = definition =>
-	definition.recursiveDescription && definition.recursiveName
-		? `# ${definition.recursiveDescription}
-        ${definition.recursiveName}${maybePaginate(
-				definition
-		  )}: ${maybePluralType(definition)} @cypher(
-      statement: "MATCH (this)${relFragment(
-				definition.underlyingRelationship,
-				definition.direction,
-				'*1..20'
-			)}(related:${definition.type}) RETURN DISTINCT related"
-    )`
-		: '';
+// const generateRecursiveRelationshipField = definition =>
+// 	definition.recursiveDescription && definition.recursiveName
+// 		? `# ${definition.recursiveDescription}
+//         ${definition.recursiveName}${maybePaginate(
+// 				definition
+// 		  )}: ${maybePluralType(definition)} @cypher(
+//       statement: "MATCH (this)${relFragment(
+// 				definition.underlyingRelationship,
+// 				definition.direction,
+// 				'*1..20'
+// 			)}(related:${definition.type}) RETURN DISTINCT related"
+//     )`
+// 		: '';
 
-const generateRelationshipField = definition => {
-	return stripEmptyFirstLine`
-        ${generateDirectRelationshipField(definition)}
-        ${generateRecursiveRelationshipField(definition)}`;
-};
+// const generateRelationshipField = definition => {
+// 	return stripEmptyFirstLine`
+//         ${generateDirectRelationshipField(definition)}
+//         ${generateRecursiveRelationshipField(definition)}`;
+// };
 
-const generateRelationshipFields = definitions =>
-	(definitions || []).map(generateRelationshipField).join('');
+// const generateRelationshipFields = definitions =>
+// 	(definitions || []).map(generateRelationshipField).join('');
 
 const PAGINATE = indentMultiline(
 	generatePropertyFields(
@@ -130,8 +130,9 @@ const getTypes = require('../methods/get-types').method;
 const rawData = require('../lib/raw-data');
 
 const generateGraphqlDefs = () => {
-	const typeDefinitions = getTypes().map(config => {
-		return `
+	const typeDefinitions = getTypes({ relationshipStructure: 'graphql' }).map(
+		config => {
+			return `
 # ${config.description}
 type ${config.name} {
   ${indentMultiline(
@@ -139,14 +140,16 @@ type ${config.name} {
 		2,
 		true
 	)}
-}
-		  ${indentMultiline(
-				generateRelationshipFields(relationshipsSchema[config.name]),
-				2,
-				true
-			)}
+
+		  ${'' &&
+				indentMultiline(
+					generateRelationshipFields(relationshipsSchema[config.name]),
+					2,
+					true
+				)}
 		}`;
-	});
+		}
+	);
 
 	const queries = getTypes().map(config => {
 		return stripIndent`

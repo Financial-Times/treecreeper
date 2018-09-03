@@ -13,9 +13,165 @@ describe('get-relationships', () => {
 		cache.clear();
 		sandbox.restore();
 	});
-	context('flat style', () => {});
 
-	context('rest api style', () => {
+	context('flat style (default)', () => {
+		it('returns an array', () => {
+			rawData.getRelationships.returns({});
+			expect(getRelationships('Type')).to.eql([]);
+		});
+
+		it('retrieve relationships pointing away from the node', () => {
+			rawData.getRelationships.returns({
+				HAS: {
+					cardinality: 'ONE_TO_ONE',
+					fromType: {
+						type: 'Type1',
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					},
+					toType: { type: 'Type2' }
+				}
+			});
+			expect(getRelationships('Type1')).to.eql([
+					{
+						neo4jName: 'HAS',
+						direction: 'outgoing',
+						endNode: 'Type2',
+						startNode: 'Type1',
+						hasMany: false,
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				]
+			);
+		});
+
+		it('retrieve relationships pointing to the node', () => {
+			rawData.getRelationships.returns({
+				HAS: {
+					cardinality: 'ONE_TO_ONE',
+					fromType: { type: 'Type1' },
+					toType: {
+						type: 'Type2',
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				}
+			});
+			expect(getRelationships('Type2')).to.eql([
+					{
+						neo4jName: 'HAS',
+						direction: 'incoming',
+						endNode: 'Type1',
+						startNode: 'Type2',
+						hasMany: false,
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				]
+			);
+		});
+
+		it('retrieve multiple relationships with same name', () => {
+			rawData.getRelationships.returns({
+				HAS: [
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type1' },
+						toType: { type: 'Type2' }
+					},
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type3' },
+						toType: { type: 'Type1' }
+					}
+				]
+			});
+			expect(getRelationships('Type1')).to.eql( [
+					{
+						neo4jName: 'HAS',
+						direction: 'outgoing',
+						hasMany: false,
+						endNode: 'Type2',
+						startNode: 'Type1',
+					},
+					{
+						neo4jName: 'HAS',
+						direction: 'incoming',
+						hasMany: false,
+						endNode: 'Type3',
+						startNode: 'Type1',
+					}
+				]
+			);
+		});
+
+		it('retrieve two relationships when pointing at self', () => {
+			rawData.getRelationships.returns({
+				HAS: [
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type1' },
+						toType: { type: 'Type1' }
+					}
+				]
+			});
+			expect(getRelationships('Type1')).to.eql( [
+					{
+						neo4jName: 'HAS',
+						direction: 'outgoing',
+						endNode: 'Type1',
+						startNode: 'Type1',
+						hasMany: false,
+					},
+					{
+						neo4jName: 'HAS',
+						direction: 'incoming',
+						endNode: 'Type1',
+						startNode: 'Type1',
+						hasMany: false,
+					}
+				]
+			);
+		});
+		describe('cardinality', () => {
+			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
+				.reduce(
+					(arr, cardinality) =>
+						arr.concat([
+							[cardinality, 'incoming', [1, 2]],
+							[cardinality, 'outgoing', [2, 1]]
+						]),
+					[]
+				)
+				.map(([cardinality, direction, [fromNum, toNum]]) => {
+					it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
+						rawData.getRelationships.returns({
+							HAS: [
+								{
+									cardinality,
+									fromType: { type: `Type${fromNum}` },
+									toType: { type: `Type${toNum}` }
+								}
+							]
+						});
+						const hasMany =
+							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
+						expect(
+							getRelationships('Type1').find(({neo4jName}) => neo4jName === 'HAS').hasMany
+						).to.equal(hasMany);
+					});
+				});
+		});
+
+
+	});
+
+	context('rest api (grouped) style', () => {
 		it('returns an object', () => {
 			rawData.getRelationships.returns({});
 			expect(getRelationships('Type', { structure: 'grouped' })).to.eql({});
@@ -24,7 +180,7 @@ describe('get-relationships', () => {
 		it('retrieve relationships pointing away from the node', () => {
 			rawData.getRelationships.returns({
 				HAS: {
-					type: 'ONE_TO_ONE',
+					cardinality: 'ONE_TO_ONE',
 					fromType: {
 						type: 'Type1',
 						name: 'test-name',
@@ -51,7 +207,7 @@ describe('get-relationships', () => {
 		it('retrieve relationships pointing to the node', () => {
 			rawData.getRelationships.returns({
 				HAS: {
-					type: 'ONE_TO_ONE',
+					cardinality: 'ONE_TO_ONE',
 					fromType: { type: 'Type1' },
 					toType: {
 						type: 'Type2',
@@ -79,12 +235,12 @@ describe('get-relationships', () => {
 			rawData.getRelationships.returns({
 				HAS: [
 					{
-						type: 'ONE_TO_ONE',
+						cardinality: 'ONE_TO_ONE',
 						fromType: { type: 'Type1' },
 						toType: { type: 'Type2' }
 					},
 					{
-						type: 'ONE_TO_ONE',
+						cardinality: 'ONE_TO_ONE',
 						fromType: { type: 'Type3' },
 						toType: { type: 'Type1' }
 					}
@@ -116,7 +272,7 @@ describe('get-relationships', () => {
 			rawData.getRelationships.returns({
 				HAS: [
 					{
-						type: 'ONE_TO_ONE',
+						cardinality: 'ONE_TO_ONE',
 						fromType: { type: 'Type1' },
 						toType: { type: 'Type1' }
 					}
@@ -146,10 +302,10 @@ describe('get-relationships', () => {
 		describe('cardinality', () => {
 			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
 				.reduce(
-					(arr, card) =>
+					(arr, cardinality) =>
 						arr.concat([
-							[card, 'incoming', [1, 2]],
-							[card, 'outgoing', [2, 1]]
+							[cardinality, 'incoming', [1, 2]],
+							[cardinality, 'outgoing', [2, 1]]
 						]),
 					[]
 				)
@@ -158,7 +314,7 @@ describe('get-relationships', () => {
 						rawData.getRelationships.returns({
 							HAS: [
 								{
-									type: cardinality,
+									cardinality,
 									fromType: { type: `Type${fromNum}` },
 									toType: { type: `Type${toNum}` }
 								}

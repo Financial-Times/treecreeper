@@ -1,5 +1,5 @@
 PAYS_FOR:
-  type: ONE_TO_MANY
+  cardinality: ONE_TO_MANY
   fromType:
     type: CostCentre
     name: groups
@@ -10,7 +10,7 @@ PAYS_FOR:
     description: The Cost Centre associated with the group
 
 HAS_TECH_DIRECTOR:
-  type: MANY_TO_ONE
+  cardinality: MANY_TO_ONE
   fromType:
     type: Group
     name: techDirector
@@ -21,7 +21,7 @@ HAS_TECH_DIRECTOR:
     description: Groups the person is a technical director for
 
 HAS_TECH_LEAD:
-  type: MANY_TO_MANY
+  cardinality: MANY_TO_MANY
   fromType:
     type: Team
     name: techLeads
@@ -33,7 +33,7 @@ HAS_TECH_LEAD:
 
 HAS_PRODUCT_OWNER:
   -
-    type: MANY_TO_MANY
+    cardinality: MANY_TO_MANY
     fromType:
       type: Team
       name: productOwners
@@ -42,7 +42,7 @@ HAS_PRODUCT_OWNER:
       type: Person
       name: ownedTeams
       description: Teams the person is a product owner for
-  - type: MANY_TO_MANY
+  - cardinality: MANY_TO_MANY
     fromType:
       type: Product
       name: productOwners
@@ -53,7 +53,7 @@ HAS_PRODUCT_OWNER:
       description: Products the person is a product owner for
 
 HAS_STAKEHOLDER:
-  type: MANY_TO_MANY
+  cardinality: MANY_TO_MANY
   fromType:
     type: System
     name: stakeholders
@@ -65,7 +65,7 @@ HAS_STAKEHOLDER:
 
 HAS_TEAM:
   -
-    type: ONE_TO_MANY
+    cardinality: ONE_TO_MANY
     fromType:
       type: Group
       name: topLevelTeams
@@ -77,7 +77,7 @@ HAS_TEAM:
     recursiveName: group
     recursiveDescription: The group the team belongs to
   -
-    type: ONE_TO_MANY
+    cardinality: ONE_TO_MANY
     fromType:
       type: Team
       name: subTeams
@@ -89,7 +89,7 @@ HAS_TEAM:
 
 
 HAS_REPO:
-  type: MANY_TO_MANY
+  cardinality: MANY_TO_MANY
   fromType:
     type: System
     name: repositories
@@ -100,7 +100,7 @@ HAS_REPO:
     description: Systems which the repository holds source code for
 
 MONITORED_BY:
-  type: MANY_TO_MANY
+  cardinality: MANY_TO_MANY
   fromType:
     type: System
     name: monitoredBy
@@ -111,7 +111,7 @@ MONITORED_BY:
     description: The systems which the healthcheck monitors
 
 DELIVERED_BY:
-  type: MANY_TO_ONE
+  cardinality: MANY_TO_ONE
   fromType:
     type: System
     name: deliveredBy
@@ -122,7 +122,7 @@ DELIVERED_BY:
     description: The systems the team delivers
 
 SUPPORTED_BY:
-  type: MANY_TO_ONE
+  cardinality: MANY_TO_ONE
   fromType:
     type: System
     name: supportedBy
@@ -133,7 +133,7 @@ SUPPORTED_BY:
     description: The systems the team supports
 
 KNOWN_ABOUT_BY:
-  type: MANY_TO_MANY
+  cardinality: MANY_TO_MANY
   fromType:
     type: System
     name: knownAboutBy
@@ -145,7 +145,7 @@ KNOWN_ABOUT_BY:
 
 DEPENDS_ON:
   -
-    type: MANY_TO_MANY
+    cardinality: MANY_TO_MANY
     fromType:
       type: System
       name: dependencies
@@ -159,7 +159,7 @@ DEPENDS_ON:
       recursiveName: recursiveDependents
       recursiveDescription: The other systems which depend on this system, either directly or indirectly
   -
-    type: MANY_TO_MANY
+    cardinality: MANY_TO_MANY
     fromType:
       type: Product
       name: dependencies
@@ -173,14 +173,14 @@ DEPENDS_ON:
       recursiveName: recursiveDependentProducts
       recursiveDescription: The products which depend on this system, either directly or indirectly
   -
-    type: MANY_TO_MANY
+    cardinality: MANY_TO_MANY
     fromType:
       type: Product # deliberately hidden from graphql
     toType:
       type: Product # deliberately hidden from graphql
 
 STORED_IN:
-  type: MANY_TO_ONE
+  cardinality: MANY_TO_ONE
   fromType:
     type: Repository
     name: storedIn

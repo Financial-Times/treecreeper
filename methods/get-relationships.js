@@ -22,7 +22,7 @@ const groupRelationships = relationships => {
 	);
 };
 
-const buildTwinRelationships = ({ neo4jName, type, fromType, toType }) => {
+const buildTwinRelationships = ({ neo4jName, cardinality, fromType, toType }) => {
 	const startNode = fromType.type;
 	const endNode = toType.type;
 
@@ -32,14 +32,14 @@ const buildTwinRelationships = ({ neo4jName, type, fromType, toType }) => {
 			endNode,
 			neo4jName,
 			direction: 'outgoing',
-			hasMany: /MANY$/.test(type)
+			hasMany: /MANY$/.test(cardinality)
 		}),
 		Object.assign({}, toType, {
 			startNode: endNode,
 			endNode: startNode,
 			neo4jName,
 			direction: 'incoming',
-			hasMany: /^MANY/.test(type)
+			hasMany: /^MANY/.test(cardinality)
 		})
 	].map(obj => {
 		delete obj.type;
