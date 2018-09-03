@@ -3,7 +3,7 @@ const cache = require('../lib/cache');
 const getRelationships = require('./get-relationships');
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
-const getStringPatterns = require('./get-string-patterns');
+const getStringPattern = require('../lib/get-string-pattern');
 
 const getType = (
 	typeName,
@@ -27,7 +27,7 @@ const getType = (
 
 	Object.values(type.properties).forEach(prop => {
 		if (prop.pattern) {
-			prop.pattern = getStringPatterns.method(prop.pattern);
+			prop.validator = getStringPattern(prop.pattern);
 		}
 	});
 

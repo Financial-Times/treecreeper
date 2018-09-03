@@ -72,7 +72,7 @@ describe('get-type', () => {
 			CODE: '^ab$'
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.pattern;
+		const validator = type.properties.code.validator;
 		expect(validator.test('ay')).to.be.false;
 		expect(validator.test('zb')).to.be.false;
 		expect(validator.test('ab')).to.be.true;
@@ -97,7 +97,7 @@ describe('get-type', () => {
 			}
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.pattern;
+		const validator = type.properties.code.validator;
 		expect(validator.test('AB')).to.be.true;
 	});
 

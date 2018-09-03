@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
-const getStringPatterns = require('../../methods/get-string-patterns');
-const ATTRIBUTE_NAME = getStringPatterns.method('ATTRIBUTE_NAME');
+const getStringValidator = require('../../lib/get-string-validator');
+const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 
 const fs = require('fs');

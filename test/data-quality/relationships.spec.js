@@ -2,11 +2,11 @@ const rawData = require('../../lib/raw-data');
 const { expect } = require('chai');
 const relationships = rawData.getRelationships();
 const { getTypes } = require('../../');
-const getStringPatterns = require('../../methods/get-string-patterns');
-const RELATIONSHIP_NAME = getStringPatterns.method('RELATIONSHIP_NAME');
-const ATTRIBUTE_NAME = getStringPatterns.method('ATTRIBUTE_NAME');
+const getStringValidator = require('../../lib/get-string-validator');
+const RELATIONSHIP_NAME = getStringValidator('RELATIONSHIP_NAME');
+const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 
-describe.only('data-quality: relationships', () => {
+describe('data-quality: relationships', () => {
 	const validTypes = getTypes().map(t => t.name);
 
 	describe('raw data', () => {
