@@ -1,7 +1,6 @@
 const rawData = require('../lib/raw-data');
 const cache = require('../lib/cache');
 const getRelationships = require('./get-relationships');
-const dummyRegExp = { test: () => true };
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const getStringPatterns = require('./get-string-patterns');

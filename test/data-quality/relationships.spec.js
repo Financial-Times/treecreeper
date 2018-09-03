@@ -16,60 +16,60 @@ describe.only('data-quality: relationships', () => {
 					definitions = [definitions];
 				}
 
-				definitions.forEach(({ hideFromGraphql, cardinality, toType, fromType }) => {
-					it('has a constant-case neo4j relationship name', () => {
-						expect(neo4jName).to.match(RELATIONSHIP_NAME);
-					});
-
-					it('defines cardinality and end node types', () => {
-						expect(cardinality).to.exist;
-						expect(fromType).to.exist;
-						expect(toType).to.exist;
-					});
-
-					const validateNode = node => {
-						it('uses valid node type', () => {
-							expect(node.type).to.be.oneOf(validTypes);
+				definitions.forEach(
+					({ hideFromGraphql, cardinality, toType, fromType }) => {
+						it('has a constant-case neo4j relationship name', () => {
+							expect(neo4jName).to.match(RELATIONSHIP_NAME);
 						});
 
-						it('defines recursive or single level graphql properties', () => {
-							expect(!!(node.name || node.recursiveName)).to.be.true;
+						it('defines cardinality and end node types', () => {
+							expect(cardinality).to.exist;
+							expect(fromType).to.exist;
+							expect(toType).to.exist;
 						});
 
-						if (node.recursiveName) {
-							it('uses valid graphql recursive property name', () => {
-								expect(node.recursiveName).to.match(ATTRIBUTE_NAME);
+						const validateNode = node => {
+							it('uses valid node type', () => {
+								expect(node.type).to.be.oneOf(validTypes);
 							});
-							it('has graphql recursiveDescription', () => {
-								expect(node.recursiveDescription).to.be.a('string');
+
+							it('defines recursive or single level graphql properties', () => {
+								expect(!!(node.name || node.recursiveName)).to.be.true;
 							});
+
+							if (node.recursiveName) {
+								it('uses valid graphql recursive property name', () => {
+									expect(node.recursiveName).to.match(ATTRIBUTE_NAME);
+								});
+								it('has graphql recursiveDescription', () => {
+									expect(node.recursiveDescription).to.be.a('string');
+								});
+							}
+							if (node.name) {
+								it('uses valid graphql property name', () => {
+									expect(node.name).to.match(ATTRIBUTE_NAME);
+								});
+								it('has graphql description', () => {
+									expect(node.description).to.be.a('string');
+								});
+							}
+						};
+						it('defines valid cardinality type', () => {
+							expect(cardinality).to.be.oneOf([
+								'ONE_TO_ONE',
+								'ONE_TO_MANY',
+								'MANY_TO_ONE',
+								'MANY_TO_MANY'
+							]);
+						});
+						if (!hideFromGraphql) {
+							describe(`toType: ${toType.type}`, () => validateNode(toType));
+							describe(`fromType: ${fromType.type}`, () =>
+								validateNode(fromType));
 						}
-						if (node.name) {
-							it('uses valid graphql property name', () => {
-								expect(node.name).to.match(ATTRIBUTE_NAME);
-							});
-							it('has graphql description', () => {
-								expect(node.description).to.be.a('string');
-							});
-						}
-					};
-					it('defines valid cardinality type', () => {
-						expect(cardinality).to.be.oneOf([
-							'ONE_TO_ONE',
-							'ONE_TO_MANY',
-							'MANY_TO_ONE',
-							'MANY_TO_MANY'
-						]);
-					});
-					if (!hideFromGraphql) {
-						describe(`toType: ${toType.type}`, () => validateNode(toType));
-						describe(`fromType: ${fromType.type}`, () =>
-							validateNode(fromType));
 					}
-				});
+				);
 			});
 		});
 	});
-
-	describe.skip('constructed schema', () => {});
 });
