@@ -10,7 +10,7 @@ module.exports = Object.assign(
 		// getIdentifierFields: type => [],
 		// getGraphQLSchema: () => '',
 
-		graphqlDefs: require('./graphql/generate-graphql-defs')
+		graphqlDefs: require('./lib/generate-graphql-defs')
 	},
 	require('./lib/validate')
 );

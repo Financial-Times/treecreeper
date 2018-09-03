@@ -91,53 +91,53 @@ const buildTwinRelationships = ({
 	});
 };
 
-const getNormalizedRawData = () => {
-	let normalizedRelationships = cache.get('relationships', `normalizedRawData`);
-	if (!normalizedRelationships) {
-		normalizedRelationships = Object.entries(rawData.getRelationships()).reduce(
-			(configsList, [neo4jName, definitions]) => {
-				if (!Array.isArray(definitions)) {
-					definitions = [definitions];
-				}
-				return configsList.concat(
-					definitions.map(definition =>
-						Object.assign({ neo4jName }, definition)
-					)
-				);
-			},
-			[]
-		);
-		cache.set('relationships', `normalizedRawData`, normalizedRelationships);
-	}
-
-	return normalizedRelationships;
-};
-
-module.exports.method = (typeName = undefined, { structure = 'flat' } = {}) => {
-	let relationships = cache.get('relationships', `${typeName}:${structure}`);
-
-	if (!relationships) {
-		relationships = getNormalizedRawData()
-			.filter(({ fromType, toType }) =>
-				[fromType.type, toType.type].includes(typeName)
-			)
-			.reduce(
-				(list, definition) => list.concat(buildTwinRelationships(definition)),
+const getNormalizedRawData = cache.cacheify(
+	() => {
+		return deepFreeze(
+			Object.entries(rawData.getRelationships()).reduce(
+				(configsList, [neo4jName, definitions]) => {
+					if (!Array.isArray(definitions)) {
+						definitions = [definitions];
+					}
+					return configsList.concat(
+						definitions.map(definition =>
+							Object.assign({ neo4jName }, definition)
+						)
+					);
+				},
 				[]
 			)
-			.filter(({ startNode }) => startNode === typeName);
+		);
+	},
+	() => 'relationships:normalizedRawData'
+);
 
-		if (structure === 'rest') {
-			relationships = restRelationships(relationships);
-		}
+const getRelationships = (
+	typeName = undefined,
+	{ structure = 'flat' } = {}
+) => {
+	let relationships = getNormalizedRawData()
+		.filter(({ fromType, toType }) =>
+			[fromType.type, toType.type].includes(typeName)
+		)
+		.reduce(
+			(list, definition) => list.concat(buildTwinRelationships(definition)),
+			[]
+		)
+		.filter(({ startNode }) => startNode === typeName);
 
-		if (structure === 'graphql') {
-			relationships = graphqlRelationships(relationships);
-		}
-		relationships = deepFreeze(relationships);
-
-		cache.set('relationships', `${typeName}:${structure}`, relationships);
+	if (structure === 'rest') {
+		relationships = restRelationships(relationships);
 	}
 
-	return relationships;
+	if (structure === 'graphql') {
+		relationships = graphqlRelationships(relationships);
+	}
+	return deepFreeze(relationships);
 };
+
+module.exports.method = cache.cacheify(
+	getRelationships,
+	(typeName = undefined, { structure = 'flat' } = {}) =>
+		`relationships:${typeName}:${structure}`
+);
