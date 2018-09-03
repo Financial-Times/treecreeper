@@ -36,7 +36,11 @@ module.exports.method = (
 	const cacheKey = `${typeName}:${relationshipStructure}:${groupProperties}`;
 	let type = cache.get('types', cacheKey);
 	if (!type) {
-		type = rawData.getTypes().find(type => type.name === typeName);
+		type = Object.assign(
+			{},
+			rawData.getTypes().find(type => type.name === typeName)
+		);
+		type.properties = Object.assign({}, type.properties || {});
 		if (!type) {
 			cache.set('types', cacheKey, null);
 			return;
@@ -45,18 +49,24 @@ module.exports.method = (
 			type.pluralName = `${type.name}s`;
 		}
 
-		if (type.properties) {
-			Object.values(type.properties).forEach(prop => {
-				prop.pattern = getValidator(prop.pattern);
-			});
-		}
-		cache.set('types', cacheKey, type);
+		Object.values(type.properties).forEach(prop => {
+			prop.pattern = getValidator(prop.pattern);
+		});
 
 		if (relationshipStructure) {
-			type.relationships = getRelationships.method(type.name, {
+			const relationships = getRelationships.method(type.name, {
 				structure: relationshipStructure
 			});
+			if (relationshipStructure === 'graphql') {
+				relationships.forEach(def => {
+					type.properties[def.name] = def;
+				});
+			} else {
+				type.relationships = relationships;
+			}
 		}
+
+		cache.set('types', cacheKey, type);
 	}
 	return type;
 };

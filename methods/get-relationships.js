@@ -22,7 +22,60 @@ const groupRelationships = relationships => {
 	);
 };
 
-const buildTwinRelationships = ({ neo4jName, cardinality, fromType, toType }) => {
+const graphqlRelationships = relationships => {
+	return relationships.reduce(
+		(
+			arr,
+			{
+				neo4jName,
+				direction,
+				endNode,
+				hasMany,
+				name,
+				description,
+				label,
+				recursiveName,
+				recursiveDescription,
+				recursiveLabel
+			}
+		) => {
+			if (name) {
+				arr.push({
+					type: endNode,
+					hasMany,
+					name,
+					isRecursive: false,
+					isRelationship: true,
+					neo4jName,
+					description,
+					label
+				});
+			}
+			if (recursiveName) {
+				arr.push({
+					type: endNode,
+					hasMany,
+					name: recursiveName,
+					isRecursive: true,
+					isRelationship: true,
+					neo4jName,
+					description: recursiveDescription,
+					label: recursiveLabel
+				});
+			}
+
+			return arr;
+		},
+		[]
+	);
+};
+
+const buildTwinRelationships = ({
+	neo4jName,
+	cardinality,
+	fromType,
+	toType
+}) => {
 	const startNode = fromType.type;
 	const endNode = toType.type;
 
@@ -89,7 +142,11 @@ module.exports.method = (
 			.filter(({ startNode }) => startNode === typeName);
 
 		relationships =
-			structure === 'flat' ? relationships : groupRelationships(relationships);
+			structure === 'grouped'
+				? groupRelationships(relationships)
+				: structure === 'graphql'
+					? graphqlRelationships(relationships)
+					: relationships;
 	}
 
 	return relationships;

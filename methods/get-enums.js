@@ -8,9 +8,12 @@ module.exports.method = () => {
 	let enums = cache.get('enums', 'all');
 	if (!enums) {
 		enums = Object.entries(rawData.getEnums()).reduce(
-			(map, [key, { options }]) =>
+			(map, [key, { options, description }]) =>
 				Object.assign(map, {
-					[key]: Array.isArray(options) ? mapToObjectResolver(options) : options
+					[key]: {
+						options: Array.isArray(options) ? mapToObjectResolver(options) : options,
+						description
+					}
 				}),
 			{}
 		);

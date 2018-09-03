@@ -34,18 +34,17 @@ describe('get-relationships', () => {
 				}
 			});
 			expect(getRelationships('Type1')).to.eql([
-					{
-						neo4jName: 'HAS',
-						direction: 'outgoing',
-						endNode: 'Type2',
-						startNode: 'Type1',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			);
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					endNode: 'Type2',
+					startNode: 'Type1',
+					hasMany: false,
+					name: 'test-name',
+					description: 'test description',
+					label: 'test label'
+				}
+			]);
 		});
 
 		it('retrieve relationships pointing to the node', () => {
@@ -62,18 +61,17 @@ describe('get-relationships', () => {
 				}
 			});
 			expect(getRelationships('Type2')).to.eql([
-					{
-						neo4jName: 'HAS',
-						direction: 'incoming',
-						endNode: 'Type1',
-						startNode: 'Type2',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			);
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					endNode: 'Type1',
+					startNode: 'Type2',
+					hasMany: false,
+					name: 'test-name',
+					description: 'test description',
+					label: 'test label'
+				}
+			]);
 		});
 
 		it('retrieve multiple relationships with same name', () => {
@@ -91,23 +89,22 @@ describe('get-relationships', () => {
 					}
 				]
 			});
-			expect(getRelationships('Type1')).to.eql( [
-					{
-						neo4jName: 'HAS',
-						direction: 'outgoing',
-						hasMany: false,
-						endNode: 'Type2',
-						startNode: 'Type1',
-					},
-					{
-						neo4jName: 'HAS',
-						direction: 'incoming',
-						hasMany: false,
-						endNode: 'Type3',
-						startNode: 'Type1',
-					}
-				]
-			);
+			expect(getRelationships('Type1')).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					hasMany: false,
+					endNode: 'Type2',
+					startNode: 'Type1'
+				},
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					hasMany: false,
+					endNode: 'Type3',
+					startNode: 'Type1'
+				}
+			]);
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
@@ -120,23 +117,22 @@ describe('get-relationships', () => {
 					}
 				]
 			});
-			expect(getRelationships('Type1')).to.eql( [
-					{
-						neo4jName: 'HAS',
-						direction: 'outgoing',
-						endNode: 'Type1',
-						startNode: 'Type1',
-						hasMany: false,
-					},
-					{
-						neo4jName: 'HAS',
-						direction: 'incoming',
-						endNode: 'Type1',
-						startNode: 'Type1',
-						hasMany: false,
-					}
-				]
-			);
+			expect(getRelationships('Type1')).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					endNode: 'Type1',
+					startNode: 'Type1',
+					hasMany: false
+				},
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					endNode: 'Type1',
+					startNode: 'Type1',
+					hasMany: false
+				}
+			]);
 		});
 		describe('cardinality', () => {
 			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
@@ -162,13 +158,13 @@ describe('get-relationships', () => {
 						const hasMany =
 							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
 						expect(
-							getRelationships('Type1').find(({neo4jName}) => neo4jName === 'HAS').hasMany
+							getRelationships('Type1').find(
+								({ neo4jName }) => neo4jName === 'HAS'
+							).hasMany
 						).to.equal(hasMany);
 					});
 				});
 		});
-
-
 	});
 
 	context('rest api (grouped) style', () => {

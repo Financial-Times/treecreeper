@@ -1,4 +1,6 @@
 const { stripIndent } = require('common-tags');
+const getTypes = require('../methods/get-types').method;
+const getEnums = require('../methods/get-enums').method;
 
 // Just here to ensure 100% backwards compatibility with previous beginnings
 // of graphql mutations
@@ -39,60 +41,48 @@ const indentMultiline = (str, indent, trimFirst) => {
 		.join('\n');
 };
 
-const generatePropertyFields = properties => {
-	return properties
-		.map(([key, value]) => {
-			return stripEmptyFirstLine`
-      # ${value.description}
-      ${key}: ${value.type}`;
-		})
-		.join('');
-};
+const graphqlDirection = direction => direction === 'outgoing' ?  'OUT' : 'IN'
 
 const relFragment = (type, direction, depth = '') => {
-	const left = direction === 'IN' ? '<' : '';
-	const right = direction === 'OUT' ? '>' : '';
+	const left = direction === 'incoming' ? '<' : '';
+	const right = direction === 'outgoing' ? '>' : '';
 	return `${left}-[:${type}${depth}]-${right}`;
 };
 
-const maybePluralType = definition =>
-	definition.hasMany ? `[${definition.type}]` : definition.type;
 
-const maybePaginate = definition =>
-	definition.hasMany ? '(first: Int, offset: Int)' : '';
+const maybePluralType = def =>
+	def.hasMany ? `[${def.type}]` : def.type;
 
-const generateDirectRelationshipField = definition =>
-	definition.description && definition.name
-		? `# ${definition.description}
-        ${definition.name}${maybePaginate(definition)}: ${maybePluralType(
-				definition
-		  )} @relation(name: "${definition.underlyingRelationship}", direction: "${
-				definition.direction
-		  }")`
-		: '';
+const maybePaginate = def =>
+	def.isRelationship && def.hasMany ? '(first: Int, offset: Int)' : '';
 
-// const generateRecursiveRelationshipField = definition =>
-// 	definition.recursiveDescription && definition.recursiveName
-// 		? `# ${definition.recursiveDescription}
-//         ${definition.recursiveName}${maybePaginate(
-// 				definition
-// 		  )}: ${maybePluralType(definition)} @cypher(
-//       statement: "MATCH (this)${relFragment(
-// 				definition.underlyingRelationship,
-// 				definition.direction,
-// 				'*1..20'
-// 			)}(related:${definition.type}) RETURN DISTINCT related"
-//     )`
-// 		: '';
+const cypherResolver = def => {
+	if (!def.isRelationship) {
+		return '';
+	}
+	if (def.isRecursive) {
+		return `@cypher(
+      statement: "MATCH (this)${relFragment(
+				def.neo4jName,
+				def.direction,
+				'*1..20'
+			)}(related:${def.type}) RETURN DISTINCT related"
+    )`
+	} else {
+		return `@relation(name: "${def.neo4jName}", direction: "${graphqlDirection(def.direction)}")`
+	}
+}
 
-// const generateRelationshipField = definition => {
-// 	return stripEmptyFirstLine`
-//         ${generateDirectRelationshipField(definition)}
-//         ${generateRecursiveRelationshipField(definition)}`;
-// };
 
-// const generateRelationshipFields = definitions =>
-// 	(definitions || []).map(generateRelationshipField).join('');
+const generatePropertyFields = properties => {
+	return properties
+		.map(([name, def]) =>
+			stripEmptyFirstLine`
+      # ${def.description}
+      ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(def)}`
+    )
+		.join('');
+};
 
 const PAGINATE = indentMultiline(
 	generatePropertyFields(
@@ -126,9 +116,6 @@ const generateQuery = ({ name, type, properties, paginate }) => {
   ): ${type}`;
 };
 
-const getTypes = require('../methods/get-types').method;
-const rawData = require('../lib/raw-data');
-
 const generateGraphqlDefs = () => {
 	const typeDefinitions = getTypes({ relationshipStructure: 'graphql' }).map(
 		config => {
@@ -140,14 +127,7 @@ type ${config.name} {
 		2,
 		true
 	)}
-
-		  ${'' &&
-				indentMultiline(
-					generateRelationshipFields(relationshipsSchema[config.name]),
-					2,
-					true
-				)}
-		}`;
+}`;
 		}
 	);
 
@@ -171,13 +151,12 @@ type Query {
   ${indentMultiline(queries.join('\n\n'), 2)}
 }`;
 
-	const enumDefinitions = Object.entries(rawData.getEnums()).map(
-		([key, { description, options }]) => {
-			options = Array.isArray(options) ? options : Object.keys(options);
+	const enumDefinitions = Object.entries(getEnums()).map(
+		([name, {description, options}]) => {
 			return `
 # ${description}
-enum ${key} {
-${indentMultiline(options.join('\n'), 2)}
+enum ${name} {
+${indentMultiline(Object.keys(options).join('\n'), 2)}
 }`;
 		}
 	);
@@ -186,5 +165,7 @@ ${indentMultiline(options.join('\n'), 2)}
 		customGraphql
 	]);
 };
+
+console.log(generateGraphqlDefs().join(''));
 
 module.exports = generateGraphqlDefs;
