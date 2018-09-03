@@ -167,10 +167,10 @@ describe('get-relationships', () => {
 		});
 	});
 
-	context('rest api (grouped) style', () => {
+	context('rest api  style', () => {
 		it('returns an object', () => {
 			rawData.getRelationships.returns({});
-			expect(getRelationships('Type', { structure: 'grouped' })).to.eql({});
+			expect(getRelationships('Type', { structure: 'rest' })).to.eql({});
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
@@ -186,7 +186,7 @@ describe('get-relationships', () => {
 					toType: { type: 'Type2' }
 				}
 			});
-			expect(getRelationships('Type1', { structure: 'grouped' })).to.eql({
+			expect(getRelationships('Type1', { structure: 'rest' })).to.eql({
 				HAS: [
 					{
 						direction: 'outgoing',
@@ -213,7 +213,7 @@ describe('get-relationships', () => {
 					}
 				}
 			});
-			expect(getRelationships('Type2', { structure: 'grouped' })).to.eql({
+			expect(getRelationships('Type2', { structure: 'rest' })).to.eql({
 				HAS: [
 					{
 						direction: 'incoming',
@@ -242,7 +242,7 @@ describe('get-relationships', () => {
 					}
 				]
 			});
-			expect(getRelationships('Type1', { structure: 'grouped' })).to.eql({
+			expect(getRelationships('Type1', { structure: 'rest' })).to.eql({
 				HAS: [
 					{
 						description: undefined,
@@ -274,7 +274,7 @@ describe('get-relationships', () => {
 					}
 				]
 			});
-			expect(getRelationships('Type1', { structure: 'grouped' })).to.eql({
+			expect(getRelationships('Type1', { structure: 'rest' })).to.eql({
 				HAS: [
 					{
 						direction: 'outgoing',
@@ -319,7 +319,7 @@ describe('get-relationships', () => {
 						const hasMany =
 							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
 						expect(
-							getRelationships('Type1', { structure: 'grouped' }).HAS[0].hasMany
+							getRelationships('Type1', { structure: 'rest' }).HAS[0].hasMany
 						).to.equal(hasMany);
 					});
 				});

@@ -1,7 +1,7 @@
 const rawData = require('../lib/raw-data');
 const cache = require('../lib/cache');
 
-const groupRelationships = relationships => {
+const restRelationships = relationships => {
 	return relationships.reduce(
 		(
 			obj,
@@ -114,11 +114,11 @@ const getNormalizedRawData = () => {
 
 module.exports.method = (
 	typeName = undefined,
-	{ direction = undefined, structure = 'flat' } = {}
+	{ structure = 'flat' } = {}
 ) => {
 	let relationships = cache.get(
 		'relationships',
-		`${typeName}:${direction}:${structure}`
+		`${typeName}:${structure}`
 	);
 
 	if (!relationships) {
@@ -132,8 +132,8 @@ module.exports.method = (
 			)
 			.filter(({ startNode }) => startNode === typeName);
 
-		if (structure === 'grouped') {
-			relationships = groupRelationships(relationships);
+		if (structure === 'rest') {
+			relationships = restRelationships(relationships);
 		}
 
 		if (structure === 'graphql') {
@@ -142,12 +142,10 @@ module.exports.method = (
 
 		cache.set(
 			'relationships',
-			`${typeName}:${direction}:${structure}`,
+			`${typeName}:${structure}`,
 			relationships
 		);
 	}
 
 	return relationships;
-
-	// return byNodeType(rawData.getRelationships())[typeName]
 };

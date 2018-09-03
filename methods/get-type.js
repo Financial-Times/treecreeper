@@ -29,7 +29,7 @@ const getValidator = patternName => {
 module.exports.method = (
 	typeName,
 	{
-		relationshipStructure = false, // flat, grouped, graphql
+		relationshipStructure = false, // flat, rest, graphql
 		groupProperties = false
 	} = {}
 ) => {
