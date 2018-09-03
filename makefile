@@ -10,4 +10,4 @@ lint:
 	prettier --write *.md
 
 unit-test:
-	mocha test/methods
+	mocha --recursive test
