@@ -41,7 +41,7 @@ const indentMultiline = (str, indent, trimFirst) => {
 		.join('\n');
 };
 
-const graphqlDirection = direction => direction === 'outgoing' ?  'OUT' : 'IN'
+const graphqlDirection = direction => (direction === 'outgoing' ? 'OUT' : 'IN');
 
 const relFragment = (type, direction, depth = '') => {
 	const left = direction === 'incoming' ? '<' : '';
@@ -49,9 +49,7 @@ const relFragment = (type, direction, depth = '') => {
 	return `${left}-[:${type}${depth}]-${right}`;
 };
 
-
-const maybePluralType = def =>
-	def.hasMany ? `[${def.type}]` : def.type;
+const maybePluralType = def => (def.hasMany ? `[${def.type}]` : def.type);
 
 const maybePaginate = def =>
 	def.isRelationship && def.hasMany ? '(first: Int, offset: Int)' : '';
@@ -67,20 +65,24 @@ const cypherResolver = def => {
 				def.direction,
 				'*1..20'
 			)}(related:${def.type}) RETURN DISTINCT related"
-    )`
+    )`;
 	} else {
-		return `@relation(name: "${def.neo4jName}", direction: "${graphqlDirection(def.direction)}")`
+		return `@relation(name: "${def.neo4jName}", direction: "${graphqlDirection(
+			def.direction
+		)}")`;
 	}
-}
-
+};
 
 const generatePropertyFields = properties => {
 	return properties
-		.map(([name, def]) =>
-			stripEmptyFirstLine`
+		.map(
+			([name, def]) =>
+				stripEmptyFirstLine`
       # ${def.description}
-      ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(def)}`
-    )
+      ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
+					def
+				)}`
+		)
 		.join('');
 };
 
@@ -152,7 +154,7 @@ type Query {
 }`;
 
 	const enumDefinitions = Object.entries(getEnums()).map(
-		([name, {description, options}]) => {
+		([name, { description, options }]) => {
 			return `
 # ${description}
 enum ${name} {
@@ -165,7 +167,5 @@ ${indentMultiline(Object.keys(options).join('\n'), 2)}
 		customGraphql
 	]);
 };
-
-console.log(generateGraphqlDefs().join(''));
 
 module.exports = generateGraphqlDefs;

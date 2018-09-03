@@ -22,52 +22,42 @@ const groupRelationships = relationships => {
 	);
 };
 
-const graphqlRelationships = relationships => {
-	return relationships.reduce(
-		(
-			arr,
-			{
-				neo4jName,
-				direction,
-				endNode,
-				hasMany,
-				name,
-				description,
-				label,
-				recursiveName,
-				recursiveDescription,
-				recursiveLabel
-			}
-		) => {
-			if (name) {
-				arr.push({
-					type: endNode,
-					hasMany,
-					name,
-					isRecursive: false,
-					isRelationship: true,
-					neo4jName,
-					description,
-					label
-				});
-			}
-			if (recursiveName) {
-				arr.push({
-					type: endNode,
-					hasMany,
-					name: recursiveName,
-					isRecursive: true,
-					isRelationship: true,
-					neo4jName,
-					description: recursiveDescription,
-					label: recursiveLabel
-				});
-			}
+const createGraphqlRelationship = (
+	{ name, description, label },
+	isRecursive,
+	{ hasMany, direction, neo4jName, endNode }
+) => ({
+	type: endNode,
+	hasMany,
+	direction,
+	name,
+	isRecursive,
+	isRelationship: true,
+	neo4jName,
+	description,
+	label
+});
 
-			return arr;
-		},
-		[]
-	);
+const graphqlRelationships = relationships => {
+	return relationships.reduce((arr, def) => {
+		if (def.name) {
+			arr.push(createGraphqlRelationship(def, false, def));
+		}
+		if (def.recursiveName) {
+			arr.push(
+				createGraphqlRelationship(
+					{
+						name: def.recursiveName,
+						description: def.recursiveDescription,
+						label: def.recursiveLabel
+					},
+					true,
+					def
+				)
+			);
+		}
+		return arr;
+	}, []);
 };
 
 const buildTwinRelationships = ({
@@ -121,6 +111,7 @@ const getNormalizedRawData = () => {
 
 	return normalizedRelationships;
 };
+
 module.exports.method = (
 	typeName = undefined,
 	{ direction = undefined, structure = 'flat' } = {}
@@ -141,12 +132,19 @@ module.exports.method = (
 			)
 			.filter(({ startNode }) => startNode === typeName);
 
-		relationships =
-			structure === 'grouped'
-				? groupRelationships(relationships)
-				: structure === 'graphql'
-					? graphqlRelationships(relationships)
-					: relationships;
+		if (structure === 'grouped') {
+			relationships = groupRelationships(relationships);
+		}
+
+		if (structure === 'graphql') {
+			relationships = graphqlRelationships(relationships);
+		}
+
+		cache.set(
+			'relationships',
+			`${typeName}:${direction}:${structure}`,
+			relationships
+		);
 	}
 
 	return relationships;

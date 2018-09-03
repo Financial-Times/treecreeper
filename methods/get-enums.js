@@ -11,7 +11,9 @@ module.exports.method = () => {
 			(map, [key, { options, description }]) =>
 				Object.assign(map, {
 					[key]: {
-						options: Array.isArray(options) ? mapToObjectResolver(options) : options,
+						options: Array.isArray(options)
+							? mapToObjectResolver(options)
+							: options,
 						description
 					}
 				}),
