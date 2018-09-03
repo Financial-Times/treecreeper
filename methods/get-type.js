@@ -35,16 +35,16 @@ module.exports.method = (
 ) => {
 	const cacheKey = `${typeName}:${relationshipStructure}:${groupProperties}`;
 	let type = cache.get('types', cacheKey);
-	if (!type) {
-		type = Object.assign(
-			{},
-			rawData.getTypes().find(type => type.name === typeName)
-		);
-		type.properties = Object.assign({}, type.properties || {});
+	if (typeof type === 'undefined') {
+		type = rawData.getTypes().find(type => type.name === typeName);
 		if (!type) {
 			cache.set('types', cacheKey, null);
 			return;
 		}
+
+		type = Object.assign({}, type)
+		type.properties = Object.assign({}, type.properties || {});
+
 		if (!type.pluralName) {
 			type.pluralName = `${type.name}s`;
 		}
@@ -68,5 +68,6 @@ module.exports.method = (
 
 		cache.set('types', cacheKey, type);
 	}
+
 	return type;
 };
