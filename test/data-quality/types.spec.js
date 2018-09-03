@@ -19,7 +19,7 @@ describe('schema - types', () => {
 		'Float',
 		'Boolean'
 	]);
-	fs.readdirSync(path.join(process.cwd(), 'types'))
+	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
 		.map(fileName => {
 			it(`${fileName} has consistent name property`, () => {
