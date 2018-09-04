@@ -5,92 +5,92 @@ const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 
 describe('graphql def creation', () => {
-
 	let sandbox;
 	before(() => {
 		cache.clear();
 		sandbox = sinon.createSandbox();
-	})
+	});
 
-	after (() => {
+	after(() => {
 		sandbox.restore();
 		cache.clear();
-	})
+	});
 	it('generates expected graphql def given schema', () => {
-
 		sandbox.stub(rawData, 'getTypes').returns([
-				{
-					name: 'CostCentre',
-					description: 'A cost centre which groups are costed to',
-					properties: {
-						code: {
-							type: 'String',
-							required: true,
-							unique: true,
-							canIdentify: true,
-							description: 'Unique code/id for this item',
-							pattern: 'COST_CENTRE'
-						},
-						name: {
-							type: 'String',
-							canIdentify: true,
-							description: 'The name of the cost centre'
-						}
-					}
-				},
-				{
-					name: 'Group',
-					description:
-						'An overarching group which contains teams and is costed separately',
-					properties: {
-						code: {
-							type: 'String',
-							required: true,
-							unique: true,
-							canIdentify: true,
-							description: 'Unique code/id for this item',
-							pattern: 'COST_CENTRE'
-						},
-						name: {
-							type: 'String',
-							canIdentify: true,
-							description: 'The name of the group'
-						},
-						isActive: {
-							type: 'Boolean',
-							canFilter: true,
-							description: 'Whether or not the group is still in existence'
-						}
+			{
+				name: 'CostCentre',
+				description: 'A cost centre which groups are costed to',
+				properties: {
+					code: {
+						type: 'String',
+						required: true,
+						unique: true,
+						canIdentify: true,
+						description: 'Unique code/id for this item',
+						pattern: 'COST_CENTRE'
+					},
+					name: {
+						type: 'String',
+						canIdentify: true,
+						description: 'The name of the cost centre'
 					}
 				}
-			])
+			},
+			{
+				name: 'Group',
+				description:
+					'An overarching group which contains teams and is costed separately',
+				properties: {
+					code: {
+						type: 'String',
+						required: true,
+						unique: true,
+						canIdentify: true,
+						description: 'Unique code/id for this item',
+						pattern: 'COST_CENTRE'
+					},
+					name: {
+						type: 'String',
+						canIdentify: true,
+						description: 'The name of the group'
+					},
+					isActive: {
+						type: 'Boolean',
+						canFilter: true,
+						description: 'Whether or not the group is still in existence'
+					}
+				}
+			}
+		]);
 
 		sandbox.stub(rawData, 'getRelationships').returns({
-				PAYS_FOR: {
-					cardinality: 'ONE_TO_MANY',
-					fromType: {
-						type: 'CostCentre',
-						name: 'hasGroups',
-						description: 'The groups which are costed to the cost centre',
-						recursiveName: 'hasNestedGroups',
-						recursiveDescription: 'The recursive groups which are costed to the cost centre'
-					},
-					toType: {
-						type: 'Group',
-						name: 'hasBudget',
-						description: 'The Cost Centre associated with the group',
-						recursiveName: 'hasEventualBudget',
-						recursiveDescription: 'The Cost Centre associated with the group in the end'
-					}
+			PAYS_FOR: {
+				cardinality: 'ONE_TO_MANY',
+				fromType: {
+					type: 'CostCentre',
+					name: 'hasGroups',
+					description: 'The groups which are costed to the cost centre',
+					recursiveName: 'hasNestedGroups',
+					recursiveDescription:
+						'The recursive groups which are costed to the cost centre'
+				},
+				toType: {
+					type: 'Group',
+					name: 'hasBudget',
+					description: 'The Cost Centre associated with the group',
+					recursiveName: 'hasEventualBudget',
+					recursiveDescription:
+						'The Cost Centre associated with the group in the end'
 				}
-			})
+			}
+		});
 
-			sandbox.stub(rawData, 'getEnums').returns({
-				Lifecycle: {
-					description: 'The lifecycle stage of a product',
-					options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
-				}
-			})
+		sandbox.stub(rawData, 'getEnums').returns({
+			Lifecycle: {
+				description: 'The lifecycle stage of a product',
+				options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
+			}
+		});
 
 		const explodeString = str =>
 			str
@@ -98,9 +98,7 @@ describe('graphql def creation', () => {
 				.filter(str => !/^[\s]*$/.test(str))
 				.map(str => str.trim());
 
-		const generated = [].concat(
-			...generateGraphqlDefs().map(explodeString)
-		);
+		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
 
 		expect(generated).to.eql(
 			explodeString(

@@ -328,6 +328,5 @@ describe('get-relationships', () => {
 
 	context.skip('graphql style', () => {
 		it('is not tested yet', () => {});
-
-	})
+	});
 });
