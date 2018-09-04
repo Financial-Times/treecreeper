@@ -1,6 +1,6 @@
 {
   "name": "@financial-times/biz-ops-schema",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Schema for biz-ops data store and api. It provides two things: - yaml files which define which types, properties and relationships are allowed - a nodejs library for extracting subsets of this information",
   "main": "index.js",
   "directories": {

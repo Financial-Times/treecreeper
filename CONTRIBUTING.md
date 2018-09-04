@@ -6,64 +6,15 @@ Then this is the place for you.
 
 You can add 5 different types of thing to the database and API:
 
-- Types
-- Attributes on existing types
-- Relationships
+- [Types](#types-and-attributes)
+- [Attributes on existing types](#attributes)
+- [Relationships](#relationships)
 - Enums (aka drop down options)
 - String validation rules
 
-We'll cover them in reverse order, as enums and string patterns are vital to understand first
+## Types
 
-## String validation rules
-
-These are expressed as regular expressions. The following rules are applied by default to anything you create
-
-- NODE_TYPE - Pattern for the name of any new type. e.g `EachWordCapitalised` _Cannot be overridden_
-- CODE - Pattern for the code of any new type. Can be overridden by specifying a different pattern in the `pattern` property of the `code` property of the type e.g. `hyphenated-words-or-12345`
-- RELATIONSHIP_NAME - Pattern for the name of any type of relationship e.g. `I_AM_A_RELATIONSHIP`. Note that this refers to the name of the relationship in the underlying database, not the name(s) surfaced in graphQL _Cannot be overridden_
-- ATTRIBUTE_NAME - Pattern for any property on a type, or the graphQL property names used to refer to related nodes. e.g. `propertyName`, `isDirectorOf`
-
-To add a rule add a new regular expression to the map in `schema/string-patterns.js`
-
-## Enums
-
-> Todo - write this after we've discussed casing of enum fields
-
-## Relationships
-
-Relationships of any type (provided the obey the [naming rules](#string-validation-rules)) can be defined between any types. Relationships are defined in `schema/relationships/relationships.yaml`. Each entry has the following format:
-
-```yaml
-PAYS_FOR: // name of the relationship type
-  type: ONE_TO_MANY // ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE or MANY_TO_MANY
-  fromType: // One or more types the relationship can start at
-    CostCentre: // The type name
-      graphql:
-        name: hasGroups // The property name in graphql used to refer to the related type
-        description: The groups which are costed to the cost centre // graphql description
-  toType: // One or more types the relationship can end at
-    Group: // The type name
-      graphql:
-        name: hasBudget // The property name in graphql used to refer to the related type
-        description: The Cost Centre associated with the group // graphql description
-```
-
-In addition to the above, if a relationship is recursive in nature (e.g. a dependency tree for a system), the result of traversing this tree can be assigned, as a flattened list (or single node if traversing from many to many to ... to one), to a property by adding `recursiveName` and `recursiveDescription` to the graphql entries. If appropriate, when these recursive definitions are present then `name` and `description` may be omitted.
-
-### What if the relationship can exist between lots of different types?
-
-These must be added in pairs. Use an array to define a list of different pairs:
-
-```yaml
-PAYS_FOR:
-  - type: ONE_TO_MANY
-fromType: ...
-toType: ...
-```
-
-## Types and type attributes
-
-Types are defined in `schema/types`. Add a yaml file named after your type e.g. `MyType.yaml`. It's contents should be as follows:
+Types are defined in individual files in `schema/types`. Add a `.yaml` file named after your type e.g. `Cookie.yaml`, `DNSRecord.yaml`. Names of types should be singular, without punctuation, and with each word/abbreviation capitalised. The files contents should be as follows:
 
 ```yaml
 name: Bus // the type name
@@ -76,8 +27,79 @@ properties: // one or more properties defined directly on the type
     canIdentify: true // whether the field can be used to identify a single record
     canFilter: true // whether the field is useful for filtering a list of records
     description: 'Unique code/id for this item' // description used in graphql ui
+    label: Code //Short label to be used when displaying this field in forms etc.
 ```
 
 Graphql types are `String`, `Int`, `Float` and `Boolean`.
 
-In addition to these, the name of any [enum](#enums) can be used
+In addition to these, the name of any [enum](#enums) can be used as the type of a property
+
+Note that yaml files are indented with two spaces
+
+## Attributes
+To add attributes to any existing type, add them in the `properties` section of the type's `.yaml` file. Property names must be camelCased.
+
+
+## Relationships
+
+Relationships can be defined between any types. Relationships are defined in `schema/relationships.yaml`. Each entry has the following format:
+
+```yaml
+PAYS_FOR: // name of the relationship type - must be in CONSTANT_CASE
+  cardinality: ONE_TO_MANY // ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE or MANY_TO_MANY
+  fromType: // One or more types the relationship can start at
+    type: CostCentre // The type name
+    name: hasGroups // The property name in graphql used to refer to the related type
+    description: The groups which are costed to the cost centre // graphql description
+    label: Groups // Used for labelling the property in user interfaces
+  toType: // One or more types the relationship can end at
+    type: Group // The type name
+    name: hasBudget // The property name in graphql used to refer to the related type
+    description: The Cost Centre associated with the group // graphql description
+    label: Cost Centre // Used for labelling the property in user interfaces
+```
+
+In addition to the above, if a relationship is recursive in nature (e.g. a dependency tree for a system), the result of traversing this tree can be assigned, as a flattened list (or single node if traversing from many to one to ... to one), to a property by adding `recursiveName` and `recursiveDescription` to the graphql entries. If appropriate, when these recursive definitions are present then `name` and `description` may be omitted.
+
+### What if the relationship can exist between lots of different types?
+
+Use an array to define a list of pairs of end types:
+
+```yaml
+PAYS_FOR:
+  - cardinality: ONE_TO_MANY
+    fromType: ...
+    toType: ...
+  - cardinality: ...
+  ...
+```
+
+
+## String validation rules
+
+These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
+- The property name must be in CONSTANT_CASE
+- The value must be either
+  - a string that, when converted to a JavaScript regular expression, carries out the required string validation
+  - a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
+
+## Enums
+
+These are used to create enums/dropdown lists to restrict the values accepted in any field. For example `ServiceTier` is an enum with the values `Platinum`, `Gold` etc...
+
+To define a new enum add a property to `schema/enums.yaml` with either an array of values, or (if any of the values contain a number) a map of key/value pairs
+
+```yaml
+Office:
+  - OSB
+  - Manila
+  ...
+StarRating:
+  One: 1
+  Two: 2
+  ...
+```
+
+
+
+

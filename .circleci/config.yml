@@ -1,0 +1,113 @@
+version: 2
+
+
+references:
+  triggerable-by-tag: &triggerable-by-tag
+    # For a tag push unaffected by any filters, CircleCI skips the job
+    # https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+    tags:
+      only: /v[0-9]+(\.[0-9]+)*/
+
+  default_container_config: &default_container_config
+    working_directory: ~/dewey-runbooks
+    docker:
+      - image: circleci/node:8.10.0
+
+  npm_cache_key: &npm_cache_key
+    v2-dependency-npm-{{ checksum "package-lock.json" }}
+
+  restore_node_dependencies: &restore_node_dependencies
+    restore_cache:
+      keys:
+        - *npm_cache_key
+
+  cache_node_dependencies: &cache_node_dependencies
+    save_cache:
+      key: *npm_cache_key
+      paths:
+        - "node_modules"
+
+  workspace_root: &workspace_root
+    ~/
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+
+  release: &release
+    run:
+      name: Release npm package
+      command: >
+        make publish
+jobs:
+  install:
+    <<: *default_container_config
+    steps:
+      - checkout
+
+      - *restore_node_dependencies
+
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - *cache_node_dependencies
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - biz-ops-schema
+
+  test:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+
+      - run:
+          name: Run tests
+          command: make unit-test
+  lint:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+
+      - run:
+          name: Run tests
+          command: make lint
+
+  release:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+      - run:
+          name: Publish to npm
+          command: make publish
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - install:
+          filters:
+            <<: *triggerable-by-tag
+      - test:
+          requires:
+            - install
+          filters:
+            <<: *triggerable-by-tag
+      - lint:
+          requires:
+            - install
+          filters:
+            <<: *triggerable-by-tag
+      - release:
+          requires:
+            - install
+            - test
+            - lint
+          filters:
+            <<: *triggerable-by-tag
+            branches:
+              ignore: /.*/
+
