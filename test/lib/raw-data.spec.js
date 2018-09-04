@@ -1,3 +1,3 @@
 describe.skip('raw data fetching spec', () => {
-	it('is not tested yet', () => {});
+	it('add tests when functionality to refresh from s3 is added', () => {});
 });

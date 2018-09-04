@@ -4,7 +4,7 @@ module.exports = Object.assign(
 		getTypes: require('./methods/get-types').method,
 		getRelationships: require('./methods/get-relationships').method,
 		getEnums: require('./methods/get-enums').method,
-		getGraphqlDefs: require('./lib/generate-graphql-defs')
+		getGraphqlDefs: require('./methods/get-graphql-defs').method
 	},
 	require('./lib/validate')
 );

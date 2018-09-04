@@ -1,28 +1,28 @@
 const cache = require('../../lib/cache');
-const sinon = require('sinon')
-describe.only('cache spec', () => {
-	let func
+const sinon = require('sinon');
+describe('cache spec', () => {
+	let func;
 
-	let keyGetter
+	let keyGetter;
 
-	let cacheified
-	let sandbox
-	before (() => {
+	let cacheified;
+	let sandbox;
+	before(() => {
 		sandbox = sinon.createSandbox();
-		func = sandbox.stub()
-		func.callsFake(val => 2 * val)
+		func = sandbox.stub();
+		func.callsFake(val => 2 * val);
 
-		keyGetter = sandbox.stub()
-		keyGetter.callsFake(val => `key:${val}`)
+		keyGetter = sandbox.stub();
+		keyGetter.callsFake(val => `key:${val}`);
 
-	 	cacheified = cache.cacheify(func, keyGetter)
+		cacheified = cache.cacheify(func, keyGetter);
+	});
 
-	})
+	afterEach(() => sandbox.resetHistory());
 
-	afterEach(() => sandbox.resetHistory())
+	after(() => cache.clear());
 
-	after (() => cache.clear())
-	it("calls cacheified function on first call", () => {
+	it('calls cacheified function on first call', () => {
 		const result = cacheified(3);
 		expect(result).to.equal(6);
 		expect(func).calledWith(3);
@@ -34,7 +34,7 @@ describe.only('cache spec', () => {
 		expect(func).not.called;
 		expect(keyGetter).calledWith(3);
 	});
-	it("calls cacheified function if different cache key generated", () => {
+	it('calls cacheified function if different cache key generated', () => {
 		const result = cacheified(4);
 		expect(result).to.equal(8);
 		expect(func).calledWith(4);
@@ -46,5 +46,5 @@ describe.only('cache spec', () => {
 		expect(result).to.equal(8);
 		expect(func).calledWith(4);
 		expect(keyGetter).calledWith(4);
-	})
+	});
 });

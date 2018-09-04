@@ -118,7 +118,7 @@ const generateQuery = ({ name, type, properties, paginate }) => {
   ): ${type}`;
 };
 
-module.exports = () => {
+module.exports.method = () => {
 	const typeDefinitions = getTypes({ relationshipStructure: 'graphql' }).map(
 		config => {
 			return `
