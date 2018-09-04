@@ -1,6 +1,5 @@
 const sinon = require('sinon');
 const getType = require('../../methods/get-type');
-const getEnums = require('../../methods/get-enums');
 const { validateCode } = require('../../');
 
 describe('validateCode', () => {

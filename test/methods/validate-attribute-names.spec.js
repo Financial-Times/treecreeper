@@ -1,4 +1,3 @@
-const sinon = require('sinon');
 const { validateAttributeNames } = require('../../');
 
 describe('validateAttributeNames', () => {
@@ -8,9 +7,13 @@ describe('validateAttributeNames', () => {
 		).not.to.throw();
 	});
 	it('rejectOddCapitalisation', () => {
-		expect(() => validateAttributeNames({ Thing: {} })).to.throw(/Must be a camelCase string/);
+		expect(() => validateAttributeNames({ Thing: {} })).to.throw(
+			/Must be a camelCase string/
+		);
 	});
 	it('reject hyphens', () => {
-		expect(() => validateAttributeNames({ 'thi-ng': {} })).to.throw(/Must be a camelCase string/);
+		expect(() => validateAttributeNames({ 'thi-ng': {} })).to.throw(
+			/Must be a camelCase string/
+		);
 	});
 });

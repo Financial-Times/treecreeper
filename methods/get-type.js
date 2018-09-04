@@ -8,8 +8,8 @@ const getStringValidator = require('../lib/get-string-validator');
 const getType = (
 	typeName,
 	{
-		relationshipStructure = false, // flat, rest, graphql
-		groupProperties = false
+		relationshipStructure = false // flat, rest, graphql
+		// groupProperties = false
 	} = {}
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);

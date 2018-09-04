@@ -28,14 +28,22 @@ describe('validateAttributes', () => {
 			).not.to.throw();
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(/Must be a string/);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(/Must be a string/);
+			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+				/Must be a string/
+			);
+			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+				/Must be a string/
+			);
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(/Must be a string/);
+			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+				/Must be a string/
+			);
 		});
 		it('not accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(/Must be a string/);
+			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
+				/Must be a string/
+			);
 		});
 		it('apply string patterns', () => {
 			expect(() =>
@@ -65,10 +73,14 @@ describe('validateAttributes', () => {
 			expect(() => validateAttributes('Thing', { prop: false })).not.to.throw();
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(/Must be a Boolean/);
+			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+				/Must be a Boolean/
+			);
 		});
 		it('not accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(/Must be a Boolean/);
+			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
+				/Must be a Boolean/
+			);
 		});
 	});
 	describe('validating floats', () => {
@@ -89,8 +101,12 @@ describe('validateAttributes', () => {
 			).to.throw(/Must be a finite floating point number/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(/Must be a finite floating point number/);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(/Must be a finite floating point number/);
+			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+				/Must be a finite floating point number/
+			);
+			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+				/Must be a finite floating point number/
+			);
 		});
 		it('accept floats', () => {
 			expect(() => validateAttributes('Thing', { prop: 1.34 })).not.to.throw();
@@ -118,11 +134,17 @@ describe('validateAttributes', () => {
 			).to.throw(/Must be a finite integer/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(/Must be a finite integer/);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(/Must be a finite integer/);
+			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+				/Must be a finite integer/
+			);
+			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+				/Must be a finite integer/
+			);
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(/Must be a finite integer/);
+			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+				/Must be a finite integer/
+			);
 		});
 		it('accept integers', () => {
 			expect(() => validateAttributes('Thing', { prop: 134 })).not.to.throw();
@@ -152,7 +174,9 @@ describe('validateAttributes', () => {
 		});
 
 		it('not accept value not defined in a mapping enum', () => {
-			expect(() => validateAttributes('Thing', { prop: 'ban' })).to.throw(/Must be a valid enum/);
+			expect(() => validateAttributes('Thing', { prop: 'ban' })).to.throw(
+				/Must be a valid enum/
+			);
 		});
 	});
 });

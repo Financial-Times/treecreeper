@@ -15,20 +15,23 @@ You can add 5 different types of thing to the database and API:
 We'll cover them in reverse order, as enums and string patterns are vital to understand first
 
 ## String validation rules
+
 These are expressed as regular expressions. The following rules are applied by default to anything you create
 
-- NODE_TYPE - Pattern for the name of any new type. e.g `EachWordCapitalised` *Cannot be overridden*
+- NODE_TYPE - Pattern for the name of any new type. e.g `EachWordCapitalised` _Cannot be overridden_
 - CODE - Pattern for the code of any new type. Can be overridden by specifying a different pattern in the `pattern` property of the `code` property of the type e.g. `hyphenated-words-or-12345`
--	RELATIONSHIP_NAME - Pattern for the name of any type of relationship e.g. `I_AM_A_RELATIONSHIP`. Note that this refers to the name of the relationship in the underlying database, not the name(s) surfaced in graphQL *Cannot be overridden*
+- RELATIONSHIP_NAME - Pattern for the name of any type of relationship e.g. `I_AM_A_RELATIONSHIP`. Note that this refers to the name of the relationship in the underlying database, not the name(s) surfaced in graphQL _Cannot be overridden_
 - ATTRIBUTE_NAME - Pattern for any property on a type, or the graphQL property names used to refer to related nodes. e.g. `propertyName`, `isDirectorOf`
 
 To add a rule add a new regular expression to the map in `schema/string-patterns.js`
 
 ## Enums
- > Todo - write this after we've discussed casing of enum fields
+
+> Todo - write this after we've discussed casing of enum fields
 
 ## Relationships
-Relationships of any type (provided the obey the [naming rules](#string-validation-rules)) can be defined between any types.  Relationships are defined in `schema/relationships/relationships.yaml`. Each entry has the following format:
+
+Relationships of any type (provided the obey the [naming rules](#string-validation-rules)) can be defined between any types. Relationships are defined in `schema/relationships/relationships.yaml`. Each entry has the following format:
 
 ```yaml
 PAYS_FOR: // name of the relationship type
@@ -53,15 +56,13 @@ These must be added in pairs. Use an array to define a list of different pairs:
 
 ```yaml
 PAYS_FOR:
-  	-
-  		type: ONE_TO_MANY
-		  fromType:
-		    ...
-		  toType:
-		    ...
+  - type: ONE_TO_MANY
+fromType: ...
+toType: ...
 ```
 
 ## Types and type attributes
+
 Types are defined in `schema/types`. Add a yaml file named after your type e.g. `MyType.yaml`. It's contents should be as follows:
 
 ```yaml
