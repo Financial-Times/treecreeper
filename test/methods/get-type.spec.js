@@ -3,6 +3,7 @@ const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
 const cache = require('../../lib/cache');
 const getRelationships = require('../../methods/get-relationships');
+
 describe('get-type', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {

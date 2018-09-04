@@ -10,7 +10,7 @@ const readYaml = require('../../lib/read-yaml');
 const fs = require('fs');
 const path = require('path');
 
-describe('schema - types', () => {
+describe('data qulaity: types', () => {
 	const validEnums = Object.keys(enums);
 	const validStringPatterns = Object.keys(stringPatterns);
 	const validPropTypes = validEnums.concat([

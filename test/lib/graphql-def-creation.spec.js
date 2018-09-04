@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 
-describe('creating graphql schema', () => {
+describe('graphql def creation', () => {
 
 	let sandbox;
 	before(() => {
