@@ -23,16 +23,16 @@ describe('validateCode', () => {
 		expect(() => validateCode('Thing', 'acceptable')).not.to.throw();
 	});
 	it('not accept booleans', () => {
-		expect(() => validateCode('Thing', true)).to.throw();
-		expect(() => validateCode('Thing', false)).to.throw();
+		expect(() => validateCode('Thing', true)).to.throw(/Must be a string/);
+		expect(() => validateCode('Thing', false)).to.throw(/Must be a string/);
 	});
 	it('not accept floats', () => {
-		expect(() => validateCode('Thing', 1.34)).to.throw();
+		expect(() => validateCode('Thing', 1.34)).to.throw(/Must be a string/);
 	});
 	it('not accept integers', () => {
-		expect(() => validateCode('Thing', 134)).to.throw();
+		expect(() => validateCode('Thing', 134)).to.throw(/Must be a string/);
 	});
 	it('apply string patterns', () => {
-		expect(() => validateCode('Thing', 'zo-no')).to.throw();
+		expect(() => validateCode('Thing', 'zo-no')).to.throw(/Must match pattern/);
 	});
 });

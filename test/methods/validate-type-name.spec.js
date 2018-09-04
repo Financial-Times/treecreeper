@@ -16,9 +16,7 @@ describe('validateTypeName', () => {
 		expect(() => validateTypeName('Thing')).not.to.throw();
 	});
 	it('reject names not in the list', () => {
-		getType.method.returns({
-			name: 'Thing'
-		});
-		expect(() => validateTypeName('Thingo')).to.throw();
+		getType.method.returns();
+		expect(() => validateTypeName('Thingo')).to.throw(/Invalid node type/);
 	});
 });

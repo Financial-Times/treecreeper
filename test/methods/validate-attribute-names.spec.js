@@ -8,9 +8,9 @@ describe('validateAttributeNames', () => {
 		).not.to.throw();
 	});
 	it('rejectOddCapitalisation', () => {
-		expect(() => validateAttributeNames({ Thing: {} })).to.throw(/cat/);
+		expect(() => validateAttributeNames({ Thing: {} })).to.throw(/Must be a camelCase string/);
 	});
 	it('reject hyphens', () => {
-		expect(() => validateAttributeNames({ 'thi-ng': {} })).to.throw(/cat/);
+		expect(() => validateAttributeNames({ 'thi-ng': {} })).to.throw(/Must be a camelCase string/);
 	});
 });
