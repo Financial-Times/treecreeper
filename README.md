@@ -1,7 +1,7 @@
 # biz-ops-schema
 Schema for biz-ops data store and api. It provides two things:
-- yaml files which define which types, properties and relationships are allowed
-- a nodejs library for extracting subsets of this information
+- yaml files which define which types, properties and relationships are allowed. These are intended to be edited by anybody who wants to add to the things the api models
+- a nodejs library for accessing subsets this information
 
 ## API
 
@@ -11,19 +11,18 @@ Get an object defining the structure of a given `type`. The following transforms
 - any named stringPatterns will be converted to validation functions
 
 #### options
-- `relationshipStructure` [default: `flat`]: Include the relationships for the type. Can take any value accepted by `gteRelationships()` options. If it is set to `graphql` then the relationships are assigned to the `properties` object of the type as additional entries. Otherwise,they are assigned to a separate, top-level property, 'relationships'
+- `relationshipStructure` [default: `flat`]: Include the relationships for the type. Can take any value accepted by `getRelationships()` options. If it is set to `graphql` then the relationships are assigned to the `properties` object of the type as additional entries. Otherwise, they are assigned to a separate, top-level property, 'relationships'
 
 ### getAllTypes(options)
 Get an array of objects definig the structure of all types. `options` are the same as for `getType`
 
-### getEnum(enumType)
-Retrieves a key:value object defining the acceptable values of an enum
 
-### getEnums()
+### getEnums(options)
 Retrieves an array of key:value object defining the acceptable values of an enum
 
-### getRelationship(name, type = undefined, direction = undefined)
-Gets a relationship definition, possibly filtered by end node type or direction
+#### options
+- `withMeta`: wrap the enum in an object which also has metadata about the enum (e.g. 'description'.). In this case, the actual enum options will be in a `options` property
+
 
 ### getRelationships(typeName = undefined, options)
 Gets relationships for a type.
@@ -35,16 +34,32 @@ Gets relationships for a type.
 	- 'rest': returns an object grouping relationships by relationship type
 
 
-### getGraphQLSchema()
-Retrieves a schema to be used to power a graphql api // note, may not be much use without being compiled
+### validateTypeName(typeName)
+Validates that a type of the given name exists in the schema
+
+### validateCode (typeName, code)
+Validates that a code string matches the validation pattern defined for codes for the given type
+
+### validateAttributeNames ( attributes )
+Validates that names used for attributes are valid (i.e. camelCase)
+
+### validateRelationship({nodeType, relatedType, relationshipType, relatedCode})
+Validates that a relationship between a node and another node complies with the schema
+
+### validateAttributes(typeName, attributes, throwInfo)
+Validates that attribute values fora given type comply with the schema. Checks the type of each attribute and any string patterns
+
+### getGraphQLDefs()
+Retrieves graphql defs to be used to power a graphql api
+
+### normalizeTypeName
+Should be used when reading a type name from e.g. a url. Currently is a noop, but will allow consistent rolling out of more forgiving url parsing in futre if necessary
+
+*The methods below are unimplemented*
 
 ### describeGraphqlQuery(query)
 Decorates a graphql query with metadata from the schema
 
 ### describeGraphqlResult(query, result)
 
-### describeNode(type, result, options)
-
-### validate(obj)
-Unimplemented. Probably overkill for now, as API can be single source of truth, but could move in here in future
-
+### describeRestApiResult(type, result, options)
