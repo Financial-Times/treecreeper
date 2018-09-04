@@ -28,7 +28,7 @@ references:
         - "node_modules"
 
   workspace_root: &workspace_root
-    ~/
+    ~/project
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -57,7 +57,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - biz-ops-schema
+            - .
 
   test:
     <<: *default_container_config
