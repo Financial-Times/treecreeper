@@ -1,15 +1,15 @@
 const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const getEnums = require('../../methods/get-enums');
-const {validateAttributes} = require('../../')
+const { validateAttributes } = require('../../');
 
 describe('validateAttributes', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(getType, 'method')
-	})
+		sandbox.stub(getType, 'method');
+	});
 
-	afterEach(() => sandbox.restore())
+	afterEach(() => sandbox.restore());
 	describe('validating strings', () => {
 		beforeEach(() => {
 			getType.method.returns({
@@ -20,8 +20,8 @@ describe('validateAttributes', () => {
 						validator: /^[^z]+$/ //exclude the letter z
 					}
 				}
-			})
-		})
+			});
+		});
 		it('accept strings', () => {
 			expect(() =>
 				validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
@@ -38,7 +38,9 @@ describe('validateAttributes', () => {
 			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw();
 		});
 		it('apply string patterns', () => {
-			expect(() => validateAttributes('Thing', { prop: 'I am zebbedee' })).to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: 'I am zebbedee' })
+			).to.throw();
 		});
 	});
 	describe('validating booleans', () => {
@@ -50,7 +52,7 @@ describe('validateAttributes', () => {
 						type: 'Boolean'
 					}
 				}
-			})
+			});
 		});
 
 		it('not accept strings', () => {
@@ -72,12 +74,13 @@ describe('validateAttributes', () => {
 	describe('validating floats', () => {
 		beforeEach(() => {
 			getType.method.returns({
-			name: 'Thing',
-			properties: {
-				prop: {
-					type: 'Float'
-				}}
-			})
+				name: 'Thing',
+				properties: {
+					prop: {
+						type: 'Float'
+					}
+				}
+			});
 		});
 
 		it('not accept strings', () => {
@@ -100,12 +103,13 @@ describe('validateAttributes', () => {
 	describe('validating integers', () => {
 		beforeEach(() => {
 			getType.method.returns({
-			name: 'Thing',
-			properties: {
-				prop: {
-					type: 'Int'
-				}}
-			})
+				name: 'Thing',
+				properties: {
+					prop: {
+						type: 'Int'
+					}
+				}
+			});
 		});
 
 		it('not accept strings', () => {
@@ -126,8 +130,7 @@ describe('validateAttributes', () => {
 	});
 	describe('validating enums', () => {
 		beforeEach(() => {
-			getType.method.returns(
-			{
+			getType.method.returns({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -135,16 +138,17 @@ describe('validateAttributes', () => {
 					}
 				}
 			});
-			sandbox.stub(getEnums, 'method').returns(
-			{
+			sandbox.stub(getEnums, 'method').returns({
 				MyEnum: {
-						bear: 'grylls',
-						ray: 'winstone'
+					bear: 'grylls',
+					ray: 'winstone'
 				}
-			})
+			});
 		});
 		it('accept value defined in a mapping enum', () => {
-			expect(() => validateAttributes('Thing', { prop: 'grylls' })).not.to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: 'grylls' })
+			).not.to.throw();
 		});
 
 		it('not accept value not defined in a mapping enum', () => {
