@@ -3,7 +3,7 @@ const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
 const cache = require('../../lib/cache');
 
-describe.skip('get-enums', () => {
+describe('get-enums', () => {
 	const sandbox = sinon.createSandbox();
 
 	beforeEach(() => {

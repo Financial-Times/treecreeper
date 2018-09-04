@@ -102,8 +102,8 @@ describe('get-type', () => {
 		expect(validator.test('AB')).to.be.true;
 	});
 
-	describe('with grouped relationships', () => {
-		it('it includes relationship definitions', async () => {
+	describe('relationships', () => {
+		it('it includes rest api relationship definitions', async () => {
 			sandbox.stub(getRelationships, 'method');
 
 			rawData.getTypes.returns([
@@ -113,19 +113,46 @@ describe('get-type', () => {
 			]);
 
 			getRelationships.method.returns(['dummy relationship structure']);
-			const type = getType('Type1', { relationshipStructure: 'grouped' });
+			const type = getType('Type1', { relationshipStructure: 'rest' });
 			expect(getRelationships.method).calledWith('Type1', {
-				structure: 'grouped'
+				structure: 'rest'
 			});
 			expect(type.relationships).to.eql(['dummy relationship structure']);
 		});
-	});
 
-	describe.skip('withGraphQLRelationships', () => {
-		it('it includes singular graphql properties', async () => {});
+		it('it includes flat relationship definitions', async () => {
+			sandbox.stub(getRelationships, 'method');
 
-		it('it includes plural graphql properties', async () => {});
+			rawData.getTypes.returns([
+				{
+					name: 'Type1'
+				}
+			]);
 
-		it('it includes recursive graphql properties', async () => {});
+			getRelationships.method.returns(['dummy relationship structure']);
+			const type = getType('Type1', { relationshipStructure: 'flat' });
+			expect(getRelationships.method).calledWith('Type1', {
+				structure: 'flat'
+			});
+			expect(type.relationships).to.eql(['dummy relationship structure']);
+		});
+
+		it('it merges graphql properties', async () => {
+			sandbox.stub(getRelationships, 'method');
+
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {}
+				}
+			]);
+
+			getRelationships.method.returns([{ name: 'relProp' }]);
+			const type = getType('Type1', { relationshipStructure: 'graphql' });
+			expect(getRelationships.method).calledWith('Type1', {
+				structure: 'graphql'
+			});
+			expect(type.properties.relProp).to.eql({ name: 'relProp' });
+		});
 	});
 });

@@ -3,6 +3,13 @@ const sinon = require('sinon');
 const cache = require('../../lib/cache');
 const { getRelationships } = require('../../');
 
+const extractFields = (...fieldNames) => obj => {
+	return fieldNames.reduce(
+		(target, name) => Object.assign(target, { [name]: obj[name] }),
+		{}
+	);
+};
+
 describe('get-relationships', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
@@ -326,10 +333,10 @@ describe('get-relationships', () => {
 		});
 	});
 
-	context.only('graphql style', () => {
-		it('returns an object', () => {
+	context('graphql style', () => {
+		it('returns an array', () => {
 			rawData.getRelationships.returns({});
-			expect(getRelationships('Type', { structure: 'graphql' })).to.eql({});
+			expect(getRelationships('Type', { structure: 'graphql' })).to.eql([]);
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
@@ -345,18 +352,19 @@ describe('get-relationships', () => {
 					toType: { type: 'Type2' }
 				}
 			});
-			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
-				HAS: [
-					{
-						direction: 'outgoing',
-						nodeType: 'Type2',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			});
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					type: 'Type2',
+					hasMany: false,
+					isRelationship: true,
+					isRecursive: false,
+					name: 'test-name',
+					description: 'test description',
+					label: 'test label'
+				}
+			]);
 		});
 
 		it('retrieve relationships pointing to the node', () => {
@@ -372,18 +380,19 @@ describe('get-relationships', () => {
 					}
 				}
 			});
-			expect(getRelationships('Type2', { structure: 'graphql' })).to.eql({
-				HAS: [
-					{
-						direction: 'incoming',
-						nodeType: 'Type1',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			});
+			expect(getRelationships('Type2', { structure: 'graphql' })).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					type: 'Type1',
+					isRelationship: true,
+					isRecursive: false,
+					hasMany: false,
+					name: 'test-name',
+					description: 'test description',
+					label: 'test label'
+				}
+			]);
 		});
 
 		it('retrieve multiple relationships with same name', () => {
@@ -391,36 +400,30 @@ describe('get-relationships', () => {
 				HAS: [
 					{
 						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type1' },
-						toType: { type: 'Type2' }
+						fromType: { type: 'Type1', name: 'name1a' },
+						toType: { type: 'Type2', name: 'name1b' }
 					},
 					{
 						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type3' },
-						toType: { type: 'Type1' }
+						fromType: { type: 'Type3', name: 'name2a' },
+						toType: { type: 'Type1', name: 'name2b' }
 					}
 				]
 			});
-			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
-				HAS: [
-					{
-						description: undefined,
-						direction: 'outgoing',
-						hasMany: false,
-						label: undefined,
-						name: undefined,
-						nodeType: 'Type2'
-					},
-					{
-						description: undefined,
-						direction: 'incoming',
-						hasMany: false,
-						label: undefined,
-						name: undefined,
-						nodeType: 'Type3'
-					}
-				]
-			});
+			expect(
+				getRelationships('Type1', { structure: 'graphql' }).map(
+					extractFields('name', 'direction')
+				)
+			).to.eql([
+				{
+					direction: 'outgoing',
+					name: 'name1a'
+				},
+				{
+					direction: 'incoming',
+					name: 'name2b'
+				}
+			]);
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
@@ -428,32 +431,68 @@ describe('get-relationships', () => {
 				HAS: [
 					{
 						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type1' },
-						toType: { type: 'Type1' }
+						fromType: { type: 'Type1', name: 'name-outgoing' },
+						toType: { type: 'Type1', name: 'name-incoming' }
 					}
 				]
 			});
-			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
+			expect(
+				getRelationships('Type1', { structure: 'graphql' }).map(
+					extractFields('name', 'direction')
+				)
+			).to.eql([
+				{
+					direction: 'outgoing',
+					name: 'name-outgoing'
+				},
+				{
+					direction: 'incoming',
+					name: 'name-incoming'
+				}
+			]);
+		});
+		it('define recursive relationships', () => {
+			rawData.getRelationships.returns({
 				HAS: [
 					{
-						direction: 'outgoing',
-						nodeType: 'Type1',
-						hasMany: false,
-						name: undefined,
-						description: undefined,
-						label: undefined
-					},
-					{
-						direction: 'incoming',
-						nodeType: 'Type1',
-						hasMany: false,
-						name: undefined,
-						description: undefined,
-						label: undefined
+						cardinality: 'ONE_TO_ONE',
+						fromType: {
+							type: 'Type1',
+							name: 'name1',
+							recursiveName: 'recursiveName1',
+							recursiveDescription: 'recursiveDescription1'
+						},
+						toType: { type: 'Type2' }
 					}
 				]
 			});
+
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
+				{
+					type: 'Type2',
+					hasMany: false,
+					direction: 'outgoing',
+					name: 'name1',
+					isRecursive: false,
+					isRelationship: true,
+					neo4jName: 'HAS',
+					description: undefined,
+					label: undefined
+				},
+				{
+					type: 'Type2',
+					hasMany: false,
+					direction: 'outgoing',
+					name: 'recursiveName1',
+					isRecursive: true,
+					isRelationship: true,
+					neo4jName: 'HAS',
+					description: 'recursiveDescription1',
+					label: undefined
+				}
+			]);
 		});
+
 		describe('cardinality', () => {
 			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
 				.reduce(
@@ -470,15 +509,17 @@ describe('get-relationships', () => {
 							HAS: [
 								{
 									cardinality,
-									fromType: { type: `Type${fromNum}` },
-									toType: { type: `Type${toNum}` }
+									fromType: { type: `Type${fromNum}`, name: `name${fromNum}` },
+									toType: { type: `Type${toNum}`, name: `name${toNum}` }
 								}
 							]
 						});
 						const hasMany =
 							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
 						expect(
-							getRelationships('Type1', { structure: 'graphql' }).HAS[0].hasMany
+							getRelationships('Type1', { structure: 'graphql' }).find(
+								({ neo4jName }) => neo4jName === 'HAS'
+							).hasMany
 						).to.equal(hasMany);
 					});
 				});
