@@ -81,6 +81,9 @@ jobs:
     steps:
       - *attach_workspace
       - run:
+          name: npm auth
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ${HOME}/.npmrc
+      - run:
           name: Publish to npm
           command: make publish
 
