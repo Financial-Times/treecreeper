@@ -326,7 +326,162 @@ describe('get-relationships', () => {
 		});
 	});
 
-	context.skip('graphql style', () => {
-		it('is not tested yet', () => {});
+	context.only('graphql style', () => {
+		it('returns an object', () => {
+			rawData.getRelationships.returns({});
+			expect(getRelationships('Type', { structure: 'graphql' })).to.eql({});
+		});
+
+		it('retrieve relationships pointing away from the node', () => {
+			rawData.getRelationships.returns({
+				HAS: {
+					cardinality: 'ONE_TO_ONE',
+					fromType: {
+						type: 'Type1',
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					},
+					toType: { type: 'Type2' }
+				}
+			});
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
+				HAS: [
+					{
+						direction: 'outgoing',
+						nodeType: 'Type2',
+						hasMany: false,
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				]
+			});
+		});
+
+		it('retrieve relationships pointing to the node', () => {
+			rawData.getRelationships.returns({
+				HAS: {
+					cardinality: 'ONE_TO_ONE',
+					fromType: { type: 'Type1' },
+					toType: {
+						type: 'Type2',
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				}
+			});
+			expect(getRelationships('Type2', { structure: 'graphql' })).to.eql({
+				HAS: [
+					{
+						direction: 'incoming',
+						nodeType: 'Type1',
+						hasMany: false,
+						name: 'test-name',
+						description: 'test description',
+						label: 'test label'
+					}
+				]
+			});
+		});
+
+		it('retrieve multiple relationships with same name', () => {
+			rawData.getRelationships.returns({
+				HAS: [
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type1' },
+						toType: { type: 'Type2' }
+					},
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type3' },
+						toType: { type: 'Type1' }
+					}
+				]
+			});
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
+				HAS: [
+					{
+						description: undefined,
+						direction: 'outgoing',
+						hasMany: false,
+						label: undefined,
+						name: undefined,
+						nodeType: 'Type2'
+					},
+					{
+						description: undefined,
+						direction: 'incoming',
+						hasMany: false,
+						label: undefined,
+						name: undefined,
+						nodeType: 'Type3'
+					}
+				]
+			});
+		});
+
+		it('retrieve two relationships when pointing at self', () => {
+			rawData.getRelationships.returns({
+				HAS: [
+					{
+						cardinality: 'ONE_TO_ONE',
+						fromType: { type: 'Type1' },
+						toType: { type: 'Type1' }
+					}
+				]
+			});
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql({
+				HAS: [
+					{
+						direction: 'outgoing',
+						nodeType: 'Type1',
+						hasMany: false,
+						name: undefined,
+						description: undefined,
+						label: undefined
+					},
+					{
+						direction: 'incoming',
+						nodeType: 'Type1',
+						hasMany: false,
+						name: undefined,
+						description: undefined,
+						label: undefined
+					}
+				]
+			});
+		});
+		describe('cardinality', () => {
+			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
+				.reduce(
+					(arr, cardinality) =>
+						arr.concat([
+							[cardinality, 'incoming', [1, 2]],
+							[cardinality, 'outgoing', [2, 1]]
+						]),
+					[]
+				)
+				.map(([cardinality, direction, [fromNum, toNum]]) => {
+					it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
+						rawData.getRelationships.returns({
+							HAS: [
+								{
+									cardinality,
+									fromType: { type: `Type${fromNum}` },
+									toType: { type: `Type${toNum}` }
+								}
+							]
+						});
+						const hasMany =
+							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
+						expect(
+							getRelationships('Type1', { structure: 'graphql' }).HAS[0].hasMany
+						).to.equal(hasMany);
+					});
+				});
+		});
 	});
 });
