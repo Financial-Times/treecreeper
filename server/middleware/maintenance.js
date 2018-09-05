@@ -1,7 +1,10 @@
-const writeRestriction = req =>
-	!/^(cmdb-to-bizop|biz-ops-admin|DROP ALL|(delete|update|create|test|biz-ops-load-test)-client-id|(create|delete|update)-relationship-client)$/.test(
-		req.get('client-id')
-	);
+const permittedMatchers = [
+	/^(cmdb-to-bizop|biz-ops-admin|DROP ALL)$/,
+	/^((delete|update|create|test|biz-ops-load-test)-client-id)$/,
+	/^((create|delete|update)-relationship-client)$/
+];
+
+const writeRestriction = id => !permittedMatchers.some(regex => regex.test(id));
 
 const readRestriction = req =>
 	!req.get('client-id') ||
