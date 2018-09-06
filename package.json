@@ -102,6 +102,6 @@
 		"proxyquire": "^2.0.1",
 		"sinon": "^6.1.3",
 		"sinon-chai": "^3.0.0",
-		"supertest": "3.1.0"
+		"supertest": "^3.1.0"
 	}
 }

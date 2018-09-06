@@ -14,6 +14,12 @@ const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
 	const app = express();
+
+	app.use((req, res, next) => {
+		console.log(req.httpVersion);
+		next();
+	});
+
 	app.use(contextMiddleware);
 	app.use(requestId);
 	app.use(clientId);

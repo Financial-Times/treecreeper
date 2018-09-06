@@ -4,7 +4,9 @@ const permittedMatchers = [
 	/^((create|delete|update)-relationship-client)$/
 ];
 
-const writeRestriction = id => !permittedMatchers.some(regex => regex.test(id));
+const writeRestriction = req =>
+	!req.get('client-id') ||
+	!permittedMatchers.some(regex => regex.test(req.get('client-id')));
 
 const readRestriction = req =>
 	!req.get('client-id') ||
@@ -14,7 +16,7 @@ const readRestriction = req =>
 
 const disableWrites = (req, res, next) => {
 	if (req.method !== 'GET' && writeRestriction(req)) {
-		return res.status(505).json({
+		return res.status(405).json({
 			errors: [
 				{
 					message: `
