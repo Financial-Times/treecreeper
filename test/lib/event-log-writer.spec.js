@@ -15,7 +15,7 @@ describe('Event log writer', () => {
 	let eventLogWriter;
 
 	beforeEach(() => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 		stubKinesis = {
 			putRecord: sandbox.stub()
 		};

@@ -1,7 +1,6 @@
 const { logger } = require('../lib/request-context');
 const { stripIndents } = require('common-tags');
-const readYaml = require('../../schema/lib/read-yaml');
-const typesSchema = readYaml.directory('./schema/types');
+const { getTypes } = require('@financial-times/biz-ops-schema');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
 const { executeQuery } = require('../lib/db-connection');
@@ -25,7 +24,7 @@ const constraintsCheck = async () => {
 			};
 		}
 
-		typesSchema.map(type => {
+		getTypes().map(type => {
 			const node = type.name.toLowerCase();
 			const uniqueConstraintQuery = `CONSTRAINT ON ( ${node}:${
 				type.name

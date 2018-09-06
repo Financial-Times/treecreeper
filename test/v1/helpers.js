@@ -111,7 +111,7 @@ const setupMocks = (state, { withRelationships } = {}) => {
 	before(dropDb);
 
 	beforeEach(async () => {
-		state.sandbox = sinon.sandbox.create();
+		state.sandbox = sinon.createSandbox();
 		state.stubSendEvent = stubKinesis(state.sandbox);
 		await hydrateDb(withRelationships);
 	});

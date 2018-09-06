@@ -107,6 +107,7 @@ module.exports = {
 			'LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA', // package-lock.json:8830
 			'eEQ97k66aiEVpNnapVj90', // package-lock.json:8850
 			'Y9kPzjGvIZ5jchSlqlCpBW3I82zBBL4z', // package-lock.json:8964
+			'OluM0Nl\\+Ygr/tZ/0u9IbdwqtBoHspam3A17ThTig',
 			'getNeo4jResolverNames', // schema/index.js:30|45, server/graphql/resolvers.js:4|8
 			'tech@lt\\.com' // scripts/load-testing/lib/generate/team.js:27
 		]

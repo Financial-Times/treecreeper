@@ -1,16 +1,15 @@
-const { logger } = require('../lib/request-context');
+const logger = require('@financial-times/n-logger').default;
 const {
 	makeExecutableSchema,
 	addMockFunctionsToSchema
 } = require('graphql-tools');
 
 const resolvers = require('./resolvers');
-const schema = require('../../schema');
 
-const generateGraphqlDefs = require('./generate-graphql-defs');
+const { getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 
 module.exports = makeExecutableSchema({
-	typeDefs: generateGraphqlDefs(schema),
+	typeDefs: getGraphqlDefs(),
 	resolvers: resolvers.all,
 	logger: {
 		log(message) {
@@ -23,7 +22,7 @@ module.exports = makeExecutableSchema({
 
 module.exports.createMockSchema = mocks => {
 	const mockSchema = makeExecutableSchema({
-		typeDefs: generateGraphqlDefs(schema),
+		typeDefs: getGraphqlDefs(),
 		resolvers: resolvers.enumResolvers
 	});
 	addMockFunctionsToSchema({

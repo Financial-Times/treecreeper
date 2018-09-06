@@ -195,11 +195,11 @@ describe('v1 - node generic', () => {
 								.set('x-request-id', 'security-request-id')
 								.send({
 									relationships: {
-										HAS_TECH_LEAD: [
+										SUPPORTS: [
 											{
 												direction: 'outgoing',
 												nodeType: 'DROP ALL',
-												nodeCode: 'test-person'
+												nodeCode: 'test-system'
 											}
 										]
 									}
@@ -214,10 +214,10 @@ describe('v1 - node generic', () => {
 								.set('x-request-id', 'security-request-id')
 								.send({
 									relationships: {
-										HAS_TECH_LEAD: [
+										SUPPORTS: [
 											{
 												direction: 'outgoing',
-												nodeType: 'Person',
+												nodeType: 'System',
 												nodeCode: 'DROP ALL'
 											}
 										]
@@ -236,8 +236,8 @@ describe('v1 - node generic', () => {
 										'DROP ALL': [
 											{
 												direction: 'outgoing',
-												nodeType: 'Person',
-												nodeCode: 'test-person'
+												nodeType: 'System',
+												nodeCode: 'test-system'
 											}
 										]
 									}

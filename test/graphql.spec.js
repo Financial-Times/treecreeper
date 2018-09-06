@@ -127,7 +127,7 @@ describe('Integration - GraphQL', () => {
 	};
 
 	beforeEach(async function() {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 		this.timeout(4000);
 
 		await populateDatabaseMocks('System', 'Systems');

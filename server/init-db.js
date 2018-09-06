@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
-const {
-	executeQueryWithSharedSession
-} = require('../server/lib/db-connection');
-const schemas = require('./index');
+const { executeQueryWithSharedSession } = require('./lib/db-connection');
+const schema = require('@financial-times/biz-ops-schema');
 const logger = require('@financial-times/n-logger').default;
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
@@ -31,7 +29,7 @@ const initConstraints = async () => {
 		const existingConstraints = await retrieveConstraints();
 		const desiredConstraints = []
 			.concat(
-				...schemas.typesSchema.map(({ name: typeName, properties }) => {
+				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
 						...Object.entries(properties).map(
 							([propName, { required, unique }]) => {

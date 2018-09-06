@@ -1,25 +1,18 @@
 const util = require('util');
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
-const { getNeo4jResolverNames, enumsSchema } = require('../../schema');
+const { getTypes, getEnums } = require('@financial-times/biz-ops-schema');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
 
-const queries = getNeo4jResolverNames();
+const enumResolvers = getEnums();
 
-const mapToObjectResolver = keys =>
-	keys.reduce((resolver, key) => Object.assign(resolver, { [key]: key }), {});
-
-const enumResolvers = Object.entries(enumsSchema).reduce(
-	(map, [key, { options }]) =>
-		Object.assign(map, {
-			[key]: Array.isArray(options) ? mapToObjectResolver(options) : options
+const queryResolvers = getTypes().reduce(
+	(query, type) =>
+		Object.assign(query, {
+			[type.name]: mapToNeo4j,
+			[type.pluralName]: mapToNeo4j
 		}),
-	{}
-);
-
-const queryResolvers = queries.reduce(
-	(query, key) => Object.assign(query, { [key]: mapToNeo4j }),
 	{}
 );
 

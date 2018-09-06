@@ -2,7 +2,7 @@ const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
 const { ui, graphql, v1 } = require('./routes');
-const { initConstraints } = require('../schema/init-db');
+const { initConstraints } = require('./init-db');
 const health = require('./health');
 const {
 	middleware: contextMiddleware,
@@ -16,7 +16,6 @@ const createApp = () => {
 	const app = express();
 
 	app.use((req, res, next) => {
-		console.log(req.httpVersion);
 		next();
 	});
 

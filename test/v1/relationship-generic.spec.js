@@ -10,12 +10,32 @@ describe('v1 - relationship generic', () => {
 
 	setupMocks(state);
 
+	const cleanUp = async () => {
+		await executeQuery(
+			`MATCH (node:System { code: 'test-system' }) DETACH DELETE node`
+		);
+	};
+
+	before(async () => {
+		await cleanUp();
+	});
+
+	beforeEach(async () => {
+		await executeQuery(`
+			CREATE (node:System { code: 'test-system' }) RETURN node
+		`);
+	});
+
+	afterEach(async () => {
+		await cleanUp();
+	});
+
 	describe('unimplemented', () => {
 		describe('PUT', () => {
 			it('405 Method Not Allowed', () => {
 				return request(app)
 					.put(
-						'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 					)
 					.auth()
 					.send({ foo: 'bar' })
@@ -26,21 +46,19 @@ describe('v1 - relationship generic', () => {
 	describe('api key auth', () => {
 		it('GET no api_key returns 401', async () => {
 			return request(app)
-				.get('/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person')
+				.get('/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team')
 				.set('client-id', 'test-client-id')
 				.expect(401);
 		});
 
 		it('POST no api_key returns 401', async () => {
 			await request(app)
-				.post(
-					'/v1/relationship/Team/test-team/HAS_TEAM_MEMBER/Person/test-person'
-				)
+				.post('/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team')
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await executeQuery(
-				`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "new-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
@@ -48,13 +66,13 @@ describe('v1 - relationship generic', () => {
 		it('PATCH no api_key returns 401', async () => {
 			await request(app)
 				.patch(
-					'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+					'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 				)
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await executeQuery(
-				`MATCH (n:Team { code: "a-team" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "a-team" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
@@ -62,12 +80,12 @@ describe('v1 - relationship generic', () => {
 		it('DELETE no api_key returns 401', async () => {
 			await request(app)
 				.delete(
-					'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+					'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 				)
 				.set('client-id', 'test-client-id')
 				.expect(401);
 			const result = await executeQuery(
-				`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
+				`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 			);
 			expect(result.records.length).to.equal(0);
 		});
@@ -76,7 +94,7 @@ describe('v1 - relationship generic', () => {
 			it('GET no client-id returns 400', async () => {
 				return request(app)
 					.get(
-						'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 					)
 					.set('API_KEY', API_KEY)
 					.expect(400);
@@ -85,13 +103,13 @@ describe('v1 - relationship generic', () => {
 			it('POST no client-id returns 400', async () => {
 				await request(app)
 					.post(
-						'/v1/relationship/Team/test-team/HAS_TEAM_MEMBER/Person/test-person'
+						'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 					)
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await executeQuery(
-					`MATCH (n:Team { code: "new-team" })-[r]-(c) RETURN n, r, c`
+					`MATCH (n:System { code: "new-team" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -99,13 +117,13 @@ describe('v1 - relationship generic', () => {
 			it('PATCH no client-id returns 400', async () => {
 				await request(app)
 					.patch(
-						'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 					)
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				const result = await executeQuery(
-					`MATCH (n:Team { code: "a-team" })-[r]-(c) RETURN n, r, c`
+					`MATCH (n:System { code: "a-team" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -113,13 +131,13 @@ describe('v1 - relationship generic', () => {
 			it('DELETE no client-id returns 400', async () => {
 				await request(app)
 					.delete(
-						'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+						'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 					)
 					.set('API_KEY', API_KEY)
 					.expect(400);
 
 				const result = await executeQuery(
-					`MATCH (n:Team { code: "test-team" })-[r]-(c) RETURN n, r, c`
+					`MATCH (n:System { code: "test-system" })-[r]-(c) RETURN n, r, c`
 				);
 				expect(result.records.length).to.equal(0);
 			});
@@ -132,7 +150,7 @@ describe('v1 - relationship generic', () => {
 				it('should error when node type is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/DROP ALL/test-team/HAS_TECH_LEAD/Person/test-person'
+							'/v1/relationship/DROP ALL/test-system/SUPPORTED_BY/Team/test-team'
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
@@ -142,7 +160,7 @@ describe('v1 - relationship generic', () => {
 				it('should error when node code is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/DROP ALL/HAS_TECH_LEAD/Person/test-person'
+							'/v1/relationship/System/DROP ALL/SUPPORTED_BY/Team/test-team'
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
@@ -152,17 +170,17 @@ describe('v1 - relationship generic', () => {
 				it('should error when relationship type is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/test-team/DROP ALL/Person/test-person'
+							'/v1/relationship/System/test-system/DROP ALL/Team/test-team'
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(400, /DROP ALL is not a valid relationship on Team/);
+						.expect(400, /DROP ALL is not a valid relationship on System/);
 				});
 
 				it('should error when related node type is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/DROP ALL/test-person'
+							'/v1/relationship/System/test-system/SUPPORTED_BY/DROP ALL/test-team'
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
@@ -172,7 +190,7 @@ describe('v1 - relationship generic', () => {
 				it('should error when related node code is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/DROP ALL'
+							'/v1/relationship/System/test-system/SUPPORTED_BY/Team/DROP ALL'
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
@@ -182,7 +200,7 @@ describe('v1 - relationship generic', () => {
 				it('should error when client id is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+							'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 						)
 						.auth()
 						.set('client-id', 'DROP ALL')
@@ -192,7 +210,7 @@ describe('v1 - relationship generic', () => {
 				it('should error when request id is suspicious', async () => {
 					await request(app)
 						[method](
-							'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+							'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 						)
 						.auth()
 						.set('x-request-id', 'DROP ALL')
@@ -204,14 +222,14 @@ describe('v1 - relationship generic', () => {
 						// only needed for the first test below, but putting it in a before/after
 						// is a more robust cleanup than doing in the test body
 						const cleanUp = () =>
-							executeQuery('MATCH (s:Team {code: "security-team"}) DELETE s');
+							executeQuery('MATCH (s:System {code: "security-team"}) DELETE s');
 						before(cleanUp);
 						after(cleanUp);
 
 						it('should save injected cypher statements in attributes as strings', async () => {
 							await request(app)
 								[method](
-									'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+									'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 								)
 								.auth()
 								.set('x-request-id', 'security-request-id')
@@ -221,7 +239,7 @@ describe('v1 - relationship generic', () => {
 								.expect(({ status }) => /20(0|1)/.test(String(status)));
 
 							const result = await executeQuery(
-								'MATCH (s:Team {code: "test-team"})-[r:HAS_TECH_LEAD]->(p:Person {code: "test-person"}) RETURN s, r, p'
+								'MATCH (s:System {code: "test-system"})-[r:SUPPORTED_BY]->(p:Team {code: "test-team"}) RETURN s, r, p'
 							);
 							expect(result.records[0].get('r').properties.prop).to.equal(
 								'MATCH (n) DELETE n'
@@ -231,7 +249,7 @@ describe('v1 - relationship generic', () => {
 						it('should error when attribute name is suspicious', async () => {
 							await request(app)
 								[method](
-									'/v1/relationship/Team/test-team/HAS_TECH_LEAD/Person/test-person'
+									'/v1/relationship/System/test-system/SUPPORTED_BY/Team/test-team'
 								)
 								.auth()
 								.set('x-request-id', 'security-request-id')

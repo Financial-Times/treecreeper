@@ -2,10 +2,13 @@ const { logger } = require('../lib/request-context');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const schemaCompliance = require('./schema-compliance');
-const { stringPatterns } = require('../../schema');
+const stringPatterns = {
+	CLIENT_ID: /^[a-z\d][a-z\d\-\.]*[a-z\d]$/,
+	REQUEST_ID: /^[a-z\d][a-z\d\-]+[a-z\d]$/i
+};
 
 const validateClientId = id => {
-	if (!stringPatterns.CODE.test(id)) {
+	if (!stringPatterns.CLIENT_ID.test(id)) {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid client id \`${id}\`.
@@ -24,23 +27,6 @@ const validateRequestId = id => {
 	}
 };
 
-const validateAttributeNames = attributes => {
-	const nonCamelCaseAttributeName = Object.keys(attributes).find(
-		// FIXME: allow SF_ID as, at least for a while, we need this to exist so that
-		// salesforce sync works during the transition to the new architecture
-		name => name !== 'SF_ID' && !stringPatterns.ATTRIBUTE_NAME.test(name)
-	);
-
-	if (nonCamelCaseAttributeName) {
-		throw httpErrors(
-			400,
-			`Invalid attribute ${nonCamelCaseAttributeName}. Must be a camelCase string, i.e.
-			beginning with a lower case letter, and only containing upper and lower case letters
-			and digits`
-		);
-	}
-};
-
 const categorizeAttributes = ({ nodeType, code, attributes }) => {
 	if (attributes.code && attributes.code !== code) {
 		throw httpErrors(
@@ -51,8 +37,8 @@ const categorizeAttributes = ({ nodeType, code, attributes }) => {
 		);
 	}
 
-	validateAttributeNames(attributes);
-	schemaCompliance.validateNodeAttributes(nodeType, attributes);
+	schemaCompliance.validateAttributeNames(attributes);
+	schemaCompliance.validateAttributes(nodeType, attributes);
 
 	return {
 		deletedAttributes: Object.entries(attributes)
@@ -82,7 +68,7 @@ const sanitizeShared = ({
 }) => {
 	validateClientId(clientId);
 	validateRequestId(requestId);
-	schemaCompliance.validateNodeType(nodeType);
+	schemaCompliance.validateTypeName(nodeType);
 	schemaCompliance.validateCode(nodeType, code);
 
 	const result = {

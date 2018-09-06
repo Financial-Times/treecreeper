@@ -1,8 +1,8 @@
-const { initConstraints } = require('../../schema/init-db');
+const { initConstraints } = require('../server/init-db');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { driver } = require('../../server/lib/db-connection');
-const schema = require('../../schema');
+const { driver } = require('../server/lib/db-connection');
+const schema = require('@financial-times/biz-ops-schema');
 
 const mockConstraints = (stub, constraints, writeResponse) => {
 	stub.withArgs('CALL db.constraints').returns(
@@ -24,12 +24,9 @@ const mockConstraints = (stub, constraints, writeResponse) => {
 describe('creating db constraints', () => {
 	let sandbox;
 	let dbRun;
-	let originalSchema;
-	before(() => {
-		originalSchema = schema.typesSchema;
-	});
 	beforeEach(() => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
+		sandbox.stub(schema, 'getTypes');
 		sandbox.stub(driver, 'session').returns({
 			run: (dbRun = sandbox.stub()),
 			close: () => null
@@ -37,15 +34,12 @@ describe('creating db constraints', () => {
 	});
 
 	afterEach(() => sandbox.restore());
-	after(() => {
-		schema.typesSchema = originalSchema;
-	});
 
 	it("creates a uniqueness constraint if it doesn't exist", async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE']);
-		schema.typesSchema = [
+		schema.getTypes.returns([
 			{ name: 'Dog', properties: { tail: { unique: true } } }
-		];
+		]);
 		await initConstraints();
 		expect(dbRun).calledWith(
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE'
@@ -54,9 +48,9 @@ describe('creating db constraints', () => {
 
 	it("creates an existence constraint if it doesn't exist", async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)']);
-		schema.typesSchema = [
+		schema.getTypes.returns([
 			{ name: 'Dog', properties: { tail: { required: true } } }
-		];
+		]);
 		await initConstraints();
 		expect(dbRun).calledWith(
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)'
@@ -65,9 +59,9 @@ describe('creating db constraints', () => {
 
 	it("doesn't create a uniqueness constraint if it does exist", async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE']);
-		schema.typesSchema = [
+		schema.getTypes.returns([
 			{ name: 'Dog', properties: { nose: { unique: true } } }
-		];
+		]);
 		await initConstraints();
 		expect(dbRun).not.calledWith(
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE'
@@ -76,9 +70,9 @@ describe('creating db constraints', () => {
 
 	it("doesn't create an existence constraint if it does exist", async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)']);
-		schema.typesSchema = [
+		schema.getTypes.returns([
 			{ name: 'Dog', properties: { nose: { required: true } } }
-		];
+		]);
 		await initConstraints();
 		expect(dbRun).not.calledWith(
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)'
@@ -87,7 +81,7 @@ describe('creating db constraints', () => {
 
 	it('removes a uniqueness constraint if it is not expected to exist', async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE']);
-		schema.typesSchema = [];
+		schema.getTypes.returns([]);
 		await initConstraints();
 		expect(dbRun).calledWith(
 			'DROP CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE'
@@ -96,7 +90,7 @@ describe('creating db constraints', () => {
 
 	it('removes an existence constraint if it is not expected to exist', async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)']);
-		schema.typesSchema = [];
+		schema.getTypes.returns([]);
 		await initConstraints();
 		expect(dbRun).calledWith(
 			'DROP CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)'
@@ -109,7 +103,7 @@ describe('creating db constraints', () => {
 			'CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)',
 			'CONSTRAINT ON (s:Cat) ASSERT exists(s.tail)'
 		]);
-		schema.typesSchema = [
+		schema.getTypes.returns([
 			{
 				name: 'Dog',
 				properties: {
@@ -118,7 +112,7 @@ describe('creating db constraints', () => {
 				}
 			},
 			{ name: 'Cat', properties: { whiskers: { required: true } } }
-		];
+		]);
 		await initConstraints();
 
 		[
@@ -131,6 +125,7 @@ describe('creating db constraints', () => {
 	});
 
 	it('handles failure gracefully', async () => {
+		schema.getTypes.returns([]);
 		mockConstraints(dbRun, [], Promise.reject('db call has failed'));
 		// this should not throw
 		await initConstraints();

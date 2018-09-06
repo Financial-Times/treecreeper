@@ -17,7 +17,7 @@ describe('AWS kinesis client', () => {
 		storedEnv['DYNO'] = process.env.DYNO;
 		process.env.NODE_ENV = 'production';
 		process.env.DYNO = dynoId;
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 		stubPutRecord = sandbox.stub().returns({
 			promise() {
 				return Promise.resolve();
