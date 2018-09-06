@@ -1,7 +1,12 @@
+const permittedMatchers = [
+	/^(cmdb-to-bizop|biz-ops-admin|DROP ALL)$/,
+	/^((delete|update|create|test|biz-ops-load-test)-client-id)$/,
+	/^((create|delete|update)-relationship-client)$/
+];
+
 const writeRestriction = req =>
-	!/^(cmdb-to-bizop|DROP ALL|(delete|update|create|test|biz-ops-load-test|biz-ops-admin)-client-id|(create|delete|update)-relationship-client)$/.test(
-		req.get('client-id')
-	);
+	!req.get('client-id') ||
+	!permittedMatchers.some(regex => regex.test(req.get('client-id')));
 
 const readRestriction = req =>
 	!req.get('client-id') ||
@@ -11,7 +16,7 @@ const readRestriction = req =>
 
 const disableWrites = (req, res, next) => {
 	if (req.method !== 'GET' && writeRestriction(req)) {
-		return res.status(505).json({
+		return res.status(405).json({
 			errors: [
 				{
 					message: `
