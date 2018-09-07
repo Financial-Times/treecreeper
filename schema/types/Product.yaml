@@ -9,7 +9,7 @@ properties:
     pattern: STRICT_CODE
     label: Code
     description: 'Unique code/id for this item'
-  purpose:
+  description:
     type: String
     label: Purpose
     description: Brief description of what the product does
