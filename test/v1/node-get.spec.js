@@ -18,7 +18,7 @@ describe('v1 - node GET', () => {
 					code: 'test-team',
 					foo: 'bar1'
 				},
-				relationships: []
+				relationships: {}
 			});
 	});
 

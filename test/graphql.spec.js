@@ -217,7 +217,10 @@ describe('Integration - GraphQL', () => {
 			})
 			.set('client-id', 'graphql-client')
 			.set('API_KEY', process.env.API_KEY)
-			.expect(200, { data: { System: typeMocks['System'][0] } });
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).to.eql({ data: { System: typeMocks['System'][0] } });
+			});
 	});
 
 	it('GET for systems returns a list of systems', () => {

@@ -45,7 +45,7 @@ describe('v1 - node PATCH', () => {
 					_updatedByClient: 'update-client-id',
 					_updatedTimestamp: formattedTimestamp
 				},
-				relationships: []
+				relationships: {}
 			});
 
 		const result = await executeQuery(
@@ -80,7 +80,7 @@ describe('v1 - node PATCH', () => {
 					_updatedByClient: 'update-client-id',
 					_updatedTimestamp: formattedTimestamp
 				},
-				relationships: []
+				relationships: {}
 			});
 		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" }) RETURN n`
@@ -143,7 +143,7 @@ describe('v1 - node PATCH', () => {
 					_updatedByClient: 'update-client-id',
 					_updatedTimestamp: formattedTimestamp
 				},
-				relationships: []
+				relationships: {}
 			});
 
 		const result = await executeQuery(

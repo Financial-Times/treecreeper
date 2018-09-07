@@ -47,7 +47,7 @@ describe('v1 - node POST', () => {
 					_updatedByRequest: 'create-request-id',
 					_updatedTimestamp: formattedTimestamp
 				},
-				relationships: []
+				relationships: {}
 			});
 		const result = await executeQuery(
 			`MATCH (n:Team { code: "new-team" }) RETURN n`
