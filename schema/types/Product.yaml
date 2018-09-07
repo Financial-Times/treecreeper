@@ -11,7 +11,7 @@ properties:
     description: 'Unique code/id for this item'
   description:
     type: String
-    label: Purpose
+    label: Description
     description: Brief description of what the product does
   name:
     type: String
