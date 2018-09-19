@@ -146,6 +146,7 @@ describe('salesforce sync', () => {
 			await sfSync.setSalesforceIdForSystem({ node: { code: 'elephants' } });
 			expect(loginStub).not.called;
 		});
+
 		describe('when salesforce user defined', () => {
 			before(() => {
 				process.env.SALESFORCE_USER = 'test-sf-user';
@@ -183,7 +184,21 @@ describe('salesforce sync', () => {
 					System_Code__c: 'elephants'
 				});
 			});
-
+			it('uses code if no name specified', async () => {
+				await sfSync.setSalesforceIdForSystem({
+					node: { code: 'elephants' }
+				});
+				expect(sobjectStub).calledWith('BMCServiceDesk__BMC_BaseElement__c');
+				expect(createStub).calledWith({
+					BMCServiceDesk__Description__c:
+						'See https://dewey.in.ft.com/view/system/elephants',
+					BMCServiceDesk__Name__c: 'elephants',
+					BMCServiceDesk__TokenId__c: 'elephants',
+					Name: 'elephants',
+					RecordTypeId: '012D0000000Qn40IAC',
+					System_Code__c: 'elephants'
+				});
+			});
 			it('saves SF_ID to system', async () => {
 				await sfSync.setSalesforceIdForSystem({
 					node: { code: 'elephants', name: 'We Elephants' }

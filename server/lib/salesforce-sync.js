@@ -35,7 +35,7 @@ module.exports.setSalesforceIdForSystem = async ({
 		return;
 	}
 	try {
-		const salesforceName = (name || '').substr(0, 80);
+		const salesforceName = (name || code).substr(0, 80);
 		const conn = await login();
 		const { id: SF_ID } = await new Promise((res, rej) => {
 			conn.sobject('BMCServiceDesk__BMC_BaseElement__c').create(
