@@ -46,16 +46,12 @@ const initConstraints = async () => {
 			)
 			.filter(statement => !!statement);
 
-		const dropConstraints = exclusion(
-			existingConstraints,
-			desiredConstraints
-		).map(constraint => `DROP ${constraint}`);
 		const createConstraints = exclusion(
 			desiredConstraints,
 			existingConstraints
 		).map(constraint => `CREATE ${constraint}`);
 
-		for (const constraint of dropConstraints.concat(createConstraints)) {
+		for (const constraint of createConstraints) {
 			await setupConstraintIfPossible(constraint);
 		}
 

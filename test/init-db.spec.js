@@ -79,24 +79,6 @@ describe('creating db constraints', () => {
 		);
 	});
 
-	it('removes a uniqueness constraint if it is not expected to exist', async () => {
-		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE']);
-		schema.getTypes.returns([]);
-		await initConstraints();
-		expect(dbRun).calledWith(
-			'DROP CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE'
-		);
-	});
-
-	it('removes an existence constraint if it is not expected to exist', async () => {
-		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)']);
-		schema.getTypes.returns([]);
-		await initConstraints();
-		expect(dbRun).calledWith(
-			'DROP CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)'
-		);
-	});
-
 	it('handles a mixture of creates, ignores and removes', async () => {
 		mockConstraints(dbRun, [
 			'CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE',
@@ -116,8 +98,6 @@ describe('creating db constraints', () => {
 		await initConstraints();
 
 		[
-			'DROP CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)',
-			'DROP CONSTRAINT ON (s:Cat) ASSERT exists(s.tail)',
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE',
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)',
 			'CREATE CONSTRAINT ON (s:Cat) ASSERT exists(s.whiskers)'
