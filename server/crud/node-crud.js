@@ -21,6 +21,8 @@ const {
 	constructRelationshipMergeQueries
 } = require('./relationship-batcher');
 
+const salesforceSync = require('../lib/salesforce-sync');
+
 const getNodeWithRelationships = async (nodeType, code) => {
 	const query = stripIndents`
 	MATCH (node:${nodeType} {code: $code})
@@ -94,7 +96,18 @@ const executeWriteWithRelationships = async ({
 	}
 
 	logChanges(clientId, requestId, result, deletedRelationships);
-	return constructOutput(result);
+	const responseData = constructOutput(result);
+
+	// HACK: While salesforce also exists as a rival source of truth for Systems,
+	// we sync with it here. Don't like it being in here as the api should be agnostic
+	// in how it handles types, but a little hack in here feels preferable to managing
+	// another update stream consumer, particularly while avoiding race conditions when
+	// migrating from cmdb
+	if (nodeType === 'System') {
+		salesforceSync.setSalesforceIdForSystem(responseData);
+	}
+
+	return responseData;
 };
 
 const create = async input => {
