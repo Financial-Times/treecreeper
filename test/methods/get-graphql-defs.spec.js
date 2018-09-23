@@ -3,18 +3,26 @@ const generateGraphqlDefs = require('../../').getGraphqlDefs;
 const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
+const primitiveTypesMap = require('../../lib/primitive-types-map')
+
+const explodeString = str =>
+	str
+		.split('\n')
+		.filter(str => !/^[\s]*$/.test(str))
+		.map(str => str.trim());
 
 describe('graphql def creation', () => {
 	let sandbox;
-	before(() => {
+	beforeEach(() => {
 		cache.clear();
 		sandbox = sinon.createSandbox();
 	});
 
-	after(() => {
+	afterEach(() => {
 		sandbox.restore();
 		cache.clear();
 	});
+
 	it('generates expected graphql def given schema', () => {
 		sandbox.stub(rawData, 'getTypes').returns([
 			{
@@ -91,12 +99,6 @@ describe('graphql def creation', () => {
 				options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
 			}
 		});
-
-		const explodeString = str =>
-			str
-				.split('\n')
-				.filter(str => !/^[\s]*$/.test(str))
-				.map(str => str.trim());
 
 		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
 
@@ -201,4 +203,30 @@ type Mutation {
 			)
 		);
 	});
+
+	describe('converting types', () => {
+		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType])=> {
+			it(`Outputs correct type for properties using ${bizopsType}`, () => {
+				sandbox.stub(rawData, 'getTypes').returns([
+					{
+						name: 'Dummy',
+						description: 'dummy type description',
+						properties: {
+							prop: {
+								type: bizopsType,
+								description: 'a description',
+							}
+						}
+					}
+				])
+				sandbox.stub(rawData, 'getRelationships').returns({});
+				sandbox.stub(rawData, 'getEnums').returns({});
+				const generated = [].concat(...generateGraphqlDefs()).join('')
+
+
+				expect(generated).to.match(new RegExp(`prop: ${graphqlType}`))
+			})
+		})
+
+	})
 });

@@ -6,19 +6,15 @@ const enums = rawData.getEnums();
 const getStringValidator = require('../../lib/get-string-validator');
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
-
+const primitiveTypesMap = require('../../lib/primitive-types-map')
 const fs = require('fs');
 const path = require('path');
 
 describe('data quality: types', () => {
 	const validEnums = Object.keys(enums);
 	const validStringPatterns = Object.keys(stringPatterns);
-	const validPropTypes = validEnums.concat([
-		'String',
-		'Int',
-		'Float',
-		'Boolean'
-	]);
+	const validPropTypes = validEnums.concat(Object.keys(primitiveTypesMap));
+
 	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
 		.map(fileName => {

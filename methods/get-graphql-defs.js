@@ -119,7 +119,7 @@ const generateQuery = ({ name, type, properties, paginate }) => {
 };
 
 module.exports.method = () => {
-	const typeDefinitions = getTypes({ relationshipStructure: 'graphql' }).map(
+	const typeDefinitions = getTypes({primitiveTypes: 'graphql', relationshipStructure: 'graphql' }).map(
 		config => {
 			return `
 # ${config.description}
@@ -133,7 +133,7 @@ type ${config.name} {
 		}
 	);
 
-	const queries = getTypes().map(config => {
+	const queries = getTypes({primitiveTypes: 'graphql'}).map(config => {
 		return stripIndent`
       ${generateQuery({
 				name: config.name,
