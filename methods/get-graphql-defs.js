@@ -1,27 +1,6 @@
 const getTypes = require('../methods/get-types').method;
 const getEnums = require('../methods/get-enums').method;
 
-// Just here to ensure 100% backwards compatibility with previous beginnings
-// of graphql mutations
-const customGraphql = `
-input SystemInput {
-    serviceTier: ServiceTier
-    name: String
-    supported: Boolean
-    primaryURL: String
-    systemType: String
-    serviceTier: ServiceTier
-    serviceType: String
-    hostPlatform: String
-    personalData: Boolean
-    sensitiveData: Boolean
-    lifecycleStage: SystemLifecycle
-}
-
-type Mutation {
-    System(code: String, params: SystemInput): System!
-}`;
-
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
 	return [...Array(Math.max(hardCoded.length, vars.length))]
@@ -158,7 +137,6 @@ module.exports.method = () => {
 		'type Query {\n',
 		...typesFromSchema.map(defineQueries),
 		'}',
-		Object.entries(getEnums({ withMeta: true })).map(defineEnum),
-		customGraphql
+		Object.entries(getEnums({ withMeta: true })).map(defineEnum)
 	);
 };
