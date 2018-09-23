@@ -4,7 +4,7 @@ const getRelationships = require('./get-relationships');
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
-const primitiveTypesMap = require('../lib/primitive-types-map')
+const primitiveTypesMap = require('../lib/primitive-types-map');
 
 const getType = (
 	typeName,
@@ -32,7 +32,7 @@ const getType = (
 			prop.validator = getStringValidator(prop.pattern);
 		}
 		if (primitiveTypes === 'graphql') {
-			prop.type = primitiveTypesMap[prop.type]
+			prop.type = primitiveTypesMap[prop.type];
 		}
 	});
 

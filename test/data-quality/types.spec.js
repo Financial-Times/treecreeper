@@ -6,7 +6,7 @@ const enums = rawData.getEnums();
 const getStringValidator = require('../../lib/get-string-validator');
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
-const primitiveTypesMap = require('../../lib/primitive-types-map')
+const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
 

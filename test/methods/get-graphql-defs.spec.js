@@ -3,7 +3,7 @@ const generateGraphqlDefs = require('../../').getGraphqlDefs;
 const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
-const primitiveTypesMap = require('../../lib/primitive-types-map')
+const primitiveTypesMap = require('../../lib/primitive-types-map');
 
 const explodeString = str =>
 	str
@@ -205,7 +205,7 @@ type Mutation {
 	});
 
 	describe('converting types', () => {
-		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType])=> {
+		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
 			it(`Outputs correct type for properties using ${bizopsType}`, () => {
 				sandbox.stub(rawData, 'getTypes').returns([
 					{
@@ -214,19 +214,17 @@ type Mutation {
 						properties: {
 							prop: {
 								type: bizopsType,
-								description: 'a description',
+								description: 'a description'
 							}
 						}
 					}
-				])
+				]);
 				sandbox.stub(rawData, 'getRelationships').returns({});
 				sandbox.stub(rawData, 'getEnums').returns({});
-				const generated = [].concat(...generateGraphqlDefs()).join('')
+				const generated = [].concat(...generateGraphqlDefs()).join('');
 
-
-				expect(generated).to.match(new RegExp(`prop: ${graphqlType}`))
-			})
-		})
-
-	})
+				expect(generated).to.match(new RegExp(`prop: ${graphqlType}`));
+			});
+		});
+	});
 });

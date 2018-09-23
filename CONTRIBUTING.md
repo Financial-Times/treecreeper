@@ -31,6 +31,7 @@ properties: // one or more properties defined directly on the type
 ```
 
 ### Primitive types
+
 Each property should have a type chosen from the following
 
 - Word - for ids and other very short strings, generally not allowing whitespace
@@ -50,8 +51,8 @@ In addition to the above, the name of any [enum](#enums) can be used as the type
 Note that yaml files are indented with two spaces
 
 ## Attributes
-To add attributes to any existing type, add them in the `properties` section of the type's `.yaml` file. Property names must be camelCased.
 
+To add attributes to any existing type, add them in the `properties` section of the type's `.yaml` file. Property names must be camelCased.
 
 ## Relationships
 
@@ -87,10 +88,10 @@ PAYS_FOR:
   ...
 ```
 
-
 ## String validation rules
 
 These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
+
 - The property name must be in CONSTANT_CASE
 - The value must be either
   - a string that, when converted to a JavaScript regular expression, carries out the required string validation
@@ -112,7 +113,3 @@ StarRating:
   Two: 2
   ...
 ```
-
-
-
-

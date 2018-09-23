@@ -1,4 +1,3 @@
-const { stripIndent } = require('common-tags');
 const getTypes = require('../methods/get-types').method;
 const getEnums = require('../methods/get-enums').method;
 
@@ -73,7 +72,7 @@ const cypherResolver = def => {
 	}
 };
 
-const generatePropertyFields = properties => {
+const defineProperties = properties => {
 	return properties
 		.map(
 			([name, def]) =>
@@ -87,7 +86,7 @@ const generatePropertyFields = properties => {
 };
 
 const PAGINATE = indentMultiline(
-	generatePropertyFields(
+	defineProperties(
 		Object.entries({
 			offset: {
 				type: 'Int = 0',
@@ -110,60 +109,56 @@ const getIdentifyingFields = config =>
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canFilter);
 
-const generateQuery = ({ name, type, properties, paginate }) => {
+const defineQuery = ({ name, type, properties, paginate }) => {
 	return `
   ${name}(
     ${paginate ? PAGINATE : ''}
-    ${indentMultiline(generatePropertyFields(properties), 4, true)}
+    ${indentMultiline(defineProperties(properties), 4, true)}
   ): ${type}`;
 };
 
-module.exports.method = () => {
-	const typeDefinitions = getTypes({primitiveTypes: 'graphql', relationshipStructure: 'graphql' }).map(
-		config => {
-			return `
+const defineType = config => `
 # ${config.description}
 type ${config.name} {
   ${indentMultiline(
-		generatePropertyFields(Object.entries(config.properties)),
+		defineProperties(Object.entries(config.properties)),
 		2,
 		true
 	)}
 }`;
-		}
-	);
 
-	const queries = getTypes({primitiveTypes: 'graphql'}).map(config => {
-		return stripIndent`
-      ${generateQuery({
-				name: config.name,
-				type: config.name,
-				properties: getIdentifyingFields(config)
-			})}
-      ${generateQuery({
-				name: config.pluralName,
-				type: `[${config.name}]`,
-				properties: getFilteringFields(config),
-				paginate: true
-			})}`;
-	});
+const defineQueries = config => [
+	defineQuery({
+		name: config.name,
+		type: config.name,
+		properties: getIdentifyingFields(config)
+	}),
+	defineQuery({
+		name: config.pluralName,
+		type: `[${config.name}]`,
+		properties: getFilteringFields(config),
+		paginate: true
+	})
+];
 
-	const queryDefinitions = stripIndent`
-type Query {
-  ${indentMultiline(queries.join('\n\n'), 2)}
-}`;
-
-	const enumDefinitions = Object.entries(getEnums({ withMeta: true })).map(
-		([name, { description, options }]) => {
-			return `
+const defineEnum = ([name, { description, options }]) => `
 # ${description}
 enum ${name} {
 ${indentMultiline(Object.keys(options).join('\n'), 2)}
 }`;
-		}
-	);
 
-	return typeDefinitions.concat([queryDefinitions], enumDefinitions, [
+module.exports.method = () => {
+	const typesFromSchema = getTypes({
+		primitiveTypes: 'graphql',
+		relationshipStructure: 'graphql'
+	});
+
+	return [].concat(
+		typesFromSchema.map(defineType),
+		'type Query {\n',
+		...typesFromSchema.map(defineQueries),
+		'}',
+		Object.entries(getEnums({ withMeta: true })).map(defineEnum),
 		customGraphql
-	]);
+	);
 };
