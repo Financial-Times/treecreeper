@@ -8,6 +8,7 @@ const primitiveTypesMap = require('../../lib/primitive-types-map');
 const explodeString = str =>
 	str
 		.split('\n')
+		// exclude strings which are just whitespace or empty
 		.filter(str => !/^[\s]*$/.test(str))
 		.map(str => str.trim());
 
