@@ -64,3 +64,20 @@ properties:
     canFilter: true
     label: Salesforce ID
     description: ID of the system in salesforce (required for change-logging as of june 2018)
+  architectureDiagram:
+    type: Document
+    label: Architecture Diagram
+    description: A diagram of the system's architecture (either a link to one or embedded directly)
+  moreInformation:
+    type: Document
+    label: More Information
+    description: Any additional information about the system
+  troubleshooting:
+    type: Document
+    label: Troubleshooting
+    description: Guidance for troubleshooting problems with the system
+  monitoring:
+    type: Document
+    label: Monitoring
+    description: Details of any monitoring the system has
+

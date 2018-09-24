@@ -27,14 +27,21 @@ const getType = (
 		type.pluralName = `${type.name}s`;
 	}
 
-	Object.values(type.properties).forEach(prop => {
-		if (prop.pattern) {
-			prop.validator = getStringValidator(prop.pattern);
-		}
-		if (primitiveTypes === 'graphql') {
-			prop.type = primitiveTypesMap[prop.type];
-		}
-	});
+	type.properties = Object.entries(type.properties)
+		.map(([name, def]) => {
+			if (primitiveTypes === 'graphql') {
+				if (def.type === 'Document') {
+					return
+				}
+				def.type = primitiveTypesMap[def.type];
+			}
+			if (def.pattern) {
+				def.validator = getStringValidator(def.pattern);
+			}
+			return [name, def]
+		})
+		.filter(entry => !!entry)
+		.reduce((obj, [name, def])=> Object.assign(obj, {[name]: def}), {});
 
 	if (relationshipStructure) {
 		const relationships = getRelationships.method(type.name, {

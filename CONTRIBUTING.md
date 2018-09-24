@@ -22,7 +22,7 @@ pluralName: Buses // optional plural name. Defaults to name with an 's' suffix
 description: Big red things // description used in graphql ui
 properties: // one or more properties defined directly on the type
   code: // required. Defines the code for the type
-    type: String // Any primitive type or enum (see below)
+    type: Paragraph // Any primitive type or enum (see below)
     required: true // whether or not the field is required
     canIdentify: true // whether the field can be used to identify a single record
     canFilter: true // whether the field is useful for filtering a list of records

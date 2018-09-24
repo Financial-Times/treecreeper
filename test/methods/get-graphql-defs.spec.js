@@ -188,25 +188,47 @@ enum Lifecycle {
 
 	describe('converting types', () => {
 		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
-			it(`Outputs correct type for properties using ${bizopsType}`, () => {
-				sandbox.stub(rawData, 'getTypes').returns([
-					{
-						name: 'Dummy',
-						description: 'dummy type description',
-						properties: {
-							prop: {
-								type: bizopsType,
-								description: 'a description'
+			if (bizopsType === 'Document') {
+				it(`Does not expose Document properties`, () => {
+					sandbox.stub(rawData, 'getTypes').returns([
+						{
+							name: 'Dummy',
+							description: 'dummy type description',
+							properties: {
+								prop: {
+									type: 'Document',
+									description: 'a description'
+								}
 							}
 						}
-					}
-				]);
-				sandbox.stub(rawData, 'getRelationships').returns({});
-				sandbox.stub(rawData, 'getEnums').returns({});
-				const generated = [].concat(...generateGraphqlDefs()).join('');
+					]);
+					sandbox.stub(rawData, 'getRelationships').returns({});
+					sandbox.stub(rawData, 'getEnums').returns({});
+					const generated = [].concat(...generateGraphqlDefs()).join('');
 
-				expect(generated).to.match(new RegExp(`prop: ${graphqlType}`));
-			});
+					expect(generated).not.to.match(new RegExp(`prop: String`));
+				});
+			} else {
+				it(`Outputs correct type for properties using ${bizopsType}`, () => {
+					sandbox.stub(rawData, 'getTypes').returns([
+						{
+							name: 'Dummy',
+							description: 'dummy type description',
+							properties: {
+								prop: {
+									type: bizopsType,
+									description: 'a description'
+								}
+							}
+						}
+					]);
+					sandbox.stub(rawData, 'getRelationships').returns({});
+					sandbox.stub(rawData, 'getEnums').returns({});
+					const generated = [].concat(...generateGraphqlDefs()).join('');
+
+					expect(generated).to.match(new RegExp(`prop: ${graphqlType}`));
+				});
+			}
 		});
 	});
 });
