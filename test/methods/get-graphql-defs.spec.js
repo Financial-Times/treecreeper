@@ -30,7 +30,7 @@ describe('graphql def creation', () => {
 				description: 'A cost centre which groups are costed to',
 				properties: {
 					code: {
-						type: 'String',
+						type: 'Word',
 						required: true,
 						unique: true,
 						canIdentify: true,
@@ -38,7 +38,7 @@ describe('graphql def creation', () => {
 						pattern: 'COST_CENTRE'
 					},
 					name: {
-						type: 'String',
+						type: 'Word',
 						canIdentify: true,
 						description: 'The name of the cost centre'
 					}
@@ -50,7 +50,7 @@ describe('graphql def creation', () => {
 					'An overarching group which contains teams and is costed separately',
 				properties: {
 					code: {
-						type: 'String',
+						type: 'Word',
 						required: true,
 						unique: true,
 						canIdentify: true,
@@ -58,7 +58,7 @@ describe('graphql def creation', () => {
 						pattern: 'COST_CENTRE'
 					},
 					name: {
-						type: 'String',
+						type: 'Word',
 						canIdentify: true,
 						description: 'The name of the group'
 					},
