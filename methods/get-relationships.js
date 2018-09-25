@@ -112,19 +112,40 @@ const getNormalizedRawData = cache.cacheify(
 	() => 'relationships:normalizedRawData'
 );
 
+const normalize = (propName, def, typeName) => {
+	const obj = Object.assign({}, def, {
+		endNode: def.type,
+		hasMany: !!def.hasMany,
+		name: propName,
+		neo4jName: def.relationship,
+		startNode: typeName
+	})
+
+	delete obj.relationship;
+	delete obj.type;
+	return obj
+}
+
 const getRelationships = (
 	typeName = undefined,
 	{ structure = 'flat' } = {}
 ) => {
-	let relationships = getNormalizedRawData()
-		.filter(({ fromType, toType }) =>
-			[fromType.type, toType.type].includes(typeName)
-		)
-		.reduce(
-			(list, definition) => list.concat(buildTwinRelationships(definition)),
-			[]
-		)
-		.filter(({ startNode }) => startNode === typeName);
+	const type = rawData.getTypes().find(({name}) => name === typeName)
+	let relationships = Object.entries(type.properties || {})
+		.filter(([key, {relationship}]) => !!relationship)
+		.map(([key, val]) => normalize(key, val, typeName))
+	if (structure === 'flat') {
+
+	}
+	// let relationships = getNormalizedRawData()
+	// 	.filter(({ fromType, toType }) =>
+	// 		[fromType.type, toType.type].includes(typeName)
+	// 	)
+	// 	.reduce(
+	// 		(list, definition) => list.concat(buildTwinRelationships(definition)),
+	// 		[]
+	// 	)
+	// 	.filter(({ startNode }) => startNode === typeName);
 
 	if (structure === 'rest') {
 		relationships = restRelationships(relationships);

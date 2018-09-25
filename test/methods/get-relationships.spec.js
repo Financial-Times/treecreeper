@@ -10,10 +10,67 @@ const extractFields = (...fieldNames) => obj => {
 	);
 };
 
+const mocks = {
+	pointingAway: [{
+		name: 'Type1',
+		properties: {
+			'test-name': {
+				type: 'Type2',
+				direction: 'outgoing',
+				relationship: 'HAS',
+				label: 'test label',
+				description: 'test description'
+			}
+		}
+	}],
+	pointingTo: [{
+		name: 'Type2',
+		properties: {
+			'test-name': {
+				type: 'Type1',
+				direction: 'incoming',
+				relationship: 'HAS',
+				label: 'test label',
+				description: 'test description'
+			}
+		}
+	}],
+	sameUnderlyingRelationship: [{
+		name: 'Type1',
+		properties: {
+			'test-name1': {
+				type: 'Type2',
+				direction: 'outgoing',
+				relationship: 'HAS',
+			},
+			'test-name2': {
+				type: 'Type3',
+				direction: 'incoming',
+				relationship: 'HAS',
+			}
+		}
+	}],
+	selfReferencing: [{
+		name: 'Type1',
+		properties: {
+			'test-name1': {
+				type: 'Type1',
+				direction: 'outgoing',
+				relationship: 'HAS',
+			},
+			'test-name2': {
+				type: 'Type1',
+				direction: 'incoming',
+				relationship: 'HAS',
+			}
+		}
+	}]
+}
+
 describe('get-relationships', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(rawData, 'getRelationships');
+		sandbox.stub(rawData, 'getTypes');
 	});
 
 	afterEach(() => {
@@ -21,25 +78,14 @@ describe('get-relationships', () => {
 		sandbox.restore();
 	});
 
-	context('flat style (default)', () => {
+	context.only('flat style (default)', () => {
 		it('returns an array', () => {
-			rawData.getRelationships.returns({});
+			rawData.getTypes.returns([{name: 'Type'}]);
 			expect(getRelationships('Type')).to.eql([]);
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
-			rawData.getRelationships.returns({
-				HAS: {
-					cardinality: 'ONE_TO_ONE',
-					fromType: {
-						type: 'Type1',
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					},
-					toType: { type: 'Type2' }
-				}
-			});
+			rawData.getTypes.returns(mocks.pointingAway);
 			expect(getRelationships('Type1')).to.eql([
 				{
 					neo4jName: 'HAS',
@@ -55,18 +101,7 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			rawData.getRelationships.returns({
-				HAS: {
-					cardinality: 'ONE_TO_ONE',
-					fromType: { type: 'Type1' },
-					toType: {
-						type: 'Type2',
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				}
-			});
+			rawData.getTypes.returns(mocks.pointingTo);
 			expect(getRelationships('Type2')).to.eql([
 				{
 					neo4jName: 'HAS',
@@ -82,26 +117,14 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve multiple relationships with same name', () => {
-			rawData.getRelationships.returns({
-				HAS: [
-					{
-						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type1' },
-						toType: { type: 'Type2' }
-					},
-					{
-						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type3' },
-						toType: { type: 'Type1' }
-					}
-				]
-			});
+			rawData.getTypes.returns(mocks.sameUnderlyingRelationship);
 			expect(getRelationships('Type1')).to.eql([
 				{
 					neo4jName: 'HAS',
 					direction: 'outgoing',
 					hasMany: false,
 					endNode: 'Type2',
+					name: 'test-name1',
 					startNode: 'Type1'
 				},
 				{
@@ -109,27 +132,21 @@ describe('get-relationships', () => {
 					direction: 'incoming',
 					hasMany: false,
 					endNode: 'Type3',
+					name: 'test-name2',
 					startNode: 'Type1'
 				}
 			]);
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
-			rawData.getRelationships.returns({
-				HAS: [
-					{
-						cardinality: 'ONE_TO_ONE',
-						fromType: { type: 'Type1' },
-						toType: { type: 'Type1' }
-					}
-				]
-			});
+			rawData.getTypes.returns(mocks.selfReferencing);
 			expect(getRelationships('Type1')).to.eql([
 				{
 					neo4jName: 'HAS',
 					direction: 'outgoing',
 					endNode: 'Type1',
 					startNode: 'Type1',
+					name: 'test-name1',
 					hasMany: false
 				},
 				{
@@ -137,6 +154,7 @@ describe('get-relationships', () => {
 					direction: 'incoming',
 					endNode: 'Type1',
 					startNode: 'Type1',
+					name: 'test-name2',
 					hasMany: false
 				}
 			]);
@@ -153,7 +171,7 @@ describe('get-relationships', () => {
 				)
 				.map(([cardinality, direction, [fromNum, toNum]]) => {
 					it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
-						rawData.getRelationships.returns({
+						rawData.getTypes.returns([{
 							HAS: [
 								{
 									cardinality,
@@ -161,7 +179,7 @@ describe('get-relationships', () => {
 									toType: { type: `Type${toNum}` }
 								}
 							]
-						});
+						}]);
 						const hasMany =
 							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
 						expect(
@@ -181,18 +199,18 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
-			rawData.getRelationships.returns({
-				HAS: {
-					cardinality: 'ONE_TO_ONE',
-					fromType: {
-						type: 'Type1',
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					},
-					toType: { type: 'Type2' }
+			rawData.getTypes.returns([{
+				name: 'Type1',
+				properties: {
+					'test-name': {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description'
+					}
 				}
-			});
+			}]);
 			expect(getRelationships('Type1', { structure: 'rest' })).to.eql({
 				HAS: [
 					{
@@ -208,7 +226,7 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			rawData.getRelationships.returns({
+			rawData.getTypes.returns({
 				HAS: {
 					cardinality: 'ONE_TO_ONE',
 					fromType: { type: 'Type1' },
@@ -340,18 +358,18 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
-			rawData.getRelationships.returns({
-				HAS: {
-					cardinality: 'ONE_TO_ONE',
-					fromType: {
-						type: 'Type1',
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					},
-					toType: { type: 'Type2' }
+			rawData.getTypes.returns([{
+				name: 'Type1',
+				properties: {
+					'test-name': {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description'
+					}
 				}
-			});
+			}]);
 			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
 				{
 					neo4jName: 'HAS',
@@ -368,7 +386,7 @@ describe('get-relationships', () => {
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			rawData.getRelationships.returns({
+			rawData.getTypes.returns({
 				HAS: {
 					cardinality: 'ONE_TO_ONE',
 					fromType: { type: 'Type1' },
