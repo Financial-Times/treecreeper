@@ -125,6 +125,13 @@ Run tests locally:
 npm run test-dev
 ```
 
+## Update AWS CloudFormation template
+
+To deploy an update to the AWS CloudFormation template (for the Reliability Eng AWS accounts), make your changes and run
+
+```
+make deploy-aws
+```
 
 ## Load Testing
 
