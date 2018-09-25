@@ -39,7 +39,7 @@ Each property should have a type chosen from the following
 - Paragraph - for longer pieces of text
 - Document - for arbitrarily long pieces of text
 - Url - Urls
-- Date - Dates, which shoudl generally be input as ISO strings
+- Date - Dates, which should generally be input as ISO strings
 - Int - Integers
 - Float - Decimal numbers
 - Boolean - True or False

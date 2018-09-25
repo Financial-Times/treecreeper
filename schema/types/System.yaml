@@ -23,7 +23,7 @@ properties:
     type: Url
     canIdentify: true
     label: Primary URL
-    description: The main url served the system
+    description: The main url served by the system
   systemType:
     type: Word
     canFilter: true
