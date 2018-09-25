@@ -22,7 +22,7 @@ pluralName: Buses // optional plural name. Defaults to name with an 's' suffix
 description: Big red things // description used in graphql ui
 properties: // one or more properties defined directly on the type
   code: // required. Defines the code for the type
-    type: String // Any graphql type (see below)
+    type: Paragraph // Any primitive type or enum (see below)
     required: true // whether or not the field is required
     canIdentify: true // whether the field can be used to identify a single record
     canFilter: true // whether the field is useful for filtering a list of records
@@ -30,15 +30,29 @@ properties: // one or more properties defined directly on the type
     label: Code //Short label to be used when displaying this field in forms etc.
 ```
 
-Graphql types are `String`, `Int`, `Float` and `Boolean`.
+### Primitive types
 
-In addition to these, the name of any [enum](#enums) can be used as the type of a property
+Each property should have a type chosen from the following
+
+- Word - for ids and other very short strings, generally not allowing whitespace
+- Sentence - for short pieces of text
+- Paragraph - for longer pieces of text
+- Document - for arbitrarily long pieces of text
+- Url - Urls
+- Date - Dates, which should generally be input as ISO strings
+- Int - Integers
+- Float - Decimal numbers
+- Boolean - True or False
+
+Most of the above will be mapped to Strings in the data layer, and do not have any strict conditions attached. They are intended as hints for the underlying systems storing the data, and any systems displaying it.
+
+In addition to the above, the name of any [enum](#enums) can be used as the type of a property
 
 Note that yaml files are indented with two spaces
 
 ## Attributes
-To add attributes to any existing type, add them in the `properties` section of the type's `.yaml` file. Property names must be camelCased.
 
+To add attributes to any existing type, add them in the `properties` section of the type's `.yaml` file. Property names must be camelCased.
 
 ## Relationships
 
@@ -74,10 +88,10 @@ PAYS_FOR:
   ...
 ```
 
-
 ## String validation rules
 
 These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
+
 - The property name must be in CONSTANT_CASE
 - The value must be either
   - a string that, when converted to a JavaScript regular expression, carries out the required string validation
@@ -99,7 +113,3 @@ StarRating:
   Two: 2
   ...
 ```
-
-
-
-

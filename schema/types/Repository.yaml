@@ -3,7 +3,7 @@ pluralName: Repositories
 description: A source code repository
 properties:
   code:
-    type: String
+    type: Word
     required: true
     unique: true
     pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
@@ -11,21 +11,21 @@ properties:
     label: Code
     description: 'Unique code/id for this item'
   name:
-    type: String
+    type: Word
     label: Name
     description: Display Name
   url:
-    type: String
+    type: Url
     # required: true
     canIdentify: true
     label: URL
     description: Repository URL
   vcsID:
-    type: String
+    type: Word
     label: VCS ID
     description: Repository hosts internal ID
   sshUrl:
-    type: String
+    type: Url
     # required: true
     canIdentify: true
     label: SSH URL
@@ -41,7 +41,7 @@ properties:
     label: Archived
     description: Is the repository archived
   description:
-    type: String
+    type: Paragraph
     label: Description
     description: Repository description field
   mostRecentCircleCIPlatform:
@@ -50,22 +50,18 @@ properties:
     label: CircleCI version
     description: Most recently indexed CircleCI version used
   createdAt:
-    type: String
+    type: Date
     label: Created
     description: The UTC time when the repository was created in the VCS system
   pushedAt:
-    type: String
+    type: Date
     label: Updated
     description: The UTC time when the repository was last pushed to
-  shortDescriptionHTML:
-    type: String
-    label: Short description
-    description: A short description of the repository on Github
   projectName:
-    type: String
+    type: Word
     label: Project name
     description: The project name on FT Bitbucket
   projectUrl:
-    type: String
+    type: Url
     label: Project URL
     description: The URL of the project on FT Bitbucket

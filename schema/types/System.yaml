@@ -2,45 +2,45 @@ name: System
 description: Any combination of software and technical infrastructure used by the business, engineering or operations
 properties:
   code:
-    type: String
+    type: Word
     required: true
     unique: true
     canIdentify: true
     pattern: CODE
     label: Code
-    description: 'Unique code/id for this item'
+    description: Unique code/id for this item. Once created it should (in most cases) never be altered
   name:
-    type: String
+    type: Word
     canIdentify: true
     label: Name
     description: Display name of the system
   description:
-    type: String
+    type: Paragraph
     canIdentify: true
     label: Description
-    description: Description of the system
+    description: Brief overview of what the system does and how
   primaryURL:
-    type: String
+    type: Url
     canIdentify: true
     label: Primary URL
-    description: The primary URL of the system
+    description: The main url served by the system
   systemType:
-    type: String
+    type: Word
     canFilter: true
     label: System type
-    description: The system type
+    description: The system type (don't worry about entering anything here)
   serviceTier:
     type: ServiceTier
     canFilter: true
     label: Service tier
     description: The system's service tier level
   serviceType:
-    type: String
+    type: Word
     canFilter: true
     label: Service type
-    description: The type of service the system provides
+    description: The type of service the system provides  (don't worry about entering anything here)
   hostPlatform:
-    type: String
+    type: Word
     canFilter: true
     label: Host platform
     description: The platform the service is hosted on, e.g. Heroku
@@ -54,13 +54,33 @@ properties:
     canFilter: true
     label: Contains sensitive data
     description: Whether the system contains sensitive data
+  risk:
+    type: Paragraph
+    label: Data risk
+    description: More details of what kind of data is held/processesed in this system, and what the associated risks are
   lifecycleStage:
     type: SystemLifecycle
     canFilter: true
-    label: Lifecylce stage
-    description: The lifecycle stage of the system
+    label: Lifecycle stage
+    description: The system lifecycle stage of the system
   SF_ID:
-    type: String
+    type: Word
     canFilter: true
     label: Salesforce ID
-    description: ID of the system in salesforce (required for change-logging as of june 2018)
+    description: ID of the system in salesforce **DO NOT EDIT**
+  architectureDiagram:
+    type: Document
+    label: Architecture Diagram
+    description: A diagram of the system's architecture (either a link to one or embedded directly)
+  troubleshooting:
+    type: Document
+    label: Troubleshooting
+    description: Guidance for troubleshooting problems with the system
+  monitoring:
+    type: Document
+    label: Monitoring
+    description: Details of any monitoring the system has
+  moreInformation:
+    type: Document
+    label: More Information
+    description: Any additional information about the system

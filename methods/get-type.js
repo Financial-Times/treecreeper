@@ -4,10 +4,12 @@ const getRelationships = require('./get-relationships');
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
+const primitiveTypesMap = require('../lib/primitive-types-map');
 
 const getType = (
 	typeName,
 	{
+		primitiveTypes = 'biz-ops', // graphql
 		relationshipStructure = false // flat, rest, graphql
 		// groupProperties = false
 	} = {}
@@ -25,11 +27,23 @@ const getType = (
 		type.pluralName = `${type.name}s`;
 	}
 
-	Object.values(type.properties).forEach(prop => {
-		if (prop.pattern) {
-			prop.validator = getStringValidator(prop.pattern);
-		}
-	});
+	type.properties = Object.entries(type.properties)
+		.map(([name, def]) => {
+			if (primitiveTypes === 'graphql') {
+				if (def.type === 'Document') {
+					// documents are too big to be served by graphql
+					return
+				}
+				// If not a primitive type we assume it's an enum and leave it unaltered
+				def.type = primitiveTypesMap[def.type] || def.type;
+			}
+			if (def.pattern) {
+				def.validator = getStringValidator(def.pattern);
+			}
+			return [name, def]
+		})
+		.filter(entry => !!entry)
+		.reduce((obj, [name, def])=> Object.assign(obj, {[name]: def}), {});
 
 	if (relationshipStructure) {
 		const relationships = getRelationships.method(type.name, {

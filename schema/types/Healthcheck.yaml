@@ -2,7 +2,7 @@ name: Healthcheck
 description: The configuration used to provide monitoring/healthchecks for a system.
 properties:
   code:
-    type: String
+    type: Word
     required: true
     unique: true
     canIdentify: true
@@ -14,7 +14,7 @@ properties:
     label: Live
     description: Whether the monitored entity is live
   url:
-    type: String
+    type: Url
     # required: true
     canIdentify: true
     label: URL

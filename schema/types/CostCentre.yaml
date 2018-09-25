@@ -2,7 +2,7 @@ name: CostCentre
 description: A cost centre which groups are costed to
 properties:
   code:
-    type: String
+    type: Word
     required: true
     unique: true
     canIdentify: true
@@ -10,7 +10,7 @@ properties:
     description: 'Unique code/id for this item'
     pattern: PERMISSIVE
   name:
-    type: String
+    type: Word
     canIdentify: true
     label: Name
     description: The name of the cost centre

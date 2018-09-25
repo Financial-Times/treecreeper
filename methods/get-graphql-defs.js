@@ -1,27 +1,5 @@
-const { stripIndent } = require('common-tags');
 const getTypes = require('../methods/get-types').method;
 const getEnums = require('../methods/get-enums').method;
-
-// Just here to ensure 100% backwards compatibility with previous beginnings
-// of graphql mutations
-const customGraphql = `
-input SystemInput {
-    serviceTier: ServiceTier
-    name: String
-    supported: Boolean
-    primaryURL: String
-    systemType: String
-    serviceTier: ServiceTier
-    serviceType: String
-    hostPlatform: String
-    personalData: Boolean
-    sensitiveData: Boolean
-    lifecycleStage: SystemLifecycle
-}
-
-type Mutation {
-    System(code: String, params: SystemInput): System!
-}`;
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -73,7 +51,7 @@ const cypherResolver = def => {
 	}
 };
 
-const generatePropertyFields = properties => {
+const defineProperties = properties => {
 	return properties
 		.map(
 			([name, def]) =>
@@ -87,7 +65,7 @@ const generatePropertyFields = properties => {
 };
 
 const PAGINATE = indentMultiline(
-	generatePropertyFields(
+	defineProperties(
 		Object.entries({
 			offset: {
 				type: 'Int = 0',
@@ -110,60 +88,55 @@ const getIdentifyingFields = config =>
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canFilter);
 
-const generateQuery = ({ name, type, properties, paginate }) => {
+const defineQuery = ({ name, type, properties, paginate }) => {
 	return `
   ${name}(
     ${paginate ? PAGINATE : ''}
-    ${indentMultiline(generatePropertyFields(properties), 4, true)}
+    ${indentMultiline(defineProperties(properties), 4, true)}
   ): ${type}`;
 };
 
-module.exports.method = () => {
-	const typeDefinitions = getTypes({ relationshipStructure: 'graphql' }).map(
-		config => {
-			return `
+const defineType = config => `
 # ${config.description}
 type ${config.name} {
   ${indentMultiline(
-		generatePropertyFields(Object.entries(config.properties)),
+		defineProperties(Object.entries(config.properties)),
 		2,
 		true
 	)}
 }`;
-		}
-	);
 
-	const queries = getTypes().map(config => {
-		return stripIndent`
-      ${generateQuery({
-				name: config.name,
-				type: config.name,
-				properties: getIdentifyingFields(config)
-			})}
-      ${generateQuery({
-				name: config.pluralName,
-				type: `[${config.name}]`,
-				properties: getFilteringFields(config),
-				paginate: true
-			})}`;
-	});
+const defineQueries = config => [
+	defineQuery({
+		name: config.name,
+		type: config.name,
+		properties: getIdentifyingFields(config)
+	}),
+	defineQuery({
+		name: config.pluralName,
+		type: `[${config.name}]`,
+		properties: getFilteringFields(config),
+		paginate: true
+	})
+];
 
-	const queryDefinitions = stripIndent`
-type Query {
-  ${indentMultiline(queries.join('\n\n'), 2)}
-}`;
-
-	const enumDefinitions = Object.entries(getEnums({ withMeta: true })).map(
-		([name, { description, options }]) => {
-			return `
+const defineEnum = ([name, { description, options }]) => `
 # ${description}
 enum ${name} {
 ${indentMultiline(Object.keys(options).join('\n'), 2)}
 }`;
-		}
-	);
 
-	return typeDefinitions.concat([queryDefinitions], enumDefinitions, [
-		customGraphql
-	]);
+module.exports.method = () => {
+	const typesFromSchema = getTypes({
+		primitiveTypes: 'graphql',
+		relationshipStructure: 'graphql'
+	});
+
+	return [].concat(
+		typesFromSchema.map(defineType),
+		'type Query {\n',
+		...typesFromSchema.map(defineQueries),
+		'}',
+		Object.entries(getEnums({ withMeta: true })).map(defineEnum)
+	);
 };

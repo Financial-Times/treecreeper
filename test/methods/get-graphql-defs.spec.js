@@ -3,18 +3,27 @@ const generateGraphqlDefs = require('../../').getGraphqlDefs;
 const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
+const primitiveTypesMap = require('../../lib/primitive-types-map');
+
+const explodeString = str =>
+	str
+		.split('\n')
+		// exclude strings which are just whitespace or empty
+		.filter(str => !/^[\s]*$/.test(str))
+		.map(str => str.trim());
 
 describe('graphql def creation', () => {
 	let sandbox;
-	before(() => {
+	beforeEach(() => {
 		cache.clear();
 		sandbox = sinon.createSandbox();
 	});
 
-	after(() => {
+	afterEach(() => {
 		sandbox.restore();
 		cache.clear();
 	});
+
 	it('generates expected graphql def given schema', () => {
 		sandbox.stub(rawData, 'getTypes').returns([
 			{
@@ -22,7 +31,7 @@ describe('graphql def creation', () => {
 				description: 'A cost centre which groups are costed to',
 				properties: {
 					code: {
-						type: 'String',
+						type: 'Word',
 						required: true,
 						unique: true,
 						canIdentify: true,
@@ -30,7 +39,7 @@ describe('graphql def creation', () => {
 						pattern: 'COST_CENTRE'
 					},
 					name: {
-						type: 'String',
+						type: 'Word',
 						canIdentify: true,
 						description: 'The name of the cost centre'
 					}
@@ -42,7 +51,7 @@ describe('graphql def creation', () => {
 					'An overarching group which contains teams and is costed separately',
 				properties: {
 					code: {
-						type: 'String',
+						type: 'Word',
 						required: true,
 						unique: true,
 						canIdentify: true,
@@ -50,7 +59,7 @@ describe('graphql def creation', () => {
 						pattern: 'COST_CENTRE'
 					},
 					name: {
-						type: 'String',
+						type: 'Word',
 						canIdentify: true,
 						description: 'The name of the group'
 					},
@@ -91,12 +100,6 @@ describe('graphql def creation', () => {
 				options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
 			}
 		});
-
-		const explodeString = str =>
-			str
-				.split('\n')
-				.filter(str => !/^[\s]*$/.test(str))
-				.map(str => str.trim());
 
 		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
 
@@ -179,26 +182,54 @@ enum Lifecycle {
   Sustain
   Grow
   Sunset
-}
-
-input SystemInput {
-    serviceTier: ServiceTier
-    name: String
-    supported: Boolean
-    primaryURL: String
-    systemType: String
-    serviceTier: ServiceTier
-    serviceType: String
-    hostPlatform: String
-    personalData: Boolean
-    sensitiveData: Boolean
-    lifecycleStage: SystemLifecycle
-}
-
-type Mutation {
-    System(code: String, params: SystemInput): System!
 }`
 			)
 		);
+	});
+
+	describe('converting types', () => {
+		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
+			if (bizopsType === 'Document') {
+				it(`Does not expose Document properties`, () => {
+					sandbox.stub(rawData, 'getTypes').returns([
+						{
+							name: 'Dummy',
+							description: 'dummy type description',
+							properties: {
+								prop: {
+									type: 'Document',
+									description: 'a description'
+								}
+							}
+						}
+					]);
+					sandbox.stub(rawData, 'getRelationships').returns({});
+					sandbox.stub(rawData, 'getEnums').returns({});
+					const generated = [].concat(...generateGraphqlDefs()).join('');
+
+					expect(generated).not.to.match(new RegExp(`prop: String`));
+				});
+			} else {
+				it(`Outputs correct type for properties using ${bizopsType}`, () => {
+					sandbox.stub(rawData, 'getTypes').returns([
+						{
+							name: 'Dummy',
+							description: 'dummy type description',
+							properties: {
+								prop: {
+									type: bizopsType,
+									description: 'a description'
+								}
+							}
+						}
+					]);
+					sandbox.stub(rawData, 'getRelationships').returns({});
+					sandbox.stub(rawData, 'getEnums').returns({});
+					const generated = [].concat(...generateGraphqlDefs()).join('');
+
+					expect(generated).to.match(new RegExp(`prop: ${graphqlType}`));
+				});
+			}
+		});
 	});
 });

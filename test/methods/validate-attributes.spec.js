@@ -2,7 +2,7 @@ const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const getEnums = require('../../methods/get-enums');
 const { validateAttributes } = require('../../');
-
+const primitiveTypesMap = require('../../lib/primitive-types-map')
 describe('validateAttributes', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
@@ -11,45 +11,50 @@ describe('validateAttributes', () => {
 
 	afterEach(() => sandbox.restore());
 	describe('validating strings', () => {
-		beforeEach(() => {
-			getType.method.returns({
-				name: 'Thing',
-				properties: {
-					prop: {
-						type: 'String',
-						validator: /^[^z]+$/ //exclude the letter z
-					}
-				}
-			});
-		});
-		it('accept strings', () => {
-			expect(() =>
-				validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
-			).not.to.throw();
-		});
-		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
-				/Must be a string/
-			);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
-				/Must be a string/
-			);
-		});
-		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
-				/Must be a string/
-			);
-		});
-		it('not accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
-				/Must be a string/
-			);
-		});
-		it('apply string patterns', () => {
-			expect(() =>
-				validateAttributes('Thing', { prop: 'I am zebbedee' })
-			).to.throw(/Must match pattern/);
-		});
+		Object.entries(primitiveTypesMap).forEach(([bizOpsType, graphqlType]) => {
+			if (graphqlType === 'String') {
+				beforeEach(() => {
+					getType.method.returns({
+						name: 'Thing',
+						properties: {
+							prop: {
+								type: bizOpsType,
+								validator: /^[^z]+$/ //exclude the letter z
+							}
+						}
+					});
+				});
+				it('accept strings', () => {
+					expect(() =>
+						validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
+					).not.to.throw();
+				});
+				it('not accept booleans', () => {
+					expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+						/Must be a string/
+					);
+					expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+						/Must be a string/
+					);
+				});
+				it('not accept floats', () => {
+					expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+						/Must be a string/
+					);
+				});
+				it('not accept integers', () => {
+					expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
+						/Must be a string/
+					);
+				});
+				it('apply string patterns', () => {
+					expect(() =>
+						validateAttributes('Thing', { prop: 'I am zebbedee' })
+					).to.throw(/Must match pattern/);
+				});
+			}
+		})
+
 	});
 	describe('validating booleans', () => {
 		beforeEach(() => {
