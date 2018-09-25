@@ -14,3 +14,10 @@ properties:
     canIdentify: true
     label: Name
     description: The name of the cost centre
+  groups:
+    type: Group
+    direction: outgoing
+    name: groups
+    relationship: PAYS_FOR
+    description: The groups which are costed to the cost centre
+    hasMany: true

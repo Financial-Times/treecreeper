@@ -52,3 +52,51 @@ properties:
     type: Word
     label: Preferred contact method
     description: Preferred contact method
+  techLeads:
+    type: Person
+    direction: outgoing
+    name: techLeads
+    relationship: HAS_TECH_LEAD
+    description: The tech leads of the team
+    hasMany: true
+  productOwners:
+    type: Person
+    direction: outgoing
+    name: productOwners
+    relationship: HAS_PRODUCT_OWNER
+    description: The product owner of the team
+    hasMany: true
+  group:
+    type: Group
+    direction: incoming
+    name: group
+    relationship: HAS_TEAM
+    description: The group the team belongs to
+    isRecursive: true
+  subTeams:
+    type: Team
+    direction: outgoing
+    name: subTeams
+    relationship: HAS_TEAM
+    description: This team's subteams
+    hasMany: true
+  parentTeam:
+    type: Team
+    direction: incoming
+    name: parentTeam
+    relationship: HAS_TEAM
+    description: The team this team is a subteam of
+  delivers:
+    type: System
+    direction: incoming
+    name: delivers
+    relationship: DELIVERED_BY
+    description: The systems the team delivers
+    hasMany: true
+  supports:
+    type: System
+    direction: incoming
+    name: supports
+    relationship: SUPPORTED_BY
+    description: The systems the team supports
+    hasMany: true

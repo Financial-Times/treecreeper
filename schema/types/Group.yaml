@@ -23,3 +23,30 @@ properties:
     canFilter: true
     label: Active
     description: Whether or not the group is still in existence
+  costCentre:
+    type: CostCentre
+    direction: incoming
+    name: costCentre
+    relationship: PAYS_FOR
+    description: The Cost Centre associated with the group
+  techDirector:
+    type: Person
+    direction: outgoing
+    name: techDirector
+    relationship: HAS_TECH_DIRECTOR
+    description: The tech director who owns the group
+  topLevelTeams:
+    type: Team
+    direction: outgoing
+    name: topLevelTeams
+    relationship: HAS_TEAM
+    description: The top level teams working under the group
+    hasMany: true
+  allTeams:
+    type: Team
+    direction: outgoing
+    name: allTeams
+    relationship: HAS_TEAM
+    description: The teams working under the group
+    hasMany: true
+    isRecursive: true

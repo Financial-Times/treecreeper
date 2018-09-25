@@ -65,3 +65,16 @@ properties:
     type: Url
     label: Project URL
     description: The URL of the project on FT Bitbucket
+  systems:
+    type: System
+    direction: incoming
+    name: systems
+    relationship: HAS_REPO
+    description: Systems which the repository holds source code for
+    hasMany: true
+  storedIn:
+    type: System
+    direction: outgoing
+    name: storedIn
+    relationship: STORED_IN
+    description: VCS provider that the repository is hosted by

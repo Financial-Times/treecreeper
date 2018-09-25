@@ -34,6 +34,35 @@ properties:
     canFilter: true
     label: Lifecycle stage
     description: Lifecycle stage of the product
-
-
-
+  productOwners:
+    type: Person
+    direction: outgoing
+    name: productOwners
+    relationship: HAS_PRODUCT_OWNER
+    description: The product's owner
+    hasMany: true
+  dependencies:
+    type: System
+    direction: outgoing
+    name: dependencies
+    relationship: DEPENDS_ON
+    description: The systems the product directly depends on
+    hasMany: true
+  recursiveDependencies:
+    type: System
+    direction: outgoing
+    name: recursiveDependencies
+    relationship: DEPENDS_ON
+    description: 'The systems the product depends on, either directly or indirectly'
+    hasMany: true
+    isRecursive: true
+  productDependencies:
+    hasMany: true
+    hidden: true
+    relationship: DEPENDS_ON
+    direction: outgoing
+  productDependents:
+    hasMany: true
+    hidden: true
+    relationship: DEPENDS_ON
+    direction: incoming

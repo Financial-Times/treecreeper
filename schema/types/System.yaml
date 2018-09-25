@@ -84,3 +84,97 @@ properties:
     type: Document
     label: More Information
     description: Any additional information about the system
+  stakeholders:
+    type: Person
+    direction: outgoing
+    name: stakeholders
+    relationship: HAS_STAKEHOLDER
+    description: The system's stakeholders
+    hasMany: true
+  repositories:
+    type: Repository
+    direction: outgoing
+    name: repositories
+    relationship: HAS_REPO
+    description: The repositories which store the system's source code
+    hasMany: true
+  monitoredBy:
+    type: Healthcheck
+    direction: outgoing
+    name: monitoredBy
+    relationship: MONITORED_BY
+    description: Healthchecks which are used to monitor this system
+    hasMany: true
+  deliveredBy:
+    type: Team
+    direction: outgoing
+    name: deliveredBy
+    relationship: DELIVERED_BY
+    description: The team which delivers the system
+  supportedBy:
+    type: Team
+    direction: outgoing
+    name: supportedBy
+    relationship: SUPPORTED_BY
+    description: The team which supports the system
+  knownAboutBy:
+    type: Person
+    direction: outgoing
+    name: knownAboutBy
+    relationship: KNOWN_ABOUT_BY
+    description: People who know about the system
+    hasMany: true
+  dependencies:
+    type: System
+    direction: outgoing
+    name: dependencies
+    relationship: DEPENDS_ON
+    description: The other systems the system directly depends on
+    hasMany: true
+  recursiveDependencies:
+    type: System
+    direction: outgoing
+    name: recursiveDependencies
+    relationship: DEPENDS_ON
+    description: 'The other systems the system depends on, either directly or indirectly'
+    hasMany: true
+    isRecursive: true
+  dependents:
+    type: System
+    direction: incoming
+    name: dependents
+    relationship: DEPENDS_ON
+    description: The other systems which directly depend on this system
+    hasMany: true
+  recursiveDependents:
+    type: System
+    direction: incoming
+    name: recursiveDependents
+    relationship: DEPENDS_ON
+    description: >-
+      The other systems which depend on this system, either directly or
+      indirectly
+    hasMany: true
+    isRecursive: true
+  dependentProducts:
+    type: Product
+    direction: incoming
+    name: dependentProducts
+    relationship: DEPENDS_ON
+    description: Products which depend on this system
+    hasMany: true
+  recursiveDependentProducts:
+    type: Product
+    direction: incoming
+    name: recursiveDependentProducts
+    relationship: DEPENDS_ON
+    description: 'The products which depend on this system, either directly or indirectly'
+    hasMany: true
+    isRecursive: true
+  stores:
+    type: Repository
+    direction: incoming
+    name: stores
+    relationship: STORED_IN
+    description: 'If the system is a VCS, the repositories it stores'
+    hasMany: true

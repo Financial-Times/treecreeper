@@ -19,3 +19,10 @@ properties:
     canIdentify: true
     label: URL
     description: The URL to check against
+  monitors:
+    type: System
+    direction: incoming
+    name: monitors
+    relationship: MONITORED_BY
+    description: The systems which the healthcheck monitors
+    hasMany: true
