@@ -4,16 +4,17 @@ const { logger } = require('../lib/request-context');
 const {
 	KINESIS_AWS_REGION: region = 'eu-west-1',
 	KINESIS_AWS_ACCESS_KEY_ID: accessKeyId,
-	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey
+	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey,
+	AWS_ACCESS_KEY,
+	AWS_SECRET_ACCESS_KEY
 } = process.env;
 
 function Kinesis(streamName) {
 	const isProduction = process.env.NODE_ENV === 'production';
 
 	const dyno = process.env.DYNO;
-	const kinesis = new AWS.Kinesis({
-		accessKeyId,
-		secretAccessKey,
+
+	const kinesisStreamOptions = {
 		region,
 		apiVersion: '2013-12-02',
 		logger: {
@@ -21,7 +22,23 @@ function Kinesis(streamName) {
 				logger.debug('Kinesis API call', message);
 			}
 		}
-	});
+	};
+
+	// infra-prod || infra-dev accounts
+	const kinesisInfra = new AWS.Kinesis(
+		Object.assign({}, kinesisStreamOptions, {
+			accessKeyId,
+			secretAccessKey
+		})
+	);
+
+	// operations-reliability-prod || operations-reliability-test accounts
+	const kinesisRelEng = new AWS.Kinesis(
+		Object.assign({}, kinesisStreamOptions, {
+			accessKeyId: AWS_ACCESS_KEY,
+			secretAccessKey: AWS_SECRET_ACCESS_KEY
+		})
+	);
 
 	const stubInDevelopment = (action, fn) => (...args) => {
 		if (!isProduction) {
@@ -35,21 +52,23 @@ function Kinesis(streamName) {
 
 	return {
 		putRecord: stubInDevelopment('put record', data => {
-			return kinesis
-				.putRecord({
-					Data: Buffer.from(JSON.stringify(data), 'utf-8'),
-					PartitionKey: `${dyno}:${Date.now()}`,
-					StreamName: streamName
-				})
-				.promise()
-				.catch(error => {
-					logger.error('Kinesis put record failed', {
-						event: 'KINESIS_PUT_RECORD_FAILURE',
-						error,
-						data
-					});
-					throw error;
+			const options = {
+				Data: Buffer.from(JSON.stringify(data), 'utf-8'),
+				PartitionKey: `${dyno}:${Date.now()}`,
+				StreamName: streamName
+			};
+
+			const putRecordInfra = kinesisInfra.putRecord(options).promise();
+			const putRecordRelEng = kinesisRelEng.putRecord(options).promise();
+
+			return Promise.all([putRecordInfra, putRecordRelEng]).catch(error => {
+				logger.error('Kinesis put record failed', {
+					event: 'KINESIS_PUT_RECORD_FAILURE',
+					error,
+					data
 				});
+				throw error;
+			});
 		})
 	};
 }
