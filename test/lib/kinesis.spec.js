@@ -38,13 +38,14 @@ describe('AWS kinesis client', () => {
 	});
 
 	describe('put record', () => {
-		it('should write to the given stream name', async () => {
+		it('should write to the given stream name in both AWS accounts', async () => {
 			await kinesis.putRecord({
 				event: 'test'
 			});
 
-			expect(stubPutRecord).to.have.been.calledOnce;
+			expect(stubPutRecord).to.have.been.calledTwice;
 			expect(stubPutRecord.getCall(0).args[0].StreamName).to.equal(streamName);
+			expect(stubPutRecord.getCall(1).args[0].StreamName).to.equal(streamName);
 		});
 
 		it('should JSON stringify then buffer the event data', async () => {
