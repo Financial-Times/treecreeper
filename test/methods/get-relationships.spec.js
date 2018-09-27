@@ -11,77 +11,87 @@ const extractFields = (...fieldNames) => obj => {
 };
 
 const mocks = {
-	pointingAway: [{
-		name: 'Type1',
-		properties: {
-			'test-name': {
-				type: 'Type2',
-				direction: 'outgoing',
-				relationship: 'HAS',
-				label: 'test label',
-				description: 'test description'
+	pointingAway: [
+		{
+			name: 'Type1',
+			properties: {
+				'test-name': {
+					type: 'Type2',
+					direction: 'outgoing',
+					relationship: 'HAS',
+					label: 'test label',
+					description: 'test description'
+				}
 			}
 		}
-	}],
-	pointingTo: [{
-		name: 'Type2',
-		properties: {
-			'test-name': {
-				type: 'Type1',
-				direction: 'incoming',
-				relationship: 'HAS',
-				label: 'test label',
-				description: 'test description'
+	],
+	pointingTo: [
+		{
+			name: 'Type2',
+			properties: {
+				'test-name': {
+					type: 'Type1',
+					direction: 'incoming',
+					relationship: 'HAS',
+					label: 'test label',
+					description: 'test description'
+				}
 			}
 		}
-	}],
-	sameUnderlyingRelationship: [{
-		name: 'Type1',
-		properties: {
-			'test-name1': {
-				type: 'Type2',
-				direction: 'outgoing',
-				relationship: 'HAS',
-			},
-			'test-name2': {
-				type: 'Type3',
-				direction: 'incoming',
-				relationship: 'HAS',
+	],
+	sameUnderlyingRelationship: [
+		{
+			name: 'Type1',
+			properties: {
+				'test-name1': {
+					type: 'Type2',
+					direction: 'outgoing',
+					relationship: 'HAS'
+				},
+				'test-name2': {
+					type: 'Type3',
+					direction: 'incoming',
+					relationship: 'HAS'
+				}
 			}
 		}
-	}],
-	selfReferencing: [{
-		name: 'Type1',
-		properties: {
-			'test-name1': {
-				type: 'Type1',
-				direction: 'outgoing',
-				relationship: 'HAS',
-			},
-			'test-name2': {
-				type: 'Type1',
-				direction: 'incoming',
-				relationship: 'HAS',
+	],
+	selfReferencing: [
+		{
+			name: 'Type1',
+			properties: {
+				'test-name1': {
+					type: 'Type1',
+					direction: 'outgoing',
+					relationship: 'HAS'
+				},
+				'test-name2': {
+					type: 'Type1',
+					direction: 'incoming',
+					relationship: 'HAS'
+				}
 			}
 		}
-	}],
-	cardinality: [{
-		name: 'Type1',
-		properties: {
-			'many': {
-				type: 'Type2',
-				hasMany: true,
-				direction: 'outgoing',
-				relationship: 'HAS',
-			},
-			'singular': {
-				type: 'Type2',
-				direction: 'incoming',
-				relationship: 'HAS',
+	],
+	cardinality: [
+		{
+			name: 'Type1',
+			properties: {
+				many: {
+					type: 'Type2',
+					hasMany: true,
+					direction: 'outgoing',
+					relationship: 'HAS'
+				},
+				singular: {
+					type: 'Type2',
+					direction: 'incoming',
+					relationship: 'HAS'
+				}
 			}
 		}
-	}]
-}
+	]
+};
 
 describe('get-relationships', () => {
 	const sandbox = sinon.createSandbox();
@@ -96,7 +106,7 @@ describe('get-relationships', () => {
 
 	context('flat style (default)', () => {
 		it('returns an array', () => {
-			rawData.getTypes.returns([{name: 'Type'}]);
+			rawData.getTypes.returns([{ name: 'Type' }]);
 			expect(getRelationships('Type')).to.eql([]);
 		});
 
@@ -205,8 +215,8 @@ describe('get-relationships', () => {
 					direction: 'outgoing',
 					endNode: 'Type2',
 					startNode: 'Type1',
-					 "hasMany": true,
-          "name": "many"
+					hasMany: true,
+					name: 'many'
 				},
 				{
 					neo4jName: 'HAS',
@@ -222,7 +232,7 @@ describe('get-relationships', () => {
 
 	context('rest api  style', () => {
 		it('returns an object', () => {
-			rawData.getTypes.returns([{name: 'Type'}]);
+			rawData.getTypes.returns([{ name: 'Type' }]);
 			expect(getRelationships('Type', { structure: 'rest' })).to.eql({});
 		});
 
@@ -307,28 +317,32 @@ describe('get-relationships', () => {
 		});
 		it('cardinality', () => {
 			rawData.getTypes.returns(mocks.cardinality);
-			expect(getRelationships('Type1', {structure: 'rest'})).to.eql({HAS:[
-				{
-					direction: 'outgoing',
-					nodeType: 'Type2',
-					 "hasMany": true,
-          "name": "many",description: undefined,
+			expect(getRelationships('Type1', { structure: 'rest' })).to.eql({
+				HAS: [
+					{
+						direction: 'outgoing',
+						nodeType: 'Type2',
+						hasMany: true,
+						name: 'many',
+						description: undefined,
 						label: undefined
-				},
-				{
-					direction: 'incoming',
-					nodeType: 'Type2',
-					name: 'singular',
-					hasMany: false,description: undefined,
+					},
+					{
+						direction: 'incoming',
+						nodeType: 'Type2',
+						name: 'singular',
+						hasMany: false,
+						description: undefined,
 						label: undefined
-				}
-			]});
+					}
+				]
+			});
 		});
 	});
 
 	context('graphql style', () => {
 		it('returns an array', () => {
-			rawData.getTypes.returns([{name: 'Type'}]);
+			rawData.getTypes.returns([{ name: 'Type' }]);
 			expect(getRelationships('Type', { structure: 'graphql' })).to.eql([]);
 		});
 
@@ -402,19 +416,21 @@ describe('get-relationships', () => {
 			]);
 		});
 		it('define recursive relationships', () => {
-			rawData.getTypes.returns([{
-				name: 'Type1',
-				properties: {
-					'test-name': {
-						type: 'Type2',
-						direction: 'outgoing',
-						isRecursive: true,
-						relationship: 'HAS',
-						label: 'test label',
-						description: 'test description'
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						'test-name': {
+							type: 'Type2',
+							direction: 'outgoing',
+							isRecursive: true,
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description'
+						}
 					}
 				}
-			}]);
+			]);
 
 			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
 				{
@@ -422,7 +438,7 @@ describe('get-relationships', () => {
 					hasMany: false,
 					direction: 'outgoing',
 					name: 'test-name',
-					isRecursive: false,
+					isRecursive: true,
 					isRelationship: true,
 					neo4jName: 'HAS',
 					description: 'test description',
@@ -433,22 +449,24 @@ describe('get-relationships', () => {
 
 		it('cardinality', () => {
 			rawData.getTypes.returns(mocks.cardinality);
-			expect(getRelationships('Type1', {structure: 'graphql'})).to.eql([
-				{"description": undefined,
-"isRecursive": false,
-"isRelationship": true,
-"label": undefined,
-"type": "Type2",
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
+				{
+					description: undefined,
+					isRecursive: false,
+					isRelationship: true,
+					label: undefined,
+					type: 'Type2',
 					neo4jName: 'HAS',
 					direction: 'outgoing',
-					 "hasMany": true,
-          "name": "many"
+					hasMany: true,
+					name: 'many'
 				},
-				{"description": undefined,
-"isRecursive": false,
-"isRelationship": true,
-"label": undefined,
-"type": "Type2",
+				{
+					description: undefined,
+					isRecursive: false,
+					isRelationship: true,
+					label: undefined,
+					type: 'Type2',
 					neo4jName: 'HAS',
 					direction: 'incoming',
 					name: 'singular',
@@ -456,7 +474,9 @@ describe('get-relationships', () => {
 				}
 			]);
 		});
+
+		it.skip('hidden relationships', () => {
+
+		});
 	});
 });
-
-

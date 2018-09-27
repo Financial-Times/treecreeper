@@ -10,10 +10,14 @@ const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
 
-describe('data quality: types', () => {
+describe.only('data quality: types', () => {
 	const validEnums = Object.keys(enums);
 	const validStringPatterns = Object.keys(stringPatterns);
-	const validPropTypes = validEnums.concat(Object.keys(primitiveTypesMap));
+	const typeNames = types.map(({ name }) => name);
+	const validPropTypes = validEnums.concat(
+		Object.keys(primitiveTypesMap),
+		typeNames
+	);
 
 	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
@@ -42,16 +46,29 @@ describe('data quality: types', () => {
 					describe(name, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
-								expect(key).to.be.oneOf([
-									'type',
-									'unique',
-									'required',
-									'canIdentify',
-									'canFilter',
-									'description',
-									'pattern',
-									'label'
-								]);
+								const commonKeys = ['type', 'description', 'label'];
+								if (typeNames.includes(config.type)) {
+									// it's a relationship
+									expect(key).to.be.oneOf(
+										commonKeys.concat([
+											'direction',
+											'relationship',
+											'hasMany',
+											'isRecursive',
+											'hidden'
+										])
+									);
+								} else {
+									expect(key).to.be.oneOf(
+										commonKeys.concat([
+											'unique',
+											'required',
+											'canIdentify',
+											'canFilter',
+											'pattern'
+										])
+									);
+								}
 							});
 						});
 						it('has valid name', () => {
@@ -70,27 +87,60 @@ describe('data quality: types', () => {
 							expect(config.type).to.exist;
 							expect(config.type).to.be.oneOf(validPropTypes);
 						});
-						it('may be required', () => {
-							if (config.required) {
-								expect(config.required).to.be.true;
-							}
-						});
-						it('may be an identifier', () => {
-							if (config.canIdentify) {
-								expect(config.canIdentify).to.be.true;
-							}
-						});
-						it('may be a filterer', () => {
-							if (config.canFilter) {
-								expect(config.canFilter).to.be.true;
-							}
-						});
 
-						it('may define a pattern', () => {
-							if (config.pattern) {
-								expect(config.pattern).to.be.oneOf(validStringPatterns);
-							}
-						});
+						if (!typeNames.includes(config.type)) {
+							context('direct property', () => {
+								// tests for direct properties
+								it('may be required', () => {
+									if (config.required) {
+										expect(config.required).to.be.true;
+									}
+								});
+								it('may be an identifier', () => {
+									if (config.canIdentify) {
+										expect(config.canIdentify).to.be.true;
+									}
+								});
+								it('may be a filterer', () => {
+									if (config.canFilter) {
+										expect(config.canFilter).to.be.true;
+									}
+								});
+
+								it('may define a pattern', () => {
+									if (config.pattern) {
+										expect(config.pattern).to.be.oneOf(validStringPatterns);
+									}
+								});
+							})
+						} else {
+							const RELATIONSHIP_NAME = getStringValidator('RELATIONSHIP_NAME');
+							context('relationship property', () => {
+								it('must specify underlying relationship', () => {
+									expect(config.relationship).to.match(RELATIONSHIP_NAME)
+								});
+								it('must specify direction', () => {
+									expect(config.direction).to.be.oneOf(['incoming', 'outgoing'])
+								});
+								it('may be hidden', () => {
+									if (config.hidden) {
+										expect(config.hidden).to.be.true
+									}
+								});
+
+								it('may have many', () => {
+									if (config.hasMany) {
+										expect(config.hasMany).to.be.true
+									}
+								});
+								it('may be recursive', () => {
+									if (config.isRecursive) {
+										expect(config.isRecursive).to.be.true
+									}
+								});
+							})
+
+						}
 					});
 				});
 			});

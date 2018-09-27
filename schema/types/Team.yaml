@@ -55,48 +55,48 @@ properties:
   techLeads:
     type: Person
     direction: outgoing
-    name: techLeads
+    label: Tech leads
     relationship: HAS_TECH_LEAD
     description: The tech leads of the team
     hasMany: true
   productOwners:
     type: Person
     direction: outgoing
-    name: productOwners
+    label: Product owners
     relationship: HAS_PRODUCT_OWNER
     description: The product owner of the team
     hasMany: true
   group:
     type: Group
     direction: incoming
-    name: group
+    label: FT Group
     relationship: HAS_TEAM
     description: The group the team belongs to
     isRecursive: true
   subTeams:
     type: Team
     direction: outgoing
-    name: subTeams
+    label: Sub-teams
     relationship: HAS_TEAM
     description: This team's subteams
     hasMany: true
   parentTeam:
     type: Team
     direction: incoming
-    name: parentTeam
+    label: Parent team
     relationship: HAS_TEAM
     description: The team this team is a subteam of
   delivers:
     type: System
     direction: incoming
-    name: delivers
+    label: Delivers systems
     relationship: DELIVERED_BY
     description: The systems the team delivers
     hasMany: true
   supports:
     type: System
     direction: incoming
-    name: supports
+    label: Supports systems
     relationship: SUPPORTED_BY
     description: The systems the team supports
     hasMany: true

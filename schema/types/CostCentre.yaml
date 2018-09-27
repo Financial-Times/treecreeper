@@ -17,7 +17,7 @@ properties:
   groups:
     type: Group
     direction: outgoing
-    name: groups
+    label: FT Group
     relationship: PAYS_FOR
     description: The groups which are costed to the cost centre
     hasMany: true

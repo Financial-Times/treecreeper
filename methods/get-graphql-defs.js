@@ -36,6 +36,7 @@ const cypherResolver = def => {
 	if (!def.isRelationship) {
 		return '';
 	}
+	console.log(def);
 	if (def.isRecursive) {
 		return `@cypher(
       statement: "MATCH (this)${relFragment(

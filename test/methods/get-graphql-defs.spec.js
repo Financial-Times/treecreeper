@@ -42,6 +42,22 @@ describe('graphql def creation', () => {
 						type: 'Word',
 						canIdentify: true,
 						description: 'The name of the cost centre'
+					},
+					hasGroups: {
+						type: 'Group',
+						relationship: 'PAYS_FOR',
+						direction: 'outgoing',
+						hasMany: true,
+						description: 'The groups which are costed to the cost centre'
+					},
+					hasNestedGroups: {
+						type: 'Group',
+						relationship: 'PAYS_FOR',
+						direction: 'outgoing',
+						hasMany: true,
+						isRecursive: true,
+						description:
+							'The recursive groups which are costed to the cost centre'
 					}
 				}
 			},
@@ -67,32 +83,23 @@ describe('graphql def creation', () => {
 						type: 'Boolean',
 						canFilter: true,
 						description: 'Whether or not the group is still in existence'
+					},
+					hasBudget: {
+						type: 'CostCentre',
+						relationship: 'PAYS_FOR',
+						direction: 'incoming',
+						description: 'The Cost Centre associated with the group'
+					},
+					hasEventualBudget: {
+						type: 'CostCentre',
+						description: 'The Cost Centre associated with the group in the end',
+						isRecursive: true,
+						relationship: 'PAYS_FOR',
+						direction: 'incoming'
 					}
 				}
 			}
 		]);
-
-		sandbox.stub(rawData, 'getRelationships').returns({
-			PAYS_FOR: {
-				cardinality: 'ONE_TO_MANY',
-				fromType: {
-					type: 'CostCentre',
-					name: 'hasGroups',
-					description: 'The groups which are costed to the cost centre',
-					recursiveName: 'hasNestedGroups',
-					recursiveDescription:
-						'The recursive groups which are costed to the cost centre'
-				},
-				toType: {
-					type: 'Group',
-					name: 'hasBudget',
-					description: 'The Cost Centre associated with the group',
-					recursiveName: 'hasEventualBudget',
-					recursiveDescription:
-						'The Cost Centre associated with the group in the end'
-				}
-			}
-		});
 
 		sandbox.stub(rawData, 'getEnums').returns({
 			Lifecycle: {
@@ -203,7 +210,6 @@ enum Lifecycle {
 							}
 						}
 					]);
-					sandbox.stub(rawData, 'getRelationships').returns({});
 					sandbox.stub(rawData, 'getEnums').returns({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 
@@ -223,7 +229,6 @@ enum Lifecycle {
 							}
 						}
 					]);
-					sandbox.stub(rawData, 'getRelationships').returns({});
 					sandbox.stub(rawData, 'getEnums').returns({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 

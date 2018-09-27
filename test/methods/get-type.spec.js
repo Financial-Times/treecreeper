@@ -103,30 +103,30 @@ describe('get-type', () => {
 	});
 
 	it('it maps types to graphql properties', async () => {
-			sandbox.stub(getRelationships, 'method');
+		sandbox.stub(getRelationships, 'method');
 
-			rawData.getTypes.returns([
-				{
-					name: 'Type1',
-					properties: {
-						primitiveProp: {
-							type: 'Word'
-						},
-						documentProp: {
-							type: 'Document'
-						},
-						enumProp: {
-							type: 'SomeEnum'
-						}
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					primitiveProp: {
+						type: 'Word'
+					},
+					documentProp: {
+						type: 'Document'
+					},
+					enumProp: {
+						type: 'SomeEnum'
 					}
 				}
-			]);
+			}
+		]);
 
-			const type = getType('Type1', { primitiveTypes: 'graphql' });
-			expect(type.properties.primitiveProp).to.eql({ type: 'String' });
-			expect(type.properties.documentProp).to.not.exist;
-			expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
-		});
+		const type = getType('Type1', { primitiveTypes: 'graphql' });
+		expect(type.properties.primitiveProp).to.eql({ type: 'String' });
+		expect(type.properties.documentProp).to.not.exist;
+		expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
+	});
 
 	describe('relationships', () => {
 		it('it includes rest api relationship definitions', async () => {

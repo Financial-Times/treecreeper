@@ -32,7 +32,7 @@ const getType = (
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
 					// documents are too big to be served by graphql
-					return
+					return;
 				}
 				// If not a primitive type we assume it's an enum and leave it unaltered
 				def.type = primitiveTypesMap[def.type] || def.type;
@@ -40,10 +40,10 @@ const getType = (
 			if (def.pattern) {
 				def.validator = getStringValidator(def.pattern);
 			}
-			return [name, def]
+			return [name, def];
 		})
 		.filter(entry => !!entry)
-		.reduce((obj, [name, def])=> Object.assign(obj, {[name]: def}), {});
+		.reduce((obj, [name, def]) => Object.assign(obj, { [name]: def }), {});
 
 	if (relationshipStructure) {
 		const relationships = getRelationships.method(type.name, {

@@ -22,7 +22,7 @@ properties:
   monitors:
     type: System
     direction: incoming
-    name: monitors
     relationship: MONITORED_BY
+    label: Monitored systems
     description: The systems which the healthcheck monitors
     hasMany: true

@@ -37,21 +37,21 @@ properties:
   productOwners:
     type: Person
     direction: outgoing
-    name: productOwners
+    label: Product owners
     relationship: HAS_PRODUCT_OWNER
     description: The product's owner
     hasMany: true
   dependencies:
     type: System
     direction: outgoing
-    name: dependencies
+    label: Direct dependencies
     relationship: DEPENDS_ON
     description: The systems the product directly depends on
     hasMany: true
   recursiveDependencies:
     type: System
     direction: outgoing
-    name: recursiveDependencies
+    label: Recursive dependencies
     relationship: DEPENDS_ON
     description: 'The systems the product depends on, either directly or indirectly'
     hasMany: true
@@ -59,10 +59,16 @@ properties:
   productDependencies:
     hasMany: true
     hidden: true
+    type: Product
     relationship: DEPENDS_ON
     direction: outgoing
+    description: Products that this product depends on
+    label: Product dependencies
   productDependents:
     hasMany: true
     hidden: true
+    type: Product
     relationship: DEPENDS_ON
     direction: incoming
+    description: Products that depend on this product
+    label: Product dependents

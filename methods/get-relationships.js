@@ -23,16 +23,21 @@ const restRelationships = relationships => {
 	);
 };
 
-const createGraphqlRelationship = (
-	{ name, description, label },
-	isRecursive,
-	{ hasMany, direction, neo4jName, endNode }
-) => ({
+const createGraphqlRelationship = ({
+	name,
+	description,
+	label,
+	hasMany,
+	direction,
+	neo4jName,
+	endNode,
+	isRecursive
+}) => ({
 	type: endNode,
 	hasMany,
 	direction,
 	name,
-	isRecursive,
+	isRecursive: !!isRecursive,
 	isRelationship: true,
 	neo4jName,
 	description,
@@ -41,22 +46,7 @@ const createGraphqlRelationship = (
 
 const graphqlRelationships = relationships => {
 	return relationships.reduce((arr, def) => {
-		if (def.name) {
-			arr.push(createGraphqlRelationship(def, false, def));
-		}
-		if (def.recursiveName) {
-			arr.push(
-				createGraphqlRelationship(
-					{
-						name: def.recursiveName,
-						description: def.recursiveDescription,
-						label: def.recursiveLabel
-					},
-					true,
-					def
-				)
-			);
-		}
+		arr.push(createGraphqlRelationship(def));
 		return arr;
 	}, []);
 };
@@ -119,33 +109,21 @@ const normalize = (propName, def, typeName) => {
 		name: propName,
 		neo4jName: def.relationship,
 		startNode: typeName
-	})
+	});
 
 	delete obj.relationship;
 	delete obj.type;
-	return obj
-}
+	return obj;
+};
 
 const getRelationships = (
 	typeName = undefined,
 	{ structure = 'flat' } = {}
 ) => {
-	const type = rawData.getTypes().find(({name}) => name === typeName)
+	const type = rawData.getTypes().find(({ name }) => name === typeName);
 	let relationships = Object.entries(type.properties || {})
-		.filter(([key, {relationship}]) => !!relationship)
-		.map(([key, val]) => normalize(key, val, typeName))
-	if (structure === 'flat') {
-
-	}
-	// let relationships = getNormalizedRawData()
-	// 	.filter(({ fromType, toType }) =>
-	// 		[fromType.type, toType.type].includes(typeName)
-	// 	)
-	// 	.reduce(
-	// 		(list, definition) => list.concat(buildTwinRelationships(definition)),
-	// 		[]
-	// 	)
-	// 	.filter(({ startNode }) => startNode === typeName);
+		.filter(([key, { relationship }]) => !!relationship)
+		.map(([key, val]) => normalize(key, val, typeName));
 
 	if (structure === 'rest') {
 		relationships = restRelationships(relationships);
