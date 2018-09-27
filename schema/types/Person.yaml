@@ -34,3 +34,45 @@ properties:
     canFilter: true
     label: Active
     description: Whether or not the person is still working at the FT
+  techDirectorFor:
+    type: Group
+    label: Tech director for group
+    direction: incoming
+    relationship: HAS_TECH_DIRECTOR
+    description: Groups the person is a technical director for
+    hasMany: true
+  techLeadFor:
+    type: Team
+    label: Tech lead for teams
+    direction: incoming
+    relationship: HAS_TECH_LEAD
+    description: Teams the person is a technical lead for
+    hasMany: true
+  ownedTeams:
+    type: Team
+    direction: incoming
+    label: Product owner for teams
+    relationship: HAS_PRODUCT_OWNER
+    description: Teams the person is a product owner for
+    hasMany: true
+  ownedProducts:
+    type: Product
+    direction: incoming
+    label: Product owner for products
+    relationship: HAS_PRODUCT_OWNER
+    description: Products the person is a product owner for
+    hasMany: true
+  stakeholderFor:
+    type: System
+    direction: incoming
+    label: Stakeholder for systems
+    relationship: HAS_STAKEHOLDER
+    description: Systems the person is a stakeholder for
+    hasMany: true
+  knowsAbout:
+    type: System
+    direction: incoming
+    label: Knows about systems
+    relationship: KNOWN_ABOUT_BY
+    description: Systems the person knows about
+    hasMany: true

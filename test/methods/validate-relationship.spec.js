@@ -35,7 +35,7 @@ describe('validateRelationship', () => {
 				},
 				relationships: [
 					{
-						neo4jName: 'HAS',
+						relationship: 'HAS',
 						direction: 'outgoing',
 						endNode: 'EndType',
 						startNode: 'StartType',
@@ -53,7 +53,7 @@ describe('validateRelationship', () => {
 				},
 				relationships: [
 					{
-						neo4jName: 'HAS',
+						relationship: 'HAS',
 						direction: 'incoming',
 						endNode: 'StartType',
 						startNode: 'EndType',

@@ -2,7 +2,7 @@ const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const getEnums = require('../../methods/get-enums');
 const { validateAttributes } = require('../../');
-const primitiveTypesMap = require('../../lib/primitive-types-map')
+const primitiveTypesMap = require('../../lib/primitive-types-map');
 describe('validateAttributes', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
@@ -53,8 +53,7 @@ describe('validateAttributes', () => {
 					).to.throw(/Must match pattern/);
 				});
 			}
-		})
-
+		});
 	});
 	describe('validating booleans', () => {
 		beforeEach(() => {
