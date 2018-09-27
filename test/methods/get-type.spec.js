@@ -103,8 +103,6 @@ describe('get-type', () => {
 	});
 
 	it('it maps types to graphql properties', async () => {
-		sandbox.stub(getRelationships, 'method');
-
 		rawData.getTypes.returns([
 			{
 				name: 'Type1',
@@ -127,6 +125,47 @@ describe('get-type', () => {
 		expect(type.properties.documentProp).to.not.exist;
 		expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
 	});
+
+	it('groups properties by section', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word',
+						section: 'main'
+					},
+					secondaryProp: {
+						type: 'Document',
+						section: 'secondary'
+					},
+					miscProp: {
+						type: 'SomeEnum'
+					}
+				},
+				sections: {
+					main:{
+						heading: 'Main properties',
+						description: 'Fill these out please'},
+					secondary: {
+						heading:'Secondary properties',
+						description: 'Fill these out optionally'}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.sections.main.properties.mainProp).to.exist;
+		expect(type.sections.main.heading).to.equal('Main properties');
+		expect(type.sections.main.description).to.equal('Fill these out please');
+		expect(type.sections.secondary.properties.secondaryProp).to.exist;
+		expect(type.sections.secondary.heading).to.equal('Secondary properties');
+		expect(type.sections.secondary.description).to.equal('Fill these out optionally');
+		expect(type.sections.misc.properties.miscProp).to.exist;
+		expect(type.sections.misc.heading).to.equal('Miscellaneous');
+		expect(type.sections.misc.description).not.to.exist;
+	})
 
 	describe('relationships', () => {
 		it('it includes rest api relationship definitions', async () => {
@@ -180,5 +219,51 @@ describe('get-type', () => {
 			});
 			expect(type.properties.relProp).to.eql({ name: 'relProp' });
 		});
+
+		it('groups relationship properties by section', () => {
+			sandbox.stub(getRelationships, 'method');
+
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						mainProp: {
+							type: 'Word',
+							section: 'main',
+							relationship: 'HAS'
+						},
+						secondaryProp: {
+							type: 'Document',
+							section: 'secondary',
+							relationship: 'HAS'
+						},
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					},
+					sections: {
+						main:{
+							heading: 'Main properties',
+							description: 'Fill these out please'},
+						secondary: {
+							heading:'Secondary properties',
+							description: 'Fill these out optionally'}
+					}
+				}
+			]);
+
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.properties).to.not.exist;
+			expect(type.sections.main.properties.mainProp).to.exist;
+			expect(type.sections.main.heading).to.equal('Main properties');
+			expect(type.sections.main.description).to.equal('Fill these out please');
+			expect(type.sections.secondary.properties.secondaryProp).to.exist;
+			expect(type.sections.secondary.heading).to.equal('Secondary properties');
+			expect(type.sections.secondary.description).to.equal('Fill these out optionally');
+			expect(type.sections.misc.properties.miscProp).to.exist;
+			expect(type.sections.misc.heading).to.equal('Miscellaneous');
+			expect(type.sections.misc.description).not.to.exist;
+		})
 	});
 });

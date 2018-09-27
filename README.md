@@ -16,7 +16,9 @@ Get an object defining the structure of a given `type`. The following transforms
 
 #### options
 
-- `relationshipStructure` [default: `flat`]: Include the relationships for the type. Can take any value accepted by `getRelationships()` options. If it is set to `graphql` then the relationships are assigned to the `properties` object of the type as additional entries. Otherwise, they are assigned to a separate, top-level property, 'relationships'
+- `relationshipStructure` [default: `false`]: Include the relationships for the type. Can take any value accepted by `getRelationships()` options. If it is set to `graphql` then the relationships are assigned to the `properties` object of the type as additional entries. Otherwise, they are assigned to a separate, top-level property, 'relationships'
+- `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
+- `groupProperties` [default: `false`]: Each property may have a `section` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `sections`, where all properties are grouped by section
 
 ### getAllTypes(options)
 

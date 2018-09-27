@@ -10,8 +10,8 @@ const getType = (
 	typeName,
 	{
 		primitiveTypes = 'biz-ops', // graphql
-		relationshipStructure = false // flat, rest, graphql
-		// groupProperties = false
+		relationshipStructure = false, // flat, rest, graphql
+		groupProperties = false
 	} = {}
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);
@@ -27,7 +27,20 @@ const getType = (
 		type.pluralName = `${type.name}s`;
 	}
 
-	type.properties = Object.entries(type.properties)
+	if (relationshipStructure) {
+		relationships = getRelationships.method(type.name, {
+			structure: relationshipStructure
+		});
+		if (relationshipStructure === 'graphql') {
+			relationships.forEach(def => {
+				type.properties[def.name] = def;
+			});
+		} else {
+			type.relationships = relationships;
+		}
+	}
+
+	type[groupProperties ? 'sections' : 'properties'] = Object.entries(type.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -43,20 +56,26 @@ const getType = (
 			return [name, def];
 		})
 		.filter(entry => !!entry)
-		.reduce((obj, [name, def]) => Object.assign(obj, { [name]: def }), {});
+		.reduce((obj, [name, def]) => {
+			if (groupProperties) {
+				const sectionName = def.section || 'misc';
+				const section = obj[sectionName] || type.sections[sectionName] || {
+					heading: 'Miscellaneous'
+				};
+				section.properties = section.properties || {};
+				Object.assign(section.properties, { [name]: def })
+				obj[sectionName] = section;
+				return obj;
+			}
+			return Object.assign(obj, { [name]: def })
+		}, {});
 
-	if (relationshipStructure) {
-		const relationships = getRelationships.method(type.name, {
-			structure: relationshipStructure
-		});
-		if (relationshipStructure === 'graphql') {
-			relationships.forEach(def => {
-				type.properties[def.name] = def;
-			});
-		} else {
-			type.relationships = relationships;
-		}
+	if (groupProperties) {
+		delete type.properties
 	}
+
+
+
 	return deepFreeze(type);
 };
 
