@@ -475,8 +475,23 @@ describe('get-relationships', () => {
 			]);
 		});
 
-		it.skip('hidden relationships', () => {
-
+		it('hidden relationships', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						'test-name': {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description',
+							hidden: true
+						}
+					}
+				}
+			]);
+			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([]);
 		});
 	});
 });

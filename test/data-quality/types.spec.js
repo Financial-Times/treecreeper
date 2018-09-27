@@ -10,7 +10,22 @@ const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
 
-describe.only('data quality: types', () => {
+const getTwinnedRelationship = (
+	homeTypeName,
+	awayTypeName,
+	relationshipName,
+	homeDirection
+) => {
+	const awayType = types.find(({ name }) => name === awayTypeName);
+	return Object.values(awayType.properties).find(
+		({ relationship, type, direction }) =>
+			relationship === relationshipName &&
+			type === homeTypeName &&
+			direction !== homeDirection
+	);
+};
+
+describe('data quality: types', () => {
 	const validEnums = Object.keys(enums);
 	const validStringPatterns = Object.keys(stringPatterns);
 	const typeNames = types.map(({ name }) => name);
@@ -112,34 +127,46 @@ describe.only('data quality: types', () => {
 										expect(config.pattern).to.be.oneOf(validStringPatterns);
 									}
 								});
-							})
+							});
 						} else {
 							const RELATIONSHIP_NAME = getStringValidator('RELATIONSHIP_NAME');
 							context('relationship property', () => {
 								it('must specify underlying relationship', () => {
-									expect(config.relationship).to.match(RELATIONSHIP_NAME)
+									expect(config.relationship).to.match(RELATIONSHIP_NAME);
 								});
 								it('must specify direction', () => {
-									expect(config.direction).to.be.oneOf(['incoming', 'outgoing'])
+									expect(config.direction).to.be.oneOf([
+										'incoming',
+										'outgoing'
+									]);
 								});
 								it('may be hidden', () => {
 									if (config.hidden) {
-										expect(config.hidden).to.be.true
+										expect(config.hidden).to.be.true;
 									}
 								});
 
 								it('may have many', () => {
 									if (config.hasMany) {
-										expect(config.hasMany).to.be.true
+										expect(config.hasMany).to.be.true;
 									}
 								});
 								it('may be recursive', () => {
 									if (config.isRecursive) {
-										expect(config.isRecursive).to.be.true
+										expect(config.isRecursive).to.be.true;
 									}
 								});
-							})
-
+								it('is defined at both ends', () => {
+									expect(
+										getTwinnedRelationship(
+											type.name,
+											config.type,
+											config.relationship,
+											config.direction
+										)
+									).to.exist;
+								});
+							});
 						}
 					});
 				});

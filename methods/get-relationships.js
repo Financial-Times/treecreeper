@@ -45,62 +45,11 @@ const createGraphqlRelationship = ({
 });
 
 const graphqlRelationships = relationships => {
-	return relationships.reduce((arr, def) => {
+	return relationships.filter(({ hidden }) => !hidden).reduce((arr, def) => {
 		arr.push(createGraphqlRelationship(def));
 		return arr;
 	}, []);
 };
-
-const buildTwinRelationships = ({
-	neo4jName,
-	cardinality,
-	fromType,
-	toType
-}) => {
-	const startNode = fromType.type;
-	const endNode = toType.type;
-
-	return [
-		Object.assign({}, fromType, {
-			startNode,
-			endNode,
-			neo4jName,
-			direction: 'outgoing',
-			hasMany: /MANY$/.test(cardinality)
-		}),
-		Object.assign({}, toType, {
-			startNode: endNode,
-			endNode: startNode,
-			neo4jName,
-			direction: 'incoming',
-			hasMany: /^MANY/.test(cardinality)
-		})
-	].map(obj => {
-		delete obj.type;
-		return obj;
-	});
-};
-
-const getNormalizedRawData = cache.cacheify(
-	() => {
-		return deepFreeze(
-			Object.entries(rawData.getRelationships()).reduce(
-				(configsList, [neo4jName, definitions]) => {
-					if (!Array.isArray(definitions)) {
-						definitions = [definitions];
-					}
-					return configsList.concat(
-						definitions.map(definition =>
-							Object.assign({ neo4jName }, definition)
-						)
-					);
-				},
-				[]
-			)
-		);
-	},
-	() => 'relationships:normalizedRawData'
-);
 
 const normalize = (propName, def, typeName) => {
 	const obj = Object.assign({}, def, {
@@ -122,7 +71,7 @@ const getRelationships = (
 ) => {
 	const type = rawData.getTypes().find(({ name }) => name === typeName);
 	let relationships = Object.entries(type.properties || {})
-		.filter(([key, { relationship }]) => !!relationship)
+		.filter(([, { relationship }]) => !!relationship)
 		.map(([key, val]) => normalize(key, val, typeName));
 
 	if (structure === 'rest') {
