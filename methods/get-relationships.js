@@ -6,10 +6,10 @@ const restRelationships = relationships => {
 	return relationships.reduce(
 		(
 			obj,
-			{ neo4jName, direction, endNode, hasMany, name, description, label }
+			{ relationship, direction, endNode, hasMany, name, description, label }
 		) => {
-			obj[neo4jName] = obj[neo4jName] || [];
-			obj[neo4jName].push({
+			obj[relationship] = obj[relationship] || [];
+			obj[relationship].push({
 				direction,
 				nodeType: endNode,
 				hasMany,
@@ -29,7 +29,7 @@ const createGraphqlRelationship = ({
 	label,
 	hasMany,
 	direction,
-	neo4jName,
+	relationship,
 	endNode,
 	isRecursive
 }) => ({
@@ -39,16 +39,13 @@ const createGraphqlRelationship = ({
 	name,
 	isRecursive: !!isRecursive,
 	isRelationship: true,
-	neo4jName,
+	relationship,
 	description,
 	label
 });
 
 const graphqlRelationships = relationships => {
-	return relationships.filter(({ hidden }) => !hidden).reduce((arr, def) => {
-		arr.push(createGraphqlRelationship(def));
-		return arr;
-	}, []);
+	return relationships.filter(({ hidden }) => !hidden).map(createGraphqlRelationship);
 };
 
 const normalize = (propName, def, typeName) => {
@@ -56,11 +53,9 @@ const normalize = (propName, def, typeName) => {
 		endNode: def.type,
 		hasMany: !!def.hasMany,
 		name: propName,
-		neo4jName: def.relationship,
 		startNode: typeName
 	});
 
-	delete obj.relationship;
 	delete obj.type;
 	return obj;
 };

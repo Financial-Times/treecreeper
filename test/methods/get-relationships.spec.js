@@ -114,7 +114,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.pointingAway);
 			expect(getRelationships('Type1')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					endNode: 'Type2',
 					startNode: 'Type1',
@@ -130,7 +130,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.pointingTo);
 			expect(getRelationships('Type2')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					endNode: 'Type1',
 					startNode: 'Type2',
@@ -146,7 +146,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.sameUnderlyingRelationship);
 			expect(getRelationships('Type1')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					hasMany: false,
 					endNode: 'Type2',
@@ -154,7 +154,7 @@ describe('get-relationships', () => {
 					startNode: 'Type1'
 				},
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					hasMany: false,
 					endNode: 'Type3',
@@ -168,7 +168,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.selfReferencing);
 			expect(getRelationships('Type1')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					endNode: 'Type1',
 					startNode: 'Type1',
@@ -176,7 +176,7 @@ describe('get-relationships', () => {
 					hasMany: false
 				},
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					endNode: 'Type1',
 					startNode: 'Type1',
@@ -190,7 +190,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.selfReferencing);
 			expect(getRelationships('Type1')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					endNode: 'Type1',
 					startNode: 'Type1',
@@ -198,7 +198,7 @@ describe('get-relationships', () => {
 					hasMany: false
 				},
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					endNode: 'Type1',
 					startNode: 'Type1',
@@ -211,7 +211,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.cardinality);
 			expect(getRelationships('Type1')).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					endNode: 'Type2',
 					startNode: 'Type1',
@@ -219,7 +219,7 @@ describe('get-relationships', () => {
 					name: 'many'
 				},
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					endNode: 'Type2',
 					startNode: 'Type1',
@@ -350,7 +350,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.pointingAway);
 			expect(getRelationships('Type1', { structure: 'graphql' })).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					type: 'Type2',
 					hasMany: false,
@@ -367,7 +367,7 @@ describe('get-relationships', () => {
 			rawData.getTypes.returns(mocks.pointingTo);
 			expect(getRelationships('Type2', { structure: 'graphql' })).to.eql([
 				{
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					type: 'Type1',
 					isRelationship: true,
@@ -440,7 +440,7 @@ describe('get-relationships', () => {
 					name: 'test-name',
 					isRecursive: true,
 					isRelationship: true,
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					description: 'test description',
 					label: 'test label'
 				}
@@ -456,7 +456,7 @@ describe('get-relationships', () => {
 					isRelationship: true,
 					label: undefined,
 					type: 'Type2',
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'outgoing',
 					hasMany: true,
 					name: 'many'
@@ -467,7 +467,7 @@ describe('get-relationships', () => {
 					isRelationship: true,
 					label: undefined,
 					type: 'Type2',
-					neo4jName: 'HAS',
+					relationship: 'HAS',
 					direction: 'incoming',
 					name: 'singular',
 					hasMany: false

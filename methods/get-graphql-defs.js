@@ -39,13 +39,13 @@ const cypherResolver = def => {
 	if (def.isRecursive) {
 		return `@cypher(
       statement: "MATCH (this)${relFragment(
-				def.neo4jName,
+				def.relationship,
 				def.direction,
 				'*1..20'
 			)}(related:${def.type}) RETURN DISTINCT related"
     )`;
 	} else {
-		return `@relation(name: "${def.neo4jName}", direction: "${graphqlDirection(
+		return `@relation(name: "${def.relationship}", direction: "${graphqlDirection(
 			def.direction
 		)}")`;
 	}
