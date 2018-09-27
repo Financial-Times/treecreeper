@@ -62,7 +62,7 @@ const getType = (
 			if (groupProperties) {
 				const sectionName = def.section || 'misc';
 				const section = obj[sectionName] ||
-					type.sections[sectionName] || {
+					(type.sections && type.sections[sectionName]) || {
 						heading: 'Miscellaneous'
 					};
 				section.properties = section.properties || {};
