@@ -65,17 +65,25 @@ const mocks = {
 			}
 		}
 	}],
-	cardinality: (([cardinality, direction, [fromNum, toNum]]) => [{
-		name: `Type${fromNum}`
-	},
-	{
-		name: `Type${toNum}`
-	}
-
-	]
+	cardinality: [{
+		name: 'Type1',
+		properties: {
+			'many': {
+				type: 'Type2',
+				hasMany: true,
+				direction: 'outgoing',
+				relationship: 'HAS',
+			},
+			'singular': {
+				type: 'Type2',
+				direction: 'incoming',
+				relationship: 'HAS',
+			}
+		}
+	}]
 }
 
-describe.only('get-relationships', () => {
+describe('get-relationships', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
 		sandbox.stub(rawData, 'getTypes');
@@ -167,37 +175,49 @@ describe.only('get-relationships', () => {
 				}
 			]);
 		});
-		// describe('cardinality', () => {
-		// 	['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
-		// 		.reduce(
-		// 			(arr, cardinality) =>
-		// 				arr.concat([
-		// 					[cardinality, 'incoming', [1, 2]],
-		// 					[cardinality, 'outgoing', [2, 1]]
-		// 				]),
-		// 			[]
-		// 		)
-		// 		.map(([cardinality, direction, [fromNum, toNum]]) => {
-		// 			it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
-		// 				rawData.getTypes.returns([{
-		// 					HAS: [
-		// 						{
-		// 							cardinality,
-		// 							fromType: { type: `Type${fromNum}` },
-		// 							toType: { type: `Type${toNum}` }
-		// 						}
-		// 					]
-		// 				}]);
-		// 				const hasMany =
-		// 					/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
-		// 				expect(
-		// 					getTypes('Type1').find(
-		// 						({ neo4jName }) => neo4jName === 'HAS'
-		// 					).hasMany
-		// 				).to.equal(hasMany);
-		// 			});
-		// 		});
-		// });
+
+		it('retrieve two relationships when pointing at self', () => {
+			rawData.getTypes.returns(mocks.selfReferencing);
+			expect(getRelationships('Type1')).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					endNode: 'Type1',
+					startNode: 'Type1',
+					name: 'test-name1',
+					hasMany: false
+				},
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					endNode: 'Type1',
+					startNode: 'Type1',
+					name: 'test-name2',
+					hasMany: false
+				}
+			]);
+		});
+		it('cardinality', () => {
+			rawData.getTypes.returns(mocks.cardinality);
+			expect(getRelationships('Type1')).to.eql([
+				{
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					endNode: 'Type2',
+					startNode: 'Type1',
+					 "hasMany": true,
+          "name": "many"
+				},
+				{
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					endNode: 'Type2',
+					startNode: 'Type1',
+					name: 'singular',
+					hasMany: false
+				}
+			]);
+		});
 	});
 
 	context('rest api  style', () => {
@@ -285,34 +305,24 @@ describe.only('get-relationships', () => {
 				]
 			});
 		});
-		describe.only('cardinality', () => {
-			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
-				.reduce(
-					(arr, cardinality) =>
-						arr.concat([
-							[cardinality, 'incoming', [1, 2]],
-							[cardinality, 'outgoing', [2, 1]]
-						]),
-					[]
-				)
-				.map(([cardinality, direction, [fromNum, toNum]]) => {
-					it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
-						rawData.getTypes.returns({
-							HAS: [
-								{
-									cardinality,
-									fromType: { type: `Type${fromNum}` },
-									toType: { type: `Type${toNum}` }
-								}
-							]
-						});
-						const hasMany =
-							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
-						expect(
-							getTypes('Type1', { structure: 'rest' }).HAS[0].hasMany
-						).to.equal(hasMany);
-					});
-				});
+		it('cardinality', () => {
+			rawData.getTypes.returns(mocks.cardinality);
+			expect(getRelationships('Type1', {structure: 'rest'})).to.eql({HAS:[
+				{
+					direction: 'outgoing',
+					nodeType: 'Type2',
+					 "hasMany": true,
+          "name": "many",description: undefined,
+						label: undefined
+				},
+				{
+					direction: 'incoming',
+					nodeType: 'Type2',
+					name: 'singular',
+					hasMany: false,description: undefined,
+						label: undefined
+				}
+			]});
 		});
 	});
 
@@ -421,36 +431,32 @@ describe.only('get-relationships', () => {
 			]);
 		});
 
-		describe.skip('cardinality', () => {
-			['ONE_TO_ONE', 'ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY']
-				.reduce(
-					(arr, cardinality) =>
-						arr.concat([
-							[cardinality, 'incoming', [1, 2]],
-							[cardinality, 'outgoing', [2, 1]]
-						]),
-					[]
-				)
-				.map(([cardinality, direction, [fromNum, toNum]]) => {
-					it(`assigns correct cardinality for ${direction} ${cardinality} relationship`, () => {
-						rawData.getTypes.returns({
-							HAS: [
-								{
-									cardinality,
-									fromType: { type: `Type${fromNum}`, name: `name${fromNum}` },
-									toType: { type: `Type${toNum}`, name: `name${toNum}` }
-								}
-							]
-						});
-						const hasMany =
-							/(ONE|MANY)_TO_(ONE|MANY)/.exec(cardinality)[toNum] === 'MANY';
-						expect(
-							getRelationships('Type1', { structure: 'graphql' }).find(
-								({ neo4jName }) => neo4jName === 'HAS'
-							).hasMany
-						).to.equal(hasMany);
-					});
-				});
+		it('cardinality', () => {
+			rawData.getTypes.returns(mocks.cardinality);
+			expect(getRelationships('Type1', {structure: 'graphql'})).to.eql([
+				{"description": undefined,
+"isRecursive": false,
+"isRelationship": true,
+"label": undefined,
+"type": "Type2",
+					neo4jName: 'HAS',
+					direction: 'outgoing',
+					 "hasMany": true,
+          "name": "many"
+				},
+				{"description": undefined,
+"isRecursive": false,
+"isRelationship": true,
+"label": undefined,
+"type": "Type2",
+					neo4jName: 'HAS',
+					direction: 'incoming',
+					name: 'singular',
+					hasMany: false
+				}
+			]);
 		});
 	});
 });
+
+
