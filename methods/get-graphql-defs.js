@@ -45,9 +45,9 @@ const cypherResolver = def => {
 			)}(related:${def.type}) RETURN DISTINCT related"
     )`;
 	} else {
-		return `@relation(name: "${def.relationship}", direction: "${graphqlDirection(
-			def.direction
-		)}")`;
+		return `@relation(name: "${
+			def.relationship
+		}", direction: "${graphqlDirection(def.direction)}")`;
 	}
 };
 

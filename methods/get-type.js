@@ -28,7 +28,7 @@ const getType = (
 	}
 
 	if (relationshipStructure) {
-		relationships = getRelationships.method(type.name, {
+		const relationships = getRelationships.method(type.name, {
 			structure: relationshipStructure
 		});
 		if (relationshipStructure === 'graphql') {
@@ -40,7 +40,9 @@ const getType = (
 		}
 	}
 
-	type[groupProperties ? 'sections' : 'properties'] = Object.entries(type.properties)
+	type[groupProperties ? 'sections' : 'properties'] = Object.entries(
+		type.properties
+	)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -59,22 +61,21 @@ const getType = (
 		.reduce((obj, [name, def]) => {
 			if (groupProperties) {
 				const sectionName = def.section || 'misc';
-				const section = obj[sectionName] || type.sections[sectionName] || {
-					heading: 'Miscellaneous'
-				};
+				const section = obj[sectionName] ||
+					type.sections[sectionName] || {
+						heading: 'Miscellaneous'
+					};
 				section.properties = section.properties || {};
-				Object.assign(section.properties, { [name]: def })
+				Object.assign(section.properties, { [name]: def });
 				obj[sectionName] = section;
 				return obj;
 			}
-			return Object.assign(obj, { [name]: def })
+			return Object.assign(obj, { [name]: def });
 		}, {});
 
 	if (groupProperties) {
-		delete type.properties
+		delete type.properties;
 	}
-
-
 
 	return deepFreeze(type);
 };

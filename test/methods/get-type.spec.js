@@ -144,12 +144,14 @@ describe('get-type', () => {
 					}
 				},
 				sections: {
-					main:{
+					main: {
 						heading: 'Main properties',
-						description: 'Fill these out please'},
+						description: 'Fill these out please'
+					},
 					secondary: {
-						heading:'Secondary properties',
-						description: 'Fill these out optionally'}
+						heading: 'Secondary properties',
+						description: 'Fill these out optionally'
+					}
 				}
 			}
 		]);
@@ -161,11 +163,13 @@ describe('get-type', () => {
 		expect(type.sections.main.description).to.equal('Fill these out please');
 		expect(type.sections.secondary.properties.secondaryProp).to.exist;
 		expect(type.sections.secondary.heading).to.equal('Secondary properties');
-		expect(type.sections.secondary.description).to.equal('Fill these out optionally');
+		expect(type.sections.secondary.description).to.equal(
+			'Fill these out optionally'
+		);
 		expect(type.sections.misc.properties.miscProp).to.exist;
 		expect(type.sections.misc.heading).to.equal('Miscellaneous');
 		expect(type.sections.misc.description).not.to.exist;
-	})
+	});
 
 	describe('relationships', () => {
 		it('it includes rest api relationship definitions', async () => {
@@ -243,12 +247,14 @@ describe('get-type', () => {
 						}
 					},
 					sections: {
-						main:{
+						main: {
 							heading: 'Main properties',
-							description: 'Fill these out please'},
+							description: 'Fill these out please'
+						},
 						secondary: {
-							heading:'Secondary properties',
-							description: 'Fill these out optionally'}
+							heading: 'Secondary properties',
+							description: 'Fill these out optionally'
+						}
 					}
 				}
 			]);
@@ -260,10 +266,12 @@ describe('get-type', () => {
 			expect(type.sections.main.description).to.equal('Fill these out please');
 			expect(type.sections.secondary.properties.secondaryProp).to.exist;
 			expect(type.sections.secondary.heading).to.equal('Secondary properties');
-			expect(type.sections.secondary.description).to.equal('Fill these out optionally');
+			expect(type.sections.secondary.description).to.equal(
+				'Fill these out optionally'
+			);
 			expect(type.sections.misc.properties.miscProp).to.exist;
 			expect(type.sections.misc.heading).to.equal('Miscellaneous');
 			expect(type.sections.misc.description).not.to.exist;
-		})
+		});
 	});
 });

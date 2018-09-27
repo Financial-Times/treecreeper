@@ -45,7 +45,9 @@ const createGraphqlRelationship = ({
 });
 
 const graphqlRelationships = relationships => {
-	return relationships.filter(({ hidden }) => !hidden).map(createGraphqlRelationship);
+	return relationships
+		.filter(({ hidden }) => !hidden)
+		.map(createGraphqlRelationship);
 };
 
 const normalize = (propName, def, typeName) => {
