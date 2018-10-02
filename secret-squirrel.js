@@ -4,6 +4,7 @@ module.exports = {
 			'.prettierrc',
 			'doc/model.cql',
 			'doc/model.grass',
+			'makefile',
 			'scripts/neo4j-plugins',
 			'scripts/neo4j-wait-for-start',
 			'test/mocha.opts'

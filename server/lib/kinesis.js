@@ -58,17 +58,29 @@ function Kinesis(streamName) {
 				StreamName: streamName
 			};
 
-			const putRecordInfra = kinesisInfra.putRecord(options).promise();
-			const putRecordRelEng = kinesisRelEng.putRecord(options).promise();
-
-			return Promise.all([putRecordInfra, putRecordRelEng]).catch(error => {
-				logger.error('Kinesis put record failed', {
-					event: 'KINESIS_PUT_RECORD_FAILURE',
-					error,
-					data
+			const putRecordInfra = kinesisInfra
+				.putRecord(options)
+				.promise()
+				.catch(error => {
+					logger.error('Kinesis put record failed', {
+						event: 'KINESIS_PUT_RECORD_FAILURE',
+						error,
+						data,
+						env: 'Infra'
+					});
 				});
-				throw error;
-			});
+			const putRecordRelEng = kinesisRelEng
+				.putRecord(options)
+				.promise()
+				.catch(error => {
+					logger.error('Kinesis put record failed', {
+						event: 'KINESIS_PUT_RECORD_FAILURE',
+						error,
+						data,
+						env: 'RelEng'
+					});
+				});
+			return Promise.all([putRecordInfra, putRecordRelEng]);
 		})
 	};
 }
