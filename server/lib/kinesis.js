@@ -5,7 +5,7 @@ const {
 	KINESIS_AWS_REGION: region = 'eu-west-1',
 	KINESIS_AWS_ACCESS_KEY_ID: accessKeyId,
 	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey,
-	AWS_ACCESS_KEY,
+	AWS_ACCESS_KEY_ID,
 	AWS_SECRET_ACCESS_KEY
 } = process.env;
 
@@ -35,7 +35,7 @@ function Kinesis(streamName) {
 	// operations-reliability-prod || operations-reliability-test accounts
 	const kinesisRelEng = new AWS.Kinesis(
 		Object.assign({}, kinesisStreamOptions, {
-			accessKeyId: AWS_ACCESS_KEY,
+			accessKeyId: AWS_ACCESS_KEY_ID,
 			secretAccessKey: AWS_SECRET_ACCESS_KEY
 		})
 	);
