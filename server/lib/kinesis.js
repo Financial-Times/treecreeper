@@ -28,7 +28,8 @@ function Kinesis(streamName) {
 	const kinesisInfra = new AWS.Kinesis(
 		Object.assign({}, kinesisStreamOptions, {
 			accessKeyId,
-			secretAccessKey
+			secretAccessKey,
+			signatureCache: false
 		})
 	);
 
@@ -37,6 +38,7 @@ function Kinesis(streamName) {
 		Object.assign({}, kinesisStreamOptions, {
 			accessKeyId: AWS_ACCESS_KEY_ID,
 			secretAccessKey: AWS_SECRET_ACCESS_KEY
+			signatureCache: false
 		})
 	);
 
