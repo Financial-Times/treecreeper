@@ -6,6 +6,8 @@ const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 
+const exitArray = arr => arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {})
+
 const getType = (
 	typeName,
 	{
@@ -40,7 +42,7 @@ const getType = (
 		}
 	}
 
-	type[groupProperties ? 'sections' : 'properties'] = Object.entries(
+	const properties = Object.entries(
 		type.properties
 	)
 		.map(([name, def]) => {
@@ -58,22 +60,50 @@ const getType = (
 			return [name, def];
 		})
 		.filter(entry => !!entry)
-		.reduce((obj, [name, def]) => {
-			if (groupProperties) {
-				const sectionName = def.section || 'misc';
-				const section = obj[sectionName] ||
-					(type.sections && type.sections[sectionName]) || {
-						heading: 'Miscellaneous'
-					};
-				section.properties = section.properties || {};
-				Object.assign(section.properties, { [name]: def });
-				obj[sectionName] = section;
-				return obj;
-			}
-			return Object.assign(obj, { [name]: def });
-		}, {});
 
-	if (groupProperties) {
+	if (!groupProperties) {
+		type.properties = exitArray(properties);
+	} else {
+
+
+
+		const virtualSectionProperties = properties
+			.filter(([,{section}]) => section === 'self')
+
+		const realSectionProperties = properties
+			.filter(([,{section}]) => section && section !== 'self')
+
+		const miscProperties = properties
+			.filter(([,{section}]) => !section)
+
+		const realSections = Object.entries(type.sections)
+			.map(([sectionName, sectionDef]) => {
+				sectionDef.properties = exitArray(realSectionProperties
+					.filter(([,{section}]) => section === sectionName))
+
+				return [sectionName, sectionDef];
+			})
+
+		const virtualSections = virtualSectionProperties
+				.map(([propertyName, propertyDef]) => {
+					return [propertyName, {
+						heading: propertyDef.label,
+						description: propertyDef.description,
+						properties: {[propertyName]: propertyDef}
+					}]
+				})
+
+		const miscellaneous = [['misc', {
+			heading: 'Miscellaneous',
+			properties: exitArray(miscProperties)
+		}]]
+
+		type.sections = exitArray([].concat(
+			realSections,
+			virtualSections,
+			miscellaneous
+		))
+
 		delete type.properties;
 	}
 
