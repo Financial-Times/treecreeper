@@ -56,12 +56,38 @@ describe('data quality: types', () => {
 					expect(type.pluralName).to.be.a('string');
 				}
 			});
+			const fieldsets = type.fieldsets;
+			const validFieldsetNames = fieldsets ? ['self'].concat(Object.keys(fieldsets)) : [];
+
+			if (fieldsets) {
+				describe('fieldsets', () => {
+					it('is an object if it exists', () => {
+						expect(fieldsets).to.be.an('object');
+					})
+					Object.entries(type.fieldsets).forEach(([name, fieldsetConfig]) => {
+						describe(name, () => {
+							it('has a heading', () => {
+								expect(fieldsetConfig.heading).to.be.a('string');
+							});
+							it('may have a description', () => {
+								if ('description' in fieldsetConfig) {
+									expect(fieldsetConfig.description).to.be.a('string');
+								}
+							});
+						});
+					});
+				});
+			}
+
 			describe('properties', () => {
 				Object.entries(type.properties).forEach(([name, config]) => {
 					describe(name, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
 								const commonKeys = ['type', 'description', 'label'];
+								if (fieldsets) {
+									commonKeys.push('fieldset');
+								}
 								if (typeNames.includes(config.type)) {
 									// it's a relationship
 									expect(key).to.be.oneOf(
@@ -86,6 +112,7 @@ describe('data quality: types', () => {
 								}
 							});
 						});
+
 						it('has valid name', () => {
 							if (name !== 'SF_ID') {
 								expect(name).to.match(ATTRIBUTE_NAME);
@@ -102,6 +129,12 @@ describe('data quality: types', () => {
 							expect(config.type).to.exist;
 							expect(config.type).to.be.oneOf(validPropTypes);
 						});
+
+						it('has valid fieldset', () => {
+							if (config.fieldset) {
+								expect(validFieldsetNames).to.contain(config.fieldset)
+							}
+						})
 
 						if (!typeNames.includes(config.type)) {
 							context('direct property', () => {

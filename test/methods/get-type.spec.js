@@ -126,24 +126,25 @@ describe('get-type', () => {
 		expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
 	});
 
-	it('groups properties by section', () => {
+	it('groups properties by fieldset', () => {
 		rawData.getTypes.returns([
 			{
 				name: 'Type1',
 				properties: {
 					mainProp: {
 						type: 'Word',
-						section: 'main'
+						fieldset: 'main'
 					},
 					secondaryProp: {
 						type: 'Document',
-						section: 'secondary'
+						fieldset: 'self',
+						label: 'Standalone'
 					},
 					miscProp: {
 						type: 'SomeEnum'
 					}
 				},
-				sections: {
+				fieldsets: {
 					main: {
 						heading: 'Main properties',
 						description: 'Fill these out please'
@@ -158,17 +159,43 @@ describe('get-type', () => {
 
 		const type = getType('Type1', { groupProperties: true });
 		expect(type.properties).to.not.exist;
-		expect(type.sections.main.properties.mainProp).to.exist;
-		expect(type.sections.main.heading).to.equal('Main properties');
-		expect(type.sections.main.description).to.equal('Fill these out please');
-		expect(type.sections.secondary.properties.secondaryProp).to.exist;
-		expect(type.sections.secondary.heading).to.equal('Secondary properties');
-		expect(type.sections.secondary.description).to.equal(
-			'Fill these out optionally'
-		);
-		expect(type.sections.misc.properties.miscProp).to.exist;
-		expect(type.sections.misc.heading).to.equal('Miscellaneous');
-		expect(type.sections.misc.description).not.to.exist;
+		expect(type.fieldsets.main.properties.mainProp).to.exist;
+		expect(type.fieldsets.main.heading).to.equal('Main properties');
+		expect(type.fieldsets.main.description).to.equal('Fill these out please');
+		expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+		expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
+		expect(type.fieldsets.secondaryProp.description).to.not.exist;
+		expect(type.fieldsets.misc.properties.miscProp).to.exist;
+		expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
+		expect(type.fieldsets.misc.description).not.to.exist;
+	});
+
+
+	it('handle lack of custom fieldsets well when grouping', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word',
+					},
+					secondaryProp: {
+						type: 'Document',
+						label: 'Standalone'
+					},
+					miscProp: {
+						type: 'SomeEnum'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.fieldsets.misc.properties.mainProp).to.exist;
+		expect(type.fieldsets.misc.properties.secondaryProp).to.exist;
+		expect(type.fieldsets.misc.properties.miscProp).to.exist;
+		expect(type.fieldsets.misc.heading).to.equal('General');
 	});
 
 	describe('relationships', () => {
@@ -224,7 +251,7 @@ describe('get-type', () => {
 			expect(type.properties.relProp).to.eql({ name: 'relProp' });
 		});
 
-		it('groups relationship properties by section', () => {
+		it('groups relationship properties by fieldset', () => {
 			sandbox.stub(getRelationships, 'method');
 
 			rawData.getTypes.returns([
@@ -233,20 +260,21 @@ describe('get-type', () => {
 					properties: {
 						mainProp: {
 							type: 'Word',
-							section: 'main',
+							fieldset: 'main',
 							relationship: 'HAS'
 						},
 						secondaryProp: {
 							type: 'Document',
-							section: 'secondary',
-							relationship: 'HAS'
+							fieldset: 'self',
+							relationship: 'HAS',
+							label: 'Standalone'
 						},
 						miscProp: {
 							type: 'SomeEnum',
 							relationship: 'HAS'
 						}
 					},
-					sections: {
+					fieldsets: {
 						main: {
 							heading: 'Main properties',
 							description: 'Fill these out please'
@@ -261,17 +289,15 @@ describe('get-type', () => {
 
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.properties).to.not.exist;
-			expect(type.sections.main.properties.mainProp).to.exist;
-			expect(type.sections.main.heading).to.equal('Main properties');
-			expect(type.sections.main.description).to.equal('Fill these out please');
-			expect(type.sections.secondary.properties.secondaryProp).to.exist;
-			expect(type.sections.secondary.heading).to.equal('Secondary properties');
-			expect(type.sections.secondary.description).to.equal(
-				'Fill these out optionally'
-			);
-			expect(type.sections.misc.properties.miscProp).to.exist;
-			expect(type.sections.misc.heading).to.equal('Miscellaneous');
-			expect(type.sections.misc.description).not.to.exist;
+			expect(type.fieldsets.main.properties.mainProp).to.exist;
+			expect(type.fieldsets.main.heading).to.equal('Main properties');
+			expect(type.fieldsets.main.description).to.equal('Fill these out please');
+			expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+			expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
+			expect(type.fieldsets.secondaryProp.description).to.not.exist;
+			expect(type.fieldsets.misc.properties.miscProp).to.exist;
+			expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
+			expect(type.fieldsets.misc.description).not.to.exist;
 		});
 	});
 });

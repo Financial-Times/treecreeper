@@ -65,26 +65,24 @@ const getType = (
 		type.properties = exitArray(properties);
 	} else {
 
+		const virtualFieldsetProperties = properties
+			.filter(([,{fieldset}]) => fieldset === 'self')
 
-
-		const virtualSectionProperties = properties
-			.filter(([,{section}]) => section === 'self')
-
-		const realSectionProperties = properties
-			.filter(([,{section}]) => section && section !== 'self')
+		const realFieldsetProperties = properties
+			.filter(([,{fieldset}]) => fieldset && fieldset !== 'self')
 
 		const miscProperties = properties
-			.filter(([,{section}]) => !section)
+			.filter(([,{fieldset}]) => !fieldset)
 
-		const realSections = Object.entries(type.sections)
-			.map(([sectionName, sectionDef]) => {
-				sectionDef.properties = exitArray(realSectionProperties
-					.filter(([,{section}]) => section === sectionName))
+		const realFieldsets = Object.entries(type.fieldsets || {})
+			.map(([fieldsetName, fieldsetDef]) => {
+				fieldsetDef.properties = exitArray(realFieldsetProperties
+					.filter(([,{fieldset}]) => fieldset === fieldsetName))
 
-				return [sectionName, sectionDef];
+				return [fieldsetName, fieldsetDef];
 			})
 
-		const virtualSections = virtualSectionProperties
+		const virtualFieldsets = virtualFieldsetProperties
 				.map(([propertyName, propertyDef]) => {
 					return [propertyName, {
 						heading: propertyDef.label,
@@ -94,13 +92,13 @@ const getType = (
 				})
 
 		const miscellaneous = [['misc', {
-			heading: 'Miscellaneous',
+			heading: realFieldsets.length ? 'Miscellaneous' : 'General',
 			properties: exitArray(miscProperties)
 		}]]
 
-		type.sections = exitArray([].concat(
-			realSections,
-			virtualSections,
+		type.fieldsets = exitArray([].concat(
+			realFieldsets,
+			virtualFieldsets,
 			miscellaneous
 		))
 
