@@ -6,7 +6,8 @@ const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 
-const exitArray = arr => arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {})
+const entriesArrayToObject = arr =>
+	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
 const getType = (
 	typeName,
@@ -42,9 +43,7 @@ const getType = (
 		}
 	}
 
-	const properties = Object.entries(
-		type.properties
-	)
+	const properties = Object.entries(type.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -59,48 +58,59 @@ const getType = (
 			}
 			return [name, def];
 		})
-		.filter(entry => !!entry)
+		.filter(entry => !!entry);
 
 	if (!groupProperties) {
-		type.properties = exitArray(properties);
+		type.properties = entriesArrayToObject(properties);
 	} else {
+		const virtualFieldsetProperties = properties.filter(
+			([, { fieldset }]) => fieldset === 'self'
+		);
 
-		const virtualFieldsetProperties = properties
-			.filter(([,{fieldset}]) => fieldset === 'self')
+		const realFieldsetProperties = properties.filter(
+			([, { fieldset }]) => fieldset && fieldset !== 'self'
+		);
 
-		const realFieldsetProperties = properties
-			.filter(([,{fieldset}]) => fieldset && fieldset !== 'self')
+		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
-		const miscProperties = properties
-			.filter(([,{fieldset}]) => !fieldset)
-
-		const realFieldsets = Object.entries(type.fieldsets || {})
-			.map(([fieldsetName, fieldsetDef]) => {
-				fieldsetDef.properties = exitArray(realFieldsetProperties
-					.filter(([,{fieldset}]) => fieldset === fieldsetName))
+		const realFieldsets = Object.entries(type.fieldsets || {}).map(
+			([fieldsetName, fieldsetDef]) => {
+				fieldsetDef.properties = entriesArrayToObject(
+					realFieldsetProperties.filter(
+						([, { fieldset }]) => fieldset === fieldsetName
+					)
+				);
 
 				return [fieldsetName, fieldsetDef];
-			})
+			}
+		);
 
-		const virtualFieldsets = virtualFieldsetProperties
-				.map(([propertyName, propertyDef]) => {
-					return [propertyName, {
+		const virtualFieldsets = virtualFieldsetProperties.map(
+			([propertyName, propertyDef]) => {
+				return [
+					propertyName,
+					{
 						heading: propertyDef.label,
 						description: propertyDef.description,
-						properties: {[propertyName]: propertyDef}
-					}]
-				})
+						properties: { [propertyName]: propertyDef }
+					}
+				];
+			}
+		);
 
-		const miscellaneous = [['misc', {
-			heading: realFieldsets.length ? 'Miscellaneous' : 'General',
-			properties: exitArray(miscProperties)
-		}]]
+		const miscellaneous = [
+			[
+				'misc',
+				{
+					heading: realFieldsets.length ? 'Miscellaneous' : 'General',
+					properties: entriesArrayToObject(miscProperties)
+				}
+			]
+		];
 
-		type.fieldsets = exitArray([].concat(
-			realFieldsets,
-			virtualFieldsets,
-			miscellaneous
-		))
+		type.fieldsets = entriesArrayToObject(
+			[].concat(realFieldsets, virtualFieldsets, miscellaneous)
+		);
 
 		delete type.properties;
 	}

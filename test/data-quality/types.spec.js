@@ -57,13 +57,15 @@ describe('data quality: types', () => {
 				}
 			});
 			const fieldsets = type.fieldsets;
-			const validFieldsetNames = fieldsets ? ['self'].concat(Object.keys(fieldsets)) : [];
+			const validFieldsetNames = fieldsets
+				? ['self'].concat(Object.keys(fieldsets))
+				: [];
 
 			if (fieldsets) {
 				describe('fieldsets', () => {
 					it('is an object if it exists', () => {
 						expect(fieldsets).to.be.an('object');
-					})
+					});
 					Object.entries(type.fieldsets).forEach(([name, fieldsetConfig]) => {
 						describe(name, () => {
 							it('has a heading', () => {
@@ -132,9 +134,9 @@ describe('data quality: types', () => {
 
 						it('has valid fieldset', () => {
 							if (config.fieldset) {
-								expect(validFieldsetNames).to.contain(config.fieldset)
+								expect(validFieldsetNames).to.contain(config.fieldset);
 							}
-						})
+						});
 
 						if (!typeNames.includes(config.type)) {
 							context('direct property', () => {

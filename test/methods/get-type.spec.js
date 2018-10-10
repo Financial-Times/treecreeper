@@ -170,14 +170,13 @@ describe('get-type', () => {
 		expect(type.fieldsets.misc.description).not.to.exist;
 	});
 
-
 	it('handle lack of custom fieldsets well when grouping', () => {
 		rawData.getTypes.returns([
 			{
 				name: 'Type1',
 				properties: {
 					mainProp: {
-						type: 'Word',
+						type: 'Word'
 					},
 					secondaryProp: {
 						type: 'Document',
