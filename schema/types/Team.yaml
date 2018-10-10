@@ -9,49 +9,59 @@ properties:
     pattern: NO_SPACES
     label: Code
     description: 'Unique code/id for this item'
+    fieldset: general
   name:
     type: Word
     canIdentify: true
     label: Name
     description: The team's name
+    fieldset: general
   description:
     type: Paragraph
     canIdentify: true
     label: Description
     description: Description of the team
+    fieldset: general
   email:
     type: Word
     canIdentify: true
     label: Email
     description: The team's email address
+    fieldset: general
   slack:
     type: Word
     canIdentify: true
     label: Slack
     description: The team's slack contact address
+    fieldset: general
   phone:
     type: Word
     canIdentify: true
     label: Phone
     description: The team's phone contact number
+    fieldset: general
   isActive:
     type: Boolean
     canFilter: true
     label: Active
     description: Whether or not the team is still in existence
+    fieldset: general
   isThirdParty:
     type: Boolean
     canFilter: true
     label: Third party
     description: Whether or not the team is a supplier
+    fieldset: general
   supportRota:
     type: Url
     label: Support rota
     description: Url linking to details of the system's support rota
+    fieldset: general
   contactPref:
     type: Word
     label: Preferred contact method
     description: Preferred contact method
+    fieldset: general
   techLeads:
     type: Person
     direction: outgoing
@@ -59,6 +69,7 @@ properties:
     relationship: HAS_TECH_LEAD
     description: The tech leads of the team
     hasMany: true
+    fieldset: network
   productOwners:
     type: Person
     direction: outgoing
@@ -66,6 +77,7 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: The product owner of the team
     hasMany: true
+    fieldset: network
   group:
     type: Group
     direction: incoming
@@ -73,6 +85,7 @@ properties:
     relationship: HAS_TEAM
     description: The group the team belongs to
     isRecursive: true
+    fieldset: network
   subTeams:
     type: Team
     direction: outgoing
@@ -80,12 +93,14 @@ properties:
     relationship: HAS_TEAM
     description: This team's subteams
     hasMany: true
+    fieldset: network
   parentTeam:
     type: Team
     direction: incoming
     label: Parent team
     relationship: HAS_TEAM
     description: The team this team is a subteam of
+    fieldset: network
   delivers:
     type: System
     direction: incoming
@@ -93,6 +108,7 @@ properties:
     relationship: DELIVERED_BY
     description: The systems the team delivers
     hasMany: true
+    fieldset: network
   supports:
     type: System
     direction: incoming
@@ -100,3 +116,9 @@ properties:
     relationship: SUPPORTED_BY
     description: The systems the team supports
     hasMany: true
+    fieldset: network
+fieldsets:
+  general:
+    heading: General information
+  network:
+    heading: Network

@@ -73,8 +73,8 @@ const getType = (
 
 		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
-		const realFieldsets = Object.entries(type.fieldsets || {}).map(
-			([fieldsetName, fieldsetDef]) => {
+		const realFieldsets = Object.entries(type.fieldsets || {})
+			.map(([fieldsetName, fieldsetDef]) => {
 				fieldsetDef.properties = entriesArrayToObject(
 					realFieldsetProperties.filter(
 						([, { fieldset }]) => fieldset === fieldsetName
@@ -82,8 +82,8 @@ const getType = (
 				);
 
 				return [fieldsetName, fieldsetDef];
-			}
-		);
+			})
+			.filter(([, { properties }]) => !!Object.keys(properties).length);
 
 		const virtualFieldsets = virtualFieldsetProperties.map(
 			([propertyName, propertyDef]) => {
@@ -98,15 +98,17 @@ const getType = (
 			}
 		);
 
-		const miscellaneous = [
-			[
-				'misc',
-				{
-					heading: realFieldsets.length ? 'Miscellaneous' : 'General',
-					properties: entriesArrayToObject(miscProperties)
-				}
-			]
-		];
+		const miscellaneous = miscProperties.length
+			? [
+					[
+						'misc',
+						{
+							heading: realFieldsets.length ? 'Miscellaneous' : 'General',
+							properties: entriesArrayToObject(miscProperties)
+						}
+					]
+			  ]
+			: [];
 
 		type.fieldsets = entriesArrayToObject(
 			[].concat(realFieldsets, virtualFieldsets, miscellaneous)

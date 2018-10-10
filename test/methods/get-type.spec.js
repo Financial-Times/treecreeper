@@ -170,6 +170,35 @@ describe('get-type', () => {
 		expect(type.fieldsets.misc.description).not.to.exist;
 	});
 
+	it('not have empty fieldsets', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word',
+						fieldset: 'main'
+					}
+				},
+				fieldsets: {
+					main: {
+						heading: 'Main properties',
+						description: 'Fill these out please'
+					},
+					secondary: {
+						heading: 'Secondary properties',
+						description: 'Fill these out optionally'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.fieldsets.secondary).to.not.exist;
+		expect(type.fieldsets.misc).to.not.exist;
+	});
+
 	it('handle lack of custom fieldsets well when grouping', () => {
 		rawData.getTypes.returns([
 			{
