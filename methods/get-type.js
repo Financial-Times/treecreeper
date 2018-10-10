@@ -6,12 +6,15 @@ const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 
+const entriesArrayToObject = arr =>
+	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
+
 const getType = (
 	typeName,
 	{
 		primitiveTypes = 'biz-ops', // graphql
-		relationshipStructure = false // flat, rest, graphql
-		// groupProperties = false
+		relationshipStructure = false, // flat, rest, graphql
+		groupProperties = false
 	} = {}
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);
@@ -27,7 +30,20 @@ const getType = (
 		type.pluralName = `${type.name}s`;
 	}
 
-	type.properties = Object.entries(type.properties)
+	if (relationshipStructure) {
+		const relationships = getRelationships.method(type.name, {
+			structure: relationshipStructure
+		});
+		if (relationshipStructure === 'graphql') {
+			relationships.forEach(def => {
+				type.properties[def.name] = def;
+			});
+		} else {
+			type.relationships = relationships;
+		}
+	}
+
+	const properties = Object.entries(type.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -42,21 +58,65 @@ const getType = (
 			}
 			return [name, def];
 		})
-		.filter(entry => !!entry)
-		.reduce((obj, [name, def]) => Object.assign(obj, { [name]: def }), {});
+		.filter(entry => !!entry);
 
-	if (relationshipStructure) {
-		const relationships = getRelationships.method(type.name, {
-			structure: relationshipStructure
-		});
-		if (relationshipStructure === 'graphql') {
-			relationships.forEach(def => {
-				type.properties[def.name] = def;
-			});
-		} else {
-			type.relationships = relationships;
-		}
+	if (!groupProperties) {
+		type.properties = entriesArrayToObject(properties);
+	} else {
+		const virtualFieldsetProperties = properties.filter(
+			([, { fieldset }]) => fieldset === 'self'
+		);
+
+		const realFieldsetProperties = properties.filter(
+			([, { fieldset }]) => fieldset && fieldset !== 'self'
+		);
+
+		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
+
+		const realFieldsets = Object.entries(type.fieldsets || {})
+			.map(([fieldsetName, fieldsetDef]) => {
+				fieldsetDef.properties = entriesArrayToObject(
+					realFieldsetProperties.filter(
+						([, { fieldset }]) => fieldset === fieldsetName
+					)
+				);
+
+				return [fieldsetName, fieldsetDef];
+			})
+			.filter(([, { properties }]) => !!Object.keys(properties).length);
+
+		const virtualFieldsets = virtualFieldsetProperties.map(
+			([propertyName, propertyDef]) => {
+				return [
+					propertyName,
+					{
+						heading: propertyDef.label,
+						description: propertyDef.description,
+						properties: { [propertyName]: propertyDef }
+					}
+				];
+			}
+		);
+
+		const miscellaneous = miscProperties.length
+			? [
+					[
+						'misc',
+						{
+							heading: realFieldsets.length ? 'Miscellaneous' : 'General',
+							properties: entriesArrayToObject(miscProperties)
+						}
+					]
+			  ]
+			: [];
+
+		type.fieldsets = entriesArrayToObject(
+			[].concat(realFieldsets, virtualFieldsets, miscellaneous)
+		);
+
+		delete type.properties;
 	}
+
 	return deepFreeze(type);
 };
 

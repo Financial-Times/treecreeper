@@ -9,31 +9,37 @@ properties:
     canIdentify: true
     label: Code
     description: 'Unique code/id for this person'
+    fieldset: general
   name:
     type: Word
     canIdentify: true
     label: Name
     description: The name of the person
+    fieldset: general
   email:
     type: Word
     canIdentify: true
     label: Email
     description: The email address of the person
+    fieldset: general
   slack:
     type: Word
     canIdentify: true
     label: Slack
     description: The slack link for the person
+    fieldset: general
   phone:
     type: Word
     canIdentify: true
     label: Phone
     description: The phone contact number for the person
+    fieldset: general
   isActive:
     type: Boolean
     canFilter: true
     label: Active
     description: Whether or not the person is still working at the FT
+    fieldset: general
   techDirectorFor:
     type: Group
     label: Tech director for group
@@ -41,6 +47,7 @@ properties:
     relationship: HAS_TECH_DIRECTOR
     description: Groups the person is a technical director for
     hasMany: true
+    fieldset: network
   techLeadFor:
     type: Team
     label: Tech lead for teams
@@ -48,6 +55,7 @@ properties:
     relationship: HAS_TECH_LEAD
     description: Teams the person is a technical lead for
     hasMany: true
+    fieldset: network
   ownedTeams:
     type: Team
     direction: incoming
@@ -55,6 +63,7 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: Teams the person is a product owner for
     hasMany: true
+    fieldset: network
   ownedProducts:
     type: Product
     direction: incoming
@@ -62,6 +71,7 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: Products the person is a product owner for
     hasMany: true
+    fieldset: network
   stakeholderFor:
     type: System
     direction: incoming
@@ -69,6 +79,7 @@ properties:
     relationship: HAS_STAKEHOLDER
     description: Systems the person is a stakeholder for
     hasMany: true
+    fieldset: network
   knowsAbout:
     type: System
     direction: incoming
@@ -76,3 +87,9 @@ properties:
     relationship: KNOWN_ABOUT_BY
     description: Systems the person knows about
     hasMany: true
+    fieldset: network
+fieldsets:
+  general:
+    heading: General information
+  network:
+    heading: Network

@@ -103,8 +103,6 @@ describe('get-type', () => {
 	});
 
 	it('it maps types to graphql properties', async () => {
-		sandbox.stub(getRelationships, 'method');
-
 		rawData.getTypes.returns([
 			{
 				name: 'Type1',
@@ -126,6 +124,106 @@ describe('get-type', () => {
 		expect(type.properties.primitiveProp).to.eql({ type: 'String' });
 		expect(type.properties.documentProp).to.not.exist;
 		expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
+	});
+
+	it('groups properties by fieldset', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word',
+						fieldset: 'main'
+					},
+					secondaryProp: {
+						type: 'Document',
+						fieldset: 'self',
+						label: 'Standalone'
+					},
+					miscProp: {
+						type: 'SomeEnum'
+					}
+				},
+				fieldsets: {
+					main: {
+						heading: 'Main properties',
+						description: 'Fill these out please'
+					},
+					secondary: {
+						heading: 'Secondary properties',
+						description: 'Fill these out optionally'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.fieldsets.main.properties.mainProp).to.exist;
+		expect(type.fieldsets.main.heading).to.equal('Main properties');
+		expect(type.fieldsets.main.description).to.equal('Fill these out please');
+		expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+		expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
+		expect(type.fieldsets.secondaryProp.description).to.not.exist;
+		expect(type.fieldsets.misc.properties.miscProp).to.exist;
+		expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
+		expect(type.fieldsets.misc.description).not.to.exist;
+	});
+
+	it('not have empty fieldsets', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word',
+						fieldset: 'main'
+					}
+				},
+				fieldsets: {
+					main: {
+						heading: 'Main properties',
+						description: 'Fill these out please'
+					},
+					secondary: {
+						heading: 'Secondary properties',
+						description: 'Fill these out optionally'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.fieldsets.secondary).to.not.exist;
+		expect(type.fieldsets.misc).to.not.exist;
+	});
+
+	it('handle lack of custom fieldsets well when grouping', () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					mainProp: {
+						type: 'Word'
+					},
+					secondaryProp: {
+						type: 'Document',
+						label: 'Standalone'
+					},
+					miscProp: {
+						type: 'SomeEnum'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { groupProperties: true });
+		expect(type.properties).to.not.exist;
+		expect(type.fieldsets.misc.properties.mainProp).to.exist;
+		expect(type.fieldsets.misc.properties.secondaryProp).to.exist;
+		expect(type.fieldsets.misc.properties.miscProp).to.exist;
+		expect(type.fieldsets.misc.heading).to.equal('General');
 	});
 
 	describe('relationships', () => {
@@ -179,6 +277,55 @@ describe('get-type', () => {
 				structure: 'graphql'
 			});
 			expect(type.properties.relProp).to.eql({ name: 'relProp' });
+		});
+
+		it('groups relationship properties by fieldset', () => {
+			sandbox.stub(getRelationships, 'method');
+
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+							relationship: 'HAS'
+						},
+						secondaryProp: {
+							type: 'Document',
+							fieldset: 'self',
+							relationship: 'HAS',
+							label: 'Standalone'
+						},
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please'
+						},
+						secondary: {
+							heading: 'Secondary properties',
+							description: 'Fill these out optionally'
+						}
+					}
+				}
+			]);
+
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.properties).to.not.exist;
+			expect(type.fieldsets.main.properties.mainProp).to.exist;
+			expect(type.fieldsets.main.heading).to.equal('Main properties');
+			expect(type.fieldsets.main.description).to.equal('Fill these out please');
+			expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+			expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
+			expect(type.fieldsets.secondaryProp.description).to.not.exist;
+			expect(type.fieldsets.misc.properties.miscProp).to.exist;
+			expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
+			expect(type.fieldsets.misc.description).not.to.exist;
 		});
 	});
 });

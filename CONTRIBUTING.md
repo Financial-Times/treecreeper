@@ -28,6 +28,11 @@ properties: // one or more properties defined directly on the type
     canFilter: true // whether the field is useful for filtering a list of records
     description: 'Unique code/id for this item' // description used in graphql ui
     label: Code //Short label to be used when displaying this field in forms etc.
+    section: main // Optional section that this property belongs to. Useful for grouping related properties
+sections:
+  main: // name of a section
+    heading: Main properties // heading that can be used in UIs that group properties by section
+    description: These are all essential to fill out // description fo the section
 ```
 
 ### Primitive types
