@@ -3,19 +3,13 @@ const { executeQuery } = require('./db-connection');
 const { logger } = require('./request-context');
 
 const login = () => {
-	return new Promise((res, rej) => {
-		const conn = new jsforce.Connection();
-		conn.login(
+	const conn = new jsforce.Connection();
+	return conn
+		.login(
 			process.env.SALESFORCE_USER,
-			`${process.env.SALESFORCE_PASSWORD}${process.env.SALESFORCE_TOKEN}`,
-			function(err) {
-				if (err) {
-					rej(err);
-				}
-				res(conn);
-			}
-		);
-	});
+			`${process.env.SALESFORCE_PASSWORD}${process.env.SALESFORCE_TOKEN}`
+		)
+		.then(() => conn);
 };
 
 module.exports.setSalesforceIdForSystem = async ({
@@ -37,24 +31,16 @@ module.exports.setSalesforceIdForSystem = async ({
 	try {
 		const salesforceName = (name || code).substr(0, 80);
 		const conn = await login();
-		const { id: SF_ID } = await new Promise((res, rej) => {
-			conn.sobject('BMCServiceDesk__BMC_BaseElement__c').create(
-				{
-					Name: salesforceName,
-					BMCServiceDesk__Name__c: salesforceName,
-					BMCServiceDesk__TokenId__c: salesforceName,
-					System_Code__c: code.substr(0, 48),
-					RecordTypeId: '012D0000000Qn40IAC', // this is the id for the 'System' type
-					BMCServiceDesk__Description__c: `See https://dewey.in.ft.com/view/system/${code}`
-				},
-				(err, result) => {
-					if (err) {
-						return rej(err);
-					}
-					res(result);
-				}
-			);
-		});
+		const { id: SF_ID } = await conn
+			.sobject('BMCServiceDesk__BMC_BaseElement__c')
+			.create({
+				Name: salesforceName,
+				BMCServiceDesk__Name__c: salesforceName,
+				BMCServiceDesk__TokenId__c: salesforceName,
+				System_Code__c: code.substr(0, 48),
+				RecordTypeId: '012D0000000Qn40IAC', // this is the id for the 'System' type
+				BMCServiceDesk__Description__c: `See https://dewey.in.ft.com/view/system/${code}`
+			});
 		logger.info(
 			{ event: 'SALESFORCE_SYSTEM_CREATION_SUCCESS', code, SF_ID },
 			'Create system in salesforce'
