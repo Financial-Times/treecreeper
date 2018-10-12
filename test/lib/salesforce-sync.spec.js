@@ -115,12 +115,10 @@ describe('salesforce sync', () => {
 					return sobjectStub(...args);
 				}
 			};
-			loginStub = sb
-				.stub()
-				.callsFake((user, pass, cb) => cb(null, new Connection()));
+			loginStub = sb.stub().callsFake(() => Promise.resolve(new Connection()));
 			createStub = sb
 				.stub()
-				.callsFake((obj, cb) => cb(null, { id: 'test-id' }));
+				.callsFake(() => Promise.resolve({ id: 'test-id' }));
 			sobjectStub = sb.stub().returns({
 				create: createStub
 			});
