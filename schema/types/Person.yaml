@@ -45,12 +45,6 @@ properties:
     label: Active
     description: Whether or not the person is still working at the FT
     fieldset: general
-  existsInPeopleAPI:  
-    type: Boolean
-    canFilter: true
-    label: Exists in People API
-    description: Whether or not the person exists in People API
-    fieldset: general
   source:
     type: Word
     label: Source
