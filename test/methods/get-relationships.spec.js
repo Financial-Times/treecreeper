@@ -358,7 +358,8 @@ describe('get-relationships', () => {
 					isRecursive: false,
 					name: 'test-name',
 					description: 'test description',
-					label: 'test label'
+					label: 'test label',
+					fieldset: undefined
 				}
 			]);
 		});
@@ -375,7 +376,8 @@ describe('get-relationships', () => {
 					hasMany: false,
 					name: 'test-name',
 					description: 'test description',
-					label: 'test label'
+					label: 'test label',
+					fieldset: undefined
 				}
 			]);
 		});
@@ -442,7 +444,8 @@ describe('get-relationships', () => {
 					isRelationship: true,
 					relationship: 'HAS',
 					description: 'test description',
-					label: 'test label'
+					label: 'test label',
+					fieldset: undefined
 				}
 			]);
 		});
@@ -459,7 +462,8 @@ describe('get-relationships', () => {
 					relationship: 'HAS',
 					direction: 'outgoing',
 					hasMany: true,
-					name: 'many'
+					name: 'many',
+					fieldset: undefined
 				},
 				{
 					description: undefined,
@@ -470,7 +474,8 @@ describe('get-relationships', () => {
 					relationship: 'HAS',
 					direction: 'incoming',
 					name: 'singular',
-					hasMany: false
+					hasMany: false,
+					fieldset: undefined
 				}
 			]);
 		});
