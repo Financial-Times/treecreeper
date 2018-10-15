@@ -31,7 +31,8 @@ const createGraphqlRelationship = ({
 	direction,
 	relationship,
 	endNode,
-	isRecursive
+	isRecursive,
+	fieldset
 }) => ({
 	type: endNode,
 	hasMany,
@@ -41,12 +42,17 @@ const createGraphqlRelationship = ({
 	isRelationship: true,
 	relationship,
 	description,
-	label
+	label,
+	fieldset
 });
 
-const graphqlRelationships = relationships => {
+const graphqlRelationships = (relationships, properties) => {
 	return relationships
 		.filter(({ hidden }) => !hidden)
+		.map(def => {
+			def.fieldset = properties[def.name].fieldset
+			return def
+		})
 		.map(createGraphqlRelationship);
 };
 
@@ -76,7 +82,7 @@ const getRelationships = (
 	}
 
 	if (structure === 'graphql') {
-		relationships = graphqlRelationships(relationships);
+		relationships = graphqlRelationships(relationships, type.properties);
 	}
 	return deepFreeze(relationships);
 };
