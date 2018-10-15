@@ -24,9 +24,14 @@ properties:
     fieldset: general
   slack:
     type: Word
-    canIdentify: true
     label: Slack
-    description: The slack link for the person
+    description: The slack link for the person (inherited from team)
+    fieldset: general
+  slackName:
+    type: Word
+    canIdentify: true
+    label: Slack Name
+    description: The slack name for the person
     fieldset: general
   phone:
     type: Word
@@ -39,6 +44,17 @@ properties:
     canFilter: true
     label: Active
     description: Whether or not the person is still working at the FT
+    fieldset: general
+  existsInPeopleAPI:  
+    type: Boolean
+    canFilter: true
+    label: Exists in People API
+    description: Whether or not the person exists in People API
+    fieldset: general
+  source:
+    type: Word
+    label: Source
+    description: Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi.
     fieldset: general
   techDirectorFor:
     type: Group
