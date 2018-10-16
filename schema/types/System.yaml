@@ -119,7 +119,7 @@ properties:
   monitoredBy:
     type: Healthcheck
     direction: outgoing
-    label: Healtchecks
+    label: Healthchecks
     relationship: MONITORED_BY
     description: Healthchecks which are used to monitor this system
     hasMany: true
