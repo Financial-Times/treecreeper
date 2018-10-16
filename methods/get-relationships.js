@@ -50,8 +50,8 @@ const graphqlRelationships = (relationships, properties) => {
 	return relationships
 		.filter(({ hidden }) => !hidden)
 		.map(def => {
-			def.fieldset = properties[def.name].fieldset
-			return def
+			def.fieldset = properties[def.name].fieldset;
+			return def;
 		})
 		.map(createGraphqlRelationship);
 };

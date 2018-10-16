@@ -92,7 +92,7 @@ properties:
     fieldset: self
   monitoring:
     type: Document
-    label: Monitoring
+    label: Bespoke Monitoring
     description: Details of any monitoring the system has
     fieldset: monitoring
   moreInformation:
