@@ -33,6 +33,12 @@ properties:
     label: Slack Name
     description: The slack name for the person
     fieldset: general
+  slackID:
+    type: Word
+    canIdentify: true
+    label: Slack ID
+    description: The slack id for the person
+    fieldset: general
   phone:
     type: Word
     canIdentify: true
@@ -45,7 +51,7 @@ properties:
     label: Active
     description: Whether or not the person is still working at the FT
     fieldset: general
-  peopleApi:
+  isPeopleApi:
     type: Boolean
     canFilter: true
     label: Active
