@@ -45,6 +45,12 @@ properties:
     label: Active
     description: Whether or not the person is still working at the FT
     fieldset: general
+  peopleApi:
+    type: Boolean
+    canFilter: true
+    label: Active
+    description: Whether or not the person is still working at the FT
+    fieldset: general
   source:
     type: Word
     label: Source
