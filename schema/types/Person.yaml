@@ -25,7 +25,8 @@ properties:
   slack:
     type: Word
     label: Slack
-    description: The slack link for the person (inherited from team)
+    canIdentify: true
+    description: The slack link for the person (deprecated)
     fieldset: general
   slackName:
     type: Word
