@@ -59,7 +59,7 @@ properties:
   proposedId:
     type: Word
     label: Source
-    description: this user's id in: workday, ldap, github or slack. `namelastname` if no id found.
+    description: this user's id in: workday, ldap, github or slack. `name.lastname` if no id found.
     fieldset: general
   techDirectorFor:
     type: Group
