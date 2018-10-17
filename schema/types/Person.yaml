@@ -56,6 +56,11 @@ properties:
     label: Source
     description: Where the data for this person comes from, via People API - workday, salesforce, ldap, github, slack, multi.
     fieldset: general
+  proposedId:
+    type: Word
+    label: Source
+    description: Where the data for this person comes from, via People API - workday, salesforce, ldap, github, slack, multi.
+    fieldset: general
   techDirectorFor:
     type: Group
     label: Tech director for group
