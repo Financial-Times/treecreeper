@@ -85,7 +85,7 @@ properties:
     relationship: HAS_TEAM
     description: The group this team is a subset of
     fieldset: network
-  Group:
+  group:
     type: Group
     direction: incoming
     label: Associated Group
