@@ -87,13 +87,12 @@ const getType = (
 
 		const virtualFieldsets = virtualFieldsetProperties.map(
 			([propertyName, propertyDef]) => {
-				const label = propertyDef.label;
-				delete propertyDef.label; // dont need a label since we have a heading for a single field
 				return [
 					propertyName,
 					{
-						heading: label,
+						heading: propertyDef.label,
 						description: propertyDef.description,
+						isSingleField: true,
 						properties: { [propertyName]: propertyDef }
 					}
 				];
