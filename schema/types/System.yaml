@@ -92,7 +92,7 @@ properties:
     fieldset: self
   monitoring:
     type: Document
-    label: Monitoring
+    label: Bespoke Monitoring
     description: Details of any monitoring the system has
     fieldset: monitoring
   moreInformation:
@@ -119,7 +119,7 @@ properties:
   monitoredBy:
     type: Healthcheck
     direction: outgoing
-    label: Healtchecks
+    label: Healthchecks
     relationship: MONITORED_BY
     description: Healthchecks which are used to monitor this system
     hasMany: true

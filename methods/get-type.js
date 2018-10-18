@@ -92,6 +92,7 @@ const getType = (
 					{
 						heading: propertyDef.label,
 						description: propertyDef.description,
+						isSingleField: true,
 						properties: { [propertyName]: propertyDef }
 					}
 				];
