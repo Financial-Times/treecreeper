@@ -78,10 +78,17 @@ properties:
     description: The product owner of the team
     hasMany: true
     fieldset: network
-  group:
+  parentGroup:
     type: Group
     direction: incoming
-    label: FT Group
+    label: FT Group Parent
+    relationship: HAS_TEAM
+    description: The group this team is a subset of
+    fieldset: network
+  Group:
+    type: Group
+    direction: incoming
+    label: Associated Group
     relationship: HAS_TEAM
     description: The group the team belongs to
     isRecursive: true
