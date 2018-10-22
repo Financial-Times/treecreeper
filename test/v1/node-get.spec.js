@@ -58,46 +58,6 @@ describe('v1 - node GET', () => {
 			);
 	});
 
-	it('gets node with a nodeName relationships when the includeRelNames param is present', async () => {
-		// create the relationships
-		await executeQuery(`MATCH (s:Team { code: "test-team-nodename" }), (p:Person { code: "test-person-nodename" }), (g:Group { code: "test-group-nodename" })
-									MERGE (g)-[o:HAS_TEAM]->(s)-[t:HAS_TECH_LEAD]->(p)
-									RETURN g, o, s, t, p`);
-
-		return request(app, { useCached: false })
-			.get('/v1/node/Team/test-team-nodename')
-			.query('includeRelNames=true')
-			.auth()
-			.expect(200)
-			.then(({ body }) =>
-				checkResponse(body, {
-					node: {
-						code: 'test-team-nodename',
-						foo: 'bar1',
-						name: 'Test Team'
-					},
-					relationships: {
-						HAS_TECH_LEAD: [
-							{
-								direction: 'outgoing',
-								nodeType: 'Person',
-								nodeCode: 'test-person-nodename',
-								nodeName: 'Test Person'
-							}
-						],
-						HAS_TEAM: [
-							{
-								direction: 'incoming',
-								nodeType: 'Group',
-								nodeCode: 'test-group-nodename',
-								nodeName: 'Test Group'
-							}
-						]
-					}
-				})
-			);
-	});
-
 	it('responds with 404 if no node', async () => {
 		return request(app)
 			.get('/v1/node/Team/not-test-team')

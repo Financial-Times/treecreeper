@@ -53,8 +53,7 @@ module.exports = router => {
 				Object.assign(
 					{
 						requestId: res.locals.requestId,
-						clientId: res.locals.clientId,
-						query: req.query
+						clientId: res.locals.clientId
 					},
 					req.params
 				)
