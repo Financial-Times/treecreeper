@@ -80,6 +80,7 @@ properties:
     canFilter: true
     label: Salesforce ID
     description: ID of the system in salesforce **DO NOT EDIT**
+    readonly: true
   architectureDiagram:
     type: Document
     label: Architecture Diagram

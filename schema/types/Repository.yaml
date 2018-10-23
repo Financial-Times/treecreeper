@@ -14,36 +14,43 @@ properties:
     type: Word
     label: Name
     description: Display Name
+    readonly: true
   url:
     type: Url
     # required: true
     canIdentify: true
     label: URL
     description: Repository URL
+    readonly: true
   vcsID:
     type: Word
     label: VCS ID
     description: Repository hosts internal ID
+    readonly: true
   sshUrl:
     type: Url
     # required: true
     canIdentify: true
     label: SSH URL
     description: SSH URL to checkout the source
+    readonly: true
   isPrivate:
     type: Boolean
     canFilter: true
     label: Private
     description: Is the repository private
+    readonly: true
   isArchived:
     type: Boolean
     canFilter: true
     label: Archived
     description: Is the repository archived
+    readonly: true
   description:
     type: Paragraph
     label: Description
     description: Repository description field
+    readonly: true
   mostRecentCircleCIPlatform:
     type: CircleCiVersion
     canFilter: true
@@ -53,10 +60,12 @@ properties:
     type: Date
     label: Created
     description: The UTC time when the repository was created in the VCS system
+    readonly: true
   pushedAt:
     type: Date
     label: Updated
     description: The UTC time when the repository was last pushed to
+    readonly: true
   projectName:
     type: Word
     label: Project name
@@ -78,3 +87,4 @@ properties:
     label: Stored in
     relationship: STORED_IN
     description: VCS provider that the repository is hosted by
+    readonly: true
