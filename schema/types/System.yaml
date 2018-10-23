@@ -55,7 +55,7 @@ properties:
   containsPersonalData:
     type: Boolean
     canFilter: true
-    label: Does this system store of process Personal Data?
+    label: Does this system store or process Personal Data?
     description: |
       Personal data means any information from which an individual can be
       identified directly or indirectly.
