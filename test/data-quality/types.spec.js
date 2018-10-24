@@ -99,7 +99,7 @@ describe('data quality: types', () => {
 											'hasMany',
 											'isRecursive',
 											'hidden',
-											'readonly'
+											'autoPopulated'
 										])
 									);
 								} else {
@@ -109,7 +109,7 @@ describe('data quality: types', () => {
 											'required',
 											'canIdentify',
 											'canFilter',
-											'readonly',
+											'autoPopulated',
 											'pattern'
 										])
 									);

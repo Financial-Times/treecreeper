@@ -109,11 +109,11 @@ describe('get-type', () => {
 				properties: {
 					primitiveProp: {
 						type: 'Word',
-						readonly: true
+						autoPopulated: true
 					},
 					paragraphProp: {
 						type: 'Paragraph',
-						readonly: false
+						autoPopulated: false
 					},
 					enumProp: {
 						type: 'SomeEnum'
@@ -123,9 +123,9 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { primitiveTypes: 'graphql' });
-		expect(type.properties.primitiveProp.readonly).to.eql(true);
-		expect(type.properties.paragraphProp.readonly).to.eql(false);
-		expect(type.properties.enumProp.readonly).to.not.exist;
+		expect(type.properties.primitiveProp.autoPopulated).to.eql(true);
+		expect(type.properties.paragraphProp.autoPopulated).to.eql(false);
+		expect(type.properties.enumProp.autoPopulated).to.not.exist;
 	});
 
 	it('it maps types to graphql properties', async () => {
