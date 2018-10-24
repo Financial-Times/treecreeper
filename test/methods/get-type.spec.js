@@ -102,6 +102,32 @@ describe('get-type', () => {
 		expect(validator.test('AB')).to.be.true;
 	});
 
+	it('it returns read-only properties', async () => {
+		rawData.getTypes.returns([
+			{
+				name: 'Type1',
+				properties: {
+					primitiveProp: {
+						type: 'Word',
+						autoPopulated: true
+					},
+					paragraphProp: {
+						type: 'Paragraph',
+						autoPopulated: false
+					},
+					enumProp: {
+						type: 'SomeEnum'
+					}
+				}
+			}
+		]);
+
+		const type = getType('Type1', { primitiveTypes: 'graphql' });
+		expect(type.properties.primitiveProp.autoPopulated).to.eql(true);
+		expect(type.properties.paragraphProp.autoPopulated).to.eql(false);
+		expect(type.properties.enumProp.autoPopulated).to.not.exist;
+	});
+
 	it('it maps types to graphql properties', async () => {
 		rawData.getTypes.returns([
 			{
