@@ -194,6 +194,25 @@ enum Lifecycle {
 		);
 	});
 
+	it('Multiline descriptions', () => {
+		sandbox.stub(rawData, 'getTypes').returns([
+			{
+				name: 'Dummy',
+				description: 'dummy type description',
+				properties: {
+					prop: {
+						type: 'Boolean',
+						description: 'a description\nmultiline'
+					}
+				}
+			}
+		]);
+		sandbox.stub(rawData, 'getEnums').returns({});
+		const generated = [].concat(...generateGraphqlDefs()).join('');
+		// note the regex has a space, not a new line
+		expect(generated).to.match(/a description multiline/);
+	});
+
 	describe('converting types', () => {
 		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
 			if (bizopsType === 'Document') {
