@@ -147,6 +147,13 @@ properties:
   monitoredBy:
     type: Healthcheck
     direction: outgoing
+    label: Monitored by (deprecated)
+    relationship: MONITORED_BY
+    description: Endpoints which monitor this system
+    hasMany: true
+  healthchecks:
+    type: Healthcheck
+    direction: outgoing
     label: Healthchecks
     relationship: MONITORED_BY
     description: Healthchecks which are used to monitor this system
