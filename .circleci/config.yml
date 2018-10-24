@@ -74,7 +74,7 @@ jobs:
 
       - run:
           name: Run tests
-          command: make lint
+          command: make lint-ci
 
   release:
     <<: *default_container_config
