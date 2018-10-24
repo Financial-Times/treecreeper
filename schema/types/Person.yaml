@@ -61,12 +61,12 @@ properties:
   source:
     type: Word
     label: Source
-    description: Where the data for this person comes from, via People API - workday, salesforce, ldap, github, slack, multi.
+    description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
     fieldset: general
   proposedId:
     type: Word
     label: Source
-    description: this user's id in: workday, ldap, github or slack. `name.lastname` if no id found.
+    description: "This user's id in: workday, ldap, github or slack. `name.lastname` if no id found."
     fieldset: general
   techDirectorFor:
     type: Group
