@@ -67,18 +67,18 @@ const createApp = () => {
 	return app;
 };
 
-console.log('main', require.main); //eslint-disable-line
-console.log('isWorker', cluster.isWorker); //eslint-disable-line
-
 if (require.main === module || cluster.isWorker) {
 	const PORT = process.env.PORT || 8888;
-	const app = createApp();
-
-	initConstraints().then(() => {
-		app.listen(PORT, () => {
-			logger.info(`Listening on ${PORT}`);
+	try {
+		const app = createApp();
+		initConstraints().then(() => {
+			app.listen(PORT, () => {
+				logger.info(`Listening on ${PORT}`);
+			});
 		});
-	});
+	} catch (err) {
+		console.log({ err }); //eslint-disable-line
+	}
 }
 
 module.exports = createApp;
