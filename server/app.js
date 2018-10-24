@@ -69,16 +69,12 @@ const createApp = () => {
 
 if (require.main === module || cluster.isWorker) {
 	const PORT = process.env.PORT || 8888;
-	try {
-		const app = createApp();
-		initConstraints().then(() => {
-			app.listen(PORT, () => {
-				logger.info(`Listening on ${PORT}`);
-			});
+	const app = createApp();
+	initConstraints().then(() => {
+		app.listen(PORT, () => {
+			logger.info(`Listening on ${PORT}`);
 		});
-	} catch (err) {
-		console.log({ err }); //eslint-disable-line
-	}
+	});
 }
 
 module.exports = createApp;
