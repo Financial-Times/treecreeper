@@ -123,6 +123,13 @@ const getType = (
 
 module.exports.method = cache.cacheify(
 	getType,
-	(typeName, { primitiveTypes = 'biz-ops', relationshipStructure = false, groupProperties = false } = {}) =>
+	(
+		typeName,
+		{
+			primitiveTypes = 'biz-ops',
+			relationshipStructure = false,
+			groupProperties = false
+		} = {}
+	) =>
 		`types:${typeName}:${relationshipStructure}:${groupProperties}:${primitiveTypes}`
 );
