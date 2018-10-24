@@ -67,6 +67,9 @@ const createApp = () => {
 	return app;
 };
 
+console.log('main', require.main); //eslint-disable-line
+console.log('isWorker', cluster.isWorker); //eslint-disable-line
+
 if (require.main === module || cluster.isWorker) {
 	const PORT = process.env.PORT || 8888;
 	const app = createApp();
