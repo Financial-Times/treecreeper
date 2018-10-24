@@ -78,12 +78,19 @@ properties:
     description: The product owner of the team
     hasMany: true
     fieldset: network
+  parentGroup:
+    type: Group
+    direction: incoming
+    label: FT Group Parent
+    relationship: HAS_TEAM
+    description: The group this team is a direct child of (indirect children - sub-teams - are defined by using the Parent Team field)
+    fieldset: network
   group:
     type: Group
     direction: incoming
-    label: FT Group
+    label: Associated Group
     relationship: HAS_TEAM
-    description: The group the team belongs to
+    description: The group that owns the team (either as a direct report or a sub-team)
     isRecursive: true
     fieldset: network
   subTeams:
@@ -99,7 +106,7 @@ properties:
     direction: incoming
     label: Parent team
     relationship: HAS_TEAM
-    description: The team this team is a subteam of
+    description: The team this team is a subteam of (direct children of a FT Group and defined by using the FT Group Parent field)
     fieldset: network
   delivers:
     type: System

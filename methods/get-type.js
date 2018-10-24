@@ -92,6 +92,7 @@ const getType = (
 					{
 						heading: propertyDef.label,
 						description: propertyDef.description,
+						isSingleField: true,
 						properties: { [propertyName]: propertyDef }
 					}
 				];
@@ -122,6 +123,6 @@ const getType = (
 
 module.exports.method = cache.cacheify(
 	getType,
-	(typeName, { relationshipStructure = false, groupProperties = false } = {}) =>
-		`types:${typeName}:${relationshipStructure}:${groupProperties}`
+	(typeName, { primitiveTypes = 'biz-ops', relationshipStructure = false, groupProperties = false } = {}) =>
+		`types:${typeName}:${relationshipStructure}:${groupProperties}:${primitiveTypes}`
 );

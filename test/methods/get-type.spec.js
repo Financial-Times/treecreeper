@@ -133,7 +133,8 @@ describe('get-type', () => {
 				properties: {
 					mainProp: {
 						type: 'Word',
-						fieldset: 'main'
+						fieldset: 'main',
+						label: 'A word'
 					},
 					secondaryProp: {
 						type: 'Document',
@@ -160,11 +161,17 @@ describe('get-type', () => {
 		const type = getType('Type1', { groupProperties: true });
 		expect(type.properties).to.not.exist;
 		expect(type.fieldsets.main.properties.mainProp).to.exist;
+		expect(type.fieldsets.main.properties.mainProp.label).to.equal('A word');
 		expect(type.fieldsets.main.heading).to.equal('Main properties');
 		expect(type.fieldsets.main.description).to.equal('Fill these out please');
+		expect(type.fieldsets.main.isSingleField).to.not.exist;
 		expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+		expect(
+			type.fieldsets.secondaryProp.properties.secondaryProp.label
+		).to.equal('Standalone');
 		expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
 		expect(type.fieldsets.secondaryProp.description).to.not.exist;
+		expect(type.fieldsets.secondaryProp.isSingleField).to.equal(true);
 		expect(type.fieldsets.misc.properties.miscProp).to.exist;
 		expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
 		expect(type.fieldsets.misc.description).not.to.exist;
@@ -289,7 +296,8 @@ describe('get-type', () => {
 						mainProp: {
 							type: 'Word',
 							fieldset: 'main',
-							relationship: 'HAS'
+							relationship: 'HAS',
+							label: 'A word relationship'
 						},
 						secondaryProp: {
 							type: 'Document',
@@ -318,11 +326,19 @@ describe('get-type', () => {
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.properties).to.not.exist;
 			expect(type.fieldsets.main.properties.mainProp).to.exist;
+			expect(type.fieldsets.main.properties.mainProp.label).to.equal(
+				'A word relationship'
+			);
 			expect(type.fieldsets.main.heading).to.equal('Main properties');
 			expect(type.fieldsets.main.description).to.equal('Fill these out please');
+			expect(type.fieldsets.main.isSingleField).to.not.exist;
 			expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+			expect(
+				type.fieldsets.secondaryProp.properties.secondaryProp.label
+			).to.equal('Standalone');
 			expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
 			expect(type.fieldsets.secondaryProp.description).to.not.exist;
+			expect(type.fieldsets.secondaryProp.isSingleField).to.equal(true);
 			expect(type.fieldsets.misc.properties.miscProp).to.exist;
 			expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
 			expect(type.fieldsets.misc.description).not.to.exist;

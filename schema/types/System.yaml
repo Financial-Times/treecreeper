@@ -55,14 +55,42 @@ properties:
   containsPersonalData:
     type: Boolean
     canFilter: true
-    label: Contains personal data
-    description: Whether the system contains personal PI2 data
+    label: Does this system store or process Personal Data?
+    description: |
+      Personal data means any information from which an individual can be
+      identified directly or indirectly.
+      For Personal Data this includes: Full name and title, email address,
+      physical address, contact number, location data, online identifiers
+      (e.g. IP Address, cookies, MAC Addresses, pixel tags, account handles,
+      device finger prints, username and passwords), government identifiers
+      (e.g. passport, drivers license), signatures, workplace data (e.g.
+      salary/bonus/annual reviews), gender, date of birth
     fieldset: risk
   containsSensitiveData:
     type: Boolean
     canFilter: true
-    label: Contains sensitive data
-    description: Whether the system contains sensitive data
+    label: Does this system store or process Sensitive Data?
+    description: |
+      Sensitive, or special category data, is a more regulated subset of
+      personal data, including race, ethnic origin, politics, religion,
+      trade union membership, genetics, biometrics (where used for ID purposes),
+      health, sex life or sexual orientation. We also include personal data
+      about children (under 16 years or age) and payment card information
+      in this category.
+      For more details, see the Information Commissioner's definition:
+      https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/what-is-personal-data/what-is-personal-data/
+    fieldset: risk
+  canDownloadPersonalData:
+    type: Boolean
+    canFilter: true
+    label: Downloadable personal data?
+    description: Does the system allow users to download personal data?
+    fieldset: risk
+  canContactIndividuals:
+    type: Boolean
+    canFilter: true
+    label: Contactable individuals?
+    description: Does the system have the capability to contact individuals?
     fieldset: risk
   risk:
     type: Paragraph
@@ -92,7 +120,7 @@ properties:
     fieldset: self
   monitoring:
     type: Document
-    label: Monitoring
+    label: Bespoke Monitoring
     description: Details of any monitoring the system has
     fieldset: monitoring
   moreInformation:
@@ -119,7 +147,14 @@ properties:
   monitoredBy:
     type: Healthcheck
     direction: outgoing
-    label: Healtchecks
+    label: Monitored by (deprecated)
+    relationship: MONITORED_BY
+    description: Endpoints which monitor this system
+    hasMany: true
+  healthchecks:
+    type: Healthcheck
+    direction: outgoing
+    label: Healthchecks
     relationship: MONITORED_BY
     description: Healthchecks which are used to monitor this system
     hasMany: true
