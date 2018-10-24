@@ -108,7 +108,10 @@ describe('data quality: types', () => {
 											'required',
 											'canIdentify',
 											'canFilter',
-											'pattern'
+											'pattern',
+											'examples',
+											'trueLabel',
+											'falseLabel'
 										])
 									);
 								}
