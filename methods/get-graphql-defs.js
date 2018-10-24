@@ -56,7 +56,7 @@ const defineProperties = properties => {
 		.map(
 			([name, def]) =>
 				stripEmptyFirstLine`
-      # ${def.description}
+      # ${def.description.replace(/\n/g, ' ')}
       ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
 					def
 				)}`
