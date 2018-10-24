@@ -24,9 +24,21 @@ properties:
     fieldset: general
   slack:
     type: Word
-    canIdentify: true
     label: Slack
-    description: The slack link for the person
+    canIdentify: true
+    description: The slack link for the person (deprecated)
+    fieldset: general
+  slackName:
+    type: Word
+    canIdentify: true
+    label: Slack Name
+    description: The slack name for the person
+    fieldset: general
+  slackID:
+    type: Word
+    canIdentify: true
+    label: Slack ID
+    description: The slack id for the person
     fieldset: general
   phone:
     type: Word
@@ -39,6 +51,22 @@ properties:
     canFilter: true
     label: Active
     description: Whether or not the person is still working at the FT
+    fieldset: general
+  isPeopleApi:
+    type: Boolean
+    canFilter: true
+    label: Active
+    description: Whether or not the person is still working at the FT
+    fieldset: general
+  source:
+    type: Word
+    label: Source
+    description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
+    fieldset: general
+  proposedId:
+    type: Word
+    label: Source
+    description: "This user's id in: workday, ldap, github or slack. `name.lastname` if no id found."
     fieldset: general
   techDirectorFor:
     type: Group
