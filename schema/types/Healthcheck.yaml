@@ -25,7 +25,8 @@ properties:
     canIdentify: true
     label: URL of the healthcheck endpoint
     description: The full URL of the endpoint, including the "/__health"
-    placeholder: https://my-new-app.ft.com/__health
+    examples:
+     - https://my-new-app.ft.com/__health
   monitors:
     type: System
     direction: incoming
