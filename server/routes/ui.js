@@ -44,7 +44,7 @@ module.exports = router => {
 		'/graphiql',
 		security.requireS3o,
 		graphiqlExpress({
-			endpointURL: '/graphiql',
+			endpointURL: '/graphql',
 			query: DEFAULT_QUERY
 		})
 	);
