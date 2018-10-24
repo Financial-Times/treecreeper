@@ -1,5 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
-const { logger } = require('./request-context');
+const { logger } = require('../lib/request-context');
 
 const driver = neo4j.driver(
 	process.env.GRAPHENEDB_CHARCOAL_BOLT_URL,

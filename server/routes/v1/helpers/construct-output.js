@@ -1,4 +1,3 @@
-const { isSameNeo4jInteger } = require('./utils');
 const Integer = require('neo4j-driver/lib/v1/integer.js');
 
 const convertIntegersToNumbers = node => {
@@ -26,9 +25,7 @@ const constructNode = result => {
 			map[rel.type] = map[rel.type] || [];
 
 			map[rel.type].push({
-				direction: isSameNeo4jInteger(rel.start, node.identity)
-					? 'outgoing'
-					: 'incoming',
+				direction: rel.start.equals(node.identity) ? 'outgoing' : 'incoming',
 				nodeType: target.labels[0],
 				nodeCode: target.properties.code
 			});

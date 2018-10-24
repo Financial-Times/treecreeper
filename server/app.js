@@ -1,19 +1,26 @@
 const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
-const { ui, graphql, v1 } = require('./routes');
+const ui = require('./routes/ui');
+const graphql = require('./routes/graphql');
+const v1 = require('./routes/v1');
 const { initConstraints } = require('./init-db');
 const health = require('./health');
 const {
 	middleware: contextMiddleware,
 	logger
 } = require('./lib/request-context');
+
 const requestId = require('./middleware/request-id');
 const clientId = require('./middleware/client-id');
 const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
 	const app = express();
+
+	app.get('/__gtg', (req, res) => {
+		res.status(200).end();
+	});
 
 	app.use((req, res, next) => {
 		next();

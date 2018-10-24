@@ -1,26 +1,41 @@
-const { logger } = require('../lib/request-context');
-const EventLogWriter = require('../lib/event-log-writer');
-const Kinesis = require('../lib/kinesis');
-const { isSameNeo4jInteger } = require('./utils');
+const { logger } = require('../../../lib/request-context');
+const EventLogWriter = require('../../../lib/event-log-writer');
+const Kinesis = require('../../../lib/kinesis-client');
 
 const kinesisClient = new Kinesis(
 	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name'
 );
 const eventLogWriter = new EventLogWriter(kinesisClient);
 
-const sendEvent = event =>
+const sendEvent = event => {
+	event.action = actionFromEvent(event.event);
 	eventLogWriter.sendEvent(event).catch(error => {
 		logger.error(
 			'Failed to send event to event log',
 			Object.assign({ event, error: error })
 		);
 	});
+};
 
-const createRelationshipInfoFromNeo4jData = ({ rel, destination, origin }) => {
-	const isIncoming = !isSameNeo4jInteger(rel.start, origin.identity);
+const calculateDirection = (rel, origin) =>
+	!rel.start.equals(origin.identity) ? 'incoming' : 'outgoing';
+
+const actionFromEvent = event => {
+	if (/D_NODE$/.test(event)) {
+		return event.replace(/D_NODE$/, '');
+	}
+	return 'UPDATE';
+};
+
+const createRelationshipInfoFromNeo4jData = ({
+	rel,
+	destination,
+	origin,
+	direction
+}) => {
 	return {
 		relType: rel.type,
-		direction: isIncoming ? 'incoming' : 'outgoing',
+		direction: direction || calculateDirection(rel, origin),
 		nodeCode: destination.properties.code,
 		nodeType: destination.labels[0]
 	};
@@ -31,6 +46,7 @@ const sendNodeRelationshipEvent = ({
 	rel,
 	destination,
 	origin,
+	direction,
 	requestId,
 	clientId
 }) => {
@@ -46,6 +62,7 @@ const sendNodeRelationshipEvent = ({
 				relationship: createRelationshipInfoFromNeo4jData({
 					rel,
 					destination,
+					direction,
 					origin
 				}),
 				requestId,
@@ -58,21 +75,16 @@ const sendNodeRelationshipEvent = ({
 const logNodeChanges = (clientId, requestId, result, deletedRelationships) => {
 	const node = result.records[0].get('node');
 	let event;
-	let action;
 	if (node.properties.deletedByRequest === requestId) {
 		event = 'DELETED_NODE';
-		action = EventLogWriter.actions.DELETE;
 	} else if (node.properties._createdByRequest === requestId) {
 		event = 'CREATED_NODE';
-		action = EventLogWriter.actions.CREATE;
 	} else {
 		event = 'UPDATED_NODE';
-		action = EventLogWriter.actions.UPDATE;
 	}
 
 	sendEvent({
 		event,
-		action,
 		code: node.properties.code,
 		type: node.labels[0],
 		requestId,
@@ -91,7 +103,6 @@ const logNodeChanges = (clientId, requestId, result, deletedRelationships) => {
 			if (target.properties._createdByRequest === requestId) {
 				sendEvent({
 					event: 'CREATED_NODE',
-					action: EventLogWriter.actions.CREATE,
 					code: target.properties.code,
 					type: target.labels[0],
 					requestId,
@@ -155,7 +166,6 @@ const sendRelationshipEvents = (
 ) => {
 	sendEvent({
 		event: `${verb}_RELATIONSHIP`,
-		action: EventLogWriter.actions.UPDATE,
 		relationship: {
 			relType: relationshipType,
 			direction: 'outgoing',
@@ -169,7 +179,6 @@ const sendRelationshipEvents = (
 	});
 	sendEvent({
 		event: `${verb}_RELATIONSHIP`,
-		action: EventLogWriter.actions.UPDATE,
 		relationship: {
 			relType: relationshipType,
 			direction: 'incoming',
@@ -196,4 +205,90 @@ const logRelationshipChanges = (requestId, clientId, result, params) => {
 	}
 };
 
-module.exports = { logNodeChanges, logRelationshipChanges };
+const logSubstituteChanges = (
+	requestId,
+	clientId,
+	sourceNode,
+	destinationNode,
+	sourceRels,
+	destinationRels
+) => {
+	sourceNode = sourceNode.records[0].get('node');
+	destinationNode = destinationNode.records[0].get('node');
+
+	sendEvent({
+		event: 'DELETED_NODE',
+		code: sourceNode.properties.code,
+		type: sourceNode.labels[0],
+		requestId,
+		clientId
+	});
+
+	sendEvent({
+		event: 'UPDATED_NODE',
+		code: destinationNode.properties.code,
+		type: destinationNode.labels[0],
+		requestId,
+		clientId
+	});
+
+	sourceRels.records.forEach(record => {
+		const sourceTarget = record.get('related');
+		const sourceRel = record.get('relationship');
+
+		sendNodeRelationshipEvent({
+			verb: 'DELETED',
+			rel: sourceRel,
+			destination: sourceNode,
+			origin: sourceTarget,
+			requestId,
+			clientId
+		});
+
+		// reflexive relationships will all be discarded without a new creation event
+		if (sourceTarget.identity.equals(sourceNode.identity)) {
+			return;
+		}
+
+		const existingRecord = destinationRels.records.find(record => {
+			const destinationTarget = record.get('related');
+			const destinationRel = record.get('relationship');
+			if (
+				destinationTarget.identity.equals(sourceTarget.identity) &&
+				destinationRel.type === sourceRel.type &&
+				(destinationRel.start.equals(sourceRel.start) ||
+					destinationRel.end.equals(sourceRel.end))
+			) {
+				return true;
+			}
+		});
+
+		if (!existingRecord) {
+			sendNodeRelationshipEvent({
+				verb: 'CREATED',
+				rel: sourceRel,
+				destination: destinationNode,
+				direction: calculateDirection(sourceRel, sourceTarget),
+				origin: sourceTarget,
+				requestId,
+				clientId
+			});
+
+			sendNodeRelationshipEvent({
+				verb: 'CREATED',
+				rel: sourceRel,
+				destination: sourceTarget,
+				direction: calculateDirection(sourceRel, sourceNode),
+				origin: destinationNode,
+				requestId,
+				clientId
+			});
+		}
+	});
+};
+
+module.exports = {
+	logNodeChanges,
+	logRelationshipChanges,
+	logSubstituteChanges
+};

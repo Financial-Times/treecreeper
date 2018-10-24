@@ -1,7 +1,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const logger = require('@financial-times/n-logger').default;
-const { executeQuery, driver } = require('../../server/lib/db-connection');
+const { executeQuery, driver } = require('../../server/data/db-connection');
 const EventLogWriter = require('../../server/lib/event-log-writer');
 
 const checkResponse = (actual, expected) => {
@@ -82,19 +82,25 @@ const dropDb = async () => {
 	);
 };
 
-const setupMocks = (state, { withRelationships } = {}) => {
-	// clean up after potentially failed test runs
-	before(dropDb);
+const setupMocks = (state, { withRelationships, withDb = true } = {}) => {
+	if (withDb) {
+		// clean up after potentially failed test runs
+		before(dropDb);
+	}
 
 	beforeEach(async () => {
 		state.sandbox = sinon.createSandbox();
 		state.stubSendEvent = stubKinesis(state.sandbox);
-		await hydrateDb(withRelationships);
+		if (withDb) {
+			await hydrateDb(withRelationships);
+		}
 	});
 
 	afterEach(async () => {
 		state.sandbox.restore();
-		await dropDb();
+		if (withDb) {
+			await dropDb();
+		}
 	});
 };
 
@@ -108,10 +114,17 @@ const stubDbUnavailable = state =>
 
 const stubDbTransaction = (state, properties = {}) => {
 	const runStub = state.sandbox.stub();
+	const dummyInteger = { equals: () => false };
 	runStub.resolves({
 		records: [
 			{
-				get: () => ({ properties, labels: [] }),
+				get: () => ({
+					properties,
+					labels: [],
+					identity: dummyInteger,
+					start: dummyInteger,
+					end: dummyInteger
+				}),
 				has: () => false
 			}
 		]

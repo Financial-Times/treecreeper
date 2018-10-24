@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { setupMocks } = require('../v1/helpers');
 const request = require('../helpers/supertest');
 const sinon = require('sinon');
-const { executeQuery } = require('../../server/lib/db-connection');
+const { executeQuery } = require('../../server/data/db-connection');
 
 describe('salesforce sync', () => {
 	describe('integration with api', () => {
@@ -128,7 +128,7 @@ describe('salesforce sync', () => {
 				jsforce: {
 					Connection
 				},
-				'./db-connection': {
+				'../data/db-connection': {
 					executeQuery: neoStub
 				}
 			});

@@ -1,31 +1,6 @@
-const { logger } = require('../lib/request-context');
+const { logger } = require('../../../lib/request-context');
 const httpErrors = require('http-errors');
-const { stripIndents } = require('common-tags');
-const schemaCompliance = require('./schema-compliance');
-const stringPatterns = {
-	CLIENT_ID: /^[a-z\d][a-z\d\-\.]*[a-z\d]$/,
-	REQUEST_ID: /^[a-z\d][a-z\d\-]+[a-z\d]$/i
-};
-
-const validateClientId = id => {
-	if (!stringPatterns.CLIENT_ID.test(id)) {
-		throw httpErrors(
-			400,
-			stripIndents`Invalid client id \`${id}\`.
-			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with -.`
-		);
-	}
-};
-
-const validateRequestId = id => {
-	if (!stringPatterns.REQUEST_ID.test(id)) {
-		throw httpErrors(
-			400,
-			stripIndents`Invalid request id \`${id}\`.
-			Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
-		);
-	}
-};
+const validation = require('./validation');
 
 const categorizeAttributes = ({ nodeType, code, attributes }) => {
 	if (attributes.code && attributes.code !== code) {
@@ -37,8 +12,8 @@ const categorizeAttributes = ({ nodeType, code, attributes }) => {
 		);
 	}
 
-	schemaCompliance.validateAttributeNames(attributes);
-	schemaCompliance.validateAttributes(nodeType, attributes);
+	validation.validateAttributeNames(attributes);
+	validation.validateAttributes(nodeType, attributes);
 
 	return {
 		deletedAttributes: Object.entries(attributes)
@@ -66,10 +41,10 @@ const sanitizeShared = ({
 	query,
 	method
 }) => {
-	validateClientId(clientId);
-	validateRequestId(requestId);
-	schemaCompliance.validateTypeName(nodeType);
-	schemaCompliance.validateCode(nodeType, code);
+	validation.validateClientId(clientId);
+	validation.validateRequestId(requestId);
+	validation.validateTypeName(nodeType);
+	validation.validateCode(nodeType, code);
 
 	const result = {
 		clientId,
@@ -123,7 +98,7 @@ const sanitizeNode = (inputs, method) => {
 			relationships: [].concat(
 				...Object.entries(relationships).map(([relType, relInstances]) => {
 					return relInstances.map(({ direction, nodeCode, nodeType }) => {
-						schemaCompliance.validateRelationship({
+						validation.validateRelationship({
 							nodeType: direction === 'outgoing' ? result.nodeType : nodeType,
 							relatedType:
 								direction === 'outgoing' ? nodeType : result.nodeType,
@@ -158,7 +133,7 @@ const sanitizeRelationship = (inputs, method) => {
 		relationshipType: input.relationshipType
 	});
 
-	schemaCompliance.validateRelationship(completedInput);
+	validation.validateRelationship(completedInput);
 
 	return completedInput;
 };

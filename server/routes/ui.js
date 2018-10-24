@@ -1,12 +1,53 @@
 const security = require('../middleware/security');
-const graphql = require('../graphql/controllers');
+const { graphiqlExpress } = require('apollo-server-express');
+
+const DEFAULT_QUERY = `{
+  System(code: "biz-ops-api") {
+    name
+    serviceTier
+    primaryURL
+    supportedBy {
+      name
+      isThirdParty
+      slack
+      email
+    }
+    deliveredBy {
+      name
+      isThirdParty
+      slack
+      email
+      techLeads {
+        name
+        email
+      }
+      productOwners {
+        name
+        email
+      }
+    }
+    knownAboutBy {
+      name
+    }
+    repositories {
+      url
+      mostRecentCircleCIPlatform
+      storedIn {
+        name
+      }
+    }
+  }
+}`;
 
 module.exports = router => {
-	router.get('/__gtg', (req, res) => {
-		res.status(200).end();
-	});
-
-	router.use('/graphiql', security.requireS3o, graphql.graphiql('/graphql'));
+	router.use(
+		'/graphiql',
+		security.requireS3o,
+		graphiqlExpress({
+			endpointURL: '/graphiql',
+			query: DEFAULT_QUERY
+		})
+	);
 
 	return router;
 };

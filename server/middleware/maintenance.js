@@ -1,6 +1,6 @@
 const permittedMatchers = [
 	/^(cmdb-to-bizop|biz-ops-admin|monitoring-manager|DROP ALL)$/,
-	/^((delete|update|create|test|biz-ops-load-test)-client-id)$/,
+	/^((delete|update|create|test|biz-ops-load-test|substitute)-client-id)$/,
 	/^((create|delete|update)-relationship-client)$/,
 	/^(people-api)$/
 ];

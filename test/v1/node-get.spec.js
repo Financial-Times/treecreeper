@@ -1,6 +1,6 @@
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { executeQuery } = require('../../server/lib/db-connection');
+const { executeQuery } = require('../../server/data/db-connection');
 
 const { checkResponse, setupMocks, stubDbUnavailable } = require('./helpers');
 

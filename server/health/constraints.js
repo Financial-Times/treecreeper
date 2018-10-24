@@ -3,7 +3,7 @@ const { stripIndents } = require('common-tags');
 const { getTypes } = require('@financial-times/biz-ops-schema');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
-const { executeQuery } = require('../lib/db-connection');
+const { executeQuery } = require('../data/db-connection');
 
 const constraintsCheck = async () => {
 	//FIXME: Could this be done better using arr.reduce or map and filter

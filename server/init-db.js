@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { executeQueryWithSharedSession } = require('./lib/db-connection');
+const { executeQueryWithSharedSession } = require('./data/db-connection');
 const schema = require('@financial-times/biz-ops-schema');
 const logger = require('@financial-times/n-logger').default;
 

@@ -1,7 +1,7 @@
 const { initConstraints } = require('../server/init-db');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { driver } = require('../server/lib/db-connection');
+const { driver } = require('../server/data/db-connection');
 const schema = require('@financial-times/biz-ops-schema');
 
 const mockConstraints = (stub, constraints, writeResponse) => {

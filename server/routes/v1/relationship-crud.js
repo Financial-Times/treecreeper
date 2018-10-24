@@ -1,20 +1,24 @@
 const { stripIndents } = require('common-tags');
-const { logger } = require('../lib/request-context');
-const { executeQuery } = require('../lib/db-connection');
+const { logger } = require('../../lib/request-context');
+const { executeQuery } = require('../../data/db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,
 	preflightChecks
-} = require('./errors');
+} = require('./helpers/errors');
 const {
 	metaAttributesForCreate,
 	metaAttributesForUpdate
-} = require('./cypher');
-const { logRelationshipChanges: logChanges } = require('./kinesis');
-const { sanitizeRelationship: sanitizeInput } = require('./sanitize-input');
+} = require('../../data/cypher-fragments');
+const {
+	logRelationshipChanges: logChanges
+} = require('./helpers/log-to-kinesis');
+const {
+	sanitizeRelationship: sanitizeInput
+} = require('./helpers/sanitize-input');
 const {
 	constructRelationship: constructOutput
-} = require('./construct-output');
+} = require('./helpers/construct-output');
 
 const create = async input => {
 	const sanitizedInput = sanitizeInput(input, 'CREATE');

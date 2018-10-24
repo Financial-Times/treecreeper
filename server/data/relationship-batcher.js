@@ -1,5 +1,5 @@
 const MAX_IN_SINGLE_QUERY = process.env.MAX_RELATIONSHIPS_IN_QUERY || 10;
-const { createRelationships } = require('./cypher');
+const { createRelationships } = require('./cypher-fragments');
 
 const batchRelationships = (relationships = []) => {
 	if (relationships.length > MAX_IN_SINGLE_QUERY) {

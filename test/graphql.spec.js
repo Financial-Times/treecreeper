@@ -4,10 +4,10 @@ const sinon = require('sinon');
 const app = require('../server/app.js');
 const { expect } = require('chai');
 const request = require('./helpers/supertest');
-const { executeQuery } = require('../server/lib/db-connection');
+const { executeQuery } = require('../server/data/db-connection');
 const security = require('../server/middleware/security');
-const { createMockSchema } = require('../server/graphql/schema');
-const resolvers = require('../server/graphql/resolvers');
+const { createMockSchema } = require('../server/data/graphql-schema');
+const resolvers = require('../server/data/graphql-resolvers');
 const { graphql } = require('graphql');
 
 const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';

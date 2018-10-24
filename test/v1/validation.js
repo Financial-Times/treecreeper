@@ -3,15 +3,15 @@ const { expect } = require('chai');
 const { setupMocks } = require('./helpers');
 const request = require('../helpers/supertest');
 const sinon = require('sinon');
-const { executeQuery } = require('../../server/lib/db-connection');
+const { executeQuery } = require('../../server/data/db-connection');
 
-describe('node attributes schema compliance', () => {
+describe('validation', () => {
 	describe('integration with api', () => {
 		const state = {};
 		let sb;
 
 		setupMocks(state);
-		const schemaCompliance = require('../../server/crud/schema-compliance');
+		const validation = require('../../server/routes/v1/helpers/validation');
 
 		let app;
 		const cleanUp = async () => {
@@ -20,7 +20,7 @@ describe('node attributes schema compliance', () => {
 		before(() => {
 			cleanUp();
 			sb = sinon.createSandbox();
-			sb.stub(schemaCompliance, 'validateAttributes');
+			sb.stub(validation, 'validateAttributes');
 			// using proxyquire to bust cache;
 			app = proxyquire('../../server/app.js', {});
 			return app;
@@ -43,7 +43,7 @@ describe('node attributes schema compliance', () => {
 						foo: 'created'
 					}
 				});
-			expect(schemaCompliance.validateAttributes).calledWith('Team', {
+			expect(validation.validateAttributes).calledWith('Team', {
 				foo: 'created'
 			});
 		});
@@ -57,7 +57,7 @@ describe('node attributes schema compliance', () => {
 						foo: 'updated'
 					}
 				});
-			expect(schemaCompliance.validateAttributes).calledWith('Team', {
+			expect(validation.validateAttributes).calledWith('Team', {
 				foo: 'updated'
 			});
 		});

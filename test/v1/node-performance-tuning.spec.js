@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
-const { executeQuery } = require('../../server/lib/db-connection');
+const { executeQuery } = require('../../server/data/db-connection');
 const { checkResponse, setupMocks, stubDbTransaction } = require('./helpers');
 const lolex = require('lolex');
 
@@ -188,6 +188,7 @@ describe('node performance tuning', () => {
 			const dbTransactionStub = stubDbTransaction(state, {
 				_createdByRequest: 'update-request-id'
 			});
+
 			await request(app)
 				.patch(
 					'/v1/node/System/new-hub-system?upsert=true&relationshipAction=replace'

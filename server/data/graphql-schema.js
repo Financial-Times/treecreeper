@@ -4,7 +4,7 @@ const {
 	addMockFunctionsToSchema
 } = require('graphql-tools');
 
-const resolvers = require('./resolvers');
+const resolvers = require('./graphql-resolvers');
 
 const { getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 

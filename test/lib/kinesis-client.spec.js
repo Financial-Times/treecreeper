@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const Kinesis = require('../../server/lib/kinesis');
+const Kinesis = require('../../server/lib/kinesis-client');
 
 describe('AWS kinesis client', () => {
 	const streamName = Math.random() + 'mississippi';

@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
-const { executeQuery } = require('../lib/db-connection');
+const { executeQuery } = require('../../../data/db-connection');
 
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,

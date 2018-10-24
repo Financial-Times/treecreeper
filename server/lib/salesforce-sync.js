@@ -1,5 +1,5 @@
 const jsforce = require('jsforce');
-const { executeQuery } = require('./db-connection');
+const { executeQuery } = require('../data/db-connection');
 const { logger } = require('./request-context');
 
 const login = () => {

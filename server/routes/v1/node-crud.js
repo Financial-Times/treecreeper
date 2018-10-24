@@ -1,27 +1,29 @@
 const { stripIndents } = require('common-tags');
-const { logger } = require('../lib/request-context');
-const { executeQuery, writeTransaction } = require('../lib/db-connection');
+const { logger } = require('../../lib/request-context');
+const { executeQuery, writeTransaction } = require('../../data/db-connection');
 const {
 	dbErrorHandlers,
 	queryResultHandlers,
 	preflightChecks
-} = require('./errors');
-const { logNodeChanges: logChanges } = require('./kinesis');
-const { sanitizeNode: sanitizeInput } = require('./sanitize-input');
-const { constructNode: constructOutput } = require('./construct-output');
+} = require('./helpers/errors');
+const { logNodeChanges: logChanges } = require('./helpers/log-to-kinesis');
+const { sanitizeNode: sanitizeInput } = require('./helpers/sanitize-input');
+const {
+	constructNode: constructOutput
+} = require('./helpers/construct-output');
 const {
 	metaAttributesForCreate,
 	metaAttributesForUpdate,
 	RETURN_NODE_WITH_RELS,
 	createRelationships
-} = require('./cypher');
+} = require('../../data/cypher-fragments');
 
 const {
 	batchRelationships,
 	constructRelationshipMergeQueries
-} = require('./relationship-batcher');
+} = require('../../data/relationship-batcher');
 
-const salesforceSync = require('../lib/salesforce-sync');
+const salesforceSync = require('../../lib/salesforce-sync');
 
 const getNodeWithRelationships = async (nodeType, code) => {
 	const query = stripIndents`

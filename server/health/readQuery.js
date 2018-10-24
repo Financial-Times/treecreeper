@@ -1,6 +1,6 @@
 const { logger } = require('../lib/request-context');
 const { stripIndents } = require('common-tags');
-const { executeQuery } = require('../lib/db-connection');
+const { executeQuery } = require('../data/db-connection');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
 const runQueryCheck = async () => {
