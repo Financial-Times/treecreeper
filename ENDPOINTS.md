@@ -4,14 +4,14 @@ The following provides details of the available endpoints. You must use the corr
 When calling through API gateway use the folowing:
 
 | environment | prefix value                 |
-| ----------- | -----------------------------|
-|   test      | https://api-t.ft.com/biz-ops |
-|   prod      | https://api.ft.com/biz-ops   |
+| ----------- | ---------------------------- |
+| test        | https://api-t.ft.com/biz-ops |
+| prod        | https://api.ft.com/biz-ops   |
 
 Example:
 https://api-t.ft.com/biz-ops/v1/node/Group/groupid?upsert=true&relationshipAction=merge
 
-## Node - {prefix}/v1/node/:nodeType/:code
+## Node CRUD- {prefix}/v1/node/:nodeType/:code
 
 ### Url parameters
 
@@ -61,7 +61,7 @@ _Note, it is not possible to omit `nodeType` and/or `code` to retrieve a list of
 
 Used to create a new node, optionally with relationships to other nodes.
 
-* The query string `upsert=true` allows the creation of any new nodes needed to create relationships
+- The query string `upsert=true` allows the creation of any new nodes needed to create relationships
 
 | body                   | query         | initial state                            | status | response type |
 | ---------------------- | ------------- | ---------------------------------------- | ------ | ------------- |
@@ -79,11 +79,11 @@ Not implemented. Use `PATCH`
 
 Used to modify or create a node, optionally with relationships to other nodes.
 
-* Passing in `null` as the value of any attribute of `node` will delete that attribute
-* The query string `upsert=true` allows the creation of any new nodes needed to create relationships
-* The query string `relationshipAction`, taking the values `merge` or `replace` specifies the behaviour when modifying relationships
-  * `merge` - merges the supplied relationships with those that already exist
-  * `replace` - replaces any relationships of the same relationship type as those passed in the request body
+- Passing in `null` as the value of any attribute of `node` will delete that attribute
+- The query string `upsert=true` allows the creation of any new nodes needed to create relationships
+- The query string `relationshipAction`, taking the values `merge` or `replace` specifies the behaviour when modifying relationships
+  - `merge` - merges the supplied relationships with those that already exist
+  - `replace` - replaces any relationships of the same relationship type as those passed in the request body
 
 | body                   | query                               | initial state                              | status | response type |
 | ---------------------- | ----------------------------------- | ------------------------------------------ | ------ | ------------- |
@@ -104,7 +104,7 @@ Used to remove a node. _This method should be used sparingly_
 | existing, with relationships to other nodes    | 409    | none          |
 | existing, with no relationships to other nodes | 204    | none          |
 
-## Relationship - {prefix}/v1/node/:nodeType/:code/:relationshipType/:relatedType/:relatedCode
+## Relationship CRUD - {prefix}/v1/node/:nodeType/:code/:relationshipType/:relatedType/:relatedCode
 
 ### Url parameters
 
@@ -163,3 +163,19 @@ Used to remove a relationship.
 | ------------- | ------ | ------------- |
 | absent        | 404    | none          |
 | existing      | 204    | none          |
+
+## Merge - {prefix}/v1/merge
+
+This endpoint allows merging two nodes. All relationships defined on the source node will be copied to the destination node. Any properties defined on the source node but _not_ defined on the destination node will be copied across. Properties defined on both nodes will take the value already set on the destination node. The source node will be deleted
+
+### POST
+
+Send a JSON with the following properties, all required
+
+| parameter name  | type   | description                                                            |
+| --------------- | ------ | ---------------------------------------------------------------------- |
+| type            | string | The type of the nodes to be merged. Both nodes must have the same type |
+| sourceCode      | string | The code of the source node                                            |
+| destinationCode | string | The code of the destination node                                       |
+
+Responds with a 200 JSON payload for the destination node matching the standard CRUD response https://github.com/Financial-Times/biz-ops-api/blob/master/ENDPOINTS.md#payload-structure

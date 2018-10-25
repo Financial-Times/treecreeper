@@ -9,6 +9,7 @@ const crud = {
 	node: require('./node-crud'),
 	relationship: require('./relationship-crud')
 };
+const merge = require('./merge');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -96,6 +97,11 @@ module.exports = router => {
 	);
 	router.patch(relationshipRestUrl, crudController('relationship', 'PATCH'));
 	router.delete(relationshipRestUrl, crudController('relationship', 'DELETE'));
+
+	router.post('/merge', async (req, res) => {
+		requestLog('merge', 'POST', req);
+		return respond(res, merge(combineInputs(req, res)));
+	});
 
 	return router;
 };

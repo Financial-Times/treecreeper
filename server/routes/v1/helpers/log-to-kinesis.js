@@ -205,7 +205,7 @@ const logRelationshipChanges = (requestId, clientId, result, params) => {
 	}
 };
 
-const logSubstituteChanges = (
+const logMergeChanges = (
 	requestId,
 	clientId,
 	sourceNode,
@@ -290,5 +290,5 @@ const logSubstituteChanges = (
 module.exports = {
 	logNodeChanges,
 	logRelationshipChanges,
-	logSubstituteChanges
+	logMergeChanges
 };
