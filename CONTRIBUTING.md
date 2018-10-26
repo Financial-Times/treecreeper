@@ -29,6 +29,12 @@ properties: // one or more properties defined directly on the type
     description: 'Unique code/id for this item' // description used in graphql ui
     label: Code //Short label to be used when displaying this field in forms etc.
     fieldset: main // Optional fieldset that this property belongs to. Useful for grouping related properties
+    examples: // Optional array of examples of valid values for this properity
+     - LK60HPN
+  isOperational: // Optional.  Additional properity, specific to this type
+    type: Boolean // Any primitive type or enum (see below)
+    trueLabel: Bus runs on public roads // Optional.  Label to show when a boolean's value is true.  Defaults to "Yes"
+    falseLabel: Bus doesn't run or only runs off-road // Optional.  Label to show when a boolean's value is false.  Defaults to "No"
 fieldsets:
   main: // name of a fieldset
     heading: Main properties // heading that can be used in UIs that group properties by fieldset
