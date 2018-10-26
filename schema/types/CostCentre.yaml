@@ -15,9 +15,10 @@ properties:
     label: Name
     description: The name of the cost centre
   groups:
+    relationship: PAYS_FOR
     type: Group
     direction: outgoing
-    label: FT Group
-    relationship: PAYS_FOR
-    description: The groups which are costed to the cost centre
     hasMany: true
+    label: FT Group
+    description: The groups which are costed to the cost centre
+
