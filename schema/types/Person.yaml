@@ -10,36 +10,71 @@ properties:
     label: Code
     description: 'Unique code/id for this person'
     fieldset: general
+    autoPopulated: true
   name:
     type: Word
     canIdentify: true
     label: Name
     description: The name of the person
     fieldset: general
+    autoPopulated: true
   email:
     type: Word
     canIdentify: true
     label: Email
     description: The email address of the person
-    fieldset: general
+    fieldset: contact
+    autoPopulated: true
   slack:
     type: Word
-    canIdentify: true
     label: Slack
-    description: The slack link for the person
-    fieldset: general
+    canIdentify: true
+    description: The slack link for the person (deprecated)
+    fieldset: contact
+    autoPopulated: true
+  slackName:
+    type: Word
+    canIdentify: true
+    label: Slack Name
+    description: The slack name for the person
+    fieldset: contact
+    autoPopulated: true
+  slackID:
+    type: Word
+    canIdentify: true
+    label: Slack ID
+    description: The slack id for the person
+    fieldset: contact
+    autoPopulated: true
   phone:
     type: Word
     canIdentify: true
     label: Phone
     description: The phone contact number for the person
-    fieldset: general
+    fieldset: contact
+    autoPopulated: true
   isActive:
     type: Boolean
     canFilter: true
     label: Active
     description: Whether or not the person is still working at the FT
     fieldset: general
+  isPeopleApi:
+    type: Boolean
+    canFilter: true
+    label: Active
+    description: Whether or not the person is still working at the FT
+    autoPopulated: true
+  source:
+    type: Word
+    label: Source
+    description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
+    autoPopulated: true
+  proposedId:
+    type: Word
+    label: Source
+    description: "This user's id in: workday, ldap, github or slack. `name.lastname` if no id found."
+    autoPopulated: true
   techDirectorFor:
     type: Group
     label: Tech director for group
@@ -91,5 +126,7 @@ properties:
 fieldsets:
   general:
     heading: General information
+  contact:
+    heading: Contact details
   network:
     heading: Network

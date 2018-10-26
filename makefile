@@ -9,6 +9,9 @@ lint:
 	eslint --cache --fix .
 	prettier --write *.md
 
+lint-ci:
+	eslint --cache .
+
 unit-test:
 	mocha --recursive test
 

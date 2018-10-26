@@ -115,7 +115,7 @@ properties:
     relationship: DELIVERED_BY
     description: The systems the team delivers
     hasMany: true
-    fieldset: network
+    fieldset: ownership
   supports:
     type: System
     direction: incoming
@@ -123,9 +123,12 @@ properties:
     relationship: SUPPORTED_BY
     description: The systems the team supports
     hasMany: true
-    fieldset: network
+    fieldset: ownership
 fieldsets:
   general:
     heading: General information
   network:
     heading: Network
+  ownership:
+    heading: System ownership
+

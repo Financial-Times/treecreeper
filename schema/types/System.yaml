@@ -108,6 +108,7 @@ properties:
     canFilter: true
     label: Salesforce ID
     description: ID of the system in salesforce **DO NOT EDIT**
+    autoPopulated: true
   architectureDiagram:
     type: Document
     label: Architecture Diagram
@@ -145,6 +146,13 @@ properties:
     description: The repositories which store the system's source code
     hasMany: true
   monitoredBy:
+    type: Healthcheck
+    direction: outgoing
+    label: Monitored by (deprecated)
+    relationship: MONITORED_BY
+    description: Endpoints which monitor this system
+    hasMany: true
+  healthchecks:
     type: Healthcheck
     direction: outgoing
     label: Healthchecks
