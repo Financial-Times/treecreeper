@@ -26,3 +26,18 @@ ProductLifecycle:
     - Sustain
     - Grow
     - Sunset
+PersonSource:
+  description: The main origin of information about a Person
+  options:
+    - workday
+    - multi
+    - cmdb3
+    - slack
+    - salesforce
+    - github
+PersonContract:
+  description: Types of employment contract a Person may have with the FT
+  options:
+    - permanent
+    - contractor
+    - other

@@ -59,6 +59,12 @@ properties:
     label: Active
     description: Whether or not the person is still working at the FT
     fieldset: general
+  contract:
+    type: PersonContract
+    canFilter: true
+    label: Contract type
+    description: The type of employment contract a Person has with the FT
+    fieldset: general
   isPeopleApi:
     type: Boolean
     canFilter: true
@@ -66,7 +72,7 @@ properties:
     description: Whether or not the person is still working at the FT
     autoPopulated: true
   source:
-    type: Word
+    type: PersonSource
     label: Source
     description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
     autoPopulated: true
