@@ -34,7 +34,7 @@ PersonSource:
   options:
     - workday
     - multi
-    - cmdb3
+    - cmdb
     - slack
     - salesforce
     - github

@@ -121,7 +121,7 @@ const defineQueries = config => [
 ];
 
 const defineEnum = ([name, { description, options }]) => `
-# ${description}
+# ${description.replace(/\n/g, ' ')}
 enum ${name} {
 ${indentMultiline(Object.keys(options).join('\n'), 2)}
 }`;

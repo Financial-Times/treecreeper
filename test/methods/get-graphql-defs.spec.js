@@ -207,10 +207,17 @@ enum Lifecycle {
 				}
 			}
 		]);
-		sandbox.stub(rawData, 'getEnums').returns({});
+		sandbox.stub(rawData, 'getEnums').returns({
+			AnEnum: {
+				name: 'DummyEnum',
+				description: 'an enum description\nmultiline',
+				options: ['One', 'Two']
+			}
+		});
 		const generated = [].concat(...generateGraphqlDefs()).join('');
 		// note the regex has a space, not a new line
 		expect(generated).to.match(/a description multiline/);
+		expect(generated).to.match(/an enum description multiline/);
 	});
 
 	describe('converting types', () => {
