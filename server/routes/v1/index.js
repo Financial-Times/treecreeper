@@ -20,7 +20,7 @@ const success = (res, data) =>
 	data.status ? res.status(data.status).json(data.data) : res.json(data);
 
 const failure = (res, err) => {
-	logger.error({ event: 'CRUD_ERROR', error: err });
+	logger.error({ event: 'BIZ_OPS_API_ERROR', error: err });
 
 	if (!err.status) {
 		logger.error({ error: err });

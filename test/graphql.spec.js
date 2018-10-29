@@ -32,7 +32,6 @@ describe('Integration - GraphQL', () => {
 				serviceTier: () => 'Platinum'
 			})
 		});
-		console.dir(query);
 		return await graphql(mockSchema, query);
 	};
 
