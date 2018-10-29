@@ -110,7 +110,10 @@ describe('data quality: types', () => {
 											'canIdentify',
 											'canFilter',
 											'autoPopulated',
-											'pattern'
+											'pattern',
+											'examples',
+											'trueLabel',
+											'falseLabel'
 										])
 									);
 								}
@@ -162,6 +165,20 @@ describe('data quality: types', () => {
 								it('may define a pattern', () => {
 									if (config.pattern) {
 										expect(config.pattern).to.be.oneOf(validStringPatterns);
+									}
+								});
+
+								it('may define true and false labels', () => {
+									if (config.trueLabel || config.falseLabel) {
+										expect(config.trueLabel).to.be.a('string');
+										expect(config.falseLabel).to.be.a('string');
+										expect(config.type).to.equal('Boolean');
+									}
+								});
+
+								it('may define examples', () => {
+									if (config.examples) {
+										expect(config.examples).to.be.a('array');
 									}
 								});
 							});
