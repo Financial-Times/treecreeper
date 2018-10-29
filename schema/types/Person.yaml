@@ -76,6 +76,7 @@ properties:
     label: Source
     description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
     autoPopulated: true
+    canFilter: true
   proposedId:
     type: Word
     label: Proposed ID
