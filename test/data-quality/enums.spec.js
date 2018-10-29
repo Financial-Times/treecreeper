@@ -15,8 +15,8 @@ describe('data quality: enum spec', () => {
 				it('has only string keys', () => {
 					options.forEach(opt => expect(opt).to.be.a.string);
 				});
-				it('has no numbers in keys', () => {
-					options.forEach(opt => expect(opt).not.to.match(/\d/));
+				it('has no keys beginning with numbers', () => {
+					options.forEach(opt => expect(opt).not.to.match(/^\d/));
 				});
 			} else {
 				it('has only string keys', () => {
