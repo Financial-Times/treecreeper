@@ -5,7 +5,10 @@ CircleCiVersion:
     ONE: '1.0'
     TWO: '2.0'
 SystemLifecycle:
-  description: The lifecycle stage of a system
+  description: |
+    The lifecycle stage of a system.
+    Note that 'Dormant' should be used for systems that are currently
+    not actively used, but may not be fully decommissioned yet
   options:
     - Preproduction
     - Production
@@ -26,3 +29,19 @@ ProductLifecycle:
     - Sustain
     - Grow
     - Sunset
+PersonSource:
+  description: The main origin of information about a Person
+  options:
+    - workday
+    - multi
+    - cmdb3
+    - slack
+    - salesforce
+    - github
+    - ldap
+PersonContract:
+  description: Types of employment contract a Person may have with the FT
+  options:
+    - permanent
+    - contractor
+    - other
