@@ -72,7 +72,7 @@ properties:
     autoPopulated: true
   proposedId:
     type: Word
-    label: Source
+    label: Proposed ID
     description: "This user's id in: workday, ldap, github or slack. `name.lastname` if no id found."
     autoPopulated: true
   techDirectorFor:
