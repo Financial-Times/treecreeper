@@ -38,6 +38,7 @@ PersonSource:
     - slack
     - salesforce
     - github
+    - ldap
 PersonContract:
   description: Types of employment contract a Person may have with the FT
   options:
