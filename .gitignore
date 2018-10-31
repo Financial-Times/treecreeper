@@ -1,7 +1,6 @@
 .DS_Store
 .vscode
 *.env*
-package-lock.json
 .eslintrc.js
 .scss-lint.yml
 

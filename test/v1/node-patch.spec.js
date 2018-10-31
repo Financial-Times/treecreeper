@@ -200,6 +200,7 @@ describe('v1 - node PATCH', () => {
 					}
 				]
 			};
+			// await executeQuery(`MATCH (t:Team {code: 'test-team'})-[r:HAS_TECH_LEAD]-() DELETE r`)
 			await request(app)
 				.patch('/v1/node/Team/test-team?relationshipAction=merge')
 				.auth('update-client-id')

@@ -83,13 +83,15 @@ const logNodeChanges = (clientId, requestId, result, deletedRelationships) => {
 		event = 'UPDATED_NODE';
 	}
 
-	sendEvent({
+	const nodeEventBody = {
 		event,
 		code: node.properties.code,
 		type: node.labels[0],
 		requestId,
 		clientId
-	});
+	};
+
+	sendEvent(nodeEventBody);
 
 	if (
 		result.records[0] &&

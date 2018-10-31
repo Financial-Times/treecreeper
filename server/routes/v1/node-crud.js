@@ -161,6 +161,39 @@ const read = async input => {
 	return constructOutput(result);
 };
 
+const nodeDiff = (existingNode = {}, newNode = {}) => {
+	return Object.entries(newNode)
+		.filter(([propName, value]) => existingNode[propName] !== value)
+		.map(([propName]) => propName);
+};
+
+const hasNoEquivalentIn = (arr = []) => item => {
+	const keys = Object.keys(item);
+	return !arr.some(refItem => keys.every(key => item[key] === refItem[key]));
+};
+
+const relationshipDiff = (
+	existingRelationships = {},
+	newRelationships = {},
+	action
+) => {
+	return Object.keys(newRelationships)
+		.map(relType =>
+			// additions
+			newRelationships[relType]
+				.filter(hasNoEquivalentIn(existingRelationships[relType]))
+				.concat(
+					action === 'replace' && existingRelationships[relType]
+						? // deletions when doing replace
+						  existingRelationships[relType].filter(
+								hasNoEquivalentIn(newRelationships[relType])
+						  )
+						: []
+				)
+		)
+		.filter(diff => diff.length);
+};
+
 const update = async input => {
 	const sanitizedInput = sanitizeInput(input, 'UPDATE');
 	const {
@@ -169,6 +202,7 @@ const update = async input => {
 		nodeType,
 		code,
 		relationships,
+		attributes,
 		deletedAttributes,
 		relationshipAction,
 		relationshipTypes
@@ -177,6 +211,46 @@ const update = async input => {
 	let deletedRelationships;
 
 	try {
+		if (relationships.length) {
+			preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
+		}
+		const prefetch = await getNodeWithRelationships(nodeType, code);
+
+		const existingRecord = prefetch.records.length
+			? constructOutput(prefetch)
+			: {};
+
+		let hasChanged = false;
+
+		if (deletedAttributes.length) {
+			hasChanged = true;
+		}
+
+		const changedAttributes = nodeDiff(existingRecord.node, attributes);
+
+		if (changedAttributes.length) {
+			hasChanged = true;
+		}
+
+		if (!hasChanged && relationships.length) {
+			const diff = relationshipDiff(
+				existingRecord.relationships,
+				input.relationships,
+				relationshipAction
+			);
+			if (diff.length) {
+				hasChanged = true;
+			}
+		}
+
+		if (!hasChanged) {
+			logger.info(
+				{ event: 'SKIP_NODE_UPDATE' },
+				'No changed properties or relationships - skipping node update'
+			);
+			return existingRecord;
+		}
+
 		const baseParameters = {
 			clientId,
 			date: new Date().toUTCString(),

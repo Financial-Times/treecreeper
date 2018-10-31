@@ -2,7 +2,12 @@ const { expect } = require('chai');
 const request = require('../helpers/supertest');
 const app = require('../../server/app.js');
 const { executeQuery } = require('../../server/data/db-connection');
-const { checkResponse, setupMocks, stubDbTransaction } = require('./helpers');
+const {
+	checkResponse,
+	setupMocks,
+	stubDbTransaction,
+	spyDbQuery
+} = require('./helpers');
 const lolex = require('lolex');
 
 describe('node performance tuning', () => {
@@ -71,7 +76,7 @@ describe('node performance tuning', () => {
 	};
 
 	const state = {};
-	setupMocks(state);
+	setupMocks(state, { withRelationships: true });
 
 	let clock;
 	const timestamp = 1528458548930;
@@ -201,9 +206,212 @@ describe('node performance tuning', () => {
 				})
 				.expect(201);
 
-			expect(dbTransactionStub.args.length).to.equal(4);
-			expect(dbTransactionStub.args[1][0]).to.match(/^MERGE/);
-			expect(dbTransactionStub.args[2][0]).to.match(/MERGE/);
+			expect(dbTransactionStub.args.length).to.equal(5);
+			expect(dbTransactionStub.args[2][0]).to.match(/^MERGE/);
+			expect(dbTransactionStub.args[3][0]).to.match(/MERGE/);
+		});
+
+		describe('diffing before writes', () => {
+			it("doesn't write if no real property changes detected", async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch(
+						'/v1/node/Team/test-team?upsert=true&relationshipAction=replace'
+					)
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						node: { foo: 'bar1' }
+					})
+					.expect(200);
+
+				dbQuerySpy().args.forEach(args => {
+					expect(args[0]).to.not.match(/MERGE|CREATE/);
+				});
+				expect(state.stubSendEvent.called).to.be.false;
+			});
+
+			it("doesn't write if no real relationship changes detected in replace mode", async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch(
+						'/v1/node/Team/test-team?upsert=true&relationshipAction=replace'
+					)
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									nodeType: 'Person',
+									nodeCode: 'test-person',
+									direction: 'outgoing'
+								}
+							]
+						}
+					})
+					.expect(200);
+
+				dbQuerySpy().args.forEach(args => {
+					expect(args[0]).to.not.match(/MERGE|CREATE/);
+				});
+				expect(state.stubSendEvent.called).to.be.false;
+			});
+
+			it("doesn't write if no real relationship changes detected in merge mode", async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=merge')
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									nodeType: 'Person',
+									nodeCode: 'test-person',
+									direction: 'outgoing'
+								}
+							]
+						}
+					})
+					.expect(200);
+
+				dbQuerySpy().args.forEach(args => {
+					expect(args[0]).to.not.match(/MERGE|CREATE/);
+				});
+				expect(state.stubSendEvent.called).to.be.false;
+			});
+
+			it('writes if property but no relationship changes detected', async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=merge')
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						node: { foo: 'change' },
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									nodeType: 'Person',
+									nodeCode: 'test-person',
+									direction: 'outgoing'
+								}
+							]
+						}
+					})
+					.expect(200);
+
+				expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).to
+					.be.true;
+				expect(state.stubSendEvent.called).to.be.true;
+			});
+
+			it('writes if relationship but no property changes detected', async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=merge')
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						node: { foo: 'bar1' },
+						relationships: {
+							HAS_TECH_LEAD: [
+								{
+									nodeType: 'Person',
+									nodeCode: 'test-person2',
+									direction: 'outgoing'
+								}
+							]
+						}
+					})
+					.expect(200);
+
+				expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).to
+					.be.true;
+				expect(state.stubSendEvent.called).to.be.true;
+			});
+
+			it('detects deleted property as a change', async () => {
+				const dbQuerySpy = spyDbQuery(state);
+				await request(app)
+					.patch('/v1/node/Team/test-team?upsert=true&relationshipAction=merge')
+					.auth('update-client-id')
+					.set('x-request-id', 'update-request-id')
+					.send({
+						node: { foo: null }
+					})
+					.expect(200);
+
+				expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).to
+					.be.true;
+				expect(state.stubSendEvent.called).to.be.true;
+			});
+
+			describe('patching with fewer relationships', () => {
+				beforeEach(() =>
+					executeQuery(`MATCH (t:Team { code: "test-team" })
+									WITH t
+									MERGE (p2:Person { code: "test-person2" })
+									MERGE (t)-[htl:HAS_TECH_LEAD]->(p2)
+									RETURN t, htl, p2`));
+				it('treats fewer relationships as a delete when replacing relationships', async () => {
+					const dbQuerySpy = spyDbQuery(state);
+					await request(app)
+						.patch(
+							'/v1/node/Team/test-team?upsert=true&relationshipAction=replace'
+						)
+						.auth('update-client-id')
+						.set('x-request-id', 'update-request-id')
+						.send({
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										nodeType: 'Person',
+										nodeCode: 'test-person',
+										direction: 'outgoing'
+									}
+								]
+							}
+						})
+						.expect(200);
+
+					expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])))
+						.to.be.true;
+					expect(state.stubSendEvent.called).to.be.true;
+				});
+
+				it('treats fewer relationships as no change when merging relationships', async () => {
+					const dbQuerySpy = spyDbQuery(state);
+					await request(app)
+						.patch(
+							'/v1/node/Team/test-team?upsert=true&relationshipAction=merge'
+						)
+						.auth('update-client-id')
+						.set('x-request-id', 'update-request-id')
+						.send({
+							relationships: {
+								HAS_TECH_LEAD: [
+									{
+										nodeType: 'Person',
+										nodeCode: 'test-person',
+										direction: 'outgoing'
+									}
+								]
+							}
+						})
+						.expect(200);
+
+					expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])))
+						.to.be.false;
+					expect(state.stubSendEvent.called).to.be.false;
+				});
+			});
+
+			// it('inclues diff information in kinesis log', async () => {
+
+			// })
 		});
 	});
 });

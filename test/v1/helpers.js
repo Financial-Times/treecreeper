@@ -138,6 +138,18 @@ const stubDbTransaction = (state, properties = {}) => {
 	return runStub;
 };
 
+const spyDbQuery = state => {
+	const originalSession = driver.session.bind(driver);
+	let spy;
+	state.sandbox.stub(driver, 'session').callsFake(() => {
+		const session = originalSession();
+		state.sandbox.spy(session, 'run');
+		spy = session.run;
+		return session;
+	});
+	return () => spy;
+};
+
 const getRelationship = (relType = 'HAS_TECH_LEAD') =>
 	executeQuery(`
 			MATCH (node:Team { code: 'test-team' })-[relationship:${relType}]->(relatedNode:Person { code: 'test-person' })
@@ -149,5 +161,6 @@ module.exports = {
 	setupMocks,
 	stubDbTransaction,
 	stubDbUnavailable,
+	spyDbQuery,
 	getRelationship
 };
