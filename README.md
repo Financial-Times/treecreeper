@@ -21,8 +21,8 @@ The public API URLs are:
 
 | Environment   | Url                                |
 | ------------- | --------------------------------   |
-| Production    | `https://api.ft.com/biz-ops/v1`   |
-| Test          | `https://api-t.ft.com/biz-ops/v1` |
+| Production    | `https://api.ft.com/biz-ops`   |
+| Test          | `https://api-t.ft.com/biz-ops` |
 
 To get access you will need to acquire an API key.
 To get one, either:
@@ -65,9 +65,13 @@ This should be accessed directly as it is a UI, not through the above API gatewa
 | Production    | `https://biz-ops.api.ft.com/graphiql`                 |
 | Test          | `https://biz-ops-staging.api.ft.com/graphiql`         |
 
-## Endpoints
+## API endpoints 
 
-[Endpoint](ENDPOINTS.md) Reference
+Prefer to use V2 as V1 will be deprecated in the near future
+
+- [V2 API Reference](ENDPOINTS-V2.md) 
+- [V1 API Reference](ENDPOINTS.md) 
+
 
 ## Cookbook
 

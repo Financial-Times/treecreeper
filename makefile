@@ -13,5 +13,16 @@ endif
 SHELL := /bin/bash
 STAGE ?= test
 
+.PHONY: test
+
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
+
+test:
+	@if [ -z $(CIRCLECI) ]; \
+		then jest test/v2 --watch; \
+		else jest test/v2; \
+	fi
+
+lint:
+	eslint --cache --fix .

@@ -27,7 +27,6 @@ const batchRelationships = (relationships = []) => {
 
 		return batches;
 	}
-
 	return [relationships];
 };
 

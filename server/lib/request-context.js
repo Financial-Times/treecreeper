@@ -19,8 +19,8 @@ const contextStore = {};
 
 const getContext = key => {
 	const eid = asyncHooks.executionAsyncId();
-
-	return key ? contextStore[eid][key] : contextStore[eid];
+	const store = contextStore[eid] || {};
+	return key ? store[key] : store;
 };
 
 const asyncHook = asyncHooks.createHook({
@@ -100,6 +100,7 @@ const logger = new Proxy(nLogger, {
 
 module.exports = {
 	setContext,
+	getContext,
 	middleware,
 	logger
 };

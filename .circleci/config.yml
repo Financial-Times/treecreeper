@@ -68,12 +68,15 @@ jobs:
             ./scripts/neo4j-wait-for-start
             node server/init-db.js
       - run:
-          name: Run tests
+          name: Run v1 tests
           command: npm test
 
       - store_artifacts:
           path: coverage
           destination: /coverage
+      - run:
+          name: Run v2 tests
+          command: make test
 
   lint:
     <<: *default_container_config

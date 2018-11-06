@@ -13,6 +13,8 @@ https://api-t.ft.com/biz-ops/v1/node/Group/groupid?upsert=true&relationshipActio
 
 ## Node CRUD- {prefix}/v1/node/:nodeType/:code
 
+**NOTE - there is now a v2 api, currently only implemented for /node (but /relationship and /merge will follow soon) - Prefer to use v2**
+
 ### Url parameters
 
 _These are case-insensitive and will be converted internally to the casing used in the underlying database_

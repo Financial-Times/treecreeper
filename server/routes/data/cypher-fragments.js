@@ -1,14 +1,14 @@
 const { stripIndents } = require('common-tags');
-const { executeQuery } = require('./db-connection');
+
 const RETURN_NODE_WITH_RELS = stripIndents`
 	WITH node
 	OPTIONAL MATCH (node)-[relationship]-(related)
 	RETURN node, relationship, related`;
 
-const relFragment = (type, direction) => {
+const relFragment = (type, direction, relName) => {
 	const left = direction === 'incoming' ? '<' : '';
 	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[relationship:${type}]-${right}`;
+	return `${left}-[${relName || 'relationship'}:${type}]-${right}`;
 };
 
 const metaAttributesForCreate = type => stripIndents`
@@ -28,39 +28,50 @@ const metaAttributesForUpdate = type => stripIndents`
 // rather than [] if the node doesn't exist
 // This means the next line tries to create a relationship pointing
 // at null, so we get an informative error
-const optionalMatchNode = ({ key, nodeType }) => `
-OPTIONAL MATCH (related:${nodeType})
+const optionalMatchNode = ({ key, type }) => `
+OPTIONAL MATCH (related:${type})
 WHERE related.code IN $${key}
 `;
 
-const mergeNode = ({ key, nodeType }) => `
+const mergeNode = ({ key, type }) => `
 UNWIND $${key} as nodeCodes
-MERGE (related:${nodeType} {code: nodeCodes} )
+MERGE (related:${type} {code: nodeCodes} )
 	ON CREATE SET ${metaAttributesForCreate('related')}
 
 `;
 
-const writeRelationships = ({ relType, direction }) => `
-MERGE (node)${relFragment(relType, direction)}(related)
+const writeRelationships = ({ relationship, direction }) => `
+MERGE (node)${relFragment(relationship, direction)}(related)
 	ON CREATE SET ${metaAttributesForCreate('relationship')}
+`;
+
+// Must use OPTIONAL MATCH because 'cypher'
+const deleteRelationships = ({ relationship, direction, type }, codesKey) => `
+OPTIONAL MATCH (node)${relFragment(
+	relationship,
+	direction,
+	'deletableRelationship'
+)}(related:${type})
+	WHERE related.code IN $${codesKey}
+	DELETE deletableRelationship
 `;
 
 const groupSimilarRelationships = relationships =>
 	Object.entries(
 		relationships.reduce((map, rel) => {
-			const key = `${rel.relType}:${rel.direction}:${rel.nodeType}`;
+			const key = `${rel.relationship}:${rel.direction}:${rel.type}`;
 			map[key] = map[key] || [];
-			map[key].push(rel.nodeCode);
+			map[key].push(rel.code);
 			return map;
 		}, {})
-	).map(([key, nodeCodes]) => {
-		const [relType, direction, nodeType] = key.split(':');
+	).map(([key, codes]) => {
+		const [relationship, direction, type] = key.split(':');
 		return {
 			key: key.replace(/\:/g, ''),
-			relType,
+			relationship,
 			direction,
-			nodeType,
-			nodeCodes
+			type,
+			codes
 		};
 	});
 
@@ -69,8 +80,8 @@ const createRelationships = (upsert, relationships, globalParameters) => {
 
 	// make sure the parameter referenced in the query exists on the
 	// globalParameters object passed to the db driver
-	groupedRelationships.map(({ key, nodeCodes }) =>
-		Object.assign(globalParameters, { [key]: nodeCodes })
+	groupedRelationships.map(({ key, codes }) =>
+		Object.assign(globalParameters, { [key]: codes })
 	);
 
 	// Note on the limitations of cypher:
@@ -79,27 +90,20 @@ const createRelationships = (upsert, relationships, globalParameters) => {
 	return `
 ${groupedRelationships
 		.map(obj => {
-			return `
-WITH node
-${upsert ? mergeNode(obj) : optionalMatchNode(obj)}
-WITH node, related
-${writeRelationships(obj)}
+			return stripIndents`
+		WITH node
+		${upsert ? mergeNode(obj) : optionalMatchNode(obj)}
+		WITH node, related
+		${writeRelationships(obj)}
 	`;
 		})
 		.join('\n')}`;
 };
 
-const getNodeWithRelationships = (nodeType, code) =>
-	executeQuery(
-		`MATCH (node:${nodeType} {code: $code})
-		${RETURN_NODE_WITH_RELS}`,
-		{ code }
-	);
-
 module.exports = {
+	deleteRelationships,
 	metaAttributesForCreate,
 	metaAttributesForUpdate,
-	RETURN_NODE_WITH_RELS,
 	createRelationships,
-	getNodeWithRelationships
+	RETURN_NODE_WITH_RELS
 };
