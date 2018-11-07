@@ -19,7 +19,6 @@ const stubDbUnavailable = ({ sinon }) =>
 		},
 		close: () => {}
 	});
-};
 
 const stubDbTransaction = ({ sinon }, properties = {}) => {
 	const runStub = sinon.stub();
