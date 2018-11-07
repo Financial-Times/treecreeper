@@ -12,16 +12,9 @@ const spyDbQuery = ({ sinon }) => {
 	return () => spy;
 };
 
-const stubDbUnavailable = ({ sinon }) => {
-	console.log(
-		'============================== stub unavailable entry ======================================='
-	);
-
-	return sinon.stub(driver, 'session').returns({
+const stubDbUnavailable = ({ sinon }) =>
+	sinon.stub(driver, 'session').returns({
 		run: () => {
-			console.log(
-				'============================== stub unavailable throw ======================================='
-			);
 			throw 'oh no';
 		},
 		close: () => {}
