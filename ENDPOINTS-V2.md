@@ -54,11 +54,14 @@ All errors are returned as json of the following structure:
 
 ```json
 {
-  errors: [{
-    message: 'First error message'
-  },{
-    message: 'Second error message'
-  }]
+  "errors": [
+    {
+      "message": "First error message"
+    },
+    {
+      "message": "Second error message"
+    }
+  ]
 }
 
 ```
