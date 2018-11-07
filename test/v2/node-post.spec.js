@@ -23,7 +23,7 @@ describe('v2 - node POST', () => {
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return sandbox
+		await sandbox
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
