@@ -1,5 +1,3 @@
-const FIVE_MINUTES = 5 * 60 * 1000;
-
 module.exports = async (check, func, type) => {
 	let lastStatus = {};
 	const checkAndUpdateState = async () => {

@@ -13,9 +13,6 @@
 		"node": ">= 8.11.1",
 		"npm": ">= 5.6.0"
 	},
-  "jest": {
-    "testEnvironment": "node"
-  },
 	"scripts": {
 		"lint": "eslint --cache --fix .",
 		"lint-ci": "eslint .",
