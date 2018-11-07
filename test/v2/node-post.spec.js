@@ -23,14 +23,14 @@ describe('v2 - node POST', () => {
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return sandbox
+		await sandbox
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
 			.send({})
 			.expect(500);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
+		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		// verifyNotExists('Team', teamCode);
 	});
 
 	it('create node', async () => {

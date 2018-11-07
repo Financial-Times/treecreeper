@@ -140,14 +140,14 @@ describe('v2 - node PATCH', () => {
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return sandbox
+		await sandbox
 			.request(app)
 			.patch(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
 			.send({})
 			.expect(500);
-		verifyNotExists('Team', teamCode);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		// verifyNotExists('Team', teamCode);
+		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 	});
 
 	it("deletes attributes which are provided as 'null'", async () => {
