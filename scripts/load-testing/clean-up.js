@@ -1,4 +1,4 @@
-const { driver } = require('../../server/db-connection');
+const { driver } = require('../../server/data/db-connection');
 const logger = require('@financial-times/n-logger').default;
 
 const cleanUp = async () => {
