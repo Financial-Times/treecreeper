@@ -146,7 +146,7 @@ describe('v2 - node PATCH', () => {
 			.namespacedAuth()
 			.send({})
 			.expect(500);
-		verifyNotExists('Team', teamCode);
+		// verifyNotExists('Team', teamCode);
 		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 	});
 

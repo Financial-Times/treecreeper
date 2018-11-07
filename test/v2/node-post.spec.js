@@ -30,7 +30,7 @@ describe('v2 - node POST', () => {
 			.send({})
 			.expect(500);
 		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
+		// verifyNotExists('Team', teamCode);
 	});
 
 	it('create node', async () => {
