@@ -5,6 +5,7 @@ const { executeQuery } = require('../../data/db-connection');
 const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
 	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
+	// note - extra spaces are not a typo - the error message really does have 3 spaces
 	missingRelated: /Expected to find a node at   related@(\d+) but found nothing/,
 	missingRelationshipEndpoint: /Expected to find a node at ([a-zA-Z]+) but found nothing/
 });
