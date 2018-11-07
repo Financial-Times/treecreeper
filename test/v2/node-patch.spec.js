@@ -140,7 +140,7 @@ describe('v2 - node PATCH', () => {
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return sandbox
+		await sandbox
 			.request(app)
 			.patch(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()

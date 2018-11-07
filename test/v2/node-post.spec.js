@@ -21,6 +21,18 @@ describe('v2 - node POST', () => {
 
 	setupMocks(sandbox, { namespace });
 
+	it('responds with 500 if query fails', async () => {
+		stubDbUnavailable(sandbox);
+		await sandbox
+			.request(app)
+			.post(`/v2/node/Team/${teamCode}`)
+			.namespacedAuth()
+			.send({})
+			.expect(500);
+		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		verifyNotExists('Team', teamCode);
+	});
+
 	it('create node', async () => {
 		await sandbox
 			.request(app)
@@ -269,17 +281,5 @@ describe('v2 - node POST', () => {
 		namespace,
 		sandbox,
 		app
-	});
-
-	it('responds with 500 if query fails', async () => {
-		stubDbUnavailable(sandbox);
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({})
-			.expect(500);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
 	});
 });
