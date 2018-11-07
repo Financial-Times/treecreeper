@@ -9,7 +9,6 @@ module.exports = async (check, func, type) => {
 	};
 
 	checkAndUpdateState();
-	setInterval(checkAndUpdateState, FIVE_MINUTES).unref();
 
 	return {
 		getStatus: () => ({
