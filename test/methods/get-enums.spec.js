@@ -1,22 +1,19 @@
 const { getEnums } = require('../../');
 const rawData = require('../../lib/raw-data');
-const sinon = require('sinon');
 const cache = require('../../lib/cache');
 
 describe('get-enums', () => {
-	const sandbox = sinon.createSandbox();
-
 	beforeEach(() => {
-		sandbox.stub(rawData, 'getEnums');
+		jest.spyOn(rawData, 'getEnums');
 	});
 
 	afterEach(() => {
 		cache.clear();
-		sandbox.restore();
+		jest.restoreAllMocks();
 	});
 
 	it('retrieve enums', () => {
-		rawData.getEnums.returns({
+		rawData.getEnums.mockReturnValue({
 			enum1: {
 				description: 'ab',
 				options: ['a']
@@ -26,7 +23,7 @@ describe('get-enums', () => {
 	});
 
 	it('retrieve enums with metadata', () => {
-		rawData.getEnums.returns({
+		rawData.getEnums.mockReturnValue({
 			enum1: {
 				description: 'ab',
 				options: ['a']
@@ -38,7 +35,7 @@ describe('get-enums', () => {
 	});
 
 	it('convert arrays into key/value maps', () => {
-		rawData.getEnums.returns({
+		rawData.getEnums.mockReturnValue({
 			enum1: {
 				options: ['a', 'b', 'c']
 			}
@@ -47,7 +44,7 @@ describe('get-enums', () => {
 	});
 
 	it('retrieve key/value maps unaltered', () => {
-		rawData.getEnums.returns({
+		rawData.getEnums.mockReturnValue({
 			enum1: {
 				options: {
 					a: 1,

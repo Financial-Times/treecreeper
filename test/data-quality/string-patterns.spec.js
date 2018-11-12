@@ -9,7 +9,9 @@ describe('data quality: string patterns', () => {
 			});
 		} else {
 			it(`${name} evaluates to valid flagged regex`, () => {
-				expect(() => new RegExp(pattern.pattern, pattern.flags)).not.toThrowError();
+				expect(
+					() => new RegExp(pattern.pattern, pattern.flags)
+				).not.toThrowError();
 			});
 		}
 	});

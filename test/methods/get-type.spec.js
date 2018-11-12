@@ -1,18 +1,16 @@
 const { getType } = require('../../');
 const rawData = require('../../lib/raw-data');
-const sinon = require('sinon');
 const cache = require('../../lib/cache');
 
 describe('get-type', () => {
-	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(rawData, 'getTypes');
-		sandbox.stub(rawData, 'getStringPatterns');
+		jest.spyOn(rawData, 'getTypes');
+		jest.spyOn(rawData, 'getStringPatterns');
 	});
 
 	afterEach(() => {
 		cache.clear();
-		sandbox.restore();
+		jest.restoreAllMocks();
 	});
 
 	it('returns all properties of a type', async () => {
@@ -28,7 +26,7 @@ describe('get-type', () => {
 				}
 			}
 		};
-		rawData.getTypes.returns([{ name: 'DummyType' }, type1]);
+		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');
 		expect(type.name).toBe('Type1');
 		expect(type.description).toBe('I am Type1');
@@ -36,7 +34,7 @@ describe('get-type', () => {
 	});
 
 	it('generates plural name if necessary', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1'
 			}
@@ -46,7 +44,7 @@ describe('get-type', () => {
 	});
 
 	it('does not override manually set plural name', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				pluralName: 'Type1ticles'
@@ -57,7 +55,7 @@ describe('get-type', () => {
 	});
 
 	it('converts string patterns to regex based function', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -68,7 +66,7 @@ describe('get-type', () => {
 				}
 			}
 		]);
-		rawData.getStringPatterns.returns({
+		rawData.getStringPatterns.mockReturnValue({
 			CODE: '^ab$'
 		});
 		const type = getType('Type1');
@@ -79,7 +77,7 @@ describe('get-type', () => {
 	});
 
 	it('converts string patterns with regex flags to regex based function', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -90,7 +88,7 @@ describe('get-type', () => {
 				}
 			}
 		]);
-		rawData.getStringPatterns.returns({
+		rawData.getStringPatterns.mockReturnValue({
 			CODE2: {
 				pattern: '^ab$',
 				flags: 'i'
@@ -102,7 +100,7 @@ describe('get-type', () => {
 	});
 
 	it('it returns read-only properties', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -128,7 +126,7 @@ describe('get-type', () => {
 	});
 
 	it('it maps types to graphql properties', async () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -152,7 +150,7 @@ describe('get-type', () => {
 	});
 
 	it('groups properties by fieldset', () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -191,9 +189,9 @@ describe('get-type', () => {
 		expect(type.fieldsets.main.description).toBe('Fill these out please');
 		expect(type.fieldsets.main.isSingleField).toBeFalsy();
 		expect(type.fieldsets.secondaryProp.properties.secondaryProp).toBeDefined();
-		expect(
-			type.fieldsets.secondaryProp.properties.secondaryProp.label
-		).toBe('Standalone');
+		expect(type.fieldsets.secondaryProp.properties.secondaryProp.label).toBe(
+			'Standalone'
+		);
 		expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
 		expect(type.fieldsets.secondaryProp.description).toBeFalsy();
 		expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);
@@ -203,7 +201,7 @@ describe('get-type', () => {
 	});
 
 	it('not have empty fieldsets', () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -232,7 +230,7 @@ describe('get-type', () => {
 	});
 
 	it('handle lack of custom fieldsets well when grouping', () => {
-		rawData.getTypes.returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
 				properties: {
@@ -260,7 +258,7 @@ describe('get-type', () => {
 
 	describe('relationships', () => {
 		it('it can exclude relationships', async () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -280,7 +278,7 @@ describe('get-type', () => {
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -307,7 +305,7 @@ describe('get-type', () => {
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type2',
 					properties: {
@@ -334,7 +332,7 @@ describe('get-type', () => {
 		});
 
 		it('retrieve multiple relationships with same name', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -357,7 +355,7 @@ describe('get-type', () => {
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -379,7 +377,7 @@ describe('get-type', () => {
 			expect(result.testName2.direction).toBe('incoming');
 		});
 		it('define recursive relationships', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -408,7 +406,7 @@ describe('get-type', () => {
 		});
 
 		it('cardinality', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -447,7 +445,7 @@ describe('get-type', () => {
 		});
 
 		it('hidden relationships', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -466,7 +464,7 @@ describe('get-type', () => {
 		});
 
 		it('can group relationship properties by fieldset', () => {
-			rawData.getTypes.returns([
+			rawData.getTypes.mockReturnValue([
 				{
 					name: 'Type1',
 					properties: {
@@ -503,14 +501,18 @@ describe('get-type', () => {
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.properties).toBeFalsy();
 			expect(type.fieldsets.main.properties.mainProp).toBeDefined();
-			expect(type.fieldsets.main.properties.mainProp.label).toBe('A word relationship');
+			expect(type.fieldsets.main.properties.mainProp.label).toBe(
+				'A word relationship'
+			);
 			expect(type.fieldsets.main.heading).toBe('Main properties');
 			expect(type.fieldsets.main.description).toBe('Fill these out please');
 			expect(type.fieldsets.main.isSingleField).toBeFalsy();
-			expect(type.fieldsets.secondaryProp.properties.secondaryProp).toBeDefined();
 			expect(
-				type.fieldsets.secondaryProp.properties.secondaryProp.label
-			).toBe('Standalone');
+				type.fieldsets.secondaryProp.properties.secondaryProp
+			).toBeDefined();
+			expect(type.fieldsets.secondaryProp.properties.secondaryProp.label).toBe(
+				'Standalone'
+			);
 			expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
 			expect(type.fieldsets.secondaryProp.description).toBeFalsy();
 			expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);

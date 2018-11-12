@@ -8,7 +8,7 @@ const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
-const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`)
+const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`);
 
 const getTwinnedRelationship = (
 	homeTypeName,
@@ -92,29 +92,33 @@ describe('data quality: types', () => {
 								}
 								if (typeNames.includes(config.type)) {
 									// it's a relationship
-									expect(key).toMatch(arrayToRexExp(
-										commonKeys.concat([
-											'direction',
-											'relationship',
-											'hasMany',
-											'isRecursive',
-											'hidden',
-											'autoPopulated'
-										]))
+									expect(key).toMatch(
+										arrayToRexExp(
+											commonKeys.concat([
+												'direction',
+												'relationship',
+												'hasMany',
+												'isRecursive',
+												'hidden',
+												'autoPopulated'
+											])
+										)
 									);
 								} else {
-									expect(key).toMatch(arrayToRexExp(
-										commonKeys.concat([
-											'unique',
-											'required',
-											'canIdentify',
-											'canFilter',
-											'autoPopulated',
-											'pattern',
-											'examples',
-											'trueLabel',
-											'falseLabel'
-										]))
+									expect(key).toMatch(
+										arrayToRexExp(
+											commonKeys.concat([
+												'unique',
+												'required',
+												'canIdentify',
+												'canFilter',
+												'autoPopulated',
+												'pattern',
+												'examples',
+												'trueLabel',
+												'falseLabel'
+											])
+										)
 									);
 								}
 							});
@@ -189,7 +193,7 @@ describe('data quality: types', () => {
 									expect(config.relationship).toMatch(RELATIONSHIP_NAME);
 								});
 								it('must specify direction', () => {
-									expect(config.direction).toMatch(/^incoming|outgoing$/)
+									expect(config.direction).toMatch(/^incoming|outgoing$/);
 								});
 								it('may be hidden', () => {
 									if (config.hidden) {

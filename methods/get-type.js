@@ -128,7 +128,7 @@ const getType = (
 	return deepFreeze(type);
 };
 
-module.exports.method = cache.cacheify(
+module.exports = cache.cacheify(
 	getType,
 	(
 		typeName,

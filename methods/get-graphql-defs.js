@@ -1,5 +1,5 @@
-const getTypes = require('../methods/get-types').method;
-const getEnums = require('../methods/get-enums').method;
+const getTypes = require('../methods/get-types');
+const getEnums = require('../methods/get-enums');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -126,7 +126,7 @@ enum ${name} {
 ${indentMultiline(Object.keys(options).join('\n'), 2)}
 }`;
 
-module.exports.method = () => {
+module.exports = () => {
 	const typesFromSchema = getTypes({
 		primitiveTypes: 'graphql',
 		relationshipStructure: 'graphql'

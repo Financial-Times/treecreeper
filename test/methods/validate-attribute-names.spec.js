@@ -7,9 +7,13 @@ describe('validateAttributeNames', () => {
 		).not.toThrowError();
 	});
 	it('rejectOddCapitalisation', () => {
-		expect(() => validateAttributeNames({ Thing: {} })).toThrowError(/Must be a camelCase string/);
+		expect(() => validateAttributeNames({ Thing: {} })).toThrowError(
+			/Must be a camelCase string/
+		);
 	});
 	it('reject hyphens', () => {
-		expect(() => validateAttributeNames({ 'thi-ng': {} })).toThrowError(/Must be a camelCase string/);
+		expect(() => validateAttributeNames({ 'thi-ng': {} })).toThrowError(
+			/Must be a camelCase string/
+		);
 	});
 });

@@ -1,5 +1,4 @@
 const generateGraphqlDefs = require('../../').getGraphqlDefs;
-const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
@@ -12,19 +11,19 @@ const explodeString = str =>
 		.map(str => str.trim());
 
 describe('graphql def creation', () => {
-	let sandbox;
 	beforeEach(() => {
 		cache.clear();
-		sandbox = sinon.createSandbox();
+		jest.spyOn(rawData, 'getTypes');
+		jest.spyOn(rawData, 'getEnums');
 	});
 
 	afterEach(() => {
-		sandbox.restore();
 		cache.clear();
+		jest.restoreAllMocks();
 	});
 
 	it('generates expected graphql def given schema', () => {
-		sandbox.stub(rawData, 'getTypes').returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'CostCentre',
 				description: 'A cost centre which groups are costed to',
@@ -100,7 +99,7 @@ describe('graphql def creation', () => {
 			}
 		]);
 
-		sandbox.stub(rawData, 'getEnums').returns({
+		rawData.getEnums.mockReturnValue({
 			Lifecycle: {
 				description: 'The lifecycle stage of a product',
 				options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
@@ -109,8 +108,9 @@ describe('graphql def creation', () => {
 
 		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
 
-		expect(generated).toEqual(explodeString(
-            `
+		expect(generated).toEqual(
+			explodeString(
+				`
 # A cost centre which groups are costed to
 type CostCentre {
 
@@ -188,11 +188,12 @@ Sustain
 Grow
 Sunset
 }`
-        ));
+			)
+		);
 	});
 
 	it('Multiline descriptions', () => {
-		sandbox.stub(rawData, 'getTypes').returns([
+		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Dummy',
 				description: 'dummy type description',
@@ -204,7 +205,7 @@ Sunset
 				}
 			}
 		]);
-		sandbox.stub(rawData, 'getEnums').returns({
+		rawData.getEnums.mockReturnValue({
 			AnEnum: {
 				name: 'DummyEnum',
 				description: 'an enum description\nmultiline',
@@ -221,7 +222,7 @@ Sunset
 		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
 			if (bizopsType === 'Document') {
 				it(`Does not expose Document properties`, () => {
-					sandbox.stub(rawData, 'getTypes').returns([
+					rawData.getTypes.mockReturnValue([
 						{
 							name: 'Dummy',
 							description: 'dummy type description',
@@ -233,14 +234,14 @@ Sunset
 							}
 						}
 					]);
-					sandbox.stub(rawData, 'getEnums').returns({});
+					rawData.getEnums.mockReturnValue({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 
 					expect(generated).not.toMatch(new RegExp(`prop: String`));
 				});
 			} else {
 				it(`Outputs correct type for properties using ${bizopsType}`, () => {
-					sandbox.stub(rawData, 'getTypes').returns([
+					rawData.getTypes.mockReturnValue([
 						{
 							name: 'Dummy',
 							description: 'dummy type description',
@@ -252,7 +253,7 @@ Sunset
 							}
 						}
 					]);
-					sandbox.stub(rawData, 'getEnums').returns({});
+					rawData.getEnums.mockReturnValue({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 
 					expect(generated).toMatch(new RegExp(`prop: ${graphqlType}`));
