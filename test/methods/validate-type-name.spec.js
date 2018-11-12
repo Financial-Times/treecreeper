@@ -13,10 +13,10 @@ describe('validateTypeName', () => {
 		getType.method.returns({
 			name: 'Thing'
 		});
-		expect(() => validateTypeName('Thing')).not.to.throw();
+		expect(() => validateTypeName('Thing')).not.toThrowError();
 	});
 	it('reject names not in the list', () => {
 		getType.method.returns();
-		expect(() => validateTypeName('Thingo')).to.throw(/Invalid node type/);
+		expect(() => validateTypeName('Thingo')).toThrowError(/Invalid node type/);
 	});
 });

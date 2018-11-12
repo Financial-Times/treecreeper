@@ -1,50 +1,45 @@
 const cache = require('../../lib/cache');
-const sinon = require('sinon');
 describe('cache spec', () => {
 	let func;
 
 	let keyGetter;
 
 	let cacheified;
-	let sandbox;
-	before(() => {
-		sandbox = sinon.createSandbox();
-		func = sandbox.stub();
-		func.callsFake(val => 2 * val);
+	beforeAll(() => {
+		func = jest.fn(val => 2 * val);
 
-		keyGetter = sandbox.stub();
-		keyGetter.callsFake(val => `key:${val}`);
+		keyGetter = jest.fn(val => `key:${val}`);
 
 		cacheified = cache.cacheify(func, keyGetter);
 	});
 
-	afterEach(() => sandbox.resetHistory());
+	afterEach(() => jest.clearAllMocks());
 
-	after(() => cache.clear());
+	afterAll(() => cache.clear());
 
 	it('calls cacheified function on first call', () => {
 		const result = cacheified(3);
-		expect(result).to.equal(6);
-		expect(func).calledWith(3);
-		expect(keyGetter).calledWith(3);
+		expect(result).toBe(6);
+		expect(func).toHaveBeenCalledWith(3);
+		expect(keyGetter).toHaveBeenCalledWith(3);
 	});
 	it("doesn't call cacheified function on second call", () => {
 		const result = cacheified(3);
-		expect(result).to.equal(6);
+		expect(result).toBe(6);
 		expect(func).not.called;
-		expect(keyGetter).calledWith(3);
+		expect(keyGetter).toHaveBeenCalledWith(3);
 	});
 	it('calls cacheified function if different cache key generated', () => {
 		const result = cacheified(4);
-		expect(result).to.equal(8);
-		expect(func).calledWith(4);
-		expect(keyGetter).calledWith(4);
+		expect(result).toBe(8);
+		expect(func).toHaveBeenCalledWith(4);
+		expect(keyGetter).toHaveBeenCalledWith(4);
 	});
 	it("doesn't retrieve from cache if cache cleared", () => {
 		cache.clear();
 		const result = cacheified(4);
-		expect(result).to.equal(8);
-		expect(func).calledWith(4);
-		expect(keyGetter).calledWith(4);
+		expect(result).toBe(8);
+		expect(func).toHaveBeenCalledWith(4);
+		expect(keyGetter).toHaveBeenCalledWith(4);
 	});
 });

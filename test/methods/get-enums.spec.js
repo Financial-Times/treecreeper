@@ -22,7 +22,7 @@ describe('get-enums', () => {
 				options: ['a']
 			}
 		});
-		expect(getEnums()).to.eql({ enum1: { a: 'a' } });
+		expect(getEnums()).toEqual({ enum1: { a: 'a' } });
 	});
 
 	it('retrieve enums with metadata', () => {
@@ -32,7 +32,7 @@ describe('get-enums', () => {
 				options: ['a']
 			}
 		});
-		expect(getEnums({ withMeta: true })).to.eql({
+		expect(getEnums({ withMeta: true })).toEqual({
 			enum1: { description: 'ab', options: { a: 'a' } }
 		});
 	});
@@ -43,7 +43,7 @@ describe('get-enums', () => {
 				options: ['a', 'b', 'c']
 			}
 		});
-		expect(getEnums()).to.eql({ enum1: { a: 'a', b: 'b', c: 'c' } });
+		expect(getEnums()).toEqual({ enum1: { a: 'a', b: 'b', c: 'c' } });
 	});
 
 	it('retrieve key/value maps unaltered', () => {
@@ -56,6 +56,6 @@ describe('get-enums', () => {
 				}
 			}
 		});
-		expect(getEnums()).to.eql({ enum1: { a: 1, b: 2, c: 3 } });
+		expect(getEnums()).toEqual({ enum1: { a: 1, b: 2, c: 3 } });
 	});
 });

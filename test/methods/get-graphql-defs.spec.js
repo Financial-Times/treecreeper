@@ -1,4 +1,3 @@
-const { expect } = require('chai');
 const generateGraphqlDefs = require('../../').getGraphqlDefs;
 const sinon = require('sinon');
 const rawData = require('../../lib/raw-data');
@@ -110,88 +109,86 @@ describe('graphql def creation', () => {
 
 		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
 
-		expect(generated).to.eql(
-			explodeString(
-				`
+		expect(generated).toEqual(explodeString(
+            `
 # A cost centre which groups are costed to
 type CostCentre {
 
-  # Unique code/id for this item
-  code: String
-  # The name of the cost centre
-  name: String
-	# The groups which are costed to the cost centre
-	hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
-	# The recursive groups which are costed to the cost centre
-	hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
-	statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
-	)
+# Unique code/id for this item
+code: String
+# The name of the cost centre
+name: String
+# The groups which are costed to the cost centre
+hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
+# The recursive groups which are costed to the cost centre
+hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
+statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
+)
 }
 
 # An overarching group which contains teams and is costed separately
 type Group {
 
-  # Unique code/id for this item
-  code: String
-  # The name of the group
-  name: String
-  # Whether or not the group is still in existence
-  isActive: Boolean
+# Unique code/id for this item
+code: String
+# The name of the group
+name: String
+# Whether or not the group is still in existence
+isActive: Boolean
 
-	# The Cost Centre associated with the group
-	hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
-	# The Cost Centre associated with the group in the end
-	hasEventualBudget: CostCentre @cypher(
-	statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
-	)
+# The Cost Centre associated with the group
+hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
+# The Cost Centre associated with the group in the end
+hasEventualBudget: CostCentre @cypher(
+statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
+)
 
 }
 type Query {
-    CostCentre(
+CostCentre(
 
-    # Unique code/id for this item
-    code: String
-    # The name of the cost centre
-    name: String
-  ): CostCentre
+# Unique code/id for this item
+code: String
+# The name of the cost centre
+name: String
+): CostCentre
 
-  CostCentres(
+CostCentres(
 
-    # The pagination offset to use
-    offset: Int = 0
-    # The number of records to return after the pagination offset. This uses the default neo4j ordering
-    first: Int = 20000
+# The pagination offset to use
+offset: Int = 0
+# The number of records to return after the pagination offset. This uses the default neo4j ordering
+first: Int = 20000
 
-  ): [CostCentre]
+): [CostCentre]
 
-  Group(
+Group(
 
-    # Unique code/id for this item
-    code: String
-    # The name of the group
-    name: String
-  ): Group
+# Unique code/id for this item
+code: String
+# The name of the group
+name: String
+): Group
 
-  Groups(
+Groups(
 
-    # The pagination offset to use
-    offset: Int = 0
-    # The number of records to return after the pagination offset. This uses the default neo4j ordering
-    first: Int = 20000
+# The pagination offset to use
+offset: Int = 0
+# The number of records to return after the pagination offset. This uses the default neo4j ordering
+first: Int = 20000
 
-    # Whether or not the group is still in existence
-    isActive: Boolean
-  ): [Group]
+# Whether or not the group is still in existence
+isActive: Boolean
+): [Group]
 }
 # The lifecycle stage of a product
 enum Lifecycle {
-  Incubate
-  Sustain
-  Grow
-  Sunset
+Incubate
+Sustain
+Grow
+Sunset
 }`
-			)
-		);
+        ));
 	});
 
 	it('Multiline descriptions', () => {
@@ -216,8 +213,8 @@ enum Lifecycle {
 		});
 		const generated = [].concat(...generateGraphqlDefs()).join('');
 		// note the regex has a space, not a new line
-		expect(generated).to.match(/a description multiline/);
-		expect(generated).to.match(/an enum description multiline/);
+		expect(generated).toMatch(/a description multiline/);
+		expect(generated).toMatch(/an enum description multiline/);
 	});
 
 	describe('converting types', () => {
@@ -239,7 +236,7 @@ enum Lifecycle {
 					sandbox.stub(rawData, 'getEnums').returns({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 
-					expect(generated).not.to.match(new RegExp(`prop: String`));
+					expect(generated).not.toMatch(new RegExp(`prop: String`));
 				});
 			} else {
 				it(`Outputs correct type for properties using ${bizopsType}`, () => {
@@ -258,7 +255,7 @@ enum Lifecycle {
 					sandbox.stub(rawData, 'getEnums').returns({});
 					const generated = [].concat(...generateGraphqlDefs()).join('');
 
-					expect(generated).to.match(new RegExp(`prop: ${graphqlType}`));
+					expect(generated).toMatch(new RegExp(`prop: ${graphqlType}`));
 				});
 			}
 		});

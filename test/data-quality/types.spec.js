@@ -1,5 +1,4 @@
 const rawData = require('../../lib/raw-data');
-const { expect } = require('chai');
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
@@ -9,6 +8,7 @@ const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
+const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`)
 
 const getTwinnedRelationship = (
 	homeTypeName,
@@ -27,7 +27,7 @@ const getTwinnedRelationship = (
 
 describe('data quality: types', () => {
 	const validEnums = Object.keys(enums);
-	const validStringPatterns = Object.keys(stringPatterns);
+	const validStringPatternsRX = arrayToRexExp(Object.keys(stringPatterns));
 	const typeNames = types.map(({ name }) => name);
 	const validPropTypes = validEnums.concat(
 		Object.keys(primitiveTypesMap),
@@ -39,21 +39,21 @@ describe('data quality: types', () => {
 		.map(fileName => {
 			it(`${fileName} has consistent name property`, () => {
 				const contents = readYaml.file(path.join('types', fileName));
-				expect(`${contents.name}.yaml`).to.equal(fileName);
+				expect(`${contents.name}.yaml`).toBe(fileName);
 			});
 		});
 
 	types.forEach(type => {
 		describe(`${type.name}`, () => {
 			it('has a name', () => {
-				expect(type.name).to.be.a('string');
+				expect(typeof type.name).toBe('string');
 			});
 			it('has a description', () => {
-				expect(type.description).to.be.a('string');
+				expect(typeof type.description).toBe('string');
 			});
 			it('may have a plural name', () => {
 				if ('pluralName' in type) {
-					expect(type.pluralName).to.be.a('string');
+					expect(typeof type.pluralName).toBe('string');
 				}
 			});
 			const fieldsets = type.fieldsets;
@@ -64,16 +64,16 @@ describe('data quality: types', () => {
 			if (fieldsets) {
 				describe('fieldsets', () => {
 					it('is an object if it exists', () => {
-						expect(fieldsets).to.be.an('object');
+						expect(typeof fieldsets).toBe('object');
 					});
 					Object.entries(type.fieldsets).forEach(([name, fieldsetConfig]) => {
 						describe(name, () => {
 							it('has a heading', () => {
-								expect(fieldsetConfig.heading).to.be.a('string');
+								expect(typeof fieldsetConfig.heading).toBe('string');
 							});
 							it('may have a description', () => {
 								if ('description' in fieldsetConfig) {
-									expect(fieldsetConfig.description).to.be.a('string');
+									expect(typeof fieldsetConfig.description).toBe('string');
 								}
 							});
 						});
@@ -92,7 +92,7 @@ describe('data quality: types', () => {
 								}
 								if (typeNames.includes(config.type)) {
 									// it's a relationship
-									expect(key).to.be.oneOf(
+									expect(key).toMatch(arrayToRexExp(
 										commonKeys.concat([
 											'direction',
 											'relationship',
@@ -100,10 +100,10 @@ describe('data quality: types', () => {
 											'isRecursive',
 											'hidden',
 											'autoPopulated'
-										])
+										]))
 									);
 								} else {
-									expect(key).to.be.oneOf(
+									expect(key).toMatch(arrayToRexExp(
 										commonKeys.concat([
 											'unique',
 											'required',
@@ -114,7 +114,7 @@ describe('data quality: types', () => {
 											'examples',
 											'trueLabel',
 											'falseLabel'
-										])
+										]))
 									);
 								}
 							});
@@ -122,92 +122,89 @@ describe('data quality: types', () => {
 
 						it('has valid name', () => {
 							if (name !== 'SF_ID') {
-								expect(name).to.match(ATTRIBUTE_NAME);
+								expect(name).toMatch(ATTRIBUTE_NAME);
 							}
 						});
 
 						it('has valid label', () => {
-							expect(config.label).to.be.a('string');
+							expect(typeof config.label).toBe('string');
 						});
 						it('has valid description', () => {
-							expect(config.description).to.be.a('string');
+							expect(typeof config.description).toBe('string');
 						});
 						it('has valid type', () => {
-							expect(config.type).to.exist;
-							expect(config.type).to.be.oneOf(validPropTypes);
+							expect(config.type).toBeDefined();
+							expect(config.type).toMatch(arrayToRexExp(validPropTypes));
 						});
 
 						it('has valid fieldset', () => {
 							if (config.fieldset) {
-								expect(validFieldsetNames).to.contain(config.fieldset);
+								expect(validFieldsetNames).toContain(config.fieldset);
 							}
 						});
 
 						if (!typeNames.includes(config.type)) {
-							context('direct property', () => {
+							describe('direct property', () => {
 								// tests for direct properties
 								it('may be required', () => {
 									if (config.required) {
-										expect(config.required).to.be.true;
+										expect(config.required).toBe(true);
 									}
 								});
 								it('may be an identifier', () => {
 									if (config.canIdentify) {
-										expect(config.canIdentify).to.be.true;
+										expect(config.canIdentify).toBe(true);
 									}
 								});
 								it('may be a filterer', () => {
 									if (config.canFilter) {
-										expect(config.canFilter).to.be.true;
+										expect(config.canFilter).toBe(true);
 									}
 								});
 
 								it('may define a pattern', () => {
 									if (config.pattern) {
-										expect(config.pattern).to.be.oneOf(validStringPatterns);
+										expect(config.pattern).toMatch(validStringPatternsRX);
 									}
 								});
 
 								it('may define true and false labels', () => {
 									if (config.trueLabel || config.falseLabel) {
-										expect(config.trueLabel).to.be.a('string');
-										expect(config.falseLabel).to.be.a('string');
-										expect(config.type).to.equal('Boolean');
+										expect(typeof config.trueLabel).toBe('string');
+										expect(typeof config.falseLabel).toBe('string');
+										expect(config.type).toBe('Boolean');
 									}
 								});
 
 								it('may define examples', () => {
 									if (config.examples) {
-										expect(config.examples).to.be.a('array');
+										expect(Array.isArray(config.examples)).toBe(true);
 									}
 								});
 							});
 						} else {
 							const RELATIONSHIP_NAME = getStringValidator('RELATIONSHIP_NAME');
-							context('relationship property', () => {
+							describe('relationship property', () => {
 								it('must specify underlying relationship', () => {
-									expect(config.relationship).to.match(RELATIONSHIP_NAME);
+									expect(config.relationship).toMatch(RELATIONSHIP_NAME);
 								});
 								it('must specify direction', () => {
-									expect(config.direction).to.be.oneOf([
-										'incoming',
-										'outgoing'
-									]);
+									expect(config.direction).toMatch(/^incoming|outgoing$/)
 								});
 								it('may be hidden', () => {
 									if (config.hidden) {
-										expect(config.hidden).to.be.true;
+										expect(config.hidden).toBe(true);
 									}
 								});
 
 								it('may have many', () => {
 									if (config.hasMany) {
-										expect(config.hasMany).to.be.true;
+										expect(config.hasMany).toBe(true);
 									}
 								});
 								it('may be recursive', () => {
 									if (config.isRecursive) {
-										expect(config.isRecursive).to.be.true;
+										expect(config.isRecursive).toBe(true);
 									}
 								});
 								it('is defined at both ends', () => {
@@ -218,7 +215,7 @@ describe('data quality: types', () => {
 											config.relationship,
 											config.direction
 										)
-									).to.exist;
+									).toBeDefined();
 								});
 							});
 						}

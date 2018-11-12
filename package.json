@@ -27,6 +27,7 @@
     "eslint-config-origami-component": "^1.0.0",
     "eslint-config-prettier": "^3.0.1",
     "eslint-plugin-prettier": "^2.6.2",
+    "jest": "^23.6.0",
     "mocha": "^5.2.0",
     "prettier": "^1.14.2",
     "sinon": "^6.1.5",

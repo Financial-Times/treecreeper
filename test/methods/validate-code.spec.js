@@ -19,19 +19,19 @@ describe('validateCode', () => {
 	afterEach(() => sandbox.restore());
 
 	it('accept strings', () => {
-		expect(() => validateCode('Thing', 'acceptable')).not.to.throw();
+		expect(() => validateCode('Thing', 'acceptable')).not.toThrowError();
 	});
 	it('not accept booleans', () => {
-		expect(() => validateCode('Thing', true)).to.throw(/Must be a string/);
-		expect(() => validateCode('Thing', false)).to.throw(/Must be a string/);
+		expect(() => validateCode('Thing', true)).toThrowError(/Must be a string/);
+		expect(() => validateCode('Thing', false)).toThrowError(/Must be a string/);
 	});
 	it('not accept floats', () => {
-		expect(() => validateCode('Thing', 1.34)).to.throw(/Must be a string/);
+		expect(() => validateCode('Thing', 1.34)).toThrowError(/Must be a string/);
 	});
 	it('not accept integers', () => {
-		expect(() => validateCode('Thing', 134)).to.throw(/Must be a string/);
+		expect(() => validateCode('Thing', 134)).toThrowError(/Must be a string/);
 	});
 	it('apply string patterns', () => {
-		expect(() => validateCode('Thing', 'zo-no')).to.throw(/Must match pattern/);
+		expect(() => validateCode('Thing', 'zo-no')).toThrowError(/Must match pattern/);
 	});
 });

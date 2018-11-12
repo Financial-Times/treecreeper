@@ -30,9 +30,9 @@ describe('get-type', () => {
 		};
 		rawData.getTypes.returns([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');
-		expect(type.name).to.equal('Type1');
-		expect(type.description).to.equal('I am Type1');
-		expect(type.properties).to.eql(type1.properties);
+		expect(type.name).toBe('Type1');
+		expect(type.description).toBe('I am Type1');
+		expect(type.properties).toEqual(type1.properties);
 	});
 
 	it('generates plural name if necessary', async () => {
@@ -42,7 +42,7 @@ describe('get-type', () => {
 			}
 		]);
 		const type = getType('Type1');
-		expect(type.pluralName).to.equal('Type1s');
+		expect(type.pluralName).toBe('Type1s');
 	});
 
 	it('does not override manually set plural name', async () => {
@@ -53,7 +53,7 @@ describe('get-type', () => {
 			}
 		]);
 		const type = getType('Type1');
-		expect(type.pluralName).to.equal('Type1ticles');
+		expect(type.pluralName).toBe('Type1ticles');
 	});
 
 	it('converts string patterns to regex based function', async () => {
@@ -73,9 +73,9 @@ describe('get-type', () => {
 		});
 		const type = getType('Type1');
 		const validator = type.properties.code.validator;
-		expect(validator.test('ay')).to.be.false;
-		expect(validator.test('zb')).to.be.false;
-		expect(validator.test('ab')).to.be.true;
+		expect(validator.test('ay')).toBe(false);
+		expect(validator.test('zb')).toBe(false);
+		expect(validator.test('ab')).toBe(true);
 	});
 
 	it('converts string patterns with regex flags to regex based function', async () => {
@@ -98,7 +98,7 @@ describe('get-type', () => {
 		});
 		const type = getType('Type1');
 		const validator = type.properties.code.validator;
-		expect(validator.test('AB')).to.be.true;
+		expect(validator.test('AB')).toBe(true);
 	});
 
 	it('it returns read-only properties', async () => {
@@ -122,9 +122,9 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { primitiveTypes: 'graphql' });
-		expect(type.properties.primitiveProp.autoPopulated).to.eql(true);
-		expect(type.properties.paragraphProp.autoPopulated).to.eql(false);
-		expect(type.properties.enumProp.autoPopulated).to.not.exist;
+		expect(type.properties.primitiveProp.autoPopulated).toBe(true);
+		expect(type.properties.paragraphProp.autoPopulated).toBe(false);
+		expect(type.properties.enumProp.autoPopulated).toBeFalsy();
 	});
 
 	it('it maps types to graphql properties', async () => {
@@ -146,9 +146,9 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { primitiveTypes: 'graphql' });
-		expect(type.properties.primitiveProp).to.eql({ type: 'String' });
-		expect(type.properties.documentProp).to.not.exist;
-		expect(type.properties.enumProp).to.eql({ type: 'SomeEnum' });
+		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
+		expect(type.properties.documentProp).toBeFalsy();
+		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
 	});
 
 	it('groups properties by fieldset', () => {
@@ -184,22 +184,22 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
-		expect(type.properties).to.not.exist;
-		expect(type.fieldsets.main.properties.mainProp).to.exist;
-		expect(type.fieldsets.main.properties.mainProp.label).to.equal('A word');
-		expect(type.fieldsets.main.heading).to.equal('Main properties');
-		expect(type.fieldsets.main.description).to.equal('Fill these out please');
-		expect(type.fieldsets.main.isSingleField).to.not.exist;
-		expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+		expect(type.properties).toBeFalsy();
+		expect(type.fieldsets.main.properties.mainProp).toBeDefined();
+		expect(type.fieldsets.main.properties.mainProp.label).toBe('A word');
+		expect(type.fieldsets.main.heading).toBe('Main properties');
+		expect(type.fieldsets.main.description).toBe('Fill these out please');
+		expect(type.fieldsets.main.isSingleField).toBeFalsy();
+		expect(type.fieldsets.secondaryProp.properties.secondaryProp).toBeDefined();
 		expect(
 			type.fieldsets.secondaryProp.properties.secondaryProp.label
-		).to.equal('Standalone');
-		expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
-		expect(type.fieldsets.secondaryProp.description).to.not.exist;
-		expect(type.fieldsets.secondaryProp.isSingleField).to.equal(true);
-		expect(type.fieldsets.misc.properties.miscProp).to.exist;
-		expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
-		expect(type.fieldsets.misc.description).not.to.exist;
+		).toBe('Standalone');
+		expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
+		expect(type.fieldsets.secondaryProp.description).toBeFalsy();
+		expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);
+		expect(type.fieldsets.misc.properties.miscProp).toBeDefined();
+		expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+		expect(type.fieldsets.misc.description).not.toBeDefined();
 	});
 
 	it('not have empty fieldsets', () => {
@@ -226,9 +226,9 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
-		expect(type.properties).to.not.exist;
-		expect(type.fieldsets.secondary).to.not.exist;
-		expect(type.fieldsets.misc).to.not.exist;
+		expect(type.properties).toBeFalsy();
+		expect(type.fieldsets.secondary).toBeFalsy();
+		expect(type.fieldsets.misc).toBeFalsy();
 	});
 
 	it('handle lack of custom fieldsets well when grouping', () => {
@@ -251,11 +251,11 @@ describe('get-type', () => {
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
-		expect(type.properties).to.not.exist;
-		expect(type.fieldsets.misc.properties.mainProp).to.exist;
-		expect(type.fieldsets.misc.properties.secondaryProp).to.exist;
-		expect(type.fieldsets.misc.properties.miscProp).to.exist;
-		expect(type.fieldsets.misc.heading).to.equal('General');
+		expect(type.properties).toBeFalsy();
+		expect(type.fieldsets.misc.properties.mainProp).toBeDefined();
+		expect(type.fieldsets.misc.properties.secondaryProp).toBeDefined();
+		expect(type.fieldsets.misc.properties.miscProp).toBeDefined();
+		expect(type.fieldsets.misc.heading).toBe('General');
 	});
 
 	describe('relationships', () => {
@@ -276,7 +276,7 @@ describe('get-type', () => {
 			]);
 
 			const type = getType('Type1', { withRelationships: false });
-			expect(type.properties.testName).to.not.exist;
+			expect(type.properties.testName).toBeFalsy();
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
@@ -294,7 +294,7 @@ describe('get-type', () => {
 					}
 				}
 			]);
-			expect(getType('Type1').properties.testName).to.eql({
+			expect(getType('Type1').properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'outgoing',
 				type: 'Type2',
@@ -321,7 +321,7 @@ describe('get-type', () => {
 					}
 				}
 			]);
-			expect(getType('Type2').properties.testName).to.eql({
+			expect(getType('Type2').properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'incoming',
 				type: 'Type1',
@@ -352,8 +352,8 @@ describe('get-type', () => {
 				}
 			]);
 			const result = getType('Type1').properties;
-			expect(result.testName1.direction).to.equal('outgoing');
-			expect(result.testName2.direction).to.equal('incoming');
+			expect(result.testName1.direction).toBe('outgoing');
+			expect(result.testName2.direction).toBe('incoming');
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
@@ -375,8 +375,8 @@ describe('get-type', () => {
 				}
 			]);
 			const result = getType('Type1').properties;
-			expect(result.testName1.direction).to.equal('outgoing');
-			expect(result.testName2.direction).to.equal('incoming');
+			expect(result.testName1.direction).toBe('outgoing');
+			expect(result.testName2.direction).toBe('incoming');
 		});
 		it('define recursive relationships', () => {
 			rawData.getTypes.returns([
@@ -395,7 +395,7 @@ describe('get-type', () => {
 				}
 			]);
 
-			expect(getType('Type1').properties.testName).to.eql({
+			expect(getType('Type1').properties.testName).toEqual({
 				type: 'Type2',
 				hasMany: false,
 				direction: 'outgoing',
@@ -426,7 +426,7 @@ describe('get-type', () => {
 					}
 				}
 			]);
-			expect(getType('Type1').properties).to.eql({
+			expect(getType('Type1').properties).toEqual({
 				many: {
 					isRecursive: false,
 					isRelationship: true,
@@ -462,7 +462,7 @@ describe('get-type', () => {
 					}
 				}
 			]);
-			expect(getType('Type1').properties.testName).to.not.exist;
+			expect(getType('Type1').properties.testName).toBeFalsy();
 		});
 
 		it('can group relationship properties by fieldset', () => {
@@ -501,24 +501,22 @@ describe('get-type', () => {
 			]);
 
 			const type = getType('Type1', { groupProperties: true });
-			expect(type.properties).to.not.exist;
-			expect(type.fieldsets.main.properties.mainProp).to.exist;
-			expect(type.fieldsets.main.properties.mainProp.label).to.equal(
-				'A word relationship'
-			);
-			expect(type.fieldsets.main.heading).to.equal('Main properties');
-			expect(type.fieldsets.main.description).to.equal('Fill these out please');
-			expect(type.fieldsets.main.isSingleField).to.not.exist;
-			expect(type.fieldsets.secondaryProp.properties.secondaryProp).to.exist;
+			expect(type.properties).toBeFalsy();
+			expect(type.fieldsets.main.properties.mainProp).toBeDefined();
+			expect(type.fieldsets.main.properties.mainProp.label).toBe('A word relationship');
+			expect(type.fieldsets.main.heading).toBe('Main properties');
+			expect(type.fieldsets.main.description).toBe('Fill these out please');
+			expect(type.fieldsets.main.isSingleField).toBeFalsy();
+			expect(type.fieldsets.secondaryProp.properties.secondaryProp).toBeDefined();
 			expect(
 				type.fieldsets.secondaryProp.properties.secondaryProp.label
-			).to.equal('Standalone');
-			expect(type.fieldsets.secondaryProp.heading).to.equal('Standalone');
-			expect(type.fieldsets.secondaryProp.description).to.not.exist;
-			expect(type.fieldsets.secondaryProp.isSingleField).to.equal(true);
-			expect(type.fieldsets.misc.properties.miscProp).to.exist;
-			expect(type.fieldsets.misc.heading).to.equal('Miscellaneous');
-			expect(type.fieldsets.misc.description).not.to.exist;
+			).toBe('Standalone');
+			expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
+			expect(type.fieldsets.secondaryProp.description).toBeFalsy();
+			expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);
+			expect(type.fieldsets.misc.properties.miscProp).toBeDefined();
+			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+			expect(type.fieldsets.misc.description).not.toBeDefined();
 		});
 	});
 });

@@ -5,11 +5,11 @@ describe('data quality: string patterns', () => {
 	Object.entries(stringPatterns).forEach(([name, pattern]) => {
 		if (typeof pattern === 'string') {
 			it(`${name} evaluates to valid flagless regex`, () => {
-				expect(() => new RegExp(pattern)).not.to.throw();
+				expect(() => new RegExp(pattern)).not.toThrowError();
 			});
 		} else {
 			it(`${name} evaluates to valid flagged regex`, () => {
-				expect(() => new RegExp(pattern.pattern, pattern.flags)).not.to.throw();
+				expect(() => new RegExp(pattern.pattern, pattern.flags)).not.toThrowError();
 			});
 		}
 	});
