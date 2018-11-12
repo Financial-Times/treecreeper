@@ -44,8 +44,8 @@ const getType = (
 				Object.assign(def, {
 					hasMany: def.hasMany || false,
 					isRelationship: !!def.relationship,
-					isRecursive: def.isRecursive || false,
-				})
+					isRecursive: def.isRecursive || false
+				});
 			}
 		});
 	}

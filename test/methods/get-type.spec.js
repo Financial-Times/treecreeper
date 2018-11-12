@@ -3,13 +3,6 @@ const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
 const cache = require('../../lib/cache');
 
-const extractFields = (...fieldNames) => obj => {
-	return fieldNames.reduce(
-		(target, name) => Object.assign(target, { [name]: obj[name] }),
-		{}
-	);
-};
-
 describe('get-type', () => {
 	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
@@ -302,14 +295,14 @@ describe('get-type', () => {
 				}
 			]);
 			expect(getType('Type1').properties.testName).to.eql({
-					relationship: 'HAS',
-					direction: 'outgoing',
-					type: 'Type2',
-					hasMany: false,
-					isRelationship: true,
-					isRecursive: false,
-					description: 'test description',
-					label: 'test label',
+				relationship: 'HAS',
+				direction: 'outgoing',
+				type: 'Type2',
+				hasMany: false,
+				isRelationship: true,
+				isRecursive: false,
+				description: 'test description',
+				label: 'test label'
 			});
 		});
 
@@ -336,7 +329,7 @@ describe('get-type', () => {
 				isRecursive: false,
 				hasMany: false,
 				description: 'test description',
-				label: 'test label',
+				label: 'test label'
 			});
 		});
 
@@ -402,18 +395,16 @@ describe('get-type', () => {
 				}
 			]);
 
-			expect(getType('Type1').properties.testName).to.eql(
-				{
-					type: 'Type2',
-					hasMany: false,
-					direction: 'outgoing',
-					isRecursive: true,
-					isRelationship: true,
-					relationship: 'HAS',
-					description: 'test description',
-					label: 'test label',
-				}
-			);
+			expect(getType('Type1').properties.testName).to.eql({
+				type: 'Type2',
+				hasMany: false,
+				direction: 'outgoing',
+				isRecursive: true,
+				isRelationship: true,
+				relationship: 'HAS',
+				description: 'test description',
+				label: 'test label'
+			});
 		});
 
 		it('cardinality', () => {
@@ -442,7 +433,7 @@ describe('get-type', () => {
 					type: 'Type2',
 					relationship: 'HAS',
 					direction: 'outgoing',
-					hasMany: true,
+					hasMany: true
 				},
 				singular: {
 					isRecursive: false,
@@ -450,7 +441,7 @@ describe('get-type', () => {
 					type: 'Type2',
 					relationship: 'HAS',
 					direction: 'incoming',
-					hasMany: false,
+					hasMany: false
 				}
 			});
 		});
