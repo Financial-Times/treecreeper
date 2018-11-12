@@ -37,7 +37,7 @@ Get an object defining the structure of a given `type`. The following transforms
 
 #### options
 
-- `relationshipStructure` [default: `false`]: Include the relationships for the type. Can take any value accepted by `getRelationships()` options. If it is set to `graphql` then the relationships are assigned to the `properties` object of the type as additional entries. Otherwise, they are assigned to a separate, top-level property, 'relationships'
+- `withRelationships` [default: `true`]: Include the relationships for the type, expressed as graphql property definitions.
 - `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
 - `groupProperties` [default: `false`]: Each property may have a `section` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `sections`, where all properties are grouped by section
 
@@ -52,10 +52,6 @@ Retrieves an array of key:value object defining the acceptable values of an enum
 #### options
 
 - `withMeta`: wrap the enum in an object which also has metadata about the enum (e.g. 'description'.). In this case, the actual enum options will be in a `options` property
-
-### getRelationships(typeName = undefined, options)
-
-Gets relationships for a type.
 
 #### options
 
@@ -72,10 +68,6 @@ Validates that a code string matches the validation pattern defined for codes fo
 ### validateAttributeNames ( attributes )
 
 Validates that names used for attributes are valid (i.e. camelCase)
-
-### validateRelationship({nodeType, relatedType, relationshipType, relatedCode})
-
-Validates that a relationship between a node and another node complies with the schema
 
 ### validateAttributes(typeName, attributes, throwInfo)
 
