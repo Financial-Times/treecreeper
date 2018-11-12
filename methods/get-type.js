@@ -1,6 +1,5 @@
 const rawData = require('../lib/raw-data');
 const cache = require('../lib/cache');
-const getRelationships = require('./get-relationships');
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
@@ -13,7 +12,7 @@ const getType = (
 	typeName,
 	{
 		primitiveTypes = 'biz-ops', // graphql
-		relationshipStructure = false, // flat, rest, graphql
+		withRelationships = true,
 		groupProperties = false
 	} = {}
 ) => {
@@ -30,17 +29,25 @@ const getType = (
 		type.pluralName = `${type.name}s`;
 	}
 
-	if (relationshipStructure) {
-		const relationships = getRelationships.method(type.name, {
-			structure: relationshipStructure
+	if (!withRelationships) {
+		Object.entries(type.properties).forEach(([propName, def]) => {
+			if (def.relationship) {
+				delete type.properties[propName];
+			}
 		});
-		if (relationshipStructure === 'graphql') {
-			relationships.forEach(def => {
-				type.properties[def.name] = def;
-			});
-		} else {
-			type.relationships = relationships;
-		}
+	} else {
+		Object.entries(type.properties).forEach(([propName, def]) => {
+			if (def.relationship) {
+				if (def.hidden) {
+					delete type.properties[propName];
+				}
+				Object.assign(def, {
+					hasMany: def.hasMany || false,
+					isRelationship: !!def.relationship,
+					isRecursive: def.isRecursive || false,
+				})
+			}
+		});
 	}
 
 	const properties = Object.entries(type.properties)
@@ -127,9 +134,9 @@ module.exports.method = cache.cacheify(
 		typeName,
 		{
 			primitiveTypes = 'biz-ops',
-			relationshipStructure = false,
+			withRelationships = true,
 			groupProperties = false
 		} = {}
 	) =>
-		`types:${typeName}:${relationshipStructure}:${groupProperties}:${primitiveTypes}`
+		`types:${typeName}:${withRelationships}:${groupProperties}:${primitiveTypes}`
 );

@@ -2,7 +2,13 @@ const { getType } = require('../../');
 const rawData = require('../../lib/raw-data');
 const sinon = require('sinon');
 const cache = require('../../lib/cache');
-const getRelationships = require('../../methods/get-relationships');
+
+const extractFields = (...fieldNames) => obj => {
+	return fieldNames.reduce(
+		(target, name) => Object.assign(target, { [name]: obj[name] }),
+		{}
+	);
+};
 
 describe('get-type', () => {
 	const sandbox = sinon.createSandbox();
@@ -260,61 +266,215 @@ describe('get-type', () => {
 	});
 
 	describe('relationships', () => {
-		it('it includes rest api relationship definitions', async () => {
-			sandbox.stub(getRelationships, 'method');
-
-			rawData.getTypes.returns([
-				{
-					name: 'Type1'
-				}
-			]);
-
-			getRelationships.method.returns(['dummy relationship structure']);
-			const type = getType('Type1', { relationshipStructure: 'rest' });
-			expect(getRelationships.method).calledWith('Type1', {
-				structure: 'rest'
-			});
-			expect(type.relationships).to.eql(['dummy relationship structure']);
-		});
-
-		it('it includes flat relationship definitions', async () => {
-			sandbox.stub(getRelationships, 'method');
-
-			rawData.getTypes.returns([
-				{
-					name: 'Type1'
-				}
-			]);
-
-			getRelationships.method.returns(['dummy relationship structure']);
-			const type = getType('Type1', { relationshipStructure: 'flat' });
-			expect(getRelationships.method).calledWith('Type1', {
-				structure: 'flat'
-			});
-			expect(type.relationships).to.eql(['dummy relationship structure']);
-		});
-
-		it('it merges graphql properties', async () => {
-			sandbox.stub(getRelationships, 'method');
-
+		it('it can exclude relationships', async () => {
 			rawData.getTypes.returns([
 				{
 					name: 'Type1',
-					properties: {}
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description'
+						}
+					}
 				}
 			]);
 
-			getRelationships.method.returns([{ name: 'relProp' }]);
-			const type = getType('Type1', { relationshipStructure: 'graphql' });
-			expect(getRelationships.method).calledWith('Type1', {
-				structure: 'graphql'
-			});
-			expect(type.properties.relProp).to.eql({ name: 'relProp' });
+			const type = getType('Type1', { withRelationships: false });
+			expect(type.properties.testName).to.not.exist;
 		});
 
-		it('groups relationship properties by fieldset', () => {
-			sandbox.stub(getRelationships, 'method');
+		it('retrieve relationships pointing away from the node', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description'
+						}
+					}
+				}
+			]);
+			expect(getType('Type1').properties.testName).to.eql({
+					relationship: 'HAS',
+					direction: 'outgoing',
+					type: 'Type2',
+					hasMany: false,
+					isRelationship: true,
+					isRecursive: false,
+					description: 'test description',
+					label: 'test label',
+			});
+		});
 
+		it('retrieve relationships pointing to the node', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type2',
+					properties: {
+						testName: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description'
+						}
+					}
+				}
+			]);
+			expect(getType('Type2').properties.testName).to.eql({
+				relationship: 'HAS',
+				direction: 'incoming',
+				type: 'Type1',
+				isRelationship: true,
+				isRecursive: false,
+				hasMany: false,
+				description: 'test description',
+				label: 'test label',
+			});
+		});
+
+		it('retrieve multiple relationships with same name', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						testName1: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS'
+						},
+						testName2: {
+							type: 'Type3',
+							direction: 'incoming',
+							relationship: 'HAS'
+						}
+					}
+				}
+			]);
+			const result = getType('Type1').properties;
+			expect(result.testName1.direction).to.equal('outgoing');
+			expect(result.testName2.direction).to.equal('incoming');
+		});
+
+		it('retrieve two relationships when pointing at self', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						testName1: {
+							type: 'Type1',
+							direction: 'outgoing',
+							relationship: 'HAS'
+						},
+						testName2: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS'
+						}
+					}
+				}
+			]);
+			const result = getType('Type1').properties;
+			expect(result.testName1.direction).to.equal('outgoing');
+			expect(result.testName2.direction).to.equal('incoming');
+		});
+		it('define recursive relationships', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							isRecursive: true,
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description'
+						}
+					}
+				}
+			]);
+
+			expect(getType('Type1').properties.testName).to.eql(
+				{
+					type: 'Type2',
+					hasMany: false,
+					direction: 'outgoing',
+					isRecursive: true,
+					isRelationship: true,
+					relationship: 'HAS',
+					description: 'test description',
+					label: 'test label',
+				}
+			);
+		});
+
+		it('cardinality', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						many: {
+							type: 'Type2',
+							hasMany: true,
+							direction: 'outgoing',
+							relationship: 'HAS'
+						},
+						singular: {
+							type: 'Type2',
+							direction: 'incoming',
+							relationship: 'HAS'
+						}
+					}
+				}
+			]);
+			expect(getType('Type1').properties).to.eql({
+				many: {
+					isRecursive: false,
+					isRelationship: true,
+					type: 'Type2',
+					relationship: 'HAS',
+					direction: 'outgoing',
+					hasMany: true,
+				},
+				singular: {
+					isRecursive: false,
+					isRelationship: true,
+					type: 'Type2',
+					relationship: 'HAS',
+					direction: 'incoming',
+					hasMany: false,
+				}
+			});
+		});
+
+		it('hidden relationships', () => {
+			rawData.getTypes.returns([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description',
+							hidden: true
+						}
+					}
+				}
+			]);
+			expect(getType('Type1').properties.testName).to.not.exist;
+		});
+
+		it('can group relationship properties by fieldset', () => {
 			rawData.getTypes.returns([
 				{
 					name: 'Type1',
