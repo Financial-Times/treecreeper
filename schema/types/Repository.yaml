@@ -81,10 +81,16 @@ properties:
     relationship: HAS_REPO
     description: Systems which the repository holds source code for
     hasMany: true
+  versionControlSystem:
+    type: VersionControlSystem
+    label: Version control system
+    description: Version control system the repository is stored in
+    autoPopulated: true
   storedIn:
     type: System
     direction: outgoing
     label: Stored in
+    deprecationReason: The storedIn relationship is now replaced by the versionControlSystem property
     relationship: STORED_IN
     description: VCS provider that the repository is hosted by
     autoPopulated: true

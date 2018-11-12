@@ -45,3 +45,8 @@ PersonContract:
     - permanent
     - contractor
     - other
+VersionControlSystem:
+  description: Version control system that can store source code repositories
+  options:
+    - bitbucket
+    - github

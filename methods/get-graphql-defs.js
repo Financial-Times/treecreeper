@@ -51,6 +51,14 @@ const cypherResolver = def => {
 	}
 };
 
+const maybeDeprecate = ({deprecationReason}) => {
+	if (!deprecationReason) {
+		return ''
+	}
+	return `@deprecated(reason: "${deprecationReason.replace(/"/g, '\\"')}")`
+}
+
+
 const defineProperties = properties => {
 	return properties
 		.map(
@@ -59,7 +67,7 @@ const defineProperties = properties => {
       # ${def.description.replace(/\n/g, ' ')}
       ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
 					def
-				)}`
+				)} ${maybeDeprecate(def)}`
 		)
 		.join('');
 };
