@@ -108,7 +108,7 @@ const handleAttachedNode = ({ result, nodeType, code }) => {
 	) {
 		throw httpErrors(
 			409,
-			`Cannot delete - ${nodeType} ${code} has relationships`,
+			`Cannot delete - ${nodeType} ${code} has relationships. Delete all relationships before attempting to delete this record.`,
 			{ relationships: result.records }
 		);
 	}
