@@ -73,6 +73,10 @@ Validates that names used for attributes are valid (i.e. camelCase)
 
 Validates that attribute values fora given type comply with the schema. Checks the type of each attribute and any string patterns
 
+### validateRelationship({nodeType, relatedType, relationshipType, relatedCode})
+
+Validates that a relationship between a node and another node complies with the schema
+
 ### getGraphQLDefs()
 
 Retrieves graphql defs to be used to power a graphql api

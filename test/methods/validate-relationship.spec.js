@@ -1,21 +1,37 @@
-const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const { validateRelationship } = require('../../');
 const cache = require('../../lib/cache');
 
+jest.mock('../../methods/get-type');
+
+const startType = {
+	name: 'StartType',
+	properties: {
+		testRelationship: {
+			type: 'EndType',
+			direction: 'outgoing',
+			relationship: 'HAS',
+			hasMany: false
+		}
+	}
+};
+
 describe('validateRelationship', () => {
-	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(getType, 'method');
+		jest.mock('../../methods/get-type');
 	});
 
 	afterEach(() => {
+		jest.clearAllMocks();
 		cache.clear();
-		sandbox.restore();
+	});
+
+	afterAll(() => {
+		jest.restoreAllMocks();
 	});
 
 	it('reject when start node type is invalid', () => {
-		getType.method.withArgs('NotType').returns(undefined);
+		getType.mockReturnValue(undefined);
 		expect(() =>
 			validateRelationship({
 				nodeType: 'NotType',
@@ -25,120 +41,120 @@ describe('validateRelationship', () => {
 			})
 		).toThrowError(/Invalid node type/);
 	});
+	it('reject when related node type is invalid', () => {
+		getType.mockImplementation(type =>
+			type === 'StartType' ? startType : undefined
+		);
+		expect(() =>
+			validateRelationship({
+				nodeType: 'StartType',
+				relatedType: 'NoType',
+				relationshipType: 'HAS',
+				relatedCode: 'code'
+			})
+		).toThrowError(/not a valid relationship between/);
+	});
 
-	describe('when start node is guaranteed to be valid', () => {
-		beforeEach(() => {
-			getType.method.withArgs('StartType').returns({
-				name: 'StartType',
-				properties: {
-					code: { validator: /^[A-Z]+$/, type: 'String' }
-				},
-				relationships: [
-					{
-						relationship: 'HAS',
-						direction: 'outgoing',
-						endNode: 'EndType',
-						startNode: 'StartType',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			});
-			getType.method.withArgs('EndType').returns({
-				name: 'endType',
-				properties: {
-					code: { validator: /^[a-z]+$/, type: 'String' }
-				},
-				relationships: [
-					{
-						relationship: 'HAS',
-						direction: 'incoming',
-						endNode: 'StartType',
-						startNode: 'EndType',
-						hasMany: false,
-						name: 'test-name',
-						description: 'test description',
-						label: 'test label'
-					}
-				]
-			});
+	it('reject when related node code is invalid', () => {
+		getType.mockImplementation(type =>
+			type === 'StartType'
+				? startType
+				: {
+						name: 'EndType',
+						properties: {
+							code: { validator: /^[a-z]+$/, type: 'String' }
+						}
+				  }
+		);
+		expect(() =>
+			validateRelationship({
+				nodeType: 'StartType',
+				relatedType: 'EndType',
+				relationshipType: 'HAS',
+				relatedCode: 'CODE'
+			})
+		).toThrowError(/Invalid node identifier/);
+	});
 
-			getType.method.withArgs('NoType').returns(undefined);
+	it('reject when relationship not defined on start node', () => {
+		getType.mockImplementation(type => (type === 'StartType' ? startType : {}));
+		expect(() =>
+			validateRelationship({
+				nodeType: 'StartType',
+				relatedType: 'EndType',
+				relationshipType: 'HASNT',
+				relatedCode: 'code'
+			})
+		).toThrowError(/not a valid relationship on/);
+	});
 
-			getType.method.withArgs('OrphanType').returns({
-				name: 'OrphanType',
-				properties: {
-					code: { validator: /^[a-z]+$/ }
-				}
-			});
-		});
+	it('reject when relationship not defined between start node and end node', () => {
+		getType.mockImplementation(type => (type === 'StartType' ? startType : {}));
+		expect(() =>
+			validateRelationship({
+				nodeType: 'StartType',
+				relatedType: 'OtherType',
+				relationshipType: 'HAS',
+				relatedCode: 'code'
+			})
+		).toThrowError(/not a valid relationship between/);
+	});
 
-		it('reject when related node type is invalid', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'StartType',
-					relatedType: 'NoType',
-					relationshipType: 'HAS',
-					relatedCode: 'code'
-				})
-			).toThrowError(/Invalid node type/);
-		});
+	it('reject when relationship not defined in correct direction  between start node and end node', () => {
+		getType.mockImplementation(type =>
+			type === 'StartType'
+				? {
+						name: 'StartType',
+						properties: {
+							code: { validator: /^[a-z]+$/, type: 'String' },
+							testRelationship: {
+								type: 'EndType',
+								direction: 'outgoing',
+								relationship: 'HAS',
+								hasMany: false
+							}
+						}
+				  }
+				: {
+						name: 'EndType',
+						properties: {
+							testRelationship: {
+								type: 'EndType',
+								direction: 'incoming',
+								relationship: 'HAS',
+								hasMany: false
+							}
+						}
+				  }
+		);
+		expect(() =>
+			validateRelationship({
+				nodeType: 'EndType',
+				relatedType: 'StartType',
+				relationshipType: 'HAS',
+				relatedCode: 'code'
+			})
+		).toThrowError(/not a valid relationship between/);
+	});
 
-		it('reject when related node code is invalid', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'StartType',
-					relatedType: 'EndType',
-					relationshipType: 'HAS',
-					relatedCode: 'CODE'
-				})
-			).toThrowError(/Invalid node identifier/);
-		});
-
-		it('reject when relationship not defined on start node', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'StartType',
-					relatedType: 'EndType',
-					relationshipType: 'HASNT',
-					relatedCode: 'code'
-				})
-			).toThrowError(/is not a valid relationship on/);
-		});
-
-		it('reject when relationship not defined between start node and end node', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'StartType',
-					relatedType: 'OrphanType',
-					relationshipType: 'HAS',
-					relatedCode: 'code'
-				})
-			).toThrowError(/is not a valid relationship between/);
-		});
-
-		it('reject when relationship not defined in correct direction  between start node and end node', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'EndType',
-					relatedType: 'StartType',
-					relationshipType: 'HAS',
-					relatedCode: 'CODE'
-				})
-			).toThrowError(/is not a valid relationship from/);
-		});
-
-		it('accept when all is correct', () => {
-			expect(() =>
-				validateRelationship({
-					nodeType: 'StartType',
-					relatedType: 'EndType',
-					relationshipType: 'HAS',
-					relatedCode: 'code'
-				})
-			).not.toThrowError();
-		});
+	it('accept when all is correct', () => {
+		getType.mockImplementation(type =>
+			type === 'StartType'
+				? startType
+				: {
+						name: 'EndType',
+						properties: {
+							code: { validator: /^[a-z]+$/, type: 'String' }
+						}
+				  }
+		);
+		expect(() =>
+			validateRelationship({
+				nodeType: 'StartType',
+				relatedType: 'EndType',
+				relationshipType: 'HAS',
+				relatedCode: 'code'
+			})
+		).not.toThrowError();
 	});
 });
