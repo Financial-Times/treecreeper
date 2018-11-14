@@ -23,7 +23,7 @@ describe('validateRelationship', () => {
 				relationshipType: 'HAS',
 				relatedCode: 'code'
 			})
-		).to.throw(/Invalid node type/);
+		).toThrowError(/Invalid node type/);
 	});
 
 	describe('when start node is guaranteed to be valid', () => {
@@ -83,7 +83,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HAS',
 					relatedCode: 'code'
 				})
-			).to.throw(/Invalid node type/);
+			).toThrowError(/Invalid node type/);
 		});
 
 		it('reject when related node code is invalid', () => {
@@ -94,7 +94,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HAS',
 					relatedCode: 'CODE'
 				})
-			).to.throw(/Invalid node identifier/);
+			).toThrowError(/Invalid node identifier/);
 		});
 
 		it('reject when relationship not defined on start node', () => {
@@ -105,7 +105,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HASNT',
 					relatedCode: 'code'
 				})
-			).to.throw(/is not a valid relationship on/);
+			).toThrowError(/is not a valid relationship on/);
 		});
 
 		it('reject when relationship not defined between start node and end node', () => {
@@ -116,7 +116,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HAS',
 					relatedCode: 'code'
 				})
-			).to.throw(/is not a valid relationship between/);
+			).toThrowError(/is not a valid relationship between/);
 		});
 
 		it('reject when relationship not defined in correct direction  between start node and end node', () => {
@@ -127,7 +127,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HAS',
 					relatedCode: 'CODE'
 				})
-			).to.throw(/is not a valid relationship from/);
+			).toThrowError(/is not a valid relationship from/);
 		});
 
 		it('accept when all is correct', () => {
@@ -138,7 +138,7 @@ describe('validateRelationship', () => {
 					relationshipType: 'HAS',
 					relatedCode: 'code'
 				})
-			).not.to.throw();
+			).not.toThrowError();
 		});
 	});
 });
