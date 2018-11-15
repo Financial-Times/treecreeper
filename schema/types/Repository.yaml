@@ -52,6 +52,7 @@ properties:
     description: Repository description field
     autoPopulated: true
   mostRecentCircleCIPlatform:
+    deprecationReason: This information was useful during migration of circleci. Now deprecated in favour of modelling CI in general at some point
     type: CircleCiVersion
     canFilter: true
     label: CircleCI version
@@ -81,10 +82,16 @@ properties:
     relationship: HAS_REPO
     description: Systems which the repository holds source code for
     hasMany: true
+  versionControlSystem:
+    type: VersionControlSystem
+    label: Version control system
+    description: Version control system the repository is stored in
+    autoPopulated: true
   storedIn:
     type: System
     direction: outgoing
     label: Stored in
+    deprecationReason: The storedIn relationship is now replaced by the versionControlSystem property
     relationship: STORED_IN
     description: VCS provider that the repository is hosted by
     autoPopulated: true

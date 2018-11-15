@@ -66,7 +66,7 @@ jobs:
 
       - run:
           name: Run tests
-          command: make unit-test
+          command: make test
   lint:
     <<: *default_container_config
     steps:
@@ -74,7 +74,7 @@ jobs:
 
       - run:
           name: Run tests
-          command: make lint-ci
+          command: make lint
 
   release:
     <<: *default_container_config
