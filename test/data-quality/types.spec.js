@@ -86,7 +86,7 @@ describe('data quality: types', () => {
 					describe(name, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
-								const commonKeys = ['type', 'description', 'label'];
+								const commonKeys = ['type', 'description', 'label', 'deprecationReason'];
 								if (fieldsets) {
 									commonKeys.push('fieldset');
 								}
@@ -144,6 +144,13 @@ describe('data quality: types', () => {
 						it('has valid fieldset', () => {
 							if (config.fieldset) {
 								expect(validFieldsetNames).toContain(config.fieldset);
+							}
+						});
+
+						it('has valid deprecation reason', () => {
+							if (config.deprecationReason) {
+								expect(typeof config.deprecationReason).toBe('string');
+								expect(config.deprecationReason).not.toMatch(/\n/);
 							}
 						});
 

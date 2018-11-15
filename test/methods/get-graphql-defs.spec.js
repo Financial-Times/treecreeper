@@ -205,18 +205,64 @@ Sunset
 				}
 			}
 		]);
-		rawData.getEnums.mockReturnValue({
-			AnEnum: {
-				name: 'DummyEnum',
-				description: 'an enum description\nmultiline',
-				options: ['One', 'Two']
-			}
-		});
+               rawData.getEnums.mockReturnValue({
+                       AnEnum: {
+                               name: 'DummyEnum',
+                               description: 'an enum description\nmultiline',
+                               options: ['One', 'Two']
+                       }
+               });
 		const generated = [].concat(...generateGraphqlDefs()).join('');
 		// note the regex has a space, not a new line
 		expect(generated).toMatch(/a description multiline/);
 		expect(generated).toMatch(/an enum description multiline/);
 	});
+
+	describe('deprecation', () => {
+		it('can deprecate a property', () => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Dummy',
+					description: 'dummy type description',
+					properties: {
+						prop: {
+							type: 'Boolean',
+							deprecationReason: 'not needed',
+							description: 'a description'
+						}
+					}
+				}
+			]);
+			rawData.getEnums.mockReturnValue({});
+			const generated = [].concat(...generateGraphqlDefs()).join('');
+			// note the regex has a space, not a new line
+			expect(generated).toContain('prop: Boolean  @deprecated(reason: "not needed")');
+		});
+
+		it('can deprecate a relationship property', () => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Dummy',
+					description: 'dummy type description',
+					properties: {
+						prop: {
+							type: 'Boolean',
+							deprecationReason: 'not needed',
+							description: 'a description',
+							relationship: 'HAS',
+							direction: 'outgoing',
+							hasMany: true
+						}
+					}
+				}
+			]);
+			rawData.getEnums.mockReturnValue({});
+			const generated = [].concat(...generateGraphqlDefs()).join('');
+			// note the regex has a space, not a new line
+			expect(generated).toContain('prop(first: Int, offset: Int): [Boolean] @relation(name: \"HAS\", direction: \"OUT\") @deprecated(reason: \"not needed\")');
+		});
+
+	})
 
 	describe('converting types', () => {
 		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
