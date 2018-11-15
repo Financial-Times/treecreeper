@@ -241,6 +241,7 @@ properties:
     label: Repositories
     relationship: STORED_IN
     description: 'If the system is a VCS, the repositories it stores'
+    deprecationReason: 'Of little value to model as a relationship; repositories will have a property on them detailing whether they are stored in bitbucket or github'
     hasMany: true
     fieldset: network
   replaces:
