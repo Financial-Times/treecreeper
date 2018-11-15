@@ -69,7 +69,7 @@ properties:
     relationship: HAS_TECH_LEAD
     description: The tech leads of the team
     hasMany: true
-    fieldset: network
+    fieldset: people
   productOwners:
     type: Person
     direction: outgoing
@@ -77,14 +77,14 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: The product owner of the team
     hasMany: true
-    fieldset: network
+    fieldset: people
   parentGroup:
     type: Group
     direction: incoming
     label: FT Group Parent
     relationship: HAS_TEAM
     description: The group this team is a direct child of (indirect children - sub-teams - are defined by using the Parent Team field)
-    fieldset: network
+    fieldset: organisation
   group:
     type: Group
     direction: incoming
@@ -92,7 +92,7 @@ properties:
     relationship: HAS_TEAM
     description: The group that owns the team (either as a direct report or a sub-team)
     isRecursive: true
-    fieldset: network
+    fieldset: organisation
   subTeams:
     type: Team
     direction: outgoing
@@ -100,14 +100,14 @@ properties:
     relationship: HAS_TEAM
     description: This team's subteams
     hasMany: true
-    fieldset: network
+    fieldset: organisation
   parentTeam:
     type: Team
     direction: incoming
     label: Parent team
     relationship: HAS_TEAM
     description: The team this team is a subteam of (direct children of a FT Group and defined by using the FT Group Parent field)
-    fieldset: network
+    fieldset: organisation
   delivers:
     type: System
     direction: incoming
@@ -124,11 +124,21 @@ properties:
     description: The systems the team supports
     hasMany: true
     fieldset: ownership
+  teamMembers:
+    type: Person
+    direction: outgoing
+    label: Team members
+    relationship: HAS_TEAM_MEMBER
+    description: The people who make up this team
+    hasMany: true
+    fieldset: people
 fieldsets:
   general:
     heading: General information
-  network:
-    heading: Network
+  people:
+    heading: People
+  organisation:
+    heading: Place in the FT
   ownership:
     heading: System ownership
 
