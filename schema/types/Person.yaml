@@ -130,6 +130,14 @@ properties:
     description: Systems the person knows about
     hasMany: true
     fieldset: network
+  teams:
+    type: Team
+    direction: incoming
+    label: Teams
+    relationship: HAS_TEAM_MEMBER
+    description: Teams this person is a member of
+    hasMany: true
+    fieldset: network
 fieldsets:
   general:
     heading: General information

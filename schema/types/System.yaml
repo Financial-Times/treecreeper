@@ -243,6 +243,22 @@ properties:
     description: 'If the system is a VCS, the repositories it stores'
     hasMany: true
     fieldset: network
+  replaces:
+    type: System
+    direction: outgoing
+    label: Replaces systems
+    relationship: REPLACES
+    description: System(s) that are, or will be, replaced, at least in part, by this system
+    hasMany: true
+    fieldset: network
+  replacedBy:
+    type: System
+    direction: incoming
+    label: Replaced by systems
+    relationship: REPLACES
+    description: System(s) that do, or will, replace all or part of this system
+    hasMany: true
+    fieldset: network
 fieldsets:
   general:
     heading: General information
