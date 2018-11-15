@@ -11,7 +11,7 @@ const convertIntegersToNumbers = obj => {
 };
 
 const constructNode = (type, result) => {
-	const schema = getType(type, { relationshipStructure: 'graphql' });
+	const schema = getType(type);
 	const node = result.records[0].get('node');
 	const response = convertIntegersToNumbers(node.properties);
 	if (result.records[0].get('related')) {

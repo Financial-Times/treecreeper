@@ -15,9 +15,7 @@ const categorizeAttributes = ({ nodeType, code, attributes }) => {
 	validation.validateAttributeNames(attributes);
 	validation.validateAttributes(nodeType, attributes);
 
-	const { properties } = getType(nodeType, {
-		relationshipStructure: 'graphql'
-	});
+	const { properties } = getType(nodeType);
 
 	Object.keys(attributes).forEach(name => {
 		if (!properties[name]) {
