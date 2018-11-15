@@ -2,7 +2,7 @@ module.exports = {
 	extends: ['origami-component', 'plugin:prettier/recommended'],
 	env: {
 		node: true,
-		mocha: true,
+		jest: true,
 	},
 	parserOptions: {
 		ecmaVersion: 2017,
