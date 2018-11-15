@@ -1,20 +1,29 @@
-const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const getEnums = require('../../methods/get-enums');
 const { validateAttributes } = require('../../');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
+
+jest.mock('../../methods/get-type');
+jest.mock('../../methods/get-enums');
+
 describe('validateAttributes', () => {
-	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(getType, 'method');
+		jest.mock('../../methods/get-type');
 	});
 
-	afterEach(() => sandbox.restore());
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	afterAll(() => {
+		jest.restoreAllMocks();
+	});
+
 	describe('validating strings', () => {
 		Object.entries(primitiveTypesMap).forEach(([bizOpsType, graphqlType]) => {
 			if (graphqlType === 'String') {
 				beforeEach(() => {
-					getType.method.returns({
+					getType.mockReturnValue({
 						name: 'Thing',
 						properties: {
 							prop: {
@@ -27,37 +36,37 @@ describe('validateAttributes', () => {
 				it('accept strings', () => {
 					expect(() =>
 						validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
-					).not.to.throw();
+					).not.toThrowError();
 				});
 				it('not accept booleans', () => {
-					expect(() => validateAttributes('Thing', { prop: true })).to.throw(
-						/Must be a string/
-					);
-					expect(() => validateAttributes('Thing', { prop: false })).to.throw(
-						/Must be a string/
-					);
+					expect(() =>
+						validateAttributes('Thing', { prop: true })
+					).toThrowError(/Must be a string/);
+					expect(() =>
+						validateAttributes('Thing', { prop: false })
+					).toThrowError(/Must be a string/);
 				});
 				it('not accept floats', () => {
-					expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
-						/Must be a string/
-					);
+					expect(() =>
+						validateAttributes('Thing', { prop: 1.34 })
+					).toThrowError(/Must be a string/);
 				});
 				it('not accept integers', () => {
-					expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
+					expect(() => validateAttributes('Thing', { prop: 134 })).toThrowError(
 						/Must be a string/
 					);
 				});
 				it('apply string patterns', () => {
 					expect(() =>
 						validateAttributes('Thing', { prop: 'I am zebbedee' })
-					).to.throw(/Must match pattern/);
+					).toThrowError(/Must match pattern/);
 				});
 			}
 		});
 	});
 	describe('validating booleans', () => {
 		beforeEach(() => {
-			getType.method.returns({
+			getType.mockReturnValue({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -70,26 +79,30 @@ describe('validateAttributes', () => {
 		it('not accept strings', () => {
 			expect(() =>
 				validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
-			).to.throw(/Must be a Boolean/);
+			).toThrowError(/Must be a Boolean/);
 		});
 		it('accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).not.to.throw();
-			expect(() => validateAttributes('Thing', { prop: false })).not.to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: true })
+			).not.toThrowError();
+			expect(() =>
+				validateAttributes('Thing', { prop: false })
+			).not.toThrowError();
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: 1.34 })).toThrowError(
 				/Must be a Boolean/
 			);
 		});
 		it('not accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: 134 })).toThrowError(
 				/Must be a Boolean/
 			);
 		});
 	});
 	describe('validating floats', () => {
 		beforeEach(() => {
-			getType.method.returns({
+			getType.mockReturnValue({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -102,27 +115,31 @@ describe('validateAttributes', () => {
 		it('not accept strings', () => {
 			expect(() =>
 				validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
-			).to.throw(/Must be a finite floating point number/);
+			).toThrowError(/Must be a finite floating point number/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: true })).toThrowError(
 				/Must be a finite floating point number/
 			);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: false })).toThrowError(
 				/Must be a finite floating point number/
 			);
 		});
 		it('accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).not.to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: 1.34 })
+			).not.toThrowError();
 		});
 		it('accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).not.to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: 134 })
+			).not.toThrowError();
 		});
 	});
 
 	describe('validating integers', () => {
 		beforeEach(() => {
-			getType.method.returns({
+			getType.mockReturnValue({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -135,28 +152,30 @@ describe('validateAttributes', () => {
 		it('not accept strings', () => {
 			expect(() =>
 				validateAttributes('Thing', { prop: 'I am Tracy Beaker' })
-			).to.throw(/Must be a finite integer/);
+			).toThrowError(/Must be a finite integer/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttributes('Thing', { prop: true })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: true })).toThrowError(
 				/Must be a finite integer/
 			);
-			expect(() => validateAttributes('Thing', { prop: false })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: false })).toThrowError(
 				/Must be a finite integer/
 			);
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttributes('Thing', { prop: 1.34 })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: 1.34 })).toThrowError(
 				/Must be a finite integer/
 			);
 		});
 		it('accept integers', () => {
-			expect(() => validateAttributes('Thing', { prop: 134 })).not.to.throw();
+			expect(() =>
+				validateAttributes('Thing', { prop: 134 })
+			).not.toThrowError();
 		});
 	});
 	describe('validating enums', () => {
 		beforeEach(() => {
-			getType.method.returns({
+			getType.mockReturnValue({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -164,7 +183,7 @@ describe('validateAttributes', () => {
 					}
 				}
 			});
-			sandbox.stub(getEnums, 'method').returns({
+			getEnums.mockReturnValue({
 				MyEnum: {
 					bear: 'grylls',
 					ray: 'winstone'
@@ -174,11 +193,11 @@ describe('validateAttributes', () => {
 		it('accept value defined in a mapping enum', () => {
 			expect(() =>
 				validateAttributes('Thing', { prop: 'grylls' })
-			).not.to.throw();
+			).not.toThrowError();
 		});
 
 		it('not accept value not defined in a mapping enum', () => {
-			expect(() => validateAttributes('Thing', { prop: 'ban' })).to.throw(
+			expect(() => validateAttributes('Thing', { prop: 'ban' })).toThrowError(
 				/Must be a valid enum/
 			);
 		});

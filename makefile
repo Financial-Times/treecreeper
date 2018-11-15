@@ -13,7 +13,7 @@ lint-ci:
 	eslint --cache .
 
 unit-test:
-	mocha --recursive test
+	jest
 
 publish:
 	npm version --no-git-tag-version ${CIRCLE_TAG}

@@ -4,7 +4,7 @@ const cache = require('../lib/cache');
 const mapToObjectResolver = keys =>
 	keys.reduce((resolver, key) => Object.assign(resolver, { [key]: key }), {});
 
-module.exports.method = cache.cacheify(
+module.exports = cache.cacheify(
 	({ withMeta = false } = {}) => {
 		return Object.entries(rawData.getEnums()).reduce(
 			(map, [key, { options, description }]) => {

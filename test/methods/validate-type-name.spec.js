@@ -1,22 +1,29 @@
-const sinon = require('sinon');
 const getType = require('../../methods/get-type');
 const { validateTypeName } = require('../../');
 
+jest.mock('../../methods/get-type');
+
 describe('validateTypeName', () => {
-	const sandbox = sinon.createSandbox();
 	beforeEach(() => {
-		sandbox.stub(getType, 'method');
+		jest.mock('../../methods/get-type');
 	});
 
-	afterEach(() => sandbox.restore());
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	afterAll(() => {
+		jest.restoreAllMocks();
+	});
+
 	it('accept names in the list', () => {
-		getType.method.returns({
+		getType.mockReturnValue({
 			name: 'Thing'
 		});
-		expect(() => validateTypeName('Thing')).not.to.throw();
+		expect(() => validateTypeName('Thing')).not.toThrowError();
 	});
 	it('reject names not in the list', () => {
-		getType.method.returns();
-		expect(() => validateTypeName('Thingo')).to.throw(/Invalid node type/);
+		getType.mockReturnValue();
+		expect(() => validateTypeName('Thingo')).toThrowError(/Invalid node type/);
 	});
 });
