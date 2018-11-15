@@ -86,7 +86,12 @@ describe('data quality: types', () => {
 					describe(name, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
-								const commonKeys = ['type', 'description', 'label', 'deprecationReason'];
+								const commonKeys = [
+									'type',
+									'description',
+									'label',
+									'deprecationReason'
+								];
 								if (fieldsets) {
 									commonKeys.push('fieldset');
 								}

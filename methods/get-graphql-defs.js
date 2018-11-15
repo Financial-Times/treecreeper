@@ -51,13 +51,12 @@ const cypherResolver = def => {
 	}
 };
 
-const maybeDeprecate = ({deprecationReason}) => {
+const maybeDeprecate = ({ deprecationReason }) => {
 	if (!deprecationReason) {
-		return ''
+		return '';
 	}
-	return `@deprecated(reason: "${deprecationReason.replace(/"/g, '\\"')}")`
-}
-
+	return `@deprecated(reason: "${deprecationReason.replace(/"/g, '\\"')}")`;
+};
 
 const defineProperties = properties => {
 	return properties
