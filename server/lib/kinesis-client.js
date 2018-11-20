@@ -3,8 +3,6 @@ const { logger } = require('../lib/request-context');
 
 const {
 	KINESIS_AWS_REGION: region = 'eu-west-1',
-	KINESIS_AWS_ACCESS_KEY_ID: accessKeyId,
-	KINESIS_AWS_SECRET_ACCESS_KEY: secretAccessKey,
 	AWS_ACCESS_KEY_ID,
 	AWS_SECRET_ACCESS_KEY
 } = process.env;
@@ -14,33 +12,18 @@ function Kinesis(streamName) {
 
 	const dyno = process.env.DYNO;
 
-	const kinesisStreamOptions = {
+	const kinesisClient = new AWS.Kinesis({
 		region,
 		apiVersion: '2013-12-02',
 		logger: {
 			log(message) {
 				logger.debug('Kinesis API call', message);
 			}
-		}
-	};
-
-	// infra-prod || infra-dev accounts
-	const kinesisInfra = new AWS.Kinesis(
-		Object.assign({}, kinesisStreamOptions, {
-			accessKeyId,
-			secretAccessKey,
-			signatureCache: false
-		})
-	);
-
-	// operations-reliability-prod || operations-reliability-test accounts
-	const kinesisRelEng = new AWS.Kinesis(
-		Object.assign({}, kinesisStreamOptions, {
-			accessKeyId: AWS_ACCESS_KEY_ID,
-			secretAccessKey: AWS_SECRET_ACCESS_KEY,
-			signatureCache: false
-		})
-	);
+		},
+		accessKeyId: AWS_ACCESS_KEY_ID,
+		secretAccessKey: AWS_SECRET_ACCESS_KEY,
+		signatureCache: false
+	});
 
 	const stubInDevelopment = (action, fn) => (...args) => {
 		if (!isProduction) {
@@ -60,19 +43,7 @@ function Kinesis(streamName) {
 				StreamName: streamName
 			};
 
-			const putRecordInfra = kinesisInfra
-				.putRecord(options)
-				.promise()
-				.catch(error => {
-					logger.error('Kinesis put record failed', {
-						event: 'KINESIS_PUT_RECORD_FAILURE',
-						error,
-						data,
-						env: 'Infra'
-					});
-				});
-
-			const putRecordRelEng = kinesisRelEng
+			return kinesisClient
 				.putRecord(options)
 				.promise()
 				.catch(error => {
@@ -83,8 +54,6 @@ function Kinesis(streamName) {
 						env: 'RelEng'
 					});
 				});
-
-			return Promise.all([putRecordInfra, putRecordRelEng]);
 		})
 	};
 }
