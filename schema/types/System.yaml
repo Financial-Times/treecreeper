@@ -33,6 +33,7 @@ properties:
     canFilter: true
     label: System type
     description: The system type (don't worry about entering anything here)
+    deprecationReason: 'Was never used or populated'
     fieldset: general
   serviceTier:
     type: ServiceTier
@@ -45,6 +46,7 @@ properties:
     canFilter: true
     label: Service type
     description: The type of service the system provides  (don't worry about entering anything here)
+    deprecationReason: 'Was never used or populated'
     fieldset: general
   hostPlatform:
     type: Word
