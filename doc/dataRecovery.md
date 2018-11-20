@@ -8,9 +8,15 @@
 1. Navigate to graphene db from https://dashboard.heroku.com/apps/biz-ops-api
 2. Download the required backup
 3. Extract the data and copy into `./neo4j/data/databases`, deleting what was there before
+<<<<<<< HEAD
 4. Inspect the live DB to discover which records need restoring and get a list of codes as necessary
 5. Start your local api
 6. Write a script to iterate through the bad codes, retrieve good data from teh backup and write to production. Below is an example (used to recreate relationships between healthchecks and systems)
+=======
+4. Inspect the live DB to discover which records need restoring and get a list of codes as necessary. `_updated...` metadata fields can help with this
+5. Start your local api
+6. Write a script to iterate through the bad codes, retrieve good data from the backup and write to production. Below is an example (used to recreate relationships between healthchecks and systems)
+>>>>>>> af580e87eef2e6821be495c39ccf815ecaa97560
 
 
 ```javascript
