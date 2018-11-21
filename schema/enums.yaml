@@ -19,8 +19,8 @@ ServiceTier:
   options:
     - Unsupported
     - Bronze
-    - Gold
     - Silver
+    - Gold
     - Platinum
 ProductLifecycle:
   description: The lifecycle stage of a product
