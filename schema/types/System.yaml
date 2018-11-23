@@ -126,6 +126,50 @@ properties:
     label: Bespoke Monitoring
     description: Details of any monitoring the system has
     fieldset: monitoring
+  failoverProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Failover Process Type
+    description: The type of process used to achieve a failover
+    fieldset: failover
+  failoverProcess:
+    type: Document
+    label: Failover Process
+    description: The actions require to fail the system from one region to another
+    fieldset: failover
+  dataRecoveryType:
+    type: ProcessType
+    canFilter: true
+    label: Data Recovery Process Type
+    description: The type of process used to achieve a data recovery
+    fieldset: dataRecovery
+  dataRecoveryProcess:
+    type: Document
+    label: Data Recovery Process
+    description: The actions require to restore the data for the system
+    fieldset: dataRecovery
+  releaseProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Release Process Type
+    description: The type of process used to achieve a release
+    fieldset: release
+  releaseProcess:
+    type: Document
+    label: Release Process
+    description: The actions require to deploy a new version of the system
+    fieldset: release
+  keyRotationProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Key Rotation Process Type
+    description: The type of process used to achieve a key rotation
+    fieldset: keyRotation
+  keyRotationProcess:
+    type: Document
+    label: Key Rotation Process
+    description: The actions require to rotate a key used by the system
+    fieldset: keyRotation
   moreInformation:
     type: Document
     label: More Information
@@ -270,6 +314,14 @@ fieldsets:
     heading: Ownership & knowledge
   network:
     heading: Related resources
+  failover:
+    heading: Failover
+  dataRecovery:
+    heading: Data Recovery
+  release:
+    heading: Release
+  keyRotation:
+    heading: Key Rotation
   risk:
     heading: Data risk
   monitoring:
