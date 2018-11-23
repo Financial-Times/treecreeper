@@ -312,8 +312,6 @@ fieldsets:
     heading: General information
   ownership:
     heading: Ownership & knowledge
-  network:
-    heading: Related resources
   failover:
     heading: Failover
   dataRecovery:
@@ -322,6 +320,8 @@ fieldsets:
     heading: Release
   keyRotation:
     heading: Key Rotation
+  network:
+    heading: Related resources
   risk:
     heading: Data risk
   monitoring:
