@@ -11,7 +11,6 @@ Capability:
     - ManualKickoff
     - ManualSteps
     - None
-    - Unknown
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.

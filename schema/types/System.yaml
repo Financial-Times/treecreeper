@@ -162,7 +162,7 @@ properties:
   credentialRefreshCapability:
     type: Capability
     canFilter: true
-    label: Key Rotation Capability
+    label: Credential Rotation Capability
     description: The mechanism used to achieve a key rotation
     fieldset: credentialRotation
   credentialRefreshActions:
@@ -319,7 +319,7 @@ fieldsets:
   release:
     heading: Release
   credentialRotation:
-    heading: Credentail Rotation
+    heading: Credential Rotation
   network:
     heading: Related resources
   risk:
