@@ -126,50 +126,50 @@ properties:
     label: Bespoke Monitoring
     description: Details of any monitoring the system has
     fieldset: monitoring
-  failoverProcessType:
-    type: ProcessType
+  failoverCapability:
+    type: Capability
     canFilter: true
-    label: Failover Process Type
-    description: The type of process used to achieve a failover
+    label: Failover Capability
+    description: The mechanism used to achieve a failover
     fieldset: failover
-  failoverProcess:
+  failoverActions:
     type: Document
-    label: Failover Process
+    label: Failover Actions
     description: The actions require to fail the system from one region to another
     fieldset: failover
-  dataRecoveryType:
-    type: ProcessType
+  dataRecoveryCapability:
+    type: Capability
     canFilter: true
-    label: Data Recovery Process Type
-    description: The type of process used to achieve a data recovery
+    label: Data Recovery Capability
+    description: The mechanism used to achieve a data recovery
     fieldset: dataRecovery
-  dataRecoveryProcess:
+  dataRecoveryActions:
     type: Document
-    label: Data Recovery Process
+    label: Data Recovery Actions
     description: The actions require to restore the data for the system
     fieldset: dataRecovery
-  releaseProcessType:
-    type: ProcessType
+  releaseCapabiity:
+    type: Capability
     canFilter: true
-    label: Release Process Type
-    description: The type of process used to achieve a release
+    label: Release Process Capability
+    description: The mechanism used to achieve a release
     fieldset: release
   releaseProcess:
     type: Document
     label: Release Process
     description: The actions require to deploy a new version of the system
     fieldset: release
-  keyRotationProcessType:
-    type: ProcessType
+  credentialRefreshCapability:
+    type: Capability
     canFilter: true
-    label: Key Rotation Process Type
-    description: The type of process used to achieve a key rotation
-    fieldset: keyRotation
-  keyRotationProcess:
+    label: Key Rotation Capability
+    description: The mechanism used to achieve a key rotation
+    fieldset: credentialRotation
+  credentialRefreshActions:
     type: Document
-    label: Key Rotation Process
-    description: The actions require to rotate a key used by the system
-    fieldset: keyRotation
+    label: Credentials Refresh Actions
+    description: The actions require to rotate the credentials used by the system
+    fieldset: credentialRotation
   moreInformation:
     type: Document
     label: More Information
@@ -318,8 +318,8 @@ fieldsets:
     heading: Data Recovery
   release:
     heading: Release
-  keyRotation:
-    heading: Key Rotation
+  credentialRotation:
+    heading: Credentail Rotation
   network:
     heading: Related resources
   risk:

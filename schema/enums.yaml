@@ -4,13 +4,14 @@ CircleCiVersion:
     # because enum values cannot begin with a number in graphQL
     ONE: '1.0'
     TWO: '2.0'
-ProcessType:
-  description: The type of process being used to achieve the result
+Capability:
+  description: The means by which a technique is delivered
   options:
-    - Automatic
-    - Manual
+    - FullyAutomated
+    - ManualKickoff
+    - ManualSteps
     - None
-    - ThirdParty
+    - Unknown
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
