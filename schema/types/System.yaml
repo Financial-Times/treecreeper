@@ -159,17 +159,17 @@ properties:
     label: Release Process
     description: The actions require to deploy a new version of the system
     fieldset: release
-  credentialRefreshCapability:
+  credentialsRefreshCapability:
     type: Capability
     canFilter: true
-    label: Credential Rotation Capability
-    description: The mechanism used to achieve a key rotation
-    fieldset: credentialRotation
-  credentialRefreshActions:
+    label: Credentials Refresh Capability
+    description: The mechanism used to achieve a change in credentials
+    fieldset: credentialRefresh
+  credentialsRefreshActions:
     type: Document
     label: Credentials Refresh Actions
-    description: The actions require to rotate the credentials used by the system
-    fieldset: credentialRotation
+    description: The actions require to chage the credentials used by the system
+    fieldset: credentialRefresh
   moreInformation:
     type: Document
     label: More Information
@@ -318,11 +318,11 @@ fieldsets:
     heading: Data Recovery
   release:
     heading: Release
-  credentialRotation:
-    heading: Credential Rotation
-  network:
-    heading: Related resources
+  credentialRefresh:
+    heading: Credentials Refresh
   risk:
     heading: Data risk
   monitoring:
     heading: Monitoring
+  network:
+    heading: Related resources

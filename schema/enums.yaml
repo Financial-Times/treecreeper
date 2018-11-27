@@ -7,10 +7,11 @@ CircleCiVersion:
 Capability:
   description: The means by which a technique is delivered
   options:
-    - FullyAutomated
-    - ManualKickoff
-    - ManualSteps
-    - None
+    - Fully Automated
+    - Manual Kickoff
+    - Manual Steps
+    - Not Defined
+    - Not Required
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
