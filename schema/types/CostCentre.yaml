@@ -8,7 +8,7 @@ properties:
     canIdentify: true
     label: Code
     description: 'Unique code/id for this item'
-    pattern: PERMISSIVE
+    pattern: NO_LOWER_CASE
   name:
     type: Word
     canIdentify: true
