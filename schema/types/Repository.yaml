@@ -8,10 +8,12 @@ properties:
     unique: true
     pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
     canIdentify: true
+    isCore: true
     label: Code
     description: 'Unique code/id for this item'
   name:
     type: Word
+    isCore: true
     label: Name
     description: Display Name
     autoPopulated: true

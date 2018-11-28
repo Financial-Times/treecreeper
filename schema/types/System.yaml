@@ -6,6 +6,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
+    isCore: true
     pattern: CODE
     label: Code
     fieldset: general
@@ -13,18 +14,21 @@ properties:
   name:
     type: Word
     canIdentify: true
+    isCore: true
     label: Name
     description: Display name of the system
     fieldset: general
   description:
     type: Paragraph
     canIdentify: true
+    isCore: true
     label: Description
     description: Brief overview of what the system does and how
     fieldset: general
   primaryURL:
     type: Url
     canIdentify: true
+    isCore: true
     label: Primary URL
     description: The main url served by the system
     fieldset: general
@@ -38,6 +42,7 @@ properties:
   serviceTier:
     type: ServiceTier
     canFilter: true
+    isCore: true
     label: Service tier
     description: The system's service tier level
     fieldset: general
@@ -166,6 +171,7 @@ properties:
   deliveredBy:
     type: Team
     direction: outgoing
+    isCore: true
     label: Delivered by team
     relationship: DELIVERED_BY
     description: The team which delivers the system
@@ -173,6 +179,7 @@ properties:
   supportedBy:
     type: Team
     direction: outgoing
+    isCore: true
     label: Supported by team
     relationship: SUPPORTED_BY
     description: The team which supports the system

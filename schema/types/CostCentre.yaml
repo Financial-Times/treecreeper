@@ -6,12 +6,14 @@ properties:
     required: true
     unique: true
     canIdentify: true
+    isCore: true
     label: Code
     description: 'Unique code/id for this item'
     pattern: NO_LOWER_CASE
   name:
     type: Word
     canIdentify: true
+    isCore: true
     label: Name
     description: The name of the cost centre
   groups:

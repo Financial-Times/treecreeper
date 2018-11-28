@@ -103,6 +103,7 @@ describe('data quality: types', () => {
 												'direction',
 												'relationship',
 												'hasMany',
+												'isCode',
 												'isRecursive',
 												'hidden',
 												'autoPopulated'
@@ -117,6 +118,7 @@ describe('data quality: types', () => {
 												'required',
 												'canIdentify',
 												'canFilter',
+												'isCore',
 												'autoPopulated',
 												'pattern',
 												'examples',
