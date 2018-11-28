@@ -18,6 +18,12 @@ const sendEvent = event => {
 	});
 };
 
+const sendUniqueEvents = events =>
+	uniqBy(
+		events,
+		({ action, code, type }) => `${action}:${code}:${type}`
+	).forEach(sendEvent);
+
 const logNodeDeletion = node => {
 	const { requestId, clientId } = getContext();
 	sendEvent({
@@ -91,13 +97,77 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 		});
 	}
 
-	uniqBy(
-		events,
-		({ action, code, type }) => `${action}:${code}:${type}`
-	).forEach(sendEvent);
+	sendUniqueEvents(events);
+};
+
+const logMergeChanges = (
+	requestId,
+	clientId,
+	sourceNode,
+	destinationNode,
+	sourceRels,
+	destinationRels
+) => {
+	sourceNode = sourceNode.records[0].get('node');
+	destinationNode = destinationNode.records[0].get('node');
+
+	const events = [
+		{
+			action: 'DELETE',
+			code: sourceNode.properties.code,
+			type: sourceNode.labels[0],
+			requestId,
+			clientId
+		},
+		{
+			action: 'UPDATE',
+			code: destinationNode.properties.code,
+			type: destinationNode.labels[0],
+			requestId,
+			clientId
+		}
+	].concat(
+		sourceRels.records
+			.map(record => {
+				const sourceTarget = record.get('related');
+				const sourceRel = record.get('relationship');
+
+				// reflexive relationships will all be discarded without a new creation event
+				if (sourceTarget.identity.equals(sourceNode.identity)) {
+					return;
+				}
+
+				const existingRecord = destinationRels.records.find(record => {
+					const destinationTarget = record.get('related');
+					const destinationRel = record.get('relationship');
+					if (
+						destinationTarget.identity.equals(sourceTarget.identity) &&
+						destinationRel.type === sourceRel.type &&
+						(destinationRel.start.equals(sourceRel.start) ||
+							destinationRel.end.equals(sourceRel.end))
+					) {
+						return true;
+					}
+				});
+
+				if (!existingRecord) {
+					return {
+						action: 'UPDATE',
+						code: sourceTarget.properties.code,
+						type: sourceTarget.labels[0],
+						requestId,
+						clientId
+					};
+				}
+			})
+			.filter(node => !!node)
+	);
+
+	sendUniqueEvents(events);
 };
 
 module.exports = {
 	logNodeDeletion,
-	logNodeChanges
+	logNodeChanges,
+	logMergeChanges
 };

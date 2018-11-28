@@ -4,7 +4,7 @@ require('express-async-errors');
 const ui = require('./routes/ui');
 const graphql = require('./routes/graphql');
 const v1 = require('./routes/v1');
-const v2Node = require('./routes/v2-node-rest');
+const v2 = require('./routes/v2');
 const { initConstraints } = require('./init-db');
 const health = require('./health');
 const {
@@ -45,7 +45,7 @@ const createApp = () => {
 
 	app.use('/graphql', graphql(new express.Router()));
 	app.use('/v1', v1(new express.Router()));
-	app.use('/v2/node', v2Node(new express.Router()));
+	app.use('/v2', v2(new express.Router()));
 	app.use('/', ui(new express.Router()));
 	app.get('/__health', health);
 

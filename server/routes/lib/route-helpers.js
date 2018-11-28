@@ -45,7 +45,7 @@ const unimplemented = (endpointName, method, alternativeMethod) => (
 	);
 };
 
-const combineInputs = (req, res) =>
+const combineCrudInputs = (req, res) =>
 	Object.assign(
 		{
 			requestId: res.locals.requestId,
@@ -64,14 +64,35 @@ const methodCrudMap = {
 	DELETE: 'delete'
 };
 
-const getCrudController = (endpointName, crudImplementation) => method => (
+const getCrudControllers = (endpointName, crudImplementation) => method => (
 	req,
 	res
 ) => {
 	requestLog(endpointName, method, req);
 	respond(
 		res,
-		crudImplementation[methodCrudMap[method]](combineInputs(req, res))
+		crudImplementation[methodCrudMap[method]](combineCrudInputs(req, res))
+	);
+};
+
+const getCustomController = (endpointName, method, controller) => (
+	req,
+	res
+) => {
+	requestLog(endpointName, method, req);
+	respond(
+		res,
+		controller(
+			Object.assign(
+				{
+					requestId: res.locals.requestId,
+					clientId: res.locals.clientId,
+					body: req.body,
+					query: req.query
+				},
+				req.params
+			)
+		)
 	);
 };
 
@@ -86,6 +107,7 @@ const applyMiddleware = router => {
 
 module.exports = {
 	applyMiddleware,
-	getCrudController,
-	unimplemented
+	getCrudControllers,
+	unimplemented,
+	getCustomController
 };

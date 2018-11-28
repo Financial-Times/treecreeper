@@ -47,10 +47,6 @@ const constructNode = (type, result) => {
 	return response;
 };
 
-const constructRelationship = result =>
-	convertIntegersToNumbers(result.records[0].get('relationship').properties);
-
 module.exports = {
-	constructNode,
-	constructRelationship
+	constructNode
 };

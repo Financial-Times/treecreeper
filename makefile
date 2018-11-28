@@ -26,3 +26,9 @@ test:
 
 lint:
 	eslint --cache --fix .
+
+run:
+	nodemon server/app.js
+
+db:
+	docker-compose up
