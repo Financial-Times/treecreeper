@@ -135,7 +135,7 @@ properties:
   failoverActions:
     type: Document
     label: Failover Actions
-    description: The actions require to fail the system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to fail the system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow
     fieldset: failover
   dataRecoveryCapability:
     type: Capability
@@ -146,7 +146,7 @@ properties:
   dataRecoveryActions:
     type: Document
     label: Data Recovery Actions
-    description: The actions require to restore the data for the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to restore the data for the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow
     fieldset: dataRecovery
   releaseCapabiity:
     type: Capability
@@ -157,7 +157,7 @@ properties:
   releaseProcess:
     type: Document
     label: Release Process
-    description: The actions require to deploy a new version of the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to deploy a new version of the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow
     fieldset: release
   credentialsRefreshCapability:
     type: Capability
@@ -168,7 +168,7 @@ properties:
   credentialsRefreshActions:
     type: Document
     label: Credentials Refresh Actions
-    description: The actions require to chage the credentials used by the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to change the credentials used by the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow
     fieldset: credentialRefresh
   moreInformation:
     type: Document
@@ -315,11 +315,11 @@ fieldsets:
   failover:
     heading: Failover
   dataRecovery:
-    heading: Data Recovery
+    heading: Data recovery
   release:
     heading: Release
   credentialRefresh:
-    heading: Credentials Refresh
+    heading: Credentials refresh
   risk:
     heading: Data risk
   monitoring:

@@ -8,8 +8,8 @@ Capability:
   description: The means by which a technique is delivered
   options:
     - Fully Automated
-    - Manual Kickoff
-    - Manual Steps
+    - Manually Triggered Script
+    - Manual, No automation
     - Not Defined
     - Not Required
 SystemLifecycle:
