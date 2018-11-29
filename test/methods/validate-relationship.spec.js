@@ -73,7 +73,9 @@ describe('validateRelationship', () => {
 				relationshipType: 'HAS',
 				relatedCode: 'CODE'
 			})
-		).toThrowError(/Invalid attributeValue `CODE` for property `code` on type `EndType`/);
+		).toThrowError(
+			/Invalid value `CODE` for property `code` on type `EndType`/
+		);
 	});
 
 	it('reject when relationship not defined on start node', () => {
