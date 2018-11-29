@@ -1,12 +1,12 @@
 const getType = require('../../methods/get-type');
 const getEnums = require('../../methods/get-enums');
-const { validateAttribute } = require('../../');
+const { validateProperty } = require('../../');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
 jest.mock('../../methods/get-type');
 jest.mock('../../methods/get-enums');
 
-describe('validateAttribute', () => {
+describe('validateProperty', () => {
 	beforeEach(() => {
 		jest.mock('../../methods/get-type');
 	});
@@ -28,7 +28,7 @@ describe('validateAttribute', () => {
 				}
 			}
 		});
-		expect(() => validateAttribute('Thing', 'prop1', true)).toThrowError(
+		expect(() => validateProperty('Thing', 'prop1', true)).toThrowError(
 			/Invalid property `prop1` on type `Thing`/
 		);
 	});
@@ -49,30 +49,30 @@ describe('validateAttribute', () => {
 				});
 				it('accept strings', () => {
 					expect(() =>
-						validateAttribute('Thing', 'prop', 'I am Tracy Beaker')
+						validateProperty('Thing', 'prop', 'I am Tracy Beaker')
 					).not.toThrowError();
 				});
 				it('not accept booleans', () => {
-					expect(() => validateAttribute('Thing', 'prop', true)).toThrowError(
+					expect(() => validateProperty('Thing', 'prop', true)).toThrowError(
 						/Must be a string/
 					);
-					expect(() => validateAttribute('Thing', 'prop', false)).toThrowError(
+					expect(() => validateProperty('Thing', 'prop', false)).toThrowError(
 						/Must be a string/
 					);
 				});
 				it('not accept floats', () => {
-					expect(() => validateAttribute('Thing', 'prop', 1.34)).toThrowError(
+					expect(() => validateProperty('Thing', 'prop', 1.34)).toThrowError(
 						/Must be a string/
 					);
 				});
 				it('not accept integers', () => {
-					expect(() => validateAttribute('Thing', 'prop', 134)).toThrowError(
+					expect(() => validateProperty('Thing', 'prop', 134)).toThrowError(
 						/Must be a string/
 					);
 				});
 				it('apply string patterns', () => {
 					expect(() =>
-						validateAttribute('Thing', 'prop', 'I am zebbedee')
+						validateProperty('Thing', 'prop', 'I am zebbedee')
 					).toThrowError(/Must match pattern/);
 				});
 			}
@@ -92,22 +92,20 @@ describe('validateAttribute', () => {
 
 		it('not accept strings', () => {
 			expect(() =>
-				validateAttribute('Thing', 'prop', 'I am Tracy Beaker')
+				validateProperty('Thing', 'prop', 'I am Tracy Beaker')
 			).toThrowError(/Must be a Boolean/);
 		});
 		it('accept booleans', () => {
-			expect(() => validateAttribute('Thing', 'prop', true)).not.toThrowError();
-			expect(() =>
-				validateAttribute('Thing', 'prop', false)
-			).not.toThrowError();
+			expect(() => validateProperty('Thing', 'prop', true)).not.toThrowError();
+			expect(() => validateProperty('Thing', 'prop', false)).not.toThrowError();
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttribute('Thing', 'prop', 1.34)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', 1.34)).toThrowError(
 				/Must be a Boolean/
 			);
 		});
 		it('not accept integers', () => {
-			expect(() => validateAttribute('Thing', 'prop', 134)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', 134)).toThrowError(
 				/Must be a Boolean/
 			);
 		});
@@ -126,22 +124,22 @@ describe('validateAttribute', () => {
 
 		it('not accept strings', () => {
 			expect(() =>
-				validateAttribute('Thing', 'prop', 'I am Tracy Beaker')
+				validateProperty('Thing', 'prop', 'I am Tracy Beaker')
 			).toThrowError(/Must be a finite floating point number/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttribute('Thing', 'prop', true)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', true)).toThrowError(
 				/Must be a finite floating point number/
 			);
-			expect(() => validateAttribute('Thing', 'prop', false)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', false)).toThrowError(
 				/Must be a finite floating point number/
 			);
 		});
 		it('accept floats', () => {
-			expect(() => validateAttribute('Thing', 'prop', 1.34)).not.toThrowError();
+			expect(() => validateProperty('Thing', 'prop', 1.34)).not.toThrowError();
 		});
 		it('accept integers', () => {
-			expect(() => validateAttribute('Thing', 'prop', 134)).not.toThrowError();
+			expect(() => validateProperty('Thing', 'prop', 134)).not.toThrowError();
 		});
 	});
 
@@ -159,24 +157,24 @@ describe('validateAttribute', () => {
 
 		it('not accept strings', () => {
 			expect(() =>
-				validateAttribute('Thing', 'prop', 'I am Tracy Beaker')
+				validateProperty('Thing', 'prop', 'I am Tracy Beaker')
 			).toThrowError(/Must be a finite integer/);
 		});
 		it('not accept booleans', () => {
-			expect(() => validateAttribute('Thing', 'prop', true)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', true)).toThrowError(
 				/Must be a finite integer/
 			);
-			expect(() => validateAttribute('Thing', 'prop', false)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', false)).toThrowError(
 				/Must be a finite integer/
 			);
 		});
 		it('not accept floats', () => {
-			expect(() => validateAttribute('Thing', 'prop', 1.34)).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', 1.34)).toThrowError(
 				/Must be a finite integer/
 			);
 		});
 		it('accept integers', () => {
-			expect(() => validateAttribute('Thing', 'prop', 134)).not.toThrowError();
+			expect(() => validateProperty('Thing', 'prop', 134)).not.toThrowError();
 		});
 	});
 	describe('validating enums', () => {
@@ -198,12 +196,12 @@ describe('validateAttribute', () => {
 		});
 		it('accept value defined in a mapping enum', () => {
 			expect(() =>
-				validateAttribute('Thing', 'prop', 'grylls')
+				validateProperty('Thing', 'prop', 'grylls')
 			).not.toThrowError();
 		});
 
 		it('not accept value not defined in a mapping enum', () => {
-			expect(() => validateAttribute('Thing', 'prop', 'ban')).toThrowError(
+			expect(() => validateProperty('Thing', 'prop', 'ban')).toThrowError(
 				/Must be a valid enum/
 			);
 		});
@@ -234,7 +232,7 @@ describe('validateAttribute', () => {
 		});
 		it('reject when related node code is invalid', () => {
 			expect(() =>
-				validateAttribute('StartType', 'testRelationship', 'CODE')
+				validateProperty('StartType', 'testRelationship', 'CODE')
 			).toThrowError(
 				/Invalid value `CODE` for property `code` on type `EndType`/
 			);
@@ -242,7 +240,7 @@ describe('validateAttribute', () => {
 
 		it('accept when all is correct', () => {
 			expect(() =>
-				validateAttribute('StartType', 'testRelationship', 'code')
+				validateProperty('StartType', 'testRelationship', 'code')
 			).not.toThrowError();
 		});
 	});
