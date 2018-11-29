@@ -115,7 +115,10 @@ describe('v2 - node generic', () => {
 						.request(app)
 						[method]('/v2/node/Team/DROP ALL')
 						.namespacedAuth()
-						.expect(400, /Invalid node identifier `DROP ALL`/);
+						.expect(
+							400,
+							/Invalid value `DROP ALL` for property `code` on type `Team`/
+						);
 				});
 
 				it('should error when client id is suspicious', async () => {
@@ -172,7 +175,10 @@ describe('v2 - node generic', () => {
 								.send({
 									supports: ['DROP ALL']
 								})
-								.expect(400, /Invalid node identifier `DROP ALL`/);
+								.expect(
+									400,
+									/Invalid value `DROP ALL` for property `code` on type `System`/
+								);
 						});
 					});
 				}

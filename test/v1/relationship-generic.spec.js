@@ -164,7 +164,7 @@ describe('v1 - relationship generic', () => {
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(400, /Invalid node identifier `DROP ALL`/);
+						.expect(400, /Invalid value `DROP ALL` for property `code`/);
 				});
 
 				it('should error when relationship type is suspicious', async () => {
@@ -197,7 +197,7 @@ describe('v1 - relationship generic', () => {
 						)
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(400, /Invalid node identifier `DROP ALL`/);
+						.expect(400, /Invalid value `DROP ALL` for property `code`/);
 				});
 
 				it('should error when client id is suspicious', async () => {

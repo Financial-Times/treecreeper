@@ -125,7 +125,10 @@ describe('v1 - node generic', () => {
 						[method]('/v1/node/Team/DROP ALL')
 						.auth()
 						.set('x-request-id', 'security-request-id')
-						.expect(400, /Invalid node identifier `DROP ALL`/);
+						.expect(
+							400,
+							/Invalid value `DROP ALL` for property `code` on type `Team`/
+						);
 				});
 
 				it('should error when client id is suspicious', async () => {

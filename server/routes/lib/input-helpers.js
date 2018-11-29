@@ -19,7 +19,10 @@ const categorizeAttributes = ({ nodeType, code, attributes }) => {
 
 	Object.keys(attributes).forEach(name => {
 		if (!properties[name]) {
-			throw httpErrors(400, `Unexpected attribute \`${name}\` on ${nodeType}`);
+			throw httpErrors(
+				400,
+				`Invalid property \`${name}\` on type \`${nodeType}\``
+			);
 		}
 	});
 

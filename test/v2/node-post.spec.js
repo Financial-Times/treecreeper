@@ -94,13 +94,13 @@ describe('v2 - node POST', () => {
 		verifyNotExists('Team', teamCode);
 	});
 
-	it('error when unrecognised attribute', async () => {
+	it('error when unrecognised property', async () => {
 		await sandbox
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
 			.send({ foo: 'unrecognised' })
-			.expect(400, /Unexpected attribute `foo` on Team/);
+			.expect(400, /Invalid property `foo` on type `Team`/);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		verifyNotExists('Team', teamCode);
 	});

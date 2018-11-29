@@ -133,7 +133,7 @@ describe('v2 - node PATCH', () => {
 			.patch(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
 			.send({ foo: 'unrecognised' })
-			.expect(400, /Unexpected attribute `foo` on Team/);
+			.expect(400, /Invalid property `foo` on type `Team`/);
 		verifyNotExists('Team', teamCode);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 	});
