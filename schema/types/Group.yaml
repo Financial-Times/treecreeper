@@ -2,7 +2,7 @@ name: Group
 description: An overarching group which contains teams and is costed separately
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -11,7 +11,7 @@ properties:
     label: Code
     description: 'Unique code/id for this item'
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name

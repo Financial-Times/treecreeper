@@ -3,7 +3,7 @@ pluralName: People
 description: A individual within the organisation who is contactable
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -13,7 +13,7 @@ properties:
     fieldset: general
     autoPopulated: true
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name
@@ -21,7 +21,7 @@ properties:
     fieldset: general
     autoPopulated: true
   email:
-    type: Word
+    type: Email
     canIdentify: true
     isCore: true
     label: Email
@@ -29,7 +29,7 @@ properties:
     fieldset: contact
     autoPopulated: true
   slack:
-    type: Word
+    type: Slack
     label: Slack
     canIdentify: true
     isCore: true

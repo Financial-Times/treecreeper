@@ -2,7 +2,7 @@ name: CostCentre
 description: A cost centre which groups are costed to
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -11,7 +11,7 @@ properties:
     description: 'Unique code/id for this item'
     pattern: NO_LOWER_CASE
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name

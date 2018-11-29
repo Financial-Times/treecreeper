@@ -2,7 +2,7 @@ name: System
 description: Any combination of software and technical infrastructure used by the business, engineering or operations
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -12,7 +12,7 @@ properties:
     fieldset: general
     description: Unique code/id for this item. Once created it should (in most cases) never be altered
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name
@@ -21,7 +21,6 @@ properties:
   description:
     type: Paragraph
     canIdentify: true
-    isCore: true
     label: Description
     description: Brief overview of what the system does and how
     fieldset: general
@@ -107,6 +106,7 @@ properties:
   lifecycleStage:
     type: SystemLifecycle
     canFilter: true
+    isCore: true
     label: Lifecycle stage
     description: The system lifecycle stage of the system
     fieldset: general

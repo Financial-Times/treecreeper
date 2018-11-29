@@ -2,7 +2,7 @@ name: Healthcheck
 description: The configuration used to provide monitoring/healthchecks for a system.
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true

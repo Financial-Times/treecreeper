@@ -2,7 +2,7 @@ name: Product
 description: Anything sold by the FT for use by an external entity, OR produced by an area of FT technology to be used by another internal area.
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -18,7 +18,7 @@ properties:
     description: Brief description of what the product does
     fieldset: general
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name

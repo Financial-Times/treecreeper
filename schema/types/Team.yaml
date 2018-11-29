@@ -2,7 +2,7 @@ name: Team
 description: A team within the organisation
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
@@ -12,7 +12,7 @@ properties:
     description: 'Unique code/id for this item'
     fieldset: general
   name:
-    type: Word
+    type: Name
     canIdentify: true
     isCore: true
     label: Name
@@ -21,19 +21,18 @@ properties:
   description:
     type: Paragraph
     canIdentify: true
-    isCore: true
     label: Description
     description: Description of the team
     fieldset: general
   email:
-    type: Word
+    type: Email
     canIdentify: true
     isCore: true
     label: Email
     description: The team's email address
     fieldset: general
   slack:
-    type: Word
+    type: Slack
     canIdentify: true
     isCore: true
     label: Slack
@@ -60,7 +59,6 @@ properties:
     fieldset: general
   supportRota:
     type: Url
-    isCore: true
     label: Support rota
     description: Url linking to details of the system's support rota
     fieldset: general
