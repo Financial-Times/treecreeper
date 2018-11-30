@@ -7,7 +7,7 @@ properties:
     unique: true
     canIdentify: true
     label: Code
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this item.'
   isLive:
     type: Boolean
     canFilter: true
@@ -24,7 +24,7 @@ properties:
     # required: true
     canIdentify: true
     label: URL of the healthcheck endpoint
-    description: The full URL of the endpoint. You should include the "__health" part of the url, if relevant
+    description: The full URL of the endpoint. You should include the "__health" part of the url, if relevant.
     examples:
      - https://my-new-app.ft.com/__health
   monitors:
@@ -32,5 +32,5 @@ properties:
     direction: incoming
     relationship: MONITORED_BY
     label: Monitored systems
-    description: The systems which the healthcheck monitors
+    description: The systems which the healthcheck monitors.
     hasMany: true

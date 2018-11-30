@@ -8,68 +8,68 @@ properties:
     unique: true
     canIdentify: true
     label: Code
-    description: 'Unique code/id for this person'
+    description: 'Unique code/id for this person.'
     fieldset: general
     autoPopulated: true
   name:
     type: Word
     canIdentify: true
     label: Name
-    description: The name of the person
+    description: The name of the person.
     fieldset: general
     autoPopulated: true
   email:
     type: Word
     canIdentify: true
     label: Email
-    description: The email address of the person
+    description: The email address of the person.
     fieldset: contact
     autoPopulated: true
   slack:
     type: Word
     label: Slack
     canIdentify: true
-    description: The slack link for the person (deprecated)
+    description: The slack link for the person (deprecated).
     fieldset: contact
     autoPopulated: true
   slackName:
     type: Word
     canIdentify: true
     label: Slack Name
-    description: The slack name for the person
+    description: The slack name for the person.
     fieldset: contact
     autoPopulated: true
   slackID:
     type: Word
     canIdentify: true
     label: Slack ID
-    description: The slack id for the person
+    description: The slack id for the person.
     fieldset: contact
     autoPopulated: true
   phone:
     type: Word
     canIdentify: true
     label: Phone
-    description: The phone contact number for the person
+    description: The phone contact number for the person.
     fieldset: contact
     autoPopulated: true
   isActive:
     type: Boolean
     canFilter: true
     label: Active
-    description: Whether or not the person is still working at the FT
+    description: Whether or not the person is still working at the FT.
     fieldset: general
   contract:
     type: PersonContract
     canFilter: true
     label: Contract type
-    description: The type of employment contract a Person has with the FT
+    description: The type of employment contract a Person has with the FT.
     fieldset: general
   isPeopleApi:
     type: Boolean
     canFilter: true
     label: Exists in People api
-    description: Whether or not the person exists as a record in the Internal Products people api, viewable at https://who.in.ft.com
+    description: Whether or not the person exists as a record in the Internal Products people api, viewable at https://who.in.ft.com.
     autoPopulated: true
   source:
     type: PersonSource
@@ -87,7 +87,7 @@ properties:
     label: Tech director for group
     direction: incoming
     relationship: HAS_TECH_DIRECTOR
-    description: Groups the person is a technical director for
+    description: Groups the person is a technical director for.
     hasMany: true
     fieldset: network
   techLeadFor:
@@ -95,7 +95,7 @@ properties:
     label: Tech lead for teams
     direction: incoming
     relationship: HAS_TECH_LEAD
-    description: Teams the person is a technical lead for
+    description: Teams the person is a technical lead for.
     hasMany: true
     fieldset: network
   ownedTeams:
@@ -103,7 +103,7 @@ properties:
     direction: incoming
     label: Product owner for teams
     relationship: HAS_PRODUCT_OWNER
-    description: Teams the person is a product owner for
+    description: Teams the person is a product owner for.
     hasMany: true
     fieldset: network
   ownedProducts:
@@ -111,7 +111,7 @@ properties:
     direction: incoming
     label: Product owner for products
     relationship: HAS_PRODUCT_OWNER
-    description: Products the person is a product owner for
+    description: Products the person is a product owner for.
     hasMany: true
     fieldset: network
   stakeholderFor:
@@ -119,7 +119,7 @@ properties:
     direction: incoming
     label: Stakeholder for systems
     relationship: HAS_STAKEHOLDER
-    description: Systems the person is a stakeholder for
+    description: Systems the person is a stakeholder for.
     hasMany: true
     fieldset: network
   knowsAbout:
@@ -127,7 +127,7 @@ properties:
     direction: incoming
     label: Knows about systems
     relationship: KNOWN_ABOUT_BY
-    description: Systems the person knows about
+    description: Systems the person knows about.
     hasMany: true
     fieldset: network
   teams:
@@ -135,7 +135,7 @@ properties:
     direction: incoming
     label: Teams
     relationship: HAS_TEAM_MEMBER
-    description: Teams this person is a member of
+    description: Teams this person is a member of.
     hasMany: true
     fieldset: network
 fieldsets:

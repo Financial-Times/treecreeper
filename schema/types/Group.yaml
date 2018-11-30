@@ -8,45 +8,45 @@ properties:
     canIdentify: true
     pattern: STRICT_CODE
     label: Code
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this item.'
   name:
     type: Word
     canIdentify: true
     label: Name
-    description: The name of the group
+    description: The name of the group.
   description:
     type: Paragraph
     label: Description
-    description: What the group does
+    description: What the group does.
   isActive:
     type: Boolean
     canFilter: true
     label: Active
-    description: Whether or not the group is still in existence
+    description: Whether or not the group is still in existence.
   costCentre:
     type: CostCentre
     direction: incoming
     label: Cost Centre
     relationship: PAYS_FOR
-    description: The Cost Centre associated with the group
+    description: The Cost Centre associated with the group.
   techDirector:
     type: Person
     direction: outgoing
     label: Tech Director
     relationship: HAS_TECH_DIRECTOR
-    description: The tech director who owns the group
+    description: The tech director who owns the group.
   topLevelTeams:
     type: Team
     direction: outgoing
     label: Top level teams
     relationship: HAS_TEAM
-    description: The top level teams working under the group
+    description: The top level teams working under the group.
     hasMany: true
   allTeams:
     type: Team
     label: All teams
     direction: outgoing
     relationship: HAS_TEAM
-    description: The teams working under the group
+    description: The teams working under the group.
     hasMany: true
     isRecursive: true
