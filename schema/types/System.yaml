@@ -171,7 +171,6 @@ properties:
   deliveredBy:
     type: Team
     direction: outgoing
-    isCore: true
     label: Delivered by team
     relationship: DELIVERED_BY
     description: The team which delivers the system
@@ -179,7 +178,6 @@ properties:
   supportedBy:
     type: Team
     direction: outgoing
-    isCore: true
     label: Supported by team
     relationship: SUPPORTED_BY
     description: The team which supports the system
