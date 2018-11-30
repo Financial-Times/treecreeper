@@ -68,8 +68,8 @@ properties:
   isPeopleApi:
     type: Boolean
     canFilter: true
-    label: Active
-    description: Whether or not the person is still working at the FT
+    label: Exists in People api
+    description: Whether or not the person exists as a record in the Internal Products people api, viewable at https://who.in.ft.com
     autoPopulated: true
   source:
     type: PersonSource
