@@ -18,6 +18,14 @@ describe('v2 - node PATCH', () => {
 	const requestId = `${namespace}-request`;
 	const clientId = `${namespace}-client`;
 
+	const event = (action, code, type) => ({
+		action,
+		type,
+		code,
+		requestId,
+		clientId
+	});
+
 	setupMocks(sandbox, { namespace });
 
 	it('update node', async () => {
@@ -50,13 +58,9 @@ describe('v2 - node PATCH', () => {
 		);
 
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'UPDATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('UPDATE', teamCode, 'Team')
+		);
 	});
 
 	it('Create when patching non-existent node', async () => {
@@ -84,13 +88,9 @@ describe('v2 - node PATCH', () => {
 			})
 		);
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', teamCode, 'Team')
+		);
 	});
 
 	it('error when conflicting code values', async () => {
@@ -118,13 +118,9 @@ describe('v2 - node PATCH', () => {
 			.send({ name: 'name1', code: teamCode })
 			.expect(200);
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'UPDATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('UPDATE', teamCode, 'Team')
+		);
 	});
 
 	it('error when unrecognised attribute', async () => {
@@ -175,18 +171,14 @@ describe('v2 - node PATCH', () => {
 			})
 		);
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'UPDATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('UPDATE', teamCode, 'Team')
+		);
 	});
 
 	describe('relationship patching', () => {
 		describe('deleting', () => {
-			it('errors if no relationshipAction query string', async () => {
+			it('errors if no relationshipAction query string when deleting relationship set', async () => {
 				await sandbox.createNode('Team', teamCode);
 				await sandbox
 					.request(app)
@@ -199,158 +191,165 @@ describe('v2 - node PATCH', () => {
 					);
 				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			});
+
+			it.skip('errors if no relationshipAction query string when deleting individual relationship', async () => {
+				await sandbox.createNode('Team', teamCode);
+				await sandbox
+					.request(app)
+					.patch(`/v2/node/Team/${teamCode}`)
+					.namespacedAuth()
+					.send({ '!techLeads': [personCode] })
+					.expect(
+						400,
+						/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+					);
+				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			});
 			['merge', 'replace'].forEach(action =>
 				describe(`with ${action} action`, () => {
-					it('can delete empty relationship set', async () => {
-						await sandbox.createNode('Team', teamCode);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ techLeads: null })
-							.expect(
-								200,
+					describe('individual relationship delete', () => {
+						it.skip('can delete a specific relationship', async () => {});
+						it.skip('can delete multiple specific relationships of the same kind', async () => {});
+						it.skip('can delete multiple specific relationships of different kinds', async () => {});
+						it.skip('leaves relationships in the opposite direction unaffected', async () => {});
+						it.skip('can add and remove relationships of the same type at the same time', async () => {});
+						it.skip('errors if deleting and adding the same relationship to the same record', async () => {});
+					});
+					describe('bulk relationship delete', () => {
+						it('can delete empty relationship set', async () => {
+							await sandbox.createNode('Team', teamCode);
+							await sandbox
+								.request(app)
+								.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
+								.namespacedAuth()
+								.send({ techLeads: null })
+								.expect(
+									200,
+									sandbox.withMeta({
+										code: teamCode
+									})
+								);
+
+							await testNode(
+								'Team',
+								teamCode,
 								sandbox.withMeta({
 									code: teamCode
 								})
 							);
 
-						await testNode(
-							'Team',
-							teamCode,
-							sandbox.withMeta({
-								code: teamCode
-							})
-						);
+							expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+						});
 
-						expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-					});
+						it('can delete entire relationship sets', async () => {
+							const [team, person, group] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', personCode],
+								['Group', groupCode]
+							);
+							await sandbox.connectNodes(
+								// tests incoming and outgoing relationships
+								[group, 'HAS_TEAM', team],
+								[team, 'HAS_TECH_LEAD', person]
+							);
+							await sandbox
+								.request(app)
+								.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
+								.namespacedAuth()
+								.send({ techLeads: null, parentGroup: null })
+								.expect(
+									200,
+									sandbox.withMeta({
+										code: teamCode
+									})
+								);
 
-					it('can delete relationship sets', async () => {
-						const [team, person, group] = await sandbox.createNodes(
-							['Team', `${namespace}-team`],
-							['Person', `${namespace}-person`],
-							['Group', `${namespace}-group`]
-						);
-						await sandbox.connectNodes(
-							// tests incoming and outgoing relationships
-							[group, 'HAS_TEAM', team],
-							[team, 'HAS_TECH_LEAD', person]
-						);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ techLeads: null, parentGroup: null })
-							.expect(
-								200,
+							await testNode(
+								'Team',
+								teamCode,
 								sandbox.withMeta({
 									code: teamCode
 								})
 							);
 
-						await testNode(
-							'Team',
-							teamCode,
-							sandbox.withMeta({
-								code: teamCode
-							})
-						);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', teamCode, 'Team')
+							);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', personCode, 'Person')
+							);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', groupCode, 'Group')
+							);
+						});
 
-						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: teamCode,
-							type: 'Team',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: personCode,
-							type: 'Person',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: groupCode,
-							type: 'Group',
-							requestId,
-							clientId
-						});
-					});
-					it('leaves relationships in other direction and of other types untouched when deleting', async () => {
-						const [team1, team2, team3, person] = await sandbox.createNodes(
-							['Team', `${teamCode}-1`],
-							['Team', `${teamCode}-2`],
-							['Team', `${teamCode}-3`],
-							['Person', personCode]
-						);
-						await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
-						await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
-						await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
+						it('leaves relationships in other direction and of other types untouched when deleting', async () => {
+							const [team1, team2, team3, person] = await sandbox.createNodes(
+								['Team', `${teamCode}-1`],
+								['Team', `${teamCode}-2`],
+								['Team', `${teamCode}-3`],
+								['Person', personCode]
+							);
+							await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
+							await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
+							await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
 
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({
-								subTeams: null
-							})
-							.expect(
-								200,
-								sandbox.withMeta({
-									code: `${teamCode}-2`,
-									parentTeam: `${teamCode}-1`,
-									techLeads: [personCode]
+							await sandbox
+								.request(app)
+								.patch(
+									`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`
+								)
+								.namespacedAuth()
+								.send({
+									subTeams: null
 								})
+								.expect(
+									200,
+									sandbox.withMeta({
+										code: `${teamCode}-2`,
+										parentTeam: `${teamCode}-1`,
+										techLeads: [personCode]
+									})
+								);
+
+							await testNode(
+								'Team',
+								`${teamCode}-2`,
+								sandbox.withMeta({
+									code: `${teamCode}-2`
+								}),
+								[
+									{
+										type: 'HAS_TEAM',
+										direction: 'incoming',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Team',
+										props: sandbox.withMeta({ code: `${teamCode}-1` })
+									}
+								],
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({ code: personCode })
+									}
+								]
 							);
 
-						await testNode(
-							'Team',
-							`${teamCode}-2`,
-							sandbox.withMeta({
-								code: `${teamCode}-2`
-							}),
-							[
-								{
-									type: 'HAS_TEAM',
-									direction: 'incoming',
-									props: sandbox.withMeta({})
-								},
-								{
-									type: 'Team',
-									props: sandbox.withMeta({ code: `${teamCode}-1` })
-								}
-							],
-							[
-								{
-									type: 'HAS_TECH_LEAD',
-									direction: 'outgoing',
-									props: sandbox.withMeta({})
-								},
-								{
-									type: 'Person',
-									props: sandbox.withMeta({ code: personCode })
-								}
-							]
-						);
-
-						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: `${teamCode}-2`,
-							type: 'Team',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: `${teamCode}-3`,
-							type: 'Team',
-							requestId,
-							clientId
+							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', `${teamCode}-2`, 'Team')
+							);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', `${teamCode}-3`, 'Team')
+							);
 						});
 					});
 				})
@@ -410,20 +409,12 @@ describe('v2 - node PATCH', () => {
 						);
 
 						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: teamCode,
-							type: 'Team',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: groupCode,
-							type: 'Group',
-							requestId,
-							clientId
-						});
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', teamCode, 'Team')
+						);
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', groupCode, 'Group')
+						);
 					});
 					it('accept an array of length one', async () => {
 						await sandbox.createNodes(['Team', teamCode], ['Group', groupCode]);
@@ -460,20 +451,12 @@ describe('v2 - node PATCH', () => {
 						);
 
 						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: teamCode,
-							type: 'Team',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: groupCode,
-							type: 'Group',
-							requestId,
-							clientId
-						});
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', teamCode, 'Team')
+						);
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', groupCode, 'Group')
+						);
 					});
 					it('error if trying to write multiple relationships', async () => {
 						await sandbox.createNodes(
@@ -540,27 +523,15 @@ describe('v2 - node PATCH', () => {
 						);
 
 						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: teamCode,
-							type: 'Team',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: `${groupCode}-1`,
-							type: 'Group',
-							requestId,
-							clientId
-						});
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-							action: 'UPDATE',
-							code: `${groupCode}-2`,
-							type: 'Group',
-							requestId,
-							clientId
-						});
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', teamCode, 'Team')
+						);
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', `${groupCode}-1`, 'Group')
+						);
+						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+							event('UPDATE', `${groupCode}-2`, 'Group')
+						);
 					});
 
 					it.skip('not replace existing relationship in opposite direction', async () => {
@@ -608,20 +579,12 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: teamCode,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: personCode,
-						type: 'Person',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', teamCode, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', personCode, 'Person')
+					);
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
 					const [team, person1] = await sandbox.createNodes(
@@ -676,20 +639,12 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: teamCode,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${personCode}-2`,
-						type: 'Person',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', teamCode, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${personCode}-2`, 'Person')
+					);
 				});
 			});
 
@@ -731,20 +686,12 @@ describe('v2 - node PATCH', () => {
 					);
 
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: teamCode,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: personCode,
-						type: 'Person',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', teamCode, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', personCode, 'Person')
+					);
 				});
 
 				it('can replace relationships if relationshipAction=replace', async () => {
@@ -789,27 +736,15 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: teamCode,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${personCode}-1`,
-						type: 'Person',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${personCode}-2`,
-						type: 'Person',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', teamCode, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${personCode}-1`, 'Person')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${personCode}-2`, 'Person')
+					);
 				});
 
 				it('leaves relationships in other direction and of other types untouched when replacing', async () => {
@@ -881,20 +816,12 @@ describe('v2 - node PATCH', () => {
 					);
 
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${teamCode}-2`,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${teamCode}-3`,
-						type: 'Team',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${teamCode}-2`, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${teamCode}-3`, 'Team')
+					);
 				});
 
 				it('replaces relationships in multiple directions', async () => {
@@ -953,27 +880,15 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${teamCode}-1`,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${teamCode}-2`,
-						type: 'Team',
-						requestId,
-						clientId
-					});
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action: 'UPDATE',
-						code: `${teamCode}-3`,
-						type: 'Team',
-						requestId,
-						clientId
-					});
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${teamCode}-1`, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${teamCode}-2`, 'Team')
+					);
+					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+						event('UPDATE', `${teamCode}-3`, 'Team')
+					);
 				});
 			});
 
@@ -1030,20 +945,12 @@ describe('v2 - node PATCH', () => {
 							);
 
 							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-								action: 'UPDATE',
-								code: teamCode,
-								type: 'Team',
-								requestId,
-								clientId
-							});
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-								action: 'CREATE',
-								code: personCode,
-								type: 'Person',
-								requestId,
-								clientId
-							});
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', teamCode, 'Team')
+							);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('CREATE', personCode, 'Person')
+							);
 						});
 
 						it('not leave creation artefacts on things that already existed when using `upsert=true`', async () => {
@@ -1085,20 +992,12 @@ describe('v2 - node PATCH', () => {
 							);
 
 							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-								action: 'UPDATE',
-								code: teamCode,
-								type: 'Team',
-								requestId,
-								clientId
-							});
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-								action: 'UPDATE',
-								code: personCode,
-								type: 'Person',
-								requestId,
-								clientId
-							});
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', teamCode, 'Team')
+							);
+							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+								event('UPDATE', personCode, 'Person')
+							);
 						});
 					});
 				});
@@ -1130,7 +1029,6 @@ describe('v2 - node PATCH', () => {
 				.expect(200);
 
 			dbQuerySpy().args.forEach(args => {
-				console.log(args);
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
@@ -1196,13 +1094,9 @@ describe('v2 - node PATCH', () => {
 				true
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode, 'Team')
+			);
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
@@ -1224,20 +1118,12 @@ describe('v2 - node PATCH', () => {
 				true
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: `${personCode}-2`,
-				type: 'Person',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', `${personCode}-2`, 'Person')
+			);
 		});
 
 		it('detects deleted property as a change', async () => {
@@ -1254,13 +1140,9 @@ describe('v2 - node PATCH', () => {
 				true
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode, 'Team')
+			);
 		});
 
 		describe('patching with fewer relationships', () => {
@@ -1290,20 +1172,12 @@ describe('v2 - node PATCH', () => {
 					dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))
 				).toBe(true);
 				expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-				expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-					action: 'UPDATE',
-					code: teamCode,
-					type: 'Team',
-					requestId,
-					clientId
-				});
-				expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-					action: 'UPDATE',
-					code: `${personCode}-2`,
-					type: 'Person',
-					requestId,
-					clientId
-				});
+				expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+					event('UPDATE', teamCode, 'Team')
+				);
+				expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+					event('UPDATE', `${personCode}-2`, 'Person')
+				);
 			});
 
 			it('treats fewer relationships as no change when merging relationships', async () => {

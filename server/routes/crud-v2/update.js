@@ -1,7 +1,4 @@
-const {
-	validateParams,
-	categorizeAttributes
-} = require('../lib/input-helpers');
+const inputHelpers = require('../lib/input-helpers');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { dbErrorHandlers, preflightChecks } = require('../lib/errors');
@@ -28,30 +25,23 @@ const toArray = it =>
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
 
-const entriesArrayToObject = arr =>
-	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
-
-const nodeDiffer = (
-	nodeType,
-	existingNode = {},
-	newNode = {},
-	deleteAttributes = []
-) => {
-	const schema = getType(nodeType);
-	return Object.entries(newNode)
-		.filter(([propName]) => !schema.properties[propName].relationship)
-		.filter(([propName, value]) => existingNode[propName] !== value)
-		.map(([propName]) => propName)
-		.concat(deleteAttributes.filter(name => name in existingNode));
-};
+const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const relationshipDiffer = (
 	nodeType,
 	existingRelationships = {},
-	newRelationships = {},
-	deleteRelationships,
+	attributes,
 	action
 ) => {
+	const newRelationships = inputHelpers.getWriteRelationships(
+		nodeType,
+		attributes
+	);
+	const deleteRelationships = inputHelpers.getDeleteRelationships(
+		nodeType,
+		attributes
+	);
+
 	const schema = getType(nodeType);
 	const summary = Object.entries(newRelationships)
 		.map(([relType, newCodes]) => {
@@ -88,103 +78,74 @@ const relationshipDiffer = (
 		);
 
 	return {
-		addedRelationships: entriesArrayToObject(
-			summary
-				.filter(([, { added = [] }]) => added.length)
-				.map(([relType, { added }]) => [relType, added])
-		),
-		removedRelationships: entriesArrayToObject(
-			summary
-				.filter(([, { removed = [] }]) => removed.length)
-				.map(([relType, { removed }]) => [relType, removed])
-		)
+		addedRelationships: summary
+			.filter(([, { added = [] }]) => added.length)
+			.map(([relType, { added }]) => [relType, added])
+			.reduce(entriesToObject, {}),
+		removedRelationships: summary
+			.filter(([, { removed = [] }]) => removed.length)
+			.map(([relType, { removed }]) => [relType, removed])
+			.reduce(entriesToObject, {})
 	};
 };
 
-const determineChanges = ({
-	nodeType,
-	writeAttributes,
-	deleteAttributes,
-	writeRelationships,
-	deleteRelationships,
-	existingRecord,
-	relationshipAction
-}) => {
-	return Object.assign(
-		{
-			attributeChanges: nodeDiffer(
-				nodeType,
-				existingRecord,
-				writeAttributes,
-				deleteAttributes
-			)
-		},
-		relationshipDiffer(
-			nodeType,
-			existingRecord,
-			writeRelationships,
-			deleteRelationships,
-			relationshipAction
-		)
-	);
+const getChangedAttributes = (newAttributes, oldAttributes) => {
+	return Object.entries(newAttributes)
+		.filter(([propName, value]) => value !== oldAttributes[propName])
+		.reduce(entriesToObject, {});
 };
 
-const update = async input => {
-	validateParams(input);
-	Object.assign(input, categorizeAttributes(input));
+const getDeletedAttributeNames = (deletedAttributeNames, oldAttributes) =>
+	deletedAttributeNames.filter(propName => propName in oldAttributes);
 
-	// probably not needed any more as we validate higher up
-	if (input.writeAttributes.code) {
-		input.writeAttributes.code = input.code;
-	}
+const update = async input => {
+	inputHelpers.validateParams(input);
+	inputHelpers.validatePayload(input);
 
 	const {
 		clientId,
 		requestId,
 		nodeType,
 		code,
-		writeAttributes,
-		deleteAttributes,
-		writeRelationships,
-		deleteRelationships,
 		query: { relationshipAction, upsert }
 	} = input;
 
-	try {
-		if (
-			Object.keys(writeRelationships).length + deleteRelationships.length >
-			0
-		) {
-			preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
-		}
+	if (inputHelpers.containsRelationshipData(nodeType, input.attributes)) {
+		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
+	}
 
+	try {
 		const prefetch = await getNodeWithRelationships(nodeType, code);
 
 		const existingRecord = prefetch.records.length
 			? constructOutput(nodeType, prefetch)
 			: {};
 
-		const {
-			attributeChanges,
-			removedRelationships,
-			addedRelationships
-		} = determineChanges({
-			nodeType,
-			writeAttributes,
-			deleteAttributes,
-			writeRelationships,
-			deleteRelationships,
-			existingRecord,
-			relationshipAction
-		});
+		const writeAttributes = getChangedAttributes(
+			inputHelpers.getWriteAttributes(nodeType, input.attributes, code),
+			existingRecord
+		);
 
-		if (
-			!(
-				attributeChanges.length +
-				Object.keys(removedRelationships).length +
-				Object.keys(addedRelationships).length
-			)
-		) {
+		const deleteAttributeNames = getDeletedAttributeNames(
+			inputHelpers.getDeleteAttributes(nodeType, input.attributes),
+			existingRecord
+		);
+
+		const { removedRelationships, addedRelationships } = relationshipDiffer(
+			nodeType,
+			existingRecord,
+			input.attributes,
+			relationshipAction
+		);
+
+		const willModifyNode =
+			Object.keys(writeAttributes).length + deleteAttributeNames.length;
+
+		const willModifyRelationships =
+			Object.keys(removedRelationships).length +
+			Object.keys(addedRelationships).length;
+
+		if (!willModifyNode && !willModifyRelationships) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
 				'No changed properties or relationships - skipping node update'
@@ -207,15 +168,16 @@ const update = async input => {
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
 						${metaAttributesForCreate('node')}
-				`,
-
-			attributeChanges.length
-				? stripIndents`ON MATCH SET
-						${metaAttributesForUpdate('node')}
-					SET node += $attributes`
-				: ''
+				`
 		];
-		queryParts.push(...deleteAttributes.map(attr => `REMOVE node.${attr}`));
+
+		if (willModifyNode) {
+			queryParts.push(stripIndents`ON MATCH SET
+						${metaAttributesForUpdate('node')}
+					SET node += $attributes`);
+		}
+
+		queryParts.push(...deleteAttributeNames.map(attr => `REMOVE node.${attr}`));
 
 		if (Object.keys(removedRelationships).length) {
 			const schema = getType(nodeType);

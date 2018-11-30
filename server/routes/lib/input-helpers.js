@@ -2,83 +2,102 @@ const httpErrors = require('http-errors');
 const validation = require('./validation');
 const { getType } = require('@financial-times/biz-ops-schema');
 
-const categorizeAttributes = ({ nodeType, code, attributes }) => {
-	if (attributes.code && attributes.code !== code) {
-		throw httpErrors(
-			400,
-			`Conflicting code attribute \`${
-				attributes.code
-			}\` for ${nodeType} ${code}`
-		);
-	}
+const isRelationship = properties => ([propName]) =>
+	properties[propName].relationship;
 
-	validation.validateAttributeNames(attributes);
-	validation.validateAttributes(nodeType, attributes);
+const isAttribute = properties => entry => !isRelationship(properties)(entry);
 
-	const { properties } = getType(nodeType);
+const toArray = val => (Array.isArray(val) ? val : [val]);
 
-	Object.keys(attributes).forEach(name => {
-		if (!properties[name]) {
-			throw httpErrors(
-				400,
-				`Invalid property \`${name}\` on type \`${nodeType}\``
-			);
-		}
-	});
-
-	const isRelationship = ([name]) =>
-		properties[name] && properties[name].relationship;
-
-	const isAttribute = entry => !isRelationship(entry);
-
-	return {
-		deleteAttributes: Object.entries(attributes)
-			.filter(isAttribute)
-			.filter(([, val]) => val === null)
-			.map(([key]) => key),
-		writeAttributes: Object.entries(attributes)
-			.filter(isAttribute)
-			.filter(([, val]) => val !== null)
-			.reduce(
-				(map, [propName, val]) => Object.assign(map, { [propName]: val }),
-				{}
-			),
-		deleteRelationships: Object.entries(attributes)
-			.filter(isRelationship)
-			.filter(([, val]) => val === null)
-			.map(([propName]) => propName),
-		writeRelationships: Object.entries(attributes)
-			.filter(isRelationship)
-			.filter(([, codes]) => codes !== null)
-			.map(
-				([propName, codes]) =>
-					Array.isArray(codes) ? [propName, codes] : [propName, [codes]]
-			)
-			// filter is a hacky way of running validation over the array without having
-			// to worry about mutating into
-			.filter(([propName, codes]) => {
-				const { type } = properties[propName];
-				// this will error and bail the whole process if invalid
-				codes.forEach(code => validation.validateCode(type, code));
-				// otherwise include
-				return true;
-			})
-			.reduce(
-				(map, [propName, val]) => Object.assign(map, { [propName]: val }),
-				{}
-			)
-	};
-};
+const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const validateParams = ({ clientId, requestId, nodeType, code }) => {
 	// TODO move these first two into middleware
 	validation.validateClientId(clientId);
 	validation.validateRequestId(requestId);
+	// And these two too
 	validation.validateTypeName(nodeType);
 	validation.validateCode(nodeType, code);
 };
 
+const validatePayload = ({ nodeType, code, attributes: payload }) => {
+	if (payload.code && payload.code !== code) {
+		throw httpErrors(
+			400,
+			`Conflicting code attribute \`${payload.code}\` for ${nodeType} ${code}`
+		);
+	}
+
+	Object.entries(payload).forEach(([propName, value]) => {
+		validation.validatePropertyName(propName);
+		validation.validateProperty(nodeType, propName, value);
+	});
+};
+
+const containsRelationshipData = (type, payload) => {
+	const { properties } = getType(type);
+	return Object.entries(getType(type).properties)
+		.filter(isRelationship(properties))
+		.some(([propName]) => propName in payload); // || `!${propName}` in payload)
+};
+
+const getWriteAttributes = (type, payload, code) => {
+	const { properties } = getType(type);
+
+	payload.code = code || payload.code;
+
+	return Object.entries(payload)
+		.filter(isAttribute(properties))
+		.filter(([, val]) => val !== null)
+		.reduce(entriesToObject, {});
+};
+
+const getDeleteAttributes = (type, payload) => {
+	const { properties } = getType(type);
+
+	return Object.entries(payload)
+		.filter(isAttribute(properties))
+		.filter(([, val]) => val === null)
+		.map(([key]) => key);
+};
+
+const getWriteRelationships = (type, payload) => {
+	const { properties } = getType(type);
+	return Object.entries(payload)
+		.filter(isRelationship(properties))
+		.filter(([, codes]) => codes !== null)
+		.map(([propName, codes]) => [propName, toArray(codes)])
+		.reduce(entriesToObject, {});
+};
+
+const getDeleteRelationships = (type, payload) => {
+	const { properties } = getType(type);
+	return Object.entries(payload)
+		.filter(isRelationship(properties))
+		.filter(([, val]) => val === null)
+		.map(([propName]) => propName);
+
+	// 	deleteRelationships: Object.entries(attributes)
+	// 		.filter(([propName]) => isRelationship(propName.replace(/^!/, '')))
+	// 		.filter(isDeleteRelationship)
+	// 		.map(toDelete)
+	// 		// filter is a hacky way of running validation over the array without having
+	// 		// to worry about mutating into
+	// 		.filter(([propName, codes]) => {
+	// 			const { type } = properties[propName];
+	// 			// this will error and bail the whole process if invalid
+	// 			codes.forEach(code => validation.validateCode(type, code));
+	// 			// otherwise include
+	// 			return true;
+	// 		}),
+};
+
 module.exports = {
 	validateParams,
-	categorizeAttributes
+	validatePayload,
+	containsRelationshipData,
+	getWriteAttributes,
+	getWriteRelationships,
+	getDeleteAttributes,
+	getDeleteRelationships
 };

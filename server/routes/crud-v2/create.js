@@ -1,7 +1,4 @@
-const {
-	validateParams,
-	categorizeAttributes
-} = require('../lib/input-helpers');
+const inputHelpers = require('../lib/input-helpers');
 const { stripIndents } = require('common-tags');
 const { dbErrorHandlers } = require('../lib/errors');
 const { logNodeChanges } = require('../lib/log-to-kinesis');
@@ -15,20 +12,16 @@ const {
 const salesforceSync = require('../../lib/salesforce-sync');
 
 const create = async input => {
-	validateParams(input);
-	Object.assign(input, categorizeAttributes(input));
+	inputHelpers.validateParams(input);
+	inputHelpers.validatePayload(input);
 
 	const {
 		clientId,
 		requestId,
 		nodeType,
 		code,
-		query: { upsert },
-		writeAttributes,
-		writeRelationships
+		query: { upsert }
 	} = input;
-
-	input.writeAttributes.code = code;
 
 	try {
 		// If the request creates a lot of relationships, more than one query
@@ -53,10 +46,17 @@ const create = async input => {
 
 		const queries = getBatchedQueries({
 			baseParameters,
-			writeAttributes,
+			writeAttributes: inputHelpers.getWriteAttributes(
+				nodeType,
+				input.attributes,
+				code
+			),
 			nodeType,
 			upsert,
-			writeRelationships,
+			writeRelationships: inputHelpers.getWriteRelationships(
+				nodeType,
+				input.attributes
+			),
 			initialQueryParts: queryParts
 		});
 

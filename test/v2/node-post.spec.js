@@ -19,6 +19,14 @@ describe('v2 - node POST', () => {
 	const requestId = `${namespace}-request`;
 	const clientId = `${namespace}-client`;
 
+	const event = (action, code, type) => ({
+		action,
+		type,
+		code,
+		requestId,
+		clientId
+	});
+
 	setupMocks(sandbox, { namespace });
 
 	it('responds with 500 if query fails', async () => {
@@ -29,8 +37,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({})
 			.expect(500);
-		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		// verifyNotExists('Team', teamCode);
+		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 	});
 
 	it('create node', async () => {
@@ -56,13 +63,9 @@ describe('v2 - node POST', () => {
 			})
 		);
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: `${namespace}-team`,
-			type: 'Team',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', `${namespace}-team`, 'Team')
+		);
 	});
 
 	it('error when creating duplicate node', async () => {
@@ -91,7 +94,7 @@ describe('v2 - node POST', () => {
 				)
 			);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
+		await verifyNotExists('Team', teamCode);
 	});
 
 	it('error when unrecognised property', async () => {
@@ -102,7 +105,7 @@ describe('v2 - node POST', () => {
 			.send({ foo: 'unrecognised' })
 			.expect(400, /Invalid property `foo` on type `Team`/);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
+		await verifyNotExists('Team', teamCode);
 	});
 
 	it('not error when non-conflicting code values', async () => {
@@ -113,7 +116,7 @@ describe('v2 - node POST', () => {
 			.send({ code: teamCode })
 			.expect(200);
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		verifyExists('Team', teamCode);
+		await verifyExists('Team', teamCode);
 	});
 
 	it('create node related to existing nodes', async () => {
@@ -166,27 +169,15 @@ describe('v2 - node POST', () => {
 		);
 
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'UPDATE',
-			code: personCode,
-			type: 'Person',
-			requestId,
-			clientId
-		});
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'UPDATE',
-			code: groupCode,
-			type: 'Group',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', teamCode, 'Team')
+		);
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('UPDATE', personCode, 'Person')
+		);
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('UPDATE', groupCode, 'Group')
+		);
 	});
 
 	it('error when creating node related to non-existent nodes', async () => {
@@ -200,7 +191,7 @@ describe('v2 - node POST', () => {
 			})
 			.expect(400, /Missing related node/);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-		verifyNotExists('Team', teamCode);
+		await verifyNotExists('Team', teamCode);
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -252,27 +243,15 @@ describe('v2 - node POST', () => {
 		);
 
 		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: teamCode,
-			type: 'Team',
-			requestId,
-			clientId
-		});
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: personCode,
-			type: 'Person',
-			requestId,
-			clientId
-		});
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'CREATE',
-			code: groupCode,
-			type: 'Group',
-			requestId,
-			clientId
-		});
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', teamCode, 'Team')
+		);
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', personCode, 'Person')
+		);
+		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+			event('CREATE', groupCode, 'Group')
+		);
 	});
 
 	queryBatchingTests({

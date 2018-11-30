@@ -53,26 +53,6 @@ module.exports = ({ method, url, namespace, sandbox, app }) => {
 			);
 			expect(result.records.length).toEqual(relationshipCount);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(15);
-			// expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			// 	action: 'CREATE',
-			// 	code: teamCode,
-			// 	type: 'Team',
-			// 	requestId,
-			// 	clientId
-			// });
-			// console.log(sandbox.stubSendEvent.mock.calls);
-			// const identifiers = state.stubSendEvent.args.map(
-			// 	a =>
-			// 		`${a[0].code}-${a[0].event}-${a[0].relationship &&
-			// 			a[0].relationship.relType +
-			// 				a[0].relationship.direction +
-			// 				a[0].relationship.nodeCode}`
-			// );
-			// const uniqueIdentifiers = [...new Set(identifiers)];
-			// // testing that each hcange only gets logged once
-			// expect(state.stubSendEvent.args.length).to.equal(
-			// 	uniqueIdentifiers.length
-			// );
 		});
 
 		it('splits writes of many relationships into multiple calls', async () => {

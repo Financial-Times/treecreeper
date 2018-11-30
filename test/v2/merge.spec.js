@@ -18,6 +18,14 @@ describe('merge', () => {
 	const requestId = `${namespace}-request`;
 	const clientId = `${namespace}-client`;
 
+	const event = (action, code, type) => ({
+		action,
+		type,
+		code,
+		requestId,
+		clientId
+	});
+
 	setupMocks(sandbox, { namespace });
 
 	describe('error handling', () => {
@@ -146,21 +154,13 @@ describe('merge', () => {
 			]);
 
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
 			// TODO try to avoid this event when no properties or relationships have actually changed
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
 		});
 
 		it('move outgoing relationships', async () => {
@@ -203,27 +203,15 @@ describe('merge', () => {
 				]
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: personCode,
-				type: 'Person',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', personCode, 'Person')
+			);
 		});
 
 		it('move incoming relationships', async () => {
@@ -267,27 +255,15 @@ describe('merge', () => {
 			);
 
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: groupCode,
-				type: 'Group',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', groupCode, 'Group')
+			);
 		});
 
 		it('merges identical relationships', async () => {
@@ -333,20 +309,12 @@ describe('merge', () => {
 				]
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
 		});
 
 		it('discard any newly reflexive relationships', async () => {
@@ -377,20 +345,12 @@ describe('merge', () => {
 				})
 			);
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
 		});
 
 		it('not modify existing properties of destination node', async () => {
@@ -418,20 +378,12 @@ describe('merge', () => {
 			);
 
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
 		});
 
 		it('add new properties to destination node', async () => {
@@ -459,20 +411,12 @@ describe('merge', () => {
 			);
 
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'DELETE',
-				code: teamCode1,
-				type: 'Team',
-				requestId,
-				clientId
-			});
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-				action: 'UPDATE',
-				code: teamCode2,
-				type: 'Team',
-				requestId,
-				clientId
-			});
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('DELETE', teamCode1, 'Team')
+			);
+			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
+				event('UPDATE', teamCode2, 'Team')
+			);
 		});
 	});
 });
