@@ -21,6 +21,7 @@ properties:
     type: Url
     # required: true
     canIdentify: true
+    isCore: true
     label: URL
     description: Repository URL
     autoPopulated: true
