@@ -32,7 +32,7 @@ properties:
     description: The team's email address
     fieldset: general
   slack:
-    type: Slack
+    type: Word
     canIdentify: true
     isCore: true
     label: Slack

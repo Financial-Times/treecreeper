@@ -29,7 +29,7 @@ properties:
     fieldset: contact
     autoPopulated: true
   slack:
-    type: Slack
+    type: Word
     label: Slack
     canIdentify: true
     isCore: true
