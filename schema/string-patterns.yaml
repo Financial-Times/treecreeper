@@ -7,3 +7,4 @@ PERMISSIVE: '^.*$'
 NO_SPACES: '^\S+$'
 STRICT_CODE: '^[a-z\d][a-z\d\-]*[a-z\d]$'
 REPO_NAME: '^(github|bitbucket)\:.*$'
+NO_LOWER_CASE: '^[^a-z]+$' # ANYTHING:?\NOT LOWERCASE
