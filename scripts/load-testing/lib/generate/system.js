@@ -5,7 +5,7 @@ const generateSystemData = () => {
 	const lifecycleStage = [
 		'Preproduction',
 		'Production',
-		'Dormant',
+		'Deprecated',
 		'Decommissioned'
 	];
 	const relationshipType = [
