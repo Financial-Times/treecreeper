@@ -110,6 +110,14 @@ properties:
     label: Lifecycle stage
     description: The system lifecycle stage of the system
     fieldset: general
+  replacedBy:
+    type: System
+    direction: incoming
+    label: Replaced by systems
+    relationship: REPLACES
+    description: System(s) that do, or will, replace all or part of this system
+    hasMany: true
+    fieldset: general
   SF_ID:
     type: Word
     canFilter: true
@@ -258,14 +266,6 @@ properties:
     label: Replaces systems
     relationship: REPLACES
     description: System(s) that are, or will be, replaced, at least in part, by this system
-    hasMany: true
-    fieldset: network
-  replacedBy:
-    type: System
-    direction: incoming
-    label: Replaced by systems
-    relationship: REPLACES
-    description: System(s) that do, or will, replace all or part of this system
     hasMany: true
     fieldset: network
 fieldsets:
