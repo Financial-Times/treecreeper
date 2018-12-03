@@ -2,17 +2,19 @@ name: System
 description: Any combination of software and technical infrastructure used by the business, engineering or operations
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
+    isCore: true
     pattern: CODE
     label: Code
     fieldset: general
     description: Unique code/id for this item. Once created it should (in most cases) never be altered
   name:
-    type: Word
+    type: Name
     canIdentify: true
+    isCore: true
     label: Name
     description: Display name of the system
     fieldset: general
@@ -25,6 +27,7 @@ properties:
   primaryURL:
     type: Url
     canIdentify: true
+    isCore: true
     label: Primary URL
     description: The main url served by the system
     fieldset: general
@@ -38,6 +41,7 @@ properties:
   serviceTier:
     type: ServiceTier
     canFilter: true
+    isCore: true
     label: Service tier
     description: The system's service tier level
     fieldset: general
@@ -102,6 +106,7 @@ properties:
   lifecycleStage:
     type: SystemLifecycle
     canFilter: true
+    isCore: true
     label: Lifecycle stage
     description: The system lifecycle stage of the system
     fieldset: general
