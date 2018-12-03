@@ -16,16 +16,6 @@ describe('v2 - node POST', () => {
 	const teamCode = `${namespace}-team`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
-	const requestId = `${namespace}-request`;
-	const clientId = `${namespace}-client`;
-
-	const event = (action, code, type) => ({
-		action,
-		type,
-		code,
-		requestId,
-		clientId
-	});
 
 	setupMocks(sandbox, { namespace });
 
@@ -37,7 +27,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({})
 			.expect(500);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('create node', async () => {
@@ -62,10 +52,7 @@ describe('v2 - node POST', () => {
 				name: 'name1'
 			})
 		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', `${namespace}-team`, 'Team')
-		);
+		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
 	});
 
 	it('error when creating duplicate node', async () => {
@@ -78,7 +65,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({})
 			.expect(409, new RegExp(`Team ${teamCode} already exists`));
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('error when conflicting code values', async () => {
@@ -93,7 +80,7 @@ describe('v2 - node POST', () => {
 					`Conflicting code attribute \`wrong-code\` for Team ${teamCode}`
 				)
 			);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
@@ -115,7 +102,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({ code: teamCode })
 			.expect(200);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
 		await verifyExists('Team', teamCode);
 	});
 
@@ -168,15 +155,10 @@ describe('v2 - node POST', () => {
 			]
 		);
 
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', teamCode, 'Team')
-		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('UPDATE', personCode, 'Person')
-		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('UPDATE', groupCode, 'Group')
+		sandbox.expectEvents(
+			['CREATE', teamCode, 'Team'],
+			['UPDATE', personCode, 'Person'],
+			['UPDATE', groupCode, 'Group']
 		);
 	});
 
@@ -190,7 +172,7 @@ describe('v2 - node POST', () => {
 				parentGroup: groupCode
 			})
 			.expect(400, /Missing related node/);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
@@ -242,15 +224,10 @@ describe('v2 - node POST', () => {
 			]
 		);
 
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', teamCode, 'Team')
-		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', personCode, 'Person')
-		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', groupCode, 'Group')
+		sandbox.expectEvents(
+			['CREATE', teamCode, 'Team'],
+			['CREATE', personCode, 'Person'],
+			['CREATE', groupCode, 'Group']
 		);
 	});
 

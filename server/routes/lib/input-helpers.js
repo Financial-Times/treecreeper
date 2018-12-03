@@ -2,10 +2,23 @@ const httpErrors = require('http-errors');
 const validation = require('./validation');
 const { getType } = require('@financial-times/biz-ops-schema');
 
-const isRelationship = properties => ([propName]) =>
+const stripNegation = propName => propName.replace(/^!/, '');
+
+const isRelationship = properties => propName =>
 	properties[propName].relationship;
 
-const isAttribute = properties => entry => !isRelationship(properties)(entry);
+const isAttribute = properties => ([propName]) =>
+	!isRelationship(properties)(stripNegation(propName));
+
+const isWriteRelationship = properties => ([propName, codes]) =>
+	propName.charAt(0) !== '!' &&
+	isRelationship(properties)(propName) &&
+	codes !== null;
+
+const isDeleteRelationship = properties => ([propName, codes]) =>
+	(propName.charAt(0) === '!' &&
+		isRelationship(properties)(propName.substr(1))) ||
+	(isRelationship(properties)(propName) && codes === null);
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -29,16 +42,17 @@ const validatePayload = ({ nodeType, code, attributes: payload }) => {
 	}
 
 	Object.entries(payload).forEach(([propName, value]) => {
-		validation.validatePropertyName(propName);
-		validation.validateProperty(nodeType, propName, value);
+		const realPropName = stripNegation(propName);
+		validation.validatePropertyName(realPropName);
+		validation.validateProperty(nodeType, realPropName, value);
 	});
 };
 
 const containsRelationshipData = (type, payload) => {
 	const { properties } = getType(type);
 	return Object.entries(getType(type).properties)
-		.filter(isRelationship(properties))
-		.some(([propName]) => propName in payload); // || `!${propName}` in payload)
+		.filter(([propName]) => isRelationship(properties)(propName))
+		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };
 
 const getWriteAttributes = (type, payload, code) => {
@@ -64,8 +78,7 @@ const getDeleteAttributes = (type, payload) => {
 const getWriteRelationships = (type, payload) => {
 	const { properties } = getType(type);
 	return Object.entries(payload)
-		.filter(isRelationship(properties))
-		.filter(([, codes]) => codes !== null)
+		.filter(isWriteRelationship(properties))
 		.map(([propName, codes]) => [propName, toArray(codes)])
 		.reduce(entriesToObject, {});
 };
@@ -73,23 +86,12 @@ const getWriteRelationships = (type, payload) => {
 const getDeleteRelationships = (type, payload) => {
 	const { properties } = getType(type);
 	return Object.entries(payload)
-		.filter(isRelationship(properties))
-		.filter(([, val]) => val === null)
-		.map(([propName]) => propName);
-
-	// 	deleteRelationships: Object.entries(attributes)
-	// 		.filter(([propName]) => isRelationship(propName.replace(/^!/, '')))
-	// 		.filter(isDeleteRelationship)
-	// 		.map(toDelete)
-	// 		// filter is a hacky way of running validation over the array without having
-	// 		// to worry about mutating into
-	// 		.filter(([propName, codes]) => {
-	// 			const { type } = properties[propName];
-	// 			// this will error and bail the whole process if invalid
-	// 			codes.forEach(code => validation.validateCode(type, code));
-	// 			// otherwise include
-	// 			return true;
-	// 		}),
+		.filter(isDeleteRelationship(properties))
+		.map(([propName, codes]) => [
+			codes ? stripNegation(propName) : propName,
+			codes ? toArray(codes) : null
+		])
+		.reduce(entriesToObject, {});
 };
 
 module.exports = {

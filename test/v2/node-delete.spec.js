@@ -24,14 +24,7 @@ describe('v2 - node DELETE', () => {
 			.expect(204);
 
 		await verifyNotExists('Team', `${namespace}-team`);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-			action: 'DELETE',
-			code: `${namespace}-team`,
-			type: 'Team',
-			requestId: `${namespace}-request`,
-			clientId: `${namespace}-client`
-		});
+		sandbox.expectEvents(['DELETE', `${namespace}-team`, 'Team']);
 	});
 
 	it('404 when deleting non-existent node', async () => {
@@ -40,7 +33,7 @@ describe('v2 - node DELETE', () => {
 			.delete(`/v2/node/Team/${namespace}-team`)
 			.namespacedAuth()
 			.expect(404);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
@@ -60,7 +53,7 @@ describe('v2 - node DELETE', () => {
 			);
 
 		await verifyExists('Team', `${namespace}-team`);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('responds with 500 if query fails', async () => {
@@ -70,6 +63,6 @@ describe('v2 - node DELETE', () => {
 			.delete(`/v2/node/Team/${namespace}-team`)
 			.auth()
 			.expect(500);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 });

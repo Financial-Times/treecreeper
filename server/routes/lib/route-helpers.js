@@ -14,6 +14,7 @@ const success = (res, data) =>
 	data.status ? res.status(data.status).json(data.data) : res.json(data);
 
 const failure = (res, err) => {
+	process.env.DEBUG && console.log(err);
 	logger.error({ event: 'BIZ_OPS_API_ERROR', error: err });
 
 	if (!err.status) {
