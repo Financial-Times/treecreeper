@@ -36,6 +36,22 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 		if (withDb) {
 			testDataCreators(namespace, sandbox, formattedTimestamp);
 		}
+
+		sandbox.expectEvents = (...events) => {
+			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(events.length);
+			events.forEach(([action, code, type]) => {
+				expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
+					action,
+					type,
+					code,
+					requestId: `${namespace}-request`,
+					clientId: `${namespace}-client`
+				});
+			});
+		};
+
+		sandbox.expectNoEvents = () =>
+			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(0);
 	});
 	afterEach(async () => {
 		sandbox.sinon.restore();

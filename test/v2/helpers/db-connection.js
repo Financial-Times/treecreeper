@@ -5,8 +5,12 @@ const spyDbQuery = ({ sinon }) => {
 	let spy;
 	sinon.stub(driver, 'session').callsFake(() => {
 		const session = originalSession();
-		sinon.spy(session, 'run');
-		spy = session.run;
+		if (!spy) {
+			sinon.spy(session, 'run');
+			spy = session.run;
+		} else {
+			session.run = spy;
+		}
 		return session;
 	});
 	return () => spy;

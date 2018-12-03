@@ -15,38 +15,31 @@ describe('v2 - node PATCH', () => {
 	const teamCode = `${namespace}-team`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
-	const requestId = `${namespace}-request`;
-	const clientId = `${namespace}-client`;
-
-	const event = (action, code, type) => ({
-		action,
-		type,
-		code,
-		requestId,
-		clientId
-	});
+	let authenticatedPatch;
 
 	setupMocks(sandbox, { namespace });
-
+	beforeEach(() => {
+		authenticatedPatch = (url, data) =>
+			sandbox
+				.request(app)
+				.patch(url)
+				.namespacedAuth()
+				.send(data);
+	});
 	it('update node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 			name: 'name1'
 		});
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({
-				name: 'name2'
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			name: 'name2'
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				name: 'name2',
+				code: teamCode
 			})
-			.expect(
-				200,
-				sandbox.withUpdateMeta({
-					name: 'name2',
-					code: teamCode
-				})
-			);
+		);
 
 		await testNode(
 			'Team',
@@ -57,27 +50,19 @@ describe('v2 - node PATCH', () => {
 			})
 		);
 
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('UPDATE', teamCode, 'Team')
-		);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
 	it('Create when patching non-existent node', async () => {
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({
-				name: 'name1'
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			name: 'name1'
+		}).expect(
+			201,
+			sandbox.withCreateMeta({
+				name: 'name1',
+				code: teamCode
 			})
-			.expect(
-				201,
-				sandbox.withCreateMeta({
-					name: 'name1',
-					code: teamCode
-				})
-			);
+		);
 
 		await testNode(
 			'Team',
@@ -87,63 +72,44 @@ describe('v2 - node PATCH', () => {
 				code: teamCode
 			})
 		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('CREATE', teamCode, 'Team')
-		);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
 	});
 
 	it('error when conflicting code values', async () => {
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ code: 'wrong-code' })
-			.expect(
-				400,
-				new RegExp(
-					`Conflicting code attribute \`wrong-code\` for Team ${teamCode}`
-				)
-			);
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			code: 'wrong-code'
+		}).expect(
+			400,
+			new RegExp(
+				`Conflicting code attribute \`wrong-code\` for Team ${teamCode}`
+			)
+		);
 		verifyNotExists('Team', teamCode);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('not error when non-conflicting code values', async () => {
 		await sandbox.createNode('Team', teamCode);
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ name: 'name1', code: teamCode })
-			.expect(200);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('UPDATE', teamCode, 'Team')
-		);
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			name: 'name1',
+			code: teamCode
+		}).expect(200);
+
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
 	it('error when unrecognised attribute', async () => {
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ foo: 'unrecognised' })
-			.expect(400, /Invalid property `foo` on type `Team`/);
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			foo: 'unrecognised'
+		}).expect(400, /Invalid property `foo` on type `Team`/);
 		verifyNotExists('Team', teamCode);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		sandbox.expectNoEvents();
 	});
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({})
-			.expect(500);
-		// verifyNotExists('Team', teamCode);
-		// expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {}).expect(500);
+		sandbox.expectNoEvents();
 	});
 
 	it("deletes attributes which are provided as 'null'", async () => {
@@ -151,17 +117,14 @@ describe('v2 - node PATCH', () => {
 			code: teamCode,
 			name: 'name1'
 		});
-		await sandbox
-			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ name: null })
-			.expect(
-				200,
-				sandbox.withUpdateMeta({
-					code: teamCode
-				})
-			);
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			name: null
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode
+			})
+		);
 
 		await testNode(
 			'Team',
@@ -170,65 +133,91 @@ describe('v2 - node PATCH', () => {
 				code: teamCode
 			})
 		);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-		expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-			event('UPDATE', teamCode, 'Team')
-		);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
 	describe('relationship patching', () => {
 		describe('deleting', () => {
 			it('errors if no relationshipAction query string when deleting relationship set', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await sandbox
-					.request(app)
-					.patch(`/v2/node/Team/${teamCode}`)
-					.namespacedAuth()
-					.send({ techLeads: null })
-					.expect(
-						400,
-						/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
-					);
-				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+					techLeads: null
+				}).expect(
+					400,
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+				);
+				sandbox.expectNoEvents();
 			});
 
-			it.skip('errors if no relationshipAction query string when deleting individual relationship', async () => {
+			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await sandbox
-					.request(app)
-					.patch(`/v2/node/Team/${teamCode}`)
-					.namespacedAuth()
-					.send({ '!techLeads': [personCode] })
-					.expect(
-						400,
-						/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
-					);
-				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+					'!techLeads': [personCode]
+				}).expect(
+					400,
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+				);
+				sandbox.expectNoEvents();
 			});
 			['merge', 'replace'].forEach(action =>
 				describe(`with ${action} action`, () => {
 					describe('individual relationship delete', () => {
-						it.skip('can delete a specific relationship', async () => {});
-						it.skip('can delete multiple specific relationships of the same kind', async () => {});
-						it.skip('can delete multiple specific relationships of different kinds', async () => {});
-						it.skip('leaves relationships in the opposite direction unaffected', async () => {});
-						it.skip('can add and remove relationships of the same type at the same time', async () => {});
-						it.skip('errors if deleting and adding the same relationship to the same record', async () => {});
-					});
-					describe('bulk relationship delete', () => {
-						it('can delete empty relationship set', async () => {
+						it('can delete a specific relationship', async () => {
+							const [team, person1, person2] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', `${personCode}-1`],
+								['Person', `${personCode}-2`]
+							);
+							await sandbox.connectNodes(
+								[team, 'HAS_TECH_LEAD', person1],
+								[team, 'HAS_TECH_LEAD', person2]
+							);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ '!techLeads': [`${personCode}-1`] }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
+									techLeads: [`${personCode}-2`]
+								})
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								}),
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({ code: `${personCode}-2` })
+									}
+								]
+							);
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', `${personCode}-1`, 'Person']
+							);
+						});
+
+						it("can attempt to delete a specific relationship of type that doesn't exist", async () => {
 							await sandbox.createNode('Team', teamCode);
-							await sandbox
-								.request(app)
-								.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-								.namespacedAuth()
-								.send({ techLeads: null })
-								.expect(
-									200,
-									sandbox.withMeta({
-										code: teamCode
-									})
-								);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ '!techLeads': [personCode] }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
 
 							await testNode(
 								'Team',
@@ -237,8 +226,271 @@ describe('v2 - node PATCH', () => {
 									code: teamCode
 								})
 							);
+							sandbox.expectNoEvents();
+						});
 
-							expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+						it("can attempt to delete a specific relationship that doesn't exist", async () => {
+							const [team, person1] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', `${personCode}-1`]
+							);
+							await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person1]);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ '!techLeads': [`${personCode}-2`] }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
+									techLeads: [`${personCode}-1`]
+								})
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								}),
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({ code: `${personCode}-1` })
+									}
+								]
+							);
+							sandbox.expectNoEvents();
+						});
+
+						it('can delete multiple specific relationships of the same kind', async () => {
+							const [
+								team,
+								person1,
+								person2,
+								person3
+							] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', `${personCode}-1`],
+								['Person', `${personCode}-2`],
+								['Person', `${personCode}-3`]
+							);
+							await sandbox.connectNodes(
+								[team, 'HAS_TECH_LEAD', person1],
+								[team, 'HAS_TECH_LEAD', person2],
+								[team, 'HAS_TECH_LEAD', person3]
+							);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ '!techLeads': [`${personCode}-1`, `${personCode}-3`] }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
+									techLeads: [`${personCode}-2`]
+								})
+							);
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								}),
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({ code: `${personCode}-2` })
+									}
+								]
+							);
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', `${personCode}-1`, 'Person'],
+								['UPDATE', `${personCode}-3`, 'Person']
+							);
+						});
+
+						it('can delete multiple specific relationships of different kinds', async () => {
+							const [team, person, group] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', personCode],
+								['Group', groupCode]
+							);
+							await sandbox.connectNodes(
+								[team, 'HAS_TECH_LEAD', person],
+								[group, 'HAS_TEAM', team]
+							);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{
+									'!techLeads': [personCode],
+									'!parentGroup': groupCode
+								}
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', personCode, 'Person'],
+								['UPDATE', groupCode, 'Group']
+							);
+						});
+						it('leaves relationships in the opposite direction unaffected', async () => {
+							const [team1, team2, team3] = await sandbox.createNodes(
+								['Team', `${teamCode}-1`],
+								['Team', `${teamCode}-2`],
+								['Team', `${teamCode}-3`]
+							);
+							await sandbox.connectNodes(
+								[team1, 'HAS_TEAM', team2],
+								[team2, 'HAS_TEAM', team3]
+							);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
+								{ '!subTeams': [`${teamCode}-3`] }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: `${teamCode}-2`,
+									parentTeam: `${teamCode}-1`
+								})
+							);
+
+							await testNode(
+								'Team',
+								`${teamCode}-2`,
+								sandbox.withMeta({
+									code: `${teamCode}-2`
+								}),
+								[
+									{
+										type: 'HAS_TEAM',
+										direction: 'incoming',
+										props: sandbox.withMeta({})
+									},
+									{
+										type: 'Team',
+										props: sandbox.withMeta({ code: `${teamCode}-1` })
+									}
+								]
+							);
+							sandbox.expectEvents(
+								['UPDATE', `${teamCode}-3`, 'Team'],
+								['UPDATE', `${teamCode}-2`, 'Team']
+							);
+						});
+						it('can add and remove relationships of the same type at the same time', async () => {
+							const [team, person1] = await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', `${personCode}-1`],
+								['Person', `${personCode}-2`]
+							);
+							await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person1]);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{
+									'!techLeads': [`${personCode}-1`],
+									techLeads: [`${personCode}-2`]
+								}
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
+									techLeads: [`${personCode}-2`]
+								})
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								}),
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withCreateMeta({})
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({ code: `${personCode}-2` })
+									}
+								]
+							);
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', `${personCode}-1`, 'Person'],
+								['UPDATE', `${personCode}-2`, 'Person']
+							);
+						});
+						it('errors if deleting and adding the same relationship to the same record', async () => {
+							await sandbox.createNodes(
+								['Team', teamCode],
+								['Person', personCode]
+							);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{
+									techLeads: [personCode],
+									'!techLeads': [personCode]
+								}
+							).expect(
+								400,
+								/Trying to add and remove a relationship to a record at the same time/
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
+							sandbox.expectNoEvents();
+						});
+					});
+					describe('bulk relationship delete', () => {
+						it('can delete empty relationship set', async () => {
+							await sandbox.createNode('Team', teamCode);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ techLeads: null }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
+
+							await testNode(
+								'Team',
+								teamCode,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
+							sandbox.expectNoEvents();
 						});
 
 						it('can delete entire relationship sets', async () => {
@@ -252,17 +504,15 @@ describe('v2 - node PATCH', () => {
 								[group, 'HAS_TEAM', team],
 								[team, 'HAS_TECH_LEAD', person]
 							);
-							await sandbox
-								.request(app)
-								.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-								.namespacedAuth()
-								.send({ techLeads: null, parentGroup: null })
-								.expect(
-									200,
-									sandbox.withMeta({
-										code: teamCode
-									})
-								);
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{ techLeads: null, parentGroup: null }
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode
+								})
+							);
 
 							await testNode(
 								'Team',
@@ -272,15 +522,10 @@ describe('v2 - node PATCH', () => {
 								})
 							);
 
-							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', teamCode, 'Team')
-							);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', personCode, 'Person')
-							);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', groupCode, 'Group')
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', personCode, 'Person'],
+								['UPDATE', groupCode, 'Group']
 							);
 						});
 
@@ -295,23 +540,19 @@ describe('v2 - node PATCH', () => {
 							await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
 							await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
 
-							await sandbox
-								.request(app)
-								.patch(
-									`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`
-								)
-								.namespacedAuth()
-								.send({
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
+								{
 									subTeams: null
+								}
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: `${teamCode}-2`,
+									parentTeam: `${teamCode}-1`,
+									techLeads: [personCode]
 								})
-								.expect(
-									200,
-									sandbox.withMeta({
-										code: `${teamCode}-2`,
-										parentTeam: `${teamCode}-1`,
-										techLeads: [personCode]
-									})
-								);
+							);
 
 							await testNode(
 								'Team',
@@ -343,12 +584,9 @@ describe('v2 - node PATCH', () => {
 								]
 							);
 
-							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', `${teamCode}-2`, 'Team')
-							);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', `${teamCode}-3`, 'Team')
+							sandbox.expectEvents(
+								['UPDATE', `${teamCode}-2`, 'Team'],
+								['UPDATE', `${teamCode}-3`, 'Team']
 							);
 						});
 					});
@@ -358,36 +596,33 @@ describe('v2 - node PATCH', () => {
 		describe('creating', () => {
 			it('errors if updating relationships without relationshipAction query string', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await sandbox
-					.request(app)
-					.patch(`/v2/node/Team/${teamCode}`)
-					.namespacedAuth()
-					.send({ techLeads: [personCode] })
-					.expect(
-						400,
-						/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
-					);
+				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+					techLeads: [personCode]
+				}).expect(
+					400,
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+				);
 
 				await testNode('Team', teamCode, sandbox.withMeta({ code: teamCode }));
-				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+				sandbox.expectNoEvents();
 			});
 
 			describe('__-to-one relationships', () => {
 				['merge', 'replace'].forEach(action => {
 					it('accept a string', async () => {
 						await sandbox.createNodes(['Team', teamCode], ['Group', groupCode]);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ parentGroup: groupCode })
-							.expect(
-								200,
-								sandbox.withMeta({
-									code: teamCode,
-									parentGroup: groupCode
-								})
-							);
+						await authenticatedPatch(
+							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							{
+								parentGroup: groupCode
+							}
+						).expect(
+							200,
+							sandbox.withMeta({
+								code: teamCode,
+								parentGroup: groupCode
+							})
+						);
 
 						await testNode(
 							'Team',
@@ -408,28 +643,25 @@ describe('v2 - node PATCH', () => {
 							]
 						);
 
-						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', teamCode, 'Team')
-						);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', groupCode, 'Group')
+						sandbox.expectEvents(
+							['UPDATE', teamCode, 'Team'],
+							['UPDATE', groupCode, 'Group']
 						);
 					});
 					it('accept an array of length one', async () => {
 						await sandbox.createNodes(['Team', teamCode], ['Group', groupCode]);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ parentGroup: [groupCode] })
-							.expect(
-								200,
-								sandbox.withMeta({
-									code: teamCode,
-									parentGroup: groupCode
-								})
-							);
+						await authenticatedPatch(
+							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							{
+								parentGroup: [groupCode]
+							}
+						).expect(
+							200,
+							sandbox.withMeta({
+								code: teamCode,
+								parentGroup: groupCode
+							})
+						);
 
 						await testNode(
 							'Team',
@@ -450,12 +682,9 @@ describe('v2 - node PATCH', () => {
 							]
 						);
 
-						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', teamCode, 'Team')
-						);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', groupCode, 'Group')
+						sandbox.expectEvents(
+							['UPDATE', teamCode, 'Team'],
+							['UPDATE', groupCode, 'Group']
 						);
 					});
 					it('error if trying to write multiple relationships', async () => {
@@ -464,12 +693,12 @@ describe('v2 - node PATCH', () => {
 							['Group', `${groupCode}-1`],
 							['Group', `${groupCode}-2`]
 						);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ parentGroup: [`${groupCode}-1`, `${groupCode}-2`] })
-							.expect(400, /Can only have one parentGroup/);
+						await authenticatedPatch(
+							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							{
+								parentGroup: [`${groupCode}-1`, `${groupCode}-2`]
+							}
+						).expect(400, /Can only have one parentGroup/);
 
 						await testNode(
 							'Team',
@@ -479,7 +708,7 @@ describe('v2 - node PATCH', () => {
 							})
 						);
 
-						expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+						sandbox.expectNoEvents();
 					});
 
 					it('replace existing relationship', async () => {
@@ -490,18 +719,18 @@ describe('v2 - node PATCH', () => {
 						);
 
 						await sandbox.connectNodes(group1, 'HAS_TEAM', team);
-						await sandbox
-							.request(app)
-							.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-							.namespacedAuth()
-							.send({ parentGroup: [`${groupCode}-2`] })
-							.expect(
-								200,
-								sandbox.withMeta({
-									code: teamCode,
-									parentGroup: `${groupCode}-2`
-								})
-							);
+						await authenticatedPatch(
+							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							{
+								parentGroup: [`${groupCode}-2`]
+							}
+						).expect(
+							200,
+							sandbox.withMeta({
+								code: teamCode,
+								parentGroup: `${groupCode}-2`
+							})
+						);
 
 						await testNode(
 							'Team',
@@ -522,15 +751,10 @@ describe('v2 - node PATCH', () => {
 							]
 						);
 
-						expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', teamCode, 'Team')
-						);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', `${groupCode}-1`, 'Group')
-						);
-						expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-							event('UPDATE', `${groupCode}-2`, 'Group')
+						sandbox.expectEvents(
+							['UPDATE', teamCode, 'Team'],
+							['UPDATE', `${groupCode}-1`, 'Group'],
+							['UPDATE', `${groupCode}-2`, 'Group']
 						);
 					});
 
@@ -545,20 +769,18 @@ describe('v2 - node PATCH', () => {
 			describe('merge', () => {
 				it('can merge with empty relationship set if relationshipAction=merge', async () => {
 					await sandbox.createNodes(['Team', teamCode], ['Person', personCode]);
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}?relationshipAction=merge`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
+						{
+							techLeads: [personCode]
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: teamCode,
 							techLeads: [personCode]
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: teamCode,
-								techLeads: [personCode]
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -578,12 +800,9 @@ describe('v2 - node PATCH', () => {
 							}
 						]
 					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', teamCode, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', personCode, 'Person')
+					sandbox.expectEvents(
+						['UPDATE', teamCode, 'Team'],
+						['UPDATE', personCode, 'Person']
 					);
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
@@ -594,20 +813,18 @@ describe('v2 - node PATCH', () => {
 					);
 					await sandbox.connectNodes(team, ['HAS_TECH_LEAD'], person1);
 
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}?relationshipAction=merge`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
+						{
 							techLeads: [`${personCode}-2`]
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: teamCode,
+							techLeads: [`${personCode}-1`, `${personCode}-2`]
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: teamCode,
-								techLeads: [`${personCode}-1`, `${personCode}-2`]
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -638,12 +855,9 @@ describe('v2 - node PATCH', () => {
 							}
 						]
 					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', teamCode, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${personCode}-2`, 'Person')
+					sandbox.expectEvents(
+						['UPDATE', teamCode, 'Team'],
+						['UPDATE', `${personCode}-2`, 'Person']
 					);
 				});
 			});
@@ -651,20 +865,18 @@ describe('v2 - node PATCH', () => {
 			describe('replace', () => {
 				it('can replace an empty relationship set if relationshipAction=replace', async () => {
 					await sandbox.createNodes(['Team', teamCode], ['Person', personCode]);
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}?relationshipAction=replace`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
+						{
+							techLeads: [personCode]
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: teamCode,
 							techLeads: [personCode]
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: teamCode,
-								techLeads: [personCode]
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -685,12 +897,9 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', teamCode, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', personCode, 'Person')
+					sandbox.expectEvents(
+						['UPDATE', teamCode, 'Team'],
+						['UPDATE', personCode, 'Person']
 					);
 				});
 
@@ -702,20 +911,18 @@ describe('v2 - node PATCH', () => {
 					);
 					await sandbox.connectNodes(team, ['HAS_TECH_LEAD'], person1);
 
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}?relationshipAction=replace`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
+						{
+							techLeads: [`${personCode}-2`]
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: teamCode,
 							techLeads: [`${personCode}-2`]
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: teamCode,
-								techLeads: [`${personCode}-2`]
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -735,15 +942,10 @@ describe('v2 - node PATCH', () => {
 							}
 						]
 					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', teamCode, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${personCode}-1`, 'Person')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${personCode}-2`, 'Person')
+					sandbox.expectEvents(
+						['UPDATE', teamCode, 'Team'],
+						['UPDATE', `${personCode}-1`, 'Person'],
+						['UPDATE', `${personCode}-2`, 'Person']
 					);
 				});
 
@@ -757,22 +959,20 @@ describe('v2 - node PATCH', () => {
 					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
 					await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
 
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}-2?relationshipAction=replace`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
+						{
 							subTeams: [`${teamCode}-3`]
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: `${teamCode}-2`,
+							subTeams: [`${teamCode}-3`],
+							parentTeam: `${teamCode}-1`,
+							techLeads: [personCode]
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: `${teamCode}-2`,
-								subTeams: [`${teamCode}-3`],
-								parentTeam: `${teamCode}-1`,
-								techLeads: [personCode]
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -815,12 +1015,9 @@ describe('v2 - node PATCH', () => {
 						]
 					);
 
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${teamCode}-2`, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${teamCode}-3`, 'Team')
+					sandbox.expectEvents(
+						['UPDATE', `${teamCode}-2`, 'Team'],
+						['UPDATE', `${teamCode}-3`, 'Team']
 					);
 				});
 
@@ -833,22 +1030,20 @@ describe('v2 - node PATCH', () => {
 					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
 					await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
 
-					await sandbox
-						.request(app)
-						.patch(`/v2/node/Team/${teamCode}-2?relationshipAction=replace`)
-						.namespacedAuth()
-						.send({
+					await authenticatedPatch(
+						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
+						{
+							subTeams: [`${teamCode}-1`],
+							parentTeam: `${teamCode}-3`
+						}
+					).expect(
+						200,
+						sandbox.withMeta({
+							code: `${teamCode}-2`,
 							subTeams: [`${teamCode}-1`],
 							parentTeam: `${teamCode}-3`
 						})
-						.expect(
-							200,
-							sandbox.withMeta({
-								code: `${teamCode}-2`,
-								subTeams: [`${teamCode}-1`],
-								parentTeam: `${teamCode}-3`
-							})
-						);
+					);
 
 					await testNode(
 						'Team',
@@ -879,15 +1074,10 @@ describe('v2 - node PATCH', () => {
 							}
 						]
 					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${teamCode}-1`, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${teamCode}-2`, 'Team')
-					);
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-						event('UPDATE', `${teamCode}-3`, 'Team')
+					sandbox.expectEvents(
+						['UPDATE', `${teamCode}-1`, 'Team'],
+						['UPDATE', `${teamCode}-2`, 'Team'],
+						['UPDATE', `${teamCode}-3`, 'Team']
 					);
 				});
 			});
@@ -896,35 +1086,29 @@ describe('v2 - node PATCH', () => {
 				['merge', 'replace'].forEach(action => {
 					describe(`with ${action}`, () => {
 						it(`error when relationship to non-existent node`, async () => {
-							await sandbox
-								.request(app)
-								.patch(`/v2/node/Team/${teamCode}?relationshipAction=${action}`)
-								.namespacedAuth()
-								.send({
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								{
 									techLeads: [personCode]
-								})
-								.expect(400, /Missing related node/);
-							expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+								}
+							).expect(400, /Missing related node/);
+							sandbox.expectNoEvents();
 						});
 
 						it('create node related to non-existent nodes when using upsert=true', async () => {
 							await sandbox.createNode('Team', teamCode);
-							await sandbox
-								.request(app)
-								.patch(
-									`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`
-								)
-								.namespacedAuth()
-								.send({
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
+								{
+									techLeads: [personCode]
+								}
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
 									techLeads: [personCode]
 								})
-								.expect(
-									200,
-									sandbox.withMeta({
-										code: teamCode,
-										techLeads: [personCode]
-									})
-								);
+							);
 							await testNode(
 								'Team',
 								teamCode,
@@ -944,34 +1128,27 @@ describe('v2 - node PATCH', () => {
 								]
 							);
 
-							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', teamCode, 'Team')
-							);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('CREATE', personCode, 'Person')
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['CREATE', personCode, 'Person']
 							);
 						});
 
 						it('not leave creation artefacts on things that already existed when using `upsert=true`', async () => {
 							await sandbox.createNode('Team', teamCode);
 							await sandbox.createNode('Person', personCode);
-							await sandbox
-								.request(app)
-								.patch(
-									`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`
-								)
-								.namespacedAuth()
-								.send({
+							await authenticatedPatch(
+								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
+								{
+									techLeads: [personCode]
+								}
+							).expect(
+								200,
+								sandbox.withMeta({
+									code: teamCode,
 									techLeads: [personCode]
 								})
-								.expect(
-									200,
-									sandbox.withMeta({
-										code: teamCode,
-										techLeads: [personCode]
-									})
-								);
+							);
 							await testNode(
 								'Team',
 								teamCode,
@@ -991,12 +1168,9 @@ describe('v2 - node PATCH', () => {
 								]
 							);
 
-							expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', teamCode, 'Team')
-							);
-							expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-								event('UPDATE', personCode, 'Person')
+							sandbox.expectEvents(
+								['UPDATE', teamCode, 'Team'],
+								['UPDATE', personCode, 'Person']
 							);
 						});
 					});
@@ -1015,139 +1189,113 @@ describe('v2 - node PATCH', () => {
 
 	describe('diffing before writes', () => {
 		it("doesn't write if no real property changes detected", async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			await sandbox.createNode('Team', { code: teamCode, name: 'name-1' });
-			await sandbox
-				.request(app)
-				.patch(
-					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`
-				)
-				.namespacedAuth()
-				.send({
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+				{
 					name: 'name-1'
-				})
-				.expect(200);
+				}
+			).expect(200);
 
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoEvents();
 		});
 
 		it("doesn't write if no real relationship changes detected in replace mode", async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode]
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
-			await sandbox
-				.request(app)
-				.patch(
-					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`
-				)
-				.namespacedAuth()
-				.send({ techLeads: [personCode] })
-				.expect(200);
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+				{ techLeads: [personCode] }
+			).expect(200);
 
 			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
 				false
 			);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoEvents();
 		});
 
 		it("doesn't write if no real relationship changes detected in merge mode", async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode]
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`)
-				.namespacedAuth()
-				.send({ techLeads: [personCode] })
-				.expect(200);
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+				{ techLeads: [personCode] }
+			).expect(200);
 
 			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
 				false
 			);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoEvents();
 		});
 
 		it('writes if property but no relationship changes detected', async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode]
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`)
-				.namespacedAuth()
-				.send({ name: 'new-name', techLeads: [personCode] })
-				.expect(200);
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+				{ name: 'new-name', techLeads: [personCode] }
+			).expect(200);
 
 			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
 				true
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode, 'Team')
-			);
+			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			const [team, person] = await sandbox.createNodes(
 				['Team', { code: teamCode, name: 'name' }],
 				['Person', `${personCode}-1`],
 				['Person', `${personCode}-2`]
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`)
-				.namespacedAuth()
-				.send({ name: 'name', techLeads: [`${personCode}-2`] })
-				.expect(200);
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+				{ name: 'name', techLeads: [`${personCode}-2`] }
+			).expect(200);
 
 			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
 				true
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode, 'Team')
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', `${personCode}-2`, 'Person')
+			sandbox.expectEvents(
+				['UPDATE', teamCode, 'Team'],
+				['UPDATE', `${personCode}-2`, 'Person']
 			);
 		});
 
 		it('detects deleted property as a change', async () => {
-			const dbQuerySpy = spyDbQuery(sandbox);
 			await sandbox.createNode('Team', { code: teamCode, name: 'name' });
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`)
-				.namespacedAuth()
-				.send({ name: null })
-				.expect(200);
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+				{ name: null }
+			).expect(200);
 
 			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
 				true
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(1);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode, 'Team')
-			);
+			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 		});
 
 		describe('patching with fewer relationships', () => {
 			it('treats fewer relationships as a delete when replacing relationships', async () => {
-				const dbQuerySpy = spyDbQuery(sandbox);
 				const [team, person1, person2] = await sandbox.createNodes(
 					['Team', teamCode],
 					['Person', `${personCode}-1`],
@@ -1157,31 +1305,24 @@ describe('v2 - node PATCH', () => {
 					[team, 'HAS_TECH_LEAD', person1],
 					[team, 'HAS_TECH_LEAD', person2]
 				);
-				await sandbox
-					.request(app)
-					.patch(
-						`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`
-					)
-					.namespacedAuth()
-					.send({
+				const dbQuerySpy = spyDbQuery(sandbox);
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+					{
 						techLeads: [`${personCode}-1`]
-					})
-					.expect(200);
+					}
+				).expect(200);
 
 				expect(
 					dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))
 				).toBe(true);
-				expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-				expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-					event('UPDATE', teamCode, 'Team')
-				);
-				expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-					event('UPDATE', `${personCode}-2`, 'Person')
+				sandbox.expectEvents(
+					['UPDATE', teamCode, 'Team'],
+					['UPDATE', `${personCode}-2`, 'Person']
 				);
 			});
 
 			it('treats fewer relationships as no change when merging relationships', async () => {
-				const dbQuerySpy = spyDbQuery(sandbox);
 				const [team, person1, person2] = await sandbox.createNodes(
 					['Team', teamCode],
 					['Person', `${personCode}-1`],
@@ -1191,20 +1332,18 @@ describe('v2 - node PATCH', () => {
 					[team, 'HAS_TECH_LEAD', person1],
 					[team, 'HAS_TECH_LEAD', person2]
 				);
-				await sandbox
-					.request(app)
-					.patch(
-						`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`
-					)
-					.namespacedAuth()
-					.send({
+				const dbQuerySpy = spyDbQuery(sandbox);
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+					{
 						techLeads: [`${personCode}-1`]
-					})
-					.expect(200);
+					}
+				).expect(200);
+
 				expect(
 					dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))
 				).toBe(false);
-				expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+				sandbox.expectNoEvents();
 			});
 		});
 	});

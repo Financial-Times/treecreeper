@@ -33,7 +33,11 @@ All requests that return or expect a body respond with/accept a JSON of properti
 - You can tell which properties define relationships by checking to see if there is a `relationship` property defined on the property in the schema. This contains the name the relationship is stored as in the underlying neo4j database
 - A relationship property may also define `hasMany: true`. If they do, then it should be passed an array of `code`s of related records. If `hasMany` is `false` or undefined, it will accept either a `code` as a string or an array of length 1 containing a single `code`.  
 - Codes cannot be changed using the API. If a `code` in a payload does not match the one in the array, an error will be thrown
+
+#### Deleting while patching
+
 - Sending a `null` value for any property will delete the relationships or attributes stored against that property
+- To target deleting relationships to specific nodes prefix the relationships name with a `!`, e.g. `!dependencies: ['my-app']` will remove `my-app` as a dependency, while leaving others unchanged
 
 #### Example payload
 
@@ -44,7 +48,8 @@ All requests that return or expect a body respond with/accept a JSON of properti
   "name": "My example system",
   "description": "A longer string. There are no hard limits on string lengths",
   "healthchecks": ["healthcheck-id-1", "healthcheck-id-2"],
-  "deliveredBy": "my-delivery-team"
+  "deliveredBy": "my-delivery-team",
+  "!dependencies": ["my-app"]
 }
 ```
 

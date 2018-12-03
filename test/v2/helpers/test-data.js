@@ -136,7 +136,6 @@ const testConnectedNode = async (type, code, props, relationships) => {
 			const record = records.find(record => {
 				const relatedNode = record.get('relatedNode');
 				const rel = record.get('rel');
-
 				return (
 					rel.type === relType &&
 					relatedNode.labels[0] === relatedType &&

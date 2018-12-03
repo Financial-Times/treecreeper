@@ -113,15 +113,26 @@ const getBatchedQueries = ({
 	}
 };
 
-const executeBatchOrSingle = async (queries, nodeType, code) => {
+const executeBatchOrSingle = async (
+	queries,
+	nodeType,
+	code,
+	willDeleteRelationships = false
+) => {
 	let result;
 	if (Array.isArray(queries)) {
 		await writeTransaction(queries);
-
 		result = await getNodeWithRelationships(nodeType, code);
 	} else {
 		result = await executeQuery(queries.query, queries.params);
+		// In _theory_ we could return the above all the time (it works most of the time)
+		// but behaviour when deleting relationships is confusing, and difficult to
+		// obtain consistent results, so for safety do a fresh get when deletes are involved
+		if (willDeleteRelationships) {
+			result = await getNodeWithRelationships(nodeType, code);
+		}
 	}
+
 	return { neo4jResponse: result, data: constructOutput(nodeType, result) };
 };
 

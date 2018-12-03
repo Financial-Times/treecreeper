@@ -14,6 +14,7 @@ const constructNode = (type, result) => {
 	const schema = getType(type);
 	const node = result.records[0].get('node');
 	const response = convertIntegersToNumbers(node.properties);
+
 	if (result.records[0].get('related')) {
 		const rawRelationships = result.records.map(record => {
 			const target = record.get('related');
@@ -39,6 +40,7 @@ const constructNode = (type, result) => {
 							type === n4jType
 					)
 					.map(({ n4jCode }) => n4jCode);
+
 				if (codes.length) {
 					response[propName] = hasMany ? codes : codes[0];
 				}

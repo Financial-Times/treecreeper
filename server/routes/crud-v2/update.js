@@ -27,6 +27,23 @@ const arrDiff = (arr1, arr2) =>
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
+const avoidSimultaneousWriteAndDelete = (
+	writeRelationships,
+	deleteRelationships
+) => {
+	Object.entries(writeRelationships).forEach(([propName, codes]) => {
+		if (
+			deleteRelationships[propName] &&
+			deleteRelationships[propName].some(code => codes.includes(code))
+		) {
+			throw httpErrors(
+				400,
+				'Trying to add and remove a relationship to a record at the same time'
+			);
+		}
+	});
+};
+
 const relationshipDiffer = (
 	nodeType,
 	existingRelationships = {},
@@ -42,6 +59,7 @@ const relationshipDiffer = (
 		attributes
 	);
 
+	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
 	const schema = getType(nodeType);
 	const summary = Object.entries(newRelationships)
 		.map(([relType, newCodes]) => {
@@ -61,7 +79,9 @@ const relationshipDiffer = (
 					{
 						added: newCodesOnly,
 						removed:
-							(action === 'replace' || isCardinalityOne) && existingCodesOnly
+							action === 'replace' || isCardinalityOne
+								? existingCodesOnly
+								: undefined
 					}
 				];
 			}
@@ -69,10 +89,14 @@ const relationshipDiffer = (
 		})
 		.filter(([relType]) => !!relType)
 		.concat(
-			deleteRelationships.map(relType => [
+			Object.entries(deleteRelationships).map(([relType, codes]) => [
 				relType,
 				{
-					removed: toArray(existingRelationships[relType])
+					removed: codes
+						? toArray(codes).filter(code =>
+								(existingRelationships[relType] || []).includes(code)
+						  )
+						: toArray(existingRelationships[relType])
 				}
 			])
 		);
@@ -141,9 +165,10 @@ const update = async input => {
 		const willModifyNode =
 			Object.keys(writeAttributes).length + deleteAttributeNames.length;
 
+		const willDeleteRelationships = !!Object.keys(removedRelationships).length;
+		const willCreateRelationships = !!Object.keys(addedRelationships).length;
 		const willModifyRelationships =
-			Object.keys(removedRelationships).length +
-			Object.keys(addedRelationships).length;
+			willDeleteRelationships || willCreateRelationships;
 
 		if (!willModifyNode && !willModifyRelationships) {
 			logger.info(
@@ -179,7 +204,7 @@ const update = async input => {
 
 		queryParts.push(...deleteAttributeNames.map(attr => `REMOVE node.${attr}`));
 
-		if (Object.keys(removedRelationships).length) {
+		if (willDeleteRelationships) {
 			const schema = getType(nodeType);
 			queryParts.push(
 				...Object.entries(removedRelationships).map(([propName, codes]) => {
@@ -205,7 +230,8 @@ const update = async input => {
 		const { data, neo4jResponse } = await executeBatchOrSingle(
 			queries,
 			nodeType,
-			code
+			code,
+			willDeleteRelationships
 		);
 
 		logNodeChanges({
