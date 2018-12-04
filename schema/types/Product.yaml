@@ -1,5 +1,6 @@
 name: Product
 description: Anything sold by the FT for use by an external entity, OR produced by an area of FT technology to be used by another internal area.
+rank: 10
 properties:
   code:
     type: Code

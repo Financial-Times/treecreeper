@@ -1,5 +1,6 @@
 name: Team
 description: A team within the organisation
+rank: 30
 properties:
   code:
     type: Code
