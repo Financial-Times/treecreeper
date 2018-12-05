@@ -1,6 +1,7 @@
 name: Person
 pluralName: People
 description: A individual within the organisation who is contactable
+rank: 40
 properties:
   code:
     type: Code

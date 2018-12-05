@@ -1,5 +1,6 @@
 name: Group
 description: An overarching group which contains teams and is costed separately
+rank: 50
 properties:
   code:
     type: Code

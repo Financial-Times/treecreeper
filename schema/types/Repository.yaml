@@ -1,6 +1,7 @@
 name: Repository
 pluralName: Repositories
 description: A source code repository
+rank: 27
 properties:
   code:
     type: Code

@@ -1,5 +1,6 @@
 name: System
 description: Any combination of software and technical infrastructure used by the business, engineering or operations
+rank: 20
 properties:
   code:
     type: Code

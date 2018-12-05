@@ -1,5 +1,6 @@
 name: Healthcheck
 description: The configuration used to provide monitoring/healthchecks for a system.
+rank: 25
 properties:
   code:
     type: Code

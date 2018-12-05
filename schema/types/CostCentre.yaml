@@ -1,5 +1,6 @@
 name: CostCentre
 description: A cost centre which groups are costed to
+rank: 55
 properties:
   code:
     type: Code
