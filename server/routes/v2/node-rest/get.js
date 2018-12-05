@@ -1,7 +1,9 @@
-const { validateParams } = require('../lib/input-helpers');
-const { preflightChecks } = require('../lib/errors');
-const { constructNode: constructOutput } = require('../lib/construct-output');
-const { getNodeWithRelationships } = require('../data/canned-queries');
+const { validateParams } = require('../../lib/rest-input-helpers');
+const { preflightChecks } = require('../../lib/errors');
+const {
+	constructNode: constructOutput
+} = require('../../lib/construct-output');
+const { getNodeWithRelationships } = require('../../../data/canned-queries');
 
 const read = async input => {
 	validateParams(input);

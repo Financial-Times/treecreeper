@@ -1,4 +1,4 @@
-const { executeQuery } = require('../../../server/data/db-connection');
+const { executeQuery } = require('../../server/data/db-connection');
 
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,

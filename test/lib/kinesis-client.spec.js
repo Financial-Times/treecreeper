@@ -1,37 +1,34 @@
-const AWS = require('aws-sdk');
-const sinon = require('sinon');
-const { expect } = require('chai');
-const Kinesis = require('../../server/lib/kinesis-client');
-
 describe('AWS kinesis client', () => {
 	const streamName = Math.random() + 'mississippi';
 	const dynoId = 'someDyno' + Math.floor(Math.random() * 10);
-	let sandbox;
-	let stubPutRecord;
+
 	let kinesis;
 	const storedEnv = {};
-	let clock;
+	let stubPutRecord;
 
 	beforeEach(() => {
+		const kinesisStub = jest.fn();
+		jest.doMock('aws-sdk', () => ({
+			Kinesis: kinesisStub
+		}));
+		const Kinesis = require('../../server/lib/kinesis-client');
 		storedEnv['NODE_ENV'] = process.env.NODE_ENV;
 		storedEnv['DYNO'] = process.env.DYNO;
 		process.env.NODE_ENV = 'production';
 		process.env.DYNO = dynoId;
-		sandbox = sinon.createSandbox();
-		stubPutRecord = sandbox.stub().returns({
+		stubPutRecord = jest.fn().mockReturnValue({
 			promise() {
 				return Promise.resolve();
 			}
 		});
-		sandbox.stub(AWS, 'Kinesis').returns({
+		kinesisStub.mockImplementation(() => ({
 			putRecord: stubPutRecord
-		});
-		clock = sandbox.useFakeTimers();
+		}));
+
 		kinesis = new Kinesis(streamName);
 	});
 
 	afterEach(() => {
-		sandbox.restore();
 		Object.entries(storedEnv).forEach(([key, value]) => {
 			process.env[key] = value;
 		});
@@ -43,8 +40,8 @@ describe('AWS kinesis client', () => {
 				event: 'test'
 			});
 
-			expect(stubPutRecord).to.have.been.calledOnce;
-			expect(stubPutRecord.getCall(0).args[0].StreamName).to.equal(streamName);
+			expect(stubPutRecord).toHaveBeenCalledTimes(1);
+			expect(stubPutRecord.mock.calls[0][0].StreamName).toBe(streamName);
 		});
 
 		it('should JSON stringify then buffer the event data', async () => {
@@ -56,20 +53,18 @@ describe('AWS kinesis client', () => {
 			};
 			await kinesis.putRecord(givenData);
 
-			const encodedData = stubPutRecord.getCall(0).args[0].Data;
+			const encodedData = stubPutRecord.mock.calls[0][0].Data;
 
-			expect(JSON.parse(Buffer.from(encodedData).toString())).to.deep.equal(
+			expect(JSON.parse(Buffer.from(encodedData).toString())).toEqual(
 				givenData
 			);
 		});
 
 		it('should set the partition key to be the Heroku dyno ID plus timestamp', async () => {
-			const givenTime = Math.floor(Math.random() * 10 ** 9);
-			clock.tick(givenTime);
 			await kinesis.putRecord({});
 
-			expect(stubPutRecord.getCall(0).args[0].PartitionKey).to.equal(
-				`${dynoId}:${givenTime}`
+			expect(stubPutRecord.mock.calls[0][0].PartitionKey).toMatch(
+				new RegExp(`${dynoId}\:\\d+`)
 			);
 		});
 	});

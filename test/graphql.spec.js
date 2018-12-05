@@ -2,8 +2,9 @@ const casual = require('casual');
 const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
 const app = require('../server/app.js');
-const { expect } = require('chai');
-const request = require('./helpers/supertest');
+const request = require('./helpers/supertest').getNamespacedSupertest(
+	'graphql'
+);
 const { executeQuery } = require('../server/data/db-connection');
 const security = require('../server/middleware/security');
 const { createMockSchema } = require('../server/data/graphql-schema');
@@ -127,8 +128,6 @@ describe('Integration - GraphQL', () => {
 
 	beforeEach(async function() {
 		sandbox = sinon.createSandbox();
-		this.timeout(4000);
-
 		await populateDatabaseMocks('System', 'Systems');
 	});
 
@@ -193,8 +192,7 @@ describe('Integration - GraphQL', () => {
 			return request(app)
 				.post('/graphql')
 				.send(dummyQuery)
-				.set('API_KEY', process.env.API_KEY)
-				.set('client-id', 'graphql-client')
+				.namespacedAuth()
 				.expect(200);
 		});
 
@@ -214,11 +212,10 @@ describe('Integration - GraphQL', () => {
 						${listFields(typeFields['System'])}
 					}}`
 			})
-			.set('client-id', 'graphql-client')
-			.set('API_KEY', process.env.API_KEY)
+			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
-				expect(body).to.eql({ data: { System: typeMocks['System'][0] } });
+				expect(body).toEqual({ data: { System: typeMocks['System'][0] } });
 			});
 	});
 
@@ -231,14 +228,13 @@ describe('Integration - GraphQL', () => {
 						${listFields(typeFields['System'])}
 					}}`
 			})
-			.set('client-id', 'graphql-client')
-			.set('API_KEY', process.env.API_KEY)
+			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
 				const codes = typeMocks['System'].map(s => s.code);
-				expect(
-					body.data.Systems.filter(s => codes.includes(s.code))
-				).to.have.deep.members(typeMocks['System']);
+				expect(body.data.Systems.filter(s => codes.includes(s.code))).toEqual(
+					typeMocks['System']
+				);
 			});
 	});
 });

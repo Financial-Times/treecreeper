@@ -1,9 +1,8 @@
 const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
-const ui = require('./routes/ui');
+const graphiql = require('./routes/graphiql');
 const graphql = require('./routes/graphql');
-const v1 = require('./routes/v1');
 const v2 = require('./routes/v2');
 const { initConstraints } = require('./init-db');
 const health = require('./health');
@@ -44,9 +43,8 @@ const createApp = () => {
 	});
 
 	app.use('/graphql', graphql(new express.Router()));
-	app.use('/v1', v1(new express.Router()));
 	app.use('/v2', v2(new express.Router()));
-	app.use('/', ui(new express.Router()));
+	app.use('/', graphiql(new express.Router()));
 	app.get('/__health', health);
 
 	app.use(({ path }, res) => {

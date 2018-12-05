@@ -1,4 +1,4 @@
-const { driver } = require('../../../server/data/db-connection');
+const { driver } = require('../../server/data/db-connection');
 
 const spyDbQuery = ({ sinon }) => {
 	const originalSession = driver.session.bind(driver);

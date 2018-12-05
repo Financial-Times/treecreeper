@@ -4,7 +4,7 @@ const {
 	stubDbUnavailable,
 	verifyNotExists,
 	verifyExists
-} = require('./helpers');
+} = require('../helpers');
 
 describe('v2 - node DELETE', () => {
 	const sandbox = {};

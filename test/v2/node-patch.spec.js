@@ -5,7 +5,7 @@ const {
 	testNode,
 	spyDbQuery,
 	verifyNotExists
-} = require('./helpers');
+} = require('../helpers');
 const queryBatchingTests = require('./test-bundles/query-batching');
 
 describe('v2 - node PATCH', () => {
@@ -81,7 +81,7 @@ describe('v2 - node PATCH', () => {
 		}).expect(
 			400,
 			new RegExp(
-				`Conflicting code attribute \`wrong-code\` for Team ${teamCode}`
+				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`
 			)
 		);
 		verifyNotExists('Team', teamCode);

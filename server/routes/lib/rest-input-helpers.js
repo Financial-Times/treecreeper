@@ -7,7 +7,7 @@ const stripNegation = propName => propName.replace(/^!/, '');
 const isRelationship = properties => propName =>
 	properties[propName].relationship;
 
-const isAttribute = properties => ([propName]) =>
+const isProperty = properties => ([propName]) =>
 	!isRelationship(properties)(stripNegation(propName));
 
 const isWriteRelationship = properties => ([propName, codes]) =>
@@ -33,11 +33,13 @@ const validateParams = ({ clientId, requestId, nodeType, code }) => {
 	validation.validateCode(nodeType, code);
 };
 
-const validatePayload = ({ nodeType, code, attributes: payload }) => {
+const validatePayload = ({ nodeType, code, body: payload }) => {
 	if (payload.code && payload.code !== code) {
 		throw httpErrors(
 			400,
-			`Conflicting code attribute \`${payload.code}\` for ${nodeType} ${code}`
+			`Conflicting code property \`${
+				payload.code
+			}\` in payload for ${nodeType} ${code}`
 		);
 	}
 
@@ -49,44 +51,44 @@ const validatePayload = ({ nodeType, code, attributes: payload }) => {
 };
 
 const containsRelationshipData = (type, payload) => {
-	const { properties } = getType(type);
+	const { properties: validProperties } = getType(type);
 	return Object.entries(getType(type).properties)
-		.filter(([propName]) => isRelationship(properties)(propName))
+		.filter(([propName]) => isRelationship(validProperties)(propName))
 		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };
 
-const getWriteAttributes = (type, payload, code) => {
-	const { properties } = getType(type);
+const getWriteProperties = (type, payload, code) => {
+	const { properties: validProperties } = getType(type);
 
 	payload.code = code || payload.code;
 
 	return Object.entries(payload)
-		.filter(isAttribute(properties))
+		.filter(isProperty(validProperties))
 		.filter(([, val]) => val !== null)
 		.reduce(entriesToObject, {});
 };
 
-const getDeleteAttributes = (type, payload) => {
-	const { properties } = getType(type);
+const getDeleteProperties = (type, payload) => {
+	const { properties: validProperties } = getType(type);
 
 	return Object.entries(payload)
-		.filter(isAttribute(properties))
+		.filter(isProperty(validProperties))
 		.filter(([, val]) => val === null)
 		.map(([key]) => key);
 };
 
 const getWriteRelationships = (type, payload) => {
-	const { properties } = getType(type);
+	const { properties: validProperties } = getType(type);
 	return Object.entries(payload)
-		.filter(isWriteRelationship(properties))
+		.filter(isWriteRelationship(validProperties))
 		.map(([propName, codes]) => [propName, toArray(codes)])
 		.reduce(entriesToObject, {});
 };
 
 const getDeleteRelationships = (type, payload) => {
-	const { properties } = getType(type);
+	const { properties: validProperties } = getType(type);
 	return Object.entries(payload)
-		.filter(isDeleteRelationship(properties))
+		.filter(isDeleteRelationship(validProperties))
 		.map(([propName, codes]) => [
 			codes ? stripNegation(propName) : propName,
 			codes ? toArray(codes) : null
@@ -98,8 +100,8 @@ module.exports = {
 	validateParams,
 	validatePayload,
 	containsRelationshipData,
-	getWriteAttributes,
+	getWriteProperties,
 	getWriteRelationships,
-	getDeleteAttributes,
+	getDeleteProperties,
 	getDeleteRelationships
 };

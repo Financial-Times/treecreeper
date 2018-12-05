@@ -1,6 +1,6 @@
 const app = require('../../server/app.js');
 
-const { setupMocks, stubDbUnavailable } = require('./helpers');
+const { setupMocks, stubDbUnavailable } = require('../helpers');
 
 describe('v2 - node GET', () => {
 	const sandbox = {};

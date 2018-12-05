@@ -1,23 +1,25 @@
-const inputHelpers = require('../lib/input-helpers');
+const inputHelpers = require('../../lib/rest-input-helpers');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { dbErrorHandlers, preflightChecks } = require('../lib/errors');
-const { constructNode: constructOutput } = require('../lib/construct-output');
-const { getType } = require('@financial-times/biz-ops-schema');
-const { logger } = require('../../lib/request-context');
+const { dbErrorHandlers, preflightChecks } = require('../../lib/errors');
 const {
-	metaAttributesForUpdate,
-	metaAttributesForCreate,
+	constructNode: constructOutput
+} = require('../../lib/construct-output');
+const { getType } = require('@financial-times/biz-ops-schema');
+const { logger } = require('../../../lib/request-context');
+const {
+	metaPropertiesForUpdate,
+	metaPropertiesForCreate,
 	deleteRelationships: deleteRelationshipsFragment
-} = require('../data/cypher-fragments');
+} = require('../../../data/cypher-fragments');
 
-const salesforceSync = require('../../lib/salesforce-sync');
-const { getNodeWithRelationships } = require('../data/canned-queries');
-const { logNodeChanges } = require('../lib/log-to-kinesis');
+const salesforceSync = require('../../../lib/salesforce-sync');
+const { getNodeWithRelationships } = require('../../../data/canned-queries');
+const { logNodeChanges } = require('../../lib/log-to-kinesis');
 const {
 	getBatchedQueries,
 	executeBatchOrSingle
-} = require('../data/relationship-batcher');
+} = require('../../lib/relationship-batcher');
 
 const toArray = it =>
 	typeof it === 'undefined' ? undefined : Array.isArray(it) ? it : [it];
@@ -47,19 +49,20 @@ const avoidSimultaneousWriteAndDelete = (
 const relationshipDiffer = (
 	nodeType,
 	existingRelationships = {},
-	attributes,
+	properties,
 	action
 ) => {
 	const newRelationships = inputHelpers.getWriteRelationships(
 		nodeType,
-		attributes
+		properties
 	);
 	const deleteRelationships = inputHelpers.getDeleteRelationships(
 		nodeType,
-		attributes
+		properties
 	);
 
 	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
+
 	const schema = getType(nodeType);
 	const summary = Object.entries(newRelationships)
 		.map(([relType, newCodes]) => {
@@ -113,14 +116,14 @@ const relationshipDiffer = (
 	};
 };
 
-const getChangedAttributes = (newAttributes, oldAttributes) => {
-	return Object.entries(newAttributes)
-		.filter(([propName, value]) => value !== oldAttributes[propName])
+const getChangedProperties = (newProperties, oldProperties) => {
+	return Object.entries(newProperties)
+		.filter(([propName, value]) => value !== oldProperties[propName])
 		.reduce(entriesToObject, {});
 };
 
-const getDeletedAttributeNames = (deletedAttributeNames, oldAttributes) =>
-	deletedAttributeNames.filter(propName => propName in oldAttributes);
+const getDeletedPropertyNames = (deletedPropertyNames, oldProperties) =>
+	deletedPropertyNames.filter(propName => propName in oldProperties);
 
 const update = async input => {
 	inputHelpers.validateParams(input);
@@ -134,7 +137,7 @@ const update = async input => {
 		query: { relationshipAction, upsert }
 	} = input;
 
-	if (inputHelpers.containsRelationshipData(nodeType, input.attributes)) {
+	if (inputHelpers.containsRelationshipData(nodeType, input.body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 	}
 
@@ -145,25 +148,25 @@ const update = async input => {
 			? constructOutput(nodeType, prefetch)
 			: {};
 
-		const writeAttributes = getChangedAttributes(
-			inputHelpers.getWriteAttributes(nodeType, input.attributes, code),
+		const writeProperties = getChangedProperties(
+			inputHelpers.getWriteProperties(nodeType, input.body, code),
 			existingRecord
 		);
 
-		const deleteAttributeNames = getDeletedAttributeNames(
-			inputHelpers.getDeleteAttributes(nodeType, input.attributes),
+		const deletePropertyNames = getDeletedPropertyNames(
+			inputHelpers.getDeleteProperties(nodeType, input.body),
 			existingRecord
 		);
 
 		const { removedRelationships, addedRelationships } = relationshipDiffer(
 			nodeType,
 			existingRecord,
-			input.attributes,
+			input.body,
 			relationshipAction
 		);
 
 		const willModifyNode =
-			Object.keys(writeAttributes).length + deleteAttributeNames.length;
+			Object.keys(writeProperties).length + deletePropertyNames.length;
 
 		const willDeleteRelationships = !!Object.keys(removedRelationships).length;
 		const willCreateRelationships = !!Object.keys(addedRelationships).length;
@@ -192,17 +195,17 @@ const update = async input => {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
-						${metaAttributesForCreate('node')}
+						${metaPropertiesForCreate('node')}
 				`
 		];
 
 		if (willModifyNode) {
 			queryParts.push(stripIndents`ON MATCH SET
-						${metaAttributesForUpdate('node')}
-					SET node += $attributes`);
+						${metaPropertiesForUpdate('node')}
+					SET node += $properties`);
 		}
 
-		queryParts.push(...deleteAttributeNames.map(attr => `REMOVE node.${attr}`));
+		queryParts.push(...deletePropertyNames.map(attr => `REMOVE node.${attr}`));
 
 		if (willDeleteRelationships) {
 			const schema = getType(nodeType);
@@ -220,7 +223,7 @@ const update = async input => {
 
 		const queries = getBatchedQueries({
 			baseParameters,
-			writeAttributes,
+			writeProperties,
 			nodeType,
 			upsert,
 			writeRelationships: addedRelationships,
@@ -246,7 +249,7 @@ const update = async input => {
 		// another update stream consumer, particularly while avoiding race conditions when
 		// migrating from cmdb
 		if (nodeType === 'System') {
-			salesforceSync.setSalesforceIdForSystem({ node: data });
+			salesforceSync.setSalesforceIdForSystem(data);
 		}
 
 		return {
