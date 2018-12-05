@@ -1,5 +1,5 @@
 const { executeQuery } = require('../../../server/data/db-connection');
-const { stubDbTransaction } = require('../helpers');
+const { stubDbTransaction } = require('../../helpers');
 
 const getPayload = namespace => ({
 	name: 'new-name',

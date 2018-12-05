@@ -38,7 +38,7 @@ const handleUpsertError = err => {
 			stripIndents`Missing related node.
 			If you need to create multiple things which depend on each other,
 			use the \`upsert=true\` query string to create placeholder entries for
-			related things which can be populated with attributes with subsequent
+			related things which can be populated with properties with subsequent
 			API calls.
 			DO NOT use \`upsert\` if you are attempting to create a relationship with
 			an item that already exists - there's probably a mistake somewhere in your

@@ -1,6 +1,6 @@
 const app = require('../../server/app.js');
 const API_KEY = process.env.API_KEY;
-const { setupMocks, verifyNotExists } = require('./helpers');
+const { setupMocks, verifyNotExists } = require('../helpers');
 
 describe('v2 - node generic', () => {
 	const sandbox = {};

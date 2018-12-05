@@ -5,7 +5,7 @@ const {
 	testNode,
 	verifyNotExists,
 	verifyExists
-} = require('./helpers');
+} = require('../helpers');
 
 const queryBatchingTests = require('./test-bundles/query-batching');
 
@@ -77,7 +77,7 @@ describe('v2 - node POST', () => {
 			.expect(
 				400,
 				new RegExp(
-					`Conflicting code attribute \`wrong-code\` for Team ${teamCode}`
+					`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`
 				)
 			);
 		sandbox.expectNoEvents();

@@ -1,4 +1,4 @@
-const { executeQuery } = require('../../data/db-connection');
+const { executeQuery } = require('./db-connection');
 const { RETURN_NODE_WITH_RELS } = require('./cypher-fragments');
 
 module.exports = {

@@ -42,7 +42,6 @@ function Kinesis(streamName) {
 				PartitionKey: `${dyno}:${Date.now()}`,
 				StreamName: streamName
 			};
-
 			return kinesisClient
 				.putRecord(options)
 				.promise()

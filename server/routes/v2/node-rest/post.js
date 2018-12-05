@@ -1,15 +1,15 @@
-const inputHelpers = require('../lib/input-helpers');
+const inputHelpers = require('../../lib/rest-input-helpers');
 const { stripIndents } = require('common-tags');
-const { dbErrorHandlers } = require('../lib/errors');
-const { logNodeChanges } = require('../lib/log-to-kinesis');
-const { metaAttributesForCreate } = require('../data/cypher-fragments');
+const { dbErrorHandlers } = require('../../lib/errors');
+const { logNodeChanges } = require('../../lib/log-to-kinesis');
+const { metaPropertiesForCreate } = require('../../../data/cypher-fragments');
 
 const {
 	getBatchedQueries,
 	executeBatchOrSingle
-} = require('../data/relationship-batcher');
+} = require('../../lib/relationship-batcher');
 
-const salesforceSync = require('../../lib/salesforce-sync');
+const salesforceSync = require('../../../lib/salesforce-sync');
 
 const create = async input => {
 	inputHelpers.validateParams(input);
@@ -38,24 +38,24 @@ const create = async input => {
 		// First step is to try to create the node, then pass it to the next
 		// bit of the query
 		const queryParts = [
-			stripIndents`CREATE (node:${nodeType} $attributes)
+			stripIndents`CREATE (node:${nodeType} $properties)
 				SET
-				${metaAttributesForCreate('node')}
+				${metaPropertiesForCreate('node')}
 			WITH node`
 		];
 
 		const queries = getBatchedQueries({
 			baseParameters,
-			writeAttributes: inputHelpers.getWriteAttributes(
+			writeProperties: inputHelpers.getWriteProperties(
 				nodeType,
-				input.attributes,
+				input.body,
 				code
 			),
 			nodeType,
 			upsert,
 			writeRelationships: inputHelpers.getWriteRelationships(
 				nodeType,
-				input.attributes
+				input.body
 			),
 			initialQueryParts: queryParts
 		});
@@ -72,7 +72,7 @@ const create = async input => {
 		// another update stream consumer, particularly while avoiding race conditions when
 		// migrating from cmdb
 		if (nodeType === 'System') {
-			salesforceSync.setSalesforceIdForSystem({ node: data });
+			salesforceSync.setSalesforceIdForSystem(data);
 		}
 		logNodeChanges({ newRecords: neo4jResponse.records });
 		return data;

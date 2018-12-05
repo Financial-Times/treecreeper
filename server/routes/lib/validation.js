@@ -23,19 +23,6 @@ module.exports = Object.entries(schema)
 		return methods;
 	}, {});
 
-const validateAttributes = module.exports.validateAttributes;
-
-module.exports.validateAttributes = (nodeType, attributes) => {
-	attributes = Object.assign({}, attributes);
-
-	Object.keys(attributes).forEach(propName => {
-		if (attributes[propName] === null) {
-			delete attributes[propName];
-		}
-	});
-	return validateAttributes(nodeType, attributes);
-};
-
 module.exports.validateClientId = id => {
 	if (!stringPatterns.CLIENT_ID.test(id)) {
 		throw httpErrors(

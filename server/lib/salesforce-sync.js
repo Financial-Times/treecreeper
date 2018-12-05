@@ -1,5 +1,5 @@
 const jsforce = require('jsforce');
-const { executeQuery } = require('../data/db-connection');
+const dbConnection = require('../data/db-connection');
 const { logger } = require('./request-context');
 
 const login = () => {
@@ -12,16 +12,13 @@ const login = () => {
 		.then(() => conn);
 };
 
-module.exports.setSalesforceIdForSystem = async ({
-	node: { code, name, SF_ID }
-}) => {
+module.exports.setSalesforceIdForSystem = async ({ code, name, SF_ID }) => {
 	if (!process.env.SALESFORCE_USER) {
 		logger.info(
 			'Skipping salesforce system creation - no salesforce user defined'
 		);
 		return;
 	}
-
 	if (SF_ID) {
 		logger.info(
 			'Skipping salesforce system creation - system already exists in salesforce'
@@ -45,7 +42,7 @@ module.exports.setSalesforceIdForSystem = async ({
 			{ event: 'SALESFORCE_SYSTEM_CREATION_SUCCESS', code, SF_ID },
 			'Create system in salesforce'
 		);
-		await executeQuery(
+		await dbConnection.executeQuery(
 			'MATCH (s:System {code: $code}) SET s.SF_ID = $SF_ID RETURN s',
 			{ code, SF_ID }
 		);

@@ -4,7 +4,7 @@ const {
 	verifyExists,
 	verifyNotExists,
 	testNode
-} = require('./helpers');
+} = require('../helpers');
 
 describe('merge', () => {
 	const sandbox = {};

@@ -1,8 +1,8 @@
 const sinon = require('sinon');
 const logger = require('@financial-times/n-logger').default;
 const lolex = require('lolex');
-const EventLogWriter = require('../../../server/lib/event-log-writer');
-const salesForceSync = require('../../../server/lib/salesforce-sync');
+const EventLogWriter = require('../../server/lib/event-log-writer');
+const salesForceSync = require('../../server/lib/salesforce-sync');
 const { getNamespacedSupertest } = require('./supertest');
 const dbConnection = require('./db-connection');
 
@@ -29,7 +29,7 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 
 	beforeEach(async () => {
 		sandbox.sinon = sinon.createSandbox();
-		sandbox.sinon.stub(salesForceSync, 'setSalesforceIdForSystem');
+		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis(sandbox.sinon);
 		clock = lolex.install({ now: timestamp });
@@ -55,7 +55,7 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 	});
 	afterEach(async () => {
 		sandbox.sinon.restore();
-		EventLogWriter.prototype.sendEvent.mockRestore();
+		jest.restoreAllMocks();
 		clock = clock.uninstall();
 		if (withDb) {
 			await dropDb(namespace);
