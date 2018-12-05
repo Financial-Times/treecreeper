@@ -39,6 +39,18 @@ properties:
     label: Tech Director
     relationship: HAS_TECH_DIRECTOR
     description: The tech director who owns the group
+  productOwner:
+    type: Person
+    direction: outgoing
+    label: Product Owner
+    relationship: HAS_PRODUCT_OWNER
+    description: The product owner who drives the group
+  deliveryManager:
+    type: Person
+    direction: outgoing
+    label: Delivery Manager
+    relationship: HAS_DELIVERY_MANAGER
+    description: The deivery manager who supports the group
   topLevelTeams:
     type: Team
     direction: outgoing
