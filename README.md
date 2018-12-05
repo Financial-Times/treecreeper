@@ -5,6 +5,10 @@ Schema for biz-ops data store and api. It provides two things:
 - yaml files which define which types, properties and relationships are allowed. These are intended to be edited by anybody who wants to add to the things the api models
 - a nodejs library for accessing subsets this information
 
+## Adding to the schema
+
+See CONTRIBUTING.md
+
 ## Releasing
 
 1. Create an appropriate semver tag:
@@ -41,21 +45,17 @@ Get an object defining the structure of a given `type`. The following transforms
 - `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
 - `groupProperties` [default: `false`]: Each property may have a `section` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `sections`, where all properties are grouped by section
 
-### getAllTypes(options)
+### getTypes(options)
 
-Get an array of objects definig the structure of all types. `options` are the same as for `getType`
+Get an array of objects defining the structure of all types. `options` are the same as for `getType`
 
 ### getEnums(options)
 
-Retrieves an array of key:value object defining the acceptable values of an enum
+Retrieves an array of key:value objects defining the acceptable values of an enum
 
 #### options
 
 - `withMeta`: wrap the enum in an object which also has metadata about the enum (e.g. 'description'.). In this case, the actual enum options will be in a `options` property
-
-#### options
-
-- `structure` [default: `flat`] - 'flat': returns an array of relationships, both incoming and outgoing, for the type - 'graphql': returns an array of relationships, both incoming and outgoing, for the type, including variants defined for graphql e.g. recursive traversal of relationships - 'rest': returns an object grouping relationships by relationship type
 
 ### validateTypeName(typeName)
 
@@ -65,17 +65,13 @@ Validates that a type of the given name exists in the schema
 
 Validates that a code string matches the validation pattern defined for codes for the given type
 
-### validateAttributeNames ( attributes )
+### validatePropertyName ( propertyName )
 
-Validates that names used for attributes are valid (i.e. camelCase)
+Validates that a string is a valid name for an attribute (i.e. camelCase)
 
-### validateAttributes(typeName, attributes, throwInfo)
+### validateProperty(typeName, propertyName, propertyValue)
 
-Validates that attribute values fora given type comply with the schema. Checks the type of each attribute and any string patterns
-
-### validateRelationship({nodeType, relatedType, relationshipType, relatedCode})
-
-Validates that a relationship between a node and another node complies with the schema
+Validates that the value of a property for a given type is valid
 
 ### getGraphQLDefs()
 
