@@ -268,7 +268,7 @@ properties:
     description: System(s) that do, or will, replace all or part of this system
     hasMany: true
     fieldset: network
-  fieldsets:
+fieldsets:
   general:
     heading: General information
   ownership:
