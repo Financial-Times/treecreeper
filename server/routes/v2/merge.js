@@ -2,7 +2,7 @@ const httpErrors = require('http-errors');
 const { validateTypeName } = require('../lib/validation');
 const { executeQuery } = require('../../data/db-connection');
 const { constructNode: constructOutput } = require('../lib/construct-output');
-
+const { setContext } = require('../../lib/request-context');
 const { logMergeChanges } = require('../lib/log-to-kinesis');
 
 const { RETURN_NODE_WITH_RELS } = require('../../data/cypher-fragments');
@@ -23,6 +23,7 @@ const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 
 module.exports = async input => {
 	validate(input);
+	setContext(input.body);
 	const {
 		clientId,
 		requestId,
