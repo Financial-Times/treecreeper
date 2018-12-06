@@ -1,17 +1,20 @@
 name: Repository
 pluralName: Repositories
 description: A source code repository
+rank: 27
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
     canIdentify: true
+    isCore: true
     label: Code
     description: 'Unique code/id for this item.'
   name:
-    type: Word
+    type: Name
+    isCore: true
     label: Name
     description: Display Name.
     autoPopulated: true
@@ -19,6 +22,7 @@ properties:
     type: Url
     # required: true
     canIdentify: true
+    isCore: true
     label: URL
     description: Repository URL.
     autoPopulated: true
@@ -37,12 +41,14 @@ properties:
   isPrivate:
     type: Boolean
     canFilter: true
+    isCore: true
     label: Private
     description: Is the repository private.
     autoPopulated: true
   isArchived:
     type: Boolean
     canFilter: true
+    isCore: true
     label: Archived
     description: Is the repository archived.
     autoPopulated: true

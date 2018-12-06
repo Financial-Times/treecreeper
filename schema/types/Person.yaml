@@ -1,75 +1,101 @@
 name: Person
 pluralName: People
-description: A individual within the organisation who is contactable
+description: An FT staff member or a contact at a relevant third party. For FT staff, details are imported daily from https://who.in.ft.com, so there should be no need to manually add or update
+rank: 40
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
+    isCore: true
     label: Code
-    description: 'Unique code/id for this person.'
+    description: |
+        Unique code/id for this person. For FT staff this will be their active directory name.
+        For third parties, use firstname.lastname.company.
     fieldset: general
     autoPopulated: true
   name:
-    type: Word
+    type: Name
     canIdentify: true
+    isCore: true
     label: Name
-    description: The name of the person.
+    description: |
+        The name of the person.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: general
     autoPopulated: true
   email:
-    type: Word
+    type: Email
     canIdentify: true
+    isCore: true
     label: Email
-    description: The email address of the person.
+    description: |
+        The email address of the person.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slack:
     type: Word
     label: Slack
     canIdentify: true
-    description: The slack link for the person (deprecated).
+    isCore: true
+    description: |
+        The slack link for the person (deprecated).
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slackName:
     type: Word
     canIdentify: true
     label: Slack Name
-    description: The slack name for the person.
+    description: |
+        The slack name for the person.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slackID:
     type: Word
     canIdentify: true
     label: Slack ID
-    description: The slack id for the person.
+    description: |
+        The slack id for the person.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   phone:
     type: Word
     canIdentify: true
+    isCore: true
     label: Phone
-    description: The phone contact number for the person.
+    description: |
+        The phone contact number for the person.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   isActive:
     type: Boolean
     canFilter: true
     label: Active
-    description: Whether or not the person is still working at the FT.
+    description: |
+        Whether or not the person is still working at the FT.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: general
   contract:
     type: PersonContract
     canFilter: true
     label: Contract type
-    description: The type of employment contract a Person has with the FT.
+    description: |
+        The type of employment contract a Person has with the FT.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     fieldset: general
   isPeopleApi:
     type: Boolean
     canFilter: true
-    label: Exists in People api
-    description: Whether or not the person exists as a record in the Internal Products people api, viewable at https://who.in.ft.com.
+    label: Active
+    description: |
+        Whether or not the person is still working at the FT.
+        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     autoPopulated: true
   source:
     type: PersonSource
