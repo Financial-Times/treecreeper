@@ -59,7 +59,7 @@ scenarios:
         url: "/graphql"
         beforeRequest: "setHeaders"
         json:
-            query: "{ Repositories (isPrivate: true) { code name url vcsID sshUrl isPrivate isArchived description mostRecentCircleCIPlatform createdAt pushedAt shortDescriptionHTML projectName projectUrl } }"
+            query: "{ Repositories (isPrivate: true) { code name url vcsID sshUrl isPrivate isArchived description createdAt pushedAt shortDescriptionHTML projectName projectUrl } }"
   - name: "GraphQL query that returns a list of platinum system's system codes with support contacts"
     flow:
     - post:
