@@ -57,12 +57,6 @@ properties:
     label: Description
     description: Repository description field
     autoPopulated: true
-  mostRecentCircleCIPlatform:
-    deprecationReason: This information was useful during migration of circleci. Now deprecated in favour of modelling CI in general at some point
-    type: CircleCiVersion
-    canFilter: true
-    label: CircleCI version
-    description: Most recently indexed CircleCI version used
   createdAt:
     type: Date
     label: Created
