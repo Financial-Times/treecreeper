@@ -31,10 +31,7 @@ const DEFAULT_QUERY = `{
     }
     repositories {
       url
-      mostRecentCircleCIPlatform
-      storedIn {
-        name
-      }
+      versionControlSystem
     }
   }
 }`;
