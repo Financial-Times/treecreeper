@@ -1,6 +1,6 @@
 # Contributing to the biz-ops model
 
-You can add 5 different types of thing to the schema
+biz-ops-schema controls what can be stored in the biz-ops-api. You can add 5 different types of thing to the schema:
 
 - [Types](#types-and-attributes)
 - [Properties on existing types](#property-definitions)
