@@ -1,9 +1,3 @@
-CircleCiVersion:
-  description: The Circle CI version which is running
-  options:
-    # because enum values cannot begin with a number in graphQL
-    ONE: '1.0'
-    TWO: '2.0'
 Capability:
   description: The means by which a technique is delivered
   options:
@@ -15,12 +9,12 @@ Capability:
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
-    Note that 'Dormant' should be used for systems that are currently
+    Note that 'Deprecated' should be used for systems that are currently
     not actively used, but may not be fully decommissioned yet
   options:
     - Preproduction
     - Production
-    - Dormant
+    - Deprecated
     - Decommissioned
 ServiceTier:
   description: A system's support level

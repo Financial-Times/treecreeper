@@ -115,7 +115,23 @@ properties:
     relationship: HAS_TECH_DIRECTOR
     description: Groups the person is a technical director for.
     hasMany: true
-    fieldset: network
+    fieldset: group
+  productOwnerFor:
+    type: Group
+    label: Product owner for group
+    direction: incoming
+    relationship: HAS_PRODUCT_OWNER
+    description: Groups the person is a product owner for
+    hasMany: true
+    fieldset: group
+  deliveryManagerFor:
+    type: Group
+    label: Delivery Manager for group
+    direction: incoming
+    relationship: HAS_DELIVERY_MANAGER
+    description: Groups the person is a delivery manager for
+    hasMany: true
+    fieldset: group
   techLeadFor:
     type: Team
     label: Tech lead for teams
@@ -123,7 +139,7 @@ properties:
     relationship: HAS_TECH_LEAD
     description: Teams the person is a technical lead for.
     hasMany: true
-    fieldset: network
+    fieldset: team
   ownedTeams:
     type: Team
     direction: incoming
@@ -131,7 +147,7 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: Teams the person is a product owner for.
     hasMany: true
-    fieldset: network
+    fieldset: team
   ownedProducts:
     type: Product
     direction: incoming
@@ -139,7 +155,7 @@ properties:
     relationship: HAS_PRODUCT_OWNER
     description: Products the person is a product owner for.
     hasMany: true
-    fieldset: network
+    fieldset: individual
   stakeholderFor:
     type: System
     direction: incoming
@@ -147,7 +163,7 @@ properties:
     relationship: HAS_STAKEHOLDER
     description: Systems the person is a stakeholder for.
     hasMany: true
-    fieldset: network
+    fieldset: individual
   knowsAbout:
     type: System
     direction: incoming
@@ -155,7 +171,7 @@ properties:
     relationship: KNOWN_ABOUT_BY
     description: Systems the person knows about.
     hasMany: true
-    fieldset: network
+    fieldset: individual
   teams:
     type: Team
     direction: incoming
@@ -163,11 +179,15 @@ properties:
     relationship: HAS_TEAM_MEMBER
     description: Teams this person is a member of.
     hasMany: true
-    fieldset: network
+    fieldset: team
 fieldsets:
   general:
     heading: General information
   contact:
     heading: Contact details
-  network:
-    heading: Network
+  group:
+    heading: Group Roles
+  team:
+    heading: Team Roles
+  individual:
+    heading: Individual Roles
