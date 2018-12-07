@@ -98,7 +98,7 @@ describe('generic app settings', () => {
 	it('POST graphql with default query', async () => {
 		await request(app)
 			.post('/graphql')
-			.send({query:DEFAULT_QUERY})
+			.send({ query: DEFAULT_QUERY })
 			.namespacedAuth()
 			.expect(200);
 	});

@@ -49,5 +49,5 @@ module.exports = {
 
 		return router;
 	},
-	DEFAULT_QUERY,
+	DEFAULT_QUERY
 };
