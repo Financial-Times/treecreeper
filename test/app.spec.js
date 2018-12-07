@@ -1,5 +1,6 @@
 const app = require('../server/app.js');
 const request = require('./helpers/supertest').getNamespacedSupertest('app');
+const { DEFAULT_QUERY } = require('../server/routes/graphiql');
 
 describe('generic app settings', () => {
 	it('GET gtg - status code 200', async () => {
@@ -92,5 +93,13 @@ describe('generic app settings', () => {
 			);
 
 		delete process.env.DISABLE_READS;
+	});
+
+	it('POST graphql with default query', async () => {
+		await request(app)
+			.post('/graphql')
+			.send({query:DEFAULT_QUERY})
+			.namespacedAuth()
+			.expect(200);
 	});
 });

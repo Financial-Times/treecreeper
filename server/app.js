@@ -1,7 +1,7 @@
 const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
-const graphiql = require('./routes/graphiql');
+const { graphiql } = require('./routes/graphiql');
 const graphql = require('./routes/graphql');
 const v2 = require('./routes/v2');
 const { initConstraints } = require('./init-db');
