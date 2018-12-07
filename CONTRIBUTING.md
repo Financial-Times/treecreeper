@@ -92,7 +92,7 @@ description: |
   Big red things
 properties:
   code:
-    type: Paragraph
+    type: Code
     required: true
     canIdentify: true
     canFilter: true
