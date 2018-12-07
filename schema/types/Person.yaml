@@ -121,15 +121,15 @@ properties:
     label: Product owner for group
     direction: incoming
     relationship: HAS_PRODUCT_OWNER
-    description: Groups the person is a product owner for
+    description: Groups the person is a product owner for.
     hasMany: true
     fieldset: group
   deliveryManagerFor:
     type: Group
-    label: Delivery Manager for group
+    label: Delivery manager for group
     direction: incoming
     relationship: HAS_DELIVERY_MANAGER
-    description: Groups the person is a delivery manager for
+    description: Groups the person is a delivery manager for.
     hasMany: true
     fieldset: group
   techLeadFor:
