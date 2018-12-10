@@ -183,6 +183,14 @@ properties:
     relationship: SUPPORTED_BY
     description: The team which supports the system
     fieldset: ownership
+  dataOwner:
+    type: Person
+    direction: outgoing
+    label: GPDR data owner
+    relationship: HAS_DATA_OWNER
+    description: The individual responsible for managing GDPR requests for this system
+    hasMany: false
+    fieldset: ownership
   knownAboutBy:
     type: Person
     direction: outgoing
