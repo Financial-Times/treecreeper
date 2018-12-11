@@ -112,11 +112,13 @@ properties:
     lable: Retention process
     description: Type of process used to handle GDPR data retention
     fieldset: personalData
+    canFilter: true
   gdprErasureProcess:
     type: GDPRProcess
     lable: Erasure process
     description: Type of process used to handle GDPR data erasure requests
     fieldset: personalData
+    canFilter: true
   risk:
     type: Paragraph
     label: Data - more information
@@ -201,7 +203,14 @@ properties:
     relationship: SUPPORTED_BY
     description: The team which supports the system
     fieldset: ownership
-
+  technicalOwner:
+    type: Person
+    direction: outgoing
+    label: Technical owner
+    relationship: HAS_TECHNICAL_OWNER
+    description: The individual responsible for technical aspects of this system (optional - defaults to the tech lead of the delivery team)
+    hasMany: false
+    fieldset: ownership
   knownAboutBy:
     type: Person
     direction: outgoing
