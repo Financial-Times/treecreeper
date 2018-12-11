@@ -44,3 +44,57 @@ VersionControlSystem:
   options:
     - bitbucket
     - github
+GDPRProcess:
+  description: Type of process used for handling GDPR erasure and retention requests
+  options:
+    # Automatic Chasing Email
+    # This is an auto-generated email sent from the GDPR Hub to System Owners,
+    # instructing them to erasure data for an individual. System owners who need
+    # to do deletions manually will receive this message. The email contains a
+    # link which the individual can click to confirm the fact they have deleted
+    # data. Weekly reminders will be sent until deletion has been confirmed.
+    # ACE
+    - AutomaticChasingEmail
+    # Deletion Table
+    # This is a table of people who need to be deleted, either due to retention
+    # policy or someone having submitted a request. It is maintained in Data
+    # Platform and populated when they are deleted in Membership. Some
+    # downstream systems either consume a feed from the table or poll it and
+    # delete any new records found since last accessed.
+    # DT
+    - DeletionTable
+    # Automatic routine
+    # This means the system has an automatic purge routine in place which
+    # deletes data older than a specified time. The time varies by system but
+    # should not be longer than 30 days as this is the length of time we have
+    # to fulfil a deletion request. With auto delete routines there is no
+    # requirement to do anything else to implement retention policy and system
+    # owners dont need to be notified of erasure requests.
+    # Auto
+    - ScheduledPurge
+    # Manual
+    # This means there is no automated routine in place for deletions. For
+    # erasure requests, these system owners will receive an ACE message, but
+    # for retention, they will need to set a manual trigger and delete data
+    # periodically to remain compliant.
+    - Manual
+    # Application Programming Interface
+    # Some systems have APIs which are called directly by the Hub. These are
+    # called for erasure requests only as retention is not (currently) managed
+    # in the Hub.
+    - API
+    # Multiple
+    # Some systems use a variety of the methods listed above, depending on the
+    # types of data they hold. This is only really true for systems holding a
+    # large amount of data, e.g. Redshift.
+    - Multiple
+    # N/A
+    # Some systems are considered too complex to complete erasure/ retention on,
+    # so it was decided to not implement standard policy on these systems. The
+    # risks of this have (or should have) been agreed by the FT Legal and
+    # Compliance teams, but they are marked as n/a here.
+    # N/A
+    - NotApplicable
+    # # TBD
+    # # Work is still ongoing to define delete methods for a small number of systems.
+    # - TBD

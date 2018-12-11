@@ -59,6 +59,14 @@ properties:
     label: Host platform
     description: The platform the service is hosted on, e.g. Heroku
     fieldset: general
+  dataOwner:
+    type: Person
+    direction: outgoing
+    label: GPDR data owner
+    relationship: HAS_DATA_OWNER
+    description: The individual responsible for managing GDPR requests for this system
+    hasMany: false
+    fieldset: personalData
   containsPersonalData:
     type: Boolean
     canFilter: true
@@ -72,7 +80,7 @@ properties:
       device finger prints, username and passwords), government identifiers
       (e.g. passport, drivers license), signatures, workplace data (e.g.
       salary/bonus/annual reviews), gender, date of birth
-    fieldset: risk
+    fieldset: personalData
   containsSensitiveData:
     type: Boolean
     canFilter: true
@@ -86,24 +94,34 @@ properties:
       in this category.
       For more details, see the Information Commissioner's definition:
       https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/what-is-personal-data/what-is-personal-data/
-    fieldset: risk
+    fieldset: personalData
   canDownloadPersonalData:
     type: Boolean
     canFilter: true
-    label: Downloadable personal data?
+    label: Downloadable personal data
     description: Does the system allow users to download personal data?
-    fieldset: risk
+    fieldset: personalData
   canContactIndividuals:
     type: Boolean
     canFilter: true
-    label: Contactable individuals?
+    label: Contactable individuals
     description: Does the system have the capability to contact individuals?
-    fieldset: risk
+    fieldset: personalData
+  gdprRetentionProcess:
+    type: GDPRProcess
+    lable: Retention process
+    description: Type of process used to handle GDPR data retention
+    fieldset: personalData
+  gdprErasureProcess:
+    type: GDPRProcess
+    lable: Erasure process
+    description: Type of process used to handle GDPR data erasure requests
+    fieldset: personalData
   risk:
     type: Paragraph
-    label: Data risk
+    label: Data - more information
     description: More details of what kind of data is held/processesed in this system, and what the associated risks are
-    fieldset: risk
+    fieldset: personalData
   lifecycleStage:
     type: SystemLifecycle
     canFilter: true
@@ -183,14 +201,7 @@ properties:
     relationship: SUPPORTED_BY
     description: The team which supports the system
     fieldset: ownership
-  dataOwner:
-    type: Person
-    direction: outgoing
-    label: GPDR data owner
-    relationship: HAS_DATA_OWNER
-    description: The individual responsible for managing GDPR requests for this system
-    hasMany: false
-    fieldset: ownership
+
   knownAboutBy:
     type: Person
     direction: outgoing
@@ -284,7 +295,7 @@ fieldsets:
     heading: Ownership & knowledge
   network:
     heading: Related resources
-  risk:
-    heading: Data risk
+  personalData:
+    heading: Personal Identifiable Data (PII)
   monitoring:
     heading: Monitoring
