@@ -92,7 +92,7 @@ properties:
     type: Boolean
     canFilter: true
     label: Contactable individuals?
-    description: Does the system have the capability to contact individuals?
+    description: Does the system have the ProcessType to contact individuals?
     fieldset: risk
   risk:
     type: Paragraph
@@ -126,48 +126,66 @@ properties:
     label: Bespoke Monitoring
     description: Details of any monitoring the system has.
     fieldset: monitoring
-  failoverCapability:
-    type: Capability
+  failoverArchitectureType:
+    type: FailoverArchitectureType
     canFilter: true
-    label: Failover Capability
+    label: Type of Failover Architecture
+    description: The architecture that enables failover.
+    fieldset: failover
+  failoverProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Type of Failover Process
     description: The mechanism used to achieve a failover.
     fieldset: failover
-  failoverActions:
+  failbackProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Type of Failback Process
+    description: The mechanism used to achieve a failback.
+    fieldset: failover
+  failoverDetails:
     type: Document
-    label: Failover Actions
+    label: Failover Details
     description: The actions require to fail the system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: failover
-  dataRecoveryCapability:
-    type: Capability
+  dataRecoveryProcessType:
+    type: ProcessType
     canFilter: true
-    label: Data Recovery Capability
+    label: Type of Data Recovery Process
     description: The mechanism used to achieve a data recovery.
     fieldset: dataRecovery
-  dataRecoveryActions:
+  dataRecoveryDetails:
     type: Document
-    label: Data Recovery Actions
+    label: Data Recovery Details
     description: The actions require to restore the data for the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: dataRecovery
-  releaseCapabiity:
-    type: Capability
+  releaseProcessType:
+    type: ProcessType
     canFilter: true
-    label: Release Process Capability
+    label: Type of Release Process
     description: The mechanism used to achieve a release.
     fieldset: release
-  releaseProcess:
+  rollbackProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Type of Rollback Process
+    description: The mechanism used to reverse a release.
+    fieldset: release
+  releaseDetails:
     type: Document
-    label: Release Process
+    label: Release Details
     description: The actions require to deploy a new version of the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: release
-  credentialsRefreshCapability:
-    type: Capability
+  credentialsRefreshProcessType:
+    type: ProcessType
     canFilter: true
-    label: Credentials Refresh Capability
+    label: Type of Credentials Refresh Process
     description: The mechanism used to achieve a change in credentials.
     fieldset: credentialRefresh
-  credentialsRefreshActions:
+  credentialsRefreshDetails:
     type: Document
-    label: Credentials Refresh Actions
+    label: Credentials Refresh Details
     description: The actions require to change the credentials used by the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: credentialRefresh
   moreInformation:

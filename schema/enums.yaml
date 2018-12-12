@@ -4,14 +4,20 @@ CircleCiVersion:
     # because enum values cannot begin with a number in graphQL
     ONE: '1.0'
     TWO: '2.0'
-Capability:
+ProcessType:
   description: The means by which a technique is delivered
   options:
-    - Fully_Automated
-    - Manually_Triggered_Script
-    - Manual_No_Automation
-    - Not_Defined
-    - Not_Required
+    - FullyAutomated
+    - PartiallyAutomated
+    - Manual
+    - NotDefined
+    - NotRequired
+FailoverArchitectureType:
+  description: The design which allows failover
+  options:
+    - ActiveActive
+    - ActivePassive
+    - None
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
