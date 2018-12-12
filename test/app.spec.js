@@ -1,6 +1,6 @@
 const app = require('../server/app.js');
 const request = require('./helpers/supertest').getNamespacedSupertest('app');
-const { DEFAULT_QUERY } = require('../server/routes/graphiql');
+const DEFAULT_QUERY = require('../server/routes/default-query');
 
 describe('generic app settings', () => {
 	it('GET gtg - status code 200', async () => {
