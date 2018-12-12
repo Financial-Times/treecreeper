@@ -1,21 +1,25 @@
 name: Group
 description: An overarching group which contains teams and is costed separately
+rank: 50
 properties:
   code:
-    type: Word
+    type: Code
     required: true
     unique: true
     canIdentify: true
+    isCore: true
     pattern: STRICT_CODE
     label: Code
     description: 'Unique code/id for this item.'
   name:
-    type: Word
+    type: Name
     canIdentify: true
+    isCore: true
     label: Name
     description: The name of the group.
   description:
     type: Paragraph
+    isCore: true
     label: Description
     description: What the group does.
   isActive:
@@ -34,7 +38,19 @@ properties:
     direction: outgoing
     label: Tech Director
     relationship: HAS_TECH_DIRECTOR
-    description: The tech director who owns the group.
+    description: The tech director for the group.
+  productOwner:
+    type: Person
+    direction: outgoing
+    label: Product Owner
+    relationship: HAS_PRODUCT_OWNER
+    description: The product owner for the group.
+  deliveryManager:
+    type: Person
+    direction: outgoing
+    label: Delivery Manager
+    relationship: HAS_DELIVERY_MANAGER
+    description: The delivery manager for the group.
   topLevelTeams:
     type: Team
     direction: outgoing

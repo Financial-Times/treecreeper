@@ -21,12 +21,12 @@ FailoverArchitectureType:
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
-    Note that 'Dormant' should be used for systems that are currently
+    Note that 'Deprecated' should be used for systems that are currently
     not actively used, but may not be fully decommissioned yet
   options:
     - Preproduction
     - Production
-    - Dormant
+    - Deprecated
     - Decommissioned
 ServiceTier:
   description: A system's support level
