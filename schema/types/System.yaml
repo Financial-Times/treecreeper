@@ -64,7 +64,8 @@ properties:
     direction: outgoing
     label: GPDR data owner
     relationship: HAS_DATA_OWNER
-    description: The individual responsible for managing GDPR requests for this system
+    description: |
+      The individual responsible for managing GDPR requests for this system
     hasMany: false
     fieldset: personalData
   containsPersonalData:
@@ -109,13 +110,13 @@ properties:
     fieldset: personalData
   gdprRetentionProcess:
     type: GDPRProcess
-    lable: Retention process
+    label: Retention process
     description: Type of process used to handle GDPR data retention
     fieldset: personalData
     canFilter: true
   gdprErasureProcess:
     type: GDPRProcess
-    lable: Erasure process
+    label: Erasure process
     description: Type of process used to handle GDPR data erasure requests
     fieldset: personalData
     canFilter: true
@@ -208,7 +209,10 @@ properties:
     direction: outgoing
     label: Technical owner
     relationship: HAS_TECHNICAL_OWNER
-    description: The individual responsible for technical aspects of this system (optional - defaults to the tech lead of the delivery team)
+    description: |
+      The individual responsible for technical aspects of this system
+      (optional - if absent, assume the tech lead of the delivery team is
+      responsible)
     hasMany: false
     fieldset: ownership
   knownAboutBy:
