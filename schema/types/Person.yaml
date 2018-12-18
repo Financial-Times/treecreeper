@@ -156,6 +156,22 @@ properties:
     description: Products the person is a product owner for.
     hasMany: true
     fieldset: individual
+  dataOwnerFor:
+    type: System
+    direction: incoming
+    label: GDPR Data owner for systems
+    relationship: HAS_DATA_OWNER
+    description: Systems the person has responsibility for managing GDPR processes related to personal data
+    hasMany: true
+    fieldset: individual
+  technicalOwnerFor:
+    type: System
+    direction: incoming
+    label: Technical owner for systems
+    relationship: HAS_TECHNICAL_OWNER
+    description: Systems the person has technical responsibility for
+    hasMany: true
+    fieldset: individual
   stakeholderFor:
     type: System
     direction: incoming
