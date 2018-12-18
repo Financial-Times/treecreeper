@@ -65,7 +65,7 @@ properties:
     label: GPDR data owner
     relationship: HAS_DATA_OWNER
     description: |
-      The individual responsible for managing GDPR requests for this system
+      The individual responsible for managing GDPR requests for this system.
     hasMany: false
     fieldset: personalData
   containsPersonalData:
@@ -274,7 +274,7 @@ properties:
     description: |
       The individual responsible for technical aspects of this system
       (optional - if absent, assume the tech lead of the delivery team is
-      responsible)
+      responsible).
     hasMany: false
     fieldset: ownership
   knownAboutBy:
