@@ -2,6 +2,8 @@ const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const maintenance = require('../middleware/maintenance');
+const clientId = require('../middleware/client-id');
+
 const { formatError } = require('graphql');
 const { graphqlExpress } = require('apollo-server-express');
 const schema = require('../data/graphql-schema');
@@ -34,7 +36,14 @@ const api = graphqlExpress(({ headers }) => ({
 
 module.exports = router => {
 	router.use(timeout('65s'));
-	router.use(security.requireApiAuthOrS3o);
+	router.use((req, res, next) => {
+		if (req.get('client-id')) {
+			return clientId(req, res, next);
+		}
+		next();
+	});
+
+	router.use(security.requireApiKeyOrS3o);
 	router.use(maintenance.disableReads);
 	router.use(bodyParsers);
 

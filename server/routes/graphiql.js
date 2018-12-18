@@ -38,7 +38,7 @@ const DEFAULT_QUERY = `{
 
 module.exports = router => {
 	router.use(
-		'/graphiql',
+		'/',
 		security.requireS3o,
 		graphiqlExpress({
 			endpointURL: '/graphql',

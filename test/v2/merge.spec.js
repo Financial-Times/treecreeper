@@ -42,6 +42,7 @@ describe('merge', () => {
 					destinationCode: teamCode2
 				})
 				.expect(400, /No type/);
+
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2)

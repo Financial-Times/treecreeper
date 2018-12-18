@@ -1,13 +1,13 @@
-const { logger } = require('../../lib/request-context');
-const EventLogWriter = require('../../lib/event-log-writer');
-const Kinesis = require('../../lib/kinesis-client');
+const { logger } = require('./request-context');
+const EventLogWriter = require('./event-log-writer');
+const Kinesis = require('./kinesis-client');
 const { getType } = require('@financial-times/biz-ops-schema');
 const uniqBy = require('lodash.uniqby');
 const kinesisClient = new Kinesis(
 	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name'
 );
 const eventLogWriter = new EventLogWriter(kinesisClient);
-const { getContext } = require('../../lib/request-context');
+const { getContext } = require('./request-context');
 
 const sendEvent = event => {
 	eventLogWriter.sendEvent(event).catch(error => {

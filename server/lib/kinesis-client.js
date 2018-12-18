@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const { logger } = require('../lib/request-context');
+const { logger } = require('./request-context');
 
 const {
 	KINESIS_AWS_REGION: region = 'eu-west-1',

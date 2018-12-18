@@ -1,13 +1,13 @@
-const inputHelpers = require('../../lib/rest-input-helpers');
+const inputHelpers = require('../../../lib/rest-input-helpers');
 const { stripIndents } = require('common-tags');
-const { dbErrorHandlers } = require('../../lib/errors');
-const { logNodeChanges } = require('../../lib/log-to-kinesis');
+const { dbErrorHandlers } = require('../../../lib/error-handling');
+const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const { metaPropertiesForCreate } = require('../../../data/cypher-fragments');
 
 const {
 	getBatchedQueries,
 	executeBatchOrSingle
-} = require('../../lib/relationship-batcher');
+} = require('../../../lib/relationship-batcher');
 
 const salesforceSync = require('../../../lib/salesforce-sync');
 

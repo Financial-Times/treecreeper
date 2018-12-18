@@ -24,10 +24,7 @@ const toArray = val => (Array.isArray(val) ? val : [val]);
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
-const validateParams = ({ clientId, requestId, nodeType, code }) => {
-	// TODO move these first two into middleware
-	validation.validateClientId(clientId);
-	validation.validateRequestId(requestId);
+const validateParams = ({ nodeType, code }) => {
 	// And these two too
 	validation.validateTypeName(nodeType);
 	validation.validateCode(nodeType, code);
