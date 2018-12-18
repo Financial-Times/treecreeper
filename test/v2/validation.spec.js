@@ -1,6 +1,6 @@
 const { setupMocks } = require('../helpers');
 const app = require('../../server/app.js');
-const validation = require('../../server/routes/lib/validation');
+const validation = require('../../server/lib/validation');
 
 describe('validation', () => {
 	describe('integration with api', () => {

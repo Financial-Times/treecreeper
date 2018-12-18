@@ -1,4 +1,4 @@
-const { logger } = require('../lib/request-context');
+const { logger } = require('./request-context');
 
 const actions = {
 	CREATE: 'CREATE',

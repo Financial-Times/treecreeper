@@ -1,10 +1,13 @@
-const inputHelpers = require('../../lib/rest-input-helpers');
+const inputHelpers = require('../../../lib/rest-input-helpers');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { dbErrorHandlers, preflightChecks } = require('../../lib/errors');
+const {
+	dbErrorHandlers,
+	preflightChecks
+} = require('../../../lib/error-handling');
 const {
 	constructNode: constructOutput
-} = require('../../lib/construct-output');
+} = require('../../../data/construct-output');
 const { getType } = require('@financial-times/biz-ops-schema');
 const { logger } = require('../../../lib/request-context');
 const {
@@ -15,11 +18,11 @@ const {
 
 const salesforceSync = require('../../../lib/salesforce-sync');
 const { getNodeWithRelationships } = require('../../../data/canned-queries');
-const { logNodeChanges } = require('../../lib/log-to-kinesis');
+const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const {
 	getBatchedQueries,
 	executeBatchOrSingle
-} = require('../../lib/relationship-batcher');
+} = require('../../../lib/relationship-batcher');
 
 const toArray = it =>
 	typeof it === 'undefined' ? undefined : Array.isArray(it) ? it : [it];

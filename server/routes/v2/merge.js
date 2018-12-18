@@ -1,9 +1,11 @@
 const httpErrors = require('http-errors');
-const { validateTypeName } = require('../lib/validation');
+const { validateTypeName } = require('../../lib/validation');
 const { executeQuery } = require('../../data/db-connection');
-const { constructNode: constructOutput } = require('../lib/construct-output');
+const {
+	constructNode: constructOutput
+} = require('../../data/construct-output');
 const { setContext } = require('../../lib/request-context');
-const { logMergeChanges } = require('../lib/log-to-kinesis');
+const { logMergeChanges } = require('../../lib/log-to-kinesis');
 
 const { RETURN_NODE_WITH_RELS } = require('../../data/cypher-fragments');
 

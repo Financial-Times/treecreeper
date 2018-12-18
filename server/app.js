@@ -12,30 +12,30 @@ const {
 } = require('./lib/request-context');
 
 const requestId = require('./middleware/request-id');
-const clientId = require('./middleware/client-id');
+const {
+	errorToErrors,
+	notFound,
+	uncaughtError
+} = require('./middleware/errors');
+
 const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
 	const app = express();
 
+	// __gtg and __health need no preconditions satisfying to respond
 	app.get('/__gtg', (req, res) => {
 		res.status(200).end();
 	});
+	app.get('/__health', health);
 
-	app.use((req, res, next) => {
-		next();
-	});
-
+	// Always assign/propagate requestId and setup request tracing
 	app.use(contextMiddleware);
 	app.use(requestId);
-	app.use(clientId);
 	app.set('case sensitive routing', true);
 	app.set('s3o-cookie-ttl', ONE_HOUR);
 
-	// Redirect a frequent typo to correct path
-	app.get('/graphql', (req, res) => {
-		res.redirect('/graphiql');
-	});
+	app.use('/graphiql', graphiql(new express.Router()));
 
 	// Redirect legacy graphql url
 	app.use('/api/graphql', (req, res) => {
@@ -44,25 +44,10 @@ const createApp = () => {
 
 	app.use('/graphql', graphql(new express.Router()));
 	app.use('/v2', v2(new express.Router()));
-	app.use('/', graphiql(new express.Router()));
-	app.get('/__health', health);
 
-	app.use(({ path }, res) => {
-		logger.info({ path, event: 'PATH_NOT_FOUND_ERROR' }, 'Not found');
-
-		return res.status(404).json({
-			errors: [
-				{
-					message: 'Not Found'
-				}
-			]
-		});
-	});
-
-	app.use((error, request, response, next) => {
-		logger.error({ error, event: 'UNHANDLED_ERROR' }, 'Unhandled server error');
-		next(error);
-	});
+	app.use(errorToErrors);
+	app.use(notFound);
+	app.use(uncaughtError);
 
 	return app;
 };

@@ -2,11 +2,11 @@ const MAX_IN_SINGLE_QUERY = process.env.MAX_RELATIONSHIPS_IN_QUERY || 10;
 const {
 	RETURN_NODE_WITH_RELS,
 	createRelationships
-} = require('../../data/cypher-fragments');
+} = require('../data/cypher-fragments');
 const { getType } = require('@financial-times/biz-ops-schema');
-const { getNodeWithRelationships } = require('../../data/canned-queries');
-const { executeQuery, writeTransaction } = require('../../data/db-connection');
-const { constructNode: constructOutput } = require('./construct-output');
+const { getNodeWithRelationships } = require('../data/canned-queries');
+const { executeQuery, writeTransaction } = require('../data/db-connection');
+const { constructNode: constructOutput } = require('../data/construct-output');
 
 const explodeRelationships = (type, relationships = {}) => {
 	const schema = getType(type);

@@ -12,18 +12,8 @@ const requireApiKey = (req, res, next) => {
 	return next();
 };
 
-const requireClientId = (req, res, next) => {
-	if (!req.get('client-id')) {
-		return res
-			.status(400)
-			.send('Missing client-id header')
-			.end();
-	}
-	return next();
-};
-
-const requireApiAuthOrS3o = (req, res, next) => {
-	if (!(hasApiKey(req) && req.get('client-id'))) {
+const requireApiKeyOrS3o = (req, res, next) => {
+	if (!hasApiKey(req)) {
 		return s3o.authS3ONoRedirect(req, res, next);
 	}
 	return next();
@@ -32,6 +22,5 @@ const requireApiAuthOrS3o = (req, res, next) => {
 module.exports = {
 	requireS3o: s3o,
 	requireApiKey,
-	requireClientId,
-	requireApiAuthOrS3o
+	requireApiKeyOrS3o
 };
