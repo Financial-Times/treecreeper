@@ -9,19 +9,19 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this item.'
     pattern: NO_LOWER_CASE
   name:
     type: Name
     canIdentify: true
     isCore: true
     label: Name
-    description: The name of the cost centre
+    description: The name of the cost centre.
   groups:
     relationship: PAYS_FOR
     type: Group
     direction: outgoing
     hasMany: true
     label: FT Group
-    description: The groups which are costed to the cost centre
+    description: The groups which are costed to the cost centre.
 

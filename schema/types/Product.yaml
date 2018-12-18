@@ -10,47 +10,47 @@ properties:
     isCore: true
     pattern: STRICT_CODE
     label: Code
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this item.'
     fieldset: general
   description:
     type: Paragraph
     isCore: true
     label: Description
-    description: Brief description of what the product does
+    description: Brief description of what the product does.
     fieldset: general
   name:
     type: Name
     canIdentify: true
     isCore: true
     label: Name
-    description: The name generally used to refer to the product
+    description: The name generally used to refer to the product.
     fieldset: general
   serviceTier:
     type: ServiceTier
     canFilter: true
     isCore: true
     label: Service tier
-    description: The product's service tier level
+    description: The product's service tier level.
     fieldset: general
   primaryURL:
     type: Url
     canIdentify: true
     isCore: true
     label: Primary URL
-    description: The main url the product is served on
+    description: The main url the product is served on.
     fieldset: general
   lifecycleStage:
     type: ProductLifecycle
     canFilter: true
     label: Lifecycle stage
-    description: Lifecycle stage of the product
+    description: Lifecycle stage of the product.
     fieldset: general
   productOwners:
     type: Person
     direction: outgoing
     label: Product owners
     relationship: HAS_PRODUCT_OWNER
-    description: The product's owner
+    description: The product's owner.
     hasMany: true
     fieldset: network
   dependencies:
@@ -58,7 +58,7 @@ properties:
     direction: outgoing
     label: Direct dependencies
     relationship: DEPENDS_ON
-    description: The systems the product directly depends on
+    description: The systems the product directly depends on.
     hasMany: true
     fieldset: network
   recursiveDependencies:
@@ -66,7 +66,7 @@ properties:
     direction: outgoing
     label: Recursive dependencies
     relationship: DEPENDS_ON
-    description: 'The systems the product depends on, either directly or indirectly'
+    description: 'The systems the product depends on, either directly or indirectly.'
     hasMany: true
     isRecursive: true
     fieldset: network
@@ -76,7 +76,7 @@ properties:
     type: Product
     relationship: DEPENDS_ON
     direction: outgoing
-    description: Products that this product depends on
+    description: Products that this product depends on.
     label: Product dependencies
     fieldset: network
   productDependents:
@@ -85,7 +85,7 @@ properties:
     type: Product
     relationship: DEPENDS_ON
     direction: incoming
-    description: Products that depend on this product
+    description: Products that depend on this product.
     label: Product dependents
     fieldset: network
 fieldsets:

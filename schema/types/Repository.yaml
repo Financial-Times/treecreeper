@@ -11,12 +11,12 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: 'Unique code/id for this item'
+    description: 'Unique code/id for this item.'
   name:
     type: Name
     isCore: true
     label: Name
-    description: Display Name
+    description: Display Name.
     autoPopulated: true
   url:
     type: Url
@@ -24,68 +24,68 @@ properties:
     canIdentify: true
     isCore: true
     label: URL
-    description: Repository URL
+    description: Repository URL.
     autoPopulated: true
   vcsID:
     type: Word
     label: VCS ID
-    description: Repository hosts internal ID
+    description: Repository hosts internal ID.
     autoPopulated: true
   sshUrl:
     type: Url
     # required: true
     canIdentify: true
     label: SSH URL
-    description: SSH URL to checkout the source
+    description: SSH URL to checkout the source.
     autoPopulated: true
   isPrivate:
     type: Boolean
     canFilter: true
     isCore: true
     label: Private
-    description: Is the repository private
+    description: Is the repository private.
     autoPopulated: true
   isArchived:
     type: Boolean
     canFilter: true
     isCore: true
     label: Archived
-    description: Is the repository archived
+    description: Is the repository archived.
     autoPopulated: true
   description:
     type: Paragraph
     label: Description
-    description: Repository description field
+    description: Repository description field.
     autoPopulated: true
   createdAt:
     type: Date
     label: Created
-    description: The UTC time when the repository was created in the VCS system
+    description: The UTC time when the repository was created in the VCS system.
     autoPopulated: true
   pushedAt:
     type: Date
     label: Updated
-    description: The UTC time when the repository was last pushed to
+    description: The UTC time when the repository was last pushed to.
     autoPopulated: true
   projectName:
     type: Word
     label: Project name
-    description: The project name on FT Bitbucket
+    description: The project name on FT Bitbucket.
   projectUrl:
     type: Url
     label: Project URL
-    description: The URL of the project on FT Bitbucket
+    description: The URL of the project on FT Bitbucket.
   systems:
     type: System
     direction: incoming
     label: Systems
     relationship: HAS_REPO
-    description: Systems which the repository holds source code for
+    description: Systems which the repository holds source code for.
     hasMany: true
   versionControlSystem:
     type: VersionControlSystem
     label: Version control system
-    description: Version control system the repository is stored in
+    description: Version control system the repository is stored in.
     autoPopulated: true
   storedIn:
     type: System
@@ -93,5 +93,5 @@ properties:
     label: Stored in
     deprecationReason: The storedIn relationship is now replaced by the versionControlSystem property
     relationship: STORED_IN
-    description: VCS provider that the repository is hosted by
+    description: VCS provider that the repository is hosted by.
     autoPopulated: true

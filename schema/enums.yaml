@@ -1,3 +1,16 @@
+ProcessType:
+  description: The means by which a technique is delivered
+  options:
+    - FullyAutomated
+    - PartiallyAutomated
+    - Manual
+    - NotRequired
+FailoverArchitectureType:
+  description: The design which allows failover
+  options:
+    - ActiveActive
+    - ActivePassive
+    - None
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.

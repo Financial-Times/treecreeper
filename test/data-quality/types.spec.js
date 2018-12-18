@@ -139,9 +139,11 @@ describe('data quality: types', () => {
 
 						it('has valid label', () => {
 							expect(typeof config.label).toBe('string');
+							expect(/[\.!]$/.test(config.label.trim())).toBe(false);
 						});
 						it('has valid description', () => {
 							expect(typeof config.description).toBe('string');
+							expect(/[\.\?]$/.test(config.description.trim())).toBe(true);
 						});
 						it('has valid type', () => {
 							expect(config.type).toBeDefined();
