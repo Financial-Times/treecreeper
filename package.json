@@ -78,6 +78,7 @@
 		"lodash.uniqby": "^4.7.0",
 		"neo4j-driver": "~1.6.1",
 		"neo4j-graphql-js": "~0.1.28",
+		"next-metrics": "^3.1.3",
 		"sinon": "^6.2.0",
 		"uuid": "^3.2.1"
 	},
