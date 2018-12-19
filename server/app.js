@@ -18,6 +18,7 @@ const {
 	uncaughtError
 } = require('./middleware/errors');
 
+const metrics = require('next-metrics');
 const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
@@ -28,6 +29,17 @@ const createApp = () => {
 		res.status(200).end();
 	});
 	app.get('/__health', health);
+
+	// metrics should be one of the first things as needs to be applied before any other middleware executes
+	metrics.init({
+		flushEvery: 40000
+	});
+
+	app.use((req, res, next) => {
+		metrics.instrument(req, { as: 'express.http.req' });
+		metrics.instrument(res, { as: 'express.http.res' });
+		next();
+	});
 
 	// Always assign/propagate requestId and setup request tracing
 	app.use(contextMiddleware);
