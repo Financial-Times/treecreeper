@@ -48,6 +48,7 @@ module.exports = router => {
 	router.use(bodyParsers);
 
 	router.use((req, res, next) => {
+		res.nextMetricsName = 'graphql';
 		setContext({ endpoint: 'graphql', method: req.method });
 		logger.info({
 			event: 'GRAPHQL_REQUEST',
