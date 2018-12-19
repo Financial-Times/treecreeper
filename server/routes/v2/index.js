@@ -29,7 +29,7 @@ const controller = (endpointName, method, controllerImplementation) => (
 	res,
 	next
 ) => {
-	res.nextMetricsName = `${endpointName}_${req.params.type || req.body.type}`;
+	res.nextMetricsName = `${endpointName}_${req.params.nodeType || req.body.type}`;
 	requestLog(endpointName, method, req);
 	controllerImplementation(
 		Object.assign(
