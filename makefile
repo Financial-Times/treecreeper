@@ -20,7 +20,7 @@ deploy-aws:
 
 test:
 	@if [ -z $(CIRCLECI) ]; \
-		then export DEBUG=true; jest test --watch; \
+		then export DEBUG=true; make lint && jest test --watch; \
 		else jest test; \
 	fi
 

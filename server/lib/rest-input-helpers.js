@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const validation = require('./validation');
+const validation = require('./schema-validation');
 const { getType } = require('@financial-times/biz-ops-schema');
 
 const stripNegation = propName => propName.replace(/^!/, '');

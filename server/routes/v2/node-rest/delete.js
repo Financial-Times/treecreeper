@@ -1,10 +1,9 @@
 const { validateParams } = require('../../../lib/rest-input-helpers');
 const { stripIndents } = require('common-tags');
 const { preflightChecks } = require('../../../lib/error-handling');
-
 const { executeQuery } = require('../../../data/db-connection');
 const { logNodeDeletion } = require('../../../lib/log-to-kinesis');
-const { getNodeWithRelationships } = require('../../../data/canned-queries');
+const { getNodeWithRelationships } = require('../../../data/cypher-helpers');
 
 module.exports = async input => {
 	validateParams(input);
