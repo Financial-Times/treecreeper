@@ -1,6 +1,6 @@
 const security = require('../middleware/security');
 const { graphiqlExpress } = require('apollo-server-express');
-const DEFAULT_QUERY = require('./default-query');
+const DEFAULT_QUERY = require('../data/default-query');
 
 module.exports = router => {
 	router.use(
