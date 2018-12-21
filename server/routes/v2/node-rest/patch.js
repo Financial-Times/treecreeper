@@ -5,24 +5,11 @@ const {
 	dbErrorHandlers,
 	preflightChecks
 } = require('../../../lib/error-handling');
-const {
-	constructNode: constructOutput
-} = require('../../../data/construct-output');
+const constructOutput = require('../../../data/construct-output');
 const { getType } = require('@financial-times/biz-ops-schema');
 const { logger } = require('../../../lib/request-context');
-const {
-	metaPropertiesForUpdate,
-	metaPropertiesForCreate,
-	deleteRelationships: deleteRelationshipsFragment
-} = require('../../../data/cypher-fragments');
-
-const salesforceSync = require('../../../lib/salesforce-sync');
-const { getNodeWithRelationships } = require('../../../data/canned-queries');
-const { logNodeChanges } = require('../../../lib/log-to-kinesis');
-const {
-	getBatchedQueries,
-	executeBatchOrSingle
-} = require('../../../lib/relationship-batcher');
+const cypherHelpers = require('../../../data/cypher-helpers');
+const executor = require('./_post-patch-executor');
 
 const toArray = it =>
 	typeof it === 'undefined' ? undefined : Array.isArray(it) ? it : [it];
@@ -145,7 +132,10 @@ const update = async input => {
 	}
 
 	try {
-		const prefetch = await getNodeWithRelationships(nodeType, code);
+		const prefetch = await cypherHelpers.getNodeWithRelationships(
+			nodeType,
+			code
+		);
 
 		const existingRecord = prefetch.records.length
 			? constructOutput(nodeType, prefetch)
@@ -198,13 +188,13 @@ const update = async input => {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
-						${metaPropertiesForCreate('node')}
+						${cypherHelpers.metaPropertiesForCreate('node')}
 				`
 		];
 
 		if (willModifyNode) {
 			queryParts.push(stripIndents`ON MATCH SET
-						${metaPropertiesForUpdate('node')}
+						${cypherHelpers.metaPropertiesForUpdate('node')}
 					SET node += $properties`);
 		}
 
@@ -218,47 +208,27 @@ const update = async input => {
 					const key = `Delete${def.relationship}${def.direction}${def.type}`;
 					baseParameters[key] = codes;
 					return `WITH node
-				${deleteRelationshipsFragment(def, key)}
+				${cypherHelpers.deleteRelationships(def, key)}
 				`;
 				})
 			);
 		}
 
-		const queries = getBatchedQueries({
-			baseParameters,
-			writeProperties,
-			nodeType,
+		return await executor({
+			parameters: Object.assign(
+				{
+					properties: writeProperties
+				},
+				baseParameters
+			),
+			queryParts,
+			method: 'PATCH',
 			upsert,
+			nodeType,
 			writeRelationships: addedRelationships,
-			initialQueryParts: queryParts
-		});
-
-		const { data, neo4jResponse } = await executeBatchOrSingle(
-			queries,
-			nodeType,
-			code,
-			willDeleteRelationships
-		);
-
-		logNodeChanges({
-			newRecords: neo4jResponse.records,
-			nodeType,
+			willDeleteRelationships,
 			removedRelationships
 		});
-
-		// HACK: While salesforce also exists as a rival source of truth for Systems,
-		// we sync with it here. Don't like it being in here as the api should be agnostic
-		// in how it handles types, but a little hack in here feels preferable to managing
-		// another update stream consumer, particularly while avoiding race conditions when
-		// migrating from cmdb
-		if (nodeType === 'System') {
-			salesforceSync.setSalesforceIdForSystem(data);
-		}
-
-		return {
-			data,
-			status: data._createdByRequest === requestId ? 201 : 200
-		};
 	} catch (err) {
 		dbErrorHandlers.nodeUpsert(err);
 		throw err;

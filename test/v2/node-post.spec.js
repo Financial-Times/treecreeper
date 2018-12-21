@@ -7,8 +7,6 @@ const {
 	verifyExists
 } = require('../helpers');
 
-const queryBatchingTests = require('./test-bundles/query-batching');
-
 describe('v2 - node POST', () => {
 	const sandbox = {};
 	const namespace = 'v2-node-post';
@@ -229,13 +227,5 @@ describe('v2 - node POST', () => {
 			['CREATE', personCode, 'Person'],
 			['CREATE', groupCode, 'Group']
 		);
-	});
-
-	queryBatchingTests({
-		method: 'post',
-		url: `/v2/node/System/${namespace}-system?upsert=true`,
-		namespace,
-		sandbox,
-		app
 	});
 });

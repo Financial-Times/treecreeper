@@ -50,7 +50,7 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 		clientId
 	});
 
-	if (nodeType) {
+	if (nodeType && removedRelationships) {
 		const { properties } = getType(nodeType);
 
 		Object.entries(removedRelationships).forEach(([propName, codes]) => {

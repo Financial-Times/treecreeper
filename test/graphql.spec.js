@@ -7,8 +7,10 @@ const request = require('./helpers/supertest').getNamespacedSupertest(
 );
 const { executeQuery } = require('../server/data/db-connection');
 const security = require('../server/middleware/security');
-const { createMockSchema } = require('../server/data/graphql-schema');
-const resolvers = require('../server/data/graphql-resolvers');
+const {
+	createMockSchema,
+	resolvers
+} = require('../server/data/graphql-schema');
 const { graphql } = require('graphql');
 
 const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';

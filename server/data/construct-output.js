@@ -10,7 +10,7 @@ const convertIntegersToNumbers = obj => {
 	return obj;
 };
 
-const constructNode = (type, result) => {
+const constructOutput = (type, result) => {
 	const schema = getType(type);
 	const node = result.records[0].get('node');
 	const response = convertIntegersToNumbers(node.properties);
@@ -49,6 +49,4 @@ const constructNode = (type, result) => {
 	return response;
 };
 
-module.exports = {
-	constructNode
-};
+module.exports = constructOutput;

@@ -6,7 +6,6 @@ const {
 	spyDbQuery,
 	verifyNotExists
 } = require('../helpers');
-const queryBatchingTests = require('./test-bundles/query-batching');
 
 describe('v2 - node PATCH', () => {
 	const sandbox = {};
@@ -1177,14 +1176,6 @@ describe('v2 - node PATCH', () => {
 				});
 			});
 		});
-	});
-
-	queryBatchingTests({
-		method: 'patch',
-		url: `/v2/node/System/${namespace}-system?upsert=true&relationshipAction=merge`,
-		namespace,
-		sandbox,
-		app
 	});
 
 	describe('diffing before writes', () => {

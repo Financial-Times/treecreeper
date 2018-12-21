@@ -6,7 +6,7 @@ const clientId = require('../middleware/client-id');
 
 const { formatError } = require('graphql');
 const { graphqlExpress } = require('apollo-server-express');
-const schema = require('../data/graphql-schema');
+const { schema } = require('../data/graphql-schema');
 const { driver } = require('../data/db-connection');
 
 const { logger, setContext } = require('../lib/request-context');
