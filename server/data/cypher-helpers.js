@@ -4,7 +4,7 @@ const { executeQuery } = require('./db-connection');
 const RETURN_NODE_WITH_RELS = stripIndents`
 	WITH node
 	OPTIONAL MATCH (node)-[relationship]-(related)
-	RETURN node, relationship, related`;
+	RETURN node, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest AS relatedRequestId`;
 
 const relFragment = (type, direction, relName) => {
 	const left = direction === 'incoming' ? '<' : '';

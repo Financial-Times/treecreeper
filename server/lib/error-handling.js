@@ -103,8 +103,8 @@ const handleAttachedNode = ({ result, nodeType, code }) => {
 	// use has so that get doesn't error, and get to check if null or not
 	if (
 		result.records.length &&
-		result.records[0].has('related') &&
-		result.records[0].get('related')
+		result.records[0].has('relatedCode') &&
+		result.records[0].get('relatedCode')
 	) {
 		throw httpErrors(
 			409,

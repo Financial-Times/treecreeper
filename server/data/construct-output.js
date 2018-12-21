@@ -15,16 +15,17 @@ const constructOutput = (type, result) => {
 	const node = result.records[0].get('node');
 	const response = convertIntegersToNumbers(node.properties);
 
-	if (result.records[0].get('related')) {
+	if (result.records[0].get('relatedCode')) {
 		const rawRelationships = result.records.map(record => {
-			const target = record.get('related');
+			const relatedCode = record.get('relatedCode');
+			const relatedLabels = record.get('relatedLabels');
 			const rel = record.get('relationship');
 
 			return {
 				n4jRelationship: rel.type,
 				n4jDirection: rel.start.equals(node.identity) ? 'outgoing' : 'incoming',
-				n4jType: target.labels[0],
-				n4jCode: target.properties.code
+				n4jType: relatedLabels[0],
+				n4jCode: relatedCode
 			};
 		});
 		Object.entries(schema.properties)

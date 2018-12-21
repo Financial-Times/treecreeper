@@ -68,19 +68,21 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 
 	if (
 		newRecords[0] &&
-		newRecords[0].has('related') &&
-		newRecords[0].get('related')
+		newRecords[0].has('relatedCode') &&
+		newRecords[0].get('relatedCode')
 	) {
 		newRecords.forEach(record => {
-			const target = record.get('related');
+			const relatedCode = record.get('relatedCode');
+			const relatedRequestId = record.get('relatedRequestId');
+			const relatedLabels = record.get('relatedLabels');
 			const rel = record.get('relationship');
 
 			// If created the related node, it's an CREATE on it
-			if (target.properties._createdByRequest === requestId) {
+			if (relatedRequestId === requestId) {
 				events.push({
 					action: 'CREATE',
-					code: target.properties.code,
-					type: target.labels[0],
+					code: relatedCode,
+					type: relatedLabels[0],
 					requestId,
 					clientId
 				});
@@ -88,8 +90,8 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 			} else if (rel.properties._createdByRequest === requestId) {
 				events.push({
 					action: 'UPDATE',
-					code: target.properties.code,
-					type: target.labels[0],
+					code: relatedCode,
+					type: relatedLabels[0],
 					requestId,
 					clientId
 				});
