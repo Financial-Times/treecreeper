@@ -92,9 +92,9 @@ properties:
   isPeopleApi:
     type: Boolean
     canFilter: true
-    label: Active
+    label: Is in people api
     description: |
-        Whether or not the person is still working at the FT.
+        Whether or not the person exists in who.in.ft.com.
         For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
     autoPopulated: true
   source:
