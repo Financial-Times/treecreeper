@@ -1,5 +1,6 @@
 const neo4j = require('neo4j-driver').v1;
 const { logger } = require('../lib/request-context');
+const metrics = require('next-metrics');
 
 const driver = neo4j.driver(
 	process.env.GRAPHENEDB_CHARCOAL_BOLT_URL,
@@ -9,31 +10,50 @@ const driver = neo4j.driver(
 	)
 );
 
+const originalSession = driver.session;
+
+driver.session = (...args) => {
+	const session = originalSession.apply(driver, args);
+	const originalRun = session.run;
+
+	session.run = async (...args) => {
+		const start = Date.now();
+		metrics.count('neo4j.query.count');
+		let isSuccessful = false;
+		try {
+			const result = await originalRun.apply(session, args);
+			isSuccessful = true;
+			return result;
+		} finally {
+			const totalTime = Date.now() - start;
+			const metricPrefix = `neo4j.query.${
+				isSuccessful ? 'success' : 'failure'
+			}`;
+			metrics.histogram(`${metricPrefix}.time`, totalTime);
+			metrics.count(`${metricPrefix}.count`);
+			logger.info({
+				event: 'NEO4J_QUERY',
+				successful: isSuccessful,
+				totalTime
+			});
+		}
+	};
+	return session;
+};
+
 module.exports = {
 	driver,
 	executeQuery: async (...args) => {
 		const session = driver.session();
-		const start = Date.now();
 		try {
 			return await session.run(...args);
 		} finally {
-			logger.info({
-				event: 'NEO4J_QUERY',
-				sessiontype: 'singleuse',
-				totalTime: Date.now() - start
-			});
 			session.close();
 		}
 	},
 	executeQueryWithSharedSession: (session = driver.session()) => {
 		const executeQuery = async (...args) => {
-			const start = Date.now();
 			const result = await session.run(...args);
-			logger.info({
-				event: 'NEO4J_QUERY',
-				sessiontype: 'reused',
-				totalTime: Date.now() - start
-			});
 			return result;
 		};
 		executeQuery.close = () => session.close();
@@ -60,15 +80,9 @@ module.exports = {
 			}
 			return results;
 		};
-		const start = Date.now();
 		try {
 			return await session.writeTransaction(transactionFunction);
 		} finally {
-			logger.info({
-				event: 'NEO4J_QUERY',
-				sessiontype: 'writetransaction',
-				totalTime: Date.now() - start
-			});
 			session.close();
 		}
 	}
