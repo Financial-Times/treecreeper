@@ -3,6 +3,7 @@ const timeout = require('connect-timeout');
 const security = require('../middleware/security');
 const maintenance = require('../middleware/maintenance');
 const clientId = require('../middleware/client-id');
+const { TIMEOUT } = require('../constants');
 
 const { formatError } = require('graphql');
 const { graphqlExpress } = require('apollo-server-express');
@@ -35,7 +36,7 @@ const api = graphqlExpress(({ headers }) => ({
 }));
 
 module.exports = router => {
-	router.use(timeout('65s'));
+	router.use(timeout(TIMEOUT));
 	router.use((req, res, next) => {
 		if (req.get('client-id')) {
 			return clientId(req, res, next);

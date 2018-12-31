@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
 const clientId = require('../../middleware/client-id');
+const { TIMEOUT } = require('../../constants');
 
 const timeout = require('connect-timeout');
 const { logger, setContext } = require('../../lib/request-context');
@@ -53,7 +54,7 @@ const controller = (endpointName, method, controllerImplementation) => (
 };
 
 module.exports = router => {
-	router.use(timeout('65s'));
+	router.use(timeout(TIMEOUT));
 	router.use(clientId);
 	router.use(security.requireApiKey);
 	router.use(maintenance.disableWrites);

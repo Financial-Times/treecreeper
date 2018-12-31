@@ -1,7 +1,7 @@
 const neo4j = require('neo4j-driver').v1;
 const { logger } = require('../lib/request-context');
 const metrics = require('next-metrics');
-
+const { TIMEOUT } = require('../constants');
 const driver = neo4j.driver(
 	process.env.GRAPHENEDB_CHARCOAL_BOLT_URL,
 	neo4j.auth.basic(
@@ -21,10 +21,26 @@ driver.session = (...args) => {
 		metrics.count('neo4j.query.count');
 		let isSuccessful = false;
 		try {
-			const result = await originalRun.apply(session, args);
+			const result = await Promise.race([
+				originalRun.apply(session, args),
+				new Promise((res, rej) => {
+					setTimeout(
+						() =>
+							// note that this will cause the finally block to run, which closes the session
+							rej(
+								new Error(
+									'Neo4j query took more than 15 seconds: closing session'
+								)
+							),
+						TIMEOUT
+					);
+				})
+			]);
+
 			isSuccessful = true;
 			return result;
 		} finally {
+			session.close();
 			const totalTime = Date.now() - start;
 			const metricPrefix = `neo4j.query.${
 				isSuccessful ? 'success' : 'failure'
@@ -43,14 +59,7 @@ driver.session = (...args) => {
 
 module.exports = {
 	driver,
-	executeQuery: async (...args) => {
-		const session = driver.session();
-		try {
-			return await session.run(...args);
-		} finally {
-			session.close();
-		}
-	},
+	executeQuery: async (...args) => driver.session().run(...args),
 	executeQueryWithSharedSession: (session = driver.session()) => {
 		const executeQuery = async (...args) => {
 			const result = await session.run(...args);
@@ -59,31 +68,5 @@ module.exports = {
 		executeQuery.close = () => session.close();
 
 		return executeQuery;
-	},
-	writeTransaction: async steps => {
-		const session = driver.session();
-		const transactionFunction = async transaction => {
-			let step;
-			let results = [];
-			while ((step = steps.shift())) {
-				if (Array.isArray(step)) {
-					results = results.concat(
-						await Promise.all(
-							step.map(({ query, params }) =>
-								transaction.run(query, params || {})
-							)
-						)
-					);
-				} else {
-					results.push(await transaction.run(step.query, step.params || {}));
-				}
-			}
-			return results;
-		};
-		try {
-			return await session.writeTransaction(transactionFunction);
-		} finally {
-			session.close();
-		}
 	}
 };
