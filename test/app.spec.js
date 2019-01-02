@@ -102,4 +102,39 @@ describe('generic app settings', () => {
 			.namespacedAuth()
 			.expect(200);
 	});
+
+	it('if no API_KEY in environment, will not authorize', async () => {
+		const API_KEY = process.env.API_KEY;
+		delete process.env.API_KEY;
+		await request(app)
+			.get('/v2/node/System/test-system')
+			.set('client-id', 'client-id-1')
+			.expect(401, /Missing or invalid api-key header/);
+
+		process.env.API_KEY = API_KEY;
+	});
+
+	it('will authorize using API_KEY_NEW, even if API_KEY present', async () => {
+		process.env.API_KEY_NEW = 'new-api-key';
+		await request(app)
+			.get('/v2/node/System/test-system')
+			.set('client-id', 'client-id-1')
+			.set('api_key', 'new-api-key')
+			.expect(404);
+		delete process.env.API_KEY_NEW;
+	});
+
+	it('will authorize using API_KEY_NEW, if API_KEY missing', async () => {
+		const API_KEY = process.env.API_KEY;
+		delete process.env.API_KEY;
+		process.env.API_KEY_NEW = 'new-api-key';
+		await request(app)
+			.get('/v2/node/System/test-system')
+			.set('client-id', 'client-id-1')
+			.set('api_key', 'new-api-key')
+			.expect(404);
+
+		process.env.API_KEY = API_KEY;
+		delete process.env.API_KEY_NEW;
+	});
 });
