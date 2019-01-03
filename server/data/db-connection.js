@@ -3,10 +3,10 @@ const { logger } = require('../lib/request-context');
 const metrics = require('next-metrics');
 const { TIMEOUT } = require('../constants');
 const driver = neo4j.driver(
-	process.env.GRAPHENEDB_CHARCOAL_BOLT_URL,
+	process.env.GRAPHENEDB_BOLT_URL,
 	neo4j.auth.basic(
-		process.env.GRAPHENEDB_CHARCOAL_BOLT_USER,
-		process.env.GRAPHENEDB_CHARCOAL_BOLT_PASSWORD
+		process.env.GRAPHENEDB_BOLT_USER,
+		process.env.GRAPHENEDB_BOLT_PASSWORD
 	)
 );
 
