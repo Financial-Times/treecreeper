@@ -4,6 +4,8 @@ const {
 	addMockFunctionsToSchema
 } = require('graphql-tools');
 
+const { augmentSchema } = require('neo4j-graphql-js');
+
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql } = require('neo4j-graphql-js');
 const { getTypes, getEnums } = require('@financial-times/biz-ops-schema');
@@ -29,17 +31,23 @@ const resolvers = {
 
 const { getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 
-const schema = makeExecutableSchema({
-	typeDefs: getGraphqlDefs(),
-	resolvers: resolvers.all,
-	logger: {
-		log(message) {
-			logger.error(`GraphQL Schema: ${message}`, {
-				event: 'GRAPHQL_SCHEMA_ERROR'
-			});
+const schema = augmentSchema(
+	makeExecutableSchema({
+		typeDefs: getGraphqlDefs(),
+		resolvers: resolvers.all,
+		logger: {
+			log(message) {
+				logger.error(`GraphQL Schema: ${message}`, {
+					event: 'GRAPHQL_SCHEMA_ERROR'
+				});
+			}
 		}
+	}),
+	{
+		query: true,
+		mutation: false
 	}
-});
+);
 
 const createMockSchema = mocks => {
 	const mockSchema = makeExecutableSchema({
