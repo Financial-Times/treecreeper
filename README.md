@@ -67,10 +67,9 @@ This should be accessed directly as it is a UI, not through the above API gatewa
 
 ## API endpoints 
 
-Prefer to use V2 as V1 will be deprecated in the near future
+Please use V2 as V1 has now been deprecated
 
-- [V2 API Reference](ENDPOINTS-V2.md) 
-- [V1 API Reference](ENDPOINTS.md) 
+- [V2 API Reference](ENDPOINTS.md) 
 
 
 ## Cookbook
