@@ -4,10 +4,8 @@ const {
 	addMockFunctionsToSchema
 } = require('graphql-tools');
 
-const { augmentSchema } = require('neo4j-graphql-js');
-
 const partialRight = require('lodash/partialRight');
-const { neo4jgraphql } = require('neo4j-graphql-js');
+const { neo4jgraphql, augmentSchema } = require('neo4j-graphql-js');
 const { getTypes, getEnums } = require('@financial-times/biz-ops-schema');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
