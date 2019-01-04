@@ -18,7 +18,7 @@ properties:
     description: |
       All our production systems which are used by any customer (internal or external)
       should be shown to Operations Support. Reasons for not showing it include
-      lower environments (eg test or staging) or a product which hasn't yet been
+      lower environments (e.g. test or staging) or a product which hasn't yet been
       launched to any customers.
     trueLabel: Show to Operations Support
     falseLabel: Not yet needed by Operations Support
