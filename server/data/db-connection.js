@@ -3,11 +3,8 @@ const { logger } = require('../lib/request-context');
 const metrics = require('next-metrics');
 const { TIMEOUT } = require('../constants');
 const driver = neo4j.driver(
-	process.env.GRAPHENEDB_BOLT_URL,
-	neo4j.auth.basic(
-		process.env.GRAPHENEDB_BOLT_USER,
-		process.env.GRAPHENEDB_BOLT_PASSWORD
-	)
+	process.env.NEO4J_BOLT_URL,
+	neo4j.auth.basic(process.env.NEO4J_BOLT_USER, process.env.NEO4J_BOLT_PASSWORD)
 );
 
 const originalSession = driver.session;
