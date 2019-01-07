@@ -1,7 +1,7 @@
 version: '3'
 services:
   neo4j:
-    image: neo4j:3.2.9-enterprise
+    image: neo4j:3.5.0-community
     environment:
       - NEO4J_dbms_logs_query_enabled=true
       - NEO4J_AUTH=none
