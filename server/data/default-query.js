@@ -30,6 +30,9 @@ const DEFAULT_QUERY = `{
       url
       versionControlSystem
     }
+    recursiveDependencies {
+      code
+    }
   }
 }`;
 
