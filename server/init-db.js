@@ -35,7 +35,7 @@ const initConstraints = async () => {
 							([propName, { required, unique }]) => {
 								return [
 									unique &&
-										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
+										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
 									// required &&
 									// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
 								];
