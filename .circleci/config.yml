@@ -7,7 +7,7 @@ references:
     docker:
       - image: circleci/node:8.11.1-browsers
     environment:
-      NEO4J_VERSION: "3.2.9"
+      NEO4J_VERSION: "3.5.0"
 
   workspace_root: &workspace_root
     ~/

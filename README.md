@@ -117,7 +117,7 @@ npm run init-db
 Run the server:
 
 ```shell
-npm start
+make run
 ```
 
 Which will run the app on port 8888. To visit the local version of the api replace `https://api-t.ft.com/biz-ops/...` with `http://local.in.ft.com:8888/...` and set the `API_KEY` from the app's environment variables as a header. Note: this is not the same as the `X-API-KEY` used to run api-t.ft.com so make sure you have the correct headers set for your environment.

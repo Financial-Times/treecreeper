@@ -821,7 +821,7 @@ describe('v2 - node PATCH', () => {
 						200,
 						sandbox.withMeta({
 							code: teamCode,
-							techLeads: [`${personCode}-1`, `${personCode}-2`]
+							techLeads: [`${personCode}-2`, `${personCode}-1`]
 						})
 					);
 
