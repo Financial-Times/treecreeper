@@ -39,7 +39,8 @@ const controller = (endpointName, method, controllerImplementation) => (
 				requestId: res.locals.requestId,
 				clientId: res.locals.clientId,
 				body: req.body,
-				query: req.query
+				query: req.query,
+				clientUserId: res.locals.clientUserId
 			},
 			req.params
 		)

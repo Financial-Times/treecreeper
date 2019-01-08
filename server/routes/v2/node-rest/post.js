@@ -13,6 +13,7 @@ const create = async input => {
 		requestId,
 		nodeType,
 		code,
+		clientUserId,
 		query: { upsert }
 	} = input;
 
@@ -23,6 +24,7 @@ const create = async input => {
 				date: new Date().toUTCString(),
 				requestId,
 				code,
+				clientUserId,
 				properties: inputHelpers.getWriteProperties(nodeType, input.body, code)
 			},
 			queryParts: [

@@ -9,6 +9,7 @@ module.exports = (req, res, next) => {
 		throw httpErrors(400, 'Missing client-id header');
 	}
 	res.locals.clientId = req.get('client-id');
+	res.locals.clientUserId = req.get('client-user-id');
 	setContext('clientId', res.locals.clientId);
 	if (!CLIENT_ID_RX.test(res.locals.clientId)) {
 		throw httpErrors(

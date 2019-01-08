@@ -16,13 +16,15 @@ const metaPropertiesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
 	${type}._createdTimestamp = $date,
+	${type}._createdByClientUser = $clientUserId,
 	${metaPropertiesForUpdate(type)}
 `;
 
 const metaPropertiesForUpdate = type => stripIndents`
 	${type}._updatedByRequest = $requestId,
 	${type}._updatedByClient = $clientId,
-	${type}._updatedTimestamp = $date
+	${type}._updatedTimestamp = $date,
+	${type}._updatedByClientUser = $clientUserId
 `;
 
 // Must use OPTIONAL MATCH because 'cypher'
