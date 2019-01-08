@@ -36,7 +36,7 @@ describe('get-type', () => {
 	it('returns a type property to alias the name field', async () => {
 		const type1 = {
 			name: 'Type1',
-			description: 'I am Type1',
+			description: 'I am Type1'
 		};
 		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');

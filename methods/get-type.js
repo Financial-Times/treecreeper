@@ -21,7 +21,7 @@ const getType = (
 		return;
 	}
 	type = clone(type);
-	type.type = type.name
+	type.type = type.name;
 
 	if (!('properties' in type)) {
 		type.properties = {};
