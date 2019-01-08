@@ -31,16 +31,14 @@ const initConstraints = async () => {
 			.concat(
 				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
-						...Object.entries(properties).map(
-							([propName, { unique }]) => {
-								return [
-									unique &&
-										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
-									// required &&
-									// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-								];
-							}
-						)
+						...Object.entries(properties).map(([propName, { unique }]) => {
+							return [
+								unique &&
+									`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
+								// required &&
+								// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+							];
+						})
 					);
 				})
 			)
