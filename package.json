@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,8 @@
     "eslint-config-prettier": "^3.0.1",
     "eslint-plugin-prettier": "^2.6.2",
     "jest": "^23.6.0",
-    "prettier": "^1.14.2"
+    "prettier": "^1.14.2",
+    "valid-url": "^1.0.9"
   },
   "dependencies": {
     "@financial-times/n-logger": "^5.7.2",
