@@ -35,6 +35,7 @@ const initConstraints = async () => {
 							return [
 								unique &&
 									`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
+								// skip the setting of enterprise version specific constraints until we use the enterprise version
 								// required &&
 								// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
 							];
