@@ -9,6 +9,7 @@ const primitiveTypesMap = require('../../lib/primitive-types-map');
 const fs = require('fs');
 const path = require('path');
 const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`);
+const validURL = require('valid-url');
 
 const getTwinnedRelationship = (
 	homeTypeName,
@@ -54,6 +55,15 @@ describe('data quality: types', () => {
 			it('may have a plural name', () => {
 				if ('pluralName' in type) {
 					expect(typeof type.pluralName).toBe('string');
+				}
+			});
+			it('has a rank', () => {
+				expect(typeof type.rank).toBe('number');
+			});
+			it('may have a creation URL', () => {
+				if ('creationURL' in type) {
+					expect(typeof type.creationURL).toBe('string');
+					expect(validURL.isUri(type.creationURL)).toBeTruthy();
 				}
 			});
 			const fieldsets = type.fieldsets;
@@ -240,6 +250,21 @@ describe('data quality: types', () => {
 							});
 						}
 					});
+				});
+			});
+			it('has no unrecognised properties', () => {
+				Object.keys(type).forEach(key => {
+					expect(key).toMatch(
+						arrayToRexExp([
+							'name',
+							'description',
+							'pluralName',
+							'rank',
+							'creationURL',
+							'fieldsets',
+							'properties'
+						])
+					);
 				});
 			});
 		});
