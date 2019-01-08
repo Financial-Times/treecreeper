@@ -33,6 +33,18 @@ describe('get-type', () => {
 		expect(type.properties).toEqual(type1.properties);
 	});
 
+	it('returns a type property to alias the name field', async () => {
+		const type1 = {
+			name: 'Type1',
+			description: 'I am Type1',
+		};
+		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
+		const type = getType('Type1');
+		expect(type.name).toBe('Type1');
+		expect(type.type).toBe('Type1');
+		expect(type.description).toBe('I am Type1');
+	});
+
 	it('generates plural name if necessary', async () => {
 		rawData.getTypes.mockReturnValue([
 			{
