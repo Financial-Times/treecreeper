@@ -32,7 +32,7 @@ const initConstraints = async () => {
 				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
 						...Object.entries(properties).map(
-							([propName, { required, unique }]) => {
+							([propName, { unique }]) => {
 								return [
 									unique &&
 										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
