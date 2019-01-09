@@ -44,7 +44,7 @@ Properties on types have a [daunting number of options](MODEL_SPECIFICATION.md#p
 
 Each property must define:
 
-- `name`: A camel case string not beginning with a number e.g. `hasWattle`, `tailLengthToBodyRatio`. Give them names that make sense to you. the only convention is that `Boolean` properties should begin with `is`, `has` or similar
+- `name`: A camel case string not beginning with a number e.g. `hasWattle`, `tailLengthToBodyRatio`. Give them names that make sense to you.  The only convention is that `Boolean` properties should begin with `is`, `has` or similar
 - `label`: A short string, a few words long, that describes the property. Typically used to label form fields and admin pages. Do not end in a full-stop, and only capitalise the first word. In most cases it should just be an un-camel-cased version of the name e.g. `Place in folklore`
 - `description`: A longer string, giving as full a description as you like of the property. Will be parsed as markdown and displayed, among other places, in forms and in graphQL based user interfaces. Should end in a full stop
 - `type` - The type of data stored in the field. Refer to the [primitive types documentation](MODEL_SPECIFICATION.md##primitive-types)
