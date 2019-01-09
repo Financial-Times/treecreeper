@@ -28,7 +28,7 @@ description: A bird of the family Paradisaeidae of the order Passeriformes
 
 ## Thinking about properties
 
-You could dive right in adding properties to your yaml file, but it pays to pause and think about each piece of information you want to store. You will be adding to a platform tha others will be using, so try to get into the mindset of not just what makes sense to you at this stage, but also what will be useful to others from now on.
+You could dive right in adding properties to your yaml file, but it pays to pause and think about each piece of information you want to store. You will be adding to a platform that others will be using, so try to get into the mindset of not just what makes sense to you at this stage, but also what will be useful to others from now on.
 
 List the things you wish to store out and ask the following questions of them:
 
