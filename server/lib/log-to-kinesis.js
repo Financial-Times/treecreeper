@@ -25,18 +25,19 @@ const sendUniqueEvents = events =>
 	).forEach(sendEvent);
 
 const logNodeDeletion = node => {
-	const { requestId, clientId } = getContext();
+	const { requestId, clientId, clientUserId } = getContext();
 	sendEvent({
 		action: 'DELETE',
 		code: node.properties.code,
 		type: node.labels[0],
 		requestId,
-		clientId
+		clientId,
+		clientUserId
 	});
 };
 
 const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
-	const { requestId, clientId } = getContext();
+	const { requestId, clientId, clientUserId } = getContext();
 	const node = newRecords[0].get('node');
 
 	const events = [];
@@ -47,7 +48,8 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 		code: node.properties.code,
 		type: node.labels[0],
 		requestId,
-		clientId
+		clientId,
+		clientUserId
 	});
 
 	if (nodeType && removedRelationships) {
@@ -60,7 +62,8 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 					code: code,
 					type: properties[propName].type,
 					requestId,
-					clientId
+					clientId,
+					clientUserId
 				})
 			);
 		});
@@ -84,7 +87,8 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 					code: relatedCode,
 					type: relatedLabels[0],
 					requestId,
-					clientId
+					clientId,
+					clientUserId
 				});
 				// Otherwise, we've just linked to it i.e. an UPDATE
 			} else if (rel.properties._createdByRequest === requestId) {
@@ -93,7 +97,8 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 					code: relatedCode,
 					type: relatedLabels[0],
 					requestId,
-					clientId
+					clientId,
+					clientUserId
 				});
 			}
 		});
@@ -105,6 +110,7 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 const logMergeChanges = (
 	requestId,
 	clientId,
+	clientUserId,
 	sourceNode,
 	destinationNode,
 	sourceRels,
@@ -119,14 +125,16 @@ const logMergeChanges = (
 			code: sourceNode.properties.code,
 			type: sourceNode.labels[0],
 			requestId,
-			clientId
+			clientId,
+			clientUserId
 		},
 		{
 			action: 'UPDATE',
 			code: destinationNode.properties.code,
 			type: destinationNode.labels[0],
 			requestId,
-			clientId
+			clientId,
+			clientUserId
 		}
 	].concat(
 		sourceRels.records
@@ -158,7 +166,8 @@ const logMergeChanges = (
 						code: sourceTarget.properties.code,
 						type: sourceTarget.labels[0],
 						requestId,
-						clientId
+						clientId,
+						clientUserId
 					};
 				}
 			})
