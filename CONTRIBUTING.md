@@ -40,7 +40,7 @@ Don't get too hung up on these choices, particularly if it's only going to be yo
 
 ## Adding properties - basics
 
-Properties on types have a [daunting number of options]((MODEL_SPECIFICATION.md#property-definitions), but here we will concentrate on the essential ones first.
+Properties on types have a [daunting number of options](MODEL_SPECIFICATION.md#property-definitions), but here we will concentrate on the essential ones first.
 
 Each property must define:
 
