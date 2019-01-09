@@ -7,7 +7,7 @@ Schema for biz-ops data store and api. It provides two things:
 
 ## Adding to the schema
 
-See CONTRIBUTING.md
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Releasing
 
@@ -38,6 +38,8 @@ Get an object defining the structure of a given `type`. The following transforms
 
 - if no `pluralName` field is defined, it will be generated
 - any named stringPatterns will be converted to validation functions
+
+THe full object structure can been seen [here](getType.md)
 
 #### options
 
