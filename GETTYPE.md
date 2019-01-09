@@ -26,7 +26,19 @@ Two forms of the object representation are available: grouped and ungrouped (the
          third:
          {
             type: 'SomeEnum'
-         }
+         },
+         forth:
+         {
+            type: 'Type2',
+            direction: 'outgoing',
+            relationship: 'HAS',
+            label: 'test label',
+            description: 'test description',
+            hasMany: false,
+            isRelationship: true,
+            isRecursive: false,
+            fieldset: 'main',
+         },
       },
       fieldsets:
       {
@@ -48,7 +60,10 @@ Two forms of the object representation are available: grouped and ungrouped (the
 * The **type** field is returned as an alias to the name to provide a more intuitive identification field
 * The **pluralName** will either be the explicit plural provided within the yaml or the implied plural derived by adding an **s** to the type name.
 * The single list of properties within this **ungrouped** structure identify their fieldsets
-* The fieldset list within this **ungrouped** structure just identify their headings and descriptions
+* Each property definition is derived directly from from the yaml content
+* An **isRelationship** flag is added to any property which is defined as a relationship to another type within the yaml
+* An **isSingleField** flag is added to any property which is the only member of a fieldset (commonly used for large text edit fields)
+* The fieldset list within this **ungrouped** structure just identifies the heading and description of each fieldset
 
 ## Grouped representation
 ```
@@ -93,12 +108,24 @@ Two forms of the object representation are available: grouped and ungrouped (the
                     third:
                     {
                        type: 'SomeEnum'
-                    }
+                    },
+                    forth:
+                    {
+                       type: 'TypeTwo',
+                       direction: 'outgoing',
+                       relationship: 'HAS',
+                       label: 'test label',
+                       description: 'test description',
+                       hasMany: false,
+                       isRelationship: true,
+                       isRecursive: false,
+                    },
                 }
             },
         },
     }
 ```
 
+The format/content of the structure is as above apart from ...
 * The fieldset list within this **grouped** structure include the properties within each fieldset
 * There is no separate properties structure
