@@ -4,12 +4,12 @@ Executing getType() returns an object representation of the raw type which has u
 Two forms of the object representation are available: grouped and ungrouped (the default).
 
 ## Ungrouped representation
-```json
+```
     {
-      name: 'TypeOne',
-      type: 'TypeOne',
-      pluralName: 'TypeOnes'
-      properties:
+      __name__: 'TypeOne',
+      __type__: 'TypeOne',
+      __pluralName__: 'TypeOnes'
+      __properties__:
       {
          first:
          {
@@ -28,7 +28,7 @@ Two forms of the object representation are available: grouped and ungrouped (the
             type: 'SomeEnum'
          }
       },
-      fieldsets:
+      __fieldsets__:
       {
          main:
          {
@@ -45,7 +45,7 @@ Two forms of the object representation are available: grouped and ungrouped (the
 ```
 
 ## Grouped representation
-```json
+```
     { name: 'Type1',
       fieldsets:
        { main:
