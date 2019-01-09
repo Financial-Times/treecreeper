@@ -110,7 +110,7 @@ discoveredBy:
   name: ...
 ```
 
-Note that we don't need to specify `hasMany` for any relationship that can only ever point at one record: it defaults to `false`, bt you can add it if you want to for clarity.
+Note that we don't need to specify `hasMany` for any relationship that can only ever point at one record: it defaults to `false`, but you can add it if you want to for clarity.
 
 ## You're probably not finished yet
 
