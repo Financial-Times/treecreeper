@@ -36,7 +36,7 @@ List the things you wish to store out and ask the following questions of them:
 - Could your free text properties be stored as enums instead? e.g. `genus` has a limited number of values within the _Paradisaeidae_ family, so create an enum listing them all, then you will not be at the mercy of typos in your data
 - If you're storing a list of data, or using an enum, would it make more sense to store as relationships to instances of other types? e.g. rather than `geographicRange: ['Indonesia', 'Papua New Guinea']` define a new `Country` type, and have relationships betwen `BirdOfParadise` and `Country`
 
-Don't get too hung up on these choices, particularly if it's only going to be your team using th type you're creating at first; fields can be deprecated and replaced.
+Don't get too hung up on these choices, particularly if it's only going to be your team using the type you're creating at first; fields can be deprecated and replaced.
 
 ## Adding properties - basics
 
