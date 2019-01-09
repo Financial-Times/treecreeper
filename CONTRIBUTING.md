@@ -114,4 +114,4 @@ Note that we don't need to specify `hasMany` for any relationship that can only 
 
 ## You're probably not finished yet
 
-Please have a read through The [model specification](MODEL_SPECIFICATION.md), which will tell you how to define enums, validation rules for strings, group properties into fieldsets and add further configuration to properties and types. If you find anything confusing please don't hesitate to raise it in the #biz-ops slack channel, or submit a pull request with a work in progress and ask for comment
+Please have a read through the [model specification](MODEL_SPECIFICATION.md), which will tell you how to define enums, create validation rules for strings, group properties into fieldsets and add further configuration to properties and types. If you find anything confusing please don't hesitate to raise it in the #biz-ops slack channel, or submit a pull request with a `work in progress` label and ask for comment.
