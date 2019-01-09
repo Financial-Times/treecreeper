@@ -85,7 +85,7 @@ Adding relationships is very similar to adding normal properties, with a few imp
 
 Say I have another type called `Naturalist` and I want to add information on who discovered each species (we'll assume species can't be discovered by two people at the same time in order to illustrate some principles)
 
-In the underlying database we'd probably represent this by a `DISCOVERED_BY` relationship (by convention, relationships are capitalised, with words separated by underscores). This relationship would point _from_ the `BirdOfParadise` and _to_ the `Naturalist`. In other words, from the ``Naturalist`'s point of view it is _incoming_, and from the`BirdOfParadise`'s view it is _outgoing_'.`Naturalist`s may also discover more than one species, so from their point of view they may _have many_ relationships to`BirdOfParadise`s.
+In the underlying database we'd probably represent this by a `DISCOVERED_BY` relationship (by convention, relationships are capitalised, with words separated by underscores). This relationship would point _from_ the `BirdOfParadise` and _to_ the `Naturalist`. In other words, from the `Naturalist`'s point of view it is _incoming_, and from the `BirdOfParadise`'s view it is _outgoing_'.  `Naturalist`s may also discover more than one species, so from their point of view they may _have many_ relationships to`BirdOfParadise`s.
 
 So now we've thought about all the additional information we need to to model the relationship, and we can (once we've thought of a name, label and description) add a property to both types
 
