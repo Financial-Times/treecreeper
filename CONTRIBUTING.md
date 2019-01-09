@@ -8,7 +8,7 @@ biz-ops-schema controls what can be stored in the biz-ops-api. You can add 5 dif
 - Enums - Some properties, e.g. serviceTier, may only take one value from a set. Enums define these sets of permissible values
 - String validation rules - Regular expressions for checking values
 
-This document will take you through the process of adding a new type, and along the way we'll cover how to add each of the other things too; if all you want to do is add ome of those it'll probably help to skim this whole document, but skip ahead as you please.
+This document will take you through the process of adding a new type, and along the way we'll cover how to add each of the other things too; if all you want to do is add one of those it'll probably help to skim this whole document, but skip ahead as you please.
 
 The example we'll work through is adding the ability for the biz-ops-api to represent [**Birds of paradise**](https://en.wikipedia.org/wiki/Bird-of-paradise)
 
