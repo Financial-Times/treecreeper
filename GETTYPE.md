@@ -3,7 +3,8 @@
 Executing getType() returns an object representation of the raw type which has undergone transformations that allow the object to be used by graphql and the jsx presentation layers.
 Two forms of the object representation are available: grouped and ungrouped (the default).
 
-## Ungrouped representation:  *result = getType(type)*
+## Ungrouped representation
+### *result = getType(type)*
 ```
     {
       name: 'TypeOne',
@@ -65,7 +66,8 @@ Two forms of the object representation are available: grouped and ungrouped (the
 * An **isSingleField** flag is added to any property which is the only member of a fieldset (commonly used for large text edit fields)
 * The fieldset list within this **ungrouped** structure just identifies the heading and description of each fieldset
 
-## Grouped representation   *result = getType(type, {groupProperties: true})*
+## Grouped representation
+### *result = getType(type, {groupProperties: true})*
 ```
     {
         name: 'TypeOne',
