@@ -180,7 +180,7 @@ const update = async input => {
 		// common to all the batched queries
 		const baseParameters = {
 			clientId,
-			date: new Date().toUTCString(),
+			timestamp: new Date().toISOString(),
 			requestId,
 			code
 		};

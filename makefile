@@ -21,7 +21,7 @@ deploy-aws:
 test:
 	@if [ -z $(CIRCLECI) ]; \
 		then export DEBUG=true; make lint && jest test --watch --testEnvironment=node; \
-		else jest test --testEnvironment=node; \
+		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 lint:

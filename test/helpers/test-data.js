@@ -1,5 +1,9 @@
 const { executeQuery } = require('../../server/data/db-connection');
 
+const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
+
+const { convertNeo4jTypes } = require('../../server/data/construct-output');
+
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,
 	props = {}
@@ -35,14 +39,16 @@ RETURN n1, n2, rel`,
 		}
 	);
 
-const testDataCreators = (namespace, sandbox, formattedTimestamp) => {
+const testDataCreators = (namespace, sandbox, now, then) => {
+	const formattedTimestamp = new Date(now).toISOString();
+
 	const setupMeta = {
 		_createdByRequest: `${namespace}-init-request`,
 		_createdByClient: `${namespace}-init-client`,
-		_createdTimestamp: '12345',
+		_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
 		_updatedByRequest: `${namespace}-init-request`,
 		_updatedByClient: `${namespace}-init-client`,
-		_updatedTimestamp: '12345'
+		_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
 	};
 	const createNode = getNodeCreator(namespace, setupMeta);
 	const connect = getConnector(namespace, setupMeta);
@@ -62,10 +68,10 @@ const testDataCreators = (namespace, sandbox, formattedTimestamp) => {
 			{
 				_createdByRequest: `${namespace}-init-request`,
 				_createdByClient: `${namespace}-init-client`,
-				_createdTimestamp: '12345',
+				_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
 				_updatedByRequest: `${namespace}-init-request`,
 				_updatedByClient: `${namespace}-init-client`,
-				_updatedTimestamp: '12345'
+				_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
 			},
 			obj
 		);
@@ -76,10 +82,14 @@ const testDataCreators = (namespace, sandbox, formattedTimestamp) => {
 				{
 					_createdByClient: `${namespace}-client`,
 					_createdByRequest: `${namespace}-request`,
-					_createdTimestamp: formattedTimestamp,
+					_createdTimestamp: DateTime.fromStandardDate(
+						new Date(formattedTimestamp)
+					).toString(),
 					_updatedByClient: `${namespace}-client`,
 					_updatedByRequest: `${namespace}-request`,
-					_updatedTimestamp: formattedTimestamp
+					_updatedTimestamp: DateTime.fromStandardDate(
+						new Date(formattedTimestamp)
+					).toString()
 				},
 				obj
 			)
@@ -91,7 +101,9 @@ const testDataCreators = (namespace, sandbox, formattedTimestamp) => {
 				{
 					_updatedByClient: `${namespace}-client`,
 					_updatedByRequest: `${namespace}-request`,
-					_updatedTimestamp: formattedTimestamp
+					_updatedTimestamp: DateTime.fromStandardDate(
+						new Date(formattedTimestamp)
+					).toString()
 				},
 				obj
 			)
@@ -109,7 +121,7 @@ const testIsolatedNode = async (type, code, props) => {
 	);
 
 	expect(records.length).toBe(1);
-	expect(records[0].get('node').properties).toEqual(props);
+	expect(convertNeo4jTypes(records[0].get('node').properties)).toEqual(props);
 
 	const { records: rels } = await executeQuery(
 		`MATCH (node:${type} { code: "${code}" })-[r]-(n2) RETURN r`
@@ -126,7 +138,7 @@ const testConnectedNode = async (type, code, props, relationships) => {
 
 	expect(records.length).toBe(relationships.length);
 
-	expect(records[0].get('node').properties).toEqual(props);
+	expect(convertNeo4jTypes(records[0].get('node').properties)).toEqual(props);
 
 	relationships.forEach(
 		([
@@ -146,8 +158,10 @@ const testConnectedNode = async (type, code, props, relationships) => {
 				);
 			});
 			expect(record).toExist;
-			expect(record.get('rel').properties).toEqual(relProps);
-			expect(record.get('relatedNode').properties).toEqual(relatedProps);
+			expect(convertNeo4jTypes(record.get('rel').properties)).toEqual(relProps);
+			expect(convertNeo4jTypes(record.get('relatedNode').properties)).toEqual(
+				relatedProps
+			);
 		}
 	);
 };

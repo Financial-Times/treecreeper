@@ -70,6 +70,13 @@ jobs:
       - run:
           name: Run v2 tests
           command: make test
+          environment:
+            JEST_JUNIT_OUTPUT: "junit/test-results.xml"
+      - store_test_results:
+          path: junit
+
+      - store_artifacts:
+          path: junit
 
   lint:
     <<: *default_container_config
