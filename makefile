@@ -20,8 +20,8 @@ deploy-aws:
 
 test:
 	@if [ -z $(CIRCLECI) ]; \
-		then export DEBUG=true; make lint && jest test --watch; \
-		else jest test; \
+		then export DEBUG=true; make lint && jest test --watch --testEnvironment=node; \
+		else jest test --testEnvironment=node; \
 	fi
 
 lint:
