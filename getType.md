@@ -4,7 +4,7 @@ Executing getType() returns an object representation of the raw type which has u
 Two forms of the object representation are available: grouped and ungrouped (the default).
 
 ## Ungrouped representation
-```
+<pre>
     {
       __name__: 'TypeOne',
       __type__: 'TypeOne',
@@ -42,7 +42,7 @@ Two forms of the object representation are available: grouped and ungrouped (the
          }
       },
     }
-```
+</pre>
 
 ## Grouped representation
 ```
