@@ -15,7 +15,7 @@ const relFragment = (type, direction, relName) => {
 const metaPropertiesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
-	${type}._createdByClientUser = $clientUserId,
+	${type}._createdByUser = $clientUserId,
 	${type}._createdTimestamp = datetime($timestamp),
 	${metaPropertiesForUpdate(type)}
 `;
@@ -23,7 +23,7 @@ const metaPropertiesForCreate = type => stripIndents`
 const metaPropertiesForUpdate = type => stripIndents`
 	${type}._updatedByRequest = $requestId,
 	${type}._updatedByClient = $clientId,
-	${type}._updatedByClientUser = $clientUserId
+	${type}._updatedByUser = $clientUserId
 	${type}._updatedTimestamp = datetime($timestamp)
 `;
 
