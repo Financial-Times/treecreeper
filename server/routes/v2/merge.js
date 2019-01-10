@@ -25,6 +25,7 @@ module.exports = async input => {
 	setContext(input.body);
 	const {
 		clientId,
+		clientUserId,
 		requestId,
 		body: { type, sourceCode, destinationCode }
 	} = input;
@@ -124,6 +125,7 @@ module.exports = async input => {
 	logMergeChanges(
 		requestId,
 		clientId,
+		clientUserId,
 		sourceNode,
 		destinationNode,
 		sourceRels,
