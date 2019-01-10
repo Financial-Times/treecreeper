@@ -45,9 +45,11 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 	const setupMeta = {
 		_createdByRequest: `${namespace}-init-request`,
 		_createdByClient: `${namespace}-init-client`,
+		_createdByUser: `${namespace}-init-user`,
 		_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
 		_updatedByRequest: `${namespace}-init-request`,
 		_updatedByClient: `${namespace}-init-client`,
+		_updatedByUser: `${namespace}-init-user`,
 		_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
 	};
 	const createNode = getNodeCreator(namespace, setupMeta);
@@ -68,9 +70,11 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 			{
 				_createdByRequest: `${namespace}-init-request`,
 				_createdByClient: `${namespace}-init-client`,
+				_createdByUser: `${namespace}-init-user`,
 				_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
 				_updatedByRequest: `${namespace}-init-request`,
 				_updatedByClient: `${namespace}-init-client`,
+				_updatedByUser: `${namespace}-init-user`,
 				_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
 			},
 			obj
@@ -81,11 +85,13 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 			Object.assign(
 				{
 					_createdByClient: `${namespace}-client`,
+					_createdByUser: `${namespace}-user`,
 					_createdByRequest: `${namespace}-request`,
 					_createdTimestamp: DateTime.fromStandardDate(
 						new Date(formattedTimestamp)
 					).toString(),
 					_updatedByClient: `${namespace}-client`,
+					_updatedByUser: `${namespace}-user`,
 					_updatedByRequest: `${namespace}-request`,
 					_updatedTimestamp: DateTime.fromStandardDate(
 						new Date(formattedTimestamp)
@@ -100,6 +106,7 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 			Object.assign(
 				{
 					_updatedByClient: `${namespace}-client`,
+					_updatedByUser: `${namespace}-user`,
 					_updatedByRequest: `${namespace}-request`,
 					_updatedTimestamp: DateTime.fromStandardDate(
 						new Date(formattedTimestamp)
