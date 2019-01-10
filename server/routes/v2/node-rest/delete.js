@@ -7,7 +7,7 @@ const { getNodeWithRelationships } = require('../../../data/cypher-helpers');
 
 module.exports = async input => {
 	validateParams(input);
-	const { clientId, requestId, nodeType, code } = input;
+	const { nodeType, code } = input;
 
 	const existingRecord = await getNodeWithRelationships(nodeType, code);
 
@@ -28,7 +28,7 @@ module.exports = async input => {
 	DELETE node
 	`;
 
-	await executeQuery(query, { code, clientId, requestId });
+	await executeQuery(query, { code });
 	logNodeDeletion(existingRecord.records[0].get('node'));
 
 	return { status: 204 };
