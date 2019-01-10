@@ -59,8 +59,8 @@ describe('v2 - node generic', () => {
 			verifyNotExists('Team', teamCode);
 		});
 
-		describe('client id', () => {
-			it('GET no client-id returns 400', async () => {
+		describe('client headers', () => {
+			it('GET no client-id or client-user-id returns 400', async () => {
 				return sandbox
 					.request(app)
 					.get(teamRestUrl)
@@ -68,7 +68,7 @@ describe('v2 - node generic', () => {
 					.expect(400);
 			});
 
-			it('POST no client-id returns 400', async () => {
+			it('POST no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.post('/v2/node/Team/new-team')
@@ -78,7 +78,7 @@ describe('v2 - node generic', () => {
 				verifyNotExists('Team', teamCode);
 			});
 
-			it('PATCH no client-id returns 400', async () => {
+			it('PATCH no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.patch('/v2/node/Team/a-team')
@@ -88,7 +88,7 @@ describe('v2 - node generic', () => {
 				verifyNotExists('Team', teamCode);
 			});
 
-			it('DELETE no client-id returns 400', async () => {
+			it('DELETE no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.delete(teamRestUrl)
@@ -128,6 +128,15 @@ describe('v2 - node generic', () => {
 						.set('API_KEY', API_KEY)
 						.set('client-id', 'DROP ALL')
 						.expect(400, /Invalid client id `DROP ALL`/);
+				});
+
+				it('should error when client user id is suspicious', async () => {
+					await sandbox
+						.request(app)
+						[method](teamRestUrl)
+						.set('API_KEY', API_KEY)
+						.set('client-user-id', 'DROP ALL')
+						.expect(400, /Invalid client user id `DROP ALL`/);
 				});
 
 				it('should error when request id is suspicious', async () => {
