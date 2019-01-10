@@ -45,7 +45,8 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 					type,
 					code,
 					requestId: `${namespace}-request`,
-					clientId: `${namespace}-client`
+					clientId: `${namespace}-client`,
+					clientUserId: `${namespace}-user`
 				});
 			});
 		};

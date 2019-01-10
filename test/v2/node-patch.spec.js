@@ -1133,7 +1133,7 @@ describe('v2 - node PATCH', () => {
 							);
 						});
 
-						it('not leave creation artefacts on things that already existed when using `upsert=true`', async () => {
+						it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
 							await sandbox.createNode('Team', teamCode);
 							await sandbox.createNode('Person', personCode);
 							await authenticatedPatch(

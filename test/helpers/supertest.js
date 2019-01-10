@@ -40,6 +40,7 @@ const getNamespacedSupertest = namespace => (...args) => {
 			test.namespacedAuth = function() {
 				return this.set('API_KEY', API_KEY)
 					.set('client-id', `${namespace}-client`)
+					.set('client-user-id', `${namespace}-user`)
 					.set('x-request-id', `${namespace}-request`);
 			};
 			test.send = function(json) {
