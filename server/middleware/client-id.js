@@ -6,7 +6,6 @@ const CLIENT_ID_RX = /^[a-z\d][a-z\d\-\.]*[a-z\d]$/;
 const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d\-\.]*[a-z\d]$/;
 
 module.exports = (req, res, next) => {
-
 	if (!req.get('client-id') && !req.get('client-user-id')) {
 		throw httpErrors(400, 'A client-id or client-user-id header is required');
 	}
@@ -20,7 +19,6 @@ module.exports = (req, res, next) => {
 
 		setContext('clientId', res.locals.clientId);
 		validateHeader(res.locals.clientId, errorMessage, CLIENT_ID_RX);
-
 	}
 
 	if (res.locals.clientUserId) {
@@ -29,12 +27,11 @@ module.exports = (req, res, next) => {
 
 		setContext('clientUserId', res.locals.clientUserId);
 		validateHeader(res.locals.clientUserId, errorMessage, CLIENT_USER_ID_RX);
-
 	}
 	next();
 };
 
-function validateHeader (header, errorMessage, expectedValueFormat) {
+function validateHeader(header, errorMessage, expectedValueFormat) {
 	if (!expectedValueFormat.test(header)) {
 		throw httpErrors(400, errorMessage);
 	}
