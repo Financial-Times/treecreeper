@@ -46,6 +46,7 @@ const getNamespacedSupertest = namespace => (...args) => {
 			test.send = function(json) {
 				return originalSend.bind(this)(json);
 			};
+
 			return test;
 		};
 	});

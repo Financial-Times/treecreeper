@@ -20,8 +20,9 @@ const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
 const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 	const request = getNamespacedSupertest(namespace);
 	let clock;
-	const timestamp = 1528458548930;
-	const formattedTimestamp = 'Fri, 08 Jun 2018 11:49:08 GMT';
+	const now = '2019-01-09T09:08:22.908Z';
+	const then = '2015-11-15T08:12:27.908Z';
+
 	if (withDb) {
 		// clean up after potentially failed test runs
 		beforeAll(() => dropDb(namespace));
@@ -32,9 +33,9 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis(sandbox.sinon);
-		clock = lolex.install({ now: timestamp });
+		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
-			testDataCreators(namespace, sandbox, formattedTimestamp);
+			testDataCreators(namespace, sandbox, now, then);
 		}
 
 		sandbox.expectEvents = (...events) => {

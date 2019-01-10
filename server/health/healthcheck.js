@@ -1,3 +1,5 @@
+const FIVE_MINUTES = 5 * 60 * 1000;
+
 module.exports = async (check, func, type) => {
 	let lastStatus = {};
 	const checkAndUpdateState = async () => {
@@ -7,7 +9,7 @@ module.exports = async (check, func, type) => {
 	};
 
 	checkAndUpdateState();
-
+	setInterval(checkAndUpdateState, FIVE_MINUTES).unref();
 	return {
 		getStatus: () => ({
 			ok: lastStatus.lastCheckOk,

@@ -226,10 +226,11 @@ describe('Integration - GraphQL', () => {
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
-				const codes = typeMocks['System'].map(s => s.code);
-				expect(body.data.Systems.filter(s => codes.includes(s.code))).toEqual(
-					typeMocks['System']
-				);
+				typeMocks['System'].forEach(mock => {
+					const result = body.data.Systems.find(s => s.code === mock.code);
+					expect(result).not.toBeUndefined();
+					expect(result).toEqual(mock);
+				});
 			});
 	});
 });
