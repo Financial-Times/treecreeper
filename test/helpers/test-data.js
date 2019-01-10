@@ -81,11 +81,13 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 			Object.assign(
 				{
 					_createdByClient: `${namespace}-client`,
+					_createdByUser: `${namespace}-user`,
 					_createdByRequest: `${namespace}-request`,
 					_createdTimestamp: DateTime.fromStandardDate(
 						new Date(formattedTimestamp)
 					).toString(),
 					_updatedByClient: `${namespace}-client`,
+					_updatedByUser: `${namespace}-user`,
 					_updatedByRequest: `${namespace}-request`,
 					_updatedTimestamp: DateTime.fromStandardDate(
 						new Date(formattedTimestamp)
