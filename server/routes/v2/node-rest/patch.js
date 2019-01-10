@@ -182,7 +182,7 @@ const update = async input => {
 		const baseParameters = {
 			clientId,
 			clientUserId,
-			date: new Date().toUTCString(),
+			timestamp: new Date().toISOString(),
 			requestId,
 			code
 		};

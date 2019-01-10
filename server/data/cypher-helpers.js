@@ -15,16 +15,16 @@ const relFragment = (type, direction, relName) => {
 const metaPropertiesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
-	${type}._createdTimestamp = $date,
 	${type}._createdByClientUser = $clientUserId,
+	${type}._createdTimestamp = datetime($timestamp),
 	${metaPropertiesForUpdate(type)}
 `;
 
 const metaPropertiesForUpdate = type => stripIndents`
 	${type}._updatedByRequest = $requestId,
 	${type}._updatedByClient = $clientId,
-	${type}._updatedTimestamp = $date,
 	${type}._updatedByClientUser = $clientUserId
+	${type}._updatedTimestamp = datetime($timestamp)
 `;
 
 // Must use OPTIONAL MATCH because 'cypher'

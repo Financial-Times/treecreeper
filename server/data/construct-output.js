@@ -1,19 +1,22 @@
 const Integer = require('neo4j-driver/lib/v1/integer.js');
+const { isDateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
 const { getType } = require('@financial-times/biz-ops-schema');
 
-const convertIntegersToNumbers = obj => {
-	for (const key in obj) {
-		if (Integer.isInt(obj[key])) {
-			obj[key] = obj[key].toNumber();
+const convertNeo4jTypes = obj => {
+	Object.entries(obj).forEach(([key, val]) => {
+		if (Integer.isInt(val)) {
+			obj[key] = val.toNumber();
+		} else if (isDateTime(val)) {
+			obj[key] = val.toString();
 		}
-	}
+	});
 	return obj;
 };
 
 const constructOutput = (type, result) => {
 	const schema = getType(type);
 	const node = result.records[0].get('node');
-	const response = convertIntegersToNumbers(node.properties);
+	const response = convertNeo4jTypes(node.properties);
 
 	if (result.records[0].get('relatedCode')) {
 		const rawRelationships = result.records.map(record => {
@@ -51,3 +54,4 @@ const constructOutput = (type, result) => {
 };
 
 module.exports = constructOutput;
+module.exports.convertNeo4jTypes = convertNeo4jTypes;

@@ -21,7 +21,7 @@ const create = async input => {
 		return await executor({
 			parameters: {
 				clientId,
-				date: new Date().toUTCString(),
+				timestamp: new Date().toISOString(),
 				requestId,
 				code,
 				clientUserId,
