@@ -11,8 +11,8 @@ module.exports = (req, res, next) => {
 		throw httpErrors(400, 'A client-id or client-user-id header is required');
 	}
 
-	res.locals.clientId = req.get('client-id') || null;
-	res.locals.clientUserId = req.get('client-user-id') || null;
+	res.locals.clientId = req.get('client-id');
+	res.locals.clientUserId = req.get('client-user-id');
 
 	if (res.locals.clientId) {
 		const errorMessage = stripIndents`Invalid client id \`${res.locals.clientId}\`.
