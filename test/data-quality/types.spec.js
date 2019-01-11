@@ -258,6 +258,7 @@ describe('data quality: types', () => {
 						arrayToRexExp([
 							'name',
 							'description',
+							'objective',
 							'pluralName',
 							'rank',
 							'creationURL',
