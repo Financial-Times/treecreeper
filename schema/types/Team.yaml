@@ -1,7 +1,6 @@
 name: Team
-description: |
-    A group of individuals within the FT organisation or our suppliers who deliver and/or support one or more systems.
-
+description: A group of individuals within the FT organisation or our suppliers who deliver and/or support one or more systems.
+objective: |
     Teams are structured hierarchically. Each team is either part of a Group, part of another Team, or a Supplier
     Teams that are a direct part of Group are known as Higher Level teams.
     Teams which are part of a another team are known as Sub-teams or Child teams.
