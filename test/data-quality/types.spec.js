@@ -52,6 +52,11 @@ describe('data quality: types', () => {
 			it('has a description', () => {
 				expect(typeof type.description).toBe('string');
 			});
+			it('may have an objective', () => {
+				if ('objective' in type) {
+					expect(typeof type.objective).toBe('string');
+				}
+			});
 			it('may have a plural name', () => {
 				if ('pluralName' in type) {
 					expect(typeof type.pluralName).toBe('string');
