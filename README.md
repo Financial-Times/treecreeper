@@ -7,7 +7,7 @@ Schema for biz-ops data store and api. It provides two things:
 
 ## Adding to the schema
 
-See CONTRIBUTING.md
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Releasing
 
@@ -39,11 +39,13 @@ Get an object defining the structure of a given `type`. The following transforms
 - if no `pluralName` field is defined, it will be generated
 - any named stringPatterns will be converted to validation functions
 
+The full object structure returned by getType() can been seen [here](GETTYPE.md)
+
 #### options
 
 - `withRelationships` [default: `true`]: Include the relationships for the type, expressed as graphql property definitions.
 - `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
-- `groupProperties` [default: `false`]: Each property may have a `section` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `sections`, where all properties are grouped by section
+- `groupProperties` [default: `false`]: Each property may have a `fieldset` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `fieldsets`, where all properties are then grouped by fieldset
 
 ### getTypes(options)
 
