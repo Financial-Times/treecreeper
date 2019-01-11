@@ -52,9 +52,9 @@ describe('data quality: types', () => {
 			it('has a description', () => {
 				expect(typeof type.description).toBe('string');
 			});
-			it('may have an objective', () => {
-				if ('objective' in type) {
-					expect(typeof type.objective).toBe('string');
+			it('may have a moreInformation', () => {
+				if ('moreInformation' in type) {
+					expect(typeof type.moreInformation).toBe('string');
 				}
 			});
 			it('may have a plural name', () => {
@@ -263,7 +263,7 @@ describe('data quality: types', () => {
 						arrayToRexExp([
 							'name',
 							'description',
-							'objective',
+							'moreInformation',
 							'pluralName',
 							'rank',
 							'creationURL',
