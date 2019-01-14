@@ -51,6 +51,55 @@ const getType = (
 		});
 	}
 
+	const metaProperties = [
+		{
+			name: '_createdByRequest',
+			type: 'Word',
+			description: 'Request Id that was used for creation',
+			label: 'Request Id',
+		},
+		{
+			name: '_createdByClient',
+			type: 'Word',
+			description: 'The client that was used to make the creation',
+			label: 'Created by client',
+		},
+		{
+			name: '_createdByUser',
+			type: 'Word',
+			description: 'The user that made the creation',
+			label: 'Created by user',
+		},
+		{
+			name: '_updatedByRequest',
+			type: 'Word',
+			description: 'Request Id that was used to make the update',
+			label: 'Request Id',
+		},
+		{
+			name: '_updatedByClient',
+			type: 'Word',
+			description: 'The client that was used to make the update',
+			label: 'Updated by client',
+		},
+		{
+			name: '_updatedByUser',
+			type: 'Word',
+			description: 'The user that made the update',
+			label: 'Updated by user',
+		},
+	];
+
+	metaProperties.forEach((metaProperty) => {
+		type.properties[metaProperty.name] = {
+			type: metaProperty.type,
+			description: metaProperty.description,
+			label: metaProperty.label,
+			fieldset: 'meta',
+			autoPopulated: true
+		}
+	});
+
 	const properties = Object.entries(type.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
@@ -81,6 +130,10 @@ const getType = (
 
 		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
+		const metaProperties = properties.filter(
+			([, { fieldset }]) => fieldset && fieldset === 'meta'
+		);
+
 		const realFieldsets = Object.entries(type.fieldsets || {})
 			.map(([fieldsetName, fieldsetDef]) => {
 				fieldsetDef.properties = entriesArrayToObject(
@@ -107,20 +160,18 @@ const getType = (
 			}
 		);
 
+		const miscHeading = realFieldsets.length ? 'Miscellaneous' : 'General';
+
 		const miscellaneous = miscProperties.length
-			? [
-					[
-						'misc',
-						{
-							heading: realFieldsets.length ? 'Miscellaneous' : 'General',
-							properties: entriesArrayToObject(miscProperties)
-						}
-					]
-			  ]
+			? fieldsetUp('misc', miscHeading, miscProperties)
+			: [];
+
+		const metaFieldSets = metaProperties.length
+			? fieldsetUp('meta', 'Meta Data', metaProperties)
 			: [];
 
 		type.fieldsets = entriesArrayToObject(
-			[].concat(realFieldsets, virtualFieldsets, miscellaneous)
+			[].concat(realFieldsets, virtualFieldsets, miscellaneous, metaFieldSets)
 		);
 
 		delete type.properties;
@@ -128,6 +179,18 @@ const getType = (
 
 	return deepFreeze(type);
 };
+
+function fieldsetUp (fieldsetName, heading, properties) {
+	return [
+		[
+			fieldsetName,
+			{
+				heading,
+				properties: entriesArrayToObject(properties)
+			}
+		]
+	];
+}
 
 module.exports = cache.cacheify(
 	getType,
