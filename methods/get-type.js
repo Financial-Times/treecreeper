@@ -54,14 +54,14 @@ const getType = (
 		});
 	}
 
-	metaProperties.forEach((metaProperty) => {
+	metaProperties.forEach(metaProperty => {
 		type.properties[metaProperty.name] = {
 			type: metaProperty.type,
 			description: metaProperty.description,
 			label: metaProperty.label,
 			fieldset: META,
 			autoPopulated: true
-		}
+		};
 	});
 
 	const properties = Object.entries(type.properties)
@@ -143,7 +143,7 @@ const getType = (
 	return deepFreeze(type);
 };
 
-function fieldsetUp (fieldsetName, heading, properties) {
+function fieldsetUp(fieldsetName, heading, properties) {
 	return [
 		[
 			fieldsetName,

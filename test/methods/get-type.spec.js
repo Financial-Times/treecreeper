@@ -47,15 +47,18 @@ describe('get-type', () => {
 			const propertyName = property.name;
 
 			it(`returns auto generated meta property ${propertyName}`, () => {
-				const propertyExpectedResult = metaProperties.find(property => property.name === propertyName);
-				const propertyActualResult = type.properties[property.name]
+				const propertyExpectedResult = metaProperties.find(
+					property => property.name === propertyName
+				);
+				const propertyActualResult = type.properties[property.name];
 				expect(propertyActualResult.type).toBe(propertyExpectedResult.type);
-				expect(propertyActualResult.description).toBe(propertyExpectedResult.description);
+				expect(propertyActualResult.description).toBe(
+					propertyExpectedResult.description
+				);
 				expect(propertyActualResult.label).toBe(propertyExpectedResult.label);
 				expect(propertyActualResult.fieldset).toBe('meta');
 				expect(propertyActualResult.autoPopulated).toBe(true);
 			});
-
 		});
 	});
 
@@ -71,7 +74,6 @@ describe('get-type', () => {
 		metaPropertyName.forEach(propertyName => {
 			expect(type.properties).toHaveProperty(propertyName);
 		});
-
 	});
 
 	it('returns a type property to alias the name field', async () => {
@@ -578,7 +580,7 @@ describe('get-type', () => {
 			beforeEach(() => {
 				rawData.getTypes.mockReturnValue([
 					{
-						name: 'Type1',
+						name: 'Type1'
 					}
 				]);
 
@@ -591,7 +593,7 @@ describe('get-type', () => {
 			});
 
 			metaProperties.forEach(property => {
-				const propertyName = property.name
+				const propertyName = property.name;
 				it(`returns meta fieldset property ${property.name}`, () => {
 					const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
 					expect(fieldsetProperty.type).toEqual(property.type);
