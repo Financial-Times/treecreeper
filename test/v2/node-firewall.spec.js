@@ -247,6 +247,46 @@ describe('v2 - node generic', () => {
 					.set('client-user-id', 'test-user-id')
 					.expect(204);
 			});
+
+			it('PATCH no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				const expectedMeta = sandbox.withUpdateMeta({
+					name: 'name2',
+					code: teamCode
+				});
+				delete expectedMeta._updatedByClient;
+				return sandbox
+					.request(app)
+					.patch(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', `${namespace}-user`)
+					.set('x-request-id', `${namespace}-request`)
+					.send({ name: 'name2' })
+					.expect(200, expectedMeta);
+			});
+
+			it('PATCH no client-user-id header deletes the _updatedByUser metaProperty from the database', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				const expectedMeta = sandbox.withUpdateMeta({
+					name: 'name2',
+					code: teamCode
+				});
+				delete expectedMeta._updatedByUser;
+				return sandbox
+					.request(app)
+					.patch(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', `${namespace}-client`)
+					.set('x-request-id', `${namespace}-request`)
+					.send({ name: 'name2' })
+					.expect(200, expectedMeta);
+			});
 		});
 	});
 
