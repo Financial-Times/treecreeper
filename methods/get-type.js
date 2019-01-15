@@ -124,6 +124,18 @@ const getType = (
 			}
 		);
 
+		const fieldsetUp = (fieldsetName, heading, properties) => {
+			return [
+				[
+					fieldsetName,
+					{
+						heading,
+						properties: entriesArrayToObject(properties)
+					}
+				]
+			];
+		};
+
 		const miscHeading = realFieldsets.length ? 'Miscellaneous' : 'General';
 		const miscellaneous = miscProperties.length
 			? fieldsetUp('misc', miscHeading, miscProperties)
@@ -142,18 +154,6 @@ const getType = (
 
 	return deepFreeze(type);
 };
-
-function fieldsetUp(fieldsetName, heading, properties) {
-	return [
-		[
-			fieldsetName,
-			{
-				heading,
-				properties: entriesArrayToObject(properties)
-			}
-		]
-	];
-}
 
 module.exports = cache.cacheify(
 	getType,
