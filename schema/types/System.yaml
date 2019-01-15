@@ -96,6 +96,22 @@ properties:
       For more details, see the Information Commissioner's definition:
       https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/what-is-personal-data/what-is-personal-data/.
     fieldset: personalData
+  piiSources:
+    type: System
+    direction: incoming
+    label: PII sources
+    relationship: DATA_FLOW
+    description: Systems that produce/store PII data that is used by this system (other kinds of data flow do not need to be noted here)
+    fieldset: personalData
+    hasMany: true
+  piiDestinations:
+    type: System
+    direction: outgoing
+    label: PII destinations
+    relationship: DATA_FLOW
+    description: Systems that consume PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here)
+    fieldset: personalData
+    hasMany: true
   canDownloadPersonalData:
     type: Boolean
     canFilter: true
