@@ -6,6 +6,8 @@ const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('./constants');
 
+const META = 'meta';
+
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
@@ -57,7 +59,7 @@ const getType = (
 			type: metaProperty.type,
 			description: metaProperty.description,
 			label: metaProperty.label,
-			fieldset: 'meta',
+			fieldset: META,
 			autoPopulated: true
 		}
 	});
@@ -93,7 +95,7 @@ const getType = (
 		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
 		const metaProperties = properties.filter(
-			([, { fieldset }]) => fieldset && fieldset === 'meta'
+			([, { fieldset }]) => fieldset && fieldset === META
 		);
 
 		const realFieldsets = Object.entries(type.fieldsets || {})
@@ -128,7 +130,7 @@ const getType = (
 			: [];
 
 		const metaFieldSets = metaProperties.length
-			? fieldsetUp('meta', 'Meta Data', metaProperties)
+			? fieldsetUp(META, 'Meta Data', metaProperties)
 			: [];
 
 		type.fieldsets = entriesArrayToObject(
