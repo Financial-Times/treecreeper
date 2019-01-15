@@ -20,7 +20,7 @@ const metaProperties = [
 	{
 		name: '_updatedByUser',
 		type: 'Word',
-		description: 'The user that made the update',
+		description: 'The last user to make an update',
 		label: 'Updated by user',
 	},
 ];

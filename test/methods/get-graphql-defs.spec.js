@@ -131,7 +131,7 @@ _createdByClient: String
 _createdByUser: String
 # The client that was used to make the update
 _updatedByClient: String
-# The user that made the update
+# The last user to make an update
 _updatedByUser: String
 
 }
@@ -159,7 +159,7 @@ _createdByClient: String
 _createdByUser: String
 # The client that was used to make the update
 _updatedByClient: String
-# The user that made the update
+# The last user to make an update
 _updatedByUser: String
 
 }
