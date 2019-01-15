@@ -570,8 +570,36 @@ describe('get-type', () => {
 			expect(type.fieldsets.misc.properties.miscProp).toBeDefined();
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 			expect(type.fieldsets.misc.description).not.toBeDefined();
-			expect(type.fieldsets.meta.heading).toBe('Meta Data');
-			expect(type.fieldsets.meta.properties).toBeDefined();
+		});
+
+		describe('can group auto generated mata properties by fieldset', () => {
+			let type;
+
+			beforeEach(() => {
+				rawData.getTypes.mockReturnValue([
+					{
+						name: 'Type1',
+					}
+				]);
+
+				type = getType('Type1', { groupProperties: true });
+			});
+
+			it('returns meta fieldset', () => {
+				expect(type.fieldsets.meta.heading).toBe('Meta Data');
+				expect(type.fieldsets.meta.properties).toBeDefined();
+			});
+
+			metaProperties.forEach(property => {
+				const propertyName = property.name
+				it(`returns meta fieldset property ${property.name}`, () => {
+					const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
+					expect(fieldsetProperty.type).toEqual(property.type);
+					expect(fieldsetProperty.description).toEqual(property.description);
+					expect(fieldsetProperty.label).toEqual(property.label);
+					expect(fieldsetProperty.autoPopulated).toEqual(true);
+				});
+			});
 		});
 	});
 });
