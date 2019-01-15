@@ -124,6 +124,7 @@ const update = async input => {
 		requestId,
 		nodeType,
 		code,
+		clientUserId,
 		query: { relationshipAction, upsert }
 	} = input;
 
@@ -180,6 +181,7 @@ const update = async input => {
 		// common to all the batched queries
 		const baseParameters = {
 			clientId,
+			clientUserId,
 			timestamp: new Date().toISOString(),
 			requestId,
 			code

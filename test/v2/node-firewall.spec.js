@@ -59,8 +59,8 @@ describe('v2 - node generic', () => {
 			verifyNotExists('Team', teamCode);
 		});
 
-		describe('client id', () => {
-			it('GET no client-id returns 400', async () => {
+		describe('client headers', () => {
+			it('GET no client-id or client-user-id returns 400', async () => {
 				return sandbox
 					.request(app)
 					.get(teamRestUrl)
@@ -68,7 +68,7 @@ describe('v2 - node generic', () => {
 					.expect(400);
 			});
 
-			it('POST no client-id returns 400', async () => {
+			it('POST no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.post('/v2/node/Team/new-team')
@@ -78,7 +78,7 @@ describe('v2 - node generic', () => {
 				verifyNotExists('Team', teamCode);
 			});
 
-			it('PATCH no client-id returns 400', async () => {
+			it('PATCH no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.patch('/v2/node/Team/a-team')
@@ -88,13 +88,164 @@ describe('v2 - node generic', () => {
 				verifyNotExists('Team', teamCode);
 			});
 
-			it('DELETE no client-id returns 400', async () => {
+			it('DELETE no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
 					.delete(teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.expect(400);
 				verifyNotExists('Team', teamCode);
+			});
+
+			it('GET client-id but no client-user-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.get(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.expect(200);
+			});
+
+			it('POST client-id but no client-user-id returns 200', async () => {
+				return sandbox
+					.request(app)
+					.post(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.expect(200);
+			});
+
+			it('PATCH client-id but no client-user-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.patch(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.send({ name: 'name2' })
+					.expect(200);
+			});
+
+			it('DELETE client-id but no client-user-id returns 204', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.delete(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.expect(204);
+			});
+
+			it('GET client-user-id but no client-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.get(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.expect(200);
+			});
+
+			it('POST client-user-id but no client-id returns 200', async () => {
+				return sandbox
+					.request(app)
+					.post(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.expect(200);
+			});
+
+			it('PATCH client-user-id but no client-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.patch(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.send({ name: 'name2' })
+					.expect(200);
+			});
+
+			it('DELETE client-user-id but no client-id returns 204', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.delete(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.expect(204);
+			});
+
+			it('GET client-id and client-user-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.get(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.set('client-user-id', 'test-user-id')
+					.expect(200);
+			});
+
+			it('POST client-id and client-user-id returns 200', async () => {
+				return sandbox
+					.request(app)
+					.post(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.set('client-id', 'test-client-id')
+					.expect(200);
+			});
+
+			it('PATCH client-id and client-user-id returns 200', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.patch(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.set('client-id', 'test-client-id')
+					.send({ name: 'name2' })
+					.expect(200);
+			});
+
+			it('DELETE client-id and client-user-id returns 204', async () => {
+				await sandbox.createNode('Team', {
+					code: `${namespace}-team`,
+					name: 'name1'
+				});
+				return sandbox
+					.request(app)
+					.delete(teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.set('client-user-id', 'test-user-id')
+					.expect(204);
 			});
 		});
 	});
@@ -128,6 +279,15 @@ describe('v2 - node generic', () => {
 						.set('API_KEY', API_KEY)
 						.set('client-id', 'DROP ALL')
 						.expect(400, /Invalid client id `DROP ALL`/);
+				});
+
+				it('should error when client user id is suspicious', async () => {
+					await sandbox
+						.request(app)
+						[method](teamRestUrl)
+						.set('API_KEY', API_KEY)
+						.set('client-user-id', 'DROP ALL')
+						.expect(400, /Invalid client user id `DROP ALL`/);
 				});
 
 				it('should error when request id is suspicious', async () => {

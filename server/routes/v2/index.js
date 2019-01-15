@@ -37,7 +37,10 @@ const controller = (endpointName, method, controllerImplementation) => (
 		Object.assign(
 			{
 				requestId: res.locals.requestId,
-				clientId: res.locals.clientId,
+				// Defaults to null rather than undefined because it avoids a 'missing
+				// parameter' error and it unsets any previous values when updating.
+				clientId: res.locals.clientId || null,
+				clientUserId: res.locals.clientUserId || null,
 				body: req.body,
 				query: req.query
 			},

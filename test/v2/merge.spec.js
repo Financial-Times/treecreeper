@@ -17,13 +17,15 @@ describe('merge', () => {
 
 	const requestId = `${namespace}-request`;
 	const clientId = `${namespace}-client`;
+	const clientUserId = `${namespace}-user`;
 
 	const event = (action, code, type) => ({
 		action,
 		type,
 		code,
 		requestId,
-		clientId
+		clientId,
+		clientUserId
 	});
 
 	setupMocks(sandbox, { namespace });
