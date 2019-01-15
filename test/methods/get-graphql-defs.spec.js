@@ -124,6 +124,16 @@ hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direct
 hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
 statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
 )
+
+# The client that was used to make the creation
+_createdByClient: String
+# The user that made the creation
+_createdByUser: String
+# The client that was used to make the update
+_updatedByClient: String
+# The user that made the update
+_updatedByUser: String
+
 }
 
 # An overarching group which contains teams and is costed separately
@@ -142,6 +152,15 @@ hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
 hasEventualBudget: CostCentre @cypher(
 statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
 )
+
+# The client that was used to make the creation
+_createdByClient: String
+# The user that made the creation
+_createdByUser: String
+# The client that was used to make the update
+_updatedByClient: String
+# The user that made the update
+_updatedByUser: String
 
 }
 type Query {

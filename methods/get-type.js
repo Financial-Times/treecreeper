@@ -4,6 +4,7 @@ const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
+const metaProperties = require('./constants');
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
@@ -50,45 +51,6 @@ const getType = (
 			}
 		});
 	}
-
-	const metaProperties = [
-		{
-			name: '_createdByRequest',
-			type: 'Word',
-			description: 'Request Id that was used for creation',
-			label: 'Request Id',
-		},
-		{
-			name: '_createdByClient',
-			type: 'Word',
-			description: 'The client that was used to make the creation',
-			label: 'Created by client',
-		},
-		{
-			name: '_createdByUser',
-			type: 'Word',
-			description: 'The user that made the creation',
-			label: 'Created by user',
-		},
-		{
-			name: '_updatedByRequest',
-			type: 'Word',
-			description: 'Request Id that was used to make the update',
-			label: 'Request Id',
-		},
-		{
-			name: '_updatedByClient',
-			type: 'Word',
-			description: 'The client that was used to make the update',
-			label: 'Updated by client',
-		},
-		{
-			name: '_updatedByUser',
-			type: 'Word',
-			description: 'The user that made the update',
-			label: 'Updated by user',
-		},
-	];
 
 	metaProperties.forEach((metaProperty) => {
 		type.properties[metaProperty.name] = {
@@ -161,7 +123,6 @@ const getType = (
 		);
 
 		const miscHeading = realFieldsets.length ? 'Miscellaneous' : 'General';
-
 		const miscellaneous = miscProperties.length
 			? fieldsetUp('misc', miscHeading, miscProperties)
 			: [];
