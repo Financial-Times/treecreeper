@@ -574,7 +574,7 @@ describe('get-type', () => {
 			expect(type.fieldsets.misc.description).not.toBeDefined();
 		});
 
-		describe('can group auto generated mata properties by fieldset', () => {
+		describe('can group auto generated meta properties by fieldset', () => {
 			let type;
 
 			beforeEach(() => {
