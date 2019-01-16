@@ -7,6 +7,7 @@ const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('./constants');
 
 const META = 'meta';
+const BIZ_OPS = 'biz-ops';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
@@ -14,7 +15,7 @@ const entriesArrayToObject = arr =>
 const getType = (
 	typeName,
 	{
-		primitiveTypes = 'biz-ops', // graphql
+		primitiveTypes = BIZ_OPS, // graphql
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = true
@@ -158,7 +159,7 @@ module.exports = cache.cacheify(
 	(
 		typeName,
 		{
-			primitiveTypes = 'biz-ops',
+			primitiveTypes = BIZ_OPS,
 			withRelationships = true,
 			groupProperties = false,
 			includeMetaFields = true
