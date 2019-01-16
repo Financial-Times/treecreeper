@@ -17,7 +17,7 @@ const getType = (
 		primitiveTypes = 'biz-ops', // graphql
 		withRelationships = true,
 		groupProperties = false,
-		addMetaData = true
+		includeMetaFields = true
 	} = {}
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);
@@ -97,8 +97,8 @@ const getType = (
 
 		const fieldsets = Object.entries(type.fieldsets || {});
 
-		if (addMetaData) {
-			fieldsets.push([ META, { heading: 'Meta Data' } ]);
+		if (includeMetaFields) {
+			fieldsets.push([META, { heading: 'Meta Data' }]);
 		}
 
 		const realFieldsets = fieldsets
@@ -132,7 +132,11 @@ const getType = (
 					[
 						'misc',
 						{
-							heading: (addMetaData && realFieldsets.length > 1) || (!addMetaData && realFieldsets.length) ? 'Miscellaneous' : 'General',
+							heading:
+								(includeMetaFields && realFieldsets.length > 1) ||
+								(!includeMetaFields && realFieldsets.length)
+									? 'Miscellaneous'
+									: 'General',
 							properties: entriesArrayToObject(miscProperties)
 						}
 					]
@@ -144,7 +148,6 @@ const getType = (
 		);
 
 		delete type.properties;
-
 	}
 
 	return deepFreeze(type);
@@ -158,8 +161,8 @@ module.exports = cache.cacheify(
 			primitiveTypes = 'biz-ops',
 			withRelationships = true,
 			groupProperties = false,
-			addMetaData = true
+			includeMetaFields = true
 		} = {}
 	) =>
-		`types:${typeName}:${withRelationships}:${groupProperties}:${primitiveTypes}`
+		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`
 );

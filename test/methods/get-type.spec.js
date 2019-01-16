@@ -326,13 +326,16 @@ describe('get-type', () => {
 			]);
 		});
 
-		it('is returned when addMetaData is TRUE', () => {
+		it('is returned when includeMetaFields is TRUE', () => {
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.fieldsets.misc.heading).toBe('General');
 		});
 
-		it('is returned when addMetaData is FALSE', () => {
-			const type = getType('Type1', { groupProperties: true, addMetaData: false });
+		it('is returned when includeMetaFields is FALSE', () => {
+			const type = getType('Type1', {
+				groupProperties: true,
+				includeMetaFields: false
+			});
 			expect(type.fieldsets.misc.heading).toBe('General');
 		});
 	});
@@ -364,13 +367,16 @@ describe('get-type', () => {
 			]);
 		});
 
-		it('is returned when addMetaData is TRUE', () => {
+		it('is returned when includeMetaFields is TRUE', () => {
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 		});
 
-		it('is returned when addMetaData is FALSE', () => {
-			const type = getType('Type1', { groupProperties: true, addMetaData: false });
+		it('is returned when includeMetaFields is FALSE', () => {
+			const type = getType('Type1', {
+				groupProperties: true,
+				includeMetaFields: false
+			});
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 		});
 	});
@@ -405,13 +411,16 @@ describe('get-type', () => {
 		});
 	});
 
-	it('does not create meta data fieldset when addMetaData is set to FALSE', () => {
+	it('does not create meta data fieldset when includeMetaFields is set to FALSE', () => {
 		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1'
 			}
 		]);
-		type = getType('Type1', { groupProperties: true, addMetaData: false });
+		const type = getType('Type1', {
+			groupProperties: true,
+			includeMetaFields: false
+		});
 		expect(type.fieldsets).toEqual({});
 	});
 
