@@ -258,22 +258,28 @@ describe('v2 - node generic', () => {
 		['delete', false],
 	].forEach(([method, checkBody]) => {
 		describe(`security checks - ${method}`, () => {
+			// Example cypher query from https://stackoverflow.com/a/24317293/10917765
+			const cypherQuery =
+				'1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r';
 			it('should error when node type is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method](`/v2/node/DROP ALL/${teamCode}`)
+					[method](`/v2/node/${cypherQuery}/${teamCode}`)
 					.namespacedAuth()
-					.expect(400, /Invalid node type `DROP ALL`/);
+					.expect(
+						400,
+						/Invalid node type `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+					);
 			});
 
 			it('should error when node code is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method]('/v2/node/Team/DROP ALL')
+					[method](`/v2/node/Team/${cypherQuery}`)
 					.namespacedAuth()
 					.expect(
 						400,
-						/Invalid value `DROP ALL` for property `code` on type `Team`/,
+						/Invalid value `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r` for property `code` on type `Team`/,
 					);
 			});
 
@@ -282,8 +288,11 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-id', 'DROP ALL')
-					.expect(400, /Invalid client id `DROP ALL`/);
+					.set('client-id', `${cypherQuery}`)
+					.expect(
+						400,
+						/Invalid client id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+					);
 			});
 
 			it('should error when client user id is suspicious', async () => {
@@ -291,8 +300,11 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-user-id', 'DROP ALL')
-					.expect(400, /Invalid client user id `DROP ALL`/);
+					.set('client-user-id', `${cypherQuery}`)
+					.expect(
+						400,
+						/Invalid client user id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+					);
 			});
 
 			it('should error when request id is suspicious', async () => {
@@ -301,8 +313,11 @@ describe('v2 - node generic', () => {
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-id', 'valid-id')
-					.set('x-request-id', 'DROP ALL')
-					.expect(400, /Invalid request id `DROP ALL`/);
+					.set('x-request-id', `${cypherQuery}`)
+					.expect(
+						400,
+						/Invalid request id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+					);
 			});
 
 			if (checkBody) {
@@ -313,7 +328,7 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								prop: 'MATCH (n) DELETE n',
+								prop: `${cypherQuery}`,
 							})
 							.expect(({ status }) =>
 								/20(0|1)/.test(String(status)),
@@ -327,12 +342,10 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								'MATCH (n) DELETE n': 'value',
+								[`${cypherQuery}`]: 'value',
 							})
 							.expect(400);
 					});
-
-					it.skip('TODO: write a test that is a better test of cypher injection', () => {});
 
 					it('should error when relationship node code is suspicious', async () => {
 						await sandbox
@@ -340,11 +353,11 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								supports: ['DROP ALL'],
+								supports: [`${cypherQuery}`],
 							})
 							.expect(
 								400,
-								/Invalid value `DROP ALL` for property `code` on type `System`/,
+								/Invalid value `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r` for property `code` on type `System`/,
 							);
 					});
 				});
