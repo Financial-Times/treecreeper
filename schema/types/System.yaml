@@ -100,7 +100,7 @@ properties:
     type: System
     direction: incoming
     label: PII sources
-    relationship: DATA_FLOW
+    relationship: PII_DATA_FLOW
     description: Systems that produce/store PII data that is used by this system (other kinds of data flow do not need to be noted here)
     fieldset: personalData
     hasMany: true
@@ -108,7 +108,7 @@ properties:
     type: System
     direction: outgoing
     label: PII destinations
-    relationship: DATA_FLOW
+    relationship: PII_DATA_FLOW
     description: Systems that consume PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here)
     fieldset: personalData
     hasMany: true
