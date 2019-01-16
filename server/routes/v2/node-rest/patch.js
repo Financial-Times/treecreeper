@@ -1,18 +1,23 @@
-const inputHelpers = require('../../../lib/rest-input-helpers');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const { getType } = require('@financial-times/biz-ops-schema');
+const inputHelpers = require('../../../lib/rest-input-helpers');
 const {
 	dbErrorHandlers,
-	preflightChecks
+	preflightChecks,
 } = require('../../../lib/error-handling');
 const constructOutput = require('../../../data/construct-output');
-const { getType } = require('@financial-times/biz-ops-schema');
+
 const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const executor = require('./_post-patch-executor');
 
-const toArray = it =>
-	typeof it === 'undefined' ? undefined : Array.isArray(it) ? it : [it];
+const toArray = it => {
+	if (typeof it === 'undefined') {
+		return;
+	}
+	return Array.isArray(it) ? it : [it];
+};
 
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
@@ -21,7 +26,7 @@ const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const avoidSimultaneousWriteAndDelete = (
 	writeRelationships,
-	deleteRelationships
+	deleteRelationships,
 ) => {
 	Object.entries(writeRelationships).forEach(([propName, codes]) => {
 		if (
@@ -30,7 +35,7 @@ const avoidSimultaneousWriteAndDelete = (
 		) {
 			throw httpErrors(
 				400,
-				'Trying to add and remove a relationship to a record at the same time'
+				'Trying to add and remove a relationship to a record at the same time',
 			);
 		}
 	});
@@ -40,15 +45,15 @@ const relationshipDiffer = (
 	nodeType,
 	existingRelationships = {},
 	properties,
-	action
+	action,
 ) => {
 	const newRelationships = inputHelpers.getWriteRelationships(
 		nodeType,
-		properties
+		properties,
 	);
 	const deleteRelationships = inputHelpers.getDeleteRelationships(
 		nodeType,
-		properties
+		properties,
 	);
 
 	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
@@ -74,8 +79,8 @@ const relationshipDiffer = (
 						removed:
 							action === 'replace' || isCardinalityOne
 								? existingCodesOnly
-								: undefined
-					}
+								: undefined,
+					},
 				];
 			}
 			return [];
@@ -87,11 +92,13 @@ const relationshipDiffer = (
 				{
 					removed: codes
 						? toArray(codes).filter(code =>
-								(existingRelationships[relType] || []).includes(code)
+								(existingRelationships[relType] || []).includes(
+									code,
+								),
 						  )
-						: toArray(existingRelationships[relType])
-				}
-			])
+						: toArray(existingRelationships[relType]),
+				},
+			]),
 		);
 
 	return {
@@ -102,7 +109,7 @@ const relationshipDiffer = (
 		removedRelationships: summary
 			.filter(([, { removed = [] }]) => removed.length)
 			.map(([relType, { removed }]) => [relType, removed])
-			.reduce(entriesToObject, {})
+			.reduce(entriesToObject, {}),
 	};
 };
 
@@ -125,7 +132,7 @@ const update = async input => {
 		nodeType,
 		code,
 		clientUserId,
-		query: { relationshipAction, upsert }
+		query: { relationshipAction, upsert },
 	} = input;
 
 	if (inputHelpers.containsRelationshipData(nodeType, input.body)) {
@@ -135,7 +142,7 @@ const update = async input => {
 	try {
 		const prefetch = await cypherHelpers.getNodeWithRelationships(
 			nodeType,
-			code
+			code,
 		);
 
 		const existingRecord = prefetch.records.length
@@ -144,33 +151,35 @@ const update = async input => {
 
 		const writeProperties = getChangedProperties(
 			inputHelpers.getWriteProperties(nodeType, input.body, code),
-			existingRecord
+			existingRecord,
 		);
 
 		const deletePropertyNames = getDeletedPropertyNames(
 			inputHelpers.getDeleteProperties(nodeType, input.body),
-			existingRecord
+			existingRecord,
 		);
 
 		const { removedRelationships, addedRelationships } = relationshipDiffer(
 			nodeType,
 			existingRecord,
 			input.body,
-			relationshipAction
+			relationshipAction,
 		);
 
 		const willModifyNode =
 			Object.keys(writeProperties).length + deletePropertyNames.length;
 
-		const willDeleteRelationships = !!Object.keys(removedRelationships).length;
-		const willCreateRelationships = !!Object.keys(addedRelationships).length;
+		const willDeleteRelationships = !!Object.keys(removedRelationships)
+			.length;
+		const willCreateRelationships = !!Object.keys(addedRelationships)
+			.length;
 		const willModifyRelationships =
 			willDeleteRelationships || willCreateRelationships;
 
 		if (!willModifyNode && !willModifyRelationships) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
-				'No changed properties or relationships - skipping node update'
+				'No changed properties or relationships - skipping node update',
 			);
 			return existingRecord;
 		}
@@ -184,14 +193,14 @@ const update = async input => {
 			clientUserId,
 			timestamp: new Date().toISOString(),
 			requestId,
-			code
+			code,
 		};
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
 						${cypherHelpers.metaPropertiesForCreate('node')}
-				`
+				`,
 		];
 
 		if (willModifyNode) {
@@ -200,28 +209,34 @@ const update = async input => {
 					SET node += $properties`);
 		}
 
-		queryParts.push(...deletePropertyNames.map(attr => `REMOVE node.${attr}`));
+		queryParts.push(
+			...deletePropertyNames.map(attr => `REMOVE node.${attr}`),
+		);
 
 		if (willDeleteRelationships) {
 			const schema = getType(nodeType);
 			queryParts.push(
-				...Object.entries(removedRelationships).map(([propName, codes]) => {
-					const def = schema.properties[propName];
-					const key = `Delete${def.relationship}${def.direction}${def.type}`;
-					baseParameters[key] = codes;
-					return `WITH node
+				...Object.entries(removedRelationships).map(
+					([propName, codes]) => {
+						const def = schema.properties[propName];
+						const key = `Delete${def.relationship}${def.direction}${
+							def.type
+						}`;
+						baseParameters[key] = codes;
+						return `WITH node
 				${cypherHelpers.deleteRelationships(def, key)}
 				`;
-				})
+					},
+				),
 			);
 		}
 
 		return await executor({
 			parameters: Object.assign(
 				{
-					properties: writeProperties
+					properties: writeProperties,
 				},
-				baseParameters
+				baseParameters,
 			),
 			queryParts,
 			method: 'PATCH',
@@ -229,7 +244,7 @@ const update = async input => {
 			nodeType,
 			writeRelationships: addedRelationships,
 			willDeleteRelationships,
-			removedRelationships
+			removedRelationships,
 		});
 	} catch (err) {
 		dbErrorHandlers.nodeUpsert(err);

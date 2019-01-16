@@ -7,21 +7,21 @@ class EventLogWriter {
 
 	sendEvent(data) {
 		const missingFields = ['action', 'code', 'type'].filter(
-			field => typeof data[field] === 'undefined'
+			field => typeof data[field] === 'undefined',
 		);
 		if (missingFields.length > 0) {
 			logger.warn('Missing required fields for event log record', {
 				fields: missingFields,
-				data
+				data,
 			});
 		}
 		const { action, code, type } = data;
 
 		return this.kinesisClient.putRecord({
 			action,
-			code: code,
-			type: type,
-			time: Math.floor(Date.now() / 1000)
+			code,
+			type,
+			time: Math.floor(Date.now() / 1000),
 		});
 	}
 }

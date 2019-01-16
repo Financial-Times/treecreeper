@@ -6,11 +6,11 @@ const generateTeamData = require('./team');
 const generateData = {
 	System: generateSystemData(),
 	Group: generateGroupData(),
-	Team: generateTeamData()
+	Team: generateTeamData(),
 };
 
 const exportToCSV = () => {
-	['System', 'Group', 'Team'].map(nodeType => {
+	['System', 'Group', 'Team'].forEach(nodeType => {
 		const fileName = `scripts/load-testing/lib/exportToCSV/${nodeType}.csv`;
 		if (fs.existsSync(fileName)) {
 			console.log('file already exists');

@@ -1,18 +1,16 @@
-const { executeQuery } = require('../../server/data/db-connection');
-
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-
+const { executeQuery } = require('../../server/data/db-connection');
 const { convertNeo4jTypes } = require('../../server/data/construct-output');
 
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,
-	props = {}
+	props = {},
 ) => {
 	if (typeof props === 'string') {
 		props = { code: props };
 	}
 	const result = await executeQuery(`CREATE (n:${type} $props) RETURN n`, {
-		props: Object.assign({}, defaultProps, props)
+		props: Object.assign({}, defaultProps, props),
 	});
 	return result.records[0].get('n').identity.toInt();
 };
@@ -21,7 +19,7 @@ const getConnector = (namespace, defaultProps) => (
 	id1,
 	relationshipType,
 	id2,
-	props = {}
+	props = {},
 ) =>
 	executeQuery(
 		`
@@ -35,8 +33,8 @@ RETURN n1, n2, rel`,
 		{
 			id1,
 			id2,
-			props: Object.assign({}, defaultProps, props)
-		}
+			props: Object.assign({}, defaultProps, props),
+		},
 	);
 
 const testDataCreators = (namespace, sandbox, now, then) => {
@@ -50,7 +48,7 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 		_updatedByRequest: `${namespace}-init-request`,
 		_updatedByClient: `${namespace}-init-client`,
 		_updatedByUser: `${namespace}-init-user`,
-		_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
+		_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
 	};
 	const createNode = getNodeCreator(namespace, setupMeta);
 	const connect = getConnector(namespace, setupMeta);
@@ -71,13 +69,17 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 				_createdByRequest: `${namespace}-init-request`,
 				_createdByClient: `${namespace}-init-client`,
 				_createdByUser: `${namespace}-init-user`,
-				_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
+				_createdTimestamp: DateTime.fromStandardDate(
+					new Date(then),
+				).toString(),
 				_updatedByRequest: `${namespace}-init-request`,
 				_updatedByClient: `${namespace}-init-client`,
 				_updatedByUser: `${namespace}-init-user`,
-				_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString()
+				_updatedTimestamp: DateTime.fromStandardDate(
+					new Date(then),
+				).toString(),
 			},
-			obj
+			obj,
 		);
 
 	sandbox.withCreateMeta = (obj = {}) =>
@@ -88,17 +90,17 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 					_createdByUser: `${namespace}-user`,
 					_createdByRequest: `${namespace}-request`,
 					_createdTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp)
+						new Date(formattedTimestamp),
 					).toString(),
 					_updatedByClient: `${namespace}-client`,
 					_updatedByUser: `${namespace}-user`,
 					_updatedByRequest: `${namespace}-request`,
 					_updatedTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp)
-					).toString()
+						new Date(formattedTimestamp),
+					).toString(),
 				},
-				obj
-			)
+				obj,
+			),
 		);
 
 	sandbox.withUpdateMeta = (obj = {}) =>
@@ -109,29 +111,29 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 					_updatedByUser: `${namespace}-user`,
 					_updatedByRequest: `${namespace}-request`,
 					_updatedTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp)
-					).toString()
+						new Date(formattedTimestamp),
+					).toString(),
 				},
-				obj
-			)
+				obj,
+			),
 		);
 };
 
 const dropDb = namespace =>
 	executeQuery(
-		`MATCH (n) WHERE n.code STARTS WITH "${namespace}-" DETACH DELETE n`
+		`MATCH (n) WHERE n.code STARTS WITH "${namespace}-" DETACH DELETE n`,
 	);
 
 const testIsolatedNode = async (type, code, props) => {
 	const { records } = await executeQuery(
-		`MATCH (node:${type} { code: "${code}" }) RETURN node`
+		`MATCH (node:${type} { code: "${code}" }) RETURN node`,
 	);
 
 	expect(records.length).toBe(1);
 	expect(convertNeo4jTypes(records[0].get('node').properties)).toEqual(props);
 
 	const { records: rels } = await executeQuery(
-		`MATCH (node:${type} { code: "${code}" })-[r]-(n2) RETURN r`
+		`MATCH (node:${type} { code: "${code}" })-[r]-(n2) RETURN r`,
 	);
 
 	expect(rels.length).toBe(0);
@@ -140,7 +142,7 @@ const testIsolatedNode = async (type, code, props) => {
 const testConnectedNode = async (type, code, props, relationships) => {
 	const { records } = await executeQuery(
 		`MATCH (node:${type} { code: "${code}" })-[rel]-(relatedNode)
-		RETURN node, rel, relatedNode`
+		RETURN node, rel, relatedNode`,
 	);
 
 	expect(records.length).toBe(relationships.length);
@@ -150,26 +152,29 @@ const testConnectedNode = async (type, code, props, relationships) => {
 	relationships.forEach(
 		([
 			{ type: relType, props: relProps, direction },
-			{ type: relatedType, props: relatedProps }
+			{ type: relatedType, props: relatedProps },
 		]) => {
-			const record = records.find(record => {
-				const relatedNode = record.get('relatedNode');
-				const rel = record.get('rel');
+			const record = records.find(testRecord => {
+				const relatedNode = testRecord.get('relatedNode');
+				const rel = testRecord.get('rel');
 				return (
 					rel.type === relType &&
 					relatedNode.labels[0] === relatedType &&
 					relatedNode.properties.code === relatedProps.code &&
 					// need either both things indicate outgoing, or both incoming
 					// i.e. both true or both false
-					(direction === 'outgoing') === rel.end.equals(relatedNode.identity)
+					(direction === 'outgoing') ===
+						rel.end.equals(relatedNode.identity)
 				);
 			});
-			expect(record).toExist;
-			expect(convertNeo4jTypes(record.get('rel').properties)).toEqual(relProps);
-			expect(convertNeo4jTypes(record.get('relatedNode').properties)).toEqual(
-				relatedProps
+			expect(record).not.toBeUndefined();
+			expect(convertNeo4jTypes(record.get('rel').properties)).toEqual(
+				relProps,
 			);
-		}
+			expect(
+				convertNeo4jTypes(record.get('relatedNode').properties),
+			).toEqual(relatedProps);
+		},
 	);
 };
 
@@ -183,14 +188,14 @@ const testNode = async (type, code, props, ...relationships) => {
 
 const verifyNotExists = async (type, code) => {
 	const result = await executeQuery(
-		`MATCH (n:${type} { code: "${code}" }) RETURN n`
+		`MATCH (n:${type} { code: "${code}" }) RETURN n`,
 	);
 	expect(result.records.length).toBe(0);
 };
 
 const verifyExists = async (type, code) => {
 	const result = await executeQuery(
-		`MATCH (n:${type} { code: "${code}" }) RETURN n`
+		`MATCH (n:${type} { code: "${code}" }) RETURN n`,
 	);
 	expect(result.records.length).toBe(1);
 };
@@ -202,6 +207,6 @@ module.exports = {
 		testNode,
 		testConnectedNode,
 		verifyNotExists,
-		verifyExists
-	}
+		verifyExists,
+	},
 };

@@ -1,20 +1,20 @@
+const { stripIndents } = require('common-tags');
+const { getType } = require('@financial-times/biz-ops-schema');
 const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const { executeQuery } = require('../../../data/db-connection');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const constructOutput = require('../../../data/construct-output');
-const { stripIndents } = require('common-tags');
-const { getType } = require('@financial-times/biz-ops-schema');
 const salesforceSync = require('../../../lib/salesforce-sync');
 
 const annotateRelationships = (type, relationships = {}) => {
 	const schema = getType(type);
 	return [].concat(
-		...Object.entries(relationships).map(([propName, code]) => {
-			const codes = Array.isArray(code) ? code : [code];
+		...Object.entries(relationships).map(([propName, codes]) => {
+			codes = Array.isArray(codes) ? codes : [codes];
 			return codes.map(code =>
-				Object.assign({ code }, schema.properties[propName])
+				Object.assign({ code }, schema.properties[propName]),
 			);
-		})
+		}),
 	);
 };
 
@@ -25,15 +25,15 @@ const groupSimilarRelationships = relationships =>
 			map[key] = map[key] || [];
 			map[key].push(rel.code);
 			return map;
-		}, {})
+		}, {}),
 	).map(([key, codes]) => {
 		const [relationship, direction, type] = key.split(':');
 		return {
-			key: key.replace(/\:/g, ''),
+			key: key.replace(/:/g, ''),
 			relationship,
 			direction,
 			type,
-			codes
+			codes,
 		};
 	});
 
@@ -43,7 +43,7 @@ const createRelationships = (upsert, relationships, globalParameters) => {
 	// make sure the parameter referenced in the query exists on the
 	// globalParameters object passed to the db driver
 	groupedRelationships.map(({ key, codes }) =>
-		Object.assign(globalParameters, { [key]: codes })
+		Object.assign(globalParameters, { [key]: codes }),
 	);
 
 	// Note on the limitations of cypher:
@@ -70,14 +70,14 @@ module.exports = async ({
 	nodeType,
 	upsert,
 	removedRelationships,
-	willDeleteRelationships
+	willDeleteRelationships,
 }) => {
 	queryParts.push(
 		createRelationships(
 			upsert,
 			annotateRelationships(nodeType, writeRelationships),
-			parameters
-		)
+			parameters,
+		),
 	);
 
 	queryParts.push(cypherHelpers.RETURN_NODE_WITH_RELS);
@@ -89,7 +89,7 @@ module.exports = async ({
 	if (willDeleteRelationships) {
 		result = await cypherHelpers.getNodeWithRelationships(
 			nodeType,
-			parameters.code
+			parameters.code,
 		);
 	}
 	const responseData = constructOutput(nodeType, result);
@@ -106,7 +106,7 @@ module.exports = async ({
 	logNodeChanges({
 		newRecords: result.records,
 		nodeType,
-		removedRelationships
+		removedRelationships,
 	});
 
 	return {
@@ -115,6 +115,6 @@ module.exports = async ({
 			method === 'PATCH' &&
 			responseData._createdByRequest === parameters.requestId
 				? 201
-				: 200
+				: 200,
 	};
 };

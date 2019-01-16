@@ -6,22 +6,22 @@ const callApiGatewayCheck = async () => {
 	const result = await callApiCheck({
 		headers: {
 			'x-api-key': process.env.FT_API_GATEWAY_KEY,
-			'client-id': `HEALTHCHECK_FT_API_GATEWAY`
+			'client-id': `HEALTHCHECK_FT_API_GATEWAY`,
 		},
 		url: `${process.env.FT_API_GATEWAY_URL}/__gtg`,
-		type: 'FT Api Gateway'
+		type: 'FT Api Gateway',
 	});
 
 	return {
 		lastCheckOk: result.lastCheckOk,
 		lastCheckTime: result.lastCheckTime,
 		lastCheckOutput: result.lastCheckOutput,
-		panicGuide: result.panicGuide
+		panicGuide: result.panicGuide,
 	};
 };
 
 module.exports = healthcheck(
 	callApiGatewayCheck,
 	outputs.apiCall,
-	'FT API Gateway'
+	'FT API Gateway',
 );

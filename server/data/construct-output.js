@@ -26,29 +26,37 @@ const constructOutput = (type, result) => {
 
 			return {
 				n4jRelationship: rel.type,
-				n4jDirection: rel.start.equals(node.identity) ? 'outgoing' : 'incoming',
+				n4jDirection: rel.start.equals(node.identity)
+					? 'outgoing'
+					: 'incoming',
 				n4jType: relatedLabels[0],
-				n4jCode: relatedCode
+				n4jCode: relatedCode,
 			};
 		});
 		Object.entries(schema.properties)
 			.filter(
-				([, { isRecursive, relationship }]) => relationship && !isRecursive
+				([, { isRecursive, relationship }]) =>
+					relationship && !isRecursive,
 			)
-			.forEach(([propName, { direction, relationship, type, hasMany }]) => {
-				const codes = rawRelationships
-					.filter(
-						({ n4jRelationship, n4jDirection, n4jType }) =>
-							direction === n4jDirection &&
-							relationship === n4jRelationship &&
-							type === n4jType
-					)
-					.map(({ n4jCode }) => n4jCode);
+			.forEach(
+				([
+					propName,
+					{ direction, relationship, type: propertyType, hasMany },
+				]) => {
+					const codes = rawRelationships
+						.filter(
+							({ n4jRelationship, n4jDirection, n4jType }) =>
+								direction === n4jDirection &&
+								relationship === n4jRelationship &&
+								propertyType === n4jType,
+						)
+						.map(({ n4jCode }) => n4jCode);
 
-				if (codes.length) {
-					response[propName] = hasMany ? codes : codes[0];
-				}
-			});
+					if (codes.length) {
+						response[propName] = hasMany ? codes : codes[0];
+					}
+				},
+			);
 	}
 	return response;
 };

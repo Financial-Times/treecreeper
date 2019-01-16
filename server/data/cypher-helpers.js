@@ -12,6 +12,13 @@ const relFragment = (type, direction, relName) => {
 	return `${left}-[${relName || 'relationship'}:${type}]-${right}`;
 };
 
+const metaPropertiesForUpdate = type => stripIndents`
+	${type}._updatedByRequest = $requestId,
+	${type}._updatedByClient = $clientId,
+	${type}._updatedByUser = $clientUserId,
+	${type}._updatedTimestamp = datetime($timestamp)
+`;
+
 const metaPropertiesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
@@ -20,19 +27,12 @@ const metaPropertiesForCreate = type => stripIndents`
 	${metaPropertiesForUpdate(type)}
 `;
 
-const metaPropertiesForUpdate = type => stripIndents`
-	${type}._updatedByRequest = $requestId,
-	${type}._updatedByClient = $clientId,
-	${type}._updatedByUser = $clientUserId,
-	${type}._updatedTimestamp = datetime($timestamp)
-`;
-
 // Must use OPTIONAL MATCH because 'cypher'
 const deleteRelationships = ({ relationship, direction, type }, codesKey) => `
 OPTIONAL MATCH (node)${relFragment(
 	relationship,
 	direction,
-	'deletableRelationship'
+	'deletableRelationship',
 )}(related:${type})
 	WHERE related.code IN $${codesKey}
 	DELETE deletableRelationship
@@ -42,7 +42,7 @@ const getNodeWithRelationships = (nodeType, code) =>
 	executeQuery(
 		`MATCH (node:${nodeType} {code: $code})
 			${RETURN_NODE_WITH_RELS}`,
-		{ code }
+		{ code },
 	);
 
 // Uses OPTIONAL MATCH when trying to match a node as it returns [null]
@@ -75,5 +75,5 @@ module.exports = {
 	metaPropertiesForCreate,
 	metaPropertiesForUpdate,
 	RETURN_NODE_WITH_RELS,
-	getNodeWithRelationships
+	getNodeWithRelationships,
 };

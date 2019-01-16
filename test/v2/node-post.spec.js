@@ -4,7 +4,7 @@ const {
 	stubDbUnavailable,
 	testNode,
 	verifyNotExists,
-	verifyExists
+	verifyExists,
 } = require('../helpers');
 
 describe('v2 - node POST', () => {
@@ -38,8 +38,8 @@ describe('v2 - node POST', () => {
 				200,
 				sandbox.withCreateMeta({
 					code: teamCode,
-					name: 'name1'
-				})
+					name: 'name1',
+				}),
 			);
 
 		await testNode(
@@ -47,15 +47,15 @@ describe('v2 - node POST', () => {
 			teamCode,
 			sandbox.withCreateMeta({
 				code: teamCode,
-				name: 'name1'
-			})
+				name: 'name1',
+			}),
 		);
 		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
 	});
 
 	it('error when creating duplicate node', async () => {
 		await sandbox.createNode('Team', {
-			code: teamCode
+			code: teamCode,
 		});
 		await sandbox
 			.request(app)
@@ -75,8 +75,8 @@ describe('v2 - node POST', () => {
 			.expect(
 				400,
 				new RegExp(
-					`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`
-				)
+					`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
+				),
 			);
 		sandbox.expectNoEvents();
 		await verifyNotExists('Team', teamCode);
@@ -112,51 +112,51 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({
 				techLeads: [personCode],
-				parentGroup: groupCode
+				parentGroup: groupCode,
 			})
 			.expect(
 				200,
 				sandbox.withCreateMeta({
 					code: teamCode,
 					techLeads: [personCode],
-					parentGroup: groupCode
-				})
+					parentGroup: groupCode,
+				}),
 			);
 
 		await testNode(
 			'Team',
 			teamCode,
 			sandbox.withCreateMeta({
-				code: teamCode
+				code: teamCode,
 			}),
 			[
 				{
 					type: 'HAS_TECH_LEAD',
 					direction: 'outgoing',
-					props: sandbox.withCreateMeta({})
+					props: sandbox.withCreateMeta({}),
 				},
 				{
 					type: 'Person',
-					props: sandbox.withMeta({ code: personCode })
-				}
+					props: sandbox.withMeta({ code: personCode }),
+				},
 			],
 			[
 				{
 					type: 'HAS_TEAM',
 					direction: 'incoming',
-					props: sandbox.withCreateMeta({})
+					props: sandbox.withCreateMeta({}),
 				},
 				{
 					type: 'Group',
-					props: sandbox.withMeta({ code: groupCode })
-				}
-			]
+					props: sandbox.withMeta({ code: groupCode }),
+				},
+			],
 		);
 
 		sandbox.expectEvents(
 			['CREATE', teamCode, 'Team'],
 			['UPDATE', personCode, 'Person'],
-			['UPDATE', groupCode, 'Group']
+			['UPDATE', groupCode, 'Group'],
 		);
 	});
 
@@ -167,7 +167,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({
 				techLeads: [personCode],
-				parentGroup: groupCode
+				parentGroup: groupCode,
 			})
 			.expect(400, /Missing related node/);
 		sandbox.expectNoEvents();
@@ -181,51 +181,51 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({
 				techLeads: [personCode],
-				parentGroup: groupCode
+				parentGroup: groupCode,
 			})
 			.expect(
 				200,
 				sandbox.withCreateMeta({
 					code: teamCode,
 					techLeads: [personCode],
-					parentGroup: groupCode
-				})
+					parentGroup: groupCode,
+				}),
 			);
 
 		await testNode(
 			'Team',
 			teamCode,
 			sandbox.withCreateMeta({
-				code: teamCode
+				code: teamCode,
 			}),
 			[
 				{
 					type: 'HAS_TECH_LEAD',
 					direction: 'outgoing',
-					props: sandbox.withCreateMeta({})
+					props: sandbox.withCreateMeta({}),
 				},
 				{
 					type: 'Person',
-					props: sandbox.withCreateMeta({ code: personCode })
-				}
+					props: sandbox.withCreateMeta({ code: personCode }),
+				},
 			],
 			[
 				{
 					type: 'HAS_TEAM',
 					direction: 'incoming',
-					props: sandbox.withCreateMeta({})
+					props: sandbox.withCreateMeta({}),
 				},
 				{
 					type: 'Group',
-					props: sandbox.withCreateMeta({ code: groupCode })
-				}
-			]
+					props: sandbox.withCreateMeta({ code: groupCode }),
+				},
+			],
 		);
 
 		sandbox.expectEvents(
 			['CREATE', teamCode, 'Team'],
 			['CREATE', personCode, 'Person'],
-			['CREATE', groupCode, 'Group']
+			['CREATE', groupCode, 'Group'],
 		);
 	});
 });

@@ -1,5 +1,5 @@
-const inputHelpers = require('../../../lib/rest-input-helpers');
 const { stripIndents } = require('common-tags');
+const inputHelpers = require('../../../lib/rest-input-helpers');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
@@ -14,7 +14,7 @@ const create = async input => {
 		nodeType,
 		code,
 		clientUserId,
-		query: { upsert }
+		query: { upsert },
 	} = input;
 
 	try {
@@ -25,21 +25,25 @@ const create = async input => {
 				requestId,
 				code,
 				clientUserId,
-				properties: inputHelpers.getWriteProperties(nodeType, input.body, code)
+				properties: inputHelpers.getWriteProperties(
+					nodeType,
+					input.body,
+					code,
+				),
 			},
 			queryParts: [
 				stripIndents`CREATE (node:${nodeType} $properties)
 					SET
 					${metaPropertiesForCreate('node')}
-				WITH node`
+				WITH node`,
 			],
 			method: 'POST',
 			upsert,
 			nodeType,
 			writeRelationships: inputHelpers.getWriteRelationships(
 				nodeType,
-				input.body
-			)
+				input.body,
+			),
 		});
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);

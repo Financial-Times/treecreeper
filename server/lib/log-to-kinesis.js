@@ -1,10 +1,11 @@
+const { getType } = require('@financial-times/biz-ops-schema');
+const uniqBy = require('lodash.uniqby');
 const { logger } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');
-const { getType } = require('@financial-times/biz-ops-schema');
-const uniqBy = require('lodash.uniqby');
+
 const kinesisClient = new Kinesis(
-	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name'
+	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name',
 );
 const eventLogWriter = new EventLogWriter(kinesisClient);
 const { getContext } = require('./request-context');
@@ -13,7 +14,7 @@ const sendEvent = event => {
 	eventLogWriter.sendEvent(event).catch(error => {
 		logger.error(
 			'Failed to send event to event log',
-			Object.assign({ event, error: error })
+			Object.assign({ event, error }),
 		);
 	});
 };
@@ -21,7 +22,7 @@ const sendEvent = event => {
 const sendUniqueEvents = events =>
 	uniqBy(
 		events,
-		({ action, code, type }) => `${action}:${code}:${type}`
+		({ action, code, type }) => `${action}:${code}:${type}`,
 	).forEach(sendEvent);
 
 const logNodeDeletion = node => {
@@ -32,7 +33,7 @@ const logNodeDeletion = node => {
 		type: node.labels[0],
 		requestId,
 		clientId,
-		clientUserId
+		clientUserId,
 	});
 };
 
@@ -44,12 +45,14 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 
 	events.push({
 		action:
-			node.properties._createdByRequest === requestId ? 'CREATE' : 'UPDATE',
+			node.properties._createdByRequest === requestId
+				? 'CREATE'
+				: 'UPDATE',
 		code: node.properties.code,
 		type: node.labels[0],
 		requestId,
 		clientId,
-		clientUserId
+		clientUserId,
 	});
 
 	if (nodeType && removedRelationships) {
@@ -59,12 +62,12 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 			codes.forEach(code =>
 				events.push({
 					action: 'UPDATE',
-					code: code,
+					code,
 					type: properties[propName].type,
 					requestId,
 					clientId,
-					clientUserId
-				})
+					clientUserId,
+				}),
 			);
 		});
 	}
@@ -88,7 +91,7 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 					type: relatedLabels[0],
 					requestId,
 					clientId,
-					clientUserId
+					clientUserId,
 				});
 				// Otherwise, we've just linked to it i.e. an UPDATE
 			} else if (rel.properties._createdByRequest === requestId) {
@@ -98,7 +101,7 @@ const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
 					type: relatedLabels[0],
 					requestId,
 					clientId,
-					clientUserId
+					clientUserId,
 				});
 			}
 		});
@@ -114,7 +117,7 @@ const logMergeChanges = (
 	sourceNode,
 	destinationNode,
 	sourceRels,
-	destinationRels
+	destinationRels,
 ) => {
 	sourceNode = sourceNode.records[0].get('node');
 	destinationNode = destinationNode.records[0].get('node');
@@ -126,7 +129,7 @@ const logMergeChanges = (
 			type: sourceNode.labels[0],
 			requestId,
 			clientId,
-			clientUserId
+			clientUserId,
 		},
 		{
 			action: 'UPDATE',
@@ -134,31 +137,39 @@ const logMergeChanges = (
 			type: destinationNode.labels[0],
 			requestId,
 			clientId,
-			clientUserId
-		}
+			clientUserId,
+		},
 	].concat(
 		sourceRels.records
-			.map(record => {
-				const sourceTarget = record.get('related');
-				const sourceRel = record.get('relationship');
+			.map(sourceRelsRecord => {
+				const sourceTarget = sourceRelsRecord.get('related');
+				const sourceRel = sourceRelsRecord.get('relationship');
 
 				// reflexive relationships will all be discarded without a new creation event
 				if (sourceTarget.identity.equals(sourceNode.identity)) {
 					return;
 				}
 
-				const existingRecord = destinationRels.records.find(record => {
-					const destinationTarget = record.get('related');
-					const destinationRel = record.get('relationship');
-					if (
-						destinationTarget.identity.equals(sourceTarget.identity) &&
-						destinationRel.type === sourceRel.type &&
-						(destinationRel.start.equals(sourceRel.start) ||
-							destinationRel.end.equals(sourceRel.end))
-					) {
-						return true;
-					}
-				});
+				const existingRecord = destinationRels.records.find(
+					destinationRelsRecord => {
+						const destinationTarget = destinationRelsRecord.get(
+							'related',
+						);
+						const destinationRel = destinationRelsRecord.get(
+							'relationship',
+						);
+						if (
+							destinationTarget.identity.equals(
+								sourceTarget.identity,
+							) &&
+							destinationRel.type === sourceRel.type &&
+							(destinationRel.start.equals(sourceRel.start) ||
+								destinationRel.end.equals(sourceRel.end))
+						) {
+							return true;
+						}
+					},
+				);
 
 				if (!existingRecord) {
 					return {
@@ -167,11 +178,11 @@ const logMergeChanges = (
 						type: sourceTarget.labels[0],
 						requestId,
 						clientId,
-						clientUserId
+						clientUserId,
 					};
 				}
 			})
-			.filter(node => !!node)
+			.filter(node => !!node),
 	);
 
 	sendUniqueEvents(events);
@@ -180,5 +191,5 @@ const logMergeChanges = (
 module.exports = {
 	logNodeDeletion,
 	logNodeChanges,
-	logMergeChanges
+	logMergeChanges,
 };

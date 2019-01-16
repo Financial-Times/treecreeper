@@ -1,16 +1,16 @@
 const bodyParser = require('body-parser');
+const timeout = require('connect-timeout');
+const httpErrors = require('http-errors');
+
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
 const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
-
-const timeout = require('connect-timeout');
 const { logger, setContext } = require('../../lib/request-context');
-const httpErrors = require('http-errors');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
-	bodyParser.urlencoded({ limit: '8mb', extended: true })
+	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
 const { errorToErrors } = require('../../middleware/errors');
@@ -22,13 +22,16 @@ const requestLog = (endpointName, method, req) => {
 
 const unimplemented = (endpointName, method, alternativeMethod) => req => {
 	requestLog(endpointName, method, req);
-	throw httpErrors(405, `${method} is unimplemented. Use ${alternativeMethod}`);
+	throw httpErrors(
+		405,
+		`${method} is unimplemented. Use ${alternativeMethod}`,
+	);
 };
 
 const controller = (endpointName, method, controllerImplementation) => (
 	req,
 	res,
-	next
+	next,
 ) => {
 	res.nextMetricsName = `${endpointName}_${req.params.nodeType ||
 		req.body.type}`;
@@ -42,19 +45,24 @@ const controller = (endpointName, method, controllerImplementation) => (
 				clientId: res.locals.clientId || null,
 				clientUserId: res.locals.clientUserId || null,
 				body: req.body,
-				query: req.query
+				query: req.query,
 			},
-			req.params
-		)
+			req.params,
+		),
 	)
-		.then(
-			result =>
-				result.status
-					? res.status(result.status).json(result.data)
-					: res.json(result)
+		.then(result =>
+			result.status
+				? res.status(result.status).json(result.data)
+				: res.json(result),
 		)
 		.catch(next);
 };
+
+const getHandler = require('./node-rest/get');
+const postHandler = require('./node-rest/post');
+const patchHandler = require('./node-rest/patch');
+const deleteHandler = require('./node-rest/delete');
+const mergeHandler = require('./merge');
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
@@ -66,13 +74,13 @@ module.exports = router => {
 
 	router
 		.route('/node/:nodeType/:code')
-		.get(controller('node', 'GET', require('./node-rest/get')))
-		.post(controller('node', 'POST', require('./node-rest/post')))
+		.get(controller('node', 'GET', getHandler))
+		.post(controller('node', 'POST', postHandler))
 		.put(unimplemented('PUT', 'PATCH'))
-		.patch(controller('node', 'PATCH', require('./node-rest/patch')))
-		.delete(controller('node', 'DELETE', require('./node-rest/delete')));
+		.patch(controller('node', 'PATCH', patchHandler))
+		.delete(controller('node', 'DELETE', deleteHandler));
 
-	router.post('/merge', controller('merge', 'POST', require('./merge')));
+	router.post('/merge', controller('merge', 'POST', mergeHandler));
 
 	router.use(errorToErrors);
 

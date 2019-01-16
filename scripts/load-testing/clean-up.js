@@ -1,5 +1,5 @@
-const { driver } = require('../../server/data/db-connection');
 const logger = require('@financial-times/n-logger').default;
+const { driver } = require('../../server/data/db-connection');
 
 const cleanUp = async () => {
 	const session = driver.session();
@@ -10,7 +10,7 @@ const cleanUp = async () => {
 		logger.warn({
 			event: 'LOAD_TESTING_CLEAN_UP',
 			err: err.message,
-			cleanDBQuery
+			cleanDBQuery,
 		});
 	} finally {
 		session.close(() => {

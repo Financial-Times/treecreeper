@@ -1,17 +1,17 @@
 const casual = require('casual');
 const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
+const { graphql } = require('graphql');
 const app = require('../server/app.js');
 const request = require('./helpers/supertest').getNamespacedSupertest(
-	'graphql'
+	'graphql',
 );
 const { executeQuery } = require('../server/data/db-connection');
 const security = require('../server/middleware/security');
 const {
 	createMockSchema,
-	resolvers
+	resolvers,
 } = require('../server/data/graphql-schema');
-const { graphql } = require('graphql');
 
 const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';
 const UNIQUE_ATTRIBUTE_VALUE = 'GRAPHQL_INT_TESTS';
@@ -32,10 +32,10 @@ describe('Integration - GraphQL', () => {
 				return 'Platinum';
 			},
 			System: () => ({
-				serviceTier: () => 'Platinum'
-			})
+				serviceTier: () => 'Platinum',
+			}),
 		});
-		return await graphql(mockSchema, query);
+		return graphql(mockSchema, query);
 	};
 
 	const listFields = (fields = []) =>
@@ -65,8 +65,8 @@ describe('Integration - GraphQL', () => {
 			.then(
 				({ data }) =>
 					data.__schema.types.find(
-						({ name }) => name.toUpperCase() === type.toUpperCase()
-					).fields
+						({ name }) => name.toUpperCase() === type.toUpperCase(),
+					).fields,
 			)
 			.catch(error => {
 				logger.error('Given schema type did not exist', error, type);
@@ -87,19 +87,21 @@ describe('Integration - GraphQL', () => {
 
 		return {
 			mocks,
-			fields
+			fields,
 		};
 	};
 
 	const addUniqueAttributes = item =>
-		Object.assign({}, item, { [UNIQUE_ATTRIBUTE_KEY]: UNIQUE_ATTRIBUTE_VALUE });
+		Object.assign({}, item, {
+			[UNIQUE_ATTRIBUTE_KEY]: UNIQUE_ATTRIBUTE_VALUE,
+		});
 
 	const mapEnumFields = (item, fieldSchema) =>
 		Object.entries(item).reduce((result, [key, value]) => {
 			const { type } = fieldSchema.find(({ name }) => name === key) || {};
 			if (type && type.kind === 'ENUM') {
 				return Object.assign({}, result, {
-					[key]: resolvers.enumResolvers[type.name][value]
+					[key]: resolvers.enumResolvers[type.name][value],
 				});
 			}
 			return result;
@@ -112,7 +114,7 @@ describe('Integration - GraphQL', () => {
 					? result.mocks
 					: [result.mocks];
 				return result;
-			}
+			},
 		);
 
 		typeFields[type] = fields;
@@ -128,7 +130,7 @@ describe('Integration - GraphQL', () => {
 		return executeQuery(createQuery, { props });
 	};
 
-	beforeEach(async function() {
+	beforeEach(async () => {
 		sandbox = sinon.createSandbox();
 		await populateDatabaseMocks('System', 'Systems');
 	});
@@ -147,13 +149,14 @@ describe('Integration - GraphQL', () => {
 				}
 			}`,
 			variables: null,
-			operationName: null
+			operationName: null,
 		};
 
 		const stubS3o = (req, res) => {
 			const cookie = req.get('Cookie');
 			const status =
-				/s3o_username=.+?;?/.test(cookie) && /s3o_password=.+?;?/.test(cookie)
+				/s3o_username=.+?;?/.test(cookie) &&
+				/s3o_password=.+?;?/.test(cookie)
 					? 200
 					: 400;
 			return res.sendStatus(status);
@@ -203,14 +206,16 @@ describe('Integration - GraphQL', () => {
 			.post('/graphql')
 			.send({
 				query: `{
-					System(code: "${typeMocks['System'][0].code}") {
-						${listFields(typeFields['System'])}
-					}}`
+					System(code: "${typeMocks.System[0].code}") {
+						${listFields(typeFields.System)}
+					}}`,
 			})
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
-				expect(body).toEqual({ data: { System: typeMocks['System'][0] } });
+				expect(body).toEqual({
+					data: { System: typeMocks.System[0] },
+				});
 			});
 	});
 
@@ -220,14 +225,16 @@ describe('Integration - GraphQL', () => {
 			.send({
 				query: `{
 					Systems {
-						${listFields(typeFields['System'])}
-					}}`
+						${listFields(typeFields.System)}
+					}}`,
 			})
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
-				typeMocks['System'].forEach(mock => {
-					const result = body.data.Systems.find(s => s.code === mock.code);
+				typeMocks.System.forEach(mock => {
+					const result = body.data.Systems.find(
+						s => s.code === mock.code,
+					);
 					expect(result).not.toBeUndefined();
 					expect(result).toEqual(mock);
 				});

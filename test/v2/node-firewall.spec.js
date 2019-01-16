@@ -1,5 +1,6 @@
 const app = require('../../server/app.js');
-const API_KEY = process.env.API_KEY;
+
+const { API_KEY } = process.env;
 const { setupMocks, verifyNotExists } = require('../helpers');
 
 describe('v2 - node generic', () => {
@@ -100,7 +101,7 @@ describe('v2 - node generic', () => {
 			it('GET client-id but no client-user-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -122,7 +123,7 @@ describe('v2 - node generic', () => {
 			it('PATCH client-id but no client-user-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -136,7 +137,7 @@ describe('v2 - node generic', () => {
 			it('DELETE client-id but no client-user-id returns 204', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -149,7 +150,7 @@ describe('v2 - node generic', () => {
 			it('GET client-user-id but no client-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -171,7 +172,7 @@ describe('v2 - node generic', () => {
 			it('PATCH client-user-id but no client-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -185,7 +186,7 @@ describe('v2 - node generic', () => {
 			it('DELETE client-user-id but no client-id returns 204', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -198,7 +199,7 @@ describe('v2 - node generic', () => {
 			it('GET client-id and client-user-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -222,7 +223,7 @@ describe('v2 - node generic', () => {
 			it('PATCH client-id and client-user-id returns 200', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -237,7 +238,7 @@ describe('v2 - node generic', () => {
 			it('DELETE client-id and client-user-id returns 204', async () => {
 				await sandbox.createNode('Team', {
 					code: `${namespace}-team`,
-					name: 'name1'
+					name: 'name1',
 				});
 				return sandbox
 					.request(app)
@@ -250,99 +251,104 @@ describe('v2 - node generic', () => {
 		});
 	});
 
-	[['post', true], ['patch', true], ['get', false], ['delete', false]].forEach(
-		([method, checkBody]) => {
-			describe(`security checks - ${method}`, () => {
-				it('should error when node type is suspicious', async () => {
-					await sandbox
-						.request(app)
-						[method](`/v2/node/DROP ALL/${teamCode}`)
-						.namespacedAuth()
-						.expect(400, /Invalid node type `DROP ALL`/);
-				});
-
-				it('should error when node code is suspicious', async () => {
-					await sandbox
-						.request(app)
-						[method]('/v2/node/Team/DROP ALL')
-						.namespacedAuth()
-						.expect(
-							400,
-							/Invalid value `DROP ALL` for property `code` on type `Team`/
-						);
-				});
-
-				it('should error when client id is suspicious', async () => {
-					await sandbox
-						.request(app)
-						[method](teamRestUrl)
-						.set('API_KEY', API_KEY)
-						.set('client-id', 'DROP ALL')
-						.expect(400, /Invalid client id `DROP ALL`/);
-				});
-
-				it('should error when client user id is suspicious', async () => {
-					await sandbox
-						.request(app)
-						[method](teamRestUrl)
-						.set('API_KEY', API_KEY)
-						.set('client-user-id', 'DROP ALL')
-						.expect(400, /Invalid client user id `DROP ALL`/);
-				});
-
-				it('should error when request id is suspicious', async () => {
-					await sandbox
-						.request(app)
-						[method](teamRestUrl)
-						.set('API_KEY', API_KEY)
-						.set('client-id', 'valid-id')
-						.set('x-request-id', 'DROP ALL')
-						.expect(400, /Invalid request id `DROP ALL`/);
-				});
-
-				if (checkBody) {
-					describe('values in body', () => {
-						it('should save injected cypher statements in attributes as strings', async () => {
-							await sandbox
-								.request(app)
-								[method](teamRestUrl)
-								.namespacedAuth()
-								.send({
-									prop: 'MATCH (n) DELETE n'
-								})
-								.expect(({ status }) => /20(0|1)/.test(String(status)));
-							verifyNotExists('Team', teamCode);
-						});
-
-						it('should error when attribute name is suspicious', async () => {
-							await sandbox
-								.request(app)
-								[method](teamRestUrl)
-								.namespacedAuth()
-								.send({
-									'MATCH (n) DELETE n': 'value'
-								})
-								.expect(400);
-						});
-
-						it.skip('TODO: write a test that is a better test of cypher injection', () => {});
-
-						it('should error when relationship node code is suspicious', async () => {
-							await sandbox
-								.request(app)
-								[method](teamRestUrl)
-								.namespacedAuth()
-								.send({
-									supports: ['DROP ALL']
-								})
-								.expect(
-									400,
-									/Invalid value `DROP ALL` for property `code` on type `System`/
-								);
-						});
-					});
-				}
+	[
+		['post', true],
+		['patch', true],
+		['get', false],
+		['delete', false],
+	].forEach(([method, checkBody]) => {
+		describe(`security checks - ${method}`, () => {
+			it('should error when node type is suspicious', async () => {
+				await sandbox
+					.request(app)
+					[method](`/v2/node/DROP ALL/${teamCode}`)
+					.namespacedAuth()
+					.expect(400, /Invalid node type `DROP ALL`/);
 			});
-		}
-	);
+
+			it('should error when node code is suspicious', async () => {
+				await sandbox
+					.request(app)
+					[method]('/v2/node/Team/DROP ALL')
+					.namespacedAuth()
+					.expect(
+						400,
+						/Invalid value `DROP ALL` for property `code` on type `Team`/,
+					);
+			});
+
+			it('should error when client id is suspicious', async () => {
+				await sandbox
+					.request(app)
+					[method](teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'DROP ALL')
+					.expect(400, /Invalid client id `DROP ALL`/);
+			});
+
+			it('should error when client user id is suspicious', async () => {
+				await sandbox
+					.request(app)
+					[method](teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'DROP ALL')
+					.expect(400, /Invalid client user id `DROP ALL`/);
+			});
+
+			it('should error when request id is suspicious', async () => {
+				await sandbox
+					.request(app)
+					[method](teamRestUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'valid-id')
+					.set('x-request-id', 'DROP ALL')
+					.expect(400, /Invalid request id `DROP ALL`/);
+			});
+
+			if (checkBody) {
+				describe('values in body', () => {
+					it('should save injected cypher statements in attributes as strings', async () => {
+						await sandbox
+							.request(app)
+							[method](teamRestUrl)
+							.namespacedAuth()
+							.send({
+								prop: 'MATCH (n) DELETE n',
+							})
+							.expect(({ status }) =>
+								/20(0|1)/.test(String(status)),
+							);
+						verifyNotExists('Team', teamCode);
+					});
+
+					it('should error when attribute name is suspicious', async () => {
+						await sandbox
+							.request(app)
+							[method](teamRestUrl)
+							.namespacedAuth()
+							.send({
+								'MATCH (n) DELETE n': 'value',
+							})
+							.expect(400);
+					});
+
+					it.skip('TODO: write a test that is a better test of cypher injection', () => {});
+
+					it('should error when relationship node code is suspicious', async () => {
+						await sandbox
+							.request(app)
+							[method](teamRestUrl)
+							.namespacedAuth()
+							.send({
+								supports: ['DROP ALL'],
+							})
+							.expect(
+								400,
+								/Invalid value `DROP ALL` for property `code` on type `System`/,
+							);
+					});
+				});
+			}
+		});
+	});
 });

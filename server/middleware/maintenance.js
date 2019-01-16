@@ -6,9 +6,9 @@ const disableWrites = (req, res, next) => {
 					message: `\
 Biz-Ops API is undergoing vital maintenance. Therefore, writes to the biz-ops-api \
 are restricted at this time to avoid data inconsistencies. Please slack #biz-ops to discuss \
-what you need to do - we're here to help`
-				}
-			]
+what you need to do - we're here to help`,
+				},
+			],
 		});
 	}
 	next();
@@ -25,9 +25,9 @@ const disableReads = (req, res, next) => {
 					message: `\
 Biz-Ops API is undergoing vital maintenance. Therefore, reads from the biz-ops-api \
 are restricted at this time to avoid retrieving incomplete data. Please slack \
-#biz-ops to discuss what you need to do - we're here to help`
-				}
-			]
+#biz-ops to discuss what you need to do - we're here to help`,
+				},
+			],
 		});
 	}
 	next();
@@ -35,5 +35,5 @@ are restricted at this time to avoid retrieving incomplete data. Please slack \
 
 module.exports = {
 	disableWrites,
-	disableReads
+	disableReads,
 };

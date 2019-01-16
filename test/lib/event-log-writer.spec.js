@@ -4,14 +4,14 @@ describe('Event log writer', () => {
 	const defaultEvent = {
 		action: 'CREATE',
 		code: 'biz-ops-tests',
-		type: 'ATestType'
+		type: 'ATestType',
 	};
 	let stubKinesis;
 	let eventLogWriter;
 
 	beforeEach(() => {
 		stubKinesis = {
-			putRecord: jest.fn()
+			putRecord: jest.fn(),
 		};
 
 		eventLogWriter = new EventLogWriter(stubKinesis);
@@ -30,8 +30,8 @@ describe('Event log writer', () => {
 		const givenValue = 'UPDATE';
 		await eventLogWriter.sendEvent(
 			Object.assign({}, defaultEvent, {
-				action: givenValue
-			})
+				action: givenValue,
+			}),
 		);
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].action).toBe(givenValue);
@@ -41,8 +41,8 @@ describe('Event log writer', () => {
 		const givenValue = 'dummySystemCode';
 		await eventLogWriter.sendEvent(
 			Object.assign({}, defaultEvent, {
-				code: givenValue
-			})
+				code: givenValue,
+			}),
 		);
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].code).toBe(givenValue);
@@ -52,8 +52,8 @@ describe('Event log writer', () => {
 		const givenValue = 'RepositorY';
 		await eventLogWriter.sendEvent(
 			Object.assign({}, defaultEvent, {
-				type: givenValue
-			})
+				type: givenValue,
+			}),
 		);
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].type).toBe('RepositorY');
@@ -68,7 +68,7 @@ describe('Event log writer', () => {
 			await eventLogWriter.sendEvent(defaultEvent);
 
 			expect(stubKinesis.putRecord.mock.calls[0][0].time).toBe(
-				Math.floor(time / 1000)
+				Math.floor(time / 1000),
 			);
 			jest.clearAllTimers();
 		});

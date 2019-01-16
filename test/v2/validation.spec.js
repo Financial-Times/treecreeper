@@ -22,12 +22,12 @@ describe('validation', () => {
 				.post(`/v2/node/Team/${namespace}-team`)
 				.namespacedAuth()
 				.send({
-					foo: 'created'
+					foo: 'created',
 				});
 			expect(validation.validateProperty).toHaveBeenCalledWith(
 				'Team',
 				'foo',
-				'created'
+				'created',
 			);
 		});
 		it('should call when PATCHing node', async () => {
@@ -36,12 +36,12 @@ describe('validation', () => {
 				.patch(`/v2/node/Team/${namespace}-team`)
 				.namespacedAuth()
 				.send({
-					foo: 'updated'
+					foo: 'updated',
 				});
 			expect(validation.validateProperty).toHaveBeenCalledWith(
 				'Team',
 				'foo',
-				'updated'
+				'updated',
 			);
 		});
 	});

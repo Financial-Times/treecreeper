@@ -2,7 +2,9 @@ const { logger } = require('../lib/request-context');
 
 // eslint-disable-next-line no-unused-vars
 const errorToErrors = (err, req, res, next) => {
-	process.env.DEBUG && console.log(err);
+	if (process.env.DEBUG) {
+		console.log(err); // eslint-disable-line no-console
+	}
 	logger.error({ event: 'BIZ_OPS_API_ERROR', error: err });
 
 	if (!err.status) {
@@ -18,9 +20,9 @@ const notFound = ({ path }, res) => {
 	return res.status(404).json({
 		errors: [
 			{
-				message: 'Not Found'
-			}
-		]
+				message: 'Not Found',
+			},
+		],
 	});
 };
 const uncaughtError = (error, req, res, next) => {

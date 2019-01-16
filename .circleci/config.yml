@@ -78,14 +78,13 @@ jobs:
       - store_artifacts:
           path: junit
 
-  lint:
+  verify:
     <<: *default_container_config
     steps:
       - *attach_workspace
-
       - run:
-          name: Lint
-          command: npm run lint-ci
+          name: Verify
+          command: make verify -j 3
 
 workflows:
   version: 2
@@ -95,7 +94,8 @@ workflows:
       - test:
           requires:
             - install
-      - lint:
+      - verify:
+          context: rel-eng-creds
           requires:
             - install
 

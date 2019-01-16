@@ -1,5 +1,5 @@
-const { validateParams } = require('../../../lib/rest-input-helpers');
 const { stripIndents } = require('common-tags');
+const { validateParams } = require('../../../lib/rest-input-helpers');
 const { preflightChecks } = require('../../../lib/error-handling');
 const { executeQuery } = require('../../../data/db-connection');
 const { logNodeDeletion } = require('../../../lib/log-to-kinesis');
@@ -15,12 +15,12 @@ module.exports = async input => {
 		result: existingRecord,
 		nodeType,
 		code,
-		status: 404
+		status: 404,
 	});
 	preflightChecks.bailOnAttachedNode({
 		result: existingRecord,
 		nodeType,
-		code
+		code,
 	});
 
 	const query = stripIndents`

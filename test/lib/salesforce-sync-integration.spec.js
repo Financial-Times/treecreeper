@@ -4,7 +4,7 @@ const app = require('../../server/app.js');
 const namespace = 'salesforce-sync';
 const { dropDb } = require('../helpers/test-data');
 const request = require('../helpers/supertest').getNamespacedSupertest(
-	namespace
+	namespace,
 );
 
 describe('salesforce sync integration', () => {
@@ -23,12 +23,14 @@ describe('salesforce sync integration', () => {
 			.post(`/v2/node/System/${namespace}-system`)
 			.namespacedAuth()
 			.send({
-				name: 'created'
+				name: 'created',
 			});
-		expect(salesforceSync.setSalesforceIdForSystem).toHaveBeenCalledTimes(1);
-		expect(salesforceSync.setSalesforceIdForSystem.mock.calls[0][0].code).toBe(
-			'salesforce-sync-system'
+		expect(salesforceSync.setSalesforceIdForSystem).toHaveBeenCalledTimes(
+			1,
 		);
+		expect(
+			salesforceSync.setSalesforceIdForSystem.mock.calls[0][0].code,
+		).toBe('salesforce-sync-system');
 	});
 
 	it('should call when PATCHing System', async () => {
@@ -36,12 +38,14 @@ describe('salesforce sync integration', () => {
 			.patch(`/v2/node/System/${namespace}-system`)
 			.namespacedAuth()
 			.send({
-				name: 'updated'
+				name: 'updated',
 			});
-		expect(salesforceSync.setSalesforceIdForSystem).toHaveBeenCalledTimes(1);
-		expect(salesforceSync.setSalesforceIdForSystem.mock.calls[0][0].code).toBe(
-			'salesforce-sync-system'
+		expect(salesforceSync.setSalesforceIdForSystem).toHaveBeenCalledTimes(
+			1,
 		);
+		expect(
+			salesforceSync.setSalesforceIdForSystem.mock.calls[0][0].code,
+		).toBe('salesforce-sync-system');
 	});
 
 	it('should not call when POSTing non System', async () => {
@@ -49,9 +53,9 @@ describe('salesforce sync integration', () => {
 			.post(`/v2/node/Team/${namespace}-system`)
 			.namespacedAuth()
 			.send({
-				name: 'created'
+				name: 'created',
 			});
-		expect(salesforceSync.setSalesforceIdForSystem).not.called;
+		expect(salesforceSync.setSalesforceIdForSystem).not.toHaveBeenCalled();
 	});
 
 	it('should not call when PATCHing non System', async () => {
@@ -59,8 +63,8 @@ describe('salesforce sync integration', () => {
 			.patch(`/v2/node/Team/${namespace}-system`)
 			.namespacedAuth()
 			.send({
-				name: 'updated'
+				name: 'updated',
 			});
-		expect(salesforceSync.setSalesforceIdForSystem).not.called;
+		expect(salesforceSync.setSalesforceIdForSystem).not.toHaveBeenCalled();
 	});
 });

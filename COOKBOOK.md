@@ -5,9 +5,10 @@ A place to keep examples of what we can do with this API and the underlying data
 ## GraphQl Recipes
 
 #### Show me all the systems that @dan.murley is tech lead of,
+
 ```graphql
 {
-	Person (slack: "@dan.murley") {
+	Person(slack: "@dan.murley") {
 		isTechLeadFor {
 			code
 		}
@@ -16,8 +17,9 @@ A place to keep examples of what we can do with this API and the underlying data
 ```
 
 #### Show me people with a lot of technical systems assigned,
+
 The following will retrieve all people and list what they are tech leads for - it's left to the consumer to filter based on these
-*Coming soon: ability to filter people by `isTechLead`*
+_Coming soon: ability to filter people by `isTechLead`_
 
 ```graphql
 {
@@ -31,71 +33,77 @@ The following will retrieve all people and list what they are tech leads for - i
 ```
 
 #### Show me the name of a system's (upp-mccm) product owner
+
 ```graphql
 {
-	System (code: "upp-mccm") {
+	System(code: "upp-mccm") {
 		deliveredBy {
-      productOwner {
-        name
-      }
-    }
+			productOwner {
+				name
+			}
+		}
 	}
 }
 ```
 
 #### Show me the list of systems product owned by an individual (geoffthorpe)
+
 ```graphql
 {
-	Person (code: "geoffthorpe") {
-    isDeliveryLeadFor {
-      owns {
-        code
-      }
-    }
+	Person(code: "geoffthorpe") {
+		isDeliveryLeadFor {
+			owns {
+				code
+			}
+		}
 	}
 }
 ```
+
 #### Show me a list of the platinum system's system codes with support contacts
+
 ```graphql
 {
-	Systems (serviceTier: Platinum) {
+	Systems(serviceTier: Platinum) {
 		code
 		name
-    supportedBy {
-      name
-      isThirdParty
-      email
-      phone
-      slack
-    }
-    deliveredBy {
-      name
-      isThirdParty
-      productOwner {
-        name
-      }
-      techLead {
-        name
-      }
-    }
-  }
+		supportedBy {
+			name
+			isThirdParty
+			email
+			phone
+			slack
+		}
+		deliveredBy {
+			name
+			isThirdParty
+			productOwner {
+				name
+			}
+			techLead {
+				name
+			}
+		}
+	}
 }
-
 ```
 
 ## Cypher Recipes
 
 #### Show me high level counters for the population of critical system fields
+
 ```
 MATCH (s:System) RETURN count(*) as systems, count(s.name) as names, count(s.serviceTier) as tiers, count(s.description) as descs
 ```
 
 #### Show me the number of missing critical system attributes
+
 ```
 MATCH (s:System) RETURN count(*) as systems, count(*)-count(s.name) as missing_names, count(*)-count(s.serviceTier) as missing_tiers, count(*)-count(s.description) as missing_descriptions
 ```
 
 ### Show me which platinum service have missing contacts
+
 ```
 MATCH (s:System) where s.serviceTier='Platinum'
 optional match (s)-[:programme]->(p:Contact)
@@ -110,16 +118,19 @@ order by s.id
 ```
 
 #### Show me all the platinum systems with their product owners
+
 ```
 MATCH (s:System)-[:productOwner]->(c:Contact) where s.serviceTier='Platinum' RETURN c, s
 ```
 
 #### Show me contacts who share the same email address (probably duplicates)
+
 ```
 MATCH (n:Contact) WITH n.email as email, collect(n.id) AS nodes WHERE size(nodes) > 1 RETURN email, nodes as ContactIds ORDER BY email
 ```
 
 #### Show me contacts with the same name but different email addresses (probably shouldn't have the same name)
+
 ```
 MATCH (n:Contact) WITH n.email as email, collect(n.id) AS nodes WHERE size(nodes) > 1 RETURN email, nodes as ContactIds ORDER BY email
 ```

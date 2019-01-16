@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const { executeQueryWithSharedSession } = require('./data/db-connection');
 const schema = require('@financial-times/biz-ops-schema');
 const logger = require('@financial-times/n-logger').default;
+const { executeQueryWithSharedSession } = require('./data/db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
@@ -15,14 +15,14 @@ const initConstraints = async () => {
 				logger.warn({
 					event: 'CONSTRAINT_SETUP_FAILURE',
 					err: err.message,
-					constraintQuery
-				})
+					constraintQuery,
+				}),
 			);
 
 		const retrieveConstraints = async () => {
 			const constraints = await executeQuery('CALL db.constraints');
 			return constraints.records.map(constraint =>
-				constraint.get('description')
+				constraint.get('description'),
 			);
 		};
 
@@ -31,33 +31,35 @@ const initConstraints = async () => {
 			.concat(
 				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
-						...Object.entries(properties).map(([propName, { unique }]) => {
-							return [
-								unique &&
-									`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`
-								// skip the setting of enterprise version specific constraints until we use the enterprise version
-								// required &&
-								// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-							];
-						})
+						...Object.entries(properties).map(
+							([propName, { unique }]) => {
+								return [
+									unique &&
+										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
+									// skip the setting of enterprise version specific constraints until we use the enterprise version
+									// required &&
+									// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+								];
+							},
+						),
 					);
-				})
+				}),
 			)
 			.filter(statement => !!statement);
 
 		const createConstraints = exclusion(
 			desiredConstraints,
-			existingConstraints
+			existingConstraints,
 		).map(constraint => `CREATE ${constraint}`);
 
 		for (const constraint of createConstraints) {
-			await setupConstraintIfPossible(constraint);
+			await setupConstraintIfPossible(constraint); // eslint-disable-line no-await-in-loop
 		}
 
 		const constraints = await retrieveConstraints();
 
 		logger.info(
-			`db.constraints updated. ${constraints.length} constraints exist`
+			`db.constraints updated. ${constraints.length} constraints exist`,
 		);
 	} finally {
 		executeQuery.close();
@@ -65,7 +67,7 @@ const initConstraints = async () => {
 };
 
 module.exports = {
-	initConstraints
+	initConstraints,
 };
 
 if (process.argv[1] === __filename) {

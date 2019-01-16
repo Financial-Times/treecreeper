@@ -6,7 +6,7 @@ module.exports = {
 			'Unable to retrieve data from Biz-Ops API. As a result, it will not be possible to read information from Biz-Ops API about our systems, contacts, teams or products',
 		severity: 1,
 		technicalSummary:
-			'Runs a cypher read query to check that a successful response comes back from the Biz-Ops API'
+			'Runs a cypher read query to check that a successful response comes back from the Biz-Ops API',
 	}),
 	constraints: () => ({
 		id: 'biz-ops-api-constraints',
@@ -15,7 +15,7 @@ module.exports = {
 		severity: 2,
 		technicalSummary:
 			'Makes an API call which checks that all the required constraints exist.',
-		_dependencies: ['grapheneDB']
+		_dependencies: ['grapheneDB'],
 	}),
 	apiCall: type => ({
 		id: `biz-ops-api-${type}-call`,
@@ -23,6 +23,6 @@ module.exports = {
 		businessImpact: `Unable to retrieve data from Biz-Ops API via ${type}. As a result, it will not be possible to read information about our systems, contacts, teams or products.`,
 		severity: 1,
 		technicalSummary: `Makes a call to the Biz-Ops API via ${type} and checks that the response code is equal to 200`,
-		_dependencies: ['GrapheneDB']
-	})
+		_dependencies: ['GrapheneDB'],
+	}),
 };

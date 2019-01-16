@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
 		callApiGatewayCheck,
 		callApiHerokuCheck,
 		constraintsCheck,
-		readQueryCheck
+		readQueryCheck,
 	].map(async check => {
 		const checkObj = await check;
 		return checkObj.getStatus();
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 		systemCode: 'biz-ops-api',
 		description:
 			'The Business Operations API. Stores infromation (systems/contacts/teams/products) in a graph datastore (Neo4j) and exposes this for queries.',
-		checks: await Promise.all(healthchecks)
+		checks: await Promise.all(healthchecks),
 	};
 
 	if (!health) {

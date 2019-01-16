@@ -10,7 +10,7 @@
 	- setContext - pass in am object or key, value to set a value(s) on teh context
 	- logger - Same API as n-logger
 
-**/
+* */
 
 const asyncHooks = require('async_hooks');
 const nLogger = require('@financial-times/n-logger').default;
@@ -30,10 +30,38 @@ const asyncHook = asyncHooks.createHook({
 		}
 	},
 	destroy: asyncId => delete contextStore[asyncId],
-	promiseResolve: () => {}
+	promiseResolve: () => {},
 });
 
 asyncHook.enable();
+
+const logger = new Proxy(nLogger, {
+	get: (baseLogger, name) => {
+		// each logging method should get request context before logging
+		if (['info', 'warn', 'log', 'error', 'debug'].includes(name)) {
+			return new Proxy(baseLogger[name], {
+				apply: (func, thisArg, args) => {
+					// get the request context
+					const context = getContext();
+					// find the first object in the args
+					const firstObjectIndex = args.findIndex(
+						arg => typeof arg === 'object',
+					);
+
+					if (firstObjectIndex === -1) {
+						// if no object is being logged, append the context object to the args
+						args.push(context);
+					} else {
+						// if there is an object, insert the context object to the args in the place after the last object
+						args.splice(firstObjectIndex, 0, context);
+					}
+					return func.apply(thisArg, args);
+				},
+			});
+		}
+		return baseLogger[name];
+	},
+});
 
 const collectRequestMetrics = (context, res) => {
 	context = context || getContext();
@@ -42,9 +70,9 @@ const collectRequestMetrics = (context, res) => {
 		{
 			event: 'REQUEST_COMPLETE',
 			totalTime: Date.now() - context.start,
-			status: res.statusCode
+			status: res.statusCode,
 		},
-		context
+		context,
 	);
 };
 
@@ -53,7 +81,7 @@ const middleware = (req, res, next) => {
 	contextStore[eid] = {
 		start: Date.now(),
 		path: req.originalUrl,
-		environment: process.env.DEPLOYMENT_STAGE
+		environment: process.env.DEPLOYMENT_STAGE,
 	};
 	// must pass the context as the finish event is in (begins?) a
 	// different async execution context
@@ -70,37 +98,9 @@ const setContext = (key, val) => {
 	}
 };
 
-const logger = new Proxy(nLogger, {
-	get: (baseLogger, name) => {
-		// each logging method should get request context before logging
-		if (['info', 'warn', 'log', 'error', 'debug'].includes(name)) {
-			return new Proxy(baseLogger[name], {
-				apply: (func, thisArg, args) => {
-					// get the request context
-					const context = getContext();
-					// find the first object in the args
-					const firstObjectIndex = args.findIndex(
-						arg => typeof arg === 'object'
-					);
-
-					if (firstObjectIndex === -1) {
-						// if no object is being logged, append the context object to the args
-						args.push(context);
-					} else {
-						// if there is an object, insert the context object to the args in the place after the last object
-						args.splice(firstObjectIndex, 0, context);
-					}
-					return func.apply(thisArg, args);
-				}
-			});
-		}
-		return baseLogger[name];
-	}
-});
-
 module.exports = {
 	setContext,
 	getContext,
 	middleware,
-	logger
+	logger,
 };

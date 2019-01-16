@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
-const validation = require('./schema-validation');
 const { getType } = require('@financial-times/biz-ops-schema');
+const validation = require('./schema-validation');
 
 const stripNegation = propName => propName.replace(/^!/, '');
 
@@ -36,7 +36,7 @@ const validatePayload = ({ nodeType, code, body: payload }) => {
 			400,
 			`Conflicting code property \`${
 				payload.code
-			}\` in payload for ${nodeType} ${code}`
+			}\` in payload for ${nodeType} ${code}`,
 		);
 	}
 
@@ -88,7 +88,7 @@ const getDeleteRelationships = (type, payload) => {
 		.filter(isDeleteRelationship(validProperties))
 		.map(([propName, codes]) => [
 			codes ? stripNegation(propName) : propName,
-			codes ? toArray(codes) : null
+			codes ? toArray(codes) : null,
 		])
 		.reduce(entriesToObject, {});
 };
@@ -100,5 +100,5 @@ module.exports = {
 	getWriteProperties,
 	getWriteRelationships,
 	getDeleteProperties,
-	getDeleteRelationships
+	getDeleteRelationships,
 };

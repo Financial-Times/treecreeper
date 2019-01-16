@@ -17,9 +17,9 @@ describe('generic app settings', () => {
 			.expect(404, {
 				errors: [
 					{
-						message: 'Not Found'
-					}
-				]
+						message: 'Not Found',
+					},
+				],
 			});
 	});
 
@@ -30,7 +30,7 @@ describe('generic app settings', () => {
 			.namespacedAuth()
 			.expect(
 				503,
-				/Biz-Ops API is undergoing vital maintenance\. Therefore, reads/
+				/Biz-Ops API is undergoing vital maintenance\. Therefore, reads/,
 			);
 
 		delete process.env.DISABLE_READS;
@@ -43,7 +43,7 @@ describe('generic app settings', () => {
 			.namespacedAuth()
 			.expect(
 				503,
-				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/
+				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/,
 			);
 
 		delete process.env.DISABLE_WRITES;
@@ -56,7 +56,7 @@ describe('generic app settings', () => {
 			.namespacedAuth()
 			.expect(
 				503,
-				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/
+				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/,
 			);
 
 		delete process.env.DISABLE_WRITES;
@@ -69,7 +69,7 @@ describe('generic app settings', () => {
 			.namespacedAuth()
 			.expect(
 				503,
-				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/
+				/Biz-Ops API is undergoing vital maintenance\. Therefore, writes/,
 			);
 
 		delete process.env.DISABLE_WRITES;
@@ -84,12 +84,12 @@ describe('generic app settings', () => {
 					Systems {
 						code
 					}
-				}`
+				}`,
 			})
 			.namespacedAuth()
 			.expect(
 				503,
-				/Biz-Ops API is undergoing vital maintenance\. Therefore, reads/
+				/Biz-Ops API is undergoing vital maintenance\. Therefore, reads/,
 			);
 
 		delete process.env.DISABLE_READS;
@@ -104,7 +104,7 @@ describe('generic app settings', () => {
 	});
 
 	it('if no API_KEY in environment, will not authorize', async () => {
-		const API_KEY = process.env.API_KEY;
+		const { API_KEY } = process.env;
 		delete process.env.API_KEY;
 		await request(app)
 			.get('/v2/node/System/test-system')
@@ -125,7 +125,7 @@ describe('generic app settings', () => {
 	});
 
 	it('will authorize using API_KEY_NEW, if API_KEY missing', async () => {
-		const API_KEY = process.env.API_KEY;
+		const { API_KEY } = process.env;
 		delete process.env.API_KEY;
 		process.env.API_KEY_NEW = 'new-api-key';
 		await request(app)

@@ -1,6 +1,6 @@
 describe('AWS kinesis client', () => {
-	const streamName = Math.random() + 'mississippi';
-	const dynoId = 'someDyno' + Math.floor(Math.random() * 10);
+	const streamName = `${Math.random()}mississippi`;
+	const dynoId = `someDyno${Math.floor(Math.random() * 10)}`;
 
 	let kinesis;
 	const storedEnv = {};
@@ -9,20 +9,20 @@ describe('AWS kinesis client', () => {
 	beforeEach(() => {
 		const kinesisStub = jest.fn();
 		jest.doMock('aws-sdk', () => ({
-			Kinesis: kinesisStub
+			Kinesis: kinesisStub,
 		}));
-		const Kinesis = require('../../server/lib/kinesis-client');
-		storedEnv['NODE_ENV'] = process.env.NODE_ENV;
-		storedEnv['DYNO'] = process.env.DYNO;
+		const Kinesis = require('../../server/lib/kinesis-client'); // eslint-disable-line global-require
+		storedEnv.NODE_ENV = process.env.NODE_ENV;
+		storedEnv.DYNO = process.env.DYNO;
 		process.env.NODE_ENV = 'production';
 		process.env.DYNO = dynoId;
 		stubPutRecord = jest.fn().mockReturnValue({
 			promise() {
 				return Promise.resolve();
-			}
+			},
 		});
 		kinesisStub.mockImplementation(() => ({
-			putRecord: stubPutRecord
+			putRecord: stubPutRecord,
 		}));
 
 		kinesis = new Kinesis(streamName);
@@ -37,7 +37,7 @@ describe('AWS kinesis client', () => {
 	describe('put record', () => {
 		it('should write to the given stream name in both AWS accounts', async () => {
 			await kinesis.putRecord({
-				event: 'test'
+				event: 'test',
 			});
 
 			expect(stubPutRecord).toHaveBeenCalledTimes(1);
@@ -49,14 +49,14 @@ describe('AWS kinesis client', () => {
 				event: 'test',
 				someField: null,
 				otherField: 'string',
-				number: 1
+				number: 1,
 			};
 			await kinesis.putRecord(givenData);
 
 			const encodedData = stubPutRecord.mock.calls[0][0].Data;
 
 			expect(JSON.parse(Buffer.from(encodedData).toString())).toEqual(
-				givenData
+				givenData,
 			);
 		});
 
@@ -64,7 +64,7 @@ describe('AWS kinesis client', () => {
 			await kinesis.putRecord({});
 
 			expect(stubPutRecord.mock.calls[0][0].PartitionKey).toMatch(
-				new RegExp(`${dynoId}\:\\d+`)
+				new RegExp(`${dynoId}:\\d+`),
 			);
 		});
 	});

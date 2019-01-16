@@ -3,7 +3,7 @@ const {
 	setupMocks,
 	stubDbUnavailable,
 	verifyNotExists,
-	verifyExists
+	verifyExists,
 } = require('../helpers');
 
 describe('v2 - node DELETE', () => {
@@ -15,7 +15,7 @@ describe('v2 - node DELETE', () => {
 	it('deletes a detached node', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
-			name: 'name1'
+			name: 'name1',
 		});
 		await sandbox
 			.request(app)
@@ -39,7 +39,7 @@ describe('v2 - node DELETE', () => {
 	it('error informatively when attempting to delete connected node', async () => {
 		const [team, person] = await sandbox.createNodes(
 			['Team', `${namespace}-team`],
-			['Person', `${namespace}-person`]
+			['Person', `${namespace}-person`],
 		);
 		await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person]);
 
@@ -49,7 +49,9 @@ describe('v2 - node DELETE', () => {
 			.namespacedAuth()
 			.expect(
 				409,
-				new RegExp(`Cannot delete - Team ${namespace}-team has relationships`)
+				new RegExp(
+					`Cannot delete - Team ${namespace}-team has relationships`,
+				),
 			);
 
 		await verifyExists('Team', `${namespace}-team`);

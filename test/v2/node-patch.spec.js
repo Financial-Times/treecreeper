@@ -1,11 +1,12 @@
 const app = require('../../server/app.js');
-const API_KEY = process.env.API_KEY;
+
+const { API_KEY } = process.env;
 const {
 	setupMocks,
 	stubDbUnavailable,
 	testNode,
 	spyDbQuery,
-	verifyNotExists
+	verifyNotExists,
 } = require('../helpers');
 
 describe('v2 - node PATCH', () => {
@@ -29,16 +30,16 @@ describe('v2 - node PATCH', () => {
 	it('update node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
-			name: 'name1'
+			name: 'name1',
 		});
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: 'name2'
+			name: 'name2',
 		}).expect(
 			200,
 			sandbox.withUpdateMeta({
 				name: 'name2',
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 
 		await testNode(
@@ -46,8 +47,8 @@ describe('v2 - node PATCH', () => {
 			teamCode,
 			sandbox.withUpdateMeta({
 				name: 'name2',
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
@@ -55,13 +56,13 @@ describe('v2 - node PATCH', () => {
 
 	it('Create when patching non-existent node', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: 'name1'
+			name: 'name1',
 		}).expect(
 			201,
 			sandbox.withCreateMeta({
 				name: 'name1',
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 
 		await testNode(
@@ -69,20 +70,20 @@ describe('v2 - node PATCH', () => {
 			teamCode,
 			sandbox.withCreateMeta({
 				name: 'name1',
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
 	});
 
 	it('error when conflicting code values', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			code: 'wrong-code'
+			code: 'wrong-code',
 		}).expect(
 			400,
 			new RegExp(
-				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`
-			)
+				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
+			),
 		);
 		verifyNotExists('Team', teamCode);
 		sandbox.expectNoEvents();
@@ -92,7 +93,7 @@ describe('v2 - node PATCH', () => {
 		await sandbox.createNode('Team', teamCode);
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
 			name: 'name1',
-			code: teamCode
+			code: teamCode,
 		}).expect(200);
 
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
@@ -100,7 +101,7 @@ describe('v2 - node PATCH', () => {
 
 	it('error when unrecognised attribute', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			foo: 'unrecognised'
+			foo: 'unrecognised',
 		}).expect(400, /Invalid property `foo` on type `Team`/);
 		verifyNotExists('Team', teamCode);
 		sandbox.expectNoEvents();
@@ -115,23 +116,23 @@ describe('v2 - node PATCH', () => {
 	it("deletes attributes which are provided as 'null'", async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
-			name: 'name1'
+			name: 'name1',
 		});
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: null
+			name: null,
 		}).expect(
 			200,
 			sandbox.withUpdateMeta({
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 
 		await testNode(
 			'Team',
 			teamCode,
 			sandbox.withUpdateMeta({
-				code: teamCode
-			})
+				code: teamCode,
+			}),
 		);
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
@@ -139,11 +140,11 @@ describe('v2 - node PATCH', () => {
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
-			name: 'name1'
+			name: 'name1',
 		});
 		const expectedMeta = sandbox.withUpdateMeta({
 			name: 'name2',
-			code: teamCode
+			code: teamCode,
 		});
 		delete expectedMeta._updatedByClient;
 		return sandbox
@@ -159,11 +160,11 @@ describe('v2 - node PATCH', () => {
 	it('no client-user-id header deletes the _updatedByUser metaProperty from the database', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
-			name: 'name1'
+			name: 'name1',
 		});
 		const expectedMeta = sandbox.withUpdateMeta({
 			name: 'name2',
-			code: teamCode
+			code: teamCode,
 		});
 		delete expectedMeta._updatedByUser;
 		return sandbox
@@ -181,10 +182,10 @@ describe('v2 - node PATCH', () => {
 			it('errors if no relationshipAction query string when deleting relationship set', async () => {
 				await sandbox.createNode('Team', teamCode);
 				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					techLeads: null
+					techLeads: null,
 				}).expect(
 					400,
-					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
 				sandbox.expectNoEvents();
 			});
@@ -192,10 +193,10 @@ describe('v2 - node PATCH', () => {
 			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
 				await sandbox.createNode('Team', teamCode);
 				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					'!techLeads': [personCode]
+					'!techLeads': [personCode],
 				}).expect(
 					400,
-					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
 				sandbox.expectNoEvents();
 			});
@@ -203,47 +204,53 @@ describe('v2 - node PATCH', () => {
 				describe(`with ${action} action`, () => {
 					describe('individual relationship delete', () => {
 						it('can delete a specific relationship', async () => {
-							const [team, person1, person2] = await sandbox.createNodes(
+							const [
+								team,
+								person1,
+								person2,
+							] = await sandbox.createNodes(
 								['Team', teamCode],
 								['Person', `${personCode}-1`],
-								['Person', `${personCode}-2`]
+								['Person', `${personCode}-2`],
 							);
 							await sandbox.connectNodes(
 								[team, 'HAS_TECH_LEAD', person1],
-								[team, 'HAS_TECH_LEAD', person2]
+								[team, 'HAS_TECH_LEAD', person2],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [`${personCode}-1`] }
+								{ '!techLeads': [`${personCode}-1`] },
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [`${personCode}-2`]
-								})
+									techLeads: [`${personCode}-2`],
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: `${personCode}-2` })
-									}
-								]
+										props: sandbox.withMeta({
+											code: `${personCode}-2`,
+										}),
+									},
+								],
 							);
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
-								['UPDATE', `${personCode}-1`, 'Person']
+								['UPDATE', `${personCode}-1`, 'Person'],
 							);
 						});
 
@@ -251,20 +258,20 @@ describe('v2 - node PATCH', () => {
 							await sandbox.createNode('Team', teamCode);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [personCode] }
+								{ '!techLeads': [personCode] },
 							).expect(
 								200,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 							sandbox.expectNoEvents();
 						});
@@ -272,37 +279,43 @@ describe('v2 - node PATCH', () => {
 						it("can attempt to delete a specific relationship that doesn't exist", async () => {
 							const [team, person1] = await sandbox.createNodes(
 								['Team', teamCode],
-								['Person', `${personCode}-1`]
+								['Person', `${personCode}-1`],
 							);
-							await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person1]);
+							await sandbox.connectNodes([
+								team,
+								'HAS_TECH_LEAD',
+								person1,
+							]);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [`${personCode}-2`] }
+								{ '!techLeads': [`${personCode}-2`] },
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [`${personCode}-1`]
-								})
+									techLeads: [`${personCode}-1`],
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: `${personCode}-1` })
-									}
-								]
+										props: sandbox.withMeta({
+											code: `${personCode}-1`,
+										}),
+									},
+								],
 							);
 							sandbox.expectNoEvents();
 						});
@@ -312,200 +325,223 @@ describe('v2 - node PATCH', () => {
 								team,
 								person1,
 								person2,
-								person3
+								person3,
 							] = await sandbox.createNodes(
 								['Team', teamCode],
 								['Person', `${personCode}-1`],
 								['Person', `${personCode}-2`],
-								['Person', `${personCode}-3`]
+								['Person', `${personCode}-3`],
 							);
 							await sandbox.connectNodes(
 								[team, 'HAS_TECH_LEAD', person1],
 								[team, 'HAS_TECH_LEAD', person2],
-								[team, 'HAS_TECH_LEAD', person3]
+								[team, 'HAS_TECH_LEAD', person3],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [`${personCode}-1`, `${personCode}-3`] }
+								{
+									'!techLeads': [
+										`${personCode}-1`,
+										`${personCode}-3`,
+									],
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [`${personCode}-2`]
-								})
+									techLeads: [`${personCode}-2`],
+								}),
 							);
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: `${personCode}-2` })
-									}
-								]
+										props: sandbox.withMeta({
+											code: `${personCode}-2`,
+										}),
+									},
+								],
 							);
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
 								['UPDATE', `${personCode}-1`, 'Person'],
-								['UPDATE', `${personCode}-3`, 'Person']
+								['UPDATE', `${personCode}-3`, 'Person'],
 							);
 						});
 
 						it('can delete multiple specific relationships of different kinds', async () => {
-							const [team, person, group] = await sandbox.createNodes(
+							const [
+								team,
+								person,
+								group,
+							] = await sandbox.createNodes(
 								['Team', teamCode],
 								['Person', personCode],
-								['Group', groupCode]
+								['Group', groupCode],
 							);
 							await sandbox.connectNodes(
 								[team, 'HAS_TECH_LEAD', person],
-								[group, 'HAS_TEAM', team]
+								[group, 'HAS_TEAM', team],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									'!techLeads': [personCode],
-									'!parentGroup': groupCode
-								}
+									'!parentGroup': groupCode,
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
 								['UPDATE', personCode, 'Person'],
-								['UPDATE', groupCode, 'Group']
+								['UPDATE', groupCode, 'Group'],
 							);
 						});
 						it('leaves relationships in the opposite direction unaffected', async () => {
-							const [team1, team2, team3] = await sandbox.createNodes(
+							const [
+								team1,
+								team2,
+								team3,
+							] = await sandbox.createNodes(
 								['Team', `${teamCode}-1`],
 								['Team', `${teamCode}-2`],
-								['Team', `${teamCode}-3`]
+								['Team', `${teamCode}-3`],
 							);
 							await sandbox.connectNodes(
 								[team1, 'HAS_TEAM', team2],
-								[team2, 'HAS_TEAM', team3]
+								[team2, 'HAS_TEAM', team3],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
-								{ '!subTeams': [`${teamCode}-3`] }
+								{ '!subTeams': [`${teamCode}-3`] },
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: `${teamCode}-2`,
-									parentTeam: `${teamCode}-1`
-								})
+									parentTeam: `${teamCode}-1`,
+								}),
 							);
 
 							await testNode(
 								'Team',
 								`${teamCode}-2`,
 								sandbox.withMeta({
-									code: `${teamCode}-2`
+									code: `${teamCode}-2`,
 								}),
 								[
 									{
 										type: 'HAS_TEAM',
 										direction: 'incoming',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Team',
-										props: sandbox.withMeta({ code: `${teamCode}-1` })
-									}
-								]
+										props: sandbox.withMeta({
+											code: `${teamCode}-1`,
+										}),
+									},
+								],
 							);
 							sandbox.expectEvents(
 								['UPDATE', `${teamCode}-3`, 'Team'],
-								['UPDATE', `${teamCode}-2`, 'Team']
+								['UPDATE', `${teamCode}-2`, 'Team'],
 							);
 						});
 						it('can add and remove relationships of the same type at the same time', async () => {
 							const [team, person1] = await sandbox.createNodes(
 								['Team', teamCode],
 								['Person', `${personCode}-1`],
-								['Person', `${personCode}-2`]
+								['Person', `${personCode}-2`],
 							);
-							await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person1]);
+							await sandbox.connectNodes([
+								team,
+								'HAS_TECH_LEAD',
+								person1,
+							]);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									'!techLeads': [`${personCode}-1`],
-									techLeads: [`${personCode}-2`]
-								}
+									techLeads: [`${personCode}-2`],
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [`${personCode}-2`]
-								})
+									techLeads: [`${personCode}-2`],
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withCreateMeta({})
+										props: sandbox.withCreateMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: `${personCode}-2` })
-									}
-								]
+										props: sandbox.withMeta({
+											code: `${personCode}-2`,
+										}),
+									},
+								],
 							);
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
 								['UPDATE', `${personCode}-1`, 'Person'],
-								['UPDATE', `${personCode}-2`, 'Person']
+								['UPDATE', `${personCode}-2`, 'Person'],
 							);
 						});
 						it('errors if deleting and adding the same relationship to the same record', async () => {
 							await sandbox.createNodes(
 								['Team', teamCode],
-								['Person', personCode]
+								['Person', personCode],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									techLeads: [personCode],
-									'!techLeads': [personCode]
-								}
+									'!techLeads': [personCode],
+								},
 							).expect(
 								400,
-								/Trying to add and remove a relationship to a record at the same time/
+								/Trying to add and remove a relationship to a record at the same time/,
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 							sandbox.expectNoEvents();
 						});
@@ -515,237 +551,279 @@ describe('v2 - node PATCH', () => {
 							await sandbox.createNode('Team', teamCode);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ techLeads: null }
+								{ techLeads: null },
 							).expect(
 								200,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 							sandbox.expectNoEvents();
 						});
 
 						it('can delete entire relationship sets', async () => {
-							const [team, person, group] = await sandbox.createNodes(
+							const [
+								team,
+								person,
+								group,
+							] = await sandbox.createNodes(
 								['Team', teamCode],
 								['Person', personCode],
-								['Group', groupCode]
+								['Group', groupCode],
 							);
 							await sandbox.connectNodes(
 								// tests incoming and outgoing relationships
 								[group, 'HAS_TEAM', team],
-								[team, 'HAS_TECH_LEAD', person]
+								[team, 'HAS_TECH_LEAD', person],
 							);
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ techLeads: null, parentGroup: null }
+								{ techLeads: null, parentGroup: null },
 							).expect(
 								200,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
-								})
+									code: teamCode,
+								}),
 							);
 
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
 								['UPDATE', personCode, 'Person'],
-								['UPDATE', groupCode, 'Group']
+								['UPDATE', groupCode, 'Group'],
 							);
 						});
 
 						it('leaves relationships in other direction and of other types untouched when deleting', async () => {
-							const [team1, team2, team3, person] = await sandbox.createNodes(
+							const [
+								team1,
+								team2,
+								team3,
+								person,
+							] = await sandbox.createNodes(
 								['Team', `${teamCode}-1`],
 								['Team', `${teamCode}-2`],
 								['Team', `${teamCode}-3`],
-								['Person', personCode]
+								['Person', personCode],
 							);
-							await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
-							await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
-							await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
+							await sandbox.connectNodes([
+								team1,
+								'HAS_TEAM',
+								team2,
+							]);
+							await sandbox.connectNodes([
+								team2,
+								'HAS_TEAM',
+								team3,
+							]);
+							await sandbox.connectNodes([
+								team2,
+								'HAS_TECH_LEAD',
+								person,
+							]);
 
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
 								{
-									subTeams: null
-								}
+									subTeams: null,
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: `${teamCode}-2`,
 									parentTeam: `${teamCode}-1`,
-									techLeads: [personCode]
-								})
+									techLeads: [personCode],
+								}),
 							);
 
 							await testNode(
 								'Team',
 								`${teamCode}-2`,
 								sandbox.withMeta({
-									code: `${teamCode}-2`
+									code: `${teamCode}-2`,
 								}),
 								[
 									{
 										type: 'HAS_TEAM',
 										direction: 'incoming',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Team',
-										props: sandbox.withMeta({ code: `${teamCode}-1` })
-									}
+										props: sandbox.withMeta({
+											code: `${teamCode}-1`,
+										}),
+									},
 								],
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withMeta({})
+										props: sandbox.withMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: personCode })
-									}
-								]
+										props: sandbox.withMeta({
+											code: personCode,
+										}),
+									},
+								],
 							);
 
 							sandbox.expectEvents(
 								['UPDATE', `${teamCode}-2`, 'Team'],
-								['UPDATE', `${teamCode}-3`, 'Team']
+								['UPDATE', `${teamCode}-3`, 'Team'],
 							);
 						});
 					});
-				})
+				}),
 			);
 		});
 		describe('creating', () => {
 			it('errors if updating relationships without relationshipAction query string', async () => {
 				await sandbox.createNode('Team', teamCode);
 				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					techLeads: [personCode]
+					techLeads: [personCode],
 				}).expect(
 					400,
-					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/
+					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
 
-				await testNode('Team', teamCode, sandbox.withMeta({ code: teamCode }));
+				await testNode(
+					'Team',
+					teamCode,
+					sandbox.withMeta({ code: teamCode }),
+				);
 				sandbox.expectNoEvents();
 			});
 
 			describe('__-to-one relationships', () => {
 				['merge', 'replace'].forEach(action => {
 					it('accept a string', async () => {
-						await sandbox.createNodes(['Team', teamCode], ['Group', groupCode]);
+						await sandbox.createNodes(
+							['Team', teamCode],
+							['Group', groupCode],
+						);
 						await authenticatedPatch(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
-								parentGroup: groupCode
-							}
+								parentGroup: groupCode,
+							},
 						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
-								parentGroup: groupCode
-							})
+								parentGroup: groupCode,
+							}),
 						);
 
 						await testNode(
 							'Team',
 							teamCode,
 							sandbox.withMeta({
-								code: teamCode
+								code: teamCode,
 							}),
 							[
 								{
 									type: 'HAS_TEAM',
 									direction: 'incoming',
-									props: sandbox.withCreateMeta({})
+									props: sandbox.withCreateMeta({}),
 								},
 								{
 									type: 'Group',
-									props: sandbox.withMeta({ code: groupCode })
-								}
-							]
+									props: sandbox.withMeta({
+										code: groupCode,
+									}),
+								},
+							],
 						);
 
 						sandbox.expectEvents(
 							['UPDATE', teamCode, 'Team'],
-							['UPDATE', groupCode, 'Group']
+							['UPDATE', groupCode, 'Group'],
 						);
 					});
 					it('accept an array of length one', async () => {
-						await sandbox.createNodes(['Team', teamCode], ['Group', groupCode]);
+						await sandbox.createNodes(
+							['Team', teamCode],
+							['Group', groupCode],
+						);
 						await authenticatedPatch(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [groupCode]
-							}
+								parentGroup: [groupCode],
+							},
 						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
-								parentGroup: groupCode
-							})
+								parentGroup: groupCode,
+							}),
 						);
 
 						await testNode(
 							'Team',
 							teamCode,
 							sandbox.withMeta({
-								code: teamCode
+								code: teamCode,
 							}),
 							[
 								{
 									type: 'HAS_TEAM',
 									direction: 'incoming',
-									props: sandbox.withCreateMeta({})
+									props: sandbox.withCreateMeta({}),
 								},
 								{
 									type: 'Group',
-									props: sandbox.withMeta({ code: groupCode })
-								}
-							]
+									props: sandbox.withMeta({
+										code: groupCode,
+									}),
+								},
+							],
 						);
 
 						sandbox.expectEvents(
 							['UPDATE', teamCode, 'Team'],
-							['UPDATE', groupCode, 'Group']
+							['UPDATE', groupCode, 'Group'],
 						);
 					});
 					it('error if trying to write multiple relationships', async () => {
 						await sandbox.createNodes(
 							['Team', teamCode],
 							['Group', `${groupCode}-1`],
-							['Group', `${groupCode}-2`]
+							['Group', `${groupCode}-2`],
 						);
 						await authenticatedPatch(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [`${groupCode}-1`, `${groupCode}-2`]
-							}
+								parentGroup: [
+									`${groupCode}-1`,
+									`${groupCode}-2`,
+								],
+							},
 						).expect(400, /Can only have one parentGroup/);
 
 						await testNode(
 							'Team',
 							teamCode,
 							sandbox.withMeta({
-								code: teamCode
-							})
+								code: teamCode,
+							}),
 						);
 
 						sandbox.expectNoEvents();
@@ -755,191 +833,205 @@ describe('v2 - node PATCH', () => {
 						const [team, group1] = await sandbox.createNodes(
 							['Team', teamCode],
 							['Group', `${groupCode}-1`],
-							['Group', `${groupCode}-2`]
+							['Group', `${groupCode}-2`],
 						);
 
 						await sandbox.connectNodes(group1, 'HAS_TEAM', team);
 						await authenticatedPatch(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [`${groupCode}-2`]
-							}
+								parentGroup: [`${groupCode}-2`],
+							},
 						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
-								parentGroup: `${groupCode}-2`
-							})
+								parentGroup: `${groupCode}-2`,
+							}),
 						);
 
 						await testNode(
 							'Team',
 							teamCode,
 							sandbox.withMeta({
-								code: teamCode
+								code: teamCode,
 							}),
 							[
 								{
 									type: 'HAS_TEAM',
 									direction: 'incoming',
-									props: sandbox.withCreateMeta({})
+									props: sandbox.withCreateMeta({}),
 								},
 								{
 									type: 'Group',
-									props: sandbox.withMeta({ code: `${groupCode}-2` })
-								}
-							]
+									props: sandbox.withMeta({
+										code: `${groupCode}-2`,
+									}),
+								},
+							],
 						);
 
 						sandbox.expectEvents(
 							['UPDATE', teamCode, 'Team'],
 							['UPDATE', `${groupCode}-1`, 'Group'],
-							['UPDATE', `${groupCode}-2`, 'Group']
+							['UPDATE', `${groupCode}-2`, 'Group'],
 						);
 					});
 
 					it.skip('not replace existing relationship in opposite direction', async () => {
-						console.log(
-							"schema doesn't support any one-to-one relationships in both directions, so not possible to test this yet"
-						);
+						// schema doesn't support any one-to-one relationships in both directions, so not possible to test this yet,
 					});
 				});
 			});
 
 			describe('merge', () => {
 				it('can merge with empty relationship set if relationshipAction=merge', async () => {
-					await sandbox.createNodes(['Team', teamCode], ['Person', personCode]);
+					await sandbox.createNodes(
+						['Team', teamCode],
+						['Person', personCode],
+					);
 					await authenticatedPatch(
 						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
 						{
-							techLeads: [personCode]
-						}
+							techLeads: [personCode],
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
-							techLeads: [personCode]
-						})
+							techLeads: [personCode],
+						}),
 					);
 
 					await testNode(
 						'Team',
 						teamCode,
 						sandbox.withMeta({
-							code: teamCode
+							code: teamCode,
 						}),
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: personCode })
-							}
-						]
+								props: sandbox.withMeta({ code: personCode }),
+							},
+						],
 					);
 					sandbox.expectEvents(
 						['UPDATE', teamCode, 'Team'],
-						['UPDATE', personCode, 'Person']
+						['UPDATE', personCode, 'Person'],
 					);
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
 					const [team, person1] = await sandbox.createNodes(
 						['Team', teamCode],
 						['Person', `${personCode}-1`],
-						['Person', `${personCode}-2`]
+						['Person', `${personCode}-2`],
 					);
-					await sandbox.connectNodes(team, ['HAS_TECH_LEAD'], person1);
+					await sandbox.connectNodes(
+						team,
+						['HAS_TECH_LEAD'],
+						person1,
+					);
 
 					await authenticatedPatch(
 						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
 						{
-							techLeads: [`${personCode}-2`]
-						}
+							techLeads: [`${personCode}-2`],
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
-							techLeads: [`${personCode}-2`, `${personCode}-1`]
-						})
+							techLeads: [`${personCode}-2`, `${personCode}-1`],
+						}),
 					);
 
 					await testNode(
 						'Team',
 						teamCode,
 						sandbox.withMeta({
-							code: teamCode
+							code: teamCode,
 						}),
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withMeta({})
+								props: sandbox.withMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: `${personCode}-1` })
-							}
+								props: sandbox.withMeta({
+									code: `${personCode}-1`,
+								}),
+							},
 						],
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: `${personCode}-2` })
-							}
-						]
+								props: sandbox.withMeta({
+									code: `${personCode}-2`,
+								}),
+							},
+						],
 					);
 					sandbox.expectEvents(
 						['UPDATE', teamCode, 'Team'],
-						['UPDATE', `${personCode}-2`, 'Person']
+						['UPDATE', `${personCode}-2`, 'Person'],
 					);
 				});
 			});
 
 			describe('replace', () => {
 				it('can replace an empty relationship set if relationshipAction=replace', async () => {
-					await sandbox.createNodes(['Team', teamCode], ['Person', personCode]);
+					await sandbox.createNodes(
+						['Team', teamCode],
+						['Person', personCode],
+					);
 					await authenticatedPatch(
 						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
 						{
-							techLeads: [personCode]
-						}
+							techLeads: [personCode],
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
-							techLeads: [personCode]
-						})
+							techLeads: [personCode],
+						}),
 					);
 
 					await testNode(
 						'Team',
 						teamCode,
 						sandbox.withMeta({
-							code: teamCode
+							code: teamCode,
 						}),
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: personCode })
-							}
-						]
+								props: sandbox.withMeta({ code: personCode }),
+							},
+						],
 					);
 
 					sandbox.expectEvents(
 						['UPDATE', teamCode, 'Team'],
-						['UPDATE', personCode, 'Person']
+						['UPDATE', personCode, 'Person'],
 					);
 				});
 
@@ -947,45 +1039,51 @@ describe('v2 - node PATCH', () => {
 					const [team, person1] = await sandbox.createNodes(
 						['Team', teamCode],
 						['Person', `${personCode}-1`],
-						['Person', `${personCode}-2`]
+						['Person', `${personCode}-2`],
 					);
-					await sandbox.connectNodes(team, ['HAS_TECH_LEAD'], person1);
+					await sandbox.connectNodes(
+						team,
+						['HAS_TECH_LEAD'],
+						person1,
+					);
 
 					await authenticatedPatch(
 						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
 						{
-							techLeads: [`${personCode}-2`]
-						}
+							techLeads: [`${personCode}-2`],
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
-							techLeads: [`${personCode}-2`]
-						})
+							techLeads: [`${personCode}-2`],
+						}),
 					);
 
 					await testNode(
 						'Team',
 						teamCode,
 						sandbox.withMeta({
-							code: teamCode
+							code: teamCode,
 						}),
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: `${personCode}-2` })
-							}
-						]
+								props: sandbox.withMeta({
+									code: `${personCode}-2`,
+								}),
+							},
+						],
 					);
 					sandbox.expectEvents(
 						['UPDATE', teamCode, 'Team'],
 						['UPDATE', `${personCode}-1`, 'Person'],
-						['UPDATE', `${personCode}-2`, 'Person']
+						['UPDATE', `${personCode}-2`, 'Person'],
 					);
 				});
 
@@ -994,70 +1092,78 @@ describe('v2 - node PATCH', () => {
 						['Team', `${teamCode}-1`],
 						['Team', `${teamCode}-2`],
 						['Team', `${teamCode}-3`],
-						['Person', personCode]
+						['Person', personCode],
 					);
 					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
-					await sandbox.connectNodes([team2, 'HAS_TECH_LEAD', person]);
+					await sandbox.connectNodes([
+						team2,
+						'HAS_TECH_LEAD',
+						person,
+					]);
 
 					await authenticatedPatch(
 						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
 						{
-							subTeams: [`${teamCode}-3`]
-						}
+							subTeams: [`${teamCode}-3`],
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: `${teamCode}-2`,
 							subTeams: [`${teamCode}-3`],
 							parentTeam: `${teamCode}-1`,
-							techLeads: [personCode]
-						})
+							techLeads: [personCode],
+						}),
 					);
 
 					await testNode(
 						'Team',
 						`${teamCode}-2`,
 						sandbox.withMeta({
-							code: `${teamCode}-2`
+							code: `${teamCode}-2`,
 						}),
 						[
 							{
 								type: 'HAS_TEAM',
 								direction: 'incoming',
-								props: sandbox.withMeta({})
+								props: sandbox.withMeta({}),
 							},
 							{
 								type: 'Team',
-								props: sandbox.withMeta({ code: `${teamCode}-1` })
-							}
+								props: sandbox.withMeta({
+									code: `${teamCode}-1`,
+								}),
+							},
 						],
 						[
 							{
 								type: 'HAS_TEAM',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Team',
-								props: sandbox.withMeta({ code: `${teamCode}-3` })
-							}
+								props: sandbox.withMeta({
+									code: `${teamCode}-3`,
+								}),
+							},
 						],
 						[
 							{
 								type: 'HAS_TECH_LEAD',
 								direction: 'outgoing',
-								props: sandbox.withMeta({})
+								props: sandbox.withMeta({}),
 							},
 							{
 								type: 'Person',
-								props: sandbox.withMeta({ code: personCode })
-							}
-						]
+								props: sandbox.withMeta({ code: personCode }),
+							},
+						],
 					);
 
 					sandbox.expectEvents(
 						['UPDATE', `${teamCode}-2`, 'Team'],
-						['UPDATE', `${teamCode}-3`, 'Team']
+						['UPDATE', `${teamCode}-3`, 'Team'],
 					);
 				});
 
@@ -1065,7 +1171,7 @@ describe('v2 - node PATCH', () => {
 					const [team1, team2, team3] = await sandbox.createNodes(
 						['Team', `${teamCode}-1`],
 						['Team', `${teamCode}-2`],
-						['Team', `${teamCode}-3`]
+						['Team', `${teamCode}-3`],
 					);
 					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
 					await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
@@ -1074,50 +1180,54 @@ describe('v2 - node PATCH', () => {
 						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
 						{
 							subTeams: [`${teamCode}-1`],
-							parentTeam: `${teamCode}-3`
-						}
+							parentTeam: `${teamCode}-3`,
+						},
 					).expect(
 						200,
 						sandbox.withMeta({
 							code: `${teamCode}-2`,
 							subTeams: [`${teamCode}-1`],
-							parentTeam: `${teamCode}-3`
-						})
+							parentTeam: `${teamCode}-3`,
+						}),
 					);
 
 					await testNode(
 						'Team',
 						`${teamCode}-2`,
 						sandbox.withMeta({
-							code: `${teamCode}-2`
+							code: `${teamCode}-2`,
 						}),
 						[
 							{
 								type: 'HAS_TEAM',
 								direction: 'incoming',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Team',
-								props: sandbox.withMeta({ code: `${teamCode}-3` })
-							}
+								props: sandbox.withMeta({
+									code: `${teamCode}-3`,
+								}),
+							},
 						],
 						[
 							{
 								type: 'HAS_TEAM',
 								direction: 'outgoing',
-								props: sandbox.withCreateMeta({})
+								props: sandbox.withCreateMeta({}),
 							},
 							{
 								type: 'Team',
-								props: sandbox.withMeta({ code: `${teamCode}-1` })
-							}
-						]
+								props: sandbox.withMeta({
+									code: `${teamCode}-1`,
+								}),
+							},
+						],
 					);
 					sandbox.expectEvents(
 						['UPDATE', `${teamCode}-1`, 'Team'],
 						['UPDATE', `${teamCode}-2`, 'Team'],
-						['UPDATE', `${teamCode}-3`, 'Team']
+						['UPDATE', `${teamCode}-3`, 'Team'],
 					);
 				});
 			});
@@ -1129,8 +1239,8 @@ describe('v2 - node PATCH', () => {
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
-									techLeads: [personCode]
-								}
+									techLeads: [personCode],
+								},
 							).expect(400, /Missing related node/);
 							sandbox.expectNoEvents();
 						});
@@ -1140,37 +1250,39 @@ describe('v2 - node PATCH', () => {
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
 								{
-									techLeads: [personCode]
-								}
+									techLeads: [personCode],
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [personCode]
-								})
+									techLeads: [personCode],
+								}),
 							);
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withCreateMeta({})
+										props: sandbox.withCreateMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withCreateMeta({ code: personCode })
-									}
-								]
+										props: sandbox.withCreateMeta({
+											code: personCode,
+										}),
+									},
+								],
 							);
 
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
-								['CREATE', personCode, 'Person']
+								['CREATE', personCode, 'Person'],
 							);
 						});
 
@@ -1180,37 +1292,39 @@ describe('v2 - node PATCH', () => {
 							await authenticatedPatch(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
 								{
-									techLeads: [personCode]
-								}
+									techLeads: [personCode],
+								},
 							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
-									techLeads: [personCode]
-								})
+									techLeads: [personCode],
+								}),
 							);
 							await testNode(
 								'Team',
 								teamCode,
 								sandbox.withMeta({
-									code: teamCode
+									code: teamCode,
 								}),
 								[
 									{
 										type: 'HAS_TECH_LEAD',
 										direction: 'outgoing',
-										props: sandbox.withCreateMeta({})
+										props: sandbox.withCreateMeta({}),
 									},
 									{
 										type: 'Person',
-										props: sandbox.withMeta({ code: personCode })
-									}
-								]
+										props: sandbox.withMeta({
+											code: personCode,
+										}),
+									},
+								],
 							);
 
 							sandbox.expectEvents(
 								['UPDATE', teamCode, 'Team'],
-								['UPDATE', personCode, 'Person']
+								['UPDATE', personCode, 'Person'],
 							);
 						});
 					});
@@ -1221,13 +1335,16 @@ describe('v2 - node PATCH', () => {
 
 	describe('diffing before writes', () => {
 		it("doesn't write if no real property changes detected", async () => {
-			await sandbox.createNode('Team', { code: teamCode, name: 'name-1' });
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name-1',
+			});
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
 				{
-					name: 'name-1'
-				}
+					name: 'name-1',
+				},
 			).expect(200);
 
 			dbQuerySpy().args.forEach(args => {
@@ -1239,54 +1356,54 @@ describe('v2 - node PATCH', () => {
 		it("doesn't write if no real relationship changes detected in replace mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
-				['Person', personCode]
+				['Person', personCode],
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
-				{ techLeads: [personCode] }
+				{ techLeads: [personCode] },
 			).expect(200);
 
-			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
-				false
-			);
+			expect(
+				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
+			).toBe(false);
 			sandbox.expectNoEvents();
 		});
 
 		it("doesn't write if no real relationship changes detected in merge mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
-				['Person', personCode]
+				['Person', personCode],
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ techLeads: [personCode] }
+				{ techLeads: [personCode] },
 			).expect(200);
 
-			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
-				false
-			);
+			expect(
+				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
+			).toBe(false);
 			sandbox.expectNoEvents();
 		});
 
 		it('writes if property but no relationship changes detected', async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
-				['Person', personCode]
+				['Person', personCode],
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: 'new-name', techLeads: [personCode] }
+				{ name: 'new-name', techLeads: [personCode] },
 			).expect(200);
 
-			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
-				true
-			);
+			expect(
+				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
+			).toBe(true);
 			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 		});
 
@@ -1294,21 +1411,21 @@ describe('v2 - node PATCH', () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', { code: teamCode, name: 'name' }],
 				['Person', `${personCode}-1`],
-				['Person', `${personCode}-2`]
+				['Person', `${personCode}-2`],
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: 'name', techLeads: [`${personCode}-2`] }
+				{ name: 'name', techLeads: [`${personCode}-2`] },
 			).expect(200);
 
-			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
-				true
-			);
+			expect(
+				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
+			).toBe(true);
 			sandbox.expectEvents(
 				['UPDATE', teamCode, 'Team'],
-				['UPDATE', `${personCode}-2`, 'Person']
+				['UPDATE', `${personCode}-2`, 'Person'],
 			);
 		});
 
@@ -1317,12 +1434,12 @@ describe('v2 - node PATCH', () => {
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: null }
+				{ name: null },
 			).expect(200);
 
-			expect(dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))).toBe(
-				true
-			);
+			expect(
+				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
+			).toBe(true);
 			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 		});
 
@@ -1331,26 +1448,28 @@ describe('v2 - node PATCH', () => {
 				const [team, person1, person2] = await sandbox.createNodes(
 					['Team', teamCode],
 					['Person', `${personCode}-1`],
-					['Person', `${personCode}-2`]
+					['Person', `${personCode}-2`],
 				);
 				await sandbox.connectNodes(
 					[team, 'HAS_TECH_LEAD', person1],
-					[team, 'HAS_TECH_LEAD', person2]
+					[team, 'HAS_TECH_LEAD', person2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
 				await authenticatedPatch(
 					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
 					{
-						techLeads: [`${personCode}-1`]
-					}
+						techLeads: [`${personCode}-1`],
+					},
 				).expect(200);
 
 				expect(
-					dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))
+					dbQuerySpy().args.some(args =>
+						/MERGE|CREATE/.test(args[0]),
+					),
 				).toBe(true);
 				sandbox.expectEvents(
 					['UPDATE', teamCode, 'Team'],
-					['UPDATE', `${personCode}-2`, 'Person']
+					['UPDATE', `${personCode}-2`, 'Person'],
 				);
 			});
 
@@ -1358,22 +1477,24 @@ describe('v2 - node PATCH', () => {
 				const [team, person1, person2] = await sandbox.createNodes(
 					['Team', teamCode],
 					['Person', `${personCode}-1`],
-					['Person', `${personCode}-2`]
+					['Person', `${personCode}-2`],
 				);
 				await sandbox.connectNodes(
 					[team, 'HAS_TECH_LEAD', person1],
-					[team, 'HAS_TECH_LEAD', person2]
+					[team, 'HAS_TECH_LEAD', person2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
 				await authenticatedPatch(
 					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 					{
-						techLeads: [`${personCode}-1`]
-					}
+						techLeads: [`${personCode}-1`],
+					},
 				).expect(200);
 
 				expect(
-					dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0]))
+					dbQuerySpy().args.some(args =>
+						/MERGE|CREATE/.test(args[0]),
+					),
 				).toBe(false);
 				sandbox.expectNoEvents();
 			});

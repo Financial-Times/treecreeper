@@ -1,6 +1,7 @@
 const cluster = require('cluster');
 const express = require('express');
 require('express-async-errors');
+const metrics = require('next-metrics');
 const graphiql = require('./routes/graphiql');
 const graphql = require('./routes/graphql');
 const v2 = require('./routes/v2');
@@ -8,17 +9,16 @@ const { initConstraints } = require('./init-db');
 const health = require('./health');
 const {
 	middleware: contextMiddleware,
-	logger
+	logger,
 } = require('./lib/request-context');
 
 const requestId = require('./middleware/request-id');
 const {
 	errorToErrors,
 	notFound,
-	uncaughtError
+	uncaughtError,
 } = require('./middleware/errors');
 
-const metrics = require('next-metrics');
 const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
@@ -32,7 +32,7 @@ const createApp = () => {
 
 	// metrics should be one of the first things as needs to be applied before any other middleware executes
 	metrics.init({
-		flushEvery: 40000
+		flushEvery: 40000,
 	});
 
 	app.use((req, res, next) => {

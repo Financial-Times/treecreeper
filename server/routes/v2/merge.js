@@ -27,7 +27,7 @@ module.exports = async input => {
 		clientId,
 		clientUserId,
 		requestId,
-		body: { type, sourceCode, destinationCode }
+		body: { type, sourceCode, destinationCode },
 	} = input;
 
 	// As the actual merge is carried out by some apoc procedure magic, we
@@ -37,28 +37,28 @@ module.exports = async input => {
 		sourceNode,
 		destinationNode,
 		sourceRels,
-		destinationRels
+		destinationRels,
 	] = await Promise.all([
 		executeQuery(
 			`MATCH (node:${type} { code: $sourceCode })
 			RETURN node`,
-			{ sourceCode }
+			{ sourceCode },
 		),
 		executeQuery(
 			`MATCH (node:${type} { code: $destinationCode })
 			RETURN node`,
-			{ destinationCode }
+			{ destinationCode },
 		),
 		executeQuery(
 			`MATCH (node:${type} { code: $sourceCode })-[relationship]-(related)
 			RETURN node, relationship, related`,
-			{ sourceCode }
+			{ sourceCode },
 		),
 		executeQuery(
 			`MATCH (node:${type} { code: $destinationCode })-[relationship]-(related)
 			RETURN node, relationship, related`,
-			{ destinationCode }
-		)
+			{ destinationCode },
+		),
 	]);
 
 	if (!sourceNode.records.length) {
@@ -66,7 +66,10 @@ module.exports = async input => {
 	}
 
 	if (!destinationNode.records.length) {
-		throw httpErrors(404, `${type} record missing for \`${destinationCode}\``);
+		throw httpErrors(
+			404,
+			`${type} record missing for \`${destinationCode}\``,
+		);
 	}
 
 	const result = await executeQuery(
@@ -77,10 +80,10 @@ module.exports = async input => {
 	MATCH (node)-[relationship]-(related)
 	RETURN node, relationship, related
 	`,
-		{ sourceCode, destinationCode }
+		{ sourceCode, destinationCode },
 	);
 
-	const { deletions } = result.records.reduce(
+	const { deletions: deletedRelationships } = result.records.reduce(
 		({ relDirs, deletions }, record) => {
 			const relName = record.get('relationship').type;
 			const direction = record
@@ -111,14 +114,14 @@ module.exports = async input => {
 			}
 			return { relDirs, deletions };
 		},
-		{ relDirs: {}, deletions: [] }
+		{ relDirs: {}, deletions: [] },
 	);
 
-	if (deletions.length) {
+	if (deletedRelationships.length) {
 		await executeQuery(
 			`MATCH ()-[r]-()
-			WHERE id(r) IN [${deletions.join(',')}]
-			DELETE r`
+			WHERE id(r) IN [${deletedRelationships.join(',')}]
+			DELETE r`,
 		);
 	}
 
@@ -129,12 +132,12 @@ module.exports = async input => {
 		sourceNode,
 		destinationNode,
 		sourceRels,
-		destinationRels
+		destinationRels,
 	);
 
 	return executeQuery(
 		`MATCH (node:${type} {code: $destinationCode})
 		${RETURN_NODE_WITH_RELS}`,
-		{ destinationCode }
+		{ destinationCode },
 	).then(constructOutput.bind(null, type));
 };

@@ -7,7 +7,7 @@ const generateTeamData = () => {
 		HAS_TEAM: { direction: 'outgoing', nodeType: 'Team' },
 		HAS_TECH_LEAD: { direction: 'outgoing', nodeType: 'Person' },
 		SUPPORTED_BY: { direction: 'incoming', nodeType: 'System' },
-		DELIVERED_BY: { direction: 'incoming', nodeType: 'System' }
+		DELIVERED_BY: { direction: 'incoming', nodeType: 'System' },
 	};
 
 	const generateDataArray = [];
@@ -17,7 +17,9 @@ const generateTeamData = () => {
 		const code = faker.lorem.word();
 		const nodeCode = faker.lorem.word();
 		const relationshipName =
-			relationshipType[Math.floor(Math.random() * relationshipType.length)];
+			relationshipType[
+				Math.floor(Math.random() * relationshipType.length)
+			];
 		generateDataArray.push({
 			primaryNode: 'Team',
 			code,
@@ -29,7 +31,7 @@ const generateTeamData = () => {
 			relationshipName,
 			direction: relationship[relationshipName].direction,
 			nodeType: relationship[relationshipName].nodeType,
-			nodeCode
+			nodeCode,
 		});
 	}
 	return generateDataArray;

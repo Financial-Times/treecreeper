@@ -7,10 +7,14 @@ const { getNamespacedSupertest } = require('./supertest');
 const dbConnection = require('./db-connection');
 
 const stubKinesis = () => {
-	jest.spyOn(EventLogWriter.prototype, 'sendEvent').mockImplementation(data => {
-		logger.debug('Event log stub sendEvent called', { event: data.event });
-		return Promise.resolve();
-	});
+	jest.spyOn(EventLogWriter.prototype, 'sendEvent').mockImplementation(
+		data => {
+			logger.debug('Event log stub sendEvent called', {
+				event: data.event,
+			});
+			return Promise.resolve();
+		},
+	);
 
 	return EventLogWriter.prototype.sendEvent;
 };
@@ -47,7 +51,7 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 					code,
 					requestId: `${namespace}-request`,
 					clientId: `${namespace}-client`,
-					clientUserId: `${namespace}-user`
+					clientUserId: `${namespace}-user`,
 				});
 			});
 		};
@@ -68,8 +72,8 @@ const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
 module.exports = Object.assign(
 	{
 		stubKinesis,
-		setupMocks
+		setupMocks,
 	},
 	dbConnection,
-	testDataCheckers
+	testDataCheckers,
 );

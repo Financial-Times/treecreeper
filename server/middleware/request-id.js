@@ -1,9 +1,9 @@
 const uuid = require('uuid/v1');
-const { setContext } = require('../lib/request-context');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const { setContext } = require('../lib/request-context');
 
-const REQUEST_ID_RX = /^[a-z\d][a-z\d\-]+[a-z\d]$/i;
+const REQUEST_ID_RX = /^[a-z\d][a-z\d-]+[a-z\d]$/i;
 
 module.exports = (req, res, next) => {
 	res.locals.requestId = req.get('x-request-id') || uuid();
@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
 		throw httpErrors(
 			400,
 			stripIndents`Invalid request id \`${res.locals.requestId}\`.
-		Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`
+		Must be a string containing only a-z, 0-9 and -, not beginning or ending with -.`,
 		);
 	}
 	next();

@@ -2,12 +2,12 @@ const supertest = require('supertest');
 
 let cache;
 
-const API_KEY = process.env.API_KEY;
+const { API_KEY } = process.env;
 
-supertest.Test.prototype.auth = function(clientId) {
+supertest.Test.prototype.auth = function auth(clientId) {
 	return this.set('API_KEY', API_KEY).set(
 		'client-id',
-		clientId || 'test-client-id'
+		clientId || 'test-client-id',
 	);
 };
 
@@ -27,24 +27,19 @@ const request = (app, { useCached = true } = {}) => {
 	return instance;
 };
 
-const originalSend = supertest.Test.prototype.send;
-
-const getNamespacedSupertest = namespace => (...args) => {
-	const req = request(...args);
+const getNamespacedSupertest = namespace => (...requestArgs) => {
+	const req = request(...requestArgs);
 
 	['post', 'patch', 'get', 'delete', 'put'].forEach(methodName => {
 		const method = req[methodName].bind(req);
-		req[methodName] = function(...args) {
-			const test = method(...args);
+		req[methodName] = function(...methodArgs) {
+			const test = method(...methodArgs);
 
-			test.namespacedAuth = function() {
+			test.namespacedAuth = function namespacedAuth() {
 				return this.set('API_KEY', API_KEY)
 					.set('client-id', `${namespace}-client`)
 					.set('client-user-id', `${namespace}-user`)
 					.set('x-request-id', `${namespace}-request`);
-			};
-			test.send = function(json) {
-				return originalSend.bind(this)(json);
 			};
 
 			return test;

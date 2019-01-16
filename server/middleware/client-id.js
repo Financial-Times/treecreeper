@@ -1,13 +1,22 @@
-const { setContext } = require('../lib/request-context');
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const { setContext } = require('../lib/request-context');
 
-const CLIENT_ID_RX = /^[a-z\d][a-z\d\-\.]*[a-z\d]$/;
-const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d\-\.]*[a-z\d]$/;
+const CLIENT_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
+const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
+
+const validateHeader = (header, errorMessage, expectedValueFormat) => {
+	if (!expectedValueFormat.test(header)) {
+		throw httpErrors(400, errorMessage);
+	}
+};
 
 module.exports = (req, res, next) => {
 	if (!req.get('client-id') && !req.get('client-user-id')) {
-		throw httpErrors(400, 'A client-id or client-user-id header is required');
+		throw httpErrors(
+			400,
+			'A client-id or client-user-id header is required',
+		);
 	}
 
 	res.locals.clientId = req.get('client-id');
@@ -30,13 +39,11 @@ module.exports = (req, res, next) => {
 			It does not appear to be an LDAP user, expecting firstname.surname`;
 
 		setContext('clientUserId', res.locals.clientUserId);
-		validateHeader(res.locals.clientUserId, errorMessage, CLIENT_USER_ID_RX);
+		validateHeader(
+			res.locals.clientUserId,
+			errorMessage,
+			CLIENT_USER_ID_RX,
+		);
 	}
 	next();
 };
-
-function validateHeader(header, errorMessage, expectedValueFormat) {
-	if (!expectedValueFormat.test(header)) {
-		throw httpErrors(400, errorMessage);
-	}
-}

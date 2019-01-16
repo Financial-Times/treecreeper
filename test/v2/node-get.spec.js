@@ -11,7 +11,7 @@ describe('v2 - node GET', () => {
 	it('gets node without relationships', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
-			name: 'name1'
+			name: 'name1',
 		});
 		return sandbox
 			.request(app)
@@ -21,8 +21,8 @@ describe('v2 - node GET', () => {
 				200,
 				sandbox.withMeta({
 					code: `${namespace}-team`,
-					name: 'name1'
-				})
+					name: 'name1',
+				}),
 			);
 	});
 
@@ -30,12 +30,12 @@ describe('v2 - node GET', () => {
 		const [team, person, group] = await sandbox.createNodes(
 			['Team', `${namespace}-team`],
 			['Person', `${namespace}-person`],
-			['Group', `${namespace}-group`]
+			['Group', `${namespace}-group`],
 		);
 		await sandbox.connectNodes(
 			// tests incoming and outgoing relationships
 			[group, 'HAS_TEAM', team],
-			[team, 'HAS_TECH_LEAD', person]
+			[team, 'HAS_TECH_LEAD', person],
 		);
 
 		return sandbox
@@ -47,8 +47,8 @@ describe('v2 - node GET', () => {
 				sandbox.withMeta({
 					code: `${namespace}-team`,
 					techLeads: [`${namespace}-person`],
-					parentGroup: `${namespace}-group`
-				})
+					parentGroup: `${namespace}-group`,
+				}),
 			);
 	});
 

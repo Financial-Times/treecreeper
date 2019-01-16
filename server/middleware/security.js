@@ -43,5 +43,5 @@ const requireApiKeyOrS3o = (req, res, next) => {
 module.exports = {
 	requireS3o: s3o,
 	requireApiKey,
-	requireApiKeyOrS3o
+	requireApiKeyOrS3o,
 };

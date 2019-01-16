@@ -1,32 +1,33 @@
+const fetch = require('node-fetch');
 const { logger } = require('../lib/request-context');
-const fetch = require('isomorphic-fetch');
 
 module.exports = async ({ headers, url, type }) => {
 	try {
 		const response = await fetch(url, {
 			method: 'GET',
-			headers
+			headers,
 		});
 		if (response.status === 200) {
 			return {
 				lastCheckOk: true,
 				lastCheckTime: new Date().toUTCString(),
 				lastCheckOutput: `Successful call to the Biz-Ops API via ${type} with a status code equal to 200.`,
-				panicGuide: "Don't panic."
+				panicGuide: "Don't panic.",
 			};
-		} else {
-			throw `Unsuccessful call to Biz-Ops API via ${type} with status code equal to ${
-				response.status
-			} `;
 		}
+		throw new Error(
+			`Unsuccessful call to Biz-Ops API via ${type} with status code equal to ${
+				response.status
+			}`,
+		);
 	} catch (error) {
 		logger.error(
 			{
 				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
 				healthCheckName: 'API_CALL',
-				error
+				error,
 			},
-			'Healthcheck failed'
+			'Healthcheck failed',
 		);
 		return {
 			lastCheckOk: false,
@@ -35,7 +36,7 @@ module.exports = async ({ headers, url, type }) => {
 				error.message ? error.message : error
 			}`,
 			panicGuide:
-				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="API_CALL"`'
+				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="API_CALL"`',
 		};
 	}
 };

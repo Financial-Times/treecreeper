@@ -6,27 +6,27 @@ const ERROR_RX = Object.freeze({
 	nodeExists: /already exists with label/,
 	nodeAttached: /Cannot delete node<\d+>, because it still has relationships/,
 	// note - extra spaces are not a typo - the error message really does have 3 spaces
-	missingRelated: /Failed to create relationship `  relationship@([0-9]+)`, node `  related@([0-9]+)` is missing./,
-	missingRelationshipEndpoint: /Expected to find a node at ([a-zA-Z]+) but found nothing/
+	missingRelated: /Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./,
+	missingRelationshipEndpoint: /Expected to find a node at ([a-zA-Z]+) but found nothing/,
 });
 
 const handleMissingRelationshipNode = (
 	err,
-	{ nodeType, code, relatedCode, relatedType }
+	{ nodeType, code, relatedCode, relatedType },
 ) => {
 	const missingProperty = (ERROR_RX.missingRelationshipEndpoint.exec(
-		err.message
+		err.message,
 	) || [])[1];
 
 	if (missingProperty === 'node') {
 		throw httpErrors(
 			400,
-			`Cannot create relationship: start node ${nodeType} ${code} does not exist.`
+			`Cannot create relationship: start node ${nodeType} ${code} does not exist.`,
 		);
 	} else if (missingProperty === 'relatedNode') {
 		throw httpErrors(
 			400,
-			`Cannot create relationship: start node ${relatedType} ${relatedCode} does not exist.`
+			`Cannot create relationship: start node ${relatedType} ${relatedCode} does not exist.`,
 		);
 	}
 };
@@ -42,7 +42,7 @@ const handleUpsertError = err => {
 			API calls.
 			DO NOT use \`upsert\` if you are attempting to create a relationship with
 			an item that already exists - there's probably a mistake somewhere in your
-			code`
+			code`,
 		);
 	}
 };
@@ -58,20 +58,20 @@ const handleDuplicateRelationship = async ({
 	nodeType,
 	code,
 	relatedType,
-	relatedCode
+	relatedCode,
 }) => {
 	const existingRelationship = await executeQuery(
 		`
 			MATCH (node:${nodeType} { code: $code })-[relationship:${relationshipType}]->(relatedNode:${relatedType} { code: $relatedCode })
 			RETURN relationship
 		`,
-		{ code, relatedCode }
+		{ code, relatedCode },
 	);
 
 	if (existingRelationship.records.length) {
 		throw httpErrors(
 			409,
-			`relationship ${relationshipType} from ${nodeType} ${code} to ${relatedType} ${relatedCode} already exists`
+			`relationship ${relationshipType} from ${nodeType} ${code} to ${relatedType} ${relatedCode} already exists`,
 		);
 	}
 };
@@ -89,12 +89,12 @@ const handleMissingRelationship = ({
 	relationship,
 	relatedType,
 	relatedCode,
-	status
+	status,
 }) => {
 	if (!result.records.length) {
 		throw httpErrors(
 			status,
-			`Relationship ${relationship} from ${nodeType} ${code} to ${relatedType} ${relatedCode} does not exist`
+			`Relationship ${relationship} from ${nodeType} ${code} to ${relatedType} ${relatedCode} does not exist`,
 		);
 	}
 };
@@ -109,7 +109,7 @@ const handleAttachedNode = ({ result, nodeType, code }) => {
 		throw httpErrors(
 			409,
 			`Cannot delete - ${nodeType} ${code} has relationships. Delete all relationships before attempting to delete this record.`,
-			{ relationships: result.records }
+			{ relationships: result.records },
 		);
 	}
 };
@@ -121,7 +121,7 @@ const handleRelationshipActionError = relationshipAction => {
 	) {
 		throw httpErrors(
 			400,
-			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`'
+			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
 		);
 	}
 };
@@ -132,11 +132,11 @@ module.exports = {
 		bailOnMissingRelationshipAction: handleRelationshipActionError,
 		bailOnMissingNode: handleMissingNode,
 		bailOnAttachedNode: handleAttachedNode,
-		bailOnMissingRelationship: handleMissingRelationship
+		bailOnMissingRelationship: handleMissingRelationship,
 	},
 	dbErrorHandlers: {
 		nodeUpsert: handleUpsertError,
 		duplicateNode: handleDuplicateNodeError,
-		missingRelationshipNode: handleMissingRelationshipNode
-	}
+		missingRelationshipNode: handleMissingRelationshipNode,
+	},
 };

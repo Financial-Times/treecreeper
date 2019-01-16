@@ -19,9 +19,9 @@ const spyDbQuery = ({ sinon }) => {
 const stubDbUnavailable = ({ sinon }) =>
 	sinon.stub(driver, 'session').returns({
 		run: () => {
-			throw 'oh no';
+			throw new Error('oh no');
 		},
-		close: () => {}
+		close: () => {},
 	});
 
 const stubDbTransaction = ({ sinon }, properties = {}) => {
@@ -35,16 +35,16 @@ const stubDbTransaction = ({ sinon }, properties = {}) => {
 					labels: [],
 					identity: dummyInteger,
 					start: dummyInteger,
-					end: dummyInteger
+					end: dummyInteger,
 				}),
-				has: () => false
-			}
-		]
+				has: () => false,
+			},
+		],
 	});
 	const stubSession = {
 		run: runStub,
 		writeTransaction: func => func(stubSession),
-		close: () => {}
+		close: () => {},
 	};
 	sinon.stub(driver, 'session').returns(stubSession);
 	return runStub;
@@ -53,5 +53,5 @@ const stubDbTransaction = ({ sinon }, properties = {}) => {
 module.exports = {
 	spyDbQuery,
 	stubDbUnavailable,
-	stubDbTransaction
+	stubDbTransaction,
 };

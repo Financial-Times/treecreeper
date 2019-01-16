@@ -1,37 +1,41 @@
 const neo4j = require('neo4j-driver').v1;
-const { logger } = require('../lib/request-context');
 const metrics = require('next-metrics');
+const { logger } = require('../lib/request-context');
 const { TIMEOUT } = require('../constants');
+
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL,
-	neo4j.auth.basic(process.env.NEO4J_BOLT_USER, process.env.NEO4J_BOLT_PASSWORD)
+	neo4j.auth.basic(
+		process.env.NEO4J_BOLT_USER,
+		process.env.NEO4J_BOLT_PASSWORD,
+	),
 );
 
 const originalSession = driver.session;
 
-driver.session = (...args) => {
-	const session = originalSession.apply(driver, args);
+driver.session = (...sessionArgs) => {
+	const session = originalSession.apply(driver, sessionArgs);
 	const originalRun = session.run;
 
-	session.run = async (...args) => {
+	session.run = async (...runArgs) => {
 		const start = Date.now();
 		metrics.count('neo4j.query.count');
 		let isSuccessful = false;
 		try {
 			const result = await Promise.race([
-				originalRun.apply(session, args),
+				originalRun.apply(session, runArgs),
 				new Promise((res, rej) => {
 					setTimeout(
 						() =>
 							// note that this will cause the finally block to run, which closes the session
 							rej(
 								new Error(
-									'Neo4j query took more than 15 seconds: closing session'
-								)
+									'Neo4j query took more than 15 seconds: closing session',
+								),
 							),
-						TIMEOUT
+						TIMEOUT,
 					);
-				})
+				}),
 			]);
 
 			isSuccessful = true;
@@ -47,7 +51,7 @@ driver.session = (...args) => {
 			logger.info({
 				event: 'NEO4J_QUERY',
 				successful: isSuccessful,
-				totalTime
+				totalTime,
 			});
 		}
 	};
@@ -65,5 +69,5 @@ module.exports = {
 		executeQuery.close = () => session.close();
 
 		return executeQuery;
-	}
+	},
 };

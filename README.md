@@ -3,11 +3,9 @@
 Modelling our business' operations
 ![image](https://user-images.githubusercontent.com/447559/41767528-bf2e19d8-7601-11e8-864d-61e3701df193.png)
 
-
-
 ## Architecture
 
-[Architectural Diagrams](https://github.com/Financial-Times/gdpr).
+[Architectural Diagrams](https://github.com/Financial-Times/gdpr)
 
 WIP
 
@@ -19,16 +17,16 @@ The REST API endpoints for the biz-ops API are available behind [FT API Gateway]
 
 The public API URLs are:
 
-| Environment   | Url                                |
-| ------------- | --------------------------------   |
-| Production    | `https://api.ft.com/biz-ops`   |
-| Test          | `https://api-t.ft.com/biz-ops` |
+| Environment | Url                            |
+| ----------- | ------------------------------ |
+| Production  | `https://api.ft.com/biz-ops`   |
+| Test        | `https://api-t.ft.com/biz-ops` |
 
 To get access you will need to acquire an API key.
 To get one, either:
 
-*   use the [API gateway slack bot](https://github.com/Financial-Times/apig-api-key-warden) for the relevant environment
-*   fill in a request form to the [API gateway slack team](https://financialtimes.slack.com/messages/C06GDS7UJ).
+-   use the [API gateway slack bot](https://github.com/Financial-Times/apig-api-key-warden) for the relevant environment
+-   fill in a request form to the [API gateway slack team](https://financialtimes.slack.com/messages/C06GDS7UJ).
 
 The API key can then be passed on each request either as a query parameter, e.g.
 
@@ -50,27 +48,27 @@ Passing a request id using the `x-request-id` header is also recommended for aud
 
 The API exposes a [GraphQL](https://graphql.org/) API, which allows querying the underlying graph nodes and relationships in a single request. The read api is available by POSTing queries to the path `/biz-ops/graphql`. At present, there is no write api for graphql.
 
-| Environment   | Url                                                   |
-| ------------- | ----------------------------------------------------  |
-| Production    | `https://api.ft.com/biz-ops/graphql`                 |
-| Test          | `https://api-t.ft.com/biz-ops/graphql`         |
+| Environment | Url                                    |
+| ----------- | -------------------------------------- |
+| Production  | `https://api.ft.com/biz-ops/graphql`   |
+| Test        | `https://api-t.ft.com/biz-ops/graphql` |
 
 #### GraphiQL
+
 To complement graphql, the api exposes the [graphiql](https://github.com/graphql/graphiql) IDE, which supports autocomplete and is the recommended way to explore the underlying data.
 
 This should be accessed directly as it is a UI, not through the above API gateway endpoints. Access is authenticated via s3o.
 
-| Environment   | Url                                                   |
-| ------------- | ----------------------------------------------------  |
-| Production    | `https://biz-ops.api.ft.com/graphiql`                 |
-| Test          | `https://biz-ops-staging.api.ft.com/graphiql`         |
+| Environment | Url                                           |
+| ----------- | --------------------------------------------- |
+| Production  | `https://biz-ops.api.ft.com/graphiql`         |
+| Test        | `https://biz-ops-staging.api.ft.com/graphiql` |
 
-## API endpoints 
+## API endpoints
 
 Please use V2 as V1 has now been deprecated
 
-- [V2 API Reference](ENDPOINTS.md) 
-
+-   [V2 API Reference](ENDPOINTS.md)
 
 ## Cookbook
 
@@ -78,59 +76,55 @@ Sample [queries/output](COOKBOOK.md)
 
 ## Run
 
-This app uses Node 8.
+### Prerequisities
+
+-   nodejs 8
+-   [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli)
+-   member of reliability-engineering github team
+-   [docker](https://www.docker.com/get-docker)
 
 Install dependencies:
 
 ```shell
-npm install
+make install
 ```
 
 Start the [neo4j](https://neo4j.com/) community edition database. This requires the [APOC procedures](http://github.com/neo4j-contrib/neo4j-apoc-procedures) library to be added to a `plugins` directory:
 
 ```shell
 ./scripts/neo4j-plugins
-docker-compose up
+make run-db
 ```
 
-*Troubleshooting*
-* You may need to install `wget` in order to run `./scripts/neo4j-plugins`. You can do this with `brew` by running `brew install wget`
-* The `docker-compose up` command requires you to have an account with docker, (you should be able to do that [here](https://hub.docker.com/)) and download the the docker application (you should be able to do that [here](https://www.docker.com/get-docker))).
+_Troubleshooting_
+
+-   You may need to install `wget` in order to run `./scripts/neo4j-plugins`. You can do this with `brew` by running `brew install wget`
+-   If `wget` fails, visit https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases, download version `3.5.0.1` and save in `./neo4j/plugins`
+-   The `make run-db` command requires you to have an account with docker, (you should be able to do that [here](https://hub.docker.com/)) and download the the docker application (you should be able to do that [here](https://www.docker.com/get-docker))).
 
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
-# Vault Setup
-Setup [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli). You will also need to have permission to read the `internal-products` Vault secrets. Ask in the [`#internal-products`](https://financialtimes.slack.com/messages/C40J2GPB6/team/) slack channel and someone should be able to help you.
+Note: The database will always need to run in a separate process/terminal to the node application
 
-This allows you to populate environment variables, including secrets, from vault by running the following:
-
-```shell
-npm run vault:env
-```
-
-Populate the database:
+# Running the application
 
 ```shell
-npm run init-db
+make env run
 ```
 
-Run the server:
+This will download credentials, save them to an `.env` file, and start the node process on prt 8888. The endpoints are as documented for the production application, except that paths are not prefixed with `/biz-ops`. Copy the `API_KEY` from `.env` into a `API_KEY` header when sending requests. Note: this is not the same as the `X-API-KEY` used to authenticate with api-t.ft.com
+
+# Testing
 
 ```shell
-make run
+make test
 ```
 
-Which will run the app on port 8888. To visit the local version of the api replace `https://api-t.ft.com/biz-ops/...` with `http://local.in.ft.com:8888/...` and set the `API_KEY` from the app's environment variables as a header. Note: this is not the same as the `X-API-KEY` used to run api-t.ft.com so make sure you have the correct headers set for your environment.
-
-Run tests locally:
-
-```shell
-npm run test-dev
-```
+Will start jest in watch mode
 
 ## Update AWS CloudFormation template
 
-To deploy an update to the AWS CloudFormation template (for the Reliability Eng AWS accounts), make your changes and run
+To deploy an update to the AWS CloudFormation template for the kinesis update stream, make your changes and run
 
 ```
 make deploy-aws
@@ -151,6 +145,7 @@ First, you will need to run:
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:generateData
 ```
+
 This will generate the random data that you will need to run your performance tests.
 
 ### Running Load Tests
@@ -172,12 +167,14 @@ LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:readQueries
 ```shell
  LOAD_TEST_API_KEY=<INSERT_API_KEY> npm run test:load:writeQueriesForTeams
 ```
-There will be 3 phases to complete for each test:
- * Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
- * Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
- * Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
 
-Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard]( http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests). The config for the grafana setup can be found in scripts/load-testing/lib/statsd/docker-compose.yaml file.
+There will be 3 phases to complete for each test:
+
+-   Warm up - this is the arrival rate of 10 virtual users/second that last for 60 seconds.
+-   Ramp up - this is where we go from 10 to 25 new virtual user arrivals over 120 seconds.
+-   Cruise - this is the arrival rate of 10 virtual users/second that lasts for 1200 seconds.
+
+Once the performance test has completed, the metrics will be sent to the [Grafana Dashboard](http://grafana.ft.com/d/c5B9CEOik/biz-ops-api-load-tests). The config for the grafana setup can be found in scripts/load-testing/lib/statsd/docker-compose.yaml file.
 
 After completing the performance test for write scripts, all the dummy data created in the database will be deleted as part of the command you ran above. However, if this fails and you would like to run the cleanUp script separate from the performance test, you can run the following:
 

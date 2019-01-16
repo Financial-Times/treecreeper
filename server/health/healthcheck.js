@@ -21,7 +21,7 @@ module.exports = async (check, func, type) => {
 			severity: lastStatus.severity,
 			technicalSummary: lastStatus.technicalSummary,
 			panicGuide: lastStatus.panicGuide,
-			_dependencies: lastStatus.dependencies
-		})
+			_dependencies: lastStatus.dependencies,
+		}),
 	};
 };

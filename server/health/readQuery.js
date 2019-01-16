@@ -1,33 +1,34 @@
-const { logger } = require('../lib/request-context');
 const { stripIndents } = require('common-tags');
+const { logger } = require('../lib/request-context');
 const { executeQuery } = require('../data/db-connection');
 const healthcheck = require('./healthcheck');
 const outputs = require('./output');
+
 const runQueryCheck = async () => {
 	try {
 		const result = await executeQuery(
 			stripIndents`MATCH (node:System)-[relationship:HAS_REPO]->(relatedNode:Repository)
-			RETURN node,relatedNode,relationship LIMIT 10`
+			RETURN node,relatedNode,relationship LIMIT 10`,
 		);
 
 		if (result.records.length > 0) {
 			return {
 				lastCheckOk: true,
 				lastCheckTime: new Date().toUTCString(),
-				lastCheckOutput: 'Result of the cypher query successfully retrieved',
-				panicGuide: 'Don\t panic.'
+				lastCheckOutput:
+					'Result of the cypher query successfully retrieved',
+				panicGuide: 'Don\t panic.',
 			};
-		} else {
-			throw `Error retrieving database results: no results found!`;
 		}
+		throw new Error(`Error retrieving database results: no results found!`);
 	} catch (error) {
 		logger.error(
 			{
 				event: 'BIZ_OPS_HEALTHCHECK_FAILURE',
 				healthCheckName: 'READ_QUERY',
-				error
+				error,
 			},
-			'Healthcheck failed'
+			'Healthcheck failed',
 		);
 		return {
 			lastCheckOk: false,
@@ -36,7 +37,7 @@ const runQueryCheck = async () => {
 				error.message ? error.message : error
 			}`,
 			panicGuide:
-				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="READ_QUERY'
+				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="READ_QUERY',
 		};
 	}
 };
