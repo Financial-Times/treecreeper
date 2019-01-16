@@ -311,6 +311,110 @@ describe('get-type', () => {
 		expect(type.fieldsets.misc.heading).toBe('General');
 	});
 
+	describe('misc heading of GENERAL for fieldset', () => {
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1',
+					properties: {
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					}
+				}
+			]);
+		});
+
+		it('is returned when addMetaData is TRUE', () => {
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.fieldsets.misc.heading).toBe('General');
+		});
+
+		it('is returned when addMetaData is FALSE', () => {
+			const type = getType('Type1', { groupProperties: true, addMetaData: false });
+			expect(type.fieldsets.misc.heading).toBe('General');
+		});
+	});
+
+	describe('misc heading of MISCELLANEOUS for fieldset', () => {
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1',
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+							relationship: 'HAS',
+							label: 'A word relationship'
+						},
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please'
+						}
+					}
+				}
+			]);
+		});
+
+		it('is returned when addMetaData is TRUE', () => {
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+		});
+
+		it('is returned when addMetaData is FALSE', () => {
+			const type = getType('Type1', { groupProperties: true, addMetaData: false });
+			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+		});
+	});
+
+	describe('can group auto generated meta properties by fieldset', () => {
+		let type;
+
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1'
+				}
+			]);
+
+			type = getType('Type1', { groupProperties: true });
+		});
+
+		it('returns meta fieldset', () => {
+			expect(type.fieldsets.meta.heading).toBe('Meta Data');
+			expect(type.fieldsets.meta.properties).toBeDefined();
+		});
+
+		metaProperties.forEach(property => {
+			const propertyName = property.name;
+			it(`returns meta fieldset property ${property.name}`, () => {
+				const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
+				expect(fieldsetProperty.type).toEqual(property.type);
+				expect(fieldsetProperty.description).toEqual(property.description);
+				expect(fieldsetProperty.label).toEqual(property.label);
+				expect(fieldsetProperty.autoPopulated).toEqual(true);
+			});
+		});
+	});
+
+	it('does not create meta data fieldset when addMetaData is set to FALSE', () => {
+		rawData.getTypes.mockReturnValue([
+			{
+				name: 'Type1'
+			}
+		]);
+		type = getType('Type1', { groupProperties: true, addMetaData: false });
+		expect(type.fieldsets).toEqual({});
+	});
+
 	describe('relationships', () => {
 		it('it can exclude relationships', async () => {
 			rawData.getTypes.mockReturnValue([
@@ -431,6 +535,7 @@ describe('get-type', () => {
 			expect(result.testName1.direction).toBe('outgoing');
 			expect(result.testName2.direction).toBe('incoming');
 		});
+
 		it('define recursive relationships', () => {
 			rawData.getTypes.mockReturnValue([
 				{
@@ -572,36 +677,6 @@ describe('get-type', () => {
 			expect(type.fieldsets.misc.properties.miscProp).toBeDefined();
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 			expect(type.fieldsets.misc.description).not.toBeDefined();
-		});
-
-		describe('can group auto generated meta properties by fieldset', () => {
-			let type;
-
-			beforeEach(() => {
-				rawData.getTypes.mockReturnValue([
-					{
-						name: 'Type1'
-					}
-				]);
-
-				type = getType('Type1', { groupProperties: true });
-			});
-
-			it('returns meta fieldset', () => {
-				expect(type.fieldsets.meta.heading).toBe('Meta Data');
-				expect(type.fieldsets.meta.properties).toBeDefined();
-			});
-
-			metaProperties.forEach(property => {
-				const propertyName = property.name;
-				it(`returns meta fieldset property ${property.name}`, () => {
-					const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
-					expect(fieldsetProperty.type).toEqual(property.type);
-					expect(fieldsetProperty.description).toEqual(property.description);
-					expect(fieldsetProperty.label).toEqual(property.label);
-					expect(fieldsetProperty.autoPopulated).toEqual(true);
-				});
-			});
 		});
 	});
 });

@@ -16,7 +16,8 @@ const getType = (
 	{
 		primitiveTypes = 'biz-ops', // graphql
 		withRelationships = true,
-		groupProperties = false
+		groupProperties = false,
+		addMetaData = true
 	} = {}
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);
@@ -94,11 +95,13 @@ const getType = (
 
 		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
-		const metaProperties = properties.filter(
-			([, { fieldset }]) => fieldset && fieldset === META
-		);
+		const fieldsets = Object.entries(type.fieldsets || {});
 
-		const realFieldsets = Object.entries(type.fieldsets || {})
+		if (addMetaData) {
+			fieldsets.push([ META, { heading: 'Meta Data' } ]);
+		}
+
+		const realFieldsets = fieldsets
 			.map(([fieldsetName, fieldsetDef]) => {
 				fieldsetDef.properties = entriesArrayToObject(
 					realFieldsetProperties.filter(
@@ -124,32 +127,24 @@ const getType = (
 			}
 		);
 
-		const fieldsetUp = (fieldsetName, heading, properties) => {
-			return [
-				[
-					fieldsetName,
-					{
-						heading,
-						properties: entriesArrayToObject(properties)
-					}
-				]
-			];
-		};
-
-		const miscHeading = realFieldsets.length ? 'Miscellaneous' : 'General';
 		const miscellaneous = miscProperties.length
-			? fieldsetUp('misc', miscHeading, miscProperties)
-			: [];
-
-		const metaFieldSets = metaProperties.length
-			? fieldsetUp(META, 'Meta Data', metaProperties)
+			? [
+					[
+						'misc',
+						{
+							heading: (addMetaData && realFieldsets.length > 1) || (!addMetaData && realFieldsets.length) ? 'Miscellaneous' : 'General',
+							properties: entriesArrayToObject(miscProperties)
+						}
+					]
+			  ]
 			: [];
 
 		type.fieldsets = entriesArrayToObject(
-			[].concat(realFieldsets, virtualFieldsets, miscellaneous, metaFieldSets)
+			[].concat(realFieldsets, virtualFieldsets, miscellaneous)
 		);
 
 		delete type.properties;
+
 	}
 
 	return deepFreeze(type);
@@ -162,7 +157,8 @@ module.exports = cache.cacheify(
 		{
 			primitiveTypes = 'biz-ops',
 			withRelationships = true,
-			groupProperties = false
+			groupProperties = false,
+			addMetaData = true
 		} = {}
 	) =>
 		`types:${typeName}:${withRelationships}:${groupProperties}:${primitiveTypes}`
