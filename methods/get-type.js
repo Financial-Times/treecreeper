@@ -8,6 +8,7 @@ const metaProperties = require('./constants');
 
 const META = 'meta';
 const BIZ_OPS = 'biz-ops';
+const SELF = 'self';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
@@ -87,11 +88,11 @@ const getType = (
 		type.properties = entriesArrayToObject(properties);
 	} else {
 		const virtualFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset === 'self'
+			([, { fieldset }]) => fieldset === SELF
 		);
 
 		const realFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset && fieldset !== 'self'
+			([, { fieldset }]) => fieldset && fieldset !== SELF
 		);
 
 		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
