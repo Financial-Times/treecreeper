@@ -1,138 +1,119 @@
-# Contributing to the biz-ops model
+# Contributing to the biz-ops-schema
 
 biz-ops-schema controls what can be stored in the biz-ops-api. You can add 5 different types of thing to the schema:
 
-- [Types](#types-and-attributes)
-- [Properties on existing types](#property-definitions)
-- [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
-- [Enums](#enums) (aka drop down options)
-- [String validation rules](#string-validation-rules)
+- Types - Each record stored in biz-ops must conform to a predefined type
+- Properties on types - If a record is an instance of a given type, the schema for that type determines which properties the record may have
+- Relationships between types - Different types can be connected to other types with different types of relationship
+- Enums - Some properties, e.g. serviceTier, may only take one value from a set. Enums define these sets of permissible values
+- String validation rules - Regular expressions for checking values
 
-_Note that yaml files are indented with two spaces_
+These define what can/cannot exist in the underlying neo4j database and the graphQL API.
 
-## Types
+This document will take you through the process of adding a new type, and along the way we'll cover how to add each of the other things too; if all you want to do is add one of those it'll probably help to skim this whole document, but skip ahead as you please.
 
-Types are defined in individual files in `schema/types`. Add a `.yaml` file named after your type e.g. `Cookie.yaml`, `DNSRecord.yaml`. Names of types should be singular, without punctuation, and with each word/abbreviation capitalised. The file expects the following properties:
+The example we'll work through is adding the ability for the biz-ops-api to represent [**Birds of paradise**](https://en.wikipedia.org/wiki/Bird-of-paradise)
 
-| name        | required | default | details                                                                                                                                                                                                                                                                                                         | examples                                          |
-| ----------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| name        | yes      |         | The name of the type. This should be exactly the same as the name of the file. It must begin with an upper case letter and contain only upper and lower case letters                                                                                                                                            | `CostCentre`, `FastlyInstance`                    |
-| pluralName  | no       |         | The pluralised version of the type name. If not specified, defaults to the type name with an `s` appended                                                                                                                                                                                                       | `People`                                          |
-| description | yes      |         | Description of what kind of entity the type is. This can be spread over multiple lines and supports markdown. It is used to describe types in various parts of the biz-ops ecosystem, including documentation in the graphql-playground and when creating new instances in the biz-ops admin ui                 |                                                   |
-| rank        | no       | 9999    | This is an integer, used to indicate the relative importance of this type. A lower number means the type is more important. This exists in order that, as more types are added to the schema, there is a mechanism whereby the most important ones (such as System or Team), do not get lost in the UI          | `55`                                              |
-| properties  | yes      |         | An object containing one or more [Property Definintion](#property-definitions). Each key in this object defines the property name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word | property names: `officeLocation`, `supportsHttp2` |
-| fieldsets   | no       |         | An object containing one or more [Fieldset Definition](#fieldset-definitions). Each key in this object defines the fieldset name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word  | fieldset names: `general`, `contactDetails`       |
+## Creating a basic type
 
-### Property Definitions
-
-Each property definition is an object with the following properties
-
-| name          | required | default | details                                                                                                                                                                                                                                                                             | examples                   |
-| ------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| type          | yes      |         | This defines what kind of data can be stored in the property. It can be the name of any [primitive type](#primitive-types) or [enum](#enums)                                                                                                                                        | `Paragraph`, `ServiceTier` |
-| label         | yes      |         | A short label to be used when displaying this property in forms etc.                                                                                                                                                                                                                |                            |
-| description   | yes      |         | Description of what data is stored in the property. This is used to provide information in systems that allow viewing or modifying the data                                                                                                                                         |                            |
-| required      | no       | false   | Boolean defining whether or not the field is required                                                                                                                                                                                                                               |                            |
-| unique        | no       | false   | Boolean indicating if values in this property must be unique across all records of this type                                                                                                                                                                                        |                            |
-| canIdentify   | no       | false   | Boolean defining whether or not this field contains a 'pseudo id', i.e. a value that is unique, or almost unique, to a record, and can therefore be used in graphQL to query for a record e.g. a `Person` record's `email` property is a good example of a value that `canIdentify` |                            |
-| canFilter     | no       | false   | Boolean defining whether or not this field shoudl be available as a filter in graphQL                                                                                                                                                                                               |                            |
-| trueLabel     | no       | 'Yes'   | For properties with `Boolean` type, this defines the form label to use for the true option                                                                                                                                                                                          |                            |
-| falseLabel    | no       | 'No'    | For properties with `Boolean` type, this defines the form label to use for the false option                                                                                                                                                                                         |                            |
-| examples      | no       |         | Array of example values. This is not widely used but may e.g. be surfaced as placeholder text in a form                                                                                                                                                                             |                            |
-| fieldset      | no       | 'misc'  | The name of a fieldset to group this field in. Defaults to 'misc' which will e.g. put the field in the `Miscellaneous` fieldset at the end of edit pages                                                                                                                            |                            |
-| autoPopulated | no       | false   | Boolean indicating if the data is populated automatically by some mechanism, and should therefore not be editable in any UI                                                                                                                                                         |                            |
-| isCore        | no       | false   | Boolean indicating if the property is considered a core, identifying property of the type. At present, this is used when presenting search results                                                                                                                                  |                            |
-
-### Primitive types
-
-Biz-ops supports a number of custom primitive types, beyond those available in graphQL by default. Most of them are stored as Strings in the data layer, and do not have any strict conditions attached. They are intended as hints for the underlying systems storing the data, and any systems displaying it.
-
-| type name | underlying data type | description                                                             |
-| --------- | -------------------- | ----------------------------------------------------------------------- |
-| Code      | String               | Should be used for the code property of a type                          |
-| Name      | String               | Should be used for the name property of a type                          |
-| Word      | String               | for ids and other very short strings, generally not allowing whitespace |
-| Sentence  | String               | for short pieces of text                                                |
-| Paragraph | String               | for longer pieces of text                                               |
-| Document  | String               | for arbitrarily long pieces of text                                     |
-| Url       | String               | Should be used for properties expected to contain urls                  |
-| Email     | String               | Should be used for properties expected to contain email addresses       |
-| Date      | String               | Dates, which should generally be input as ISO strings                   |
-| Int       | Int                  | Integers                                                                |
-| Float     | Float                | Decimal numbers                                                         |
-| Boolean   | Boolean              | True or False                                                           |
-
-### Relationship property definitions
-
-All the options for [property definitions](#property-definitions) apply to relationship property definitions unless a rule below explicitly says otherwise
-
-| name         | required | default                                                                            | details                                                                                                                                                                                                                                                                                                                                                          | examples                      |
-| ------------ | -------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| type         | true     | Unlike for ordinary properties, this must be the name of some other [type](#types) | `CostCentre`, `System`                                                                                                                                                                                                                                                                                                                                           |
-| relationship | yes      |                                                                                    | The name of the underlying neo4j relationship. This should be all upper case, with words separated by underscores. It is hidden from the public APIs, and requires some familiarity with the underlying data. See existing type yaml files for examples, or ask for guidance in the [biz ops slack channel](https://financialtimes.slack.com/messages/C9S0V2KPV) | `HAS_TEAM_MEMBER`, `PAYS_FOR` |
-| direction    | yes      |                                                                                    | Whether the underlying relationship should point away from – `outgoing` – or to – `incoming` – the record. Again, this requires familiarity with the underlying data. Please see existing examples or ask for help in the [biz ops slack channel](https://financialtimes.slack.com/messages/C9S0V2KPV)                                                           | `outgoing`, `incoming`        |
-| hasMany      | no       | false                                                                              | Boolean indicating whether or not the record can be related in this way to more than one other record. If in doubt, set to `true`,                                                                                                                                                                                                                               |                               |
-| isRecursive  | no       | false                                                                              | Boolean indicating whether the query used to populate this property should recursively traverse the relationship tree to retrieve records many steps removed from the parent record                                                                                                                                                                              |                               |
-
-### Fieldset Definitions
-
-Fieldsets group properties with other properties that are related to them e.g. all the properties defining relationships between systems might be grouped in a `relatedSystems` fieldset. This structure is not used in the underlying data store, but is rather applied at a later stage by anything using the data. Fieldsets are defined using ibjects with the following properties
-
-| name        | required | default details | examples                                                     |
-| ----------- | -------- | --------------- | ------------------------------------------------------------ |
-| heading     | yes      |                 | The text to use as a heading for the group of properties     |  |
-| description | no       |                 | The text to use as a description for the group of properties |  |
-
-### Example type file
+1. Pick a name for your type. This must be a _singular_, capital case, string i.e. each word begins with a capital letter, no spaces, only letters. So for our example the name will be `BirdOfParadise` (not `BirdsOfParadise`)
+1. Create a yaml file in `./schema/types` whose name is your type name, lower case and hyphenated e.g. `bird-of-paradise.yaml`.
+1. Start filling your file with some basic, required information. Each type must have a name (the one you picked above) and a description, which should be a reasonably descriptive sentence describing _in the singular_ what an instance of this type is.  
+   The schema client library will automatically generate a `pluralName` property by appending `s` to the name, but if (as in our example) this doesn't work (BirdOfParadises :rofl: ), add one explicitly. Other top level fields also exist and may optionally be set. Refer to the [model spec](MODEL_SPECIFICATION.md#types).  
+   You will end up with something like the following:
 
 ```yaml
-name: Bus
-pluralName: Buses
-description: |
-  Big red things
+name: BirdOfParadise
+pluralName: BirdsOfParadise
+description: A bird of the family Paradisaeidae of the order Passeriformes
+```
+
+## Thinking about properties
+
+You could dive right in adding properties to your yaml file, but it pays to pause and think about each piece of information you want to store. You will be adding to a platform that others will be using, so try to get into the mindset of not just what makes sense to you at this stage, but also what will be useful to others from now on.
+
+List the things you wish to store out and ask the following questions of them:
+
+- Is it broken down finely enough - would it make more sense to store as multiple properties e.g. rather than storing `populationEstimate` as a free text string, why not store `minPopulationEstimate` and `maxPopulationEstimate` as two number fields?
+- Could your free text properties be stored as enums instead? e.g. `genus` has a limited number of values within the _Paradisaeidae_ family, so create an enum listing them all, then you will not be at the mercy of typos in your data
+- If you're storing a list of data, or using an enum, would it make more sense to store as relationships to instances of other types? e.g. rather than `geographicRange: ['Indonesia', 'Papua New Guinea']` define a new `Country` type, and have relationships betwen `BirdOfParadise` and `Country`
+
+Don't get too hung up on these choices, particularly if it's only going to be your team using the type you're creating at first; fields can be deprecated and replaced.
+
+## Adding properties - basics
+
+Properties on types have a [daunting number of options](MODEL_SPECIFICATION.md#property-definitions), but here we will concentrate on the essential ones first.
+
+Each property must define:
+
+- `name`: A camel case string not beginning with a number e.g. `hasWattle`, `tailLengthToBodyRatio`. Give them names that make sense to you.  The only convention is that `Boolean` properties should begin with `is`, `has` or similar
+- `label`: A short string, a few words long, that describes the property. Typically used to label form fields and admin pages. Do not end in a full-stop, and only capitalise the first word. In most cases it should just be an un-camel-cased version of the name e.g. `Place in folklore`
+- `description`: A longer string, giving as full a description as you like of the property. Will be parsed as markdown and displayed, among other places, in forms and in graphQL based user interfaces. Should end in a full stop
+- `type` - The type of data stored in the field. Refer to the [primitive types documentation](MODEL_SPECIFICATION.md##primitive-types)
+
+All properties are defined as an object in yaml, with `name` as the key. In addition to the properties relevant to your type, each type **must** define a `code` property, and in most cases should have `name` and `description` properties to contain the human readable information about the record.
+
+You should now have something that looks like the following (Although I've been lazy and not added `name` or `description` properties):
+
+```yaml
+name: BirdOfParadise
+pluralName: BirdsOfParadise
+description: A bird of the family Paradisaeidae of the order Passeriformes
 properties:
   code:
     type: Code
-    required: true
-    canIdentify: true
-    canFilter: true
-    description: 'Unique code/id for this item'
     label: Code
-    fieldset: main
-    examples:
-      - LK60HPN
-  isOperational:
+    description: The unique code for this bird of paradise
+  hasWattle:
     type: Boolean
-    trueLabel: Bus runs on public roads
-    falseLabel: Bus doesn't run or only runs off-road
-fieldsets:
-  main:
-    heading: Main properties
-    description: These are all essential to fill out
+    label: Has wattle
+    description: Whether or not this species has a wattle
+  conservationInformation:
+    type: Document
+    label: Conservation information
+    description: |
+      Details of the [conservation status](https://www.iucnredlist.org/) of this species, and any past, present or future conservation programmes
 ```
 
-## String validation rules
+## Adding relationships
 
-These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
+Adding relationships is very similar to adding normal properties, with a few important differences:
 
-- The property name must be in CONSTANT_CASE
-- The value must be either
-  - a string that, when converted to a JavaScript regular expression, carries out the required string validation
-  - a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
+- The `type` must refer to the name of another type defined in the biz-ops-schema files, not a primitive type
+- Additional information - `relationship`, `direction` and `hasMany` - must be set in order to define how neo4j should store the data, and how graphQL should represent it (see [the spec]((MODEL_SPECIFICATION.md#relationship-property-definitions)))
+- The relationship must be defined at both ends, so you will need to modify more than one type file!
 
-## Enums
+### Example
 
-These are used to create enums/dropdown lists to restrict the values accepted in any field. For example `ServiceTier` is an enum with the values `Platinum`, `Gold` etc...
+Say I have another type called `Naturalist` and I want to add information on who discovered each species (we'll assume species can't be discovered by two people at the same time in order to illustrate some principles)
 
-To define a new enum add a property to `schema/enums.yaml` with either an array of values, or (if any of the values contain a number) a map of key/value pairs
+In the underlying database we'd probably represent this by a `DISCOVERED_BY` relationship (by convention, relationships are capitalised, with words separated by underscores). This relationship would point _from_ the `BirdOfParadise` and _to_ the `Naturalist`. In other words, from the `Naturalist`'s point of view it is _incoming_, and from the `BirdOfParadise`'s view it is _outgoing_'.  `Naturalist`s may also discover more than one species, so from their point of view they may _have many_ relationships to`BirdOfParadise`s.
+
+So now we've thought about all the additional information we need to to model the relationship, and we can (once we've thought of a name, label and description) add a property to both types
+
+#### Naturalist.yaml
 
 ```yaml
-Office:
-  - OSB
-  - Manila
-  ...
-StarRating:
-  One: 1
-  Two: 2
-  ...
+speciesDiscovered:
+  type: BirdOfParadise
+  relationship: DISCOVERED_BY
+  direction: incoming
+  hasMany: true
+  name: ...
 ```
+
+#### BirdOfParadise.yaml
+
+```yaml
+discoveredBy:
+  type: Naturalist
+  relationship: DISCOVERED_BY
+  direction: outgoing
+  name: ...
+```
+
+Note that we don't need to specify `hasMany` for any relationship that can only ever point at one record: it defaults to `false`, but you can add it if you want to for clarity.
+
+## You're probably not finished yet
+
+Please have a read through the [model specification](MODEL_SPECIFICATION.md), which will tell you how to define enums, create validation rules for strings, group properties into fieldsets and add further configuration to properties and types. If you find anything confusing please don't hesitate to raise it in the #biz-ops slack channel, or submit a pull request with a `work in progress` label and ask for comment.
