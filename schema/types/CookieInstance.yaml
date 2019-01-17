@@ -1,4 +1,4 @@
-name: ComplianceData
+name: CookieInstance
 description: A node with cookie compliance data to add relationship properties between cookie and product
 rank: 100
 properties:
@@ -41,11 +41,11 @@ properties:
     required: true
     isCore: true
 
-  complianceDataFor:
+  cookieInstance:
     type: Cookie
-    label: Compliance Data 
-    relationship: HAS_COMPLIANCE_DATA_OF
-    description: The compliance data for a cookie attached to product by ComplianceData type.
+    label: Cookie Instance
+    relationship: IS_SET_AS
+    description: The cookie instance data for a cookie attached to product by CookieInstance type.
     direction: incoming 
 
 fieldsets:

@@ -119,10 +119,10 @@ CookieType:
 CookiePurpose:
   description: ICC cookie classification type
   options:
-    - Strictly Necessary
+    - StrictlyNecessary
     - Performance
     - Functionality
-    - Targeting or Advertising
+    - TargetingOrAdvertising
 
 
 
