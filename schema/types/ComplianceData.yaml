@@ -33,7 +33,7 @@ properties:
     description: The average life span of the cookie. 
     isCore: true
 
-path:
+  path:
     type: Word
     label: Path
     description: The path the cookie is set on  
