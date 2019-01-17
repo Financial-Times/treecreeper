@@ -9,7 +9,6 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    canIdentify: true
     fieldset: main
     autoPopulated: true
     
