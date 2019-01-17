@@ -37,7 +37,7 @@ properties:
   path:
     type: Word
     label: Path
-    description: The path the cookie is set on  
+    description: The path the cookie is set on . 
     required: true
     isCore: true
 
@@ -45,10 +45,10 @@ properties:
     type: Cookie
     label: Compliance Data 
     relationship: HAS_COMPLIANCE_DATA_OF
-    description: The compliance data for a cookie attached to product by ComplianceData type
+    description: The compliance data for a cookie attached to product by ComplianceData type.
     direction: incoming 
 
 fieldsets:
   main:
     heading: Main properties
-    description: These are all essential to fill out
+    description: These are all essential to fill out.
