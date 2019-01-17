@@ -41,9 +41,9 @@ properties:
     required: true
     isCore: true
 
-  cookieInstance:
+  cookieInstanceOf:
     type: Cookie
-    label: Cookie Instance
+    label: Cookie Instance of Cookie type
     relationship: IS_SET_AS
     description: The cookie instance data for a cookie attached to product by CookieInstance type.
     direction: incoming 
