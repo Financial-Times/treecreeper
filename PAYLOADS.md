@@ -62,7 +62,7 @@ The identical structure can also be used to update the relationships using PATCH
 
 The **upsert** URL query string option allows POST and PATCH to create the related items for you. Typically this is used during an automated upload when the provider of the data owns both the core data and all the related data.
 
-**Beware**: incorrect use of the option, where the payload contains misspelt dependencies, will cause the creation duplicates/aliases. For example, dont upsert the techleads or product owners of a team since we already have a upload process that ensures all people are present in biz-ops (a daily people API upload).
+**Beware**: incorrect use of the option, where the payload contains misspelt dependencies, will cause the creation of duplicates/aliases. For example, dont upsert the techleads or product owners of a team since we already have a upload process that ensures all people are present in biz-ops (a daily people API upload).
 
 A good example of upsert is the upload of infrastructure. For example the following POST will create an EC2 instance and its network connections:
 
@@ -141,7 +141,7 @@ The effect of the two settings of relationshipAction in the above scenario is as
 * The person.three productOwner relationship is removed
 * A person.five productOwner relationship is created
 
-The final effect is the same ass having POSTed the new version of the body to the team.
+The final effect is the same as having POSTed the new version of the body to the team.
 
 
 ### PATCH /v2/node/Team/newteam?relationshipAction=merge
@@ -174,4 +174,4 @@ The final effect is the same as having POSTed
  
  You would combine both URL querystring parameters if you had a regular upload process where you were in full control of all the data you were uploading.  That would ensure that the result of your PATCH requested would always result in the final state of the data being as you expect without extra or missing relationships.
  
- **DO NOT** use **upsert=true** and **relationshipAction=replace** when you are updating the basic fields of a record (e.g. changing name or statue fields) as you will have the potential to corrupt all the relationships.
+ **DO NOT** use **upsert=true** and **relationshipAction=replace** when you are just updating the basic fields of a record (e.g. changing name or statue fields) as you will have the potential to corrupt all the relationships.
