@@ -1,3 +1,3 @@
 module.exports = {
-	TIMEOUT: 15000,
+	TIMEOUT: process.env.TIMEOUT || 15000,
 };

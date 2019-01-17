@@ -14,6 +14,7 @@ module.exports = {
 	strings: {
 		deny: [],
 		denyOverrides: [
+			'd5deb97d-5fa2-45f2-99fa-cd155328320d', // uuid for biz-ops-api dashboard url
 			'bf2e19d8-7601-11e8-864d-61e3701df193', // README.md:4
 			'32e6ad1a-210f-11e8-89cc-978cb917c4e7', // doc/MODEL.md:5
 			'396e2a98-1d16-11e8-87fd-7f7eb4f8a221', // doc/MODEL.md:11
