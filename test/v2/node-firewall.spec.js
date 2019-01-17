@@ -259,27 +259,33 @@ describe('v2 - node generic', () => {
 	].forEach(([method, checkBody]) => {
 		describe(`security checks - ${method}`, () => {
 			// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
-			const cypherQuery =
-				'1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r';
+			const INJECTION_ATTACK_STRING =
+				'"1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r"';
+			const ESCAPED_INJECTION_ATTACK_STRING =
+				'\\\\"1 WITH count\\(1\\) AS dummy MATCH \\(u:User\\) OPTIONAL MATCH \\(u\\)-\\[r\\]-\\(\\) DELETE u, r\\\\"';
 			it('should error when node type is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method](`/v2/node/${cypherQuery}/${teamCode}`)
+					[method](`/v2/node/${INJECTION_ATTACK_STRING}/${teamCode}`)
 					.namespacedAuth()
 					.expect(
 						400,
-						/Invalid node type `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+						new RegExp(
+							`Invalid node type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
 					);
 			});
 
 			it('should error when node code is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method](`/v2/node/Team/${cypherQuery}`)
+					[method](`/v2/node/Team/${INJECTION_ATTACK_STRING}`)
 					.namespacedAuth()
 					.expect(
 						400,
-						/Invalid value `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r` for property `code` on type `Team`/,
+						new RegExp(
+							`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`Team\``,
+						),
 					);
 			});
 
@@ -288,10 +294,12 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-id', `${cypherQuery}`)
+					.set('client-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
 						400,
-						/Invalid client id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+						new RegExp(
+							`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
 					);
 			});
 
@@ -300,10 +308,12 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-user-id', `${cypherQuery}`)
+					.set('client-user-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
 						400,
-						/Invalid client user id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+						new RegExp(
+							`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
 					);
 			});
 
@@ -313,10 +323,12 @@ describe('v2 - node generic', () => {
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-id', 'valid-id')
-					.set('x-request-id', `${cypherQuery}`)
+					.set('x-request-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
 						400,
-						/Invalid request id `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r`/,
+						new RegExp(
+							`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
 					);
 			});
 
@@ -328,7 +340,7 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								prop: `${cypherQuery}`,
+								prop: `${INJECTION_ATTACK_STRING}`,
 							})
 							.expect(({ status }) =>
 								/20(0|1)/.test(String(status)),
@@ -342,7 +354,7 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								[`${cypherQuery}`]: 'value',
+								[`${INJECTION_ATTACK_STRING}`]: 'value',
 							})
 							.expect(400);
 					});
@@ -353,11 +365,13 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								supports: [`${cypherQuery}`],
+								supports: [`${INJECTION_ATTACK_STRING}`],
 							})
 							.expect(
 								400,
-								/Invalid value `1 WITH count\(1\) AS dummy MATCH \(u:User\) OPTIONAL MATCH \(u\)-\[r\]-\(\) DELETE u, r` for property `code` on type `System`/,
+								new RegExp(
+									`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`System\``,
+								),
 							);
 					});
 				});
