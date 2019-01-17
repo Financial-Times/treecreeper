@@ -61,6 +61,7 @@ properties:
     type: CookieInstance
     label: Cookie instance data
     relationship: IS_SET_AS
+    hasMany: true
     description: The cookie instance data attached to product by CookieInstance type.
     direction: outgoing 
 
