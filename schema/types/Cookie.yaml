@@ -58,7 +58,7 @@ properties:
     fieldset: main
 
   hasCookieInstanceOf:
-    type: CookieInstances
+    type: CookieInstance
     label: Cookie instance data
     relationship: IS_SET_AS
     description: The cookie instance data attached to product by CookieInstance type.
