@@ -111,3 +111,17 @@ GDPRProcess:
     # # TBD
     # # Work is still ongoing to define delete methods for a small number of systems.
     # - TBD
+CookieType:
+  description: Cookie party classification type
+  options:
+    - First Party 
+    - Third Party
+CookiePurpose:
+  description: ICC cookie classification type
+    - Strictly Necessary
+    - Performance
+    - Functionality
+    - Targeting or Advertising
+
+
+

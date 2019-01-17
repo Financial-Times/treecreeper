@@ -1,0 +1,54 @@
+name: ComplianceData
+description: A node with cookie compliance data to add relationship properties between cookie and product
+properties:
+  code:
+    type: Code
+    label: Code
+    description: Unique code/id for this Compliance data node. 
+    canIdentify: true
+    required: true
+    unique: true
+    canIdentify: true
+    fieldset: main
+    autoPopulated: true
+
+  persistent:
+    type: Int
+    label: Number of times found as persistent cookie
+    description: How many websites the cookie has been found as persistent cookie.
+    required: true
+    isCore: true
+    fieldset: main
+  
+  session:
+    type: Int
+    label: Number of times found as a session cookie
+    description: How many websites the cookie has been found as session cookie.
+    required: true
+    isCore: true
+    fieldset: main
+  
+  avgLifeSpan:
+    type: Int
+    label: Average Life Span
+    description: The average life span of the cookie. 
+    isCore: true
+
+path:
+    type: Word
+    label: Path
+    description: The path the cookie is set on  
+    required: true
+    isCore: true
+
+  ComplianceDataFor:
+    type: Cookie
+    label: Compliance Data 
+    relationship: HAS_COMPLIANCE_DATA_OF
+    description: The compliance data for a cookie attached to product by ComplianceData type 
+    direction: incoming 
+
+fieldsets:
+  main:
+    heading: Main properties
+    description: These are all essential to fill out
