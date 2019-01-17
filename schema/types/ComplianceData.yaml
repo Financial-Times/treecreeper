@@ -1,5 +1,6 @@
 name: ComplianceData
 description: A node with cookie compliance data to add relationship properties between cookie and product
+rank: 100
 properties:
   code:
     type: Code
@@ -40,11 +41,11 @@ properties:
     required: true
     isCore: true
 
-  ComplianceDataFor:
+  complianceDataFor:
     type: Cookie
     label: Compliance Data 
     relationship: HAS_COMPLIANCE_DATA_OF
-    description: The compliance data for a cookie attached to product by ComplianceData type 
+    description: The compliance data for a cookie attached to product by ComplianceData type
     direction: incoming 
 
 fieldsets:

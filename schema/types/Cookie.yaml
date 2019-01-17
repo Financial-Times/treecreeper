@@ -1,5 +1,6 @@
 name: Cookie
 description: A small packet of information sent by a web host to your computer when you visit a website.
+rank: 100
 properties:
   code:
     type: Code
@@ -25,7 +26,7 @@ properties:
   type:
     type: CookieType
     label: Type
-    description: First or Third party cookie
+    description: First or Third party cookie.
     required: true
     isCore: true
     canFilter: true
@@ -34,7 +35,7 @@ properties:
   purpose:
     type: CookiePurpose
     label: Purpose
-    description: ICC classification of cookie
+    description: ICC classification of cookie.
     required: true
     isCore: true
     canFilter: true
@@ -43,7 +44,7 @@ properties:
   description:
     type: Sentence
     label: Description
-    description: Short description of what the cookie does and data it stores
+    description: Short description of what the cookie does and data it stores.
     required: true
     isCore: true
     fieldset: main
@@ -51,7 +52,7 @@ properties:
   provider:
     type: Word
     label: Purpose
-    description: ICC classification of cookie
+    description: ICC classification of cookie.
     required: true
     isCore: true
     canFilter: true
@@ -61,13 +62,13 @@ properties:
     type: ComplianceData
     label: Compliance Data for cookie by domain
     relationship: HAS_COMPLIANCE_DATA_OF
-    description: The cookies compliance data attached to product by ComplianceData type 
+    description: The cookies compliance data attached to product by ComplianceData type.
     direction: outgoing 
 
 fieldsets:
   main:
     heading: Main properties
-    description: These are all essential to fill out
+    description: These are all essential to fill out.
 
 
 

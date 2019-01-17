@@ -118,6 +118,7 @@ CookieType:
     - Third Party
 CookiePurpose:
   description: ICC cookie classification type
+  options:
     - Strictly Necessary
     - Performance
     - Functionality
