@@ -258,7 +258,7 @@ describe('v2 - node generic', () => {
 		['delete', false],
 	].forEach(([method, checkBody]) => {
 		describe(`security checks - ${method}`, () => {
-			// Example cypher query from https://stackoverflow.com/a/24317293/10917765
+			// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 			const cypherQuery =
 				'1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r';
 			it('should error when node type is suspicious', async () => {

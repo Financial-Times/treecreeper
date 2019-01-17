@@ -13,3 +13,4 @@ yarn-error.log
 /neo4j
 .eslintcache
 /.nyc_output/
+junit.xml
