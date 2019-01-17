@@ -1,7 +1,7 @@
 # Business Operations API
 
 Modelling our business' operations
-![image](https://user-images.githubusercontent.com/447559/51336929-bae03200-1a7d-11e9-9cbc-0c12a38ab010.png)
+![image](https://user-images.githubusercontent.com/447559/51336971-dba88780-1a7d-11e9-9f6b-e867440c3985.png)
 
 ## Architecture
 
