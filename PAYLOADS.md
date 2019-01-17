@@ -1,6 +1,6 @@
 # JSON Payload Structure
 
-Write requests to the API (POST and PATCH) require both URL parameters and a JSON body to be provided. The structure of the body varies slightly depending on whether the desired create/update include relations and whether the related records already exist.
+Write requests to the API (POST and PATCH) require both URL parameters and a JSON body to be provided. The structure of the body varies slightly depending on whether the desired create/update include relationships and whether the related records already exist.
 
 ## Basic structure
 
@@ -8,7 +8,8 @@ At its simplest the JSON body is just values for each of the properties named in
 
 For example: To create a new Team named "New Team" you would POST the following:
 
-POST /v2/node/Team/newteam
+*POST /v2/node/Team/newteam*
+```
 {
     "code": "newteam" ,
     "name": "New Team",
@@ -20,6 +21,7 @@ POST /v2/node/Team/newteam
     "isThirdParty": false,
     "supportRota": "https://docs.google.com/dsdaaSFASf"
 }
+```
 
 The identical structure could be passed to PATCH to update all the fields on the team.
 
@@ -32,7 +34,8 @@ The POST and PATCH requests support a variation to the above basic structure tha
 
 For example: The team schema includes fields named **techLeads**, **productOwners**, **delivers** and **supports** (amoungst others) which allow the team to be connected.  To connect create AND connect a team you would post the following:
 
-POST /v2/node/Team/newteam
+*POST /v2/node/Team/newteam*
+```
 {
     "code": "newteam" ,
     "name": "New Team",
@@ -48,6 +51,7 @@ POST /v2/node/Team/newteam
     "delivers": [system1, system2, system3],
     "supports": [system2, system3, system4]
 }
+```
 
 The identical structure can also be used to update the relationships using PATCH but, as described below, some care is required re whether you wish to add to existing relationships or replace.
 
@@ -62,7 +66,8 @@ The **upsert** URL query string option allows POST and PATCH to create the relat
 
 A good example of upsert is the upload of infrastructure. For example the following POST will create an EC2 instance and its network connections:
 
-POST /v2/node/EC2/123454321?upsert=true
+*POST /v2/node/EC2/123454321?upsert=true*
+```
 {
     "code": "123454321",
     "account": ["505606707"],
@@ -75,8 +80,9 @@ POST /v2/node/EC2/123454321?upsert=true
     "securityGroup": ["876987"],
     "environment": "t"
 }
+```
 
-The effect of the above, due to the presence of **upsert=true** will be to create *EC2: 123454321* and *each* of the following if *they did not already exist*:
+The effect of the above, due to the presence of **upsert=true** will be to create **EC2:123454321** and **each** of the following if **they did not already exist**:
 + Account: 505606707
 + VPC: 456789
 + Subnet: 567890
@@ -106,7 +112,8 @@ For example: Our original creation of **New Team** (see above) triggered the fol
 + newteam -> supports -> system4
 
 We will now send the following PATCH request which has different techLeads and productOwners (but the same systems):
-PATCH /v2/node/Team/newteam
+*PATCH /v2/node/Team/newteam*
+```
 {
     "code": "newteam" ,
     "name": "New Team",
@@ -122,6 +129,7 @@ PATCH /v2/node/Team/newteam
     "delivers": [system1, system2, system3],
     "supports": [system2, system3, system4]
 }
+```
 
 The request will fail because we have not supplied a value for the relationshipAction parameter. We must supply a value as the API cannot guess if we wanted to add person.four as a techLead or replace the existing techLeads.
 The effect of the two settings of relationshipAction in the above scenario is as follows:
@@ -143,8 +151,9 @@ The final effect is the same ass having POSTed the new version of the body to th
 * The person.three productOwner relationship is retained
 * A person.five productOwner relationship is created
 
-The final effect is the same ass having POSTedL
- {
+The final effect is the same as having POSTed
+```
+{
      "code": "newteam" ,
      "name": "New Team",
      "description": "This is an example of a new team",
@@ -159,8 +168,9 @@ The final effect is the same ass having POSTedL
      "delivers": [system1, system2, system3],
      "supports": [system2, system3, system4]
  }
+ ```
  
- ## upsert and relatinoshipAction
+ ## upsert and relationshipAction
  
  You would combine both URL querystring parameters if you had a regular upload process where you were in full control of all the data you were uploading.  That would ensure that the result of your PATCH requested would always result in the final state of the data being as you expect without extra or missing relationships.
  
