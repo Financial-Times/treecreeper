@@ -258,22 +258,34 @@ describe('v2 - node generic', () => {
 		['delete', false],
 	].forEach(([method, checkBody]) => {
 		describe(`security checks - ${method}`, () => {
+			// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
+			const INJECTION_ATTACK_STRING =
+				'"1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r"';
+			const ESCAPED_INJECTION_ATTACK_STRING =
+				'\\\\"1 WITH count\\(1\\) AS dummy MATCH \\(u:User\\) OPTIONAL MATCH \\(u\\)-\\[r\\]-\\(\\) DELETE u, r\\\\"';
 			it('should error when node type is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method](`/v2/node/DROP ALL/${teamCode}`)
+					[method](`/v2/node/${INJECTION_ATTACK_STRING}/${teamCode}`)
 					.namespacedAuth()
-					.expect(400, /Invalid node type `DROP ALL`/);
+					.expect(
+						400,
+						new RegExp(
+							`Invalid node type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
+					);
 			});
 
 			it('should error when node code is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method]('/v2/node/Team/DROP ALL')
+					[method](`/v2/node/Team/${INJECTION_ATTACK_STRING}`)
 					.namespacedAuth()
 					.expect(
 						400,
-						/Invalid value `DROP ALL` for property `code` on type `Team`/,
+						new RegExp(
+							`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`Team\``,
+						),
 					);
 			});
 
@@ -282,8 +294,13 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-id', 'DROP ALL')
-					.expect(400, /Invalid client id `DROP ALL`/);
+					.set('client-id', `${INJECTION_ATTACK_STRING}`)
+					.expect(
+						400,
+						new RegExp(
+							`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
+					);
 			});
 
 			it('should error when client user id is suspicious', async () => {
@@ -291,8 +308,13 @@ describe('v2 - node generic', () => {
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-user-id', 'DROP ALL')
-					.expect(400, /Invalid client user id `DROP ALL`/);
+					.set('client-user-id', `${INJECTION_ATTACK_STRING}`)
+					.expect(
+						400,
+						new RegExp(
+							`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
+					);
 			});
 
 			it('should error when request id is suspicious', async () => {
@@ -301,8 +323,13 @@ describe('v2 - node generic', () => {
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-id', 'valid-id')
-					.set('x-request-id', 'DROP ALL')
-					.expect(400, /Invalid request id `DROP ALL`/);
+					.set('x-request-id', `${INJECTION_ATTACK_STRING}`)
+					.expect(
+						400,
+						new RegExp(
+							`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						),
+					);
 			});
 
 			if (checkBody) {
@@ -313,7 +340,7 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								prop: 'MATCH (n) DELETE n',
+								prop: `${INJECTION_ATTACK_STRING}`,
 							})
 							.expect(({ status }) =>
 								/20(0|1)/.test(String(status)),
@@ -327,12 +354,10 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								'MATCH (n) DELETE n': 'value',
+								[`${INJECTION_ATTACK_STRING}`]: 'value',
 							})
 							.expect(400);
 					});
-
-					it.skip('TODO: write a test that is a better test of cypher injection', () => {});
 
 					it('should error when relationship node code is suspicious', async () => {
 						await sandbox
@@ -340,11 +365,13 @@ describe('v2 - node generic', () => {
 							[method](teamRestUrl)
 							.namespacedAuth()
 							.send({
-								supports: ['DROP ALL'],
+								supports: [`${INJECTION_ATTACK_STRING}`],
 							})
 							.expect(
 								400,
-								/Invalid value `DROP ALL` for property `code` on type `System`/,
+								new RegExp(
+									`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`System\``,
+								),
 							);
 					});
 				});
