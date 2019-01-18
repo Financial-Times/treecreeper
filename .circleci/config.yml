@@ -67,14 +67,14 @@ jobs:
       - run:
           name: Run tests
           command: make test
-  lint:
+  verify:
     <<: *default_container_config
     steps:
       - *attach_workspace
 
       - run:
           name: Run tests
-          command: make lint
+          command: make verify -j 3
 
   release:
     <<: *default_container_config
@@ -99,7 +99,7 @@ workflows:
             - install
           filters:
             <<: *triggerable-by-tag
-      - lint:
+      - verify:
           requires:
             - install
           filters:
@@ -108,7 +108,7 @@ workflows:
           requires:
             - install
             - test
-            - lint
+            - verify
           filters:
             <<: *triggerable-by-tag
             branches:
