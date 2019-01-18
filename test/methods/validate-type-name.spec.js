@@ -1,5 +1,5 @@
 const getType = require('../../methods/get-type');
-const { validateTypeName } = require('../../');
+const { validateTypeName } = require('../..');
 
 jest.mock('../../methods/get-type');
 
@@ -18,12 +18,12 @@ describe('validateTypeName', () => {
 
 	it('accept names in the list', () => {
 		getType.mockReturnValue({
-			name: 'Thing'
+			name: 'Thing',
 		});
-		expect(() => validateTypeName('Thing')).not.toThrowError();
+		expect(() => validateTypeName('Thing')).not.toThrow();
 	});
 	it('reject names not in the list', () => {
 		getType.mockReturnValue();
-		expect(() => validateTypeName('Thingo')).toThrowError(/Invalid node type/);
+		expect(() => validateTypeName('Thingo')).toThrow(/Invalid node type/);
 	});
 });

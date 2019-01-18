@@ -1,7 +1,7 @@
-const rawData = require('../lib/raw-data');
-const cache = require('../lib/cache');
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
+const rawData = require('../lib/raw-data');
+const cache = require('../lib/cache');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('./constants');
@@ -19,8 +19,8 @@ const getType = (
 		primitiveTypes = BIZ_OPS, // graphql
 		withRelationships = true,
 		groupProperties = false,
-		includeMetaFields = true
-	} = {}
+		includeMetaFields = true,
+	} = {},
 ) => {
 	let type = rawData.getTypes().find(type => type.name === typeName);
 	if (!type) {
@@ -51,7 +51,7 @@ const getType = (
 				Object.assign(def, {
 					hasMany: def.hasMany || false,
 					isRelationship: !!def.relationship,
-					isRecursive: def.isRecursive || false
+					isRecursive: def.isRecursive || false,
 				});
 			}
 		});
@@ -63,7 +63,7 @@ const getType = (
 			description: metaProperty.description,
 			label: metaProperty.label,
 			fieldset: META,
-			autoPopulated: true
+			autoPopulated: true,
 		};
 	});
 
@@ -88,14 +88,16 @@ const getType = (
 		type.properties = entriesArrayToObject(properties);
 	} else {
 		const virtualFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset === SELF
+			([, { fieldset }]) => fieldset === SELF,
 		);
 
 		const realFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset && fieldset !== SELF
+			([, { fieldset }]) => fieldset && fieldset !== SELF,
 		);
 
-		const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
+		const miscProperties = properties.filter(
+			([, { fieldset }]) => !fieldset,
+		);
 
 		const fieldsets = Object.entries(type.fieldsets || {});
 
@@ -107,8 +109,8 @@ const getType = (
 			.map(([fieldsetName, fieldsetDef]) => {
 				fieldsetDef.properties = entriesArrayToObject(
 					realFieldsetProperties.filter(
-						([, { fieldset }]) => fieldset === fieldsetName
-					)
+						([, { fieldset }]) => fieldset === fieldsetName,
+					),
 				);
 
 				return [fieldsetName, fieldsetDef];
@@ -123,10 +125,10 @@ const getType = (
 						heading: propertyDef.label,
 						description: propertyDef.description,
 						isSingleField: true,
-						properties: { [propertyName]: propertyDef }
-					}
+						properties: { [propertyName]: propertyDef },
+					},
 				];
-			}
+			},
 		);
 
 		const miscellaneous = miscProperties.length
@@ -135,18 +137,19 @@ const getType = (
 						'misc',
 						{
 							heading:
-								(includeMetaFields && realFieldsets.length > 1) ||
+								(includeMetaFields &&
+									realFieldsets.length > 1) ||
 								(!includeMetaFields && realFieldsets.length)
 									? 'Miscellaneous'
 									: 'General',
-							properties: entriesArrayToObject(miscProperties)
-						}
-					]
+							properties: entriesArrayToObject(miscProperties),
+						},
+					],
 			  ]
 			: [];
 
 		type.fieldsets = entriesArrayToObject(
-			[].concat(realFieldsets, virtualFieldsets, miscellaneous)
+			[].concat(realFieldsets, virtualFieldsets, miscellaneous),
 		);
 
 		delete type.properties;
@@ -163,8 +166,8 @@ module.exports = cache.cacheify(
 			primitiveTypes = BIZ_OPS,
 			withRelationships = true,
 			groupProperties = false,
-			includeMetaFields = true
-		} = {}
+			includeMetaFields = true,
+		} = {},
 	) =>
-		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`
+		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
 );

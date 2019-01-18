@@ -5,7 +5,7 @@ module.exports = Object.assign(
 		getEnums: require('./methods/get-enums'),
 		getGraphqlDefs: require('./methods/get-graphql-defs'),
 		normalizeTypeName: name => name,
-		primitiveTypesMap: require('./lib/primitive-types-map')
+		primitiveTypesMap: require('./lib/primitive-types-map'),
 	},
-	require('./lib/validate')
+	require('./lib/validate'),
 );
