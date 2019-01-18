@@ -34,12 +34,6 @@ references:
     attach_workspace:
       at: *workspace_root
 
-
-  release: &release
-    run:
-      name: Release npm package
-      command: >
-        make publish
 jobs:
   install:
     <<: *default_container_config
@@ -85,7 +79,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ${HOME}/.npmrc
       - run:
           name: Publish to npm
-          command: make publish
+          command: make npm-publish
 
 workflows:
   version: 2
