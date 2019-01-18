@@ -21,7 +21,7 @@ verify:
 install:
 
 test:
-ifneq ($(CIRCLECI),)
+ifneq ($(CI),)
 	jest test
 else
 	jest test --watch
