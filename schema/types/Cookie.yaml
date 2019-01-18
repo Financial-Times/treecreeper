@@ -57,14 +57,6 @@ properties:
     canFilter: true
     fieldset: main
 
-  hasCookieInstanceOf:
-    type: CookieInstance
-    label: Cookie instance data
-    relationship: IS_SET_AS
-    hasMany: true
-    description: The cookie instance data attached to product by CookieInstance type.
-    direction: outgoing 
-
 fieldsets:
   main:
     heading: Main properties

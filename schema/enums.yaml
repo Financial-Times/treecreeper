@@ -114,8 +114,8 @@ GDPRProcess:
 CookieType:
   description: Cookie party classification type
   options:
-    - First Party 
-    - Third Party
+    - FirstParty 
+    - ThirdParty
 CookiePurpose:
   description: ICC cookie classification type
   options:
