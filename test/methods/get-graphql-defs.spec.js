@@ -7,8 +7,8 @@ const explodeString = str =>
 	str
 		.split('\n')
 		// exclude strings which are just whitespace or empty
-		.filter(str => !/^[\s]*$/.test(str))
-		.map(str => str.trim());
+		.filter(string => !/^[\s]*$/.test(string))
+		.map(string => string.trim());
 
 describe('graphql def creation', () => {
 	beforeEach(() => {
@@ -125,10 +125,10 @@ code: String
 # The name of the cost centre
 name: String
 # The groups which are costed to the cost centre
-hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
+hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
 # The recursive groups which are costed to the cost centre
 hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
-statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
+statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related"
 )
 
 # The client that was used to make the creation
@@ -153,10 +153,10 @@ name: String
 isActive: Boolean
 
 # The Cost Centre associated with the group
-hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
+hasBudget: CostCentre @relation(name: "PAYS_FOR", direction: "IN")
 # The Cost Centre associated with the group in the end
 hasEventualBudget: CostCentre @cypher(
-statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
+statement: "MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related"
 )
 
 # The client that was used to make the creation

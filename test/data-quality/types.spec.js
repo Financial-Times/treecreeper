@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+const validURL = require('valid-url');
 const rawData = require('../../lib/raw-data');
 
 const types = rawData.getTypes();
@@ -8,11 +11,8 @@ const getStringValidator = require('../../lib/get-string-validator');
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
-const fs = require('fs');
-const path = require('path');
 
 const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`);
-const validURL = require('valid-url');
 
 const getTwinnedRelationship = (
 	homeTypeName,
@@ -74,7 +74,7 @@ describe('data quality: types', () => {
 					expect(validURL.isUri(type.creationURL)).toBeTruthy();
 				}
 			});
-			const fieldsets = type.fieldsets;
+			const { fieldsets } = type;
 			const validFieldsetNames = fieldsets
 				? ['self'].concat(Object.keys(fieldsets))
 				: [];
@@ -86,7 +86,7 @@ describe('data quality: types', () => {
 					});
 					Object.entries(type.fieldsets).forEach(
 						([name, fieldsetConfig]) => {
-							describe(name, () => {
+							describe(`${name}`, () => {
 								it('has a heading', () => {
 									expect(typeof fieldsetConfig.heading).toBe(
 										'string',
@@ -107,7 +107,7 @@ describe('data quality: types', () => {
 
 			describe('properties', () => {
 				Object.entries(type.properties).forEach(([name, config]) => {
-					describe(name, () => {
+					describe(`${name}`, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
 								const commonKeys = [
@@ -163,14 +163,14 @@ describe('data quality: types', () => {
 
 						it('has valid label', () => {
 							expect(typeof config.label).toBe('string');
-							expect(/[\.!]$/.test(config.label.trim())).toBe(
+							expect(/[.!]$/.test(config.label.trim())).toBe(
 								false,
 							);
 						});
 						it('has valid description', () => {
 							expect(typeof config.description).toBe('string');
 							expect(
-								/[\.\?]$/.test(config.description.trim()),
+								/[.?]$/.test(config.description.trim()),
 							).toBe(true);
 						});
 						it('has valid type', () => {

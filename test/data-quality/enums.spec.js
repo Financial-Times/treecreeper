@@ -4,7 +4,7 @@ const enums = rawData.getEnums();
 
 describe('data quality: enum spec', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {
-		describe(name, () => {
+		describe(`${name}`, () => {
 			it('has a description', () => {
 				expect(typeof description).toBe('string');
 				expect(description.length).toBeGreaterThanOrEqual(1);
@@ -15,7 +15,7 @@ describe('data quality: enum spec', () => {
 				).toBe(true);
 			});
 			if (Array.isArray(options)) {
-				it('has only string keys', () => {
+				it('has only string keys ', () => {
 					options.forEach(opt => expect(typeof opt).toBe('string'));
 				});
 				it('has no keys beginning with numbers', () => {

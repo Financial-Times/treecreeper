@@ -50,7 +50,7 @@ describe('get-type', () => {
 
 			it(`returns auto generated meta property ${propertyName}`, () => {
 				const propertyExpectedResult = metaProperties.find(
-					property => property.name === propertyName,
+					prop => prop.name === propertyName,
 				);
 				const propertyActualResult = type.properties[property.name];
 				expect(propertyActualResult.type).toBe(
@@ -131,7 +131,7 @@ describe('get-type', () => {
 			CODE: '^ab$',
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.validator;
+		const { validator } = type.properties.code;
 		expect(validator.test('ay')).toBe(false);
 		expect(validator.test('zb')).toBe(false);
 		expect(validator.test('ab')).toBe(true);
@@ -156,7 +156,7 @@ describe('get-type', () => {
 			},
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.validator;
+		const { validator } = type.properties.code;
 		expect(validator.test('AB')).toBe(true);
 	});
 

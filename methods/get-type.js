@@ -22,43 +22,49 @@ const getType = (
 		includeMetaFields = true,
 	} = {},
 ) => {
-	let type = rawData.getTypes().find(type => type.name === typeName);
-	if (!type) {
+	const typeDefinition = rawData
+		.getTypes()
+		.find(type => type.name === typeName);
+	if (!typeDefinition) {
 		return;
 	}
-	type = clone(type);
-	type.type = type.name;
+	const typeDefinitionResult = clone(typeDefinition);
+	typeDefinitionResult.type = typeDefinition.name;
 
-	if (!('properties' in type)) {
-		type.properties = {};
+	if (!('properties' in typeDefinitionResult)) {
+		typeDefinitionResult.properties = {};
 	}
-	if (!type.pluralName) {
-		type.pluralName = `${type.name}s`;
+	if (!typeDefinitionResult.pluralName) {
+		typeDefinitionResult.pluralName = `${typeDefinition.name}s`;
 	}
 
 	if (!withRelationships) {
-		Object.entries(type.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
-				delete type.properties[propName];
-			}
-		});
-	} else {
-		Object.entries(type.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
-				if (def.hidden) {
-					delete type.properties[propName];
+		Object.entries(typeDefinitionResult.properties).forEach(
+			([propName, def]) => {
+				if (def.relationship) {
+					delete typeDefinitionResult.properties[propName];
 				}
-				Object.assign(def, {
-					hasMany: def.hasMany || false,
-					isRelationship: !!def.relationship,
-					isRecursive: def.isRecursive || false,
-				});
-			}
-		});
+			},
+		);
+	} else {
+		Object.entries(typeDefinitionResult.properties).forEach(
+			([propName, def]) => {
+				if (def.relationship) {
+					if (def.hidden) {
+						delete typeDefinitionResult.properties[propName];
+					}
+					Object.assign(def, {
+						hasMany: def.hasMany || false,
+						isRelationship: !!def.relationship,
+						isRecursive: def.isRecursive || false,
+					});
+				}
+			},
+		);
 	}
 
 	metaProperties.forEach(metaProperty => {
-		type.properties[metaProperty.name] = {
+		typeDefinitionResult.properties[metaProperty.name] = {
 			type: metaProperty.type,
 			description: metaProperty.description,
 			label: metaProperty.label,
@@ -67,7 +73,7 @@ const getType = (
 		};
 	});
 
-	const properties = Object.entries(type.properties)
+	const properties = Object.entries(typeDefinitionResult.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -85,7 +91,7 @@ const getType = (
 		.filter(entry => !!entry);
 
 	if (!groupProperties) {
-		type.properties = entriesArrayToObject(properties);
+		typeDefinitionResult.properties = entriesArrayToObject(properties);
 	} else {
 		const virtualFieldsetProperties = properties.filter(
 			([, { fieldset }]) => fieldset === SELF,
@@ -99,7 +105,7 @@ const getType = (
 			([, { fieldset }]) => !fieldset,
 		);
 
-		const fieldsets = Object.entries(type.fieldsets || {});
+		const fieldsets = Object.entries(typeDefinitionResult.fieldsets || {});
 
 		if (includeMetaFields) {
 			fieldsets.push([META, { heading: 'Meta Data' }]);
@@ -115,6 +121,7 @@ const getType = (
 
 				return [fieldsetName, fieldsetDef];
 			})
+			/* eslint-disable no-shadow */
 			.filter(([, { properties }]) => !!Object.keys(properties).length);
 
 		const virtualFieldsets = virtualFieldsetProperties.map(
@@ -148,14 +155,14 @@ const getType = (
 			  ]
 			: [];
 
-		type.fieldsets = entriesArrayToObject(
+		typeDefinitionResult.fieldsets = entriesArrayToObject(
 			[].concat(realFieldsets, virtualFieldsets, miscellaneous),
 		);
 
-		delete type.properties;
+		delete typeDefinitionResult.properties;
 	}
 
-	return deepFreeze(type);
+	return deepFreeze(typeDefinitionResult);
 };
 
 module.exports = cache.cacheify(

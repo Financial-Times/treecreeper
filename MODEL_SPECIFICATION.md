@@ -2,11 +2,11 @@
 
 _Note that yaml files are indented with two spaces_
 
-- [Types](#types)
-- [Properties on existing types](#property-definitions)
-- [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
-- [Enums](#enums) (aka drop down options)
-- [String validation rules](#string-validation-rules)
+-   [Types](#types)
+-   [Properties on existing types](#property-definitions)
+-   [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
+-   [Enums](#enums) (aka drop down options)
+-   [String validation rules](#string-validation-rules)
 
 ## Types
 
@@ -88,36 +88,36 @@ Fieldsets group properties with other properties that are related to them e.g. a
 name: Bus
 pluralName: Buses
 description: |
-  Big red things
+    Big red things
 properties:
-  code:
-    type: Code
-    required: true
-    canIdentify: true
-    canFilter: true
-    description: 'Unique code/id for this item'
-    label: Code
-    fieldset: main
-    examples:
-      - LK60HPN
-  isOperational:
-    type: Boolean
-    trueLabel: Bus runs on public roads
-    falseLabel: Bus doesn't run or only runs off-road
+    code:
+        type: Code
+        required: true
+        canIdentify: true
+        canFilter: true
+        description: 'Unique code/id for this item'
+        label: Code
+        fieldset: main
+        examples:
+            - LK60HPN
+    isOperational:
+        type: Boolean
+        trueLabel: Bus runs on public roads
+        falseLabel: Bus doesn't run or only runs off-road
 fieldsets:
-  main:
-    heading: Main properties
-    description: These are all essential to fill out
+    main:
+        heading: Main properties
+        description: These are all essential to fill out
 ```
 
 ## String validation rules
 
 These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
 
-- The property name must be in CONSTANT_CASE
-- The value must be either
-  - a string that, when converted to a JavaScript regular expression, carries out the required string validation
-  - a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
+-   The property name must be in CONSTANT_CASE
+-   The value must be either
+    -   a string that, when converted to a JavaScript regular expression, carries out the required string validation
+    -   a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
 
 ## Enums
 
