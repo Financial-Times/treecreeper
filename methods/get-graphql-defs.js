@@ -140,7 +140,7 @@ module.exports = () => {
 	});
 
 	return [].concat(
-		typesFromSchema.map(defineType),
+		`scalar DateTime scalar Date scalar Time` + typesFromSchema.map(defineType),
 		'type Query {\n',
 		...typesFromSchema.map(defineQueries),
 		'}',
