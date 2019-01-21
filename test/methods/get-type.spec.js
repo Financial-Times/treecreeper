@@ -1,6 +1,7 @@
 const { getType } = require('../../');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
+const metaProperties = require('../../methods/constants');
 
 describe('get-type', () => {
 	beforeEach(() => {
@@ -13,24 +14,66 @@ describe('get-type', () => {
 		jest.restoreAllMocks();
 	});
 
-	it('returns all properties of a type', async () => {
+	describe('returns all properties', () => {
+		let type;
+
+		beforeEach(() => {
+			const type1 = {
+				name: 'Type1',
+				description: 'I am Type1',
+				properties: {
+					property1: {
+						type: 'String'
+					},
+					property2: {
+						type: 'Boolean'
+					}
+				}
+			};
+			rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
+			type = getType('Type1');
+		});
+
+		it('returns name and description and properties of type (excludes meta data)', () => {
+			expect(type.name).toBe('Type1');
+			expect(type.description).toBe('I am Type1');
+			expect(type.properties).toHaveProperty('property1');
+			expect(type.properties.property1).toMatchObject({ type: 'String' });
+			expect(type.properties).toHaveProperty('property2');
+			expect(type.properties.property2).toMatchObject({ type: 'Boolean' });
+		});
+
+		metaProperties.forEach(property => {
+			const propertyName = property.name;
+
+			it(`returns auto generated meta property ${propertyName}`, () => {
+				const propertyExpectedResult = metaProperties.find(
+					property => property.name === propertyName
+				);
+				const propertyActualResult = type.properties[property.name];
+				expect(propertyActualResult.type).toBe(propertyExpectedResult.type);
+				expect(propertyActualResult.description).toBe(
+					propertyExpectedResult.description
+				);
+				expect(propertyActualResult.label).toBe(propertyExpectedResult.label);
+				expect(propertyActualResult.fieldset).toBe('meta');
+				expect(propertyActualResult.autoPopulated).toBe(true);
+			});
+		});
+	});
+
+	it('returns meta properties when no other properties are set', () => {
+		const metaPropertyName = metaProperties.map(property => property.name);
 		const type1 = {
 			name: 'Type1',
-			description: 'I am Type1',
-			properties: {
-				property1: {
-					type: 'String'
-				},
-				property2: {
-					type: 'Boolean'
-				}
-			}
+			description: 'I am Type1'
 		};
 		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');
-		expect(type.name).toBe('Type1');
-		expect(type.description).toBe('I am Type1');
-		expect(type.properties).toEqual(type1.properties);
+		expect(type).toHaveProperty('properties');
+		metaPropertyName.forEach(propertyName => {
+			expect(type.properties).toHaveProperty(propertyName);
+		});
 	});
 
 	it('returns a type property to alias the name field', async () => {
@@ -268,6 +311,119 @@ describe('get-type', () => {
 		expect(type.fieldsets.misc.heading).toBe('General');
 	});
 
+	describe('misc heading of GENERAL for fieldset', () => {
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1',
+					properties: {
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					}
+				}
+			]);
+		});
+
+		it('is returned when includeMetaFields is TRUE', () => {
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.fieldsets.misc.heading).toBe('General');
+		});
+
+		it('is returned when includeMetaFields is FALSE', () => {
+			const type = getType('Type1', {
+				groupProperties: true,
+				includeMetaFields: false
+			});
+			expect(type.fieldsets.misc.heading).toBe('General');
+		});
+	});
+
+	describe('misc heading of MISCELLANEOUS for fieldset', () => {
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1',
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+							relationship: 'HAS',
+							label: 'A word relationship'
+						},
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS'
+						}
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please'
+						}
+					}
+				}
+			]);
+		});
+
+		it('is returned when includeMetaFields is TRUE', () => {
+			const type = getType('Type1', { groupProperties: true });
+			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+		});
+
+		it('is returned when includeMetaFields is FALSE', () => {
+			const type = getType('Type1', {
+				groupProperties: true,
+				includeMetaFields: false
+			});
+			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
+		});
+	});
+
+	describe('can group auto generated meta properties by fieldset', () => {
+		let type;
+
+		beforeEach(() => {
+			rawData.getTypes.mockReturnValue([
+				{
+					name: 'Type1'
+				}
+			]);
+
+			type = getType('Type1', { groupProperties: true });
+		});
+
+		it('returns meta fieldset', () => {
+			expect(type.fieldsets.meta.heading).toBe('Meta Data');
+			expect(type.fieldsets.meta.properties).toBeDefined();
+		});
+
+		metaProperties.forEach(property => {
+			const propertyName = property.name;
+			it(`returns meta fieldset property ${property.name}`, () => {
+				const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
+				expect(fieldsetProperty.type).toEqual(property.type);
+				expect(fieldsetProperty.description).toEqual(property.description);
+				expect(fieldsetProperty.label).toEqual(property.label);
+				expect(fieldsetProperty.autoPopulated).toEqual(true);
+			});
+		});
+	});
+
+	it('does not create meta data fieldset when includeMetaFields is set to FALSE', () => {
+		rawData.getTypes.mockReturnValue([
+			{
+				name: 'Type1'
+			}
+		]);
+		const type = getType('Type1', {
+			groupProperties: true,
+			includeMetaFields: false
+		});
+		expect(type.fieldsets).toEqual({});
+	});
+
 	describe('relationships', () => {
 		it('it can exclude relationships', async () => {
 			rawData.getTypes.mockReturnValue([
@@ -388,6 +544,7 @@ describe('get-type', () => {
 			expect(result.testName1.direction).toBe('outgoing');
 			expect(result.testName2.direction).toBe('incoming');
 		});
+
 		it('define recursive relationships', () => {
 			rawData.getTypes.mockReturnValue([
 				{
@@ -436,23 +593,21 @@ describe('get-type', () => {
 					}
 				}
 			]);
-			expect(getType('Type1').properties).toEqual({
-				many: {
-					isRecursive: false,
-					isRelationship: true,
-					type: 'Type2',
-					relationship: 'HAS',
-					direction: 'outgoing',
-					hasMany: true
-				},
-				singular: {
-					isRecursive: false,
-					isRelationship: true,
-					type: 'Type2',
-					relationship: 'HAS',
-					direction: 'incoming',
-					hasMany: false
-				}
+			expect(getType('Type1').properties.many).toEqual({
+				isRecursive: false,
+				isRelationship: true,
+				type: 'Type2',
+				relationship: 'HAS',
+				direction: 'outgoing',
+				hasMany: true
+			});
+			expect(getType('Type1').properties.singular).toEqual({
+				isRecursive: false,
+				isRelationship: true,
+				type: 'Type2',
+				relationship: 'HAS',
+				direction: 'incoming',
+				hasMany: false
 			});
 		});
 
