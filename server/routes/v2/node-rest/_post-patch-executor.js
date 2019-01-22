@@ -51,15 +51,15 @@ const createRelationships = (upsert, relationships, globalParameters) => {
 	// but unfortunately parameters cannot be used to specify relationship labels
 	return `
 ${groupedRelationships
-		.map(obj => {
-			return stripIndents`
+	.map(obj => {
+		return stripIndents`
 		WITH node
 		${upsert ? cypherHelpers.mergeNode(obj) : cypherHelpers.optionalMatchNode(obj)}
 		WITH node, related
 		${cypherHelpers.mergeRelationship(obj)}
 	`;
-		})
-		.join('\n')}`;
+	})
+	.join('\n')}`;
 };
 
 module.exports = async ({
