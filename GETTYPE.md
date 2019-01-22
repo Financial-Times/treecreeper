@@ -59,14 +59,14 @@ Two forms of the object representation are available: grouped and ungrouped (the
     }
 ```
 
-- The **name** field is always returned as the unique identification of the type
-- The **type** field is returned as an alias to the name to provide a more intuitive identification field
-- The **pluralName** will either be the explicit plural provided within the yaml or the implied plural derived by adding an **s** to the type name.
-- The single list of properties within this **ungrouped** structure identify their fieldsets
-- Each property definition is derived directly from from the yaml content
-- An **isRelationship** flag is added to any property which is defined as a relationship to another type within the yaml
-- An **isSingleField** flag is added to any property which is the only member of a fieldset (commonly used for large text edit fields)
-- The fieldset list within this **ungrouped** structure just identifies the heading and description of each fieldset
+-   The **name** field is always returned as the unique identification of the type
+-   The **type** field is returned as an alias to the name to provide a more intuitive identification field
+-   The **pluralName** will either be the explicit plural provided within the yaml or the implied plural derived by adding an **s** to the type name.
+-   The single list of properties within this **ungrouped** structure identify their fieldsets
+-   Each property definition is derived directly from from the yaml content
+-   An **isRelationship** flag is added to any property which is defined as a relationship to another type within the yaml
+-   An **isSingleField** flag is added to any property which is the only member of a fieldset (commonly used for large text edit fields)
+-   The fieldset list within this **ungrouped** structure just identifies the heading and description of each fieldset
 
 ## Grouped representation
 
@@ -134,5 +134,5 @@ Two forms of the object representation are available: grouped and ungrouped (the
 
 The format/content of the structure is as above apart from ...
 
-- The fieldset list within this **grouped** structure include the properties within each fieldset
-- There is no separate properties structure
+-   The fieldset list within this **grouped** structure include the properties within each fieldset
+-   There is no separate properties structure

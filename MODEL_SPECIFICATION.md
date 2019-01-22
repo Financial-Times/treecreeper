@@ -2,11 +2,11 @@
 
 _Note that yaml files are indented with two spaces_
 
-- [Types](#types)
-- [Properties on existing types](#property-definitions)
-- [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
-- [Enums](#enums) (aka drop down options)
-- [String validation rules](#string-validation-rules)
+-   [Types](#types)
+-   [Properties on existing types](#property-definitions)
+-   [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
+-   [Enums](#enums) (aka drop down options)
+-   [String validation rules](#string-validation-rules)
 
 ## Types
 
@@ -18,7 +18,7 @@ Types are defined in individual files in `schema/types`. Add a `.yaml` file name
 | pluralName      | no       |         | The pluralised version of the type name. If not specified, defaults to the type name with an `s` appended                                                                                                                                                                                                       | `People`                                          |
 | description     | yes      |         | Description of what kind of entity the type is. This can be spread over multiple lines and supports markdown. It is used to describe types in various parts of the biz-ops ecosystem, including documentation in the graphql-playground and when creating new instances in the biz-ops admin ui                 |                                                   |
 | moreInformation | no       |         | An optional extension to the description to allow an extended description for the type. This can be spread over multiple lines andsupports markdown. It is used to provide help in various parts of the biz-ops ecosystem, including item creation and view in the admin ui                                     |                                                   |
-| rank            | yes       | 9999    | This is an integer, used to indicate the relative importance of this type. A lower number means the type is more important. This exists in order that, as more types are added to the schema, there is a mechanism whereby the most important ones (such as System or Team), do not get lost in the UI          | `55`                                              |
+| rank            | yes      | 9999    | This is an integer, used to indicate the relative importance of this type. A lower number means the type is more important. This exists in order that, as more types are added to the schema, there is a mechanism whereby the most important ones (such as System or Team), do not get lost in the UI          | `55`                                              |
 | properties      | yes      |         | An object containing one or more [Property Definintion](#property-definitions). Each key in this object defines the property name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word | property names: `officeLocation`, `supportsHttp2` |
 | fieldsets       | no       |         | An object containing one or more [Fieldset Definition](#fieldset-definitions). Each key in this object defines the fieldset name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word  | fieldset names: `general`, `contactDetails`       |
 
@@ -88,36 +88,36 @@ Fieldsets group properties with other properties that are related to them e.g. a
 name: Bus
 pluralName: Buses
 description: |
-  Big red things.
+    Big red things
 properties:
-  code:
-    type: Code
-    required: true
-    canIdentify: true
-    canFilter: true
-    description: 'Unique code/id for this item'.
-    label: Code
-    fieldset: main
-    examples:
-      - LK60HPN
-  isOperational:
-    type: Boolean
-    trueLabel: Bus runs on public roads
-    falseLabel: Bus doesn't run or only runs off-road
+    code:
+        type: Code
+        required: true
+        canIdentify: true
+        canFilter: true
+        description: 'Unique code/id for this item'
+        label: Code
+        fieldset: main
+        examples:
+            - LK60HPN
+    isOperational:
+        type: Boolean
+        trueLabel: Bus runs on public roads
+        falseLabel: Bus doesn't run or only runs off-road
 fieldsets:
-  main:
-    heading: Main properties
-    description: These are all essential to fill out.
+    main:
+        heading: Main properties
+        description: These are all essential to fill out.
 ```
 
 ## String validation rules
 
 These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `schema/string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
 
-- The property name must be in CONSTANT_CASE
-- The value must be either
-  - a string that, when converted to a JavaScript regular expression, carries out the required string validation
-  - a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
+-   The property name must be in CONSTANT_CASE
+-   The value must be either
+    -   a string that, when converted to a JavaScript regular expression, carries out the required string validation
+    -   a object with two properties, `pattern` and `flags` which are used to create a regular expression with flags
 
 ## Enums
 
