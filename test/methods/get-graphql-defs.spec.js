@@ -111,7 +111,9 @@ describe('graphql def creation', () => {
 		expect(generated).toEqual(
 			explodeString(
 				`
-scalar DateTime scalar Date scalar Time
+scalar DateTime
+scalar Date
+scalar Time
 # A cost centre which groups are costed to
 type CostCentre {
 
