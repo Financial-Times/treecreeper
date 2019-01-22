@@ -1,0 +1,66 @@
+name: Cookie
+description: A small packet of information sent by a web host to your computer when you visit a website.
+rank: 100
+properties:
+  code:
+    type: Code
+    label: Code
+    description: Unique code/id for this cookie. 
+    canIdentify: true
+    required: true
+    unique: true
+    fieldset: main
+    autoPopulated: true
+    
+  name:
+    type: Name
+    label: Name
+    description: The name of the cookie.
+    canIdentify: true
+    required: true
+    unique: true
+    isCore: true
+    fieldset: main
+
+  type:
+    type: CookieType
+    label: Type
+    description: First or Third party cookie.
+    required: true
+    isCore: true
+    canFilter: true
+    fieldset: main
+  
+  classification:
+    type: CookiePurpose
+    label: ICC Classification
+    description: ICC classification of cookie.
+    required: true
+    isCore: true
+    canFilter: true
+    fieldset: main
+  
+  description:
+    type: Sentence
+    label: Description
+    description: Short description of what the cookie does and data it stores.
+    required: true
+    isCore: true
+    fieldset: main
+
+  provider:
+    type: Word
+    label: Provider
+    description: Team/person or provider who set the cookie. 
+    required: true
+    isCore: true
+    canFilter: true
+    fieldset: main
+
+fieldsets:
+  main:
+    heading: Main properties
+    description: These are all essential to fill out.
+
+
+
