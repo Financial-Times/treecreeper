@@ -138,9 +138,10 @@ module.exports = () => {
 		primitiveTypes: 'graphql',
 		relationshipStructure: 'graphql'
 	});
+	const customDateTimeTypes = `scalar DateTime scalar Date scalar Time`;
 
 	return [].concat(
-		`scalar DateTime scalar Date scalar Time` + typesFromSchema.map(defineType),
+		customDateTimeTypes + typesFromSchema.map(defineType),
 		'type Query {\n',
 		...typesFromSchema.map(defineQueries),
 		'}',
