@@ -1,5 +1,8 @@
 name: System
-description: Any combination of software and technical infrastructure used by the business, engineering or operations
+description: Any combination of software and technical infrastructure used by the business, engineering or operations.
+moreInformation: |
+    Systems are hierachical and represent the deployable units of our business. A Product may well be formed from a number of Systems each of which is itself formed from lower level Systems.
+    Systems are owned by Teams (not individuals) from either a delivery and support perspective (or both). A well managed productionised System will be linked to its Repository and its Healthchecks.
 rank: 20
 properties:
   code:
@@ -11,19 +14,19 @@ properties:
     pattern: CODE
     label: Code
     fieldset: general
-    description: Unique code/id for this item. Once created it should (in most cases) never be altered.
+    description: The unique identifcation for this system.
   name:
     type: Name
     canIdentify: true
     isCore: true
     label: Name
-    description: Display name of the system.
+    description: The short title for the system which will be output on screens and reports.
     fieldset: general
   description:
     type: Paragraph
     canIdentify: true
     label: Description
-    description: Brief overview of what the system does and how.
+    description: A brief overview of what the system does and how from a business perspective.
     fieldset: general
   primaryURL:
     type: Url
@@ -44,7 +47,7 @@ properties:
     canFilter: true
     isCore: true
     label: Service tier
-    description: The system's service tier level.
+    description: The level of service support to be given to the system.
     fieldset: general
   serviceType:
     type: Word
@@ -57,7 +60,7 @@ properties:
     type: Word
     canFilter: true
     label: Host platform
-    description: The platform the service is hosted on, e.g. Heroku.
+    description: The technology platform used to host the service, e.g. Heroku.
     fieldset: general
   dataOwner:
     type: Person
@@ -102,7 +105,7 @@ properties:
     label: PII sources
     relationship: PII_DATA_FLOW
     description: |
-      Systems that produce/store PII data that is used by this system (other kinds of data flow do not need to be noted here).
+      The systems that produce/store the PII data that is used by this system (other kinds of data flow do not need to be noted here).
     fieldset: personalData
     hasMany: true
   piiDestinations:
@@ -111,31 +114,31 @@ properties:
     label: PII destinations
     relationship: PII_DATA_FLOW
     description: |
-      Systems that consume PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here).
+      The systems that consume the PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here).
     fieldset: personalData
     hasMany: true
   canDownloadPersonalData:
     type: Boolean
     canFilter: true
     label: Downloadable personal data
-    description: Does the system allow users to download personal data?
+    description: Does this system allow users to download personal data?
     fieldset: personalData
   canContactIndividuals:
     type: Boolean
     canFilter: true
     label: Contactable individuals
-    description: Does the system have the capability to contact individuals?
+    description: Does this system have the capability to contact individuals?
     fieldset: personalData
   gdprRetentionProcess:
     type: GDPRProcess
     label: Retention process
-    description: Type of process used to handle GDPR data retention.
+    description: The type of process used to handle GDPR data retention.
     fieldset: personalData
     canFilter: true
   gdprErasureProcess:
     type: GDPRProcess
     label: Erasure process
-    description: Type of process used to handle GDPR data erasure requests.
+    description: The type of process used to handle GDPR data erasure requests.
     fieldset: personalData
     canFilter: true
   risk:
@@ -148,13 +151,13 @@ properties:
     canFilter: true
     isCore: true
     label: Lifecycle stage
-    description: The system lifecycle stage of the system.
+    description: How far this system has progressed through its lifecycle from Preproduction to Decommissioned.
     fieldset: general
   SF_ID:
     type: Word
     canFilter: true
     label: Salesforce ID
-    description: ID of the system in salesforce **DO NOT EDIT**.
+    description: ID of this system in salesforce.
     autoPopulated: true
   architectureDiagram:
     type: Document
@@ -164,12 +167,12 @@ properties:
   troubleshooting:
     type: Document
     label: Troubleshooting
-    description: Guidance for troubleshooting problems with the system.
+    description: Guidance for troubleshooting problems with this system.
     fieldset: self
   monitoring:
     type: Document
     label: Bespoke Monitoring
-    description: Details of any monitoring the system has.
+    description: Details of any monitoring this system has.
     fieldset: monitoring
   failoverArchitectureType:
     type: FailoverArchitectureType
@@ -192,7 +195,7 @@ properties:
   failoverDetails:
     type: Document
     label: Failover Details
-    description: The actions require to fail the system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to fail this system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: failover
   dataRecoveryProcessType:
     type: ProcessType
@@ -203,7 +206,7 @@ properties:
   dataRecoveryDetails:
     type: Document
     label: Data Recovery Details
-    description: The actions require to restore the data for the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to restore the data for this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: dataRecovery
   releaseProcessType:
     type: ProcessType
@@ -220,7 +223,7 @@ properties:
   releaseDetails:
     type: Document
     label: Release Details
-    description: The actions require to deploy a new version of the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to deploy a new version of this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: release
   credentialsRefreshProcessType:
     type: ProcessType
@@ -231,12 +234,12 @@ properties:
   credentialsRefreshDetails:
     type: Document
     label: Credentials Refresh Details
-    description: The actions require to change the credentials used by the system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions require to change the credentials used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: credentialRefresh
   moreInformation:
     type: Document
     label: More Information
-    description: Any additional information about the system.
+    description: Any additional information about this system.
     fieldset: self
   stakeholders:
     type: Person
@@ -252,7 +255,7 @@ properties:
     label: Repositories
     relationship: HAS_REPO
     fieldset: network
-    description: The repositories which store the system's source code.
+    description: The repositories which store this system's source code and/or configuration.
     hasMany: true
   monitoredBy:
     type: Healthcheck
@@ -300,7 +303,7 @@ properties:
     direction: outgoing
     label: Known about by
     relationship: KNOWN_ABOUT_BY
-    description: People who know about the system.
+    description: People who know about this system.
     fieldset: ownership
     hasMany: true
   dependencies:
@@ -308,7 +311,7 @@ properties:
     direction: outgoing
     label: Dependencies
     relationship: DEPENDS_ON
-    description: The other systems the system directly depends on.
+    description: The other systems this system directly depends on.
     hasMany: true
     fieldset: network
   recursiveDependencies:
@@ -316,7 +319,7 @@ properties:
     direction: outgoing
     label: Recursive dependencies
     relationship: DEPENDS_ON
-    description: 'The other systems the system depends on, either directly or indirectly.'
+    description: The other systems this system depends on, either directly or indirectly.
     hasMany: true
     isRecursive: true
     fieldset: network
@@ -352,7 +355,7 @@ properties:
     direction: incoming
     label: Recursive dependent products
     relationship: DEPENDS_ON
-    description: 'The products which depend on this system, either directly or indirectly.'
+    description: The products which depend on this system, either directly or indirectly.
     hasMany: true
     isRecursive: true
     fieldset: network
