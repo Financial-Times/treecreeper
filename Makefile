@@ -20,6 +20,8 @@ verify:
 
 install:
 
+env:
+
 test:
 ifneq ($(CI),)
 	jest test

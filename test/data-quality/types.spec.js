@@ -40,7 +40,7 @@ describe('data quality: types', () => {
 
 	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
-		.map(fileName => {
+		.forEach(fileName => {
 			it(`${fileName} has consistent name property`, () => {
 				const contents = readYaml.file(path.join('types', fileName));
 				expect(`${contents.name}.yaml`).toBe(fileName);

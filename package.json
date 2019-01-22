@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Financial-Times/biz-ops-schema#readme",
   "devDependencies": {
-    "@financial-times/rel-engage": "^5.1.0-beta.6",
+    "@financial-times/rel-engage": "^5.1.0-beta.10",
     "jest": "^23.6.0",
     "valid-url": "^1.0.9"
   },
