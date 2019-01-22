@@ -25,7 +25,7 @@ The example we'll work through is adding the ability for the biz-ops-api to repr
 ```yaml
 name: BirdOfParadise
 pluralName: BirdsOfParadise
-description: A bird of the family Paradisaeidae of the order Passeriformes
+description: A bird of the family Paradisaeidae of the order Passeriformes.
 ```
 
 ## Thinking about properties
@@ -58,21 +58,21 @@ You should now have something that looks like the following (Although I've been 
 ```yaml
 name: BirdOfParadise
 pluralName: BirdsOfParadise
-description: A bird of the family Paradisaeidae of the order Passeriformes
+description: A bird of the family Paradisaeidae of the order Passeriformes.
 properties:
     code:
         type: Code
         label: Code
-        description: The unique code for this bird of paradise
+        description: The unique code for this bird of paradise.
     hasWattle:
         type: Boolean
         label: Has wattle
-        description: Whether or not this species has a wattle
+        description: Whether or not this species has a wattle.
     conservationInformation:
         type: Document
         label: Conservation information
         description: |
-            Details of the [conservation status](https://www.iucnredlist.org/) of this species, and any past, present or future conservation programmes
+            Details of the [conservation status](https://www.iucnredlist.org/) of this species, and any past, present or future conservation programmes.
 ```
 
 ## Adding relationships
