@@ -94,11 +94,13 @@ workflows:
           filters:
             <<: *triggerable-by-tag
       - verify:
+          context: rel-eng-creds
           requires:
             - install
           filters:
             <<: *triggerable-by-tag
       - release:
+          context: rel-eng-creds
           requires:
             - install
             - test
