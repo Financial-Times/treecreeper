@@ -1,4 +1,4 @@
-const { getType } = require('../../');
+const { getType } = require('../..');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 const metaProperties = require('../../methods/constants');
@@ -23,12 +23,12 @@ describe('get-type', () => {
 				description: 'I am Type1',
 				properties: {
 					property1: {
-						type: 'String'
+						type: 'String',
 					},
 					property2: {
-						type: 'Boolean'
-					}
-				}
+						type: 'Boolean',
+					},
+				},
 			};
 			rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 			type = getType('Type1');
@@ -40,7 +40,9 @@ describe('get-type', () => {
 			expect(type.properties).toHaveProperty('property1');
 			expect(type.properties.property1).toMatchObject({ type: 'String' });
 			expect(type.properties).toHaveProperty('property2');
-			expect(type.properties.property2).toMatchObject({ type: 'Boolean' });
+			expect(type.properties.property2).toMatchObject({
+				type: 'Boolean',
+			});
 		});
 
 		metaProperties.forEach(property => {
@@ -48,14 +50,18 @@ describe('get-type', () => {
 
 			it(`returns auto generated meta property ${propertyName}`, () => {
 				const propertyExpectedResult = metaProperties.find(
-					property => property.name === propertyName
+					prop => prop.name === propertyName,
 				);
 				const propertyActualResult = type.properties[property.name];
-				expect(propertyActualResult.type).toBe(propertyExpectedResult.type);
-				expect(propertyActualResult.description).toBe(
-					propertyExpectedResult.description
+				expect(propertyActualResult.type).toBe(
+					propertyExpectedResult.type,
 				);
-				expect(propertyActualResult.label).toBe(propertyExpectedResult.label);
+				expect(propertyActualResult.description).toBe(
+					propertyExpectedResult.description,
+				);
+				expect(propertyActualResult.label).toBe(
+					propertyExpectedResult.label,
+				);
 				expect(propertyActualResult.fieldset).toBe('meta');
 				expect(propertyActualResult.autoPopulated).toBe(true);
 			});
@@ -66,7 +72,7 @@ describe('get-type', () => {
 		const metaPropertyName = metaProperties.map(property => property.name);
 		const type1 = {
 			name: 'Type1',
-			description: 'I am Type1'
+			description: 'I am Type1',
 		};
 		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');
@@ -79,7 +85,7 @@ describe('get-type', () => {
 	it('returns a type property to alias the name field', async () => {
 		const type1 = {
 			name: 'Type1',
-			description: 'I am Type1'
+			description: 'I am Type1',
 		};
 		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
 		const type = getType('Type1');
@@ -91,8 +97,8 @@ describe('get-type', () => {
 	it('generates plural name if necessary', async () => {
 		rawData.getTypes.mockReturnValue([
 			{
-				name: 'Type1'
-			}
+				name: 'Type1',
+			},
 		]);
 		const type = getType('Type1');
 		expect(type.pluralName).toBe('Type1s');
@@ -102,8 +108,8 @@ describe('get-type', () => {
 		rawData.getTypes.mockReturnValue([
 			{
 				name: 'Type1',
-				pluralName: 'Type1ticles'
-			}
+				pluralName: 'Type1ticles',
+			},
 		]);
 		const type = getType('Type1');
 		expect(type.pluralName).toBe('Type1ticles');
@@ -116,16 +122,16 @@ describe('get-type', () => {
 				properties: {
 					code: {
 						type: 'String',
-						pattern: 'CODE'
-					}
-				}
-			}
+						pattern: 'CODE',
+					},
+				},
+			},
 		]);
 		rawData.getStringPatterns.mockReturnValue({
-			CODE: '^ab$'
+			CODE: '^ab$',
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.validator;
+		const { validator } = type.properties.code;
 		expect(validator.test('ay')).toBe(false);
 		expect(validator.test('zb')).toBe(false);
 		expect(validator.test('ab')).toBe(true);
@@ -138,19 +144,19 @@ describe('get-type', () => {
 				properties: {
 					code: {
 						type: 'String',
-						pattern: 'CODE2'
-					}
-				}
-			}
+						pattern: 'CODE2',
+					},
+				},
+			},
 		]);
 		rawData.getStringPatterns.mockReturnValue({
 			CODE2: {
 				pattern: '^ab$',
-				flags: 'i'
-			}
+				flags: 'i',
+			},
 		});
 		const type = getType('Type1');
-		const validator = type.properties.code.validator;
+		const { validator } = type.properties.code;
 		expect(validator.test('AB')).toBe(true);
 	});
 
@@ -161,17 +167,17 @@ describe('get-type', () => {
 				properties: {
 					primitiveProp: {
 						type: 'Word',
-						autoPopulated: true
+						autoPopulated: true,
 					},
 					paragraphProp: {
 						type: 'Paragraph',
-						autoPopulated: false
+						autoPopulated: false,
 					},
 					enumProp: {
-						type: 'SomeEnum'
-					}
-				}
-			}
+						type: 'SomeEnum',
+					},
+				},
+			},
 		]);
 
 		const type = getType('Type1', { primitiveTypes: 'graphql' });
@@ -186,16 +192,16 @@ describe('get-type', () => {
 				name: 'Type1',
 				properties: {
 					primitiveProp: {
-						type: 'Word'
+						type: 'Word',
 					},
 					documentProp: {
-						type: 'Document'
+						type: 'Document',
 					},
 					enumProp: {
-						type: 'SomeEnum'
-					}
-				}
-			}
+						type: 'SomeEnum',
+					},
+				},
+			},
 		]);
 
 		const type = getType('Type1', { primitiveTypes: 'graphql' });
@@ -212,28 +218,28 @@ describe('get-type', () => {
 					mainProp: {
 						type: 'Word',
 						fieldset: 'main',
-						label: 'A word'
+						label: 'A word',
 					},
 					secondaryProp: {
 						type: 'Document',
 						fieldset: 'self',
-						label: 'Standalone'
+						label: 'Standalone',
 					},
 					miscProp: {
-						type: 'SomeEnum'
-					}
+						type: 'SomeEnum',
+					},
 				},
 				fieldsets: {
 					main: {
 						heading: 'Main properties',
-						description: 'Fill these out please'
+						description: 'Fill these out please',
 					},
 					secondary: {
 						heading: 'Secondary properties',
-						description: 'Fill these out optionally'
-					}
-				}
-			}
+						description: 'Fill these out optionally',
+					},
+				},
+			},
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
@@ -243,10 +249,12 @@ describe('get-type', () => {
 		expect(type.fieldsets.main.heading).toBe('Main properties');
 		expect(type.fieldsets.main.description).toBe('Fill these out please');
 		expect(type.fieldsets.main.isSingleField).toBeFalsy();
-		expect(type.fieldsets.secondaryProp.properties.secondaryProp).toBeDefined();
-		expect(type.fieldsets.secondaryProp.properties.secondaryProp.label).toBe(
-			'Standalone'
-		);
+		expect(
+			type.fieldsets.secondaryProp.properties.secondaryProp,
+		).toBeDefined();
+		expect(
+			type.fieldsets.secondaryProp.properties.secondaryProp.label,
+		).toBe('Standalone');
 		expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
 		expect(type.fieldsets.secondaryProp.description).toBeFalsy();
 		expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);
@@ -262,20 +270,20 @@ describe('get-type', () => {
 				properties: {
 					mainProp: {
 						type: 'Word',
-						fieldset: 'main'
-					}
+						fieldset: 'main',
+					},
 				},
 				fieldsets: {
 					main: {
 						heading: 'Main properties',
-						description: 'Fill these out please'
+						description: 'Fill these out please',
 					},
 					secondary: {
 						heading: 'Secondary properties',
-						description: 'Fill these out optionally'
-					}
-				}
-			}
+						description: 'Fill these out optionally',
+					},
+				},
+			},
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
@@ -290,17 +298,17 @@ describe('get-type', () => {
 				name: 'Type1',
 				properties: {
 					mainProp: {
-						type: 'Word'
+						type: 'Word',
 					},
 					secondaryProp: {
 						type: 'Document',
-						label: 'Standalone'
+						label: 'Standalone',
 					},
 					miscProp: {
-						type: 'SomeEnum'
-					}
-				}
-			}
+						type: 'SomeEnum',
+					},
+				},
+			},
 		]);
 
 		const type = getType('Type1', { groupProperties: true });
@@ -319,10 +327,10 @@ describe('get-type', () => {
 					properties: {
 						miscProp: {
 							type: 'SomeEnum',
-							relationship: 'HAS'
-						}
-					}
-				}
+							relationship: 'HAS',
+						},
+					},
+				},
 			]);
 		});
 
@@ -334,7 +342,7 @@ describe('get-type', () => {
 		it('is returned when includeMetaFields is FALSE', () => {
 			const type = getType('Type1', {
 				groupProperties: true,
-				includeMetaFields: false
+				includeMetaFields: false,
 			});
 			expect(type.fieldsets.misc.heading).toBe('General');
 		});
@@ -350,20 +358,20 @@ describe('get-type', () => {
 							type: 'Word',
 							fieldset: 'main',
 							relationship: 'HAS',
-							label: 'A word relationship'
+							label: 'A word relationship',
 						},
 						miscProp: {
 							type: 'SomeEnum',
-							relationship: 'HAS'
-						}
+							relationship: 'HAS',
+						},
 					},
 					fieldsets: {
 						main: {
 							heading: 'Main properties',
-							description: 'Fill these out please'
-						}
-					}
-				}
+							description: 'Fill these out please',
+						},
+					},
+				},
 			]);
 		});
 
@@ -375,7 +383,7 @@ describe('get-type', () => {
 		it('is returned when includeMetaFields is FALSE', () => {
 			const type = getType('Type1', {
 				groupProperties: true,
-				includeMetaFields: false
+				includeMetaFields: false,
 			});
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 		});
@@ -387,8 +395,8 @@ describe('get-type', () => {
 		beforeEach(() => {
 			rawData.getTypes.mockReturnValue([
 				{
-					name: 'Type1'
-				}
+					name: 'Type1',
+				},
 			]);
 
 			type = getType('Type1', { groupProperties: true });
@@ -402,9 +410,12 @@ describe('get-type', () => {
 		metaProperties.forEach(property => {
 			const propertyName = property.name;
 			it(`returns meta fieldset property ${property.name}`, () => {
-				const fieldsetProperty = type.fieldsets.meta.properties[propertyName];
+				const fieldsetProperty =
+					type.fieldsets.meta.properties[propertyName];
 				expect(fieldsetProperty.type).toEqual(property.type);
-				expect(fieldsetProperty.description).toEqual(property.description);
+				expect(fieldsetProperty.description).toEqual(
+					property.description,
+				);
 				expect(fieldsetProperty.label).toEqual(property.label);
 				expect(fieldsetProperty.autoPopulated).toEqual(true);
 			});
@@ -414,12 +425,12 @@ describe('get-type', () => {
 	it('does not create meta data fieldset when includeMetaFields is set to FALSE', () => {
 		rawData.getTypes.mockReturnValue([
 			{
-				name: 'Type1'
-			}
+				name: 'Type1',
+			},
 		]);
 		const type = getType('Type1', {
 			groupProperties: true,
-			includeMetaFields: false
+			includeMetaFields: false,
 		});
 		expect(type.fieldsets).toEqual({});
 	});
@@ -435,10 +446,10 @@ describe('get-type', () => {
 							direction: 'outgoing',
 							relationship: 'HAS',
 							label: 'test label',
-							description: 'test description'
-						}
-					}
-				}
+							description: 'test description',
+						},
+					},
+				},
 			]);
 
 			const type = getType('Type1', { withRelationships: false });
@@ -455,10 +466,10 @@ describe('get-type', () => {
 							direction: 'outgoing',
 							relationship: 'HAS',
 							label: 'test label',
-							description: 'test description'
-						}
-					}
-				}
+							description: 'test description',
+						},
+					},
+				},
 			]);
 			expect(getType('Type1').properties.testName).toEqual({
 				relationship: 'HAS',
@@ -468,7 +479,7 @@ describe('get-type', () => {
 				isRelationship: true,
 				isRecursive: false,
 				description: 'test description',
-				label: 'test label'
+				label: 'test label',
 			});
 		});
 
@@ -482,10 +493,10 @@ describe('get-type', () => {
 							direction: 'incoming',
 							relationship: 'HAS',
 							label: 'test label',
-							description: 'test description'
-						}
-					}
-				}
+							description: 'test description',
+						},
+					},
+				},
 			]);
 			expect(getType('Type2').properties.testName).toEqual({
 				relationship: 'HAS',
@@ -495,7 +506,7 @@ describe('get-type', () => {
 				isRecursive: false,
 				hasMany: false,
 				description: 'test description',
-				label: 'test label'
+				label: 'test label',
 			});
 		});
 
@@ -507,15 +518,15 @@ describe('get-type', () => {
 						testName1: {
 							type: 'Type2',
 							direction: 'outgoing',
-							relationship: 'HAS'
+							relationship: 'HAS',
 						},
 						testName2: {
 							type: 'Type3',
 							direction: 'incoming',
-							relationship: 'HAS'
-						}
-					}
-				}
+							relationship: 'HAS',
+						},
+					},
+				},
 			]);
 			const result = getType('Type1').properties;
 			expect(result.testName1.direction).toBe('outgoing');
@@ -530,15 +541,15 @@ describe('get-type', () => {
 						testName1: {
 							type: 'Type1',
 							direction: 'outgoing',
-							relationship: 'HAS'
+							relationship: 'HAS',
 						},
 						testName2: {
 							type: 'Type1',
 							direction: 'incoming',
-							relationship: 'HAS'
-						}
-					}
-				}
+							relationship: 'HAS',
+						},
+					},
+				},
 			]);
 			const result = getType('Type1').properties;
 			expect(result.testName1.direction).toBe('outgoing');
@@ -556,10 +567,10 @@ describe('get-type', () => {
 							isRecursive: true,
 							relationship: 'HAS',
 							label: 'test label',
-							description: 'test description'
-						}
-					}
-				}
+							description: 'test description',
+						},
+					},
+				},
 			]);
 
 			expect(getType('Type1').properties.testName).toEqual({
@@ -570,7 +581,7 @@ describe('get-type', () => {
 				isRelationship: true,
 				relationship: 'HAS',
 				description: 'test description',
-				label: 'test label'
+				label: 'test label',
 			});
 		});
 
@@ -583,15 +594,15 @@ describe('get-type', () => {
 							type: 'Type2',
 							hasMany: true,
 							direction: 'outgoing',
-							relationship: 'HAS'
+							relationship: 'HAS',
 						},
 						singular: {
 							type: 'Type2',
 							direction: 'incoming',
-							relationship: 'HAS'
-						}
-					}
-				}
+							relationship: 'HAS',
+						},
+					},
+				},
 			]);
 			expect(getType('Type1').properties.many).toEqual({
 				isRecursive: false,
@@ -599,7 +610,7 @@ describe('get-type', () => {
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'outgoing',
-				hasMany: true
+				hasMany: true,
 			});
 			expect(getType('Type1').properties.singular).toEqual({
 				isRecursive: false,
@@ -607,7 +618,7 @@ describe('get-type', () => {
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'incoming',
-				hasMany: false
+				hasMany: false,
 			});
 		});
 
@@ -622,10 +633,10 @@ describe('get-type', () => {
 							relationship: 'HAS',
 							label: 'test label',
 							description: 'test description',
-							hidden: true
-						}
-					}
-				}
+							hidden: true,
+						},
+					},
+				},
 			]);
 			expect(getType('Type1').properties.testName).toBeFalsy();
 		});
@@ -639,47 +650,49 @@ describe('get-type', () => {
 							type: 'Word',
 							fieldset: 'main',
 							relationship: 'HAS',
-							label: 'A word relationship'
+							label: 'A word relationship',
 						},
 						secondaryProp: {
 							type: 'Document',
 							fieldset: 'self',
 							relationship: 'HAS',
-							label: 'Standalone'
+							label: 'Standalone',
 						},
 						miscProp: {
 							type: 'SomeEnum',
-							relationship: 'HAS'
-						}
+							relationship: 'HAS',
+						},
 					},
 					fieldsets: {
 						main: {
 							heading: 'Main properties',
-							description: 'Fill these out please'
+							description: 'Fill these out please',
 						},
 						secondary: {
 							heading: 'Secondary properties',
-							description: 'Fill these out optionally'
-						}
-					}
-				}
+							description: 'Fill these out optionally',
+						},
+					},
+				},
 			]);
 
 			const type = getType('Type1', { groupProperties: true });
 			expect(type.properties).toBeFalsy();
 			expect(type.fieldsets.main.properties.mainProp).toBeDefined();
 			expect(type.fieldsets.main.properties.mainProp.label).toBe(
-				'A word relationship'
+				'A word relationship',
 			);
 			expect(type.fieldsets.main.heading).toBe('Main properties');
-			expect(type.fieldsets.main.description).toBe('Fill these out please');
+			expect(type.fieldsets.main.description).toBe(
+				'Fill these out please',
+			);
 			expect(type.fieldsets.main.isSingleField).toBeFalsy();
 			expect(
-				type.fieldsets.secondaryProp.properties.secondaryProp
+				type.fieldsets.secondaryProp.properties.secondaryProp,
 			).toBeDefined();
-			expect(type.fieldsets.secondaryProp.properties.secondaryProp.label).toBe(
-				'Standalone'
-			);
+			expect(
+				type.fieldsets.secondaryProp.properties.secondaryProp.label,
+			).toBe('Standalone');
 			expect(type.fieldsets.secondaryProp.heading).toBe('Standalone');
 			expect(type.fieldsets.secondaryProp.description).toBeFalsy();
 			expect(type.fieldsets.secondaryProp.isSingleField).toBe(true);

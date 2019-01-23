@@ -7,9 +7,6 @@
     "lib": "lib",
     "test": "test"
   },
-  "scripts": {
-    "test": "make test"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Financial-Times/biz-ops-schema.git"
@@ -22,12 +19,8 @@
   },
   "homepage": "https://github.com/Financial-Times/biz-ops-schema#readme",
   "devDependencies": {
-    "eslint": "^5.5.0",
-    "eslint-config-origami-component": "^1.0.0",
-    "eslint-config-prettier": "^3.0.1",
-    "eslint-plugin-prettier": "^2.6.2",
+    "@financial-times/rel-engage": "^5.1.0-beta.10",
     "jest": "^23.6.0",
-    "prettier": "^1.14.2",
     "valid-url": "^1.0.9"
   },
   "dependencies": {
