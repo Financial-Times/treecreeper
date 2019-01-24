@@ -14,8 +14,8 @@ const metaProperties = [
 	{
 		name:'_createdTimestamp',
 		type: 'DateTime',
-		label: 'Create at',
-		description: 'The creation time and date'
+		label: 'Created at',
+		description: 'The time and date this record was created'
 	},
 	{
 		name: '_updatedByClient',
@@ -33,7 +33,7 @@ const metaProperties = [
 		name:'_updatedTimestamp',
 		type: 'DateTime',
 		label: 'Updated at',
-		description: 'The time and date of update'
+		description: 'The time and date this record was last updated'
 	}
 ];
 
