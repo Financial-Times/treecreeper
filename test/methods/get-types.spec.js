@@ -1,4 +1,4 @@
-const { getTypes } = require('../../');
+const { getTypes } = require('../..');
 const getType = require('../../methods/get-type');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
@@ -9,11 +9,14 @@ describe('get-types', () => {
 	beforeEach(() => {
 		jest.spyOn(rawData, 'getTypes').mockImplementation(() => [
 			{
-				name: 'Type1'
+				name: 'Type1',
 			},
-			{ name: 'Type2' }
+			{ name: 'Type2' },
 		]);
-		getType.mockImplementation(type => ({ name: type, description: 'woo' }));
+		getType.mockImplementation(type => ({
+			name: type,
+			description: 'woo',
+		}));
 	});
 	afterEach(() => {
 		jest.restoreAllMocks();
@@ -23,12 +26,12 @@ describe('get-types', () => {
 		expect(getTypes({ option: 'value' })).toEqual([
 			{
 				name: 'Type1',
-				description: 'woo'
+				description: 'woo',
 			},
 			{
 				name: 'Type2',
-				description: 'woo'
-			}
+				description: 'woo',
+			},
 		]);
 		expect(getType).toHaveBeenCalledWith('Type1', { option: 'value' });
 		expect(getType).toHaveBeenCalledWith('Type2', { option: 'value' });

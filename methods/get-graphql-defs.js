@@ -1,16 +1,16 @@
+const stripIndent = require('common-tags/lib/stripIndent');
 const getTypes = require('../methods/get-types');
 const getEnums = require('../methods/get-enums');
-const stripIndent =  require('common-tags/lib/stripIndent');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
-	return [...Array(Math.max(hardCoded.length, vars.length))]
+	return [...new Array(Math.max(hardCoded.length, vars.length))]
 		.map((val, i) => `${hardCoded[i] || ''}${vars[i] || ''}`)
 		.join('');
 };
 
 const indentMultiline = (str, indent, trimFirst) => {
-	indent = [...Array(indent)].map(() => ' ').join('');
+	indent = [...new Array(indent)].map(() => ' ').join('');
 	return str
 		.split('\n')
 		.map(line => {
@@ -40,16 +40,15 @@ const cypherResolver = def => {
 	if (def.isRecursive) {
 		return `@cypher(
       statement: "MATCH (this)${relFragment(
-				def.relationship,
-				def.direction,
-				'*1..20'
-			)}(related:${def.type}) RETURN DISTINCT related"
+			def.relationship,
+			def.direction,
+			'*1..20',
+		)}(related:${def.type}) RETURN DISTINCT related"
     )`;
-	} else {
-		return `@relation(name: "${
-			def.relationship
-		}", direction: "${graphqlDirection(def.direction)}")`;
 	}
+	return `@relation(name: "${
+		def.relationship
+	}", direction: "${graphqlDirection(def.direction)}")`;
 };
 
 const maybeDeprecate = ({ deprecationReason }) => {
@@ -66,8 +65,8 @@ const defineProperties = properties => {
 				stripEmptyFirstLine`
       # ${def.description.replace(/\n/g, ' ')}
       ${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
-					def
-				)} ${maybeDeprecate(def)}`
+					def,
+				)} ${maybeDeprecate(def)}`,
 		)
 		.join('');
 };
@@ -77,17 +76,17 @@ const PAGINATE = indentMultiline(
 		Object.entries({
 			offset: {
 				type: 'Int = 0',
-				description: 'The pagination offset to use'
+				description: 'The pagination offset to use',
 			},
 			first: {
 				type: 'Int = 20000',
 				description:
-					'The number of records to return after the pagination offset. This uses the default neo4j ordering'
-			}
-		})
+					'The number of records to return after the pagination offset. This uses the default neo4j ordering',
+			},
+		}),
 	),
 	4,
-	true
+	true,
 );
 
 const getIdentifyingFields = config =>
@@ -110,22 +109,22 @@ type ${config.name} {
   ${indentMultiline(
 		defineProperties(Object.entries(config.properties)),
 		2,
-		true
-	)}
+		true,
+  )}
 }`;
 
 const defineQueries = config => [
 	defineQuery({
 		name: config.name,
 		type: config.name,
-		properties: getIdentifyingFields(config)
+		properties: getIdentifyingFields(config),
 	}),
 	defineQuery({
 		name: config.pluralName,
 		type: `[${config.name}]`,
 		properties: getFilteringFields(config),
-		paginate: true
-	})
+		paginate: true,
+	}),
 ];
 
 const defineEnum = ([name, { description, options }]) => `
@@ -137,7 +136,7 @@ ${indentMultiline(Object.keys(options).join('\n'), 2)}
 module.exports = () => {
 	const typesFromSchema = getTypes({
 		primitiveTypes: 'graphql',
-		relationshipStructure: 'graphql'
+		relationshipStructure: 'graphql',
 	});
 	const customDateTimeTypes = stripIndent`
 		scalar DateTime
@@ -150,6 +149,6 @@ module.exports = () => {
 		'type Query {\n',
 		...typesFromSchema.map(defineQueries),
 		'}',
-		Object.entries(getEnums({ withMeta: true })).map(defineEnum)
+		Object.entries(getEnums({ withMeta: true })).map(defineEnum),
 	);
 };

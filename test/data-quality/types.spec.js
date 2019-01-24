@@ -1,28 +1,31 @@
+const fs = require('fs');
+const path = require('path');
+const validURL = require('valid-url');
 const rawData = require('../../lib/raw-data');
+
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
 const getStringValidator = require('../../lib/get-string-validator');
+
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
-const fs = require('fs');
-const path = require('path');
+
 const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`);
-const validURL = require('valid-url');
 
 const getTwinnedRelationship = (
 	homeTypeName,
 	awayTypeName,
 	relationshipName,
-	homeDirection
+	homeDirection,
 ) => {
 	const awayType = types.find(({ name }) => name === awayTypeName);
 	return Object.values(awayType.properties).find(
 		({ relationship, type, direction }) =>
 			relationship === relationshipName &&
 			type === homeTypeName &&
-			direction !== homeDirection
+			direction !== homeDirection,
 	);
 };
 
@@ -32,12 +35,12 @@ describe('data quality: types', () => {
 	const typeNames = types.map(({ name }) => name);
 	const validPropTypes = validEnums.concat(
 		Object.keys(primitiveTypesMap),
-		typeNames
+		typeNames,
 	);
 
 	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
-		.map(fileName => {
+		.forEach(fileName => {
 			it(`${fileName} has consistent name property`, () => {
 				const contents = readYaml.file(path.join('types', fileName));
 				expect(`${contents.name}.yaml`).toBe(fileName);
@@ -71,7 +74,7 @@ describe('data quality: types', () => {
 					expect(validURL.isUri(type.creationURL)).toBeTruthy();
 				}
 			});
-			const fieldsets = type.fieldsets;
+			const { fieldsets } = type;
 			const validFieldsetNames = fieldsets
 				? ['self'].concat(Object.keys(fieldsets))
 				: [];
@@ -81,31 +84,37 @@ describe('data quality: types', () => {
 					it('is an object if it exists', () => {
 						expect(typeof fieldsets).toBe('object');
 					});
-					Object.entries(type.fieldsets).forEach(([name, fieldsetConfig]) => {
-						describe(name, () => {
-							it('has a heading', () => {
-								expect(typeof fieldsetConfig.heading).toBe('string');
+					Object.entries(type.fieldsets).forEach(
+						([name, fieldsetConfig]) => {
+							describe(`${name}`, () => {
+								it('has a heading', () => {
+									expect(typeof fieldsetConfig.heading).toBe(
+										'string',
+									);
+								});
+								it('may have a description', () => {
+									if ('description' in fieldsetConfig) {
+										expect(
+											typeof fieldsetConfig.description,
+										).toBe('string');
+									}
+								});
 							});
-							it('may have a description', () => {
-								if ('description' in fieldsetConfig) {
-									expect(typeof fieldsetConfig.description).toBe('string');
-								}
-							});
-						});
-					});
+						},
+					);
 				});
 			}
 
 			describe('properties', () => {
 				Object.entries(type.properties).forEach(([name, config]) => {
-					describe(name, () => {
+					describe(`${name}`, () => {
 						it('has no unrecognised properties in its config', () => {
 							Object.keys(config).forEach(key => {
 								const commonKeys = [
 									'type',
 									'description',
 									'label',
-									'deprecationReason'
+									'deprecationReason',
 								];
 								if (fieldsets) {
 									commonKeys.push('fieldset');
@@ -121,9 +130,9 @@ describe('data quality: types', () => {
 												'isCore',
 												'isRecursive',
 												'hidden',
-												'autoPopulated'
-											])
-										)
+												'autoPopulated',
+											]),
+										),
 									);
 								} else {
 									expect(key).toMatch(
@@ -138,9 +147,9 @@ describe('data quality: types', () => {
 												'pattern',
 												'examples',
 												'trueLabel',
-												'falseLabel'
-											])
-										)
+												'falseLabel',
+											]),
+										),
 									);
 								}
 							});
@@ -154,27 +163,39 @@ describe('data quality: types', () => {
 
 						it('has valid label', () => {
 							expect(typeof config.label).toBe('string');
-							expect(/[\.!]$/.test(config.label.trim())).toBe(false);
+							expect(/[.!]$/.test(config.label.trim())).toBe(
+								false,
+							);
 						});
 						it('has valid description', () => {
 							expect(typeof config.description).toBe('string');
-							expect(/[\.\?]$/.test(config.description.trim())).toBe(true);
+							expect(
+								/[.?]$/.test(config.description.trim()),
+							).toBe(true);
 						});
 						it('has valid type', () => {
 							expect(config.type).toBeDefined();
-							expect(config.type).toMatch(arrayToRexExp(validPropTypes));
+							expect(config.type).toMatch(
+								arrayToRexExp(validPropTypes),
+							);
 						});
 
 						it('has valid fieldset', () => {
 							if (config.fieldset) {
-								expect(validFieldsetNames).toContain(config.fieldset);
+								expect(validFieldsetNames).toContain(
+									config.fieldset,
+								);
 							}
 						});
 
 						it('has valid deprecation reason', () => {
 							if (config.deprecationReason) {
-								expect(typeof config.deprecationReason).toBe('string');
-								expect(config.deprecationReason).not.toMatch(/\n/);
+								expect(typeof config.deprecationReason).toBe(
+									'string',
+								);
+								expect(config.deprecationReason).not.toMatch(
+									/\n/,
+								);
 							}
 						});
 
@@ -199,32 +220,46 @@ describe('data quality: types', () => {
 
 								it('may define a pattern', () => {
 									if (config.pattern) {
-										expect(config.pattern).toMatch(validStringPatternsRX);
+										expect(config.pattern).toMatch(
+											validStringPatternsRX,
+										);
 									}
 								});
 
 								it('may define true and false labels', () => {
 									if (config.trueLabel || config.falseLabel) {
-										expect(typeof config.trueLabel).toBe('string');
-										expect(typeof config.falseLabel).toBe('string');
+										expect(typeof config.trueLabel).toBe(
+											'string',
+										);
+										expect(typeof config.falseLabel).toBe(
+											'string',
+										);
 										expect(config.type).toBe('Boolean');
 									}
 								});
 
 								it('may define examples', () => {
 									if (config.examples) {
-										expect(Array.isArray(config.examples)).toBe(true);
+										expect(
+											Array.isArray(config.examples),
+										).toBe(true);
 									}
 								});
 							});
 						} else {
-							const RELATIONSHIP_NAME = getStringValidator('RELATIONSHIP_NAME');
+							const RELATIONSHIP_NAME = getStringValidator(
+								'RELATIONSHIP_NAME',
+							);
 							describe('relationship property', () => {
 								it('must specify underlying relationship', () => {
-									expect(config.relationship).toMatch(RELATIONSHIP_NAME);
+									expect(config.relationship).toMatch(
+										RELATIONSHIP_NAME,
+									);
 								});
 								it('must specify direction', () => {
-									expect(config.direction).toMatch(/^incoming|outgoing$/);
+									expect(config.direction).toMatch(
+										/^incoming|outgoing$/,
+									);
 								});
 								it('may be hidden', () => {
 									if (config.hidden) {
@@ -248,8 +283,8 @@ describe('data quality: types', () => {
 											type.name,
 											config.type,
 											config.relationship,
-											config.direction
-										)
+											config.direction,
+										),
 									).toBeDefined();
 								});
 							});
@@ -268,8 +303,8 @@ describe('data quality: types', () => {
 							'rank',
 							'creationURL',
 							'fieldsets',
-							'properties'
-						])
+							'properties',
+						]),
 					);
 				});
 			});

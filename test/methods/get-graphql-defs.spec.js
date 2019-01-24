@@ -1,4 +1,4 @@
-const generateGraphqlDefs = require('../../').getGraphqlDefs;
+const generateGraphqlDefs = require('../..').getGraphqlDefs;
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
@@ -7,8 +7,8 @@ const explodeString = str =>
 	str
 		.split('\n')
 		// exclude strings which are just whitespace or empty
-		.filter(str => !/^[\s]*$/.test(str))
-		.map(str => str.trim());
+		.filter(string => !/^[\s]*$/.test(string))
+		.map(string => string.trim());
 
 describe('graphql def creation', () => {
 	beforeEach(() => {
@@ -34,19 +34,20 @@ describe('graphql def creation', () => {
 						unique: true,
 						canIdentify: true,
 						description: 'Unique code/id for this item',
-						pattern: 'COST_CENTRE'
+						pattern: 'COST_CENTRE',
 					},
 					name: {
 						type: 'Word',
 						canIdentify: true,
-						description: 'The name of the cost centre'
+						description: 'The name of the cost centre',
 					},
 					hasGroups: {
 						type: 'Group',
 						relationship: 'PAYS_FOR',
 						direction: 'outgoing',
 						hasMany: true,
-						description: 'The groups which are costed to the cost centre'
+						description:
+							'The groups which are costed to the cost centre',
 					},
 					hasNestedGroups: {
 						type: 'Group',
@@ -55,9 +56,9 @@ describe('graphql def creation', () => {
 						hasMany: true,
 						isRecursive: true,
 						description:
-							'The recursive groups which are costed to the cost centre'
-					}
-				}
+							'The recursive groups which are costed to the cost centre',
+					},
+				},
 			},
 			{
 				name: 'Group',
@@ -70,43 +71,48 @@ describe('graphql def creation', () => {
 						unique: true,
 						canIdentify: true,
 						description: 'Unique code/id for this item',
-						pattern: 'COST_CENTRE'
+						pattern: 'COST_CENTRE',
 					},
 					name: {
 						type: 'Word',
 						canIdentify: true,
-						description: 'The name of the group'
+						description: 'The name of the group',
 					},
 					isActive: {
 						type: 'Boolean',
 						canFilter: true,
-						description: 'Whether or not the group is still in existence'
+						description:
+							'Whether or not the group is still in existence',
 					},
 					hasBudget: {
 						type: 'CostCentre',
 						relationship: 'PAYS_FOR',
 						direction: 'incoming',
-						description: 'The Cost Centre associated with the group'
+						description:
+							'The Cost Centre associated with the group',
 					},
 					hasEventualBudget: {
 						type: 'CostCentre',
-						description: 'The Cost Centre associated with the group in the end',
+						description:
+							'The Cost Centre associated with the group in the end',
 						isRecursive: true,
 						relationship: 'PAYS_FOR',
-						direction: 'incoming'
-					}
-				}
-			}
+						direction: 'incoming',
+					},
+				},
+			},
 		]);
 
 		rawData.getEnums.mockReturnValue({
 			Lifecycle: {
 				description: 'The lifecycle stage of a product',
-				options: ['Incubate', 'Sustain', 'Grow', 'Sunset']
-			}
+				options: ['Incubate', 'Sustain', 'Grow', 'Sunset'],
+			},
 		});
 
-		const generated = [].concat(...generateGraphqlDefs().map(explodeString));
+		const generated = [].concat(
+			...generateGraphqlDefs().map(explodeString),
+		);
 
 		expect(generated).toEqual(
 			explodeString(
@@ -122,10 +128,10 @@ code: String
 # The name of the cost centre
 name: String
 # The groups which are costed to the cost centre
-hasGroups(first: Int, offset: Int): [Group] @relation(name: \"PAYS_FOR\", direction: \"OUT\")
+hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
 # The recursive groups which are costed to the cost centre
 hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
-statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related\"
+statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related"
 )
 
 # The client that was used to make the creation
@@ -154,10 +160,10 @@ name: String
 isActive: Boolean
 
 # The Cost Centre associated with the group
-hasBudget: CostCentre @relation(name: \"PAYS_FOR\", direction: \"IN\")
+hasBudget: CostCentre @relation(name: "PAYS_FOR", direction: "IN")
 # The Cost Centre associated with the group in the end
 hasEventualBudget: CostCentre @cypher(
-statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related\"
+statement: "MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related"
 )
 
 # The client that was used to make the creation
@@ -217,8 +223,8 @@ Incubate
 Sustain
 Grow
 Sunset
-}`
-			)
+}`,
+			),
 		);
 	});
 
@@ -230,17 +236,17 @@ Sunset
 				properties: {
 					prop: {
 						type: 'Boolean',
-						description: 'a description\nmultiline'
-					}
-				}
-			}
+						description: 'a description\nmultiline',
+					},
+				},
+			},
 		]);
 		rawData.getEnums.mockReturnValue({
 			AnEnum: {
 				name: 'DummyEnum',
 				description: 'an enum description\nmultiline',
-				options: ['One', 'Two']
-			}
+				options: ['One', 'Two'],
+			},
 		});
 		const generated = [].concat(...generateGraphqlDefs()).join('');
 		// note the regex has a space, not a new line
@@ -258,16 +264,16 @@ Sunset
 						prop: {
 							type: 'Boolean',
 							deprecationReason: 'not needed',
-							description: 'a description'
-						}
-					}
-				}
+							description: 'a description',
+						},
+					},
+				},
 			]);
 			rawData.getEnums.mockReturnValue({});
 			const generated = [].concat(...generateGraphqlDefs()).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
-				'prop: Boolean  @deprecated(reason: "not needed")'
+				'prop: Boolean  @deprecated(reason: "not needed")',
 			);
 		});
 
@@ -283,61 +289,71 @@ Sunset
 							description: 'a description',
 							relationship: 'HAS',
 							direction: 'outgoing',
-							hasMany: true
-						}
-					}
-				}
+							hasMany: true,
+						},
+					},
+				},
 			]);
 			rawData.getEnums.mockReturnValue({});
 			const generated = [].concat(...generateGraphqlDefs()).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
-				'prop(first: Int, offset: Int): [Boolean] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")'
+				'prop(first: Int, offset: Int): [Boolean] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
 			);
 		});
 	});
 
 	describe('converting types', () => {
-		Object.entries(primitiveTypesMap).forEach(([bizopsType, graphqlType]) => {
-			if (bizopsType === 'Document') {
-				it(`Does not expose Document properties`, () => {
-					rawData.getTypes.mockReturnValue([
-						{
-							name: 'Dummy',
-							description: 'dummy type description',
-							properties: {
-								prop: {
-									type: 'Document',
-									description: 'a description'
-								}
-							}
-						}
-					]);
-					rawData.getEnums.mockReturnValue({});
-					const generated = [].concat(...generateGraphqlDefs()).join('');
+		Object.entries(primitiveTypesMap).forEach(
+			([bizopsType, graphqlType]) => {
+				if (bizopsType === 'Document') {
+					it(`Does not expose Document properties`, () => {
+						rawData.getTypes.mockReturnValue([
+							{
+								name: 'Dummy',
+								description: 'dummy type description',
+								properties: {
+									prop: {
+										type: 'Document',
+										description: 'a description',
+									},
+								},
+							},
+						]);
+						rawData.getEnums.mockReturnValue({});
+						const generated = []
+							.concat(...generateGraphqlDefs())
+							.join('');
 
-					expect(generated).not.toMatch(new RegExp(`prop: String`));
-				});
-			} else {
-				it(`Outputs correct type for properties using ${bizopsType}`, () => {
-					rawData.getTypes.mockReturnValue([
-						{
-							name: 'Dummy',
-							description: 'dummy type description',
-							properties: {
-								prop: {
-									type: bizopsType,
-									description: 'a description'
-								}
-							}
-						}
-					]);
-					rawData.getEnums.mockReturnValue({});
-					const generated = [].concat(...generateGraphqlDefs()).join('');
+						expect(generated).not.toMatch(
+							new RegExp(`prop: String`),
+						);
+					});
+				} else {
+					it(`Outputs correct type for properties using ${bizopsType}`, () => {
+						rawData.getTypes.mockReturnValue([
+							{
+								name: 'Dummy',
+								description: 'dummy type description',
+								properties: {
+									prop: {
+										type: bizopsType,
+										description: 'a description',
+									},
+								},
+							},
+						]);
+						rawData.getEnums.mockReturnValue({});
+						const generated = []
+							.concat(...generateGraphqlDefs())
+							.join('');
 
-					expect(generated).toMatch(new RegExp(`prop: ${graphqlType}`));
-				});
-			}
-		});
+						expect(generated).toMatch(
+							new RegExp(`prop: ${graphqlType}`),
+						);
+					});
+				}
+			},
+		);
 	});
 });
