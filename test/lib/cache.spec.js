@@ -1,4 +1,5 @@
 const cache = require('../../lib/cache');
+
 describe('cache spec', () => {
 	let func;
 
@@ -26,7 +27,7 @@ describe('cache spec', () => {
 	it("doesn't call cacheified function on second call", () => {
 		const result = cacheified(3);
 		expect(result).toBe(6);
-		expect(func).not.called;
+		expect(func).not.toHaveBeenCalled();
 		expect(keyGetter).toHaveBeenCalledWith(3);
 	});
 	it('calls cacheified function if different cache key generated', () => {

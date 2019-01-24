@@ -14,14 +14,14 @@ module.exports = cache.cacheify(
 				const entry = withMeta
 					? {
 							options,
-							description
+							description,
 					  }
 					: options;
 
 				return Object.assign(map, { [key]: entry });
 			},
-			{}
+			{},
 		);
 	},
-	({ withMeta = false } = {}) => `enums: ${withMeta}`
+	({ withMeta = false } = {}) => `enums: ${withMeta}`,
 );

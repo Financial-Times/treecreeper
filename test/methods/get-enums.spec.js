@@ -1,4 +1,4 @@
-const { getEnums } = require('../../');
+const { getEnums } = require('../..');
 const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 
@@ -16,8 +16,8 @@ describe('get-enums', () => {
 		rawData.getEnums.mockReturnValue({
 			enum1: {
 				description: 'ab',
-				options: ['a']
-			}
+				options: ['a'],
+			},
 		});
 		expect(getEnums()).toEqual({ enum1: { a: 'a' } });
 	});
@@ -26,19 +26,19 @@ describe('get-enums', () => {
 		rawData.getEnums.mockReturnValue({
 			enum1: {
 				description: 'ab',
-				options: ['a']
-			}
+				options: ['a'],
+			},
 		});
 		expect(getEnums({ withMeta: true })).toEqual({
-			enum1: { description: 'ab', options: { a: 'a' } }
+			enum1: { description: 'ab', options: { a: 'a' } },
 		});
 	});
 
 	it('convert arrays into key/value maps', () => {
 		rawData.getEnums.mockReturnValue({
 			enum1: {
-				options: ['a', 'b', 'c']
-			}
+				options: ['a', 'b', 'c'],
+			},
 		});
 		expect(getEnums()).toEqual({ enum1: { a: 'a', b: 'b', c: 'c' } });
 	});
@@ -49,9 +49,9 @@ describe('get-enums', () => {
 				options: {
 					a: 1,
 					b: 2,
-					c: 3
-				}
-			}
+					c: 3,
+				},
+			},
 		});
 		expect(getEnums()).toEqual({ enum1: { a: 1, b: 2, c: 3 } });
 	});
