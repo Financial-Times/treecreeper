@@ -12,7 +12,7 @@ const metaProperties = [
 		label: 'Created by user'
 	},
 	{
-		name: '_createdTimestamp',
+		name:'_createdTimestamp',
 		type: 'DateTime',
 		label: 'Create at',
 		description: 'The creation time and date'
@@ -30,7 +30,7 @@ const metaProperties = [
 		label: 'Updated by user'
 	},
 	{
-		name: '_updatedTimestamp',
+		name:'_updatedTimestamp',
 		type: 'DateTime',
 		label: 'Updated at',
 		description: 'The time and date of update'

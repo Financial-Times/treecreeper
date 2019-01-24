@@ -1,5 +1,6 @@
 const getTypes = require('../methods/get-types');
 const getEnums = require('../methods/get-enums');
+const stripIndent =  require('common-tags/lib/stripIndent');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -138,7 +139,7 @@ module.exports = () => {
 		primitiveTypes: 'graphql',
 		relationshipStructure: 'graphql'
 	});
-	const customDateTimeTypes = `
+	const customDateTimeTypes = stripIndent`
 		scalar DateTime
 		scalar Date
 		scalar Time
