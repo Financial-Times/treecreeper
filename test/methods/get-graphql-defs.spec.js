@@ -132,13 +132,13 @@ statement: \"MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT rel
 _createdByClient: String
 # The user that made the creation
 _createdByUser: String
-# The creation time and date
+# The time and date this record was created
 _createdTimestamp: DateTime
 # The client that was used to make the update
 _updatedByClient: String
 # The last user to make an update
 _updatedByUser: String
-# The time and date of update
+# The time and date this record was last updated
 _updatedTimestamp: DateTime
 
 },
@@ -164,13 +164,13 @@ statement: \"MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINC
 _createdByClient: String
 # The user that made the creation
 _createdByUser: String
-# The creation time and date
+# The time and date this record was created
 _createdTimestamp: DateTime
 # The client that was used to make the update
 _updatedByClient: String
 # The last user to make an update
 _updatedByUser: String
-# The time and date of update
+# The time and date this record was last updated
 _updatedTimestamp: DateTime
 
 }
