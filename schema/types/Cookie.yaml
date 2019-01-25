@@ -61,7 +61,7 @@ properties:
     type: Int
     label: Number of times found as persistent cookie
     description: |
-    The number of times the cookie has been found as a persistent cookie from all known occurences of this cookie. This information taken from CookiePedia at point of last update.
+      The number of times the cookie has been found as a persistent cookie from all known occurences of this cookie. This information taken from CookiePedia at point of last update.
     required: true
     isCore: true
     fieldset: main
@@ -70,7 +70,7 @@ properties:
     type: Int
     label: Number of times found as a session cookie
     description: |
-    The number of times the cookie has been found as a session cookie from all known occurences of this cookie. This information taken from CookiePedia at point of last update.
+      The number of times the cookie has been found as a session cookie from all known occurences of this cookie. This information taken from CookiePedia at point of last update.
     required: true
     isCore: true
     fieldset: main
@@ -79,7 +79,7 @@ properties:
     type: Int
     label: Average Life Span
     description: |
-    The average life span of the cookie generated from all known occurrences of this cookie. This information is 
+      The average life span of the cookie generated from all known occurrences of this cookie. This information is 
     isCore: true
 
   hasCookieInstanceOf:
