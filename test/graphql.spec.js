@@ -38,11 +38,20 @@ describe('Integration - GraphQL', () => {
 		return graphql(mockSchema, query);
 	};
 
-	const listFields = (fields = []) =>
-		fields
-			.filter(({ type: { kind } }) => !['LIST', 'OBJECT'].includes(kind))
-			.map(({ name }) => name)
-			.join('\n');
+	const listFields = (fields = []) => {
+		return (
+			fields
+				/* DateTime is given - type: { kind: 'SCALAR' } but is is an object
+			causing the test to fail.
+			*/
+				.filter(({ type: { name } }) => name !== 'DateTime')
+				.filter(
+					({ type: { kind } }) => !['LIST', 'OBJECT'].includes(kind),
+				)
+				.map(({ name }) => name)
+				.join('\n')
+		);
+	};
 
 	const getMocksForType = async (type, typeQuery) => {
 		logger.debug('Fetching graphql schema for type', { type });

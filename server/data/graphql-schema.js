@@ -5,8 +5,12 @@ const {
 } = require('graphql-tools');
 
 const partialRight = require('lodash/partialRight');
-const { neo4jgraphql, augmentSchema } = require('neo4j-graphql-js');
-const { getTypes, getEnums } = require('@financial-times/biz-ops-schema');
+const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
+const {
+	getTypes,
+	getEnums,
+	getGraphqlDefs,
+} = require('@financial-times/biz-ops-schema');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
 
@@ -27,25 +31,19 @@ const resolvers = {
 	all: Object.assign({}, enumResolvers, { Query: queryResolvers }),
 };
 
-const { getGraphqlDefs } = require('@financial-times/biz-ops-schema');
-
-const schema = augmentSchema(
-	makeExecutableSchema({
-		typeDefs: getGraphqlDefs(),
-		resolvers: resolvers.all,
-		logger: {
-			log(message) {
-				logger.error(`GraphQL Schema: ${message}`, {
-					event: 'GRAPHQL_SCHEMA_ERROR',
-				});
-			},
+const makeGraphqlSchema = makeExecutableSchema({
+	typeDefs: getGraphqlDefs(),
+	resolvers: resolvers.all,
+	logger: {
+		log(message) {
+			logger.error(`GraphQL Schema: ${message}`, {
+				event: 'GRAPHQL_SCHEMA_ERROR',
+			});
 		},
-	}),
-	{
-		query: true,
-		mutation: false,
 	},
-);
+});
+const config = { query: true, mutation: false };
+const schema = makeAugmentedSchema({ schema: makeGraphqlSchema, config });
 
 const createMockSchema = mocks => {
 	const mockSchema = makeExecutableSchema({
