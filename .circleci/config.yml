@@ -34,12 +34,6 @@ references:
     attach_workspace:
       at: *workspace_root
 
-
-  release: &release
-    run:
-      name: Release npm package
-      command: >
-        make publish
 jobs:
   install:
     <<: *default_container_config
@@ -67,14 +61,14 @@ jobs:
       - run:
           name: Run tests
           command: make test
-  lint:
+  verify:
     <<: *default_container_config
     steps:
       - *attach_workspace
 
       - run:
           name: Run tests
-          command: make lint
+          command: make verify -j 3
 
   release:
     <<: *default_container_config
@@ -85,7 +79,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ${HOME}/.npmrc
       - run:
           name: Publish to npm
-          command: make publish
+          command: make npm-publish
 
 workflows:
   version: 2
@@ -99,18 +93,19 @@ workflows:
             - install
           filters:
             <<: *triggerable-by-tag
-      - lint:
+      - verify:
+          context: rel-eng-creds
           requires:
             - install
           filters:
             <<: *triggerable-by-tag
       - release:
+          context: rel-eng-creds
           requires:
             - install
             - test
-            - lint
+            - verify
           filters:
             <<: *triggerable-by-tag
             branches:
               ignore: /.*/
-
