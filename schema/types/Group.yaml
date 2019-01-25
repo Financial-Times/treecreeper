@@ -1,5 +1,7 @@
 name: Group
-description: An overarching group which contains teams and is costed separately
+description: |
+  An overarching group, responsible for an area of the FT's activities,
+  which contains teams and is costed separately
 rank: 50
 properties:
   code:
@@ -63,7 +65,7 @@ properties:
     description: |
       The top level teams that form the main subdivisions of the group. In
       groups that are too small to have a hierarchical structure, this may
-      list all the groups teams
+      list all the groups teams.
     hasMany: true
   allTeams:
     type: Team
@@ -73,6 +75,6 @@ properties:
     description: |
       All the teams that are part of this group. This is populated by traversing
       the team hierarchy in the group and the list does not need to be manually
-      maintained
+      maintained.
     hasMany: true
     isRecursive: true

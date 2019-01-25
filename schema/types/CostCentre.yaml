@@ -16,9 +16,7 @@ properties:
     canIdentify: true
     isCore: true
     label: Name
-    deprecationReason: |
-        Ends up always being the same as code, and most of our systems default
-        to using code as name anyway.
+    deprecationReason: Ends up always being the same as code, and most of our systems default to using code as name anyway.
     description: The name of the cost centre.
   description:
     type: Paragraph
@@ -26,7 +24,7 @@ properties:
     isCore: true
     label: Description
     description: |
-        Details of what this cost centre is intended to be used to pay for.
+      Details of what this cost centre is intended to be used to pay for.
   groups:
     relationship: PAYS_FOR
     type: Group
@@ -34,6 +32,5 @@ properties:
     hasMany: true
     label: FT Group
     description: |
-        The groups whose budgets are paid for (partly or in full) by this
-        cost centre.
+      The groups whose budgets are paid for (partly or in full) by this cost centre.
 
