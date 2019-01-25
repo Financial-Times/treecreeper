@@ -1,5 +1,5 @@
 name: CostCentre
-description: A PMA cost centre which pays for the budget of one or more groups
+description: A financial cost centre which pays for the budget of one or more groups
 rank: 55
 properties:
   code:
@@ -9,7 +9,7 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: The upper case code of this cost centre in PMA.
+    description: The upper case code of this cost centre.
     pattern: NO_LOWER_CASE
   name:
     type: Name
