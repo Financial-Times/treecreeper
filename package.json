@@ -38,7 +38,7 @@
 		"ext": "js,graphql,yaml"
 	},
 	"dependencies": {
-		"@financial-times/biz-ops-schema": "~0.7.2",
+		"@financial-times/biz-ops-schema": "~0.7.3",
 		"@financial-times/n-cluster": "^1.0.0",
 		"@financial-times/n-logger": "^5.6.4",
 		"@financial-times/s3o-middleware": "^2.0.6",
@@ -51,7 +51,7 @@
 		"express-async-errors": "^3.0.0",
 		"graphql": "^0.13.2",
 		"graphql-server-express": "^1.4.0",
-		"graphql-tools": "^3.0.1",
+		"graphql-tools": "^4.0.3",
 		"http-errors": "^1.6.3",
 		"jsforce": "^1.9.1",
 		"lodash": "^4.17.10",
@@ -63,7 +63,7 @@
 		"uuid": "^3.2.1"
 	},
 	"devDependencies": {
-		"@financial-times/rel-engage": "^5.1.0-beta.6",
+		"@financial-times/rel-engage": "^5.1.0-beta.13",
 		"artillery": "^1.6.0-22",
 		"artillery-plugin-statsd": "^2.2.0",
 		"casual": "^1.5.19",
