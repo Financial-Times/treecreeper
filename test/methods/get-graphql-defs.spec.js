@@ -117,6 +117,9 @@ describe('graphql def creation', () => {
 		expect(generated).toEqual(
 			explodeString(
 				`
+scalar DateTime
+scalar Date
+scalar Time
 # A cost centre which groups are costed to
 type CostCentre {
 
@@ -135,12 +138,16 @@ statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT rela
 _createdByClient: String
 # The user that made the creation
 _createdByUser: String
+# The time and date this record was created
+_createdTimestamp: DateTime
 # The client that was used to make the update
 _updatedByClient: String
 # The last user to make an update
 _updatedByUser: String
+# The time and date this record was last updated
+_updatedTimestamp: DateTime
 
-}
+},
 
 # An overarching group which contains teams and is costed separately
 type Group {
@@ -163,10 +170,14 @@ statement: "MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT
 _createdByClient: String
 # The user that made the creation
 _createdByUser: String
+# The time and date this record was created
+_createdTimestamp: DateTime
 # The client that was used to make the update
 _updatedByClient: String
 # The last user to make an update
 _updatedByUser: String
+# The time and date this record was last updated
+_updatedTimestamp: DateTime
 
 }
 type Query {

@@ -12,6 +12,12 @@ const metaProperties = [
 		label: 'Created by user',
 	},
 	{
+		name: '_createdTimestamp',
+		type: 'DateTime',
+		label: 'Created at',
+		description: 'The time and date this record was created',
+	},
+	{
 		name: '_updatedByClient',
 		type: 'Word',
 		description: 'The client that was used to make the update',
@@ -22,6 +28,12 @@ const metaProperties = [
 		type: 'Word',
 		description: 'The last user to make an update',
 		label: 'Updated by user',
+	},
+	{
+		name: '_updatedTimestamp',
+		type: 'DateTime',
+		label: 'Updated at',
+		description: 'The time and date this record was last updated',
 	},
 ];
 
