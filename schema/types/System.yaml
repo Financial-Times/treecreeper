@@ -2,7 +2,9 @@ name: System
 description: Any combination of software and technical infrastructure used by the business, engineering or operations.
 moreInformation: |
     Systems are hierachical and represent the deployable units of our business. A Product may well be formed from a number of Systems each of which is itself formed from lower level Systems.
+    Examples of system include: FT.com Router, Content Annotator, Origami Registry, and Biz Ops Admin. Exmaples of products include: FT.com, Content API, Biz Ops, and Origami.
     Systems are owned by Teams (not individuals) from either a delivery and support perspective (or both). A well managed productionised System will be linked to its Repository and its Healthchecks.
+
 rank: 20
 properties:
   code:
@@ -14,7 +16,7 @@ properties:
     pattern: CODE
     label: Code
     fieldset: general
-    description: The unique identifcation for this system.
+    description: The unique identification (systemcode) for this system. Once assigned it cannot be altered without duplicating the data to a new record.
   name:
     type: Name
     canIdentify: true
@@ -26,7 +28,7 @@ properties:
     type: Paragraph
     canIdentify: true
     label: Description
-    description: A brief overview of what the system does and how from a business perspective.
+    description: A brief overview of what the system does and how from the user's perspective.
     fieldset: general
   primaryURL:
     type: Url
@@ -47,7 +49,7 @@ properties:
     canFilter: true
     isCore: true
     label: Service tier
-    description: The level of service support to be given to the system.
+    description: The service tier (level of support) given to this system.
     fieldset: general
   serviceType:
     type: Word
@@ -195,7 +197,7 @@ properties:
   failoverDetails:
     type: Document
     label: Failover Details
-    description: The actions require to fail this system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions required to fail this system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: failover
   dataRecoveryProcessType:
     type: ProcessType
@@ -206,7 +208,7 @@ properties:
   dataRecoveryDetails:
     type: Document
     label: Data Recovery Details
-    description: The actions require to restore the data for this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions required to restore the data for this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: dataRecovery
   releaseProcessType:
     type: ProcessType
@@ -223,7 +225,7 @@ properties:
   releaseDetails:
     type: Document
     label: Release Details
-    description: The actions require to deploy a new version of this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions required to deploy a new version of this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: release
   credentialsRefreshProcessType:
     type: ProcessType
@@ -234,7 +236,7 @@ properties:
   credentialsRefreshDetails:
     type: Document
     label: Credentials Refresh Details
-    description: The actions require to change the credentials used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    description: The actions required to change the credentials used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
     fieldset: credentialRefresh
   moreInformation:
     type: Document
@@ -246,7 +248,9 @@ properties:
     direction: outgoing
     label: Stakeholders
     relationship: HAS_STAKEHOLDER
-    description: The system's stakeholders.
+    description: |
+      People who have an interest in knowing about the status of or changes to this system.
+      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
     fieldset: ownership
     hasMany: true
   repositories:
