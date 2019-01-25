@@ -1,5 +1,5 @@
 name: CostCentre
-description: A cost centre which groups are costed to
+description: A PMA cost centre which pays for the budget of one or more groups
 rank: 55
 properties:
   code:
@@ -9,19 +9,31 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: 'Unique code/id for this item.'
+    description: The upper case code of this cost centre in PMA.
     pattern: NO_LOWER_CASE
   name:
     type: Name
     canIdentify: true
     isCore: true
     label: Name
+    deprecationReason: |
+        Ends up always being the same as code, and most of our systems default
+        to using code as name anyway.
     description: The name of the cost centre.
+  description:
+    type: Paragraph
+    canIdentify: true
+    isCore: true
+    label: Description
+    description: |
+        Details of what this cost centre is intended to be used as.
   groups:
     relationship: PAYS_FOR
     type: Group
     direction: outgoing
     hasMany: true
     label: FT Group
-    description: The groups which are costed to the cost centre.
+    description: |
+        The groups whose budgets are paid for (partly or in full) by this
+        cost centre.
 
