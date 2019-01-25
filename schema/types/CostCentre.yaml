@@ -26,7 +26,7 @@ properties:
     isCore: true
     label: Description
     description: |
-        Details of what this cost centre is intended to be used as.
+        Details of what this cost centre is intended to be used to pay for.
   groups:
     relationship: PAYS_FOR
     type: Group
