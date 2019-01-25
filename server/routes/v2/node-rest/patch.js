@@ -167,7 +167,9 @@ const update = async input => {
 		);
 
 		const willModifyNode =
-			Object.keys(writeProperties).length + deletePropertyNames.length;
+			Object.keys(writeProperties).length +
+			deletePropertyNames.length +
+			Object.keys(addedRelationships).length;
 
 		const willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
