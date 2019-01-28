@@ -104,7 +104,7 @@ const defineQuery = ({ name, type, properties, paginate }) => {
 };
 
 const defineType = config => `
-# ${config.description}
+# ${config.description.replace(/\n/g, ' ')}
 type ${config.name} {
   ${indentMultiline(
 		defineProperties(Object.entries(config.properties)),
