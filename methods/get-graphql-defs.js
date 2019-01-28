@@ -1,3 +1,4 @@
+const stripIndent = require('common-tags/lib/stripIndent');
 const getTypes = require('../methods/get-types');
 const getEnums = require('../methods/get-enums');
 
@@ -137,9 +138,14 @@ module.exports = () => {
 		primitiveTypes: 'graphql',
 		relationshipStructure: 'graphql',
 	});
+	const customDateTimeTypes = stripIndent`
+		scalar DateTime
+		scalar Date
+		scalar Time
+	`;
 
 	return [].concat(
-		typesFromSchema.map(defineType),
+		customDateTimeTypes + typesFromSchema.map(defineType),
 		'type Query {\n',
 		...typesFromSchema.map(defineQueries),
 		'}',
