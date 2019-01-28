@@ -381,6 +381,10 @@ properties:
     description: System(s) that do, or will, replace all or part of this system.
     hasMany: true
     fieldset: network
+  lastServiceReviewDate:
+    type: Date
+    description: The last date that this service was reviewed by Ops
+    label: Last review date
 fieldsets:
   general:
     heading: General information
