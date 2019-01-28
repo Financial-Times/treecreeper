@@ -167,9 +167,7 @@ const update = async input => {
 		);
 
 		const willModifyNode =
-			Object.keys(writeProperties).length +
-			deletePropertyNames.length +
-			Object.keys(addedRelationships).length;
+			Object.keys(writeProperties).length + deletePropertyNames.length;
 
 		const willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
@@ -205,7 +203,7 @@ const update = async input => {
 				`,
 		];
 
-		if (willModifyNode) {
+		if (willModifyNode || willModifyRelationships) {
 			queryParts.push(stripIndents`ON MATCH SET
 						${cypherHelpers.metaPropertiesForUpdate('node')}
 					SET node += $properties`);
