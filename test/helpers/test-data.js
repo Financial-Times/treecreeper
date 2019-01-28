@@ -45,10 +45,10 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 		_createdByClient: `${namespace}-init-client`,
 		_createdByUser: `${namespace}-init-user`,
 		_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
-		_updatedByRequest: `${namespace}-init-request`,
-		_updatedByClient: `${namespace}-init-client`,
-		_updatedByUser: `${namespace}-init-user`,
-		_updatedTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
+		_updatedByRequest: `${namespace}-request`,
+		_updatedByClient: `${namespace}-client`,
+		_updatedByUser: `${namespace}-user`,
+		_updatedTimestamp: DateTime.fromStandardDate(new Date(now)).toString(),
 	};
 	const createNode = getNodeCreator(namespace, setupMeta);
 	const connect = getConnector(namespace, setupMeta);
@@ -72,11 +72,11 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 				_createdTimestamp: DateTime.fromStandardDate(
 					new Date(then),
 				).toString(),
-				_updatedByRequest: `${namespace}-init-request`,
-				_updatedByClient: `${namespace}-init-client`,
-				_updatedByUser: `${namespace}-init-user`,
+				_updatedByRequest: `${namespace}-request`,
+				_updatedByClient: `${namespace}-client`,
+				_updatedByUser: `${namespace}-user`,
 				_updatedTimestamp: DateTime.fromStandardDate(
-					new Date(then),
+					new Date(now),
 				).toString(),
 			},
 			obj,
