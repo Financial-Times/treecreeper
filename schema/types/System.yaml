@@ -22,7 +22,7 @@ properties:
     canIdentify: true
     isCore: true
     label: Name
-    description: The short title for the system which will be output on screens and reports.
+    description: The short name for the system which will be output on screens and reports.
     fieldset: general
   description:
     type: Paragraph
