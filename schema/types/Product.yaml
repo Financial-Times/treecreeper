@@ -1,5 +1,7 @@
 name: Product
-description: Anything sold by the FT for use by an external entity, OR produced by an area of FT technology to be used by another internal area.
+description: |
+  Anything sold by the FT for use by an external entity,
+  or produced by an area of FT technology to be used by another internal area.
 rank: 10
 properties:
   code:
@@ -10,27 +12,31 @@ properties:
     isCore: true
     pattern: STRICT_CODE
     label: Code
-    description: 'Unique code/id for this item.'
-    fieldset: general
-  description:
-    type: Paragraph
-    isCore: true
-    label: Description
-    description: Brief description of what the product does.
+    description: |
+      Unique code for the product. Must be lowercase, and ideally only letters,
+      numbers and hyphens.
     fieldset: general
   name:
     type: Name
     canIdentify: true
     isCore: true
     label: Name
-    description: The name generally used to refer to the product.
+    description: |
+      The name generally used to refer to the product.
+    fieldset: general
+  description:
+    type: Paragraph
+    isCore: true
+    label: Description
+    description: |
+      Brief description of what the product is and why it exists.
     fieldset: general
   serviceTier:
     type: ServiceTier
     canFilter: true
     isCore: true
     label: Service tier
-    description: The product's service tier level.
+    description: The service tier (level of support) given to this product.
     fieldset: general
   primaryURL:
     type: Url
@@ -43,14 +49,14 @@ properties:
     type: ProductLifecycle
     canFilter: true
     label: Lifecycle stage
-    description: Lifecycle stage of the product.
+    description: The product's current lifecycle stage.
     fieldset: general
   productOwners:
     type: Person
     direction: outgoing
     label: Product owners
     relationship: HAS_PRODUCT_OWNER
-    description: The product's owner.
+    description: The product's owner or owners.
     hasMany: true
     fieldset: network
   dependencies:
@@ -66,7 +72,10 @@ properties:
     direction: outgoing
     label: Recursive dependencies
     relationship: DEPENDS_ON
-    description: 'The systems the product depends on, either directly or indirectly.'
+    description: |
+      The systems the product depends on, either directly or indirectly. This is
+      populated by traversing the dependency tree of each direct dependency,
+      and the list does not need to be manually maintained.
     hasMany: true
     isRecursive: true
     fieldset: network
