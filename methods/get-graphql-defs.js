@@ -93,7 +93,7 @@ const getIdentifyingFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canIdentify);
 
 const getFilteringFields = config =>
-	Object.entries(config.properties).filter(([, value]) => value.canFilter);
+	Object.entries(config.properties).filter(([, value]) => !(value.hasOwnProperty('relationship') || value.type == 'DateTime')); /* eslint-disable-line */
 
 const defineQuery = ({ name, type, properties, paginate }) => {
 	return `
