@@ -383,7 +383,7 @@ properties:
     fieldset: network
   lastServiceReviewDate:
     type: Date
-    description: The last date that this service was reviewed by Ops
+    description: The last date that this service was reviewed by Ops.
     label: Last review date
 fieldsets:
   general:
