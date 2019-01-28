@@ -100,9 +100,10 @@ properties:
   source:
     type: PersonSource
     label: Source
-    description: Where the data for this person is coming from, via the People API - Workday, Salesforce, ldap, github, Slack or multiple.
+    description: The primary data source used to provide information for this person - Workday, Salesforce, ldap, github, Slack or multiple.
     autoPopulated: true
     canFilter: true
+    deprecationReason: Only needed when migrating users from cmdb IDs to people-api IDs
   proposedId:
     type: Word
     label: Proposed ID
