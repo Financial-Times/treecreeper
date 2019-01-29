@@ -39,7 +39,8 @@ const metaProperties = [
 		name: '_lockedFields',
 		type: 'String',
 		label: 'Locked fields',
-		description: 'Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.',
+		description:
+			'Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.',
 	},
 ];
 

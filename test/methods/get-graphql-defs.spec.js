@@ -146,6 +146,8 @@ _updatedByClient: String
 _updatedByUser: String
 # The time and date this record was last updated
 _updatedTimestamp: DateTime
+# Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+_lockedFields: String
 
 },
 
@@ -178,6 +180,8 @@ _updatedByClient: String
 _updatedByUser: String
 # The time and date this record was last updated
 _updatedTimestamp: DateTime
+# Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+_lockedFields: String
 
 }
 type Query {
