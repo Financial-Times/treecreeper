@@ -232,12 +232,25 @@ properties:
     canFilter: true
     label: Type of Credentials Refresh Process
     description: The mechanism used to achieve a change in credentials.
-    fieldset: credentialRefresh
+    deprecationReason: 'Replaced by keyManagementProcessType property'
+    fieldset: keyManagement
   credentialsRefreshDetails:
     type: Document
     label: Credentials Refresh Details
     description: The actions required to change the credentials used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
-    fieldset: credentialRefresh
+    deprecationReason: 'Replaced by keyManagementDetails property'
+    fieldset: keyManagement
+  keyManagementProcessType:
+    type: ProcessType
+    canFilter: true
+    label: Type of Key Management Process
+    description: The mechanism used to create/rotate keys.
+    fieldset: keyManagement
+  keyManagementDetails:
+    type: Document
+    label: Key Management Details
+    description: The actions required to create/change the keys used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    fieldset: keyManagement
   moreInformation:
     type: Document
     label: More Information
@@ -404,8 +417,8 @@ fieldsets:
     heading: Data recovery
   release:
     heading: Release
-  credentialRefresh:
-    heading: Credentials refresh
+  keyManagement:
+    heading: Key Management
   personalData:
     heading: Personal Identifiable Data (PII)
   monitoring:
