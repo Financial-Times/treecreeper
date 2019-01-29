@@ -122,7 +122,7 @@ properties:
     label: Product owner for group
     direction: incoming
     relationship: HAS_PRODUCT_OWNER
-    description: The group(s) this person is a Product Owner for.
+    description: The group(s) who own the systems this person drives the business aspects of.
     hasMany: true
     fieldset: group
   deliveryManagerFor:
@@ -130,7 +130,7 @@ properties:
     label: Delivery manager for group
     direction: incoming
     relationship: HAS_DELIVERY_MANAGER
-    description: The group(s) this person is a Delivery Manager for.
+    description: The group(s) who own the systems this person drives the delivery of.
     hasMany: true
     fieldset: group
   techLeadFor:
@@ -138,7 +138,7 @@ properties:
     label: Tech lead for teams
     direction: incoming
     relationship: HAS_TECH_LEAD
-    description: The team(s) this person is a Technical Lead for.
+    description: The team(s) who own the systems this person drives the technical aspects of.
     hasMany: true
     fieldset: team
   ownedTeams:
