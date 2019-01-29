@@ -36,7 +36,7 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true TIMEOUT=500000 jest test --testEnvironment=node; \
+		then DEBUG=true TIMEOUT=500000 jest test --testEnvironment=node --watch; \
 		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
