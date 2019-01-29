@@ -211,12 +211,6 @@ describe('Integration - GraphQL', () => {
 	});
 
 	it('GET for a single system returns a single system', () => {
-		console.log('--------------------------')
-		console.log(`query: {
-			System(code: "${typeMocks.System[0].code}") {
-				${listFields(typeFields.System)}
-			}}`)
-		console.log('--------------------------')
 		return request(app)
 			.post('/graphql')
 			.send({
@@ -235,12 +229,6 @@ describe('Integration - GraphQL', () => {
 	});
 
 	it('GET for systems returns a list of systems', () => {
-		console.log('--------------------------')
-		console.log(`query: {
-			Systems {
-				${listFields(typeFields.System)}
-			}}`)
-		console.log('--------------------------')
 		return request(app)
 			.post('/graphql')
 			.send({
