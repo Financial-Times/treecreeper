@@ -388,6 +388,11 @@ properties:
     description: System(s) that do, or will, replace all or part of this system.
     hasMany: true
     fieldset: network
+  lastServiceReviewDate:
+    type: Date
+    description: The date that Operations last reviewed this system.
+    label: Last review date
+    fieldset: review
 fieldsets:
   general:
     heading: General information
@@ -407,3 +412,5 @@ fieldsets:
     heading: Monitoring
   network:
     heading: Related resources
+  review:
+    heading: Review
