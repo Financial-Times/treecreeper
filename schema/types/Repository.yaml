@@ -58,12 +58,12 @@ properties:
     description: Repository description field.
     autoPopulated: true
   createdAt:
-    type: Date
+    type: DateTime
     label: Created
     description: The UTC time when the repository was created in the VCS system.
     autoPopulated: true
   pushedAt:
-    type: Date
+    type: DateTime
     label: Updated
     description: The UTC time when the repository was last pushed to.
     autoPopulated: true
