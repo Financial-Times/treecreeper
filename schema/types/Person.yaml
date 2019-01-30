@@ -1,6 +1,6 @@
 name: Person
 pluralName: People
-description: An FT staff member or a contact at a relevant third party. For FT staff, details are imported daily from https://who.in.ft.com, so there should be no need to manually add or update
+description: A member of staff at the FT, or a contact from a relevant third party. FT staff members' details are imported daily from https://who.in.ft.com, so manual additions/updates are not needed.
 rank: 40
 properties:
   code:
@@ -11,8 +11,8 @@ properties:
     isCore: true
     label: Code
     description: |
-        Unique code/id for this person. For FT staff this will be their active directory name.
-        For third parties, use firstname.lastname.company.
+        The unique code for this person. For FT staff this will be their active directory name.
+        For third parties, please use firstname.lastname.company.
     fieldset: general
     autoPopulated: true
   name:
@@ -21,8 +21,8 @@ properties:
     isCore: true
     label: Name
     description: |
-        The name of the person.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The name by which this person is known.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
     autoPopulated: true
   email:
@@ -31,8 +31,8 @@ properties:
     isCore: true
     label: Email
     description: |
-        The email address of the person.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The email address that can be used to contact this person.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slack:
@@ -41,8 +41,8 @@ properties:
     canIdentify: true
     isCore: true
     description: |
-        The slack link for the person (deprecated).
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The Slack link for this person (deprecated).
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slackName:
@@ -50,8 +50,8 @@ properties:
     canIdentify: true
     label: Slack Name
     description: |
-        The slack name for the person.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The Slack name for this person.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   slackID:
@@ -59,8 +59,8 @@ properties:
     canIdentify: true
     label: Slack ID
     description: |
-        The slack id for the person.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The Slack id for this person.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   phone:
@@ -69,8 +69,8 @@ properties:
     isCore: true
     label: Phone
     description: |
-        The phone contact number for the person.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The telephone number that can be used to contact this person.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
   isActive:
@@ -78,42 +78,43 @@ properties:
     canFilter: true
     label: Active
     description: |
-        Whether or not the person is still working at the FT.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        Whether or not this person is still working at the FT.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
   contract:
     type: PersonContract
     canFilter: true
     label: Contract type
     description: |
-        The type of employment contract a Person has with the FT.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        The type of employment contract this Person has with the FT.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
   isPeopleApi:
     type: Boolean
     canFilter: true
     label: Is in people api
     description: |
-        Whether or not the person exists in who.in.ft.com.
-        For FT staff, if details are incorrect please raise in the \#ip-people-api slack channel.
+        Whether or not this person exists in https://who.in.ft.com.
+        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     autoPopulated: true
   source:
     type: PersonSource
     label: Source
-    description: "Where the data for this person comes from, via People API: workday, salesforce, ldap, github, slack, multi."
+    description: The primary data source used to provide information for this person - Workday, Salesforce, ldap, github, Slack or multiple.
     autoPopulated: true
     canFilter: true
+    deprecationReason: Only needed when migrating users from cmdb IDs to people-api IDs
   proposedId:
     type: Word
     label: Proposed ID
-    description: "This user's id in: workday, ldap, github or slack. `name.lastname` if no id found."
+    description: The ID of this person in Workday, ldap, github or Slack. If no ID is found, it is `name.lastname`.
     autoPopulated: true
   techDirectorFor:
     type: Group
     label: Tech director for group
     direction: incoming
     relationship: HAS_TECH_DIRECTOR
-    description: Groups the person is a technical director for.
+    description: The group(s) this person is a Technical Director for.
     hasMany: true
     fieldset: group
   productOwnerFor:
@@ -121,7 +122,7 @@ properties:
     label: Product owner for group
     direction: incoming
     relationship: HAS_PRODUCT_OWNER
-    description: Groups the person is a product owner for.
+    description: The group(s) who own the systems this person drives the business aspects of.
     hasMany: true
     fieldset: group
   deliveryManagerFor:
@@ -129,7 +130,7 @@ properties:
     label: Delivery manager for group
     direction: incoming
     relationship: HAS_DELIVERY_MANAGER
-    description: Groups the person is a delivery manager for.
+    description: The group(s) who own the systems this person drives the delivery of.
     hasMany: true
     fieldset: group
   techLeadFor:
@@ -137,7 +138,7 @@ properties:
     label: Tech lead for teams
     direction: incoming
     relationship: HAS_TECH_LEAD
-    description: Teams the person is a technical lead for.
+    description: The team(s) who own the systems this person drives the technical aspects of.
     hasMany: true
     fieldset: team
   ownedTeams:
@@ -145,7 +146,7 @@ properties:
     direction: incoming
     label: Product owner for teams
     relationship: HAS_PRODUCT_OWNER
-    description: Teams the person is a product owner for.
+    description: The team(s) this person is a Product Owner for.
     hasMany: true
     fieldset: team
   ownedProducts:
@@ -153,7 +154,7 @@ properties:
     direction: incoming
     label: Product owner for products
     relationship: HAS_PRODUCT_OWNER
-    description: Products the person is a product owner for.
+    description: The product(s) this person is a Product Owner for.
     hasMany: true
     fieldset: individual
   dataOwnerFor:
@@ -161,7 +162,7 @@ properties:
     direction: incoming
     label: GDPR Data owner for systems
     relationship: HAS_DATA_OWNER
-    description: Systems the person has responsibility for managing GDPR processes related to personal data.
+    description: The systems where this person is responsible for managing GDPR processes related to personal data.
     hasMany: true
     fieldset: individual
   technicalOwnerFor:
@@ -169,7 +170,7 @@ properties:
     direction: incoming
     label: Technical owner for systems
     relationship: HAS_TECHNICAL_OWNER
-    description: Systems the person has technical responsibility for.
+    description: The systems this person has technical responsibility for.
     hasMany: true
     fieldset: individual
   stakeholderFor:
@@ -177,7 +178,7 @@ properties:
     direction: incoming
     label: Stakeholder for systems
     relationship: HAS_STAKEHOLDER
-    description: Systems the person is a stakeholder for.
+    description: The systems this person is a stakeholder for.
     hasMany: true
     fieldset: individual
   knowsAbout:
@@ -185,7 +186,7 @@ properties:
     direction: incoming
     label: Knows about systems
     relationship: KNOWN_ABOUT_BY
-    description: Systems the person knows about.
+    description: The systems this person knows about.
     hasMany: true
     fieldset: individual
   teams:
@@ -193,7 +194,7 @@ properties:
     direction: incoming
     label: Teams
     relationship: HAS_TEAM_MEMBER
-    description: Teams this person is a member of.
+    description: The teams this person is a member of.
     hasMany: true
     fieldset: team
 fieldsets:
