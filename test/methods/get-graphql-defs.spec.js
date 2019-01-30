@@ -80,7 +80,6 @@ describe('graphql def creation', () => {
 					},
 					isActive: {
 						type: 'Boolean',
-						canFilter: true,
 						description:
 							'Whether or not the group is still in existence',
 					},

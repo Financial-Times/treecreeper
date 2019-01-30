@@ -34,7 +34,7 @@ Each property definition is an object with the following properties
 | required      | no       | false   | Boolean defining whether or not the field is required                                                                                                                                                                                                                               |                            |
 | unique        | no       | false   | Boolean indicating if values in this property must be unique across all records of this type                                                                                                                                                                                        |                            |
 | canIdentify   | no       | false   | Boolean defining whether or not this field contains a 'pseudo id', i.e. a value that is unique, or almost unique, to a record, and can therefore be used in graphQL to query for a record e.g. a `Person` record's `email` property is a good example of a value that `canIdentify` |                            |
-| canFilter     | no       | false   | Boolean defining whether or not this field shoudl be available as a filter in graphQL                                                                                                                                                                                               |                            |
+|               |          |
 | trueLabel     | no       | 'Yes'   | For properties with `Boolean` type, this defines the form label to use for the true option                                                                                                                                                                                          |                            |
 | falseLabel    | no       | 'No'    | For properties with `Boolean` type, this defines the form label to use for the false option                                                                                                                                                                                         |                            |
 | examples      | no       |         | Array of example values. This is not widely used but may e.g. be surfaced as placeholder text in a form                                                                                                                                                                             |                            |
@@ -94,7 +94,6 @@ properties:
         type: Code
         required: true
         canIdentify: true
-        canFilter: true
         description: 'Unique code/id for this item'
         label: Code
         fieldset: main

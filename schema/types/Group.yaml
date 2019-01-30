@@ -30,7 +30,6 @@ properties:
       are.
   isActive:
     type: Boolean
-    canFilter: true
     label: Active
     description: Whether or not the group still exists.
   costCentre:
