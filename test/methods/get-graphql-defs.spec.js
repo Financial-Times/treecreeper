@@ -80,7 +80,6 @@ describe('graphql def creation', () => {
 					},
 					isActive: {
 						type: 'Boolean',
-						canFilter: true,
 						description:
 							'Whether or not the group is still in existence',
 					},
@@ -199,7 +198,25 @@ CostCentres(
 offset: Int = 0
 # The number of records to return after the pagination offset. This uses the default neo4j ordering
 first: Int = 20000
+# Unique code/id for this item
+code: String
+# The name of the cost centre
+name: String
 
+# The client that was used to make the creation
+_createdByClient: String
+# The user that made the creation
+_createdByUser: String
+# The time and date this record was created
+_createdTimestamp: DateTime
+# The client that was used to make the update
+_updatedByClient: String
+# The last user to make an update
+_updatedByUser: String
+# The time and date this record was last updated
+_updatedTimestamp: DateTime
+# Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+_lockedFields: String
 ): [CostCentre]
 
 Group(
@@ -216,9 +233,26 @@ Groups(
 offset: Int = 0
 # The number of records to return after the pagination offset. This uses the default neo4j ordering
 first: Int = 20000
-
+# Unique code/id for this item
+code: String
+# The name of the group
+name: String
 # Whether or not the group is still in existence
 isActive: Boolean
+# The client that was used to make the creation
+_createdByClient: String
+# The user that made the creation
+_createdByUser: String
+# The time and date this record was created
+_createdTimestamp: DateTime
+# The client that was used to make the update
+_updatedByClient: String
+# The last user to make an update
+_updatedByUser: String
+# The time and date this record was last updated
+_updatedTimestamp: DateTime
+# Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+_lockedFields: String
 ): [Group]
 }
 # The lifecycle stage of a product

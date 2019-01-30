@@ -52,13 +52,11 @@ properties:
     fieldset: general
   isActive:
     type: Boolean
-    canFilter: true
     label: Active
     description: Whether or not the team is still in existence.
     fieldset: general
   isThirdParty:
     type: Boolean
-    canFilter: true
     label: Third party
     description: Whether or not the team is a supplier.
     fieldset: general

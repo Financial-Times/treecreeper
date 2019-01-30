@@ -75,7 +75,6 @@ properties:
     autoPopulated: true
   isActive:
     type: Boolean
-    canFilter: true
     label: Active
     description: |
         Whether or not this person is still working at the FT.
@@ -83,7 +82,6 @@ properties:
     fieldset: general
   contract:
     type: PersonContract
-    canFilter: true
     label: Contract type
     description: |
         The type of employment contract this Person has with the FT.
@@ -91,7 +89,6 @@ properties:
     fieldset: general
   isPeopleApi:
     type: Boolean
-    canFilter: true
     label: Is in people api
     description: |
         Whether or not this person exists in https://who.in.ft.com.
@@ -102,8 +99,6 @@ properties:
     label: Source
     description: The primary data source used to provide information for this person - Workday, Salesforce, ldap, github, Slack or multiple.
     autoPopulated: true
-    canFilter: true
-    deprecationReason: Only needed when migrating users from cmdb IDs to people-api IDs
   proposedId:
     type: Word
     label: Proposed ID

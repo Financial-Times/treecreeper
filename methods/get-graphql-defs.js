@@ -93,7 +93,9 @@ const getIdentifyingFields = config =>
 	Object.entries(config.properties).filter(([, value]) => value.canIdentify);
 
 const getFilteringFields = config =>
-	Object.entries(config.properties).filter(([, value]) => value.canFilter);
+	Object.entries(config.properties).filter(
+		([, value]) => !Object.keys(value).includes('relationship'),
+	);
 
 const defineQuery = ({ name, type, properties, paginate }) => {
 	return `

@@ -26,7 +26,6 @@ properties:
     description: The product / website the cookie is found on.
     required: true 
     isCore: true
-    canFilter: true
 
   isInstanceOfCookie:
     type: Cookie
