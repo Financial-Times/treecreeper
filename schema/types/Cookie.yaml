@@ -85,6 +85,7 @@ properties:
     relationship: IS_SET_AS
     description: Cookie instance data for times cookie has been found on audit of product / domain. 
     direction: outgoing 
+    hasMany: true
 
 
 fieldsets:
