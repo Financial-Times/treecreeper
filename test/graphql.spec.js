@@ -41,10 +41,13 @@ describe('Integration - GraphQL', () => {
 	const listFields = (fields = []) => {
 		return (
 			fields
-				/* DateTime is given - type: { kind: 'SCALAR' } but is is an object
+				/* DateTime, Date and Time is given - type: { kind: 'SCALAR' } but is is an object
 			causing the test to fail.
 			*/
-				.filter(({ type: { name } }) => name !== 'DateTime')
+				.filter(
+					({ type: { name } }) =>
+						!['DateTime', 'Date', 'Time'].includes(name),
+				)
 				.filter(
 					({ type: { kind } }) => !['LIST', 'OBJECT'].includes(kind),
 				)
