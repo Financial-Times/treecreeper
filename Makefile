@@ -33,7 +33,6 @@ else
 endif
 
 deploy:
-
 	aws s3 sync \
 	--exclude "*.json" \
 	./dist/browser s3://biz-ops-statics.${AWS_ACCOUNT_ID}/biz-ops-admin

@@ -14,4 +14,5 @@ module.exports = Object.assign(
 		primitiveTypesMap: primitiveTypes,
 	},
 	require('./lib/validate'),
+	require('./lib/poller'),
 );
