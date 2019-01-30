@@ -203,7 +203,7 @@ const update = async input => {
 				`,
 		];
 
-		if (willModifyNode) {
+		if (willModifyNode || willModifyRelationships) {
 			queryParts.push(stripIndents`ON MATCH SET
 						${cypherHelpers.metaPropertiesForUpdate('node')}
 					SET node += $properties`);
