@@ -20,6 +20,12 @@ properties:
     description: The path the cookie is set on. 
     required: true
   
+  lastSeen:
+    type: Date
+    label: Date last seen
+    description: Date Cookie last found during audit of product / website Audit. 
+    required: true
+  
   product: 
     type: Word
     label: Product
