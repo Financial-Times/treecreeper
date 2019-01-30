@@ -20,6 +20,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 3. Once this is merged to master, verify the https://dashboard.heroku.com/apps/biz-ops-api-staging app has deployed. If it all seems ok (try querying http://biz-ops-api-staging.herokuapp.com/graphiql for your new schema properties, or reading/writing a few dummy entries to the rest api. But use common sense, if you're just fixing a typo in a label or something, don't be too cautious)
 4. Promote to production https://dashboard.heroku.com/apps/biz-ops-api
 5. Follow something like 2 - 4 for https://github.com/Financial-Times/biz-ops-admin
+6. Follow something like 2 - 4 for https://github.com/Financial-Times/biz-ops-search
 
 ### Future plans
 
