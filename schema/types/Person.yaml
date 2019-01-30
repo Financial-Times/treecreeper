@@ -99,11 +99,6 @@ properties:
     label: Source
     description: The primary data source used to provide information for this person - Workday, Salesforce, ldap, github, Slack or multiple.
     autoPopulated: true
-<<<<<<< HEAD
-=======
-    canFilter: true
-    deprecationReason: Only needed when migrating users from cmdb IDs to people-api IDs
->>>>>>> 15bf7fcb4948f9e210f0a83f792da130c2ec6bf1
   proposedId:
     type: Word
     label: Proposed ID
