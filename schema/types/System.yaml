@@ -223,7 +223,6 @@ properties:
     fieldset: keyManagement
   keyManagementProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Key Management Process
     description: The mechanism used to create/rotate keys.
     fieldset: keyManagement
