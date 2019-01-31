@@ -28,7 +28,6 @@ properties:
     description: First or Third party cookie.
     required: true
     isCore: true
-    canFilter: true
     fieldset: main
   
   classification:
@@ -37,7 +36,6 @@ properties:
     description: ICC classification of cookie.
     required: true
     isCore: true
-    canFilter: true
     fieldset: main
   
   description:
@@ -54,7 +52,6 @@ properties:
     description: Team/person or provider who set the cookie. 
     required: true
     isCore: true
-    canFilter: true
     fieldset: main
 
   persistent:
@@ -88,6 +85,7 @@ properties:
     relationship: IS_SET_AS
     description: Cookie instance data for times cookie has been found on audit of product / domain. 
     direction: outgoing 
+    hasMany: true
 
 
 fieldsets:

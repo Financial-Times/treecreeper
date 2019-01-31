@@ -39,28 +39,24 @@ properties:
     fieldset: general
   systemType:
     type: Word
-    canFilter: true
     label: System type
     description: The system type (don't worry about entering anything here).
     deprecationReason: 'Was never used or populated'
     fieldset: general
   serviceTier:
     type: ServiceTier
-    canFilter: true
     isCore: true
     label: Service tier
     description: The service tier (level of support) given to this system.
     fieldset: general
   serviceType:
     type: Word
-    canFilter: true
     label: Service type
     description: The type of service the system provides  (don't worry about entering anything here).
     deprecationReason: 'Was never used or populated'
     fieldset: general
   hostPlatform:
     type: Word
-    canFilter: true
     label: Host platform
     description: The technology platform used to host the service, e.g. Heroku.
     fieldset: general
@@ -75,7 +71,6 @@ properties:
     fieldset: personalData
   containsPersonalData:
     type: Boolean
-    canFilter: true
     label: Does this system store or process Personal Data?
     description: |
       Personal data means any information from which an individual can be
@@ -89,7 +84,6 @@ properties:
     fieldset: personalData
   containsSensitiveData:
     type: Boolean
-    canFilter: true
     label: Does this system store or process Sensitive Data?
     description: |
       Sensitive, or special category data, is a more regulated subset of
@@ -121,13 +115,11 @@ properties:
     hasMany: true
   canDownloadPersonalData:
     type: Boolean
-    canFilter: true
     label: Downloadable personal data
     description: Does this system allow users to download personal data?
     fieldset: personalData
   canContactIndividuals:
     type: Boolean
-    canFilter: true
     label: Contactable individuals
     description: Does this system have the capability to contact individuals?
     fieldset: personalData
@@ -136,13 +128,11 @@ properties:
     label: Retention process
     description: The type of process used to handle GDPR data retention.
     fieldset: personalData
-    canFilter: true
   gdprErasureProcess:
     type: GDPRProcess
     label: Erasure process
     description: The type of process used to handle GDPR data erasure requests.
     fieldset: personalData
-    canFilter: true
   risk:
     type: Paragraph
     label: Data - more information
@@ -150,14 +140,12 @@ properties:
     fieldset: personalData
   lifecycleStage:
     type: SystemLifecycle
-    canFilter: true
     isCore: true
     label: Lifecycle stage
     description: How far this system has progressed through its lifecycle from Preproduction to Decommissioned.
     fieldset: general
   SF_ID:
     type: Word
-    canFilter: true
     label: Salesforce ID
     description: ID of this system in salesforce.
     autoPopulated: true
@@ -178,19 +166,16 @@ properties:
     fieldset: monitoring
   failoverArchitectureType:
     type: FailoverArchitectureType
-    canFilter: true
     label: Type of Failover Architecture
     description: The architecture that enables failover.
     fieldset: failover
   failoverProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Failover Process
     description: The mechanism used to achieve a failover.
     fieldset: failover
   failbackProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Failback Process
     description: The mechanism used to achieve a failback.
     fieldset: failover
@@ -201,7 +186,6 @@ properties:
     fieldset: failover
   dataRecoveryProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Data Recovery Process
     description: The mechanism used to achieve a data recovery.
     fieldset: dataRecovery
@@ -212,13 +196,11 @@ properties:
     fieldset: dataRecovery
   releaseProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Release Process
     description: The mechanism used to achieve a release.
     fieldset: release
   rollbackProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Rollback Process
     description: The mechanism used to reverse a release.
     fieldset: release
@@ -229,7 +211,6 @@ properties:
     fieldset: release
   credentialsRefreshProcessType:
     type: ProcessType
-    canFilter: true
     label: Type of Credentials Refresh Process
     description: The mechanism used to achieve a change in credentials.
     deprecationReason: 'Replaced by keyManagementProcessType property'

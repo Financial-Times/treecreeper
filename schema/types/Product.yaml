@@ -33,7 +33,6 @@ properties:
     fieldset: general
   serviceTier:
     type: ServiceTier
-    canFilter: true
     isCore: true
     label: Service tier
     description: The service tier (level of support) given to this product.
@@ -47,7 +46,6 @@ properties:
     fieldset: general
   lifecycleStage:
     type: ProductLifecycle
-    canFilter: true
     label: Lifecycle stage
     description: The product's current lifecycle stage.
     fieldset: general

@@ -13,7 +13,6 @@ properties:
     description: 'Unique code/id for this item.'
   isLive:
     type: Boolean
-    canFilter: true
     isCore: true
     label: Surface results to our Operations Support team?
     description: |

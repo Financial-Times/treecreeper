@@ -141,7 +141,6 @@ describe('data quality: types', () => {
 												'unique',
 												'required',
 												'canIdentify',
-												'canFilter',
 												'isCore',
 												'autoPopulated',
 												'pattern',
@@ -212,12 +211,6 @@ describe('data quality: types', () => {
 										expect(config.canIdentify).toBe(true);
 									}
 								});
-								it('may be a filterer', () => {
-									if (config.canFilter) {
-										expect(config.canFilter).toBe(true);
-									}
-								});
-
 								it('may define a pattern', () => {
 									if (config.pattern) {
 										expect(config.pattern).toMatch(

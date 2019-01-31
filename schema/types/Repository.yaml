@@ -40,14 +40,12 @@ properties:
     autoPopulated: true
   isPrivate:
     type: Boolean
-    canFilter: true
     isCore: true
     label: Private
     description: Is the repository private.
     autoPopulated: true
   isArchived:
     type: Boolean
-    canFilter: true
     isCore: true
     label: Archived
     description: Is the repository archived.
