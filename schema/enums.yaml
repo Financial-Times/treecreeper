@@ -123,6 +123,11 @@ CookiePurpose:
     - Performance
     - Functionality
     - TargetingOrAdvertising
+CookieExpiry:
+  description: Cookie expiry type
+  options:
+    - Session 
+    - Persistent
 
 
 
