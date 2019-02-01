@@ -54,16 +54,6 @@ properties:
     isCore: true
     fieldset: main
   
-  expiry:
-    type: CookieExpiry
-    label: Session or Persistent Cookie
-    description: |
-      Information taken from cookie audit confirming if cookie found as a session or persistent cookie at time of last audit. 
-    required: true
-    isCore: true
-    fieldset: main
-  
-
   hasCookieInstanceOf:
     type: CookieInstance
     label: Cookie instance data
