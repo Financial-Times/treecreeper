@@ -54,7 +54,7 @@ describe('v2 - node PATCH', () => {
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
-	it('Dont create an empty description', async () => {
+	it('Not create property when passed empty string', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 			name: 'name1',
@@ -77,10 +77,10 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		// sandbox.expectEvents(['UPDATE', teamCode, 'Team']); // An event shouldn't send because there is no change.
+		sandbox.expectNoEvents();
 	});
 
-	it('Remove field that become empty', async () => {
+	it('Remove property when empty string sent in payload', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 			name: 'name1',

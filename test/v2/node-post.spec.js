@@ -53,7 +53,7 @@ describe('v2 - node POST', () => {
 		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
 	});
 
-	it('delete empty property', async () => {
+	it('Not set property when empty string provided', async () => {
 		await sandbox
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
