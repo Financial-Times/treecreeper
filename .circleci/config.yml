@@ -80,6 +80,9 @@ jobs:
       - run:
           name: Publish to npm
           command: make npm-publish
+       - run:
+          name: Publish to s3
+          command: make s3-publish
 
 workflows:
   version: 2
