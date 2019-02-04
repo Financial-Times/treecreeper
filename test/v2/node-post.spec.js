@@ -53,6 +53,31 @@ describe('v2 - node POST', () => {
 		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
 	});
 
+	it('Not set property when empty string provided', async () => {
+		await sandbox
+			.request(app)
+			.post(`/v2/node/Team/${teamCode}`)
+			.namespacedAuth()
+			.send({ name: 'name1', description: '' })
+			.expect(
+				200,
+				sandbox.withCreateMeta({
+					code: teamCode,
+					name: 'name1',
+				}),
+			);
+
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withCreateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
+		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
+	});
+
 	it('error when creating duplicate node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,

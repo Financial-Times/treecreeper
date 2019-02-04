@@ -54,6 +54,58 @@ describe('v2 - node PATCH', () => {
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
+	it('Not create property when passed empty string', async () => {
+		await sandbox.createNode('Team', {
+			code: teamCode,
+			name: 'name1',
+		});
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			description: '',
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
+
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
+		sandbox.expectNoEvents();
+	});
+
+	it('Remove property when empty string sent in payload', async () => {
+		await sandbox.createNode('Team', {
+			code: teamCode,
+			name: 'name1',
+			description: 'description',
+		});
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			description: '',
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+	});
+
 	it('Create when patching non-existent node', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
 			name: 'name1',
