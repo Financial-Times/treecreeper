@@ -61,7 +61,7 @@ const getWriteProperties = (type, payload, code) => {
 
 	return Object.entries(payload)
 		.filter(isProperty(validProperties))
-		.filter(([, val]) => val !== null)
+		.filter(([, val]) => val !== null && val !== '')
 		.reduce(entriesToObject, {});
 };
 
@@ -70,7 +70,7 @@ const getDeleteProperties = (type, payload) => {
 
 	return Object.entries(payload)
 		.filter(isProperty(validProperties))
-		.filter(([, val]) => val === null)
+		.filter(([, val]) => val === null || val === '')
 		.map(([key]) => key);
 };
 

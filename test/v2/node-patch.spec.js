@@ -54,6 +54,58 @@ describe('v2 - node PATCH', () => {
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
 	});
 
+	it('Dont create an empty description', async () => {
+		await sandbox.createNode('Team', {
+			code: teamCode,
+			name: 'name1',
+		});
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			description: '',
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
+
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
+		// sandbox.expectEvents(['UPDATE', teamCode, 'Team']); // An event shouldn't send because there is no change.
+	});
+
+	it('Remove field that become empty', async () => {
+		await sandbox.createNode('Team', {
+			code: teamCode,
+			name: 'name1',
+			description: 'description',
+		});
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			description: '',
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+	});
+
 	it('Create when patching non-existent node', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
 			name: 'name1',
