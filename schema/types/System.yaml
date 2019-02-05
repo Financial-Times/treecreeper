@@ -386,6 +386,11 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
+  herokuPipelineURL:
+    type: Url
+    label: Heroku pipeline URL
+    description: The Heroku pipeline url for the system.
+    fieldset: release
 fieldsets:
   general:
     heading: General information
