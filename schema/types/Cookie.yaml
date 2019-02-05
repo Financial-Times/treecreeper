@@ -53,32 +53,7 @@ properties:
     required: true
     isCore: true
     fieldset: main
-
-  persistent:
-    type: Int
-    label: Number of times found as persistent cookie
-    description: |
-      The number of times the cookie has been found as a persistent cookie from all known occurences of this cookie. This information is taken from CookiePedia at point of last update.
-    required: true
-    isCore: true
-    fieldset: main
   
-  session:
-    type: Int
-    label: Number of times found as a session cookie
-    description: |
-      The number of times the cookie has been found as a session cookie from all known occurences of this cookie. This information is taken from CookiePedia at point of last update.
-    required: true
-    isCore: true
-    fieldset: main
-  
-  avgLifeSpan:
-    type: Int
-    label: Average Life Span
-    description: |
-      The average life span of the cookie generated from all known occurrences of this cookie. This information is taken from CookiePedia at point of last update.
-    isCore: true
-
   hasCookieInstanceOf:
     type: CookieInstance
     label: Cookie instance data
