@@ -26,16 +26,16 @@ const stubDbUnavailable = ({ sinon }) =>
 
 const stubDbTransaction = ({ sinon }, properties = {}) => {
 	const runStub = sinon.stub();
-	const dummyInteger = { equals: () => false };
+	const dummyId = { equals: () => false };
 	runStub.resolves({
 		records: [
 			{
 				get: () => ({
 					properties,
 					labels: [],
-					identity: dummyInteger,
-					start: dummyInteger,
-					end: dummyInteger,
+					identity: dummyId,
+					start: dummyId,
+					end: dummyId,
 				}),
 				has: () => false,
 			},

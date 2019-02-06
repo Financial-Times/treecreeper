@@ -86,11 +86,10 @@ module.exports = async input => {
 	const { deletions: deletedRelationships } = result.records.reduce(
 		({ relDirs, deletions }, record) => {
 			const relName = record.get('relationship').type;
-			const direction = record
-				.get('relationship')
-				.start.equals(record.get('node').identity)
-				? 'outgoing'
-				: 'incoming';
+			const direction =
+				record.get('relationship').start === record.get('node').identity
+					? 'outgoing'
+					: 'incoming';
 			const destination = `${record.get('related').labels[0]}:${
 				record.get('related').properties.code
 			}`;
@@ -98,18 +97,17 @@ module.exports = async input => {
 			// TODO once upgraded to neo4j 3.4 and corresponding apoc upgrade, deduping
 			// rels won't be required
 			if (relDirs[`${direction}:${relName}:${destination}`]) {
-				deletions.push(record.get('relationship').identity.toInt());
+				deletions.push(record.get('relationship').identity);
 			} else {
 				relDirs[`${direction}:${relName}:${destination}`] = true;
 				if (
-					record
-						.get('relationship')
-						.start.equals(record.get('relationship').end)
+					record.get('relationship').start ===
+					record.get('relationship').end
 				) {
 					// we currently have no use cases for relationships beginning and ending
 					// at the same node, so we can safely assume any that exist after the refactor
 					// can be removed
-					deletions.push(record.get('relationship').identity.toInt());
+					deletions.push(record.get('relationship').identity);
 				}
 			}
 			return { relDirs, deletions };

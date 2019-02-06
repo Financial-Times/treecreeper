@@ -12,7 +12,7 @@ const getNodeCreator = (namespace, defaultProps) => async (
 	const result = await executeQuery(`CREATE (n:${type} $props) RETURN n`, {
 		props: Object.assign({}, defaultProps, props),
 	});
-	return result.records[0].get('n').identity.toInt();
+	return result.records[0].get('n').identity;
 };
 
 const getConnector = (namespace, defaultProps) => (
@@ -164,7 +164,7 @@ const testConnectedNode = async (type, code, props, relationships) => {
 					// need either both things indicate outgoing, or both incoming
 					// i.e. both true or both false
 					(direction === 'outgoing') ===
-						rel.end.equals(relatedNode.identity)
+						(rel.end === relatedNode.identity)
 				);
 			});
 			expect(record).not.toBeUndefined();

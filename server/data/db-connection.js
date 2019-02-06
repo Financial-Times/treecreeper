@@ -9,6 +9,7 @@ const driver = neo4j.driver(
 		process.env.NEO4J_BOLT_USER,
 		process.env.NEO4J_BOLT_PASSWORD,
 	),
+	{ disableLosslessIntegers: true },
 );
 
 const originalSession = driver.session;

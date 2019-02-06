@@ -146,7 +146,7 @@ const logMergeChanges = (
 				const sourceRel = sourceRelsRecord.get('relationship');
 
 				// reflexive relationships will all be discarded without a new creation event
-				if (sourceTarget.identity.equals(sourceNode.identity)) {
+				if (sourceTarget.identity === sourceNode.identity) {
 					return;
 				}
 
@@ -159,12 +159,11 @@ const logMergeChanges = (
 							'relationship',
 						);
 						if (
-							destinationTarget.identity.equals(
-								sourceTarget.identity,
-							) &&
+							destinationTarget.identity ===
+								sourceTarget.identity &&
 							destinationRel.type === sourceRel.type &&
-							(destinationRel.start.equals(sourceRel.start) ||
-								destinationRel.end.equals(sourceRel.end))
+							(destinationRel.start === sourceRel.start ||
+								destinationRel.end === sourceRel.end)
 						) {
 							return true;
 						}
