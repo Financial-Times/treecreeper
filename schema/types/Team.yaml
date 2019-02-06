@@ -14,7 +14,9 @@ properties:
     isCore: true
     pattern: NO_SPACES
     label: Code
-    description: 'The unique identification for this team.'
+    description: |
+        The unique identification code for the team. When creating a new team,
+        choose a lower case, hyphenated string similar to the name people call the team.
     fieldset: general
   name:
     type: Name
