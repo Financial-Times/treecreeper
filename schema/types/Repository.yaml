@@ -11,12 +11,23 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: 'Unique code/id for this item.'
+    fieldset: general
+    description: |
+        Unique code for this repository. Automatically created, it is a combination
+        of the type of system the repository is stored in e.g. github, bitbucket,
+        and that system's id for the repository.
   name:
     type: Name
     isCore: true
     label: Name
-    description: Display Name.
+    fieldset: general
+    description: Display name for the repository, taken from the system it is stored in.
+    autoPopulated: true
+  description:
+    type: Paragraph
+    label: Description
+    fieldset: general
+    description: Description of what is in the repository, taken from the system it is stored in.
     autoPopulated: true
   url:
     type: Url
@@ -24,12 +35,42 @@ properties:
     canIdentify: true
     isCore: true
     label: URL
-    description: Repository URL.
+    fieldset: general
+    description: Web page URL for the repository.
+    autoPopulated: true
+  systems:
+    type: System
+    direction: incoming
+    label: Systems
+    fieldset: general
+    relationship: HAS_REPO
+    description: Systems which the repository holds source code for.
+    hasMany: true
+  versionControlSystem:
+    type: VersionControlSystem
+    label: Version control system
+    fieldset: general
+    description: Version control system the repository is stored in.
+    autoPopulated: true
+  isPrivate:
+    type: Boolean
+    isCore: true
+    label: Private
+    description: Is the repository private.
+    fieldset: technical
+    autoPopulated: true
+  isArchived:
+    type: Boolean
+    isCore: true
+    label: Archived
+    description: Is the repository archived.
+    fieldset: technical
     autoPopulated: true
   vcsID:
     type: Word
     label: VCS ID
-    description: Repository hosts internal ID.
+    description: The system used to store the repository's internal ID for the repository.
+    fieldset: technical
     autoPopulated: true
   sshUrl:
     type: Url
@@ -37,54 +78,31 @@ properties:
     canIdentify: true
     label: SSH URL
     description: SSH URL to checkout the source.
-    autoPopulated: true
-  isPrivate:
-    type: Boolean
-    isCore: true
-    label: Private
-    description: Is the repository private.
-    autoPopulated: true
-  isArchived:
-    type: Boolean
-    isCore: true
-    label: Archived
-    description: Is the repository archived.
-    autoPopulated: true
-  description:
-    type: Paragraph
-    label: Description
-    description: Repository description field.
+    fieldset: technical
     autoPopulated: true
   createdAt:
     type: DateTime
     label: Created
-    description: The UTC time when the repository was created in the VCS system.
+    description: The timestamp when the repository was created.
+    fieldset: technical
     autoPopulated: true
   pushedAt:
     type: DateTime
     label: Updated
-    description: The UTC time when the repository was last pushed to.
+    description: The timestamp when the repository was last pushed to.
+    fieldset: technical
     autoPopulated: true
   projectName:
     type: Word
     label: Project name
-    description: The project name on FT Bitbucket.
+    description: The repository's project name (FT Bitbucket repositories only).
+    fieldset: technical
   projectUrl:
     type: Url
     label: Project URL
-    description: The URL of the project on FT Bitbucket.
-  systems:
-    type: System
-    direction: incoming
-    label: Systems
-    relationship: HAS_REPO
-    description: Systems which the repository holds source code for.
-    hasMany: true
-  versionControlSystem:
-    type: VersionControlSystem
-    label: Version control system
-    description: Version control system the repository is stored in.
-    autoPopulated: true
+    description: The URL of the repository's project (FT Bitbucket repositories only).
+    fieldset: technical
+
   storedIn:
     type: System
     direction: outgoing
@@ -93,3 +111,9 @@ properties:
     relationship: STORED_IN
     description: VCS provider that the repository is hosted by.
     autoPopulated: true
+
+fieldsets:
+  general:
+    heading: General information
+  technical:
+    heading: Technical details
