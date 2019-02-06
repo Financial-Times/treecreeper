@@ -22,8 +22,8 @@ properties:
     isCore: true
     fieldset: main
 
-  type:
-    type: CookieType
+  party:
+    type: CookieParty
     label: Type
     description: First or Third party cookie.
     required: true
