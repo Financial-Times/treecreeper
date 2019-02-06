@@ -69,7 +69,7 @@ properties:
   vcsID:
     type: Word
     label: VCS ID
-    description: The system used to store the repository's internal ID for the repository.
+    description: The internal ID for the repository in the version control system that it's stored in.
     fieldset: technical
     autoPopulated: true
   sshUrl:
