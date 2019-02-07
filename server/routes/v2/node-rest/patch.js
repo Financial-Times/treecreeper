@@ -113,12 +113,6 @@ const relationshipDiffer = (
 	};
 };
 
-const getChangedProperties = (newProperties, oldProperties) => {
-	return Object.entries(newProperties)
-		.filter(([propName, value]) => value !== oldProperties[propName])
-		.reduce(entriesToObject, {});
-};
-
 const getDeletedPropertyNames = (deletedPropertyNames, oldProperties) =>
 	deletedPropertyNames.filter(propName => propName in oldProperties);
 
@@ -133,9 +127,10 @@ const update = async input => {
 		code,
 		clientUserId,
 		query: { relationshipAction, upsert },
+		body,
 	} = input;
 
-	if (inputHelpers.containsRelationshipData(nodeType, input.body)) {
+	if (inputHelpers.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 	}
 
@@ -149,20 +144,22 @@ const update = async input => {
 			? constructOutput(nodeType, prefetch)
 			: {};
 
-		const writeProperties = getChangedProperties(
-			inputHelpers.getWriteProperties(nodeType, input.body, code),
+		const writeProperties = inputHelpers.getWriteProperties(
+			nodeType,
+			body,
+			code,
 			existingRecord,
 		);
 
 		const deletePropertyNames = getDeletedPropertyNames(
-			inputHelpers.getDeleteProperties(nodeType, input.body),
+			inputHelpers.getDeleteProperties(nodeType, body),
 			existingRecord,
 		);
 
 		const { removedRelationships, addedRelationships } = relationshipDiffer(
 			nodeType,
 			existingRecord,
-			input.body,
+			body,
 			relationshipAction,
 		);
 
@@ -188,12 +185,13 @@ const update = async input => {
 		// will need to be executed because a single large query that modifies too
 		// many nodes at once hogs the database CPU. These are the parameters
 		// common to all the batched queries
-		const baseParameters = {
+		const parameters = {
 			clientId,
 			clientUserId,
 			timestamp: new Date().toISOString(),
 			requestId,
 			code,
+			properties: writeProperties,
 		};
 
 		const queryParts = [
@@ -205,8 +203,9 @@ const update = async input => {
 
 		if (willModifyNode || willModifyRelationships) {
 			queryParts.push(stripIndents`ON MATCH SET
-						${cypherHelpers.metaPropertiesForUpdate('node')}
-					SET node += $properties`);
+				${cypherHelpers.metaPropertiesForUpdate('node')}
+				SET node += $properties
+			`);
 		}
 
 		queryParts.push(
@@ -222,7 +221,7 @@ const update = async input => {
 						const key = `Delete${def.relationship}${def.direction}${
 							def.type
 						}`;
-						baseParameters[key] = codes;
+						parameters[key] = codes;
 						return `WITH node
 				${cypherHelpers.deleteRelationships(def, key)}
 				`;
@@ -232,12 +231,7 @@ const update = async input => {
 		}
 
 		return await executor({
-			parameters: Object.assign(
-				{
-					properties: writeProperties,
-				},
-				baseParameters,
-			),
+			parameters,
 			queryParts,
 			method: 'PATCH',
 			upsert,

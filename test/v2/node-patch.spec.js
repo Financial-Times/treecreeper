@@ -1,3 +1,4 @@
+const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 const app = require('../../server/app.js');
 
 const { API_KEY } = process.env;
@@ -16,6 +17,7 @@ describe('v2 - node PATCH', () => {
 	const teamCode = `${namespace}-team`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
+	const systemCode = `${namespace}-system`;
 	let authenticatedPatch;
 
 	setupMocks(sandbox, { namespace });
@@ -78,6 +80,104 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 		sandbox.expectNoEvents();
+	});
+	describe('temporal properties', () => {
+		it('Set Date property when no previous value', async () => {
+			const isoDateString = '2019-01-09';
+			const date = new Date(isoDateString);
+			await sandbox.createNode('System', {
+				code: systemCode,
+			});
+			await sandbox
+				.request(app)
+				.patch(`/v2/node/System/${systemCode}`)
+				.namespacedAuth()
+				.send({ lastServiceReviewDate: date.toISOString() })
+				.expect(
+					200,
+					sandbox.withUpdateMeta({
+						code: systemCode,
+						lastServiceReviewDate: isoDateString,
+					}),
+				);
+
+			await testNode(
+				'System',
+				systemCode,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
+			sandbox.expectEvents(['UPDATE', systemCode, 'System']);
+		});
+
+		it('Overwrite existing Date property', async () => {
+			const isoDateString = '2019-01-09';
+			const date = new Date(isoDateString);
+			await sandbox.createNode('System', {
+				code: systemCode,
+				lastServiceReviewDate: neo4jTemporalTypes.Date.fromStandardDate(
+					new Date('2018-01-09'),
+				),
+			});
+
+			await sandbox
+				.request(app)
+				.patch(`/v2/node/System/${systemCode}`)
+				.namespacedAuth()
+				.send({ lastServiceReviewDate: date.toISOString() })
+				.expect(
+					200,
+					sandbox.withUpdateMeta({
+						code: systemCode,
+						lastServiceReviewDate: isoDateString,
+					}),
+				);
+
+			await testNode(
+				'System',
+				systemCode,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
+			sandbox.expectEvents(['UPDATE', systemCode, 'System']);
+		});
+		it("Not overwrite when 'same' Date sent", async () => {
+			const isoDateString = '2019-01-09';
+			const date = new Date(isoDateString);
+			await sandbox.createNode('System', {
+				code: systemCode,
+				lastServiceReviewDate: neo4jTemporalTypes.Date.fromStandardDate(
+					date,
+				),
+			});
+
+			await sandbox
+				.request(app)
+				.patch(`/v2/node/System/${systemCode}`)
+				.namespacedAuth()
+				.send({ lastServiceReviewDate: '2019-01-09' })
+				.expect(
+					200,
+					sandbox.withUpdateMeta({
+						code: systemCode,
+						lastServiceReviewDate: isoDateString,
+					}),
+				);
+
+			await testNode(
+				'System',
+				systemCode,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
+			sandbox.expectNoEvents();
+		});
 	});
 
 	it('Remove property when empty string sent in payload', async () => {

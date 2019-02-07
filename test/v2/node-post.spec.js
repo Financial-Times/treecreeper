@@ -14,6 +14,7 @@ describe('v2 - node POST', () => {
 	const teamCode = `${namespace}-team`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
+	const systemCode = `${namespace}-group`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -50,7 +51,7 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -75,7 +76,35 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', `${namespace}-team`, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
+	});
+
+	// TODO - once we have a test schema, need to test other temporal types
+	it('Set Date property', async () => {
+		const isoDateString = '2019-01-09';
+		const date = new Date(isoDateString);
+		await sandbox
+			.request(app)
+			.post(`/v2/node/System/${systemCode}`)
+			.namespacedAuth()
+			.send({ lastServiceReviewDate: date.toISOString() })
+			.expect(
+				200,
+				sandbox.withCreateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
+
+		await testNode(
+			'System',
+			systemCode,
+			sandbox.withCreateMeta({
+				code: systemCode,
+				lastServiceReviewDate: isoDateString,
+			}),
+		);
+		sandbox.expectEvents(['CREATE', systemCode, 'System']);
 	});
 
 	it('error when creating duplicate node', async () => {

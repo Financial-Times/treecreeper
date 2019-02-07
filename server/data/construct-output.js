@@ -1,9 +1,15 @@
-const { isDateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
+const {
+	isDateTime,
+	isDate,
+	isTime,
+} = require('neo4j-driver/lib/v1/temporal-types');
 const { getType } = require('@financial-times/biz-ops-schema');
+
+const isTemporalType = val => isDateTime(val) || isDate(val) || isTime(val);
 
 const convertNeo4jTypes = obj => {
 	Object.entries(obj).forEach(([key, val]) => {
-		if (isDateTime(val)) {
+		if (isTemporalType(val)) {
 			obj[key] = val.toString();
 		}
 	});

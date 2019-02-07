@@ -15,9 +15,22 @@ const create = async input => {
 		code,
 		clientUserId,
 		query: { upsert },
+		body,
 	} = input;
 
 	try {
+		const properties = inputHelpers.getWriteProperties(
+			nodeType,
+			body,
+			code,
+		);
+
+		const queryParts = [
+			stripIndents`CREATE (node:${nodeType} $properties)
+				SET ${metaPropertiesForCreate('node')}
+			WITH node`,
+		];
+
 		return await executor({
 			parameters: {
 				clientId,
@@ -25,24 +38,15 @@ const create = async input => {
 				requestId,
 				code,
 				clientUserId,
-				properties: inputHelpers.getWriteProperties(
-					nodeType,
-					input.body,
-					code,
-				),
+				properties,
 			},
-			queryParts: [
-				stripIndents`CREATE (node:${nodeType} $properties)
-					SET
-					${metaPropertiesForCreate('node')}
-				WITH node`,
-			],
+			queryParts,
 			method: 'POST',
 			upsert,
 			nodeType,
 			writeRelationships: inputHelpers.getWriteRelationships(
 				nodeType,
-				input.body,
+				body,
 			),
 		});
 	} catch (err) {
