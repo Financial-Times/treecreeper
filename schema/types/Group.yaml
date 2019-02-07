@@ -13,8 +13,8 @@ properties:
     pattern: STRICT_CODE
     label: Code
     description: |
-      Unique code for the group. Must be lowercase, and ideally only letters,
-      numbers and hyphens.
+      The unique identification code for the group. When creating a new group,
+      choose a lower case, hyphenated string similar to the name people call the group.
   name:
     type: Name
     canIdentify: true

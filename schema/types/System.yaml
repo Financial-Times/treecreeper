@@ -16,7 +16,11 @@ properties:
     pattern: CODE
     label: Code
     fieldset: general
-    description: The unique identification (systemcode) for this system. Once assigned it cannot be altered without duplicating the data to a new record.
+    description: |
+      The unique identification (systemcode) for this system. Biz Ops is the source of
+      truth for system codes, so if the system does not yet have one, make one up -
+      a lower case, hyphenated string similar to the name people call the system is best.
+      Once assigned it cannot easily be altered, so choose carefully.
   name:
     type: Name
     canIdentify: true
