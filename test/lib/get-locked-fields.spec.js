@@ -32,7 +32,7 @@ describe('Get lockedFields', () => {
 		lockFields = 'all';
 		const nodeType = 'Person';
 		const response =
-			'fw[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
+			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
 		expect(getLockedFields(clientId, lockFields, nodeType)).toEqual(
 			response,
 		);
