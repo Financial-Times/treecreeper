@@ -3,6 +3,7 @@ const inputHelpers = require('../../../lib/rest-input-helpers');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
+const getLockedFields = require('../../../lib/get-locked-fields');
 
 const create = async input => {
 	inputHelpers.validateParams(input);
@@ -14,11 +15,15 @@ const create = async input => {
 		nodeType,
 		code,
 		clientUserId,
-		query: { upsert },
+		query: { upsert, lockFields },
 		body,
 	} = input;
 
 	try {
+		const lockedFields = lockFields
+			? getLockedFields(clientId, lockFields)
+			: '';
+
 		const properties = inputHelpers.getWriteProperties(
 			nodeType,
 			body,
@@ -39,6 +44,7 @@ const create = async input => {
 				code,
 				clientUserId,
 				properties,
+				lockedFields,
 			},
 			queryParts,
 			method: 'POST',

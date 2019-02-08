@@ -23,6 +23,7 @@ const metaPropertiesForCreate = type => stripIndents`
 	${type}._createdByRequest = $requestId,
 	${type}._createdByClient = $clientId,
 	${type}._createdByUser = $clientUserId,
+	${type}._lockedFields = $lockedFields,
 	${type}._createdTimestamp = datetime($timestamp),
 	${metaPropertiesForUpdate(type)}
 `;
