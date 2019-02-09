@@ -16,7 +16,8 @@ const metaPropertiesForUpdate = type => stripIndents`
 	${type}._updatedByRequest = $requestId,
 	${type}._updatedByClient = $clientId,
 	${type}._updatedByUser = $clientUserId,
-	${type}._updatedTimestamp = datetime($timestamp)
+	${type}._updatedTimestamp = datetime($timestamp),
+	${type}._lockedFields = $lockedFields
 `;
 
 const metaPropertiesForCreate = type => stripIndents`

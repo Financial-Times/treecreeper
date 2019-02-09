@@ -11,6 +11,7 @@ const constructOutput = require('../../../data/construct-output');
 const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const executor = require('./_post-patch-executor');
+const getLockedFields = require('../../../lib/get-locked-fields');
 
 const toArray = it => {
 	if (typeof it === 'undefined') {
@@ -126,7 +127,7 @@ const update = async input => {
 		nodeType,
 		code,
 		clientUserId,
-		query: { relationshipAction, upsert },
+		query: { relationshipAction, upsert, lockFields },
 		body,
 	} = input;
 
@@ -135,6 +136,10 @@ const update = async input => {
 	}
 
 	try {
+		const lockedFields = lockFields
+			? getLockedFields(nodeType, clientId, lockFields)
+			: null;
+
 		const prefetch = await cypherHelpers.getNodeWithRelationships(
 			nodeType,
 			code,
@@ -192,6 +197,7 @@ const update = async input => {
 			requestId,
 			code,
 			properties: writeProperties,
+			lockedFields,
 		};
 
 		const queryParts = [

@@ -21,7 +21,7 @@ const create = async input => {
 
 	try {
 		const lockedFields = lockFields
-			? getLockedFields(clientId, lockFields, nodeType)
+			? getLockedFields(nodeType, clientId, lockFields)
 			: null;
 
 		const properties = inputHelpers.getWriteProperties(

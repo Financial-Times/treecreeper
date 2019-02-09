@@ -6,7 +6,7 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const getLockedFields = (clientId, lockFields, nodeType) => {
+const getLockedFields = (nodeType, clientId, lockFields) => {
 	if (!clientId) {
 		throw new Error(
 			`clientId needs to be set in order to lock \`${lockFields}\``,

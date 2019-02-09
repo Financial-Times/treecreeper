@@ -4,6 +4,7 @@ const getLockedFields = require('../../server/lib/get-locked-fields');
 
 describe('Get lockedFields', () => {
 	let lockFields = 'code,name';
+	const nodeType = 'Person';
 
 	beforeEach(() => {
 		jest.spyOn(schema, 'getType');
@@ -11,7 +12,9 @@ describe('Get lockedFields', () => {
 
 	it('throws an error when clientId is not set', () => {
 		const clientId = undefined;
-		expect(() => getLockedFields(clientId, lockFields)).toThrow(Error);
+		expect(() => getLockedFields(nodeType, clientId, lockFields)).toThrow(
+			Error,
+		);
 	});
 
 	it('returns a JSON string containing an array of objects with clientId and fieldname properties and values', () => {
@@ -21,7 +24,9 @@ describe('Get lockedFields', () => {
 		const clientId = 'biz-ops-api';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
-		expect(getLockedFields(clientId, lockFields)).toEqual(response);
+		expect(getLockedFields(nodeType, clientId, lockFields)).toEqual(
+			response,
+		);
 	});
 
 	it('returns a JSON string containing an array of all fieldname properties and values', () => {
@@ -30,10 +35,9 @@ describe('Get lockedFields', () => {
 		});
 		const clientId = 'biz-ops-api';
 		lockFields = 'all';
-		const nodeType = 'Person';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
-		expect(getLockedFields(clientId, lockFields, nodeType)).toEqual(
+		expect(getLockedFields(nodeType, clientId, lockFields)).toEqual(
 			response,
 		);
 	});
