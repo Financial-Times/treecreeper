@@ -7,7 +7,20 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const getLockedFields = (nodeType, clientId, lockFields) => {
+const joinExistingAndNewLockedFields = (existingFields, newFields) => {
+	const existingFieldNames = existingFields.map(field => field.fieldName);
+	const nonExistantLockedFields = newFields.filter(
+		field => !existingFieldNames.includes(field.fieldName),
+	);
+	return [].concat(existingFields, nonExistantLockedFields);
+};
+
+const getLockedFields = (
+	nodeType,
+	clientId,
+	lockFields,
+	existingLockedFields,
+) => {
 	if (!clientId) {
 		throw new Error(
 			`clientId needs to be set in order to lock \`${lockFields}\``,
@@ -25,16 +38,19 @@ const getLockedFields = (nodeType, clientId, lockFields) => {
 		};
 	});
 
-	return JSON.stringify(fieldsToLock);
+	const allLockedFields = existingLockedFields.length
+		? joinExistingAndNewLockedFields(existingLockedFields, fieldsToLock)
+		: fieldsToLock;
+
+	return JSON.stringify(allLockedFields);
 };
 
-const validateFields = (lockedFields, clientId, body) => {
-	const existingLockedFields = JSON.parse(lockedFields);
+const validateFields = (existingLockedFields, clientId, writeProperties) => {
 	const lockedFieldsByAnotherClient = existingLockedFields.filter(
 		field => field.clientId !== clientId,
 	);
 	const fieldsThatCannotBeUpdated = lockedFieldsByAnotherClient.filter(
-		field => Object.keys(body).includes(field.fieldName),
+		field => Object.keys(writeProperties).includes(field.fieldName),
 	);
 
 	if (fieldsThatCannotBeUpdated.length) {

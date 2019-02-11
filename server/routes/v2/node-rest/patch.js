@@ -139,10 +139,6 @@ const update = async input => {
 	}
 
 	try {
-		const lockedFields = lockFields
-			? getLockedFields(nodeType, clientId, lockFields)
-			: null;
-
 		const prefetch = await cypherHelpers.getNodeWithRelationships(
 			nodeType,
 			code,
@@ -152,16 +148,29 @@ const update = async input => {
 			? constructOutput(nodeType, prefetch)
 			: {};
 
-		if (existingRecord._lockedFields) {
-			validateFields(existingRecord._lockedFields, clientId, body);
-		}
-
 		const writeProperties = inputHelpers.getWriteProperties(
 			nodeType,
 			body,
 			code,
 			existingRecord,
 		);
+
+		const existingLockedFields = existingRecord._lockedFields
+			? JSON.parse(existingRecord._lockedFields)
+			: [];
+
+		if (existingLockedFields.length) {
+			validateFields(existingLockedFields, clientId, writeProperties);
+		}
+
+		const lockedFields = lockFields
+			? getLockedFields(
+					nodeType,
+					clientId,
+					lockFields,
+					existingLockedFields,
+			  )
+			: null;
 
 		const deletePropertyNames = getDeletedPropertyNames(
 			inputHelpers.getDeleteProperties(nodeType, body),
