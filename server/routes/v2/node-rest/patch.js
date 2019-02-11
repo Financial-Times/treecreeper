@@ -155,12 +155,12 @@ const update = async input => {
 			existingRecord,
 		);
 
-		const existingLockedFields = existingRecord._lockedFields
-			? JSON.parse(existingRecord._lockedFields)
-			: [];
-
-		if (existingLockedFields.length > 0) {
-			validateFields(existingLockedFields, clientId, writeProperties);
+		if (existingRecord._lockedFields) {
+			validateFields(
+				existingRecord._lockedFields,
+				clientId,
+				writeProperties,
+			);
 		}
 
 		const lockedFields = lockFields
@@ -168,7 +168,7 @@ const update = async input => {
 					nodeType,
 					clientId,
 					lockFields,
-					existingLockedFields,
+					existingRecord._lockedFields,
 			  )
 			: null;
 

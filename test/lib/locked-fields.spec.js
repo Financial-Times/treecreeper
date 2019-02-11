@@ -48,16 +48,8 @@ describe('getLockedFields', () => {
 });
 
 describe('validateLockedFields', () => {
-	const lockedFields = [
-		{
-			fieldName: 'code',
-			clientId: 'biz-ops-admin',
-		},
-		{
-			fieldName: 'name',
-			clientId: 'biz-ops-admin',
-		},
-	];
+	const lockedFields =
+		'[{"fieldName":"code","clientId":"biz-ops-admin"},{"fieldName":"name","clientId":"biz-ops-admin"}]';
 	let clientId = 'clientId';
 	let writeProperties = { code: 'code', name: 'name' };
 
