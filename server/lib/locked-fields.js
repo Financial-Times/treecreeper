@@ -38,8 +38,15 @@ const validateFields = (lockedFields, clientId, body) => {
 	);
 
 	if (fieldsThatCannotBeUpdated.length) {
+		const errorMessage =
+			'The following fields cannot be updated because they are locked by another client: ';
+		const erroredFields = fieldsThatCannotBeUpdated.map(
+			field => `${field.fieldName} is locked by ${field.clientId}`,
+		);
+
 		throw new LockedFieldsError(
-			'The following fields cannot be updated because they are locked by another client',
+			errorMessage +
+				erroredFields.join(', ').replace(/,(?!.*,)/g, ' and'),
 			fieldsThatCannotBeUpdated,
 			400,
 		);
