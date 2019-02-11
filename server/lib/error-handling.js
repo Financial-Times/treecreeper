@@ -126,6 +126,18 @@ const handleRelationshipActionError = relationshipAction => {
 	}
 };
 
+class LockedFieldsError extends Error {
+	constructor(message, fields, status) {
+		super(message);
+		this.lockedFields = fields;
+		this.status = status;
+	}
+
+	toString() {
+		return `${this.constructor.name}: ${this.message}`;
+	}
+}
+
 module.exports = {
 	preflightChecks: {
 		bailOnDuplicateRelationship: handleDuplicateRelationship,
@@ -139,4 +151,5 @@ module.exports = {
 		duplicateNode: handleDuplicateNodeError,
 		missingRelationshipNode: handleMissingRelationshipNode,
 	},
+	LockedFieldsError,
 };

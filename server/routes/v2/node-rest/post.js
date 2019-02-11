@@ -3,7 +3,7 @@ const inputHelpers = require('../../../lib/rest-input-helpers');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
-const getLockedFields = require('../../../lib/get-locked-fields');
+const { getLockedFields } = require('../../../lib/locked-fields');
 
 const create = async input => {
 	inputHelpers.validateParams(input);

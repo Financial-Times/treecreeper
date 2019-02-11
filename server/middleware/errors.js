@@ -11,6 +11,16 @@ const errorToErrors = (err, req, res, next) => {
 		logger.error({ error: err });
 		err = { status: 500, message: err.toString() };
 	}
+	if (err.lockedFields) {
+		logger.error({
+			errorMessage: err.message,
+			errorFields: err.lockedFields,
+		});
+		return res.status(err.status).json({
+			errors: [{ message: err.message }, { fields: err.lockedFields }],
+		});
+	}
+
 	return res.status(err.status).json({ errors: [{ message: err.message }] });
 };
 

@@ -11,7 +11,10 @@ const constructOutput = require('../../../data/construct-output');
 const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const executor = require('./_post-patch-executor');
-const getLockedFields = require('../../../lib/get-locked-fields');
+const {
+	getLockedFields,
+	validateFields,
+} = require('../../../lib/locked-fields');
 
 const toArray = it => {
 	if (typeof it === 'undefined') {
@@ -148,6 +151,10 @@ const update = async input => {
 		const existingRecord = prefetch.records.length
 			? constructOutput(nodeType, prefetch)
 			: {};
+
+		if (existingRecord._lockedFields) {
+			validateFields(existingRecord._lockedFields, clientId, body);
+		}
 
 		const writeProperties = inputHelpers.getWriteProperties(
 			nodeType,

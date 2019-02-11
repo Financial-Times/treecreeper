@@ -1,8 +1,12 @@
 const schema = require('@financial-times/biz-ops-schema');
+const { LockedFieldsError } = require('../../server/lib/error-handling');
 
-const getLockedFields = require('../../server/lib/get-locked-fields');
+const {
+	getLockedFields,
+	validateFields,
+} = require('../../server/lib/locked-fields');
 
-describe('Get lockedFields', () => {
+describe('getLockedFields', () => {
 	let lockFields = 'code,name';
 	const nodeType = 'Person';
 
@@ -39,6 +43,33 @@ describe('Get lockedFields', () => {
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
 		expect(getLockedFields(nodeType, clientId, lockFields)).toEqual(
 			response,
+		);
+	});
+});
+
+describe('validateLockedFields', () => {
+	const lockedFields =
+		'[{"fieldName":"code","clientId":"biz-ops-admin"},{"fieldName":"name","clientId":"biz-ops-admin"}]';
+	let clientId = 'clientId';
+	let body = { code: 'code', name: 'name' };
+
+	it('throws an error when field is locked by another client', () => {
+		expect(() => validateFields(lockedFields, clientId, body)).toThrow(
+			LockedFieldsError,
+		);
+	});
+
+	it('does not throw an error when field is NOT locked', () => {
+		body = { isActive: true };
+		expect(() => validateFields(lockedFields, clientId, body)).not.toThrow(
+			LockedFieldsError,
+		);
+	});
+
+	it('does NOT throw an error when field is locked by current client', () => {
+		clientId = 'biz-ops-admin';
+		expect(() => validateFields(lockedFields, clientId, body)).not.toThrow(
+			LockedFieldsError,
 		);
 	});
 });
