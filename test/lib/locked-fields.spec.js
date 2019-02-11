@@ -48,28 +48,36 @@ describe('getLockedFields', () => {
 });
 
 describe('validateLockedFields', () => {
-	const lockedFields =
-		'[{"fieldName":"code","clientId":"biz-ops-admin"},{"fieldName":"name","clientId":"biz-ops-admin"}]';
+	const lockedFields = [
+		{
+			fieldName: 'code',
+			clientId: 'biz-ops-admin',
+		},
+		{
+			fieldName: 'name',
+			clientId: 'biz-ops-admin',
+		},
+	];
 	let clientId = 'clientId';
-	let body = { code: 'code', name: 'name' };
+	let writeProperties = { code: 'code', name: 'name' };
 
 	it('throws an error when field is locked by another client', () => {
-		expect(() => validateFields(lockedFields, clientId, body)).toThrow(
-			LockedFieldsError,
-		);
+		expect(() =>
+			validateFields(lockedFields, clientId, writeProperties),
+		).toThrow(LockedFieldsError);
 	});
 
 	it('does not throw an error when field is NOT locked', () => {
-		body = { isActive: true };
-		expect(() => validateFields(lockedFields, clientId, body)).not.toThrow(
-			LockedFieldsError,
-		);
+		writeProperties = { isActive: true };
+		expect(() =>
+			validateFields(lockedFields, clientId, writeProperties),
+		).not.toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is locked by current client', () => {
 		clientId = 'biz-ops-admin';
-		expect(() => validateFields(lockedFields, clientId, body)).not.toThrow(
-			LockedFieldsError,
-		);
+		expect(() =>
+			validateFields(lockedFields, clientId, writeProperties),
+		).not.toThrow(LockedFieldsError);
 	});
 });

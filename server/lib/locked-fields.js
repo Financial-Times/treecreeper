@@ -38,9 +38,10 @@ const getLockedFields = (
 		};
 	});
 
-	const allLockedFields = existingLockedFields.length
-		? joinExistingAndNewLockedFields(existingLockedFields, fieldsToLock)
-		: fieldsToLock;
+	const allLockedFields =
+		existingLockedFields && existingLockedFields.length
+			? joinExistingAndNewLockedFields(existingLockedFields, fieldsToLock)
+			: fieldsToLock;
 
 	return JSON.stringify(allLockedFields);
 };
