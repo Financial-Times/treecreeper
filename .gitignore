@@ -12,5 +12,4 @@ yarn-error.log
 # local neo4j docker volume mounts
 /neo4j
 .eslintcache
-/.nyc_output/
 junit.xml
