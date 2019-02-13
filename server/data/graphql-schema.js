@@ -31,8 +31,8 @@ const resolvers = {
 	all: Object.assign({}, enumResolvers, { Query: queryResolvers }),
 };
 
-const schema = makeAugmentedSchema({
-	typeDefs: getGraphqlDefs().join('\n'),
+const makeGraphqlSchema = makeExecutableSchema({
+	typeDefs: getGraphqlDefs(),
 	resolvers: resolvers.all,
 	logger: {
 		log(message) {
@@ -41,8 +41,10 @@ const schema = makeAugmentedSchema({
 			});
 		},
 	},
-	config: { query: true, mutation: false },
 });
+
+const config = { query: true, mutation: false };
+const schema = makeAugmentedSchema({ schema: makeGraphqlSchema, config });
 
 const createMockSchema = mocks => {
 	const mockSchema = makeExecutableSchema({
