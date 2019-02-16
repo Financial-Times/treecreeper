@@ -393,7 +393,7 @@ properties:
   herokuPipelineId:
     type: Code
     label: Heroku pipeline Id
-    description: This is the Heroku pipeline id for the system. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow. For example, development, staging and production. 
+    description: This is the Heroku pipeline id for the system. If you don't have a pipeline, this is the name of your Heroku app. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production. 
     fieldset: release
 fieldsets:
   general:
