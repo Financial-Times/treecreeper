@@ -390,10 +390,10 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
-  herokuPipelineId:
+  herokuPipelineName:
     type: Code
-    label: Heroku pipeline Id
-    description: This is the Heroku pipeline id for the system. If you don't have a pipeline, this is the name of your app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production. 
+    label: Heroku pipeline Name
+    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production. 
     fieldset: release
 fieldsets:
   general:
