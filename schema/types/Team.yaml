@@ -134,6 +134,14 @@ properties:
     description: The list of systems the team supports.
     hasMany: true
     fieldset: ownership
+  manages:
+    type: Platform
+    direction: incoming
+    label: Manages platforms
+    relationship: HAS_PLATFORM_MANAGEMENT
+    description: The list of platforms the team manages.
+    hasMany: true
+    fieldset: ownership
   teamMembers:
     type: Person
     direction: outgoing

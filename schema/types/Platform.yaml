@@ -1,0 +1,81 @@
+name: Platform
+description: |
+  The underlying technology used to host systems (e.g. AWS, Heroku, Salesforce) . Platforms are hierachical to allow a structure of raw and specialised technologies (e.g. Next is a specialism of Heroku).
+rank: 60
+properties:
+  code:
+    type: Code
+    required: true
+    unique: true
+    canIdentify: true
+    isCore: true
+    pattern: STRICT_CODE
+    label: Code
+    description: |
+      The unique identification code for the platform. When creating a new platform,
+      choose a lower case, hyphenated string similar to the name people call the platform.
+  name:
+    type: Name
+    canIdentify: true
+    isCore: true
+    label: Name
+    description: The official name of the platform.
+  description:
+    type: Paragraph
+    isCore: true
+    label: Description
+    description:
+      A short description of what platform technology and its potential uses. More detail can be found in the supplier's description.
+  isActive:
+    type: Boolean
+    label: Active
+    description: Whether or not the platform still exists and encouraged at the FT.
+  ownedBy:
+    type: Person
+    direction: outgoing
+    label: Owned By
+    relationship: HAS_PLATFORM_OWNER
+    description: The FT person responsible for controlling the use of the platform.
+  managedBy:
+    type: Team
+    direction: outgoing
+    label: Managed By
+    relationship: HAS_PLATFORM_MANAGEMENT
+    description: The FT team responsible for day to day operation of the platform.
+  supplierDocumentation:
+    type: Url
+    label: Supplier Documentation URL
+    description: The link to the primary documentation provided by the supplier of the platform.
+  consoleURL:
+    type: Url
+    label: Console URL
+    description: The link which provides access to the management console for the platform.
+  moreInformation:
+    type: Document
+    label: More Information
+    description: Any additional information about this platform. E.g. How to use, Cost reporting, Deployment and Recovery processes.
+  hostingPlatformFor:
+    type: System
+    direction: incoming
+    label: Host Platform For
+    relationship: HOST_PLATFORM
+    description:  A system which relies on this platform for deployment.
+    hasMany: true
+  specialisedBy:
+    type: Platform
+    direction: outgoing
+    label: Specialised By
+    relationship: SPECIALISED_BY
+    description: |
+      A platform which relies on and extends this platform.
+    hasMany: true
+  specialismOf:
+    type: Platform
+    label: Specialism Of
+    direction: incoming
+    relationship: SPECIALISED_BY
+    description: |
+      The platform which provides the based technology which this platform has extended.
+      maintained.
+    hasMany: true
+

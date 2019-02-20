@@ -61,8 +61,16 @@ properties:
     fieldset: general
   hostPlatform:
     type: Word
-    label: Host platform
+    label: Host platform (depreciated)
     description: The technology platform used to host the service, e.g. Heroku.
+    fieldset: general
+  hostingPlatform:
+    type: Platform
+    direction: outgoing
+    label: Hosting platform
+    relationship: HOST_PLATFORM
+    description: The technology platform used to host the service, e.g. Heroku.
+    hasMany: true
     fieldset: general
   dataOwner:
     type: Person
@@ -393,7 +401,7 @@ properties:
   herokuPipelineId:
     type: Code
     label: Heroku pipeline Id
-    description: This is the Heroku pipeline id for the system. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow. For example, development, staging and production. 
+    description: This is the Heroku pipeline id for the system. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow. For example, development, staging and production.
     fieldset: release
 fieldsets:
   general:
