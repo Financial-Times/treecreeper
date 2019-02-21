@@ -61,15 +61,15 @@ properties:
     fieldset: general
   hostPlatform:
     type: Word
-    label: Host platform (depreciated)
+    label: Host platform (deprecated)
     description: The technology platform used to host the service, e.g. Heroku.
     fieldset: general
-  hostingPlatform:
+  hostPlatforms:
     type: Platform
     direction: outgoing
-    label: Hosting platform
+    label: Host platforms
     relationship: HOST_PLATFORM
-    description: The technology platform used to host the service, e.g. Heroku.
+    description: The technology platform(s) used to host the service, e.g. Heroku.
     hasMany: true
     fieldset: general
   dataOwner:

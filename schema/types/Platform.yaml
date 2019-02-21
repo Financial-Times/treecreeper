@@ -13,7 +13,7 @@ properties:
     label: Code
     description: |
       The unique identification code for the platform. When creating a new platform,
-      choose a lower case, hyphenated string similar to the name people call the platform.
+      choose a lower case hyphenated string similar to the name people call the platform.
   name:
     type: Name
     canIdentify: true
@@ -25,11 +25,11 @@ properties:
     isCore: true
     label: Description
     description:
-      A short description of what platform technology and its potential uses. More detail can be found in the supplier's description.
-  isActive:
-    type: Boolean
-    label: Active
-    description: Whether or not the platform still exists and encouraged at the FT.
+      A short description of the platform technology and its potential uses. More detail can be found in the supplier's description.
+  lifecycleStage:
+    type: PlatformLifecycleStage
+    label: Lifefcycle Stage
+    description: Whether or not the platform still exists and is encouraged at the FT.
   ownedBy:
     type: Person
     direction: outgoing
@@ -54,7 +54,7 @@ properties:
     type: Document
     label: More Information
     description: Any additional information about this platform. E.g. How to use, Cost reporting, Deployment and Recovery processes.
-  hostingPlatformFor:
+  hostPlatformFor:
     type: System
     direction: incoming
     label: Host Platform For

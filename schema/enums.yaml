@@ -11,6 +11,16 @@ FailoverArchitectureType:
     - ActiveActive
     - ActivePassive
     - None
+PlatformLifecycle:
+  description: |
+    The lifecycle stage of a platform.
+    Note that 'Deprecated' should be used for platforms that are currently
+    not actively used, but may not be fully decommissioned yet
+  options:
+    - Preproduction
+    - Production
+    - Deprecated
+    - Decommissioned
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
@@ -114,7 +124,7 @@ GDPRProcess:
 CookieParty:
   description: Cookie party classification type
   options:
-    - FirstParty 
+    - FirstParty
     - ThirdParty
 CookiePurpose:
   description: ICC cookie classification type
@@ -126,7 +136,7 @@ CookiePurpose:
 CookieExpiry:
   description: Cookie expiry type
   options:
-    - Session 
+    - Session
     - Persistent
 
 
