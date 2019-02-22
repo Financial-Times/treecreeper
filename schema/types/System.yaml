@@ -390,10 +390,38 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
+  usabilityRating:
+    type: RAGStatus
+    description: The rating given by Operations to the quality of the information contain in this system as presented to them via the runbook.
+    label: Usability rating
+    fieldset: review
+  usabilityMitigation:
+    type: Document
+    label: Usability mitigation
+    description: The actions requires to make the resulting runbook more usable by the Operations team.
+    fieldset: review
+  completenessPercentage:
+    type: Integer
+    description: The percentage of the required fields which have been populated.
+    label: Completeness percentage
+    autoPopulated: true
+    fieldset: review
+  incompleteCount:
+    type: Integer
+    description: The number of fields which have not been populated correctly.
+    label: The number of incomplete fields
+    autoPopulated: true
+    fieldset: review
+  completenessMiigation:
+    type: Document
+    description: The actions required to complete the system information.
+    label: Completeness mitigation
+    autoPopulated: true
+    fieldset: review
   herokuPipelineName:
     type: Code
     label: Heroku pipeline Name
-    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production. 
+    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production.
     fieldset: release
 fieldsets:
   general:

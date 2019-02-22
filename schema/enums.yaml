@@ -11,6 +11,12 @@ FailoverArchitectureType:
     - ActiveActive
     - ActivePassive
     - None
+RAGStatus:
+  description: Quality rating based on Red, Amber and Green.
+  options:
+    - Red
+    - Amber
+    - Green
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
@@ -114,7 +120,7 @@ GDPRProcess:
 CookieParty:
   description: Cookie party classification type
   options:
-    - FirstParty 
+    - FirstParty
     - ThirdParty
 CookiePurpose:
   description: ICC cookie classification type
@@ -126,7 +132,7 @@ CookiePurpose:
 CookieExpiry:
   description: Cookie expiry type
   options:
-    - Session 
+    - Session
     - Persistent
 
 
