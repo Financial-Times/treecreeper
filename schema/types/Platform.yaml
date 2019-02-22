@@ -30,12 +30,12 @@ properties:
     type: PlatformLifecycleStage
     label: Lifefcycle Stage
     description: Whether or not the platform still exists and is encouraged at the FT.
-  ownedBy:
+  pointOfContact:
     type: Person
     direction: outgoing
     label: Owned By
-    relationship: HAS_PLATFORM_OWNER
-    description: The FT person responsible for controlling the use of the platform.
+    relationship: HAS_POINT_OF_CONTACT
+    description: The FT person to contact about the platform.
   managedBy:
     type: Team
     direction: outgoing
