@@ -153,16 +153,17 @@ properties:
     label: Salesforce ID
     description: ID of this system in salesforce.
     autoPopulated: true
+    fieldset: miscellaneous
   architectureDiagram:
     type: Document
     label: Architecture Diagram
     description: A diagram of the system's architecture (either a link to one or embedded directly).
-    fieldset: self
+    fieldset: architectureDiagram
   troubleshooting:
     type: Document
     label: Troubleshooting
     description: Guidance for troubleshooting problems with this system.
-    fieldset: self
+    fieldset: troubleshooting
   monitoring:
     type: Document
     label: Bespoke Monitoring
@@ -239,7 +240,7 @@ properties:
     type: Document
     label: More Information
     description: Any additional information about this system.
-    fieldset: self
+    fieldset: moreInformation
   stakeholders:
     type: Person
     direction: outgoing
@@ -266,6 +267,7 @@ properties:
     deprecationReason: 'Replaced by healthchecks property'
     description: Endpoints which monitor this system.
     hasMany: true
+    fieldset: monitoring
   healthchecks:
     type: Healthcheck
     direction: outgoing
@@ -442,5 +444,13 @@ fieldsets:
     heading: Monitoring
   network:
     heading: Related resources
+  architectureDiagram:
+    heading: Architecture Diagram
+  troubleshooting:
+    heading: Troubleshooting
+  moreInformation:
+    heading: More Information
+  miscellaneous:
+    heading: Miscellaneous
   review:
     heading: Review
