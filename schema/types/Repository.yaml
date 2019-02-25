@@ -58,6 +58,13 @@ properties:
     description: The date on which this repository was last listed in Synk as being actively scanned for vulnerabilities.
     autoPopulated: true
     fieldset: general
+    deprecationReason: typo in field name
+  lastSeenInSnyk:
+    type: Date
+    label: Last seen in Snyk
+    description: The date on which this repository was last listed in Snyk as being actively scanned for vulnerabilities.
+    autoPopulated: true
+    fieldset: general
   isPrivate:
     type: Boolean
     isCore: true
