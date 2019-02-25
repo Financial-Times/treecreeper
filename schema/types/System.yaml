@@ -411,13 +411,13 @@ properties:
     description: The actions required to make the resulting runbook more usable by the Operations team.
     fieldset: review
   completenessPercentage:
-    type: Integer
+    type: Int
     description: The percentage of the required fields which have been populated.
     label: Completeness percentage
     autoPopulated: true
     fieldset: review
   incompleteCount:
-    type: Integer
+    type: Int
     description: The number of fields which have not been populated correctly.
     label: The number of incomplete fields
     autoPopulated: true
