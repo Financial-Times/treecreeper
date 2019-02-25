@@ -61,8 +61,16 @@ properties:
     fieldset: general
   hostPlatform:
     type: Word
-    label: Host platform
+    label: Host platform (deprecated, use Host Platforms)
     description: The technology platform used to host the service, e.g. Heroku.
+    fieldset: general
+  hostPlatforms:
+    type: Platform
+    direction: outgoing
+    label: Host platforms
+    relationship: HOST_PLATFORM
+    description: The technology platform(s) used to host the service, e.g. Heroku.
+    hasMany: true
     fieldset: general
   dataOwner:
     type: Person
@@ -393,7 +401,7 @@ properties:
   herokuPipelineName:
     type: Code
     label: Heroku pipeline Name
-    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production. 
+    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production.
     fieldset: release
 fieldsets:
   general:
