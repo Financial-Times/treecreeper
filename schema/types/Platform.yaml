@@ -29,7 +29,7 @@ properties:
   lifecycleStage:
     type: PlatformLifecycleStage
     label: Lifefcycle Stage
-    description: Whether or not the platform still exists and is encouraged at the FT.
+    description: Whether or not the platform still exists and is recommended for use at the FT.
   pointOfContact:
     type: Person
     direction: outgoing
@@ -46,10 +46,10 @@ properties:
     type: Url
     label: Supplier Documentation URL
     description: The link to the primary documentation provided by the supplier of the platform.
-  consoleURL:
+  adminSiteURL:
     type: Url
-    label: Console URL
-    description: The link which provides access to the management console for the platform.
+    label: Admin Site URL
+    description: The link which provides access to the management site for the platform.
   moreInformation:
     type: Document
     label: More Information
@@ -61,21 +61,20 @@ properties:
     relationship: HOST_PLATFORM
     description:  A system which relies on this platform for deployment.
     hasMany: true
-  specialisedBy:
+  usedBy:
     type: Platform
     direction: outgoing
-    label: Specialised By
-    relationship: SPECIALISED_BY
+    label: Used By
+    relationship: RELIES_ON
     description: |
       A platform which relies on and extends this platform.
     hasMany: true
-  specialismOf:
+  reliesOn:
     type: Platform
-    label: Specialism Of
+    label: Relies on
     direction: incoming
-    relationship: SPECIALISED_BY
+    relationship: RELIES_ON
     description: |
-      The platform which provides the based technology which this platform has extended.
-      maintained.
+      The platform which provides the base technology on which this platform relies.
     hasMany: true
 
