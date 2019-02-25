@@ -52,6 +52,12 @@ properties:
     fieldset: general
     description: Version control system the repository is stored in.
     autoPopulated: true
+  lastSeenInSynk:
+    type: Date
+    label: Last Seen In Snyk
+    description: The date on which this repository was last listed in Synk as being actively scanned for vulnerabilities.
+    autoPopulated: true
+    fieldset: general
   isPrivate:
     type: Boolean
     isCore: true

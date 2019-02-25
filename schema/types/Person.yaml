@@ -160,6 +160,14 @@ properties:
     description: The systems where this person is responsible for managing GDPR processes related to personal data.
     hasMany: true
     fieldset: individual
+  platformPointOfContactFor:
+    type: Platform
+    direction: incoming
+    label: Platform point of contact
+    relationship: HAS_POINT_OF_CONTACT
+    description: The platform(s) this person is a Platform Contact for.
+    hasMany: true
+    fieldset: individual
   technicalOwnerFor:
     type: System
     direction: incoming
