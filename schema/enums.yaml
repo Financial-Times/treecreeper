@@ -11,6 +11,12 @@ FailoverArchitectureType:
     - ActiveActive
     - ActivePassive
     - None
+RAGStatus:
+  description: Quality rating based on Red, Amber and Green.
+  options:
+    - Red
+    - Amber
+    - Green
 PlatformLifecycle:
   description: |
     The lifecycle stage of a platform.
