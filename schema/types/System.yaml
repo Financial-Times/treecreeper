@@ -400,15 +400,15 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
-  usabilityRating:
+  runbookUsabilityRating:
     type: RAGStatus
     description: The rating given by Operations to the quality of the information contain in this system as presented to them via the runbook.
     label: Usability rating
     fieldset: review
-  usabilityMitigation:
+  usabilityActions:
     type: Document
-    label: Usability mitigation
-    description: The actions requires to make the resulting runbook more usable by the Operations team.
+    label: Usability actions
+    description: The actions required to make the resulting runbook more usable by the Operations team.
     fieldset: review
   completenessPercentage:
     type: Integer
@@ -422,10 +422,10 @@ properties:
     label: The number of incomplete fields
     autoPopulated: true
     fieldset: review
-  completenessMiigation:
+  completenessActions:
     type: Document
     description: The actions required to complete the system information.
-    label: Completeness mitigation
+    label: Completeness actions
     autoPopulated: true
     fieldset: review
   herokuPipelineName:
@@ -461,4 +461,4 @@ fieldsets:
   miscellaneous:
     heading: Miscellaneous
   review:
-    heading: Review
+    heading: Operations Review
