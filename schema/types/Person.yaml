@@ -165,7 +165,7 @@ properties:
     direction: incoming
     label: Platform point of contact
     relationship: HAS_POINT_OF_CONTACT
-    description: The platform(s) this person is a Platform Owner for.
+    description: The platform(s) this person is a Platform Contact for.
     hasMany: true
     fieldset: individual
   technicalOwnerFor:

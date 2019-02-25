@@ -1,6 +1,6 @@
 name: Platform
 description: |
-  The underlying technology used to host systems (e.g. AWS, Heroku, Salesforce) . Platforms are hierachical to allow a structure of raw and specialised technologies (e.g. Next is a specialism of Heroku).
+  The underlying technology used to host systems (e.g. AWS, Heroku, Salesforce) . Platforms are hierachical to allow a cascade of technologies (e.g. Next relies on Heroku).
 rank: 60
 properties:
   code:
