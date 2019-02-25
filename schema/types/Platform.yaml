@@ -27,7 +27,7 @@ properties:
     description:
       A short description of the platform technology and its potential uses. More detail can be found in the supplier's description.
   lifecycleStage:
-    type: PlatformLifecycleStage
+    type: PlatformLifecycle
     label: Lifefcycle Stage
     description: Whether or not the platform still exists and is recommended for use at the FT.
   pointOfContact:
