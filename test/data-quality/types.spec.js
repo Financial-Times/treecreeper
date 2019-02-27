@@ -160,6 +160,10 @@ describe('data quality: types', () => {
 							}
 						});
 
+						it("is not named 'type'", () => {
+							expect(name).not.toEqual('type');
+						});
+
 						it('has valid label', () => {
 							expect(typeof config.label).toBe('string');
 							expect(/[.!]$/.test(config.label.trim())).toBe(
