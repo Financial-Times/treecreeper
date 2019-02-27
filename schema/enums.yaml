@@ -17,15 +17,6 @@ TrafficLight:
     - Red
     - Amber
     - Green
-PlatformLifecycle:
-  description: |
-    The lifecycle stage of a platform.
-    Note that 'Deprecated' should be used for platforms that are no longer recommended for use, but may not be fully decommissioned yet
-  options:
-    - Preproduction
-    - Production
-    - Deprecated
-    - Decommissioned
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
