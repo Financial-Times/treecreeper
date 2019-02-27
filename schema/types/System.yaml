@@ -392,33 +392,15 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
-  runbookUsabilityRating:
-    type: RAGStatus
-    description: The rating given by Operations to the quality of the information contain in this system as presented to them via the runbook.
-    label: Usability rating
+  sosTrafficLight:
+    type: TrafficLight
+    description: The Service Operability Score (SOS) given by Operations during their manual review of the quality of the information contained in this system as presented to them via the runbook.
+    label: SOS Traffic light
     fieldset: review
-  usabilityActions:
-    type: Document
-    label: Usability actions
-    description: The actions required to make the resulting runbook more usable by the Operations team.
-    fieldset: review
-  completenessPercentage:
-    type: Int
-    description: The percentage of the required fields which have been populated.
-    label: Completeness percentage
-    autoPopulated: true
-    fieldset: review
-  incompleteCount:
-    type: Int
-    description: The number of fields which have not been populated correctly.
-    label: The number of incomplete fields
-    autoPopulated: true
-    fieldset: review
-  completenessActions:
-    type: Document
-    description: The actions required to complete the system information.
-    label: Completeness actions
-    autoPopulated: true
+  lastSOSReport:
+    type: Url
+    label: Last SOS Report
+    description: A link to the Service Operability Score (SOS) report detailing the actions required to make the resulting runbook more usable by the Operations team.
     fieldset: review
   herokuPipelineName:
     type: Code
@@ -453,4 +435,4 @@ fieldsets:
   miscellaneous:
     heading: Miscellaneous
   review:
-    heading: Operations Review
+    heading: Service Operability Review

@@ -11,7 +11,7 @@ FailoverArchitectureType:
     - ActiveActive
     - ActivePassive
     - None
-RAGStatus:
+TrafficLight:
   description: Quality rating based on Red, Amber and Green.
   options:
     - Red
