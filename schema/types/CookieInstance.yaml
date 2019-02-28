@@ -20,13 +20,27 @@ properties:
     description: The path the cookie is set on. 
     required: true
   
+  lastSeen:
+    type: Date
+    label: Date last seen
+    description: Date Cookie last found during audit of product / website Audit. 
+    required: true
+  
   product: 
     type: Word
     label: Product
     description: The product / website the cookie is found on.
     required: true 
     isCore: true
-    canFilter: true
+
+  expiry:
+    type: CookieExpiry
+    label: Session or Persistent Cookie
+    description: |
+      Information taken from cookie audit confirming if cookie found as a session or persistent cookie at time of last audit. 
+    required: true
+    isCore: true
+    fieldset: main
 
   isInstanceOfCookie:
     type: Cookie

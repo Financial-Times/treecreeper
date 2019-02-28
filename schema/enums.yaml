@@ -11,6 +11,12 @@ FailoverArchitectureType:
     - ActiveActive
     - ActivePassive
     - None
+TrafficLight:
+  description: Quality rating based on Red, Amber and Green.
+  options:
+    - Red
+    - Amber
+    - Green
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
@@ -111,10 +117,10 @@ GDPRProcess:
     # # TBD
     # # Work is still ongoing to define delete methods for a small number of systems.
     # - TBD
-CookieType:
+CookieParty:
   description: Cookie party classification type
   options:
-    - FirstParty 
+    - FirstParty
     - ThirdParty
 CookiePurpose:
   description: ICC cookie classification type
@@ -123,6 +129,10 @@ CookiePurpose:
     - Performance
     - Functionality
     - TargetingOrAdvertising
-
+CookieExpiry:
+  description: Cookie expiry type
+  options:
+    - Session
+    - Persistent
 
 

@@ -6,7 +6,7 @@ references:
     # For a tag push unaffected by any filters, CircleCI skips the job
     # https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
     tags:
-      only: /v[0-9]+(\.[0-9]+)*/
+      only: /^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)\.\d+)?$/
 
   default_container_config: &default_container_config
     working_directory: ~/project
@@ -80,6 +80,18 @@ jobs:
       - run:
           name: Publish to npm
           command: make npm-publish
+      - run:
+          name: Get test s3 creds
+          command: make test-env
+      - run:
+          name: Publish to s3 test
+          command: make s3-publish
+      - run:
+          name: Get prod s3 creds
+          command: make prod-env
+      - run:
+          name: Publish to s3 prod
+          command: make s3-publish
 
 workflows:
   version: 2

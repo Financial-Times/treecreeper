@@ -12,7 +12,7 @@ const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
-const arrayToRexExp = arr => new RegExp(`^${arr.join('|')}$`);
+const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
 
 const getTwinnedRelationship = (
 	homeTypeName,
@@ -31,7 +31,7 @@ const getTwinnedRelationship = (
 
 describe('data quality: types', () => {
 	const validEnums = Object.keys(enums);
-	const validStringPatternsRX = arrayToRexExp(Object.keys(stringPatterns));
+	const validStringPatternsRX = arrayToRegExp(Object.keys(stringPatterns));
 	const typeNames = types.map(({ name }) => name);
 	const validPropTypes = validEnums.concat(
 		Object.keys(primitiveTypesMap),
@@ -122,7 +122,7 @@ describe('data quality: types', () => {
 								if (typeNames.includes(config.type)) {
 									// it's a relationship
 									expect(key).toMatch(
-										arrayToRexExp(
+										arrayToRegExp(
 											commonKeys.concat([
 												'direction',
 												'relationship',
@@ -136,12 +136,11 @@ describe('data quality: types', () => {
 									);
 								} else {
 									expect(key).toMatch(
-										arrayToRexExp(
+										arrayToRegExp(
 											commonKeys.concat([
 												'unique',
 												'required',
 												'canIdentify',
-												'canFilter',
 												'isCore',
 												'autoPopulated',
 												'pattern',
@@ -161,6 +160,10 @@ describe('data quality: types', () => {
 							}
 						});
 
+						it("is not named 'type'", () => {
+							expect(name).not.toEqual('type');
+						});
+
 						it('has valid label', () => {
 							expect(typeof config.label).toBe('string');
 							expect(/[.!]$/.test(config.label.trim())).toBe(
@@ -176,7 +179,7 @@ describe('data quality: types', () => {
 						it('has valid type', () => {
 							expect(config.type).toBeDefined();
 							expect(config.type).toMatch(
-								arrayToRexExp(validPropTypes),
+								arrayToRegExp(validPropTypes),
 							);
 						});
 
@@ -212,12 +215,6 @@ describe('data quality: types', () => {
 										expect(config.canIdentify).toBe(true);
 									}
 								});
-								it('may be a filterer', () => {
-									if (config.canFilter) {
-										expect(config.canFilter).toBe(true);
-									}
-								});
-
 								it('may define a pattern', () => {
 									if (config.pattern) {
 										expect(config.pattern).toMatch(
@@ -295,7 +292,7 @@ describe('data quality: types', () => {
 			it('has no unrecognised properties', () => {
 				Object.keys(type).forEach(key => {
 					expect(key).toMatch(
-						arrayToRexExp([
+						arrayToRegExp([
 							'name',
 							'description',
 							'moreInformation',
