@@ -30,7 +30,7 @@ test-env:
 	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/test
 
 prod-env:
-	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/test
+	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/prod
 
 test:
 ifneq ($(CI),)
