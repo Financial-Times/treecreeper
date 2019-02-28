@@ -80,6 +80,18 @@ jobs:
       - run:
           name: Publish to npm
           command: make npm-publish
+      - run:
+          name: Get test s3 creds
+          command: make test-env
+      - run:
+          name: Publish to s3 test
+          command: make s3-publish
+      - run:
+          name: Get prod s3 creds
+          command: make prod-env
+      - run:
+          name: Publish to s3 prod
+          command: make s3-publish
 
 workflows:
   version: 2
