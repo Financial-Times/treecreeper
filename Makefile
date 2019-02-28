@@ -26,8 +26,11 @@ install:
 PROJECT_NAME=biz-ops-schema
 PRODUCT_NAME=biz-ops
 
-env:
-	make prod-env
+test-env:
+	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/test
+
+prod-env:
+	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/test
 
 test:
 ifneq ($(CI),)
