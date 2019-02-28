@@ -74,7 +74,7 @@ properties:
     type: Word
     canIdentify: true
     label: Is in github FT org
-    description: Whehter or not this person's github user account has been addded to the FT org.
+    description: Whether or not this person's github user account has been addded to the FT org.
     fieldset: contact
     autoPopulated: true
   phone:
