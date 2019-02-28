@@ -10,7 +10,10 @@ properties:
     canIdentify: true
     isCore: true
     label: Code
-    description: 'Unique code/id for this item.'
+    description:
+      The unique identification code for the healthcheck. When creating a new healthcheck,
+      choose a lower case, hyphenated string either similar to the url of the healthcheck,
+      or briefly describing what it checks, e.g. my-system-us-east-1-health.
   isLive:
     type: Boolean
     isCore: true

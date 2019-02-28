@@ -16,7 +16,11 @@ properties:
     pattern: CODE
     label: Code
     fieldset: general
-    description: The unique identification (systemcode) for this system. Once assigned it cannot be altered without duplicating the data to a new record.
+    description: |
+      The unique identification (systemcode) for this system. Biz Ops is the source of
+      truth for system codes, so if the system does not yet have one, make one up -
+      a lower case, hyphenated string similar to the name people call the system is best.
+      Once assigned it cannot easily be altered, so choose carefully.
   name:
     type: Name
     canIdentify: true
@@ -149,16 +153,17 @@ properties:
     label: Salesforce ID
     description: ID of this system in salesforce.
     autoPopulated: true
+    fieldset: miscellaneous
   architectureDiagram:
     type: Document
     label: Architecture Diagram
     description: A diagram of the system's architecture (either a link to one or embedded directly).
-    fieldset: self
+    fieldset: architectureDiagram
   troubleshooting:
     type: Document
     label: Troubleshooting
     description: Guidance for troubleshooting problems with this system.
-    fieldset: self
+    fieldset: troubleshooting
   monitoring:
     type: Document
     label: Bespoke Monitoring
@@ -235,7 +240,7 @@ properties:
     type: Document
     label: More Information
     description: Any additional information about this system.
-    fieldset: self
+    fieldset: moreInformation
   stakeholders:
     type: Person
     direction: outgoing
@@ -262,6 +267,7 @@ properties:
     deprecationReason: 'Replaced by healthchecks property'
     description: Endpoints which monitor this system.
     hasMany: true
+    fieldset: monitoring
   healthchecks:
     type: Healthcheck
     direction: outgoing
@@ -386,6 +392,21 @@ properties:
     description: The date that Operations last reviewed this system.
     label: Last review date
     fieldset: review
+  sosTrafficLight:
+    type: TrafficLight
+    description: The Service Operability Score (SOS) given by Operations during their manual review of the quality of the information contained in this system as presented to them via the runbook.
+    label: SOS Traffic light
+    fieldset: review
+  lastSOSReport:
+    type: Url
+    label: Last SOS Report
+    description: A link to the Service Operability Score (SOS) report detailing the actions required to make the resulting runbook more usable by the Operations team.
+    fieldset: review
+  herokuPipelineName:
+    type: Code
+    label: Heroku pipeline Name
+    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production.
+    fieldset: release
 fieldsets:
   general:
     heading: General information
@@ -405,5 +426,13 @@ fieldsets:
     heading: Monitoring
   network:
     heading: Related resources
+  architectureDiagram:
+    heading: Architecture Diagram
+  troubleshooting:
+    heading: Troubleshooting
+  moreInformation:
+    heading: More Information
+  miscellaneous:
+    heading: Miscellaneous
   review:
-    heading: Review
+    heading: Service Operability Review

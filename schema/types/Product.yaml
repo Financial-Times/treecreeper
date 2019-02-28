@@ -13,8 +13,8 @@ properties:
     pattern: STRICT_CODE
     label: Code
     description: |
-      Unique code for the product. Must be lowercase, and ideally only letters,
-      numbers and hyphens.
+      The unique identification code for the product. When creating a new product,
+      choose a lower case, hyphenated string similar to the name people call the product.
     fieldset: general
   name:
     type: Name
@@ -35,7 +35,7 @@ properties:
     type: ServiceTier
     isCore: true
     label: Service tier
-    description: The service tier (level of support) given to this product.
+    description: The service tier (level of support) given to the product.
     fieldset: general
   primaryURL:
     type: Url
