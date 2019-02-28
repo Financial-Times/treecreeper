@@ -4,6 +4,8 @@ const enums = require('./methods/get-enums');
 const graphqlDefs = require('./methods/get-graphql-defs');
 const primitiveTypes = require('./lib/primitive-types-map');
 const sendToS3 = require('./lib/send-to-s3');
+const poller = require('./lib/poller');
+const validate = require('./lib/validate');
 
 module.exports = Object.assign(
 	{
@@ -14,7 +16,7 @@ module.exports = Object.assign(
 		normalizeTypeName: name => name,
 		primitiveTypesMap: primitiveTypes,
 		sendToS3,
+		poller,
 	},
-	require('./lib/validate'),
-	require('./lib/poller'),
+	validate,
 );
