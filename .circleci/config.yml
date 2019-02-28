@@ -6,7 +6,7 @@ references:
     # For a tag push unaffected by any filters, CircleCI skips the job
     # https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
     tags:
-      only: /v[0-9]+(\.[0-9]+)*/
+      only: /^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)\.\d+)?$/
 
   default_container_config: &default_container_config
     working_directory: ~/project
