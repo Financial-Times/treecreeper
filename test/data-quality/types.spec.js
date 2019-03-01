@@ -106,6 +106,10 @@ describe('data quality: types', () => {
 			}
 
 			describe('properties', () => {
+				it('has a code that can identify', () => {
+					expect(type.properties.code).toBeDefined();
+					expect(type.properties.code.canIdentify).toEqual(true);
+				});
 				Object.entries(type.properties).forEach(([name, config]) => {
 					describe(`${name}`, () => {
 						it('has no unrecognised properties in its config', () => {
