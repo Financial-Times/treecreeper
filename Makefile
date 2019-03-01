@@ -34,8 +34,8 @@ prod-env:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true TIMEOUT=500000 jest test --testEnvironment=node --watch; \
-		else jest test --automock=true --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then DEBUG=true jest test --testEnvironment=node --watch; \
+		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 s3-publish:
