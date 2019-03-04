@@ -1,5 +1,6 @@
 /* eslint-disable global-require */
 jest.useFakeTimers();
+
 describe('poller', () => {
 	let poller;
 	let fetch;
@@ -8,6 +9,15 @@ describe('poller', () => {
 		poller.stop();
 		jest.resetModules();
 		jest.clearAllTimers();
+	});
+
+	it('exports schema file name based on package.json', async () => {
+		jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
+			virtual: true,
+		});
+		poller = require('../../lib/poller'); // eslint-disable-line global-require
+
+		expect(poller.schemaFileName).toEqual('v1.json');
 	});
 
 	describe('polling', () => {
