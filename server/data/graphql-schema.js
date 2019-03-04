@@ -1,8 +1,5 @@
 const logger = require('@financial-times/n-logger').default;
-const {
-	makeExecutableSchema,
-	addMockFunctionsToSchema,
-} = require('graphql-tools');
+const { makeExecutableSchema } = require('graphql-tools');
 
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
@@ -46,16 +43,4 @@ const makeGraphqlSchema = makeExecutableSchema({
 const config = { query: true, mutation: false };
 const schema = makeAugmentedSchema({ schema: makeGraphqlSchema, config });
 
-const createMockSchema = mocks => {
-	const mockSchema = makeExecutableSchema({
-		typeDefs: getGraphqlDefs(),
-		resolvers: resolvers.enumResolvers,
-	});
-	addMockFunctionsToSchema({
-		schema: mockSchema,
-		mocks,
-	});
-	return mockSchema;
-};
-
-module.exports = { resolvers, createMockSchema, schema };
+module.exports = { resolvers, schema };
