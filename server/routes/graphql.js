@@ -86,4 +86,4 @@ module.exports = router => {
 	return router;
 };
 
-module.exports.checkSchemaConsistentcy = () => schemaVersionIsConsistent;
+module.exports.checkSchemaConsistency = () => schemaVersionIsConsistent;

@@ -1,27 +1,24 @@
 const FIVE_MINUTES = 5 * 60 * 1000;
 
-module.exports = async (check, func, type) => {
+const outputs = require('./outputs');
+
+module.exports = async (check, outputName, outputOptions) => {
 	let lastStatus = {};
 	const checkAndUpdateState = async () => {
 		lastStatus = await check();
-		const outputObj = type ? func(type) : func();
-		lastStatus = Object.assign(outputObj, lastStatus);
+
+		const standardOutput = outputs[outputName];
+		lastStatus = Object.assign(
+			typeof standardOutput === 'function'
+				? standardOutput(outputOptions)
+				: standardOutput,
+			lastStatus,
+		);
 	};
 
 	checkAndUpdateState();
 	setInterval(checkAndUpdateState, FIVE_MINUTES).unref();
 	return {
-		getStatus: () => ({
-			ok: lastStatus.lastCheckOk,
-			checkOutput: lastStatus.lastCheckOutput,
-			lastUpdated: lastStatus.lastCheckTime,
-			id: lastStatus.id,
-			name: lastStatus.name,
-			businessImpact: lastStatus.businessImpact,
-			severity: lastStatus.severity,
-			technicalSummary: lastStatus.technicalSummary,
-			panicGuide: lastStatus.panicGuide,
-			_dependencies: lastStatus.dependencies,
-		}),
+		getStatus: () => lastStatus,
 	};
 };
