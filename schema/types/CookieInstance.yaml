@@ -11,33 +11,34 @@ properties:
     canIdentify: true
     required: true
     unique: true
+    pattern: MAX_LENGTH
     fieldset: main
     autoPopulated: true
 
   path:
     type: Word
     label: Path
-    description: The path the cookie is set on. 
+    description: The path the cookie is set on.
     required: true
-  
+
   lastSeen:
     type: Date
     label: Date last seen
-    description: Date Cookie last found during audit of product / website Audit. 
+    description: Date Cookie last found during audit of product / website Audit.
     required: true
-  
-  product: 
+
+  product:
     type: Word
     label: Product
     description: The product / website the cookie is found on.
-    required: true 
+    required: true
     isCore: true
 
   expiry:
     type: CookieExpiry
     label: Session or Persistent Cookie
     description: |
-      Information taken from cookie audit confirming if cookie found as a session or persistent cookie at time of last audit. 
+      Information taken from cookie audit confirming if cookie found as a session or persistent cookie at time of last audit.
     required: true
     isCore: true
     fieldset: main
@@ -47,7 +48,7 @@ properties:
     label: Cookie details
     relationship: IS_SET_AS
     description: Information about what the cookie is for, taken from cookiepedia.
-    direction: incoming 
+    direction: incoming
 
 fieldsets:
   main:
