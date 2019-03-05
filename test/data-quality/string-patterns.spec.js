@@ -2,11 +2,17 @@ const rawData = require('../../lib/raw-data');
 
 const stringPatterns = rawData.getStringPatterns();
 
+const longString = 'x'.repeat(65);
+
 describe('data quality: string patterns', () => {
 	Object.entries(stringPatterns).forEach(([name, pattern]) => {
 		if (typeof pattern === 'string') {
 			it(`${name} evaluates to valid flagless regex`, () => {
 				expect(() => new RegExp(pattern)).not.toThrow();
+			});
+			it(`${name} blocks very long strings`, () => {
+				const regex = new RegExp(pattern);
+				expect(regex.test(longString)).toEqual(false);
 			});
 		} else {
 			it(`${name} evaluates to valid flagged regex`, () => {

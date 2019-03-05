@@ -10,6 +10,7 @@ properties:
     canIdentify: true
     required: true
     unique: true
+    pattern: MAX_LENGTH
     fieldset: main
     autoPopulated: true
 
@@ -24,14 +25,14 @@ properties:
   lastSeen:
     type: Date
     label: Date last seen
-    description: Date Tag last found during audit of product / website Audit. 
+    description: Date Tag last found during audit of product / website Audit.
     required: true
-  
-  product: 
+
+  product:
     type: Word
     label: Product
     description: The product / website the tag is found on.
-    required: true 
+    required: true
     isCore: true
 
   isInstanceOfTag:
@@ -39,7 +40,7 @@ properties:
     label: Tag details
     relationship: IS_SET_AS
     description: Information about what the tag is for, taken from tagopedia or completed internally.
-    direction: incoming 
+    direction: incoming
 
 fieldsets:
   main:
