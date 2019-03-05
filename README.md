@@ -3,12 +3,6 @@
 Modelling our business' operations
 ![image](https://user-images.githubusercontent.com/447559/51336971-dba88780-1a7d-11e9-9f6b-e867440c3985.png)
 
-## Architecture
-
-[Architectural Diagrams](https://github.com/Financial-Times/gdpr)
-
-WIP
-
 ## Access
 
 ### API

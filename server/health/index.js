@@ -1,6 +1,7 @@
 const callApiGatewayCheck = require('./gatewayApiCall');
 const callApiHerokuCheck = require('./herokuApiCall');
 const constraintsCheck = require('./constraints');
+const schemaVersionCheck = require('./schema-version');
 const readQueryCheck = require('./readQuery');
 
 module.exports = async (req, res) => {
@@ -9,6 +10,7 @@ module.exports = async (req, res) => {
 		callApiHerokuCheck,
 		constraintsCheck,
 		readQueryCheck,
+		schemaVersionCheck,
 	].map(async check => {
 		const checkObj = await check;
 		return checkObj.getStatus();

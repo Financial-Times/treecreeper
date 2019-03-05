@@ -42,6 +42,9 @@ jobs:
           command: |
             npm install --no-save
             npm update --no-save
+      - run:
+          name: Get test env vars
+          command: make env
 
       - *cache_node_modules
 
@@ -90,7 +93,8 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - install
+      - install:
+          context: rel-eng-creds
       - test:
           requires:
             - install
