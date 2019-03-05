@@ -9,7 +9,7 @@ const content = JSON.stringify(
 			stringPatterns: rawData.getStringPatterns(),
 			enums: rawData.getEnums(),
 		},
-		gitCommit: process.env.CIRCLE_SHA1,
+		version: process.env.CIRCLE_SHA1,
 		gitTag: process.env.CIRCLE_TAG,
 	},
 	null,

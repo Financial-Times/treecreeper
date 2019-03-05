@@ -5,33 +5,39 @@ Schema for biz-ops data store and api. It provides two things:
 -   yaml files which define which types, properties and relationships are allowed. These are intended to be edited by anybody who wants to add to the things the api models
 -   a nodejs library for accessing subsets this information
 
+## Installation and usage
+
+`npm install @financial-times/biz-ops-schema`
+
+```js
+const { poller } = require('@financial-times/biz-ops-schema');
+poller.start(process.env.SCHEMA_BASE_URL);
+```
+
+Speak to a member of the [biz ops team](https://financialtimes.slack.com/messages/C9S0V2KPV) to obtain a suitable value for `SCHEMA_BASE_URL`.
+
+The component _may_ be used without starting the poller - it will use a local copy of the schema provided as part of the npm package. However, unless there are specific reasons to want to pin to a specific schema version, it is far better to enable polling.
+
 ## Adding to the schema
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Releasing
 
-1. Create an appropriate semver tag:
+Create an appropriate semver tag:
 
 -   for additions to the schema release as a patch
 -   for additions to the api relase as a minor
+-   breaking changes to the API or changes to the structure of data in the yaml files should be released as major
 
-2. Checkout https://github.com/Financial-Times/biz-ops-api and `npm install @financial-times/biz-ops-schema@{the new version}`
-3. Once this is merged to master, verify the https://dashboard.heroku.com/apps/biz-ops-api-staging app has deployed. If it all seems ok (try querying http://biz-ops-api-staging.herokuapp.com/graphiql for your new schema properties, or reading/writing a few dummy entries to the rest api. But use common sense, if you're just fixing a typo in a label or something, don't be too cautious)
-4. Promote to production https://dashboard.heroku.com/apps/biz-ops-api
-5. Follow something like 2 - 4 for https://github.com/Financial-Times/biz-ops-admin
-6. Follow something like 2 - 4 for https://github.com/Financial-Times/biz-ops-search
-
-### Future plans
-
-The plan is to have non-breaking releases of this component do two things:
-
--   Push schema files to s3 so they can be shared instantly. The js code in this component will poll s3 for the latest version
--   Restart/kick the biz-ops-api app so that the graphql api reflects schema changes
-
-So it's a bit of a painful process for now, but will improve
+This will release a new version of the library and push a JSON copy of the latest version of the schema up to an s3 bucket, at the path `/latest/v{major version}.json`. As soon as the API has picked up this latest version, it will push a copy to `/api/v{major version}.json`, which can then be safely consumed by other applications.
 
 ## API
+
+All methods use an internal caching mechanism, whih is flushed whenever the schema updates. For this reason
+
+-   it is safe to call these methods many times because the complex transformation of values is only executed on the first invocation
+-   it is an antipattern to store the result of any invocation in a variable for any _non synchronous_ period of time - this may result in incorrect reading or writing of data
 
 ### getType(type, options)
 

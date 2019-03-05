@@ -33,11 +33,10 @@ prod-env:
 	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js PRODUCTS/$(PRODUCT_NAME)/prod
 
 test:
-ifneq ($(CI),)
-	jest test
-else
-	jest test --watch
-endif
+	@if [ -z $(CI) ]; \
+		then DEBUG=true jest test --testEnvironment=node --watch; \
+		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+	fi
 
 s3-publish:
 	@node scripts/deploy
