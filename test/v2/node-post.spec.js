@@ -282,4 +282,23 @@ describe('v2 - node POST', () => {
 			['CREATE', groupCode, 'Group'],
 		);
 	});
+
+	describe('locked Fields', () => {
+		it('creates a node with _lockedFields', async () => {
+			await sandbox
+				.request(app)
+				.post(`/v2/node/Team/${teamCode}?lockFields=name`)
+				.namespacedAuth()
+				.send({ name: 'name1' })
+				.expect(
+					200,
+					sandbox.withCreateMeta({
+						code: 'v2-node-post-team',
+						name: 'name1',
+						_lockedFields:
+							'[{"fieldName":"name","clientId":"v2-node-post-client"}]',
+					}),
+				);
+		});
+	});
 });
