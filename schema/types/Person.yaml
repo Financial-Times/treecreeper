@@ -64,6 +64,13 @@ properties:
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
+  githubName:
+    type: Word
+    canIdentify: true
+    label: Github Username
+    description: The Github user name for this person.
+    fieldset: contact
+    autoPopulated: true
   phone:
     type: Word
     canIdentify: true
