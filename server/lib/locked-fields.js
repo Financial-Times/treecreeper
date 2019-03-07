@@ -25,14 +25,13 @@ const getLockedFields = (
 	existingLockedFieldsString,
 ) => {
 	if (!clientId) {
-		throw new Error(
+		throw new LockedFieldsError(
 			`clientId needs to be set in order to lock \`${lockFields}\``,
+			lockFields,
+			400,
 		);
 	}
 
-	const existingLockedFields = getExistingLockedFields(
-		existingLockedFieldsString,
-	);
 	const fields =
 		lockFields === 'all'
 			? getAllPropertyNames(nodeType)
@@ -44,10 +43,18 @@ const getLockedFields = (
 		};
 	});
 
-	const allLockedFields = existingLockedFields.length
-		? joinExistingAndNewLockedFields(existingLockedFields, fieldsToLock)
-		: fieldsToLock;
+	if (!existingLockedFieldsString) {
+		JSON.stringify(fieldsToLock);
+	}
 
+	const existingLockedFields = getExistingLockedFields(
+		existingLockedFieldsString,
+	);
+
+	const allLockedFields = joinExistingAndNewLockedFields(
+		existingLockedFields,
+		fieldsToLock,
+	);
 	return JSON.stringify(allLockedFields);
 };
 
