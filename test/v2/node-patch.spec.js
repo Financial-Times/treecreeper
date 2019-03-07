@@ -29,6 +29,7 @@ describe('v2 - node PATCH', () => {
 				.namespacedAuth()
 				.send(data);
 	});
+
 	it('update node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
@@ -81,6 +82,7 @@ describe('v2 - node PATCH', () => {
 		);
 		sandbox.expectNoEvents();
 	});
+
 	describe('temporal properties', () => {
 		it('Set Date property when no previous value', async () => {
 			const isoDateString = '2019-01-09';
@@ -145,6 +147,7 @@ describe('v2 - node PATCH', () => {
 			);
 			sandbox.expectEvents(['UPDATE', systemCode, 'System']);
 		});
+
 		it("Not overwrite when 'same' Date sent", async () => {
 			const isoDateString = '2019-01-09';
 			const date = new Date(isoDateString);
