@@ -17,7 +17,7 @@ describe('getLockedFields', () => {
 	it('throws an error when clientId is not set', () => {
 		const clientId = undefined;
 		expect(() => getLockedFields(nodeType, clientId, lockFields)).toThrow(
-			Error,
+			'clientId needs to be set in order to lock fields',
 		);
 	});
 

@@ -297,7 +297,10 @@ describe('v2 - node POST', () => {
 				.post(`/v2/node/Team/${teamCode}?lockFields=all`)
 				.namespacedAuth()
 				.send({ name: 'name1' })
-				.expect(400, /clientId needs to be set in order to lock `all`/);
+				.expect(
+					400,
+					/clientId needs to be set in order to lock fields/,
+				);
 		});
 
 		it('creates a node with _lockedFields', async () => {

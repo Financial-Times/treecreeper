@@ -26,7 +26,7 @@ const getLockedFields = (
 ) => {
 	if (!clientId) {
 		throw new LockedFieldsError(
-			`clientId needs to be set in order to lock \`${lockFields}\``,
+			'clientId needs to be set in order to lock fields',
 			lockFields,
 			400,
 		);
