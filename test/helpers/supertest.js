@@ -27,7 +27,7 @@ const request = (app, { useCached = true } = {}) => {
 	return instance;
 };
 
-const getNamespacedSupertest = (namespace, includeClientUserId = true) => (
+const getNamespacedSupertest = (namespace, includeClientId = true) => (
 	...requestArgs
 ) => {
 	const req = request(...requestArgs);
@@ -44,7 +44,7 @@ const getNamespacedSupertest = (namespace, includeClientUserId = true) => (
 
 				/* This is a bad hack to prevent client-id being set, in order to test
 				that an error is thrown when trying to lock fields */
-				if (includeClientUserId) {
+				if (includeClientId) {
 					headers.set('client-id', `${namespace}-client`);
 				}
 
