@@ -42,6 +42,9 @@ jobs:
           command: |
             npm install --no-save
             npm update --no-save
+      - run:
+          name: Get test env vars
+          command: make env
 
       - *cache_node_modules
 
@@ -66,7 +69,7 @@ jobs:
             ./scripts/neo4j-plugins
             dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start
             ./scripts/neo4j-wait-for-start
-            node server/init-db.js
+            make init-db
       - run:
           name: Run v2 tests
           command: make test
@@ -90,7 +93,8 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - install
+      - install:
+          context: rel-eng-creds
       - test:
           requires:
             - install

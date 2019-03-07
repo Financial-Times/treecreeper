@@ -66,6 +66,8 @@ const initConstraints = async () => {
 	}
 };
 
+schema.poller.on('change', initConstraints);
+
 module.exports = {
 	initConstraints,
 };

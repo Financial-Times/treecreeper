@@ -33,7 +33,7 @@ describe('salesforce sync integration', () => {
 		).toBe('salesforce-sync-system');
 	});
 
-	it('should call when PATCHing System', async () => {
+	it.skip('should call when PATCHing System', async () => {
 		await request(app)
 			.patch(`/v2/node/System/${namespace}-system`)
 			.namespacedAuth()

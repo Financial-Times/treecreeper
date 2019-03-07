@@ -2,7 +2,6 @@ const { stripIndents } = require('common-tags');
 const { getTypes } = require('@financial-times/biz-ops-schema');
 const { logger } = require('../lib/request-context');
 const healthcheck = require('./healthcheck');
-const outputs = require('./output');
 const { executeQuery } = require('../data/db-connection');
 
 const constraintsCheck = async () => {
@@ -16,9 +15,9 @@ const constraintsCheck = async () => {
 
 		if (!dbConstraints) {
 			return {
-				lastCheckOk: false,
-				lastCheckTime: new Date().toUTCString(),
-				lastCheckOutput:
+				ok: false,
+				lastUpdated: new Date().toUTCString(),
+				checkOutput:
 					'Error retrieving database constraints: no constraints found!',
 				panicGuide: "Don't panic",
 			};
@@ -54,10 +53,9 @@ const constraintsCheck = async () => {
 			missingPropertyConstraints.length === 0
 		) {
 			return {
-				lastCheckOk: true,
-				lastCheckTime: new Date().toUTCString(),
-				lastCheckOutput:
-					'Successfully retrieved all database constraints',
+				ok: true,
+				lastUpdated: new Date().toUTCString(),
+				checkOutput: 'Successfully retrieved all database constraints',
 				panicGuide: "Don't panic",
 			};
 		}
@@ -90,9 +88,9 @@ const constraintsCheck = async () => {
 				'Constraints healthcheck ok',
 			);
 			return {
-				lastCheckOk: false,
-				lastCheckTime: new Date().toUTCString(),
-				lastCheckOutput: 'Database is missing required constraints',
+				ok: false,
+				lastUpdated: new Date().toUTCString(),
+				checkOutput: 'Database is missing required constraints',
 				panicGuide: stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
 						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`,
 			};
@@ -107,9 +105,9 @@ const constraintsCheck = async () => {
 			'Healthcheck failed',
 		);
 		return {
-			lastCheckOk: false,
-			lastCheckTime: new Date().toUTCString(),
-			lastCheckOutput: stripIndents`Error retrieving database constraints: ${
+			ok: false,
+			lastUpdated: new Date().toUTCString(),
+			checkOutput: stripIndents`Error retrieving database constraints: ${
 				error.message ? error.message : error
 			}`,
 			panicGuide:
@@ -118,4 +116,4 @@ const constraintsCheck = async () => {
 	}
 };
 
-module.exports = healthcheck(constraintsCheck, outputs.constraints);
+module.exports = healthcheck(constraintsCheck, 'constraints');

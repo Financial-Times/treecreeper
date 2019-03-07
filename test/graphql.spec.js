@@ -1,159 +1,178 @@
-const casual = require('casual');
-const logger = require('@financial-times/n-logger').default;
 const sinon = require('sinon');
-const { graphql } = require('graphql');
 const app = require('../server/app.js');
+const { setupMocks } = require('./helpers');
+
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'graphql',
 );
-const { executeQuery } = require('../server/data/db-connection');
 const security = require('../server/middleware/security');
-const {
-	createMockSchema,
-	resolvers,
-} = require('../server/data/graphql-schema');
 
-const UNIQUE_ATTRIBUTE_KEY = 'uniqueAttribute';
-const UNIQUE_ATTRIBUTE_VALUE = 'GRAPHQL_INT_TESTS';
+describe('graphql', () => {
+	const sandbox = {};
 
-describe('Integration - GraphQL', () => {
-	// always seed the casual generator with a static seed so that tests are deterministic
-	casual.seed(123);
-	let sandbox;
-	const typeFields = {};
-	const typeMocks = {};
+	const namespace = 'graphql';
+	setupMocks(sandbox, { namespace });
 
-	const mockGraphQlQuery = async query => {
-		const mockSchema = createMockSchema({
-			String() {
-				return casual.word;
-			},
-			ServiceTier() {
-				return 'Platinum';
-			},
-			System: () => ({
-				serviceTier: () => 'Platinum',
-			}),
+	const systemCode = `${namespace}-system`;
+
+	it('Return a single system', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+			name: 'name1',
+			lifecycleStage: 'Production',
 		});
-		return graphql(mockSchema, query);
-	};
-
-	const listFields = (fields = []) => {
-		return (
-			fields
-				/* DateTime, Date and Time is given - type: { kind: 'SCALAR' } but is is an object
-			causing the test to fail.
-			*/
-				.filter(
-					({ type: { name } }) =>
-						!['DateTime', 'Date', 'Time'].includes(name),
-				)
-				.filter(
-					({ type: { kind } }) => !['LIST', 'OBJECT'].includes(kind),
-				)
-				.map(({ name }) => name)
-				.join('\n')
-		);
-	};
-
-	const getMocksForType = async (type, typeQuery) => {
-		logger.debug('Fetching graphql schema for type', { type });
-		const fields = await mockGraphQlQuery(`
-				query getTypes {
-					__schema {
-						types {
-							name
-							fields {
-								name
-								type {
-									name
-									kind
-								}
-							}
-						}
-					}
-				}
-			`)
-			.then(
-				({ data }) =>
-					data.__schema.types.find(
-						({ name }) => name.toUpperCase() === type.toUpperCase(),
-					).fields,
-			)
-			.catch(error => {
-				logger.error('Given schema type did not exist', error, type);
-				throw error;
-			});
-
-		logger.debug('Fetching graphql fields for type', { type, typeQuery });
-
-		const mocks = await mockGraphQlQuery(`
-				query get${typeQuery} {
-					${typeQuery} {
-						${listFields(fields)}
-					}
-				}
-			`).then(({ data }) => data[typeQuery]);
-
-		logger.debug('Created mocks for type', { type, mocks });
-
-		return {
-			mocks,
-			fields,
-		};
-	};
-
-	const addUniqueAttributes = item =>
-		Object.assign({}, item, {
-			[UNIQUE_ATTRIBUTE_KEY]: UNIQUE_ATTRIBUTE_VALUE,
-		});
-
-	const mapEnumFields = (item, fieldSchema) =>
-		Object.entries(item).reduce((result, [key, value]) => {
-			const { type } = fieldSchema.find(({ name }) => name === key) || {};
-			if (type && type.kind === 'ENUM') {
-				return Object.assign({}, result, {
-					[key]: resolvers.enumResolvers[type.name][value],
+		return sandbox
+			.request(app)
+			.post('/graphql')
+			.send({
+				query: `{
+					System(code: "${systemCode}") {
+						code
+						name
+						lifecycleStage
+					}}`,
+			})
+			.namespacedAuth()
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual({
+					data: {
+						System: {
+							code: systemCode,
+							lifecycleStage: 'Production',
+							name: 'name1',
+						},
+					},
 				});
-			}
-			return result;
-		}, item);
-
-	const populateDatabaseMocks = async (type, typeQuery) => {
-		const { mocks, fields } = await getMocksForType(type, typeQuery).then(
-			result => {
-				result.mocks = Array.isArray(result.mocks)
-					? result.mocks
-					: [result.mocks];
-				return result;
-			},
-		);
-
-		typeFields[type] = fields;
-		typeMocks[type] = mocks;
-
-		const props = mocks
-			.map(mock => mapEnumFields(mock, fields))
-			.map(addUniqueAttributes);
-
-		logger.debug('Creating graphql database stubs', { type, props });
-
-		const createQuery = `UNWIND $props AS map CREATE (n:${type}) SET n = map`;
-		return executeQuery(createQuery, { props });
-	};
-
-	beforeEach(async () => {
-		sandbox = sinon.createSandbox();
-		await populateDatabaseMocks('System', 'Systems');
+			});
 	});
 
-	afterEach(async () => {
-		sandbox.restore();
-		const deleteQuery = `MATCH (a {${UNIQUE_ATTRIBUTE_KEY}: "${UNIQUE_ATTRIBUTE_VALUE}"}) DELETE a`;
-		await executeQuery(deleteQuery);
+	it('Return metadata for system', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+		});
+		return sandbox
+			.request(app)
+			.post('/graphql')
+			.send({
+				query: `{
+					System(code: "${systemCode}") {
+						code
+						_createdTimestamp {formatted}
+						_updatedTimestamp {formatted}
+						_updatedByClient
+						_createdByClient
+						_updatedByUser
+						_createdByUser
+					}}`,
+			})
+			.namespacedAuth()
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual({
+					data: {
+						System: {
+							code: systemCode,
+							_createdByClient: 'graphql-init-client',
+							_createdByUser: 'graphql-init-user',
+							_createdTimestamp: {
+								formatted: '2015-11-15T08:12:27.908000000Z',
+							},
+							_updatedByClient: 'graphql-client',
+							_updatedByUser: 'graphql-user',
+							_updatedTimestamp: {
+								formatted: '2019-01-09T09:08:22.908000000Z',
+							},
+						},
+					},
+				});
+			});
+	});
+
+	it('Returns related entities', async () => {
+		const teamCode = `${namespace}-team`;
+		const [system, team] = await sandbox.createNodes(
+			[
+				'System',
+				{
+					code: systemCode,
+				},
+			],
+			['Team', { code: teamCode }],
+		);
+
+		await sandbox.connectNodes(system, 'DELIVERED_BY', team);
+		return sandbox
+			.request(app)
+			.post('/graphql')
+			.send({
+				query: `{
+					System(code: "${systemCode}") {
+						code
+						deliveredBy {code}
+					}}`,
+			})
+			.namespacedAuth()
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual({
+					data: {
+						System: {
+							code: systemCode,
+							deliveredBy: { code: teamCode },
+						},
+					},
+				});
+			});
+	});
+
+	it('Returns a list of systems', async () => {
+		await sandbox.createNodes(
+			[
+				'System',
+				{
+					code: systemCode + 1,
+				},
+			],
+			[
+				'System',
+				{
+					code: systemCode + 2,
+				},
+			],
+		);
+		return sandbox
+			.request(app)
+			.post('/graphql')
+			.send({
+				query: `{
+					Systems {
+						code
+					}}`,
+			})
+			.namespacedAuth()
+			.expect(200)
+			.then(({ body }) => {
+				[1, 2].forEach(num => {
+					const result = body.data.Systems.find(
+						s => s.code === systemCode + num,
+					);
+					expect(result).not.toBeUndefined();
+					expect(result).toEqual({ code: systemCode + num });
+				});
+			});
 	});
 
 	describe('access control', () => {
+		let sinonSandbox;
+		beforeEach(async () => {
+			sinonSandbox = sinon.createSandbox();
+		});
+
+		afterEach(async () => {
+			sinonSandbox.restore();
+		});
+
 		const dummyQuery = {
 			query: `{
 				Systems {
@@ -175,7 +194,7 @@ describe('Integration - GraphQL', () => {
 		};
 
 		it('should allow access to GET /graphiql behind s3o', () => {
-			sandbox.stub(security, 'requireS3o').callsFake(stubS3o);
+			sinonSandbox.stub(security, 'requireS3o').callsFake(stubS3o);
 
 			return request(app, { useCached: false })
 				.get('/graphiql')
@@ -190,7 +209,9 @@ describe('Integration - GraphQL', () => {
 		});
 
 		it('should allow access to POST /api/graphql behind s3o', () => {
-			sandbox.stub(security, 'requireApiKeyOrS3o').callsFake(stubS3o);
+			sinonSandbox
+				.stub(security, 'requireApiKeyOrS3o')
+				.callsFake(stubS3o);
 			return request(app, { useCached: false })
 				.post('/graphql')
 				.send(dummyQuery)
@@ -211,45 +232,5 @@ describe('Integration - GraphQL', () => {
 				.post('/graphql', dummyQuery)
 				.expect(403);
 		});
-	});
-
-	it('GET for a single system returns a single system', () => {
-		return request(app)
-			.post('/graphql')
-			.send({
-				query: `{
-					System(code: "${typeMocks.System[0].code}") {
-						${listFields(typeFields.System)}
-					}}`,
-			})
-			.namespacedAuth()
-			.expect(200)
-			.then(({ body }) => {
-				expect(body).toEqual({
-					data: { System: typeMocks.System[0] },
-				});
-			});
-	});
-
-	it('GET for systems returns a list of systems', () => {
-		return request(app)
-			.post('/graphql')
-			.send({
-				query: `{
-					Systems {
-						${listFields(typeFields.System)}
-					}}`,
-			})
-			.namespacedAuth()
-			.expect(200)
-			.then(({ body }) => {
-				typeMocks.System.forEach(mock => {
-					const result = body.data.Systems.find(
-						s => s.code === mock.code,
-					);
-					expect(result).not.toBeUndefined();
-					expect(result).toEqual(mock);
-				});
-			});
 	});
 });
