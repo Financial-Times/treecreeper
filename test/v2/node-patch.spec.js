@@ -1655,4 +1655,149 @@ describe('v2 - node PATCH', () => {
 			});
 		});
 	});
+
+	describe('locked fields', () => {
+		it('throws an error when trying to update a node that is locked by another clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				_lockedFields:
+					'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=code`,
+				{
+					code: 'new code',
+				},
+			).expect(400);
+		});
+
+		it('updates node by updating name and adding it as a locked field', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				}),
+			);
+		});
+
+		it('updates node that is locked by this clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields:
+					'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				}),
+			);
+		});
+
+		it('does not update node with locked field when it is has already locked it (no duplicates)', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields:
+					'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=code`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+				}),
+			);
+		});
+
+		it('adds another field to locked fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields:
+					'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'[{"fieldName":"code","clientId":"v2-node-patch-client"},{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				}),
+			);
+		});
+
+		it('does not lock existing fields when those fields are locked by another clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields:
+					'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=code`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+				}),
+			);
+		});
+
+		describe('no client-id header', () => {
+			setupMocks(sandbox, { namespace }, false);
+
+			it('error when clientId is not set', async () => {
+				await sandbox
+					.request(app)
+					.post(`/v2/node/Team/${teamCode}?lockFields=all`)
+					.namespacedAuth()
+					.send({ name: 'name1' })
+					.expect(
+						400,
+						/clientId needs to be set in order to lock fields/,
+					);
+			});
+		});
+	});
 });
