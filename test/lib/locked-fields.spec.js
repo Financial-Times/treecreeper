@@ -8,25 +8,23 @@ const {
 
 describe('getLockedFields', () => {
 	const nodeType = 'Person';
+	const lockFields = 'code,name';
+	const clientId = 'biz-ops-api';
 
 	beforeEach(() => {
 		jest.spyOn(schema, 'getType');
+		schema.getType.mockReturnValue({
+			properties: { code: {}, name: {}, teams: {} },
+		});
 	});
 
 	it('throws an error when clientId is not set', () => {
-		const clientId = undefined;
-		const lockFields = 'code,name';
-		expect(() => getLockedFields(nodeType, clientId, lockFields)).toThrow(
+		expect(() => getLockedFields(nodeType, undefined, lockFields)).toThrow(
 			'clientId needs to be set in order to lock fields',
 		);
 	});
 
 	it('returns a JSON string containing an array of objects with clientId and fieldname properties and values', () => {
-		schema.getType.mockReturnValue({
-			properties: { code: {}, name: {}, teams: {} },
-		});
-		const clientId = 'biz-ops-api';
-		const lockFields = 'code,name';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		expect(
@@ -35,47 +33,23 @@ describe('getLockedFields', () => {
 	});
 
 	it('returns a JSON string containing an array of all fieldname properties and values', () => {
-		schema.getType.mockReturnValue({
-			properties: { code: {}, name: {}, teams: {} },
-		});
-		const clientId = 'biz-ops-api';
-		const lockFields = 'all';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
-		expect(getLockedFields(nodeType, clientId, lockFields)).toEqual(
-			response,
-		);
+		expect(getLockedFields(nodeType, clientId, 'all')).toEqual(response);
 	});
 
 	it('adds new locked fields to the already existing locked fields', () => {
-		schema.getType.mockReturnValue({
-			properties: { code: {}, name: {}, teams: {} },
-		});
-		const clientId = 'biz-ops-api';
-		const lockFields = 'teams';
 		const existingLockedFields =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
 		expect(
-			getLockedFields(
-				nodeType,
-				clientId,
-				lockFields,
-				existingLockedFields,
-			),
+			getLockedFields(nodeType, clientId, 'teams', existingLockedFields),
 		).toEqual(response);
 	});
 
 	it('does not duplicate locked field values', () => {
-		schema.getType.mockReturnValue({
-			properties: { code: {}, name: {}, teams: {} },
-		});
-		const clientId = 'biz-ops-api';
-		const lockFields = 'code,name';
 		const existingLockedFields =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
-		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		expect(
 			getLockedFields(
@@ -84,7 +58,7 @@ describe('getLockedFields', () => {
 				lockFields,
 				existingLockedFields,
 			),
-		).toEqual(response);
+		).toEqual(existingLockedFields);
 	});
 });
 
