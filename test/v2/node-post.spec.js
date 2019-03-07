@@ -1,4 +1,5 @@
 const app = require('../../server/app.js');
+
 const {
 	setupMocks,
 	stubDbUnavailable,
@@ -16,7 +17,7 @@ describe('v2 - node POST', () => {
 	const groupCode = `${namespace}-group`;
 	const systemCode = `${namespace}-group`;
 
-	setupMocks(sandbox, { namespace });
+	setupMocks(sandbox, { namespace }, false);
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
@@ -34,6 +35,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({ name: 'name1' })
 			.expect(
 				200,
@@ -59,6 +61,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({ name: 'name1', description: '' })
 			.expect(
 				200,
@@ -87,6 +90,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/System/${systemCode}`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({ lastServiceReviewDate: date.toISOString() })
 			.expect(
 				200,
@@ -152,6 +156,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({ code: teamCode })
 			.expect(200);
 		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
@@ -164,6 +169,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({
 				techLeads: [personCode],
 				parentGroup: groupCode,
@@ -233,6 +239,7 @@ describe('v2 - node POST', () => {
 			.request(app)
 			.post(`/v2/node/Team/${teamCode}?upsert=true`)
 			.namespacedAuth()
+			.set('client-id', `${namespace}-client`)
 			.send({
 				techLeads: [personCode],
 				parentGroup: groupCode,
@@ -284,11 +291,21 @@ describe('v2 - node POST', () => {
 	});
 
 	describe('locked Fields', () => {
+		it('error when clientId is not set', async () => {
+			await sandbox
+				.request(app)
+				.post(`/v2/node/Team/${teamCode}?lockFields=all`)
+				.namespacedAuth()
+				.send({ name: 'name1' })
+				.expect(400, /clientId needs to be set in order to lock `all`/);
+		});
+
 		it('creates a node with _lockedFields', async () => {
 			await sandbox
 				.request(app)
 				.post(`/v2/node/Team/${teamCode}?lockFields=name`)
 				.namespacedAuth()
+				.set('client-id', `${namespace}-client`)
 				.send({ name: 'name1' })
 				.expect(
 					200,

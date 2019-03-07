@@ -27,7 +27,9 @@ const request = (app, { useCached = true } = {}) => {
 	return instance;
 };
 
-const getNamespacedSupertest = namespace => (...requestArgs) => {
+const getNamespacedSupertest = (namespace, includeClientUserId = true) => (
+	...requestArgs
+) => {
 	const req = request(...requestArgs);
 
 	['post', 'patch', 'get', 'delete', 'put'].forEach(methodName => {
@@ -36,10 +38,17 @@ const getNamespacedSupertest = namespace => (...requestArgs) => {
 			const test = method(...methodArgs);
 
 			test.namespacedAuth = function namespacedAuth() {
-				return this.set('API_KEY', API_KEY)
-					.set('client-id', `${namespace}-client`)
+				const headers = this.set('API_KEY', API_KEY)
 					.set('client-user-id', `${namespace}-user`)
 					.set('x-request-id', `${namespace}-request`);
+
+				/* This is a bad hack to prevent client-id being set, in order to test
+				that an error is thrown when trying to lock fields */
+				if (includeClientUserId) {
+					headers.set('client-id', `${namespace}-client`);
+				}
+
+				return headers;
 			};
 
 			return test;
