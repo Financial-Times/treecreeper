@@ -37,7 +37,7 @@ properties:
         relationship: VALUES_GOVERNED_BY
         direaction: outgoing
 
-     broader:
+    broader:
         type: DataType
         relationship: BROADER
         direction: incoming
