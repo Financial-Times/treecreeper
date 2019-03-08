@@ -200,6 +200,10 @@ properties:
     description: The teams this person is a member of.
     hasMany: true
     fieldset: team
+  knowsAboutAttribute:
+    type: DataAttribute:
+    relationship: KNOWS_ABOUT
+    direction: outgoing
 fieldsets:
   general:
     heading: General information
