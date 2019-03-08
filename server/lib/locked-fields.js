@@ -15,9 +15,6 @@ const joinExistingAndNewLockedFields = (existingFields, newFields) => {
 	return [].concat(existingFields, nonExistantLockedFields);
 };
 
-const getExistingLockedFields = existingLockedFields =>
-	existingLockedFields ? JSON.parse(existingLockedFields) : [];
-
 const getLockedFields = (
 	nodeType,
 	clientId,
@@ -44,12 +41,10 @@ const getLockedFields = (
 	});
 
 	if (!existingLockedFieldsString) {
-		JSON.stringify(fieldsToLock);
+		return JSON.stringify(fieldsToLock);
 	}
 
-	const existingLockedFields = getExistingLockedFields(
-		existingLockedFieldsString,
-	);
+	const existingLockedFields = JSON.parse(existingLockedFieldsString);
 
 	const allLockedFields = joinExistingAndNewLockedFields(
 		existingLockedFields,
@@ -63,9 +58,7 @@ const validateFields = (
 	clientId,
 	writeProperties,
 ) => {
-	const existingLockedFields = getExistingLockedFields(
-		existingLockedFieldsString,
-	);
+	const existingLockedFields = JSON.parse(existingLockedFieldsString);
 	const lockedFieldsByAnotherClient = existingLockedFields.filter(
 		field => field.clientId !== clientId,
 	);
