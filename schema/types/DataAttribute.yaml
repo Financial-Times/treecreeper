@@ -15,9 +15,18 @@ properties:
         label: Description
         description: |
             A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
-updates:
-  type: System
-  relationship: UPDATES
-  direction: incoming
-  hasMany: true
-  
+    updates:
+      type: System
+      relationship: UPDATES
+      direction: incoming
+      hasMany: true
+
+    isInstanceOf:
+      type: DataType
+      relationship: IS_INSTANCE_OF
+      direction: outgoing
+
+    contains:
+      type: DataAttribute
+      relationship: CONTAINS
+      direction: outgoing
