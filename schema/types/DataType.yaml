@@ -1,0 +1,45 @@
+name: DataType
+pluralName: DataTypes
+description: The type of DataAttribute. A grouping for the domain of values that a DataAttribute may take.
+properties:
+    code:
+        type: Code
+        label: Code
+        description: The unique code for this data type
+    name:
+        type: String
+        label: Name
+        description: The data type's name, e.g. Royal Mail Postcode or SIC Industry.
+    description:
+        type: String
+        label: Description
+        description: |
+            A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification not just that it's an industry code.
+  isInstanceOf:
+    type: DataAttribute
+    relationship: IS_INSTANCE_OF
+    direction: incoming
+    hasMany: true
+
+  knowsAbout:
+    type: Person
+    relationship: KNOWS_ABOUT
+    direction: incoming
+    hasMany: true
+
+  isPurchasedBy:
+    type: Team
+    relationship: IS_PURCHASED_BY
+    direction: outgoing
+
+   valuesGovernedBy:
+    type: Team
+    relationship: VALUES_GOVERNED_BY
+    direaction: outgoing
+
+    broader:
+      type: DataType
+      relationship: BROADER
+      direction: incoming
+    
+    
