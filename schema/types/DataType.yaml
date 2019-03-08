@@ -21,7 +21,7 @@ properties:
         direction: incoming
         hasMany: true
 
-    knowsAbout:
+    isKnownAboutBy:
         type: Person
         relationship: KNOWS_ABOUT
         direction: incoming
