@@ -32,14 +32,14 @@ properties:
         relationship: IS_PURCHASED_BY
         direction: outgoing
 
-     valuesGovernedBy:
+    valuesGovernedBy:
         type: Team
         relationship: VALUES_GOVERNED_BY
         direaction: outgoing
 
-      broader:
-          type: DataType
-          relationship: BROADER
-          direction: incoming
+     broader:
+        type: DataType
+        relationship: BROADER
+        direction: incoming
     
     
