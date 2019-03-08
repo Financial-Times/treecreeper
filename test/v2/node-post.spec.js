@@ -305,7 +305,7 @@ describe('v2 - node POST', () => {
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 
-			it('error when clientId is not set', async () => {
+			it('throws an error when clientId is not set', async () => {
 				await sandbox
 					.request(app)
 					.post(`/v2/node/Team/${teamCode}?lockFields=all`)

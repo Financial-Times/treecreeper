@@ -74,7 +74,7 @@ describe('validateLockedFields', () => {
 		).toThrow(LockedFieldsError);
 	});
 
-	it('does not throw an error when field is NOT locked', () => {
+	it('does NOT throw an error when field is NOT locked', () => {
 		writeProperties = { isActive: true };
 		expect(() =>
 			validateFields(lockedFields, clientId, writeProperties),
