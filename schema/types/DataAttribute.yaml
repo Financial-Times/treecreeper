@@ -1,0 +1,17 @@
+name: DataAttribute
+pluralName: DataAttributes
+description: At the basic level, an individual item of data. What would usually be called a field, an attribute or a property. May also be a higher level grouping of DataAttributes like a record, object or database row.
+properties:
+    code:
+        type: Code
+        label: Code
+        description: The unique code for this data attribute
+    name:
+        type: String
+        label: Name
+        description: A name
+    description:
+        type: String
+        label: Description
+        description: |
+            A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
