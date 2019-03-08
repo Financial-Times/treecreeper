@@ -6,6 +6,17 @@ const {
 	validateFields,
 } = require('../../server/lib/locked-fields');
 
+const existingLockedFields = [
+	{
+		fieldName: 'code',
+		clientId: 'biz-ops-api',
+	},
+	{
+		fieldName: 'name',
+		clientId: 'biz-ops-api',
+	},
+];
+
 describe('getLockedFields', () => {
 	const nodeType = 'Person';
 	const lockFields = 'code,name';
@@ -19,9 +30,9 @@ describe('getLockedFields', () => {
 	});
 
 	it('throws an error when clientId is not set', () => {
-		expect(() => getLockedFields(nodeType, undefined, lockFields)).toThrow(
-			'clientId needs to be set in order to lock fields',
-		);
+		expect(() =>
+			getLockedFields(nodeType, undefined, lockFields, undefined),
+		).toThrow('clientId needs to be set in order to lock fields');
 	});
 
 	it('returns a JSON string containing an array of objects with clientId and fieldname properties and values', () => {
@@ -35,12 +46,12 @@ describe('getLockedFields', () => {
 	it('returns a JSON string containing an array of all fieldname properties and values', () => {
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
-		expect(getLockedFields(nodeType, clientId, 'all')).toEqual(response);
+		expect(getLockedFields(nodeType, clientId, 'all', undefined)).toEqual(
+			response,
+		);
 	});
 
 	it('adds new locked fields to the already existing locked fields', () => {
-		const existingLockedFields =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
 		expect(
@@ -49,8 +60,7 @@ describe('getLockedFields', () => {
 	});
 
 	it('does not duplicate locked field values', () => {
-		const existingLockedFields =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
+		const response = JSON.stringify(existingLockedFields);
 		expect(
 			getLockedFields(
 				nodeType,
@@ -58,33 +68,31 @@ describe('getLockedFields', () => {
 				lockFields,
 				existingLockedFields,
 			),
-		).toEqual(existingLockedFields);
+		).toEqual(response);
 	});
 });
 
 describe('validateLockedFields', () => {
-	const lockedFields =
-		'[{"fieldName":"code","clientId":"biz-ops-admin"},{"fieldName":"name","clientId":"biz-ops-admin"}]';
 	let clientId = 'clientId';
 	let writeProperties = { code: 'code', name: 'name' };
 
 	it('throws an error when field is locked by another client', () => {
 		expect(() =>
-			validateFields(lockedFields, clientId, writeProperties),
+			validateFields(clientId, writeProperties, existingLockedFields),
 		).toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is NOT locked', () => {
 		writeProperties = { isActive: true };
 		expect(() =>
-			validateFields(lockedFields, clientId, writeProperties),
+			validateFields(clientId, writeProperties, existingLockedFields),
 		).not.toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is locked by current client', () => {
 		clientId = 'biz-ops-admin';
 		expect(() =>
-			validateFields(lockedFields, clientId, writeProperties),
+			validateFields(clientId, writeProperties, existingLockedFields),
 		).not.toThrow(LockedFieldsError);
 	});
 });
