@@ -51,7 +51,11 @@ const mergeLockedFields = (
 	return JSON.stringify(allLockedFields);
 };
 
-const validateFields = (clientId, writeProperties, existingLockedFields) => {
+const validateLockedFields = (
+	clientId,
+	writeProperties,
+	existingLockedFields,
+) => {
 	const lockedFieldsByAnotherClient = existingLockedFields.filter(
 		field => field.clientId !== clientId,
 	);
@@ -75,4 +79,4 @@ const validateFields = (clientId, writeProperties, existingLockedFields) => {
 	}
 };
 
-module.exports = { mergeLockedFields, validateFields };
+module.exports = { mergeLockedFields, validateLockedFields };

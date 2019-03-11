@@ -13,7 +13,7 @@ const cypherHelpers = require('../../../data/cypher-helpers');
 const executor = require('./_post-patch-executor');
 const {
 	mergeLockedFields,
-	validateFields,
+	validateLockedFields,
 } = require('../../../lib/locked-fields');
 
 const toArray = it => {
@@ -160,7 +160,11 @@ const update = async input => {
 			: null;
 
 		if (existingLockedFields) {
-			validateFields(clientId, writeProperties, existingLockedFields);
+			validateLockedFields(
+				clientId,
+				writeProperties,
+				existingLockedFields,
+			);
 		}
 
 		const lockedFields = lockFields

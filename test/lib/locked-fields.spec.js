@@ -3,7 +3,7 @@ const { LockedFieldsError } = require('../../server/lib/error-handling');
 
 const {
 	mergeLockedFields,
-	validateFields,
+	validateLockedFields,
 } = require('../../server/lib/locked-fields');
 
 const existingLockedFields = [
@@ -85,21 +85,33 @@ describe('validateLockedFields', () => {
 
 	it('throws an error when field is locked by another client', () => {
 		expect(() =>
-			validateFields(clientId, writeProperties, existingLockedFields),
+			validateLockedFields(
+				clientId,
+				writeProperties,
+				existingLockedFields,
+			),
 		).toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is NOT locked', () => {
 		writeProperties = { isActive: true };
 		expect(() =>
-			validateFields(clientId, writeProperties, existingLockedFields),
+			validateLockedFields(
+				clientId,
+				writeProperties,
+				existingLockedFields,
+			),
 		).not.toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is locked by current client', () => {
 		clientId = 'biz-ops-admin';
 		expect(() =>
-			validateFields(clientId, writeProperties, existingLockedFields),
+			validateLockedFields(
+				clientId,
+				writeProperties,
+				existingLockedFields,
+			),
 		).not.toThrow(LockedFieldsError);
 	});
 });
