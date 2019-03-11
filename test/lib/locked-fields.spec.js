@@ -35,7 +35,7 @@ describe('getLockedFields', () => {
 		).toThrow('clientId needs to be set in order to lock fields');
 	});
 
-	it('returns a JSON string containing an array of objects with clientId and fieldname properties and values', () => {
+	it('returns a JSON string containing an array of objects with clientId and selected fieldname properties and values', () => {
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		expect(
