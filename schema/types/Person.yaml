@@ -204,6 +204,8 @@ properties:
     type: DataType:
     relationship: KNOWS_ABOUT
     direction: outgoing
+    label: Knows about data
+    description: Data types that this person knows about.
 fieldsets:
   general:
     heading: General information
