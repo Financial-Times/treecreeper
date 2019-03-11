@@ -14,7 +14,7 @@ const createNewNode = (nodeType, code, upsert, body, method) => {
 		upsert,
 		isCreate: true,
 
-		propertiesToCreate: constructNeo4jProperties({
+		propertiesToModify: constructNeo4jProperties({
 			nodeType,
 			newContent: body,
 			code,

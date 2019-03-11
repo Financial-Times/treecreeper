@@ -59,6 +59,19 @@ describe('Event log writer', () => {
 		expect(stubKinesis.putRecord.mock.calls[0][0].type).toBe('RepositorY');
 	});
 
+	it('should add the updatedProperties', async () => {
+		const givenValue = ['name'];
+		await eventLogWriter.sendEvent(
+			Object.assign({}, defaultEvent, {
+				updatedProperties: givenValue,
+			}),
+		);
+
+		expect(
+			stubKinesis.putRecord.mock.calls[0][0].updatedProperties,
+		).toEqual(['name']);
+	});
+
 	new Array(2).fill(1).forEach(() => {
 		const time = Math.floor(Math.random() * 10 ** 9);
 		it.skip(`should add the correct timestamp when the clock ticks ${time} millis`, async () => {

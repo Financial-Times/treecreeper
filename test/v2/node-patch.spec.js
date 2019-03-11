@@ -216,6 +216,31 @@ describe('v2 - node PATCH', () => {
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['description']]);
 	});
 
+	it('Not remove property when falsy value sent in payload', async () => {
+		await sandbox.createNode('Team', {
+			code: teamCode,
+			isActive: true,
+		});
+		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+			isActive: false,
+		}).expect(
+			200,
+			sandbox.withUpdateMeta({
+				code: teamCode,
+				isActive: false,
+			}),
+		);
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				isActive: false,
+				code: teamCode,
+			}),
+		);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['isActive']]);
+	});
+
 	it('Create when patching non-existent node', async () => {
 		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
 			name: 'name1',

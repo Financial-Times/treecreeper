@@ -40,19 +40,12 @@ const update = async input => {
 			return await createNewNode(nodeType, code, upsert, body, 'PATCH');
 		}
 
-		const writeProperties = constructNeo4jProperties({
+		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
 			newContent: body,
 			code,
 			initialContent: existingRecord,
 		});
-
-		const deletePropertyNames = recordAnalysis
-			.diffNullProperties(
-				{ nodeType, newContent: body, initialContent: existingRecord },
-				false,
-			)
-			.map(([name]) => name);
 
 		const {
 			removedRelationships,
@@ -64,8 +57,7 @@ const update = async input => {
 			action: relationshipAction,
 		});
 
-		const willModifyNode =
-			Object.keys(writeProperties).length + deletePropertyNames.length;
+		const willModifyNode = Object.keys(propertiesToModify).length;
 
 		const willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
@@ -82,9 +74,7 @@ const update = async input => {
 			return existingRecord;
 		}
 
-		const parameters = {
-			// properties: writeProperties,
-		};
+		const parameters = {};
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
@@ -99,10 +89,6 @@ const update = async input => {
 				SET node += $properties
 			`);
 		}
-
-		queryParts.push(
-			...deletePropertyNames.map(attr => `REMOVE node.${attr}`),
-		);
 
 		if (willDeleteRelationships) {
 			const schema = getType(nodeType);
@@ -129,14 +115,13 @@ const update = async input => {
 			upsert,
 			isCreate: !existingRecord,
 
-			propertiesToCreate: writeProperties,
+			propertiesToModify,
 			relationshipsToCreate: addedRelationships,
 			removedRelationships,
 			parameters,
 			queryParts,
 
 			willDeleteRelationships,
-			deletePropertyNames,
 		});
 	} catch (err) {
 		dbErrorHandlers.nodeUpsert(err);

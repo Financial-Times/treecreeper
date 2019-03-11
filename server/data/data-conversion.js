@@ -32,6 +32,13 @@ const convertTemporalTypes = nodeType => {
 	};
 };
 
+const isNullValue = val => val === null || val === '';
+
+const convertNullValues = ([propName, val]) => [
+	propName,
+	isNullValue(val) ? null : val,
+];
+
 const constructNeo4jProperties = ({
 	nodeType,
 	newContent = {},
@@ -42,6 +49,7 @@ const constructNeo4jProperties = ({
 
 	return diffProperties({ nodeType, newContent, initialContent }, false)
 		.map(convertTemporalTypes(nodeType))
+		.map(convertNullValues)
 		.reduce(entriesToObject, {});
 };
 

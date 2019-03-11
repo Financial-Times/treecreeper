@@ -2,9 +2,7 @@ const httpErrors = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 
-const isNullValue = ([, val]) => val === null || val === '';
-
-const isNotNullValue = entry => !isNullValue(entry);
+const isNullValue = val => val === null || val === '';
 
 const isTemporalTypeName = type => ['Date', 'DateTime', 'Time'].includes(type);
 
@@ -22,6 +20,16 @@ const unNegatePropertyName = propName => propName.replace(/^!/, '');
 
 const maybeToObject = func => (input, asObject = true) =>
 	asObject ? func(input).reduce(entriesToObject, {}) : func(input);
+
+// We go to extra lengths here using constructors because the string representations
+// in the payload and retrieved from db may have different precision, but effectively
+// be the same value e.g. 12:00:00 compared to 12:00:00.000 should return false
+const normalizeDateString = (date, neo4jConstructor) =>
+	neo4jConstructor.fromStandardDate(new Date(date)).toString();
+
+const datesAreEqual = (date1, date2, neo4jConstructor) =>
+	normalizeDateString(date1, neo4jConstructor) ===
+	normalizeDateString(date2, neo4jConstructor);
 
 const identifyRelationships = nodeType => {
 	const { properties } = getType(nodeType);
@@ -49,32 +57,29 @@ const isDeleteRelationship = nodeType => {
 		(isRelationship(propName) && codes === null);
 };
 
-const detectPropertyChanges = (nodeType, initialContent) => {
-	// // don't mutate the original object
-	// initialContent = Object.assign({}, initialContent)
-	if (!initialContent || !Object.keys(initialContent).length) {
-		return () => true;
+const detectPropertyChanges = (nodeType, initialContent = {}) => {
+	if (!Object.keys(initialContent).length) {
+		return ([, val]) => !isNullValue(val);
 	}
 
 	const { properties } = getType(nodeType);
+
 	return ([propName, val]) => {
 		const { type } = properties[propName];
 
+		if (!(propName in initialContent)) {
+			return !isNullValue(val);
+		}
+
+		if (isNullValue(val)) {
+			return true;
+		}
+
 		if (isTemporalTypeName(type)) {
-			// takes care of the case when we're writing a temporal type for the first time
-			if (!initialContent[propName]) {
-				return true;
-			}
-			const constructor = neo4jTemporalTypes[type];
-			// We go to extra lengths here using constructors because the string representations
-			// in the payload and retrieved from db may have different precision, but effectively
-			// be the same value e.g. 12:00:00 compared to 12:00:00.000 should return false
-			// What a pollava!
-			return (
-				constructor.fromStandardDate(new Date(val)).toString() !==
-				constructor
-					.fromStandardDate(new Date(initialContent[propName]))
-					.toString()
+			return !datesAreEqual(
+				val,
+				initialContent[propName],
+				neo4jTemporalTypes[type],
 			);
 		}
 
@@ -86,7 +91,6 @@ const diffProperties = maybeToObject(
 	({ nodeType, newContent = {}, initialContent = {} }) => {
 		return Object.entries(newContent)
 			.filter(isProperty(nodeType))
-			.filter(isNotNullValue)
 			.filter(detectPropertyChanges(nodeType, initialContent));
 	},
 );
@@ -188,22 +192,8 @@ const containsRelationshipData = (nodeType, payload) => {
 		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };
 
-const diffNullProperties = maybeToObject(
-	({ nodeType, newContent, initialContent = {} }) => {
-		return Object.entries(newContent)
-			.filter(isProperty(nodeType))
-			.filter(isNullValue)
-			.filter(
-				([propName]) =>
-					propName in initialContent &&
-					isNotNullValue([undefined, initialContent[propName]]),
-			);
-	},
-);
-
 module.exports = {
 	diffRelationships,
 	diffProperties,
-	diffNullProperties,
 	containsRelationshipData,
 };

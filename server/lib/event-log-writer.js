@@ -15,12 +15,13 @@ class EventLogWriter {
 				data,
 			});
 		}
-		const { action, code, type } = data;
+		const { action, code, type, updatedProperties } = data;
 
 		return this.kinesisClient.putRecord({
 			action,
 			code,
 			type,
+			updatedProperties,
 			time: Math.floor(Date.now() / 1000),
 		});
 	}

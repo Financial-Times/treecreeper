@@ -56,16 +56,14 @@ module.exports = async ({
 	upsert,
 	isCreate,
 
-	propertiesToCreate,
+	propertiesToModify,
 	relationshipsToCreate,
 	removedRelationships,
 	parameters = {},
 	queryParts,
 
 	willDeleteRelationships,
-	deletePropertyNames = [],
 }) => {
-	console.log(method, isCreate);
 	const {
 		relationshipParameters,
 		relationshipQueries,
@@ -76,7 +74,7 @@ module.exports = async ({
 		getDbWriteContext(),
 		{
 			code,
-			properties: propertiesToCreate,
+			properties: propertiesToModify,
 		},
 		relationshipParameters,
 	);
@@ -106,10 +104,9 @@ module.exports = async ({
 		removedRelationships,
 		updatedProperties: [
 			...new Set([
-				...Object.keys(propertiesToCreate),
+				...Object.keys(propertiesToModify),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
-				...deletePropertyNames,
 			]),
 		],
 		addedRelationships: relationshipsToCreate,
