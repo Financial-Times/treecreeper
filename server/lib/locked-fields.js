@@ -8,14 +8,14 @@ const getAllPropertyNames = nodeType => {
 };
 
 const joinExistingAndNewLockedFields = (existingFields, newFields) => {
-	const existingFieldNames = existingFields.map(({fieldName}) => fieldName);
+	const existingFieldNames = existingFields.map(({ fieldName }) => fieldName);
 	const nonExistantLockedFields = newFields.filter(
 		field => !existingFieldNames.includes(field.fieldName),
 	);
 	return [].concat(existingFields, nonExistantLockedFields);
 };
 
-const getLockedFields = (
+const mergeLockedFields = (
 	nodeType,
 	clientId,
 	lockFields,
@@ -75,4 +75,4 @@ const validateFields = (clientId, writeProperties, existingLockedFields) => {
 	}
 };
 
-module.exports = { getLockedFields, validateFields };
+module.exports = { mergeLockedFields, validateFields };

@@ -12,7 +12,7 @@ const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const executor = require('./_post-patch-executor');
 const {
-	getLockedFields,
+	mergeLockedFields,
 	validateFields,
 } = require('../../../lib/locked-fields');
 
@@ -164,7 +164,7 @@ const update = async input => {
 		}
 
 		const lockedFields = lockFields
-			? getLockedFields(
+			? mergeLockedFields(
 					nodeType,
 					clientId,
 					lockFields,

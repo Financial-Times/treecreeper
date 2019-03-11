@@ -3,7 +3,7 @@ const inputHelpers = require('../../../lib/rest-input-helpers');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
-const { getLockedFields } = require('../../../lib/locked-fields');
+const { mergeLockedFields } = require('../../../lib/locked-fields');
 
 const create = async input => {
 	inputHelpers.validateParams(input);
@@ -21,7 +21,7 @@ const create = async input => {
 
 	try {
 		const lockedFields = lockFields
-			? getLockedFields(nodeType, clientId, lockFields)
+			? mergeLockedFields(nodeType, clientId, lockFields)
 			: null;
 
 		const properties = inputHelpers.getWriteProperties(

@@ -2,7 +2,7 @@ const schema = require('@financial-times/biz-ops-schema');
 const { LockedFieldsError } = require('../../server/lib/error-handling');
 
 const {
-	getLockedFields,
+	mergeLockedFields,
 	validateFields,
 } = require('../../server/lib/locked-fields');
 
@@ -17,7 +17,7 @@ const existingLockedFields = [
 	},
 ];
 
-describe('getLockedFields', () => {
+describe('mergeLockedFields', () => {
 	const nodeType = 'Person';
 	const lockFields = 'code,name';
 	const clientId = 'biz-ops-api';
@@ -31,7 +31,7 @@ describe('getLockedFields', () => {
 
 	it('throws an error when clientId is not set', () => {
 		expect(() =>
-			getLockedFields(nodeType, undefined, lockFields, undefined),
+			mergeLockedFields(nodeType, undefined, lockFields, undefined),
 		).toThrow('clientId needs to be set in order to lock fields');
 	});
 
@@ -39,14 +39,14 @@ describe('getLockedFields', () => {
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
 		expect(
-			getLockedFields(nodeType, clientId, lockFields, undefined),
+			mergeLockedFields(nodeType, clientId, lockFields, undefined),
 		).toEqual(response);
 	});
 
 	it('returns a JSON string containing an array of all fieldname properties and values', () => {
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
-		expect(getLockedFields(nodeType, clientId, 'all', undefined)).toEqual(
+		expect(mergeLockedFields(nodeType, clientId, 'all', undefined)).toEqual(
 			response,
 		);
 	});
@@ -55,14 +55,19 @@ describe('getLockedFields', () => {
 		const response =
 			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
 		expect(
-			getLockedFields(nodeType, clientId, 'teams', existingLockedFields),
+			mergeLockedFields(
+				nodeType,
+				clientId,
+				'teams',
+				existingLockedFields,
+			),
 		).toEqual(response);
 	});
 
 	it('does not duplicate locked field values', () => {
 		const response = JSON.stringify(existingLockedFields);
 		expect(
-			getLockedFields(
+			mergeLockedFields(
 				nodeType,
 				clientId,
 				lockFields,
