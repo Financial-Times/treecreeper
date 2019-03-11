@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { validateParams } = require('../../../lib/rest-input-helpers');
+const { validateParams } = require('../../../lib/validation');
 const { preflightChecks } = require('../../../lib/error-handling');
 const { executeQuery } = require('../../../data/db-connection');
 const { logNodeDeletion } = require('../../../lib/log-to-kinesis');
@@ -29,7 +29,7 @@ module.exports = async input => {
 	`;
 
 	await executeQuery(query, { code });
-	logNodeDeletion(existingRecord.records[0].get('node'));
+	logNodeDeletion(existingRecord.getNode());
 
 	return { status: 204 };
 };

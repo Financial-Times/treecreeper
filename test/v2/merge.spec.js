@@ -15,19 +15,6 @@ describe('merge', () => {
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
 
-	const requestId = `${namespace}-request`;
-	const clientId = `${namespace}-client`;
-	const clientUserId = `${namespace}-user`;
-
-	const event = (action, code, type) => ({
-		action,
-		type,
-		code,
-		requestId,
-		clientId,
-		clientUserId,
-	});
-
 	setupMocks(sandbox, { namespace });
 
 	describe('error handling', () => {
@@ -156,15 +143,7 @@ describe('merge', () => {
 				verifyNotExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
 			]);
-
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			// TODO try to avoid this event when no properties or relationships have actually changed
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
-			);
+			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('move outgoing relationships', async () => {
@@ -206,15 +185,11 @@ describe('merge', () => {
 					},
 				],
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', personCode, 'Person'),
+
+			sandbox.expectEvents(
+				['DELETE', teamCode1, 'Team'],
+				['UPDATE', teamCode2, 'Team', ['techLeads']],
+				['UPDATE', personCode, 'Person', ['techLeadFor']],
 			);
 		});
 
@@ -258,15 +233,10 @@ describe('merge', () => {
 				],
 			);
 
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(3);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', groupCode, 'Group'),
+			sandbox.expectEvents(
+				['DELETE', teamCode1, 'Team'],
+				['UPDATE', teamCode2, 'Team', ['group', 'parentGroup']],
+				['UPDATE', groupCode, 'Group', ['topLevelTeams', 'allTeams']],
 			);
 		});
 
@@ -312,13 +282,7 @@ describe('merge', () => {
 					},
 				],
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
-			);
+			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('discard any newly reflexive relationships', async () => {
@@ -348,12 +312,9 @@ describe('merge', () => {
 					code: teamCode2,
 				}),
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
+			sandbox.expectEvents(
+				['DELETE', teamCode1, 'Team'],
+				['UPDATE', teamCode2, 'Team', ['parentTeam']],
 			);
 		});
 
@@ -381,13 +342,7 @@ describe('merge', () => {
 				}),
 			);
 
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
-			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
-			);
+			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('add new properties to destination node', async () => {
@@ -414,12 +369,70 @@ describe('merge', () => {
 				}),
 			);
 
-			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(2);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('DELETE', teamCode1, 'Team'),
+			sandbox.expectEvents(
+				['DELETE', teamCode1, 'Team'],
+				['UPDATE', teamCode2, 'Team', ['name']],
 			);
-			expect(sandbox.stubSendEvent).toHaveBeenCalledWith(
-				event('UPDATE', teamCode2, 'Team'),
+		});
+
+		it('does not overwrite __-to-one relationships', async () => {
+			const [
+				system1,
+				system2,
+				person1,
+				person2,
+			] = await sandbox.createNodes(
+				['System', `${namespace}-system-1`],
+				['System', `${namespace}-system-2`],
+				['Person', `${namespace}-person-1`],
+				['Person', `${namespace}-person-2`],
+			);
+
+			await sandbox.connectNodes(
+				[system1, 'HAS_TECHNICAL_OWNER', person1],
+				[system2, 'HAS_TECHNICAL_OWNER', person2],
+			);
+
+			await sandbox
+				.request(app)
+				.post('/v2/merge')
+				.namespacedAuth()
+				.send({
+					type: 'System',
+					sourceCode: `${namespace}-system-1`,
+					destinationCode: `${namespace}-system-2`,
+				})
+				.expect(200);
+			await verifyNotExists('Team', teamCode1);
+
+			await testNode(
+				'System',
+				`${namespace}-system-2`,
+				sandbox.withMeta({
+					code: `${namespace}-system-2`,
+				}),
+				[
+					{
+						type: 'HAS_TECHNICAL_OWNER',
+						direction: 'outgoing',
+						props: sandbox.withMeta({}),
+					},
+					{
+						type: 'Person',
+						props: sandbox.withMeta({
+							code: `${namespace}-person-2`,
+						}),
+					},
+				],
+			);
+			sandbox.expectEvents(
+				['DELETE', `${namespace}-system-1`, 'System'],
+				[
+					'UPDATE',
+					`${namespace}-person-1`,
+					'Person',
+					['technicalOwnerFor'],
+				],
 			);
 		});
 	});

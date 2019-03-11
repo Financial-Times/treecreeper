@@ -1,49 +1,48 @@
 const { stripIndents } = require('common-tags');
 const { executeQuery } = require('./db-connection');
 
-const RETURN_NODE_WITH_RELS = stripIndents`
-	WITH node
-	OPTIONAL MATCH (node)-[relationship]-(related)
-	RETURN node, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest AS relatedRequestId`;
+const nodeWithRels = ({
+	nodeName = 'node',
+	includeWithStatement = true,
+} = {}) => stripIndents`
+	${includeWithStatement ? `WITH ${nodeName}` : ''}
+	OPTIONAL MATCH (${nodeName})-[relationship]-(related)
+	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest AS relatedRequestId`;
 
-const relFragment = (type, direction, relName) => {
+const relFragment = (type, direction) => {
 	const left = direction === 'incoming' ? '<' : '';
 	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[${relName || 'relationship'}:${type}]-${right}`;
+	return `${left}-[relationship:${type}]-${right}`;
 };
 
-const metaPropertiesForUpdate = type => stripIndents`
-	${type}._updatedByRequest = $requestId,
-	${type}._updatedByClient = $clientId,
-	${type}._updatedByUser = $clientUserId,
-	${type}._updatedTimestamp = datetime($timestamp)
+const metaPropertiesForUpdate = recordName => stripIndents`
+	${recordName}._updatedByRequest = $requestId,
+	${recordName}._updatedByClient = $clientId,
+	${recordName}._updatedByUser = $clientUserId,
+	${recordName}._updatedTimestamp = datetime($timestamp)
 `;
 
-const metaPropertiesForCreate = type => stripIndents`
-	${type}._createdByRequest = $requestId,
-	${type}._createdByClient = $clientId,
-	${type}._createdByUser = $clientUserId,
-	${type}._createdTimestamp = datetime($timestamp),
-	${metaPropertiesForUpdate(type)}
+const metaPropertiesForCreate = recordName => stripIndents`
+	${recordName}._createdByRequest = $requestId,
+	${recordName}._createdByClient = $clientId,
+	${recordName}._createdByUser = $clientUserId,
+	${recordName}._createdTimestamp = datetime($timestamp),
+	${metaPropertiesForUpdate(recordName)}
 `;
 
 // Must use OPTIONAL MATCH because 'cypher'
-const deleteRelationships = ({ relationship, direction, type }, codesKey) => `
-OPTIONAL MATCH (node)${relFragment(
+const deleteRelationships = (
+	{ relationship, direction, type },
+	codesKey,
+	nodeName = 'node',
+) => `
+OPTIONAL MATCH (${nodeName})${relFragment(
 	relationship,
 	direction,
-	'deletableRelationship',
 )}(related:${type})
 	WHERE related.code IN $${codesKey}
-	DELETE deletableRelationship
+	DELETE relationship
 `;
-
-const getNodeWithRelationships = (nodeType, code) =>
-	executeQuery(
-		`MATCH (node:${nodeType} {code: $code})
-			${RETURN_NODE_WITH_RELS}`,
-		{ code },
-	);
 
 // Uses OPTIONAL MATCH when trying to match a node as it returns [null]
 // rather than [] if the node doesn't exist
@@ -66,14 +65,22 @@ MERGE (node)${relFragment(relationship, direction)}(related)
 	ON CREATE SET ${metaPropertiesForCreate('relationship')}
 `;
 
+const getNodeWithRelationships = (nodeType, code) => {
+	return executeQuery(
+		`MATCH (node:${nodeType} {code: $code})
+			${nodeWithRels()}`,
+		{ code },
+		true,
+	);
+};
+
 module.exports = {
 	optionalMatchNode,
 	mergeNode,
 	mergeRelationship,
 	deleteRelationships,
-	relFragment,
 	metaPropertiesForCreate,
 	metaPropertiesForUpdate,
-	RETURN_NODE_WITH_RELS,
+	nodeWithRels,
 	getNodeWithRelationships,
 };

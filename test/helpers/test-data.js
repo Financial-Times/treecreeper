@@ -1,6 +1,6 @@
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
 const { executeQuery } = require('../../server/data/db-connection');
-const { convertNeo4jTypes } = require('../../server/data/construct-output');
+const { convertNeo4jTypes } = require('../../server/data/data-conversion');
 
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,
@@ -135,6 +135,7 @@ const testIsolatedNode = async (type, code, props) => {
 	const { records: rels } = await executeQuery(
 		`MATCH (node:${type} { code: "${code}" })-[r]-(n2) RETURN r`,
 	);
+	console.log(rels[0]);
 
 	expect(rels.length).toBe(0);
 };

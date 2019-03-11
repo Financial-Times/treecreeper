@@ -1,5 +1,6 @@
 const neo4j = require('neo4j-driver').v1;
 const metrics = require('next-metrics');
+const bizOpsWrapper = require('./biz-ops-wrapper');
 const { logger } = require('../lib/request-context');
 const { TIMEOUT } = require('../constants');
 
@@ -61,7 +62,10 @@ driver.session = (...sessionArgs) => {
 
 module.exports = {
 	driver,
-	executeQuery: async (...args) => driver.session().run(...args),
+	executeQuery: async (query, parameters, useBizOpsWrapper) => {
+		const result = await driver.session().run(query, parameters);
+		return useBizOpsWrapper ? bizOpsWrapper(result) : result;
+	},
 	executeQueryWithSharedSession: (session = driver.session()) => {
 		const executeQuery = async (...args) => {
 			const result = await session.run(...args);

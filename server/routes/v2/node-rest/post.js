@@ -1,54 +1,49 @@
 const { stripIndents } = require('common-tags');
-const inputHelpers = require('../../../lib/rest-input-helpers');
+const recordAnalysis = require('../../../data/record-analysis');
+const { validateParams, validatePayload } = require('../../../lib/validation');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
+const { constructNeo4jProperties } = require('../../../data/data-conversion');
 
-const create = async input => {
-	inputHelpers.validateParams(input);
-	inputHelpers.validatePayload(input);
-
-	const {
-		clientId,
-		requestId,
+const createNewNode = (nodeType, code, upsert, body, method) => {
+	return executor({
 		nodeType,
 		code,
-		clientUserId,
+		method,
+		upsert,
+		isCreate: true,
+
+		propertiesToCreate: constructNeo4jProperties({
+			nodeType,
+			newContent: body,
+			code,
+		}),
+		relationshipsToCreate: recordAnalysis.diffRelationships({
+			nodeType,
+			newContent: body,
+		}).addedRelationships,
+		queryParts: [
+			stripIndents`CREATE (node:${nodeType} $properties)
+				SET ${metaPropertiesForCreate('node')}
+			WITH node`,
+		],
+	});
+};
+
+const create = async input => {
+	validateParams(input);
+	validatePayload(input);
+
+	const {
+		nodeType,
+		code,
 		query: { upsert },
 		body,
 	} = input;
 
 	try {
-		const properties = inputHelpers.getWriteProperties(
-			nodeType,
-			body,
-			code,
-		);
-
-		const queryParts = [
-			stripIndents`CREATE (node:${nodeType} $properties)
-				SET ${metaPropertiesForCreate('node')}
-			WITH node`,
-		];
-
-		return await executor({
-			parameters: {
-				clientId,
-				timestamp: new Date().toISOString(),
-				requestId,
-				code,
-				clientUserId,
-				properties,
-			},
-			queryParts,
-			method: 'POST',
-			upsert,
-			nodeType,
-			writeRelationships: inputHelpers.getWriteRelationships(
-				nodeType,
-				body,
-			),
-		});
+		return await createNewNode(nodeType, code, upsert, body, 'POST');
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
 		dbErrorHandlers.nodeUpsert(err);
@@ -57,3 +52,5 @@ const create = async input => {
 };
 
 module.exports = create;
+
+module.exports.createNewNode = createNewNode;

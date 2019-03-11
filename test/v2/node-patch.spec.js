@@ -53,7 +53,7 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('Not create property when passed empty string', async () => {
@@ -109,7 +109,12 @@ describe('v2 - node PATCH', () => {
 					lastServiceReviewDate: isoDateString,
 				}),
 			);
-			sandbox.expectEvents(['UPDATE', systemCode, 'System']);
+			sandbox.expectEvents([
+				'UPDATE',
+				systemCode,
+				'System',
+				['lastServiceReviewDate'],
+			]);
 		});
 
 		it('Overwrite existing Date property', async () => {
@@ -143,7 +148,12 @@ describe('v2 - node PATCH', () => {
 					lastServiceReviewDate: isoDateString,
 				}),
 			);
-			sandbox.expectEvents(['UPDATE', systemCode, 'System']);
+			sandbox.expectEvents([
+				'UPDATE',
+				systemCode,
+				'System',
+				['lastServiceReviewDate'],
+			]);
 		});
 		it("Not overwrite when 'same' Date sent", async () => {
 			const isoDateString = '2019-01-09';
@@ -203,7 +213,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['description']]);
 	});
 
 	it('Create when patching non-existent node', async () => {
@@ -225,7 +235,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['name', 'code']]);
 	});
 
 	it('error when conflicting code values', async () => {
@@ -248,7 +258,7 @@ describe('v2 - node PATCH', () => {
 			code: teamCode,
 		}).expect(200);
 
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('error when unrecognised attribute', async () => {
@@ -286,7 +296,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
@@ -401,8 +411,13 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', `${personCode}-1`, 'Person'],
+								['UPDATE', teamCode, 'Team', ['techLeads']],
+								[
+									'UPDATE',
+									`${personCode}-1`,
+									'Person',
+									['techLeadFor'],
+								],
 							);
 						});
 
@@ -525,9 +540,19 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', `${personCode}-1`, 'Person'],
-								['UPDATE', `${personCode}-3`, 'Person'],
+								['UPDATE', teamCode, 'Team', ['techLeads']],
+								[
+									'UPDATE',
+									`${personCode}-1`,
+									'Person',
+									['techLeadFor'],
+								],
+								[
+									'UPDATE',
+									`${personCode}-3`,
+									'Person',
+									['techLeadFor'],
+								],
 							);
 						});
 
@@ -566,9 +591,24 @@ describe('v2 - node PATCH', () => {
 								}),
 							);
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', personCode, 'Person'],
-								['UPDATE', groupCode, 'Group'],
+								[
+									'UPDATE',
+									teamCode,
+									'Team',
+									['techLeads', 'parentGroup', 'group'],
+								],
+								[
+									'UPDATE',
+									personCode,
+									'Person',
+									['techLeadFor'],
+								],
+								[
+									'UPDATE',
+									groupCode,
+									'Group',
+									['allTeams', 'topLevelTeams'],
+								],
 							);
 						});
 						it('leaves relationships in the opposite direction unaffected', async () => {
@@ -617,8 +657,18 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 							sandbox.expectEvents(
-								['UPDATE', `${teamCode}-3`, 'Team'],
-								['UPDATE', `${teamCode}-2`, 'Team'],
+								[
+									'UPDATE',
+									`${teamCode}-3`,
+									'Team',
+									['parentTeam'],
+								],
+								[
+									'UPDATE',
+									`${teamCode}-2`,
+									'Team',
+									['subTeams'],
+								],
 							);
 						});
 						it('can add and remove relationships of the same type at the same time', async () => {
@@ -667,9 +717,19 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', `${personCode}-1`, 'Person'],
-								['UPDATE', `${personCode}-2`, 'Person'],
+								['UPDATE', teamCode, 'Team', ['techLeads']],
+								[
+									'UPDATE',
+									`${personCode}-1`,
+									'Person',
+									['techLeadFor'],
+								],
+								[
+									'UPDATE',
+									`${personCode}-2`,
+									'Person',
+									['techLeadFor'],
+								],
 							);
 						});
 						it('errors if deleting and adding the same relationship to the same record', async () => {
@@ -698,6 +758,7 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectNoEvents();
 						});
 					});
+
 					describe('bulk relationship delete', () => {
 						it('can delete empty relationship set', async () => {
 							await sandbox.createNode('Team', teamCode);
@@ -755,9 +816,24 @@ describe('v2 - node PATCH', () => {
 							);
 
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', personCode, 'Person'],
-								['UPDATE', groupCode, 'Group'],
+								[
+									'UPDATE',
+									teamCode,
+									'Team',
+									['techLeads', 'parentGroup', 'group'],
+								],
+								[
+									'UPDATE',
+									personCode,
+									'Person',
+									['techLeadFor'],
+								],
+								[
+									'UPDATE',
+									groupCode,
+									'Group',
+									['allTeams', 'topLevelTeams'],
+								],
 							);
 						});
 
@@ -838,8 +914,18 @@ describe('v2 - node PATCH', () => {
 							);
 
 							sandbox.expectEvents(
-								['UPDATE', `${teamCode}-2`, 'Team'],
-								['UPDATE', `${teamCode}-3`, 'Team'],
+								[
+									'UPDATE',
+									`${teamCode}-2`,
+									'Team',
+									['subTeams'],
+								],
+								[
+									'UPDATE',
+									`${teamCode}-3`,
+									'Team',
+									['parentTeam'],
+								],
 							);
 						});
 					});
@@ -906,8 +992,18 @@ describe('v2 - node PATCH', () => {
 						);
 
 						sandbox.expectEvents(
-							['UPDATE', teamCode, 'Team'],
-							['UPDATE', groupCode, 'Group'],
+							[
+								'UPDATE',
+								teamCode,
+								'Team',
+								['parentGroup', 'group'],
+							],
+							[
+								'UPDATE',
+								groupCode,
+								'Group',
+								['allTeams', 'topLevelTeams'],
+							],
 						);
 					});
 					it('accept an array of length one', async () => {
@@ -950,8 +1046,18 @@ describe('v2 - node PATCH', () => {
 						);
 
 						sandbox.expectEvents(
-							['UPDATE', teamCode, 'Team'],
-							['UPDATE', groupCode, 'Group'],
+							[
+								'UPDATE',
+								teamCode,
+								'Team',
+								['parentGroup', 'group'],
+							],
+							[
+								'UPDATE',
+								groupCode,
+								'Group',
+								['allTeams', 'topLevelTeams'],
+							],
 						);
 					});
 					it('error if trying to write multiple relationships', async () => {
@@ -1024,9 +1130,24 @@ describe('v2 - node PATCH', () => {
 						);
 
 						sandbox.expectEvents(
-							['UPDATE', teamCode, 'Team'],
-							['UPDATE', `${groupCode}-1`, 'Group'],
-							['UPDATE', `${groupCode}-2`, 'Group'],
+							[
+								'UPDATE',
+								teamCode,
+								'Team',
+								['parentGroup', 'group'],
+							],
+							[
+								'UPDATE',
+								`${groupCode}-1`,
+								'Group',
+								['allTeams', 'topLevelTeams'],
+							],
+							[
+								'UPDATE',
+								`${groupCode}-2`,
+								'Group',
+								['allTeams', 'topLevelTeams'],
+							],
 						);
 					});
 
@@ -1074,8 +1195,8 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 					sandbox.expectEvents(
-						['UPDATE', teamCode, 'Team'],
-						['UPDATE', personCode, 'Person'],
+						['UPDATE', teamCode, 'Team', ['techLeads']],
+						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
@@ -1137,8 +1258,13 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 					sandbox.expectEvents(
-						['UPDATE', teamCode, 'Team'],
-						['UPDATE', `${personCode}-2`, 'Person'],
+						['UPDATE', teamCode, 'Team', ['techLeads']],
+						[
+							'UPDATE',
+							`${personCode}-2`,
+							'Person',
+							['techLeadFor'],
+						],
 					);
 				});
 			});
@@ -1182,8 +1308,8 @@ describe('v2 - node PATCH', () => {
 					);
 
 					sandbox.expectEvents(
-						['UPDATE', teamCode, 'Team'],
-						['UPDATE', personCode, 'Person'],
+						['UPDATE', teamCode, 'Team', ['techLeads']],
+						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
 				});
 
@@ -1233,9 +1359,19 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 					sandbox.expectEvents(
-						['UPDATE', teamCode, 'Team'],
-						['UPDATE', `${personCode}-1`, 'Person'],
-						['UPDATE', `${personCode}-2`, 'Person'],
+						['UPDATE', teamCode, 'Team', ['techLeads']],
+						[
+							'UPDATE',
+							`${personCode}-1`,
+							'Person',
+							['techLeadFor'],
+						],
+						[
+							'UPDATE',
+							`${personCode}-2`,
+							'Person',
+							['techLeadFor'],
+						],
 					);
 				});
 
@@ -1314,8 +1450,8 @@ describe('v2 - node PATCH', () => {
 					);
 
 					sandbox.expectEvents(
-						['UPDATE', `${teamCode}-2`, 'Team'],
-						['UPDATE', `${teamCode}-3`, 'Team'],
+						['UPDATE', `${teamCode}-2`, 'Team', ['subTeams']],
+						['UPDATE', `${teamCode}-3`, 'Team', ['parentTeam']],
 					);
 				});
 
@@ -1377,9 +1513,24 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 					sandbox.expectEvents(
-						['UPDATE', `${teamCode}-1`, 'Team'],
-						['UPDATE', `${teamCode}-2`, 'Team'],
-						['UPDATE', `${teamCode}-3`, 'Team'],
+						[
+							'UPDATE',
+							`${teamCode}-1`,
+							'Team',
+							['subTeams', 'parentTeam'],
+						],
+						[
+							'UPDATE',
+							`${teamCode}-2`,
+							'Team',
+							['subTeams', 'parentTeam'],
+						],
+						[
+							'UPDATE',
+							`${teamCode}-3`,
+							'Team',
+							['subTeams', 'parentTeam'],
+						],
 					);
 				});
 			});
@@ -1433,8 +1584,13 @@ describe('v2 - node PATCH', () => {
 							);
 
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['CREATE', personCode, 'Person'],
+								['UPDATE', teamCode, 'Team', ['techLeads']],
+								[
+									'CREATE',
+									personCode,
+									'Person',
+									['code', 'techLeadFor'],
+								],
 							);
 						});
 
@@ -1475,8 +1631,13 @@ describe('v2 - node PATCH', () => {
 							);
 
 							sandbox.expectEvents(
-								['UPDATE', teamCode, 'Team'],
-								['UPDATE', personCode, 'Person'],
+								['UPDATE', teamCode, 'Team', ['techLeads']],
+								[
+									'UPDATE',
+									personCode,
+									'Person',
+									['techLeadFor'],
+								],
 							);
 						});
 					});
@@ -1556,7 +1717,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+			sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
@@ -1576,8 +1737,8 @@ describe('v2 - node PATCH', () => {
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
 			sandbox.expectEvents(
-				['UPDATE', teamCode, 'Team'],
-				['UPDATE', `${personCode}-2`, 'Person'],
+				['UPDATE', teamCode, 'Team', ['techLeads']],
+				['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 			);
 		});
 
@@ -1592,7 +1753,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectEvents(['UPDATE', teamCode, 'Team']);
+			sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 		});
 
 		describe('patching with fewer relationships', () => {
@@ -1620,8 +1781,8 @@ describe('v2 - node PATCH', () => {
 					),
 				).toBe(true);
 				sandbox.expectEvents(
-					['UPDATE', teamCode, 'Team'],
-					['UPDATE', `${personCode}-2`, 'Person'],
+					['UPDATE', teamCode, 'Team', ['techLeads']],
+					['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 				);
 			});
 

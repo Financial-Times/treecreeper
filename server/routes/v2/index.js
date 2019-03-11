@@ -39,6 +39,7 @@ const controller = (endpointName, method, controllerImplementation) => (
 	controllerImplementation(
 		Object.assign(
 			{
+				// TODO completely remove use of res.locals now we have getContext()
 				requestId: res.locals.requestId,
 				// Defaults to null rather than undefined because it avoids a 'missing
 				// parameter' error and it unsets any previous values when updating.
