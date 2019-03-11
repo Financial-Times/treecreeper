@@ -201,7 +201,7 @@ properties:
     hasMany: true
     fieldset: team
   knowsAboutDataType:
-    type: DataType:
+    type: DataType
     relationship: KNOWS_ABOUT
     direction: outgoing
     label: Knows about data
