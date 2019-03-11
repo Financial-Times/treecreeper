@@ -302,6 +302,45 @@ describe('v2 - node POST', () => {
 				);
 		});
 
+		it('creates a node with 4 fields but ONLY locks the name field', async () => {
+			await sandbox
+				.request(app)
+				.post(`/v2/node/Team/${teamCode}?lockFields=name,code`)
+				.namespacedAuth()
+				.send({
+					name: 'name1',
+					email: 'tech@lt.com',
+					slack: 'slack channel',
+				})
+				.expect(
+					200,
+					sandbox.withCreateMeta({
+						code: 'v2-node-post-team',
+						name: 'name1',
+						email: 'tech@lt.com',
+						slack: 'slack channel',
+						_lockedFields:
+							'[{"fieldName":"name","clientId":"v2-node-post-client"},{"fieldName":"code","clientId":"v2-node-post-client"}]',
+					}),
+				);
+		});
+
+		it('creates a node and locks ALL fields', async () => {
+			await sandbox
+				.request(app)
+				.post(`/v2/node/Team/${teamCode}?lockFields=all`)
+				.namespacedAuth()
+				.send({ name: 'name1' })
+				.expect(
+					200,
+					sandbox.withCreateMeta({
+						code: 'v2-node-post-team',
+						name: 'name1',
+						_lockedFields: `[{"fieldName":"code","clientId":"v2-node-post-client"},{"fieldName":"name","clientId":"v2-node-post-client"},{"fieldName":"description","clientId":"v2-node-post-client"},{"fieldName":"email","clientId":"v2-node-post-client"},{"fieldName":"slack","clientId":"v2-node-post-client"},{"fieldName":"phone","clientId":"v2-node-post-client"},{"fieldName":"isActive","clientId":"v2-node-post-client"},{"fieldName":"isThirdParty","clientId":"v2-node-post-client"},{"fieldName":"supportRota","clientId":"v2-node-post-client"},{"fieldName":"contactPref","clientId":"v2-node-post-client"},{"fieldName":"techLeads","clientId":"v2-node-post-client"},{"fieldName":"productOwners","clientId":"v2-node-post-client"},{"fieldName":"parentGroup","clientId":"v2-node-post-client"},{"fieldName":"group","clientId":"v2-node-post-client"},{"fieldName":"subTeams","clientId":"v2-node-post-client"},{"fieldName":"parentTeam","clientId":"v2-node-post-client"},{"fieldName":"delivers","clientId":"v2-node-post-client"},{"fieldName":"supports","clientId":"v2-node-post-client"},{"fieldName":"teamMembers","clientId":"v2-node-post-client"},{"fieldName":"_createdByClient","clientId":"v2-node-post-client"},{"fieldName":"_createdByUser","clientId":"v2-node-post-client"},{"fieldName":"_createdTimestamp","clientId":"v2-node-post-client"},{"fieldName":"_updatedByClient","clientId":"v2-node-post-client"},{"fieldName":"_updatedByUser","clientId":"v2-node-post-client"},{"fieldName":"_updatedTimestamp","clientId":"v2-node-post-client"},{"fieldName":"_lockedFields","clientId":"v2-node-post-client"}]`,
+					}),
+				);
+		});
+
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 

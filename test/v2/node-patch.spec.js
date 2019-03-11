@@ -1671,6 +1671,26 @@ describe('v2 - node PATCH', () => {
 			).expect(400);
 		});
 
+		it('updates node by updating name and locking ALL fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=all`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: `[{"fieldName":"code","clientId":"v2-node-patch-client"},{"fieldName":"name","clientId":"v2-node-patch-client"},{"fieldName":"description","clientId":"v2-node-patch-client"},{"fieldName":"email","clientId":"v2-node-patch-client"},{"fieldName":"slack","clientId":"v2-node-patch-client"},{"fieldName":"phone","clientId":"v2-node-patch-client"},{"fieldName":"isActive","clientId":"v2-node-patch-client"},{"fieldName":"isThirdParty","clientId":"v2-node-patch-client"},{"fieldName":"supportRota","clientId":"v2-node-patch-client"},{"fieldName":"contactPref","clientId":"v2-node-patch-client"},{"fieldName":"techLeads","clientId":"v2-node-patch-client"},{"fieldName":"productOwners","clientId":"v2-node-patch-client"},{"fieldName":"parentGroup","clientId":"v2-node-patch-client"},{"fieldName":"group","clientId":"v2-node-patch-client"},{"fieldName":"subTeams","clientId":"v2-node-patch-client"},{"fieldName":"parentTeam","clientId":"v2-node-patch-client"},{"fieldName":"delivers","clientId":"v2-node-patch-client"},{"fieldName":"supports","clientId":"v2-node-patch-client"},{"fieldName":"teamMembers","clientId":"v2-node-patch-client"},{"fieldName":"_createdByClient","clientId":"v2-node-patch-client"},{"fieldName":"_createdByUser","clientId":"v2-node-patch-client"},{"fieldName":"_createdTimestamp","clientId":"v2-node-patch-client"},{"fieldName":"_updatedByClient","clientId":"v2-node-patch-client"},{"fieldName":"_updatedByUser","clientId":"v2-node-patch-client"},{"fieldName":"_updatedTimestamp","clientId":"v2-node-patch-client"},{"fieldName":"_lockedFields","clientId":"v2-node-patch-client"}]`,
+				}),
+			);
+		});
+
 		it('updates node by updating name and adding it as a locked field', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
@@ -1715,7 +1735,7 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('does not update node with locked field when it is has already locked it (no duplicates)', async () => {
+		it('does NOT update node with locked field when it is has already locked it (no duplicates)', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
@@ -1761,7 +1781,7 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('does not lock existing fields when those fields are locked by another clientId', async () => {
+		it('does NOT lock existing fields when those fields are locked by another clientId', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
@@ -1780,6 +1800,57 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 					_lockedFields:
 						'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+				}),
+			);
+		});
+
+		it('does NOT lock fields when just updating locked and unlocked fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				email: 'email@example.com',
+				slack: 'slack channel',
+				_lockedFields:
+					'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+			});
+			await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+				name: 'new name',
+				email: 'tech@lt.com',
+				slack: 'new slack channel',
+			}).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				}),
+			);
+		});
+
+		it('only locks fields that are given in the query but updates all fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				email: 'email@example.com',
+				slack: 'slack channel',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+					_lockedFields:
+						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
 				}),
 			);
 		});
