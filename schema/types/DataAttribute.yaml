@@ -20,13 +20,15 @@ properties:
       relationship: UPDATES
       direction: incoming
       hasMany: true
-
     isInstanceOf:
       type: DataType
       relationship: IS_INSTANCE_OF
       direction: outgoing
-
     contains:
       type: DataAttribute
       relationship: CONTAINS
       direction: outgoing
+    isPartOf:
+      type: DataAttribute
+      relationship: CONTAINS
+      direction: incoming
