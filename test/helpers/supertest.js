@@ -42,8 +42,6 @@ const getNamespacedSupertest = (namespace, includeClientId = true) => (
 					.set('client-user-id', `${namespace}-user`)
 					.set('x-request-id', `${namespace}-request`);
 
-				/* This is a bad hack to prevent client-id being set, in order to test
-				that an error is thrown when trying to lock fields */
 				if (includeClientId) {
 					headers.set('client-id', `${namespace}-client`);
 				}
