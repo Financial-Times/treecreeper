@@ -8,7 +8,7 @@ const getAllPropertyNames = nodeType => {
 };
 
 const joinExistingAndNewLockedFields = (existingFields, newFields) => {
-	const existingFieldNames = existingFields.map(field => field.fieldName);
+	const existingFieldNames = existingFields.map(({fieldName}) => fieldName);
 	const nonExistantLockedFields = newFields.filter(
 		field => !existingFieldNames.includes(field.fieldName),
 	);
