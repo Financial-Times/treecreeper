@@ -32,7 +32,9 @@ describe('mergeLockedFields', () => {
 	it('throws an error when clientId is not set', () => {
 		expect(() =>
 			mergeLockedFields(nodeType, undefined, lockFields, undefined),
-		).toThrow('clientId needs to be set in order to lock fields');
+		).toThrow(
+			'clientId needs to be set to a valid system code in order to lock fields',
+		);
 	});
 
 	it('returns a JSON string containing an array of objects with clientId and selected fieldname properties and values', () => {

@@ -1795,7 +1795,7 @@ describe('v2 - node PATCH', () => {
 					.send({ name: 'name1' })
 					.expect(
 						400,
-						/clientId needs to be set in order to lock fields/,
+						/clientId needs to be set to a valid system code in order to lock fields/,
 					);
 			});
 		});
