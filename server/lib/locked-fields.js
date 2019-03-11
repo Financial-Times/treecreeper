@@ -1,5 +1,16 @@
 const schema = require('@financial-times/biz-ops-schema');
-const { LockedFieldsError } = require('./error-handling');
+
+class LockedFieldsError extends Error {
+	constructor(message, fields, status) {
+		super(message);
+		this.lockedFields = fields;
+		this.status = status;
+	}
+
+	toString() {
+		return `${this.constructor.name}: ${this.message}`;
+	}
+}
 
 const getAllPropertyNames = nodeType => {
 	return Object.entries(schema.getType(nodeType).properties).map(
@@ -79,4 +90,4 @@ const validateLockedFields = (
 	}
 };
 
-module.exports = { mergeLockedFields, validateLockedFields };
+module.exports = { mergeLockedFields, validateLockedFields, LockedFieldsError };

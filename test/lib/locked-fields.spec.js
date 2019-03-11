@@ -1,9 +1,9 @@
 const schema = require('@financial-times/biz-ops-schema');
-const { LockedFieldsError } = require('../../server/lib/error-handling');
 
 const {
 	mergeLockedFields,
 	validateLockedFields,
+	LockedFieldsError,
 } = require('../../server/lib/locked-fields');
 
 const existingLockedFields = [
