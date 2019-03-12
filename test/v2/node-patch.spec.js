@@ -1844,17 +1844,17 @@ describe('v2 - node PATCH', () => {
 
 	describe('locked fields', () => {
 		const lockedFieldName = '{"name":"v2-node-patch-client"}';
-		const lockedFieldCode = '{"code":"v2-node-patch-client"}';
+		const lockedFieldEmail = '{"email":"v2-node-patch-client"}';
 
 		it('throws an error when trying to update a node that is locked by another clientId', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
-				_lockedFields: lockedFieldName,
+				_lockedFields: '{"name":"admin"}',
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=name`,
 				{
-					code: 'new name',
+					name: 'new name',
 				},
 			).expect(400);
 		});
@@ -1924,10 +1924,10 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: lockedFieldCode,
+				_lockedFields: lockedFieldEmail,
 			});
 			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=code`,
+				`/v2/node/Team/${teamCode}?lockFields=email`,
 				{
 					name: 'new name',
 				},
@@ -1936,7 +1936,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: lockedFieldCode,
+					_lockedFields: lockedFieldEmail,
 				}),
 			);
 		});
@@ -1945,7 +1945,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: lockedFieldCode,
+				_lockedFields: lockedFieldEmail,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=name`,
@@ -1958,7 +1958,7 @@ describe('v2 - node PATCH', () => {
 					code: teamCode,
 					name: 'new name',
 					_lockedFields:
-						'{"code":"v2-node-patch-client","name":"v2-node-patch-client"}',
+						'{"email":"v2-node-patch-client","name":"v2-node-patch-client"}',
 				}),
 			);
 		});
@@ -1967,10 +1967,10 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: lockedFieldCode,
+				_lockedFields: lockedFieldEmail,
 			});
 			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=code`,
+				`/v2/node/Team/${teamCode}?lockFields=email`,
 				{
 					name: 'new name',
 				},
@@ -1979,7 +1979,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: lockedFieldCode,
+					_lockedFields: lockedFieldEmail,
 				}),
 			);
 		});
