@@ -6,21 +6,15 @@ const {
 	LockedFieldsError,
 } = require('../../server/lib/locked-fields');
 
-const existingLockedFields = [
-	{
-		fieldName: 'code',
-		clientId: 'biz-ops-api',
-	},
-	{
-		fieldName: 'name',
-		clientId: 'biz-ops-api',
-	},
-];
+const existingLockedFields = {
+	code: 'biz-ops-admin',
+	name: 'biz-ops-admin',
+};
 
 describe('mergeLockedFields', () => {
 	const nodeType = 'Person';
 	const lockFields = 'code,name';
-	const clientId = 'biz-ops-api';
+	const clientId = 'biz-ops-admin';
 
 	beforeEach(() => {
 		jest.spyOn(schema, 'getType');
@@ -37,9 +31,8 @@ describe('mergeLockedFields', () => {
 		);
 	});
 
-	it('returns a JSON string containing an array of objects with clientId and selected fieldname properties and values', () => {
-		const response =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"}]';
+	it('returns a JSON string containing fieldname and clientId objects', () => {
+		const response = '{"code":"biz-ops-admin","name":"biz-ops-admin"}';
 		expect(
 			mergeLockedFields(nodeType, clientId, lockFields, undefined),
 		).toEqual(response);
@@ -47,7 +40,7 @@ describe('mergeLockedFields', () => {
 
 	it('returns a JSON string containing an array of all fieldname properties and values', () => {
 		const response =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
+			'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
 		expect(mergeLockedFields(nodeType, clientId, 'all', undefined)).toEqual(
 			response,
 		);
@@ -55,7 +48,7 @@ describe('mergeLockedFields', () => {
 
 	it('adds new locked fields to the already existing locked fields', () => {
 		const response =
-			'[{"fieldName":"code","clientId":"biz-ops-api"},{"fieldName":"name","clientId":"biz-ops-api"},{"fieldName":"teams","clientId":"biz-ops-api"}]';
+			'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
 		expect(
 			mergeLockedFields(
 				nodeType,
@@ -81,24 +74,24 @@ describe('mergeLockedFields', () => {
 
 describe('validateLockedFields', () => {
 	let clientId = 'clientId';
-	let writeProperties = { code: 'code', name: 'name' };
+	let propertiesToModify = { code: 'code', name: 'name' };
 
 	it('throws an error when field is locked by another client', () => {
 		expect(() =>
 			validateLockedFields(
 				clientId,
-				writeProperties,
+				propertiesToModify,
 				existingLockedFields,
 			),
 		).toThrow(LockedFieldsError);
 	});
 
 	it('does NOT throw an error when field is NOT locked', () => {
-		writeProperties = { isActive: true };
+		propertiesToModify = { isActive: true, email: 'email@example.com' };
 		expect(() =>
 			validateLockedFields(
 				clientId,
-				writeProperties,
+				propertiesToModify,
 				existingLockedFields,
 			),
 		).not.toThrow(LockedFieldsError);
@@ -106,10 +99,11 @@ describe('validateLockedFields', () => {
 
 	it('does NOT throw an error when field is locked by current client', () => {
 		clientId = 'biz-ops-admin';
+		propertiesToModify = { name: 'new name' };
 		expect(() =>
 			validateLockedFields(
 				clientId,
-				writeProperties,
+				propertiesToModify,
 				existingLockedFields,
 			),
 		).not.toThrow(LockedFieldsError);

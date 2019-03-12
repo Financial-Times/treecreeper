@@ -56,6 +56,7 @@
 		"jsforce": "^1.9.1",
 		"lodash": "^4.17.10",
 		"lodash.groupby": "^4.6.0",
+		"lodash.isempty": "^4.4.0",
 		"lodash.uniqby": "^4.7.0",
 		"neo4j-driver": "^1.6.1",
 		"neo4j-graphql-js": "^2.3.1",

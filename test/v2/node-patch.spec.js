@@ -1843,16 +1843,18 @@ describe('v2 - node PATCH', () => {
 	});
 
 	describe('locked fields', () => {
+		const lockedFieldName = '{"name":"v2-node-patch-client"}';
+		const lockedFieldCode = '{"code":"v2-node-patch-client"}';
+
 		it('throws an error when trying to update a node that is locked by another clientId', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
-				_lockedFields:
-					'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+				_lockedFields: lockedFieldName,
 			});
 			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=code`,
+				`/v2/node/Team/${teamCode}?lockFields=name`,
 				{
-					code: 'new code',
+					code: 'new name',
 				},
 			).expect(400);
 		});
@@ -1872,7 +1874,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: `[{"fieldName":"code","clientId":"v2-node-patch-client"},{"fieldName":"name","clientId":"v2-node-patch-client"},{"fieldName":"description","clientId":"v2-node-patch-client"},{"fieldName":"email","clientId":"v2-node-patch-client"},{"fieldName":"slack","clientId":"v2-node-patch-client"},{"fieldName":"phone","clientId":"v2-node-patch-client"},{"fieldName":"isActive","clientId":"v2-node-patch-client"},{"fieldName":"isThirdParty","clientId":"v2-node-patch-client"},{"fieldName":"supportRota","clientId":"v2-node-patch-client"},{"fieldName":"contactPref","clientId":"v2-node-patch-client"},{"fieldName":"techLeads","clientId":"v2-node-patch-client"},{"fieldName":"productOwners","clientId":"v2-node-patch-client"},{"fieldName":"parentGroup","clientId":"v2-node-patch-client"},{"fieldName":"group","clientId":"v2-node-patch-client"},{"fieldName":"subTeams","clientId":"v2-node-patch-client"},{"fieldName":"parentTeam","clientId":"v2-node-patch-client"},{"fieldName":"delivers","clientId":"v2-node-patch-client"},{"fieldName":"supports","clientId":"v2-node-patch-client"},{"fieldName":"teamMembers","clientId":"v2-node-patch-client"},{"fieldName":"_createdByClient","clientId":"v2-node-patch-client"},{"fieldName":"_createdByUser","clientId":"v2-node-patch-client"},{"fieldName":"_createdTimestamp","clientId":"v2-node-patch-client"},{"fieldName":"_updatedByClient","clientId":"v2-node-patch-client"},{"fieldName":"_updatedByUser","clientId":"v2-node-patch-client"},{"fieldName":"_updatedTimestamp","clientId":"v2-node-patch-client"},{"fieldName":"_lockedFields","clientId":"v2-node-patch-client"}]`,
+					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
 				}),
 			);
 		});
@@ -1892,8 +1894,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields:
-						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});
@@ -1902,8 +1903,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields:
-					'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				_lockedFields: lockedFieldName,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=name`,
@@ -1915,8 +1915,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields:
-						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});
@@ -1925,8 +1924,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields:
-					'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+				_lockedFields: lockedFieldCode,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=code`,
@@ -1938,8 +1936,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields:
-						'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+					_lockedFields: lockedFieldCode,
 				}),
 			);
 		});
@@ -1948,8 +1945,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields:
-					'[{"fieldName":"code","clientId":"v2-node-patch-client"}]',
+				_lockedFields: lockedFieldCode,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=name`,
@@ -1962,7 +1958,7 @@ describe('v2 - node PATCH', () => {
 					code: teamCode,
 					name: 'new name',
 					_lockedFields:
-						'[{"fieldName":"code","clientId":"v2-node-patch-client"},{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+						'{"code":"v2-node-patch-client","name":"v2-node-patch-client"}',
 				}),
 			);
 		});
@@ -1971,8 +1967,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields:
-					'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+				_lockedFields: lockedFieldCode,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=code`,
@@ -1984,8 +1979,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields:
-						'[{"fieldName":"code","clientId":"v2-node-post-client"}]',
+					_lockedFields: lockedFieldCode,
 				}),
 			);
 		});
@@ -1996,8 +1990,7 @@ describe('v2 - node PATCH', () => {
 				name: 'name 1',
 				email: 'email@example.com',
 				slack: 'slack channel',
-				_lockedFields:
-					'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				_lockedFields: lockedFieldName,
 			});
 			await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
 				name: 'new name',
@@ -2035,8 +2028,7 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 					email: 'tech@lt.com',
 					slack: 'new slack channel',
-					_lockedFields:
-						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});
@@ -2056,8 +2048,7 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 					email: 'tech@lt.com',
 					slack: 'new slack channel',
-					_lockedFields:
-						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});

@@ -316,8 +316,7 @@ describe('v2 - node POST', () => {
 					sandbox.withCreateMeta({
 						code: 'v2-node-post-team',
 						name: 'name1',
-						_lockedFields:
-							'[{"fieldName":"name","clientId":"v2-node-post-client"}]',
+						_lockedFields: '{"name":"v2-node-post-client"}',
 					}),
 				);
 		});
@@ -340,7 +339,7 @@ describe('v2 - node POST', () => {
 						email: 'tech@lt.com',
 						slack: 'slack channel',
 						_lockedFields:
-							'[{"fieldName":"name","clientId":"v2-node-post-client"},{"fieldName":"code","clientId":"v2-node-post-client"}]',
+							'{"name":"v2-node-post-client","code":"v2-node-post-client"}',
 					}),
 				);
 		});
@@ -356,7 +355,7 @@ describe('v2 - node POST', () => {
 					sandbox.withCreateMeta({
 						code: 'v2-node-post-team',
 						name: 'name1',
-						_lockedFields: `[{"fieldName":"code","clientId":"v2-node-post-client"},{"fieldName":"name","clientId":"v2-node-post-client"},{"fieldName":"description","clientId":"v2-node-post-client"},{"fieldName":"email","clientId":"v2-node-post-client"},{"fieldName":"slack","clientId":"v2-node-post-client"},{"fieldName":"phone","clientId":"v2-node-post-client"},{"fieldName":"isActive","clientId":"v2-node-post-client"},{"fieldName":"isThirdParty","clientId":"v2-node-post-client"},{"fieldName":"supportRota","clientId":"v2-node-post-client"},{"fieldName":"contactPref","clientId":"v2-node-post-client"},{"fieldName":"techLeads","clientId":"v2-node-post-client"},{"fieldName":"productOwners","clientId":"v2-node-post-client"},{"fieldName":"parentGroup","clientId":"v2-node-post-client"},{"fieldName":"group","clientId":"v2-node-post-client"},{"fieldName":"subTeams","clientId":"v2-node-post-client"},{"fieldName":"parentTeam","clientId":"v2-node-post-client"},{"fieldName":"delivers","clientId":"v2-node-post-client"},{"fieldName":"supports","clientId":"v2-node-post-client"},{"fieldName":"teamMembers","clientId":"v2-node-post-client"},{"fieldName":"_createdByClient","clientId":"v2-node-post-client"},{"fieldName":"_createdByUser","clientId":"v2-node-post-client"},{"fieldName":"_createdTimestamp","clientId":"v2-node-post-client"},{"fieldName":"_updatedByClient","clientId":"v2-node-post-client"},{"fieldName":"_updatedByUser","clientId":"v2-node-post-client"},{"fieldName":"_updatedTimestamp","clientId":"v2-node-post-client"},{"fieldName":"_lockedFields","clientId":"v2-node-post-client"}]`,
+						_lockedFields: `{"code":"v2-node-post-client","name":"v2-node-post-client","description":"v2-node-post-client","email":"v2-node-post-client","slack":"v2-node-post-client","phone":"v2-node-post-client","isActive":"v2-node-post-client","isThirdParty":"v2-node-post-client","supportRota":"v2-node-post-client","contactPref":"v2-node-post-client","techLeads":"v2-node-post-client","productOwners":"v2-node-post-client","parentGroup":"v2-node-post-client","group":"v2-node-post-client","subTeams":"v2-node-post-client","parentTeam":"v2-node-post-client","delivers":"v2-node-post-client","supports":"v2-node-post-client","teamMembers":"v2-node-post-client","_createdByClient":"v2-node-post-client","_createdByUser":"v2-node-post-client","_createdTimestamp":"v2-node-post-client","_updatedByClient":"v2-node-post-client","_updatedByUser":"v2-node-post-client","_updatedTimestamp":"v2-node-post-client","_lockedFields":"v2-node-post-client"}`,
 					}),
 				);
 		});

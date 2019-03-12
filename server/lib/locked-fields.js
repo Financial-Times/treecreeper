@@ -1,4 +1,5 @@
 const schema = require('@financial-times/biz-ops-schema');
+const _isEmpty = require('lodash.isempty');
 
 class LockedFieldsError extends Error {
 	constructor(message, fields, status) {
@@ -19,11 +20,13 @@ const getAllPropertyNames = nodeType => {
 };
 
 const joinExistingAndNewLockedFields = (existingFields, newFields) => {
-	const existingFieldNames = existingFields.map(({ fieldName }) => fieldName);
-	const nonExistantLockedFields = newFields.filter(
-		field => !existingFieldNames.includes(field.fieldName),
-	);
-	return [].concat(existingFields, nonExistantLockedFields);
+	Object.entries(newFields).forEach(([field, clientId]) => {
+		if (!existingFields[field]) {
+			existingFields[field] = clientId;
+		}
+	});
+
+	return existingFields;
 };
 
 const mergeLockedFields = (
@@ -44,11 +47,11 @@ const mergeLockedFields = (
 		lockFields === 'all'
 			? getAllPropertyNames(nodeType)
 			: lockFields.split(',');
-	const fieldsToLock = fields.map(fieldName => {
-		return {
-			fieldName,
-			clientId,
-		};
+
+	const fieldsToLock = {};
+
+	fields.forEach(field => {
+		fieldsToLock[field] = clientId;
 	});
 
 	if (!existingLockedFields) {
@@ -59,6 +62,7 @@ const mergeLockedFields = (
 		existingLockedFields,
 		fieldsToLock,
 	);
+
 	return JSON.stringify(allLockedFields);
 };
 
@@ -67,19 +71,21 @@ const validateLockedFields = (
 	propertiesToModify,
 	existingLockedFields,
 ) => {
-	const lockedFieldsByAnotherClient = existingLockedFields.filter(
-		field => field.clientId !== clientId,
-	);
+	const fieldsThatCannotBeUpdated = {};
 
-	const fieldsThatCannotBeUpdated = lockedFieldsByAnotherClient.filter(
-		field => Object.keys(propertiesToModify).includes(field.fieldName),
-	);
+	Object.keys(propertiesToModify).forEach(property => {
+		const lockedByExistingClientId = existingLockedFields[property];
+		if (lockedByExistingClientId && lockedByExistingClientId !== clientId) {
+			fieldsThatCannotBeUpdated[property] = lockedByExistingClientId;
+		}
+	});
 
-	if (fieldsThatCannotBeUpdated.length) {
+	if (!_isEmpty(fieldsThatCannotBeUpdated)) {
 		const errorMessage =
 			'The following fields cannot be updated because they are locked by another client: ';
-		const erroredFields = fieldsThatCannotBeUpdated.map(
-			field => `${field.fieldName} is locked by ${field.clientId}`,
+		const erroredFields = Object.entries(fieldsThatCannotBeUpdated).map(
+			([fieldName, lockedFieldClientId]) =>
+				`${fieldName} is locked by ${lockedFieldClientId}`,
 		);
 
 		throw new LockedFieldsError(
