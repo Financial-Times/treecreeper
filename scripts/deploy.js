@@ -15,7 +15,10 @@ const content = JSON.stringify(
 	2,
 );
 
-sendToS3(content, {
-	environment: 'latest',
-	data: process.env.CIRCLE_TAG,
-});
+sendToS3(
+	{
+		environment: 'latest',
+		version: process.env.CIRCLE_TAG,
+	},
+	content,
+);
