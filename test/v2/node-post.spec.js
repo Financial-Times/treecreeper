@@ -52,7 +52,7 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code', 'name']]);
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -77,7 +77,7 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code', 'name']]);
 	});
 
 	// TODO - once we have a test schema, need to test other temporal types
@@ -105,7 +105,12 @@ describe('v2 - node POST', () => {
 				lastServiceReviewDate: isoDateString,
 			}),
 		);
-		sandbox.expectEvents(['CREATE', systemCode, 'System']);
+		sandbox.expectEvents([
+			'CREATE',
+			systemCode,
+			'System',
+			['code', 'lastServiceReviewDate'],
+		]);
 	});
 
 	it('error when creating duplicate node', async () => {
@@ -155,7 +160,7 @@ describe('v2 - node POST', () => {
 			.namespacedAuth()
 			.send({ code: teamCode })
 			.expect(200);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team']);
+		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code']]);
 		await verifyExists('Team', teamCode);
 	});
 
@@ -209,9 +214,14 @@ describe('v2 - node POST', () => {
 		);
 
 		sandbox.expectEvents(
-			['CREATE', teamCode, 'Team'],
-			['UPDATE', personCode, 'Person'],
-			['UPDATE', groupCode, 'Group'],
+			[
+				'CREATE',
+				teamCode,
+				'Team',
+				['code', 'techLeads', 'parentGroup', 'group'],
+			],
+			['UPDATE', personCode, 'Person', ['techLeadFor']],
+			['UPDATE', groupCode, 'Group', ['allTeams', 'topLevelTeams']],
 		);
 	});
 
@@ -278,9 +288,19 @@ describe('v2 - node POST', () => {
 		);
 
 		sandbox.expectEvents(
-			['CREATE', teamCode, 'Team'],
-			['CREATE', personCode, 'Person'],
-			['CREATE', groupCode, 'Group'],
+			[
+				'CREATE',
+				teamCode,
+				'Team',
+				['code', 'techLeads', 'parentGroup', 'group'],
+			],
+			['CREATE', personCode, 'Person', ['code', 'techLeadFor']],
+			[
+				'CREATE',
+				groupCode,
+				'Group',
+				['code', 'allTeams', 'topLevelTeams'],
+			],
 		);
 	});
 

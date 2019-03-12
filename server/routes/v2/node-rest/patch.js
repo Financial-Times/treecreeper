@@ -1,140 +1,35 @@
-const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { getType } = require('@financial-times/biz-ops-schema');
-const inputHelpers = require('../../../lib/rest-input-helpers');
+const { validateParams, validatePayload } = require('../../../lib/validation');
 const {
 	dbErrorHandlers,
 	preflightChecks,
 } = require('../../../lib/error-handling');
-const constructOutput = require('../../../data/construct-output');
 
 const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
+const recordAnalysis = require('../../../data/record-analysis');
 const executor = require('./_post-patch-executor');
+const { constructNeo4jProperties } = require('../../../data/data-conversion');
+const { createNewNode } = require('./post');
 const {
 	mergeLockedFields,
 	validateLockedFields,
 } = require('../../../lib/locked-fields');
 
-const toArray = it => {
-	if (typeof it === 'undefined') {
-		return;
-	}
-	return Array.isArray(it) ? it : [it];
-};
-
-const arrDiff = (arr1, arr2) =>
-	toArray(arr1).filter(item => !toArray(arr2).includes(item));
-
-const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
-
-const avoidSimultaneousWriteAndDelete = (
-	writeRelationships,
-	deleteRelationships,
-) => {
-	Object.entries(writeRelationships).forEach(([propName, codes]) => {
-		if (
-			deleteRelationships[propName] &&
-			deleteRelationships[propName].some(code => codes.includes(code))
-		) {
-			throw httpErrors(
-				400,
-				'Trying to add and remove a relationship to a record at the same time',
-			);
-		}
-	});
-};
-
-const relationshipDiffer = (
-	nodeType,
-	existingRelationships = {},
-	properties,
-	action,
-) => {
-	const newRelationships = inputHelpers.getWriteRelationships(
-		nodeType,
-		properties,
-	);
-	const deleteRelationships = inputHelpers.getDeleteRelationships(
-		nodeType,
-		properties,
-	);
-
-	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
-
-	const schema = getType(nodeType);
-	const summary = Object.entries(newRelationships)
-		.map(([relType, newCodes]) => {
-			const isCardinalityOne = !schema.properties[relType].hasMany;
-			if (isCardinalityOne && newCodes.length > 1) {
-				throw httpErrors(400, `Can only have one ${relType}`);
-			}
-			const existingCodes = existingRelationships[relType];
-			if (!existingCodes && newCodes.length) {
-				return [relType, { added: newCodes }];
-			}
-			const newCodesOnly = arrDiff(newCodes, existingCodes);
-			const existingCodesOnly = arrDiff(existingCodes, newCodes);
-			if (newCodesOnly.length || existingCodesOnly.length) {
-				return [
-					relType,
-					{
-						added: newCodesOnly,
-						removed:
-							action === 'replace' || isCardinalityOne
-								? existingCodesOnly
-								: undefined,
-					},
-				];
-			}
-			return [];
-		})
-		.filter(([relType]) => !!relType)
-		.concat(
-			Object.entries(deleteRelationships).map(([relType, codes]) => [
-				relType,
-				{
-					removed: codes
-						? toArray(codes).filter(code =>
-								(existingRelationships[relType] || []).includes(
-									code,
-								),
-						  )
-						: toArray(existingRelationships[relType]),
-				},
-			]),
-		);
-
-	return {
-		addedRelationships: summary
-			.filter(([, { added = [] }]) => added.length)
-			.map(([relType, { added }]) => [relType, added])
-			.reduce(entriesToObject, {}),
-		removedRelationships: summary
-			.filter(([, { removed = [] }]) => removed.length)
-			.map(([relType, { removed }]) => [relType, removed])
-			.reduce(entriesToObject, {}),
-	};
-};
-
-const getDeletedPropertyNames = (deletedPropertyNames, oldProperties) =>
-	deletedPropertyNames.filter(propName => propName in oldProperties);
-
 const update = async input => {
-	inputHelpers.validateParams(input);
-	inputHelpers.validatePayload(input);
+	validateParams(input);
+	validatePayload(input);
 
 	const {
-		clientId,
-		requestId,
 		nodeType,
 		code,
-		clientUserId,
+		clientId,
 		query: { relationshipAction, upsert, lockFields },
 		body,
 	} = input;
 
-	if (inputHelpers.containsRelationshipData(nodeType, body)) {
+	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 	}
 
@@ -144,16 +39,25 @@ const update = async input => {
 			code,
 		);
 
-		const existingRecord = prefetch.records.length
-			? constructOutput(nodeType, prefetch)
-			: {};
+		const existingRecord = prefetch.toApiV2(nodeType);
 
-		const writeProperties = inputHelpers.getWriteProperties(
+		if (!existingRecord) {
+			return await createNewNode(
+				nodeType,
+				code,
+				clientId,
+				{ upsert, lockFields },
+				body,
+				'PATCH',
+			);
+		}
+
+		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
-			body,
+			newContent: body,
 			code,
-			existingRecord,
-		);
+			initialContent: existingRecord,
+		});
 
 		const existingLockedFields = existingRecord._lockedFields
 			? JSON.parse(existingRecord._lockedFields)
@@ -162,7 +66,7 @@ const update = async input => {
 		if (existingLockedFields) {
 			validateLockedFields(
 				clientId,
-				writeProperties,
+				propertiesToModify,
 				existingLockedFields,
 			);
 		}
@@ -176,20 +80,17 @@ const update = async input => {
 			  )
 			: null;
 
-		const deletePropertyNames = getDeletedPropertyNames(
-			inputHelpers.getDeleteProperties(nodeType, body),
-			existingRecord,
-		);
-
-		const { removedRelationships, addedRelationships } = relationshipDiffer(
+		const {
+			removedRelationships,
+			addedRelationships,
+		} = recordAnalysis.diffRelationships({
 			nodeType,
-			existingRecord,
-			body,
-			relationshipAction,
-		);
+			initialContent: existingRecord,
+			newContent: body,
+			action: relationshipAction,
+		});
 
-		const willModifyNode =
-			Object.keys(writeProperties).length + deletePropertyNames.length;
+		const willModifyNode = Object.keys(propertiesToModify).length;
 
 		const willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
@@ -206,19 +107,7 @@ const update = async input => {
 			return existingRecord;
 		}
 
-		// If the request creates a lot of relationships, more than one query
-		// will need to be executed because a single large query that modifies too
-		// many nodes at once hogs the database CPU. These are the parameters
-		// common to all the batched queries
-		const parameters = {
-			clientId,
-			clientUserId,
-			timestamp: new Date().toISOString(),
-			requestId,
-			code,
-			properties: writeProperties,
-			lockedFields,
-		};
+		const parameters = {};
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
@@ -233,10 +122,6 @@ const update = async input => {
 				SET node += $properties
 			`);
 		}
-
-		queryParts.push(
-			...deletePropertyNames.map(attr => `REMOVE node.${attr}`),
-		);
 
 		if (willDeleteRelationships) {
 			const schema = getType(nodeType);
@@ -257,14 +142,20 @@ const update = async input => {
 		}
 
 		return await executor({
-			parameters,
-			queryParts,
+			nodeType,
+			code,
 			method: 'PATCH',
 			upsert,
-			nodeType,
-			writeRelationships: addedRelationships,
-			willDeleteRelationships,
+			isCreate: !existingRecord,
+
+			propertiesToModify,
+			lockedFields,
+			relationshipsToCreate: addedRelationships,
 			removedRelationships,
+			parameters,
+			queryParts,
+
+			willDeleteRelationships,
 		});
 	} catch (err) {
 		dbErrorHandlers.nodeUpsert(err);

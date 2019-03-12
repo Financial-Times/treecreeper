@@ -64,14 +64,15 @@ const mergeLockedFields = (
 
 const validateLockedFields = (
 	clientId,
-	writeProperties,
+	propertiesToModify,
 	existingLockedFields,
 ) => {
 	const lockedFieldsByAnotherClient = existingLockedFields.filter(
 		field => field.clientId !== clientId,
 	);
+
 	const fieldsThatCannotBeUpdated = lockedFieldsByAnotherClient.filter(
-		field => Object.keys(writeProperties).includes(field.fieldName),
+		field => Object.keys(propertiesToModify).includes(field.fieldName),
 	);
 
 	if (fieldsThatCannotBeUpdated.length) {

@@ -48,7 +48,7 @@ const setupMocks = (
 
 		sandbox.expectEvents = (...events) => {
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(events.length);
-			events.forEach(([action, code, type]) => {
+			events.forEach(([action, code, type, updatedProperties]) => {
 				expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
 					action,
 					type,
@@ -56,6 +56,8 @@ const setupMocks = (
 					requestId: `${namespace}-request`,
 					clientId: `${namespace}-client`,
 					clientUserId: `${namespace}-user`,
+					updatedProperties:
+						updatedProperties && updatedProperties.sort(),
 				});
 			});
 		};

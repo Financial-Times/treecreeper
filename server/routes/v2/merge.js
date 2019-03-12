@@ -1,10 +1,11 @@
+const { getType } = require('@financial-times/biz-ops-schema');
 const httpErrors = require('http-errors');
-const { validateTypeName } = require('../../lib/schema-validation');
+const { validateTypeName } = require('../../lib/validation');
 const { executeQuery } = require('../../data/db-connection');
-const constructOutput = require('../../data/construct-output');
 const { setContext } = require('../../lib/request-context');
-const { logMergeChanges } = require('../../lib/log-to-kinesis');
-const { RETURN_NODE_WITH_RELS } = require('../../data/cypher-helpers');
+const { logNodeChanges, logNodeDeletion } = require('../../lib/log-to-kinesis');
+const recordAnalysis = require('../../data/record-analysis');
+const cypherHelpers = require('../../data/cypher-helpers');
 
 const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 	if (!type) {
@@ -22,120 +23,144 @@ const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 
 module.exports = async input => {
 	validate(input);
-	setContext(input.body);
 	const {
-		clientId,
-		clientUserId,
-		requestId,
-		body: { type, sourceCode, destinationCode },
+		body: { type: nodeType, sourceCode, destinationCode },
 	} = input;
 
-	// As the actual merge is carried out by some apoc procedure magic, we
-	// first query the DB to learn what the initial state is so we can log
-	// what's changed to kinesis after the update is done
-	const [
-		sourceNode,
-		destinationNode,
-		sourceRels,
-		destinationRels,
-	] = await Promise.all([
+	setContext({ nodeType, sourceCode, destinationCode });
+
+	// Fetch the nodes to be updated
+	const [sourceNode, destinationNode] = await Promise.all([
+		// TODO dry this out using return node with relationships
 		executeQuery(
-			`MATCH (node:${type} { code: $sourceCode })
-			RETURN node`,
+			`MATCH (node:${nodeType} { code: $sourceCode })
+			${cypherHelpers.nodeWithRels()}`,
 			{ sourceCode },
+			true,
 		),
 		executeQuery(
-			`MATCH (node:${type} { code: $destinationCode })
-			RETURN node`,
+			`MATCH (node:${nodeType} { code: $destinationCode })
+			${cypherHelpers.nodeWithRels()}`,
 			{ destinationCode },
-		),
-		executeQuery(
-			`MATCH (node:${type} { code: $sourceCode })-[relationship]-(related)
-			RETURN node, relationship, related`,
-			{ sourceCode },
-		),
-		executeQuery(
-			`MATCH (node:${type} { code: $destinationCode })-[relationship]-(related)
-			RETURN node, relationship, related`,
-			{ destinationCode },
+			true,
 		),
 	]);
 
 	if (!sourceNode.records.length) {
-		throw httpErrors(404, `${type} record missing for \`${sourceCode}\``);
+		throw httpErrors(
+			404,
+			`${nodeType} record missing for \`${sourceCode}\``,
+		);
 	}
 
 	if (!destinationNode.records.length) {
 		throw httpErrors(
 			404,
-			`${type} record missing for \`${destinationCode}\``,
+			`${nodeType} record missing for \`${destinationCode}\``,
 		);
+	}
+
+	const sourceRecord = sourceNode.toApiV2(nodeType, true);
+	const destinationRecord = destinationNode.toApiV2(nodeType, true);
+
+	const writeProperties = recordAnalysis.diffProperties({
+		nodeType,
+		newContent: sourceRecord,
+		initialContent: destinationRecord,
+	});
+
+	Object.keys(sourceRecord).forEach(name => {
+		if (name in destinationRecord) {
+			delete writeProperties[name];
+		}
+	});
+
+	const { removedRelationships } = recordAnalysis.diffRelationships({
+		nodeType,
+		initialContent: sourceRecord,
+		newContent: destinationRecord,
+		action: 'merge',
+	});
+	const { properties } = getType(nodeType);
+
+	const possibleReflections = Object.entries(properties)
+		.filter(([, { type: otherType }]) => nodeType === otherType)
+		.map(([name]) => name);
+
+	possibleReflections.forEach(propName => {
+		if (
+			sourceRecord[propName] &&
+			sourceRecord[propName].includes(destinationCode)
+		) {
+			if (removedRelationships[propName]) {
+				removedRelationships[propName].push(destinationCode);
+			} else {
+				removedRelationships[propName] = [destinationCode];
+			}
+		}
+	});
+	const willDeleteRelationships = !!Object.keys(removedRelationships).length;
+	if (willDeleteRelationships) {
+		const parameters = { sourceCode };
+		const queryParts = [
+			`
+	MATCH (sourceNode:${nodeType} { code: $sourceCode })`,
+		];
+
+		const schema = getType(nodeType);
+		queryParts.push(
+			...Object.entries(removedRelationships).map(([propName, codes]) => {
+				const def = schema.properties[propName];
+				const key = `Delete${def.relationship}${def.direction}${
+					def.type
+				}`;
+				parameters[key] = codes;
+				return `WITH sourceNode
+				${cypherHelpers.deleteRelationships(def, key, 'sourceNode')}
+
+				`;
+			}),
+		);
+
+		queryParts.push('RETURN sourceNode');
+		await executeQuery(queryParts.join('\n'), parameters);
+		logNodeChanges({
+			result: sourceNode,
+			removedRelationships,
+		});
 	}
 
 	const result = await executeQuery(
 		`
-	OPTIONAL MATCH (s:${type} { code: $sourceCode }), (d:${type} { code: $destinationCode })
-	CALL apoc.refactor.mergeNodes([d, s], {properties:"discard", mergeRels:true})
+		OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
+			CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
 	YIELD node
-	MATCH (node)-[relationship]-(related)
-	RETURN node, relationship, related
+	${cypherHelpers.nodeWithRels({ includeWithStatement: false })}
 	`,
 		{ sourceCode, destinationCode },
+		true,
 	);
 
-	const { deletions: deletedRelationships } = result.records.reduce(
-		({ relDirs, deletions }, record) => {
-			const relName = record.get('relationship').type;
-			const direction =
-				record.get('relationship').start === record.get('node').identity
-					? 'outgoing'
-					: 'incoming';
-			const destination = `${record.get('related').labels[0]}:${
-				record.get('related').properties.code
-			}`;
+	const finalState = result.toApiV2(nodeType);
 
-			// TODO once upgraded to neo4j 3.4 and corresponding apoc upgrade, deduping
-			// rels won't be required
-			if (relDirs[`${direction}:${relName}:${destination}`]) {
-				deletions.push(record.get('relationship').identity);
-			} else {
-				relDirs[`${direction}:${relName}:${destination}`] = true;
-				if (
-					record.get('relationship').start ===
-					record.get('relationship').end
-				) {
-					// we currently have no use cases for relationships beginning and ending
-					// at the same node, so we can safely assume any that exist after the refactor
-					// can be removed
-					deletions.push(record.get('relationship').identity);
-				}
-			}
-			return { relDirs, deletions };
-		},
-		{ relDirs: {}, deletions: [] },
-	);
+	const { addedRelationships } = recordAnalysis.diffRelationships({
+		nodeType,
+		initialContent: destinationRecord,
+		newContent: result.toApiV2(nodeType, true),
+		action: 'merge',
+	});
 
-	if (deletedRelationships.length) {
-		await executeQuery(
-			`MATCH ()-[r]-()
-			WHERE id(r) IN [${deletedRelationships.join(',')}]
-			DELETE r`,
-		);
-	}
+	logNodeDeletion(sourceNode.getNode());
+	logNodeChanges({
+		result,
+		updatedProperties: [
+			...new Set([
+				...Object.keys(writeProperties),
+				...Object.keys(addedRelationships || {}),
+			]),
+		],
+		addedRelationships,
+	});
 
-	logMergeChanges(
-		requestId,
-		clientId,
-		clientUserId,
-		sourceNode,
-		destinationNode,
-		sourceRels,
-		destinationRels,
-	);
-
-	return executeQuery(
-		`MATCH (node:${type} {code: $destinationCode})
-		${RETURN_NODE_WITH_RELS}`,
-		{ destinationCode },
-	).then(constructOutput.bind(null, type));
+	return finalState;
 };

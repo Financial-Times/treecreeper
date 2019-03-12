@@ -1,60 +1,64 @@
 const { stripIndents } = require('common-tags');
-const inputHelpers = require('../../../lib/rest-input-helpers');
+const recordAnalysis = require('../../../data/record-analysis');
+const { validateParams, validatePayload } = require('../../../lib/validation');
 const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
+const { constructNeo4jProperties } = require('../../../data/data-conversion');
 const { mergeLockedFields } = require('../../../lib/locked-fields');
 
-const create = async input => {
-	inputHelpers.validateParams(input);
-	inputHelpers.validatePayload(input);
+const createNewNode = (
+	nodeType,
+	code,
+	clientId,
+	{ upsert, lockFields },
+	body,
+	method,
+) => {
+	const lockedFields = lockFields
+		? mergeLockedFields(nodeType, clientId, lockFields)
+		: null;
 
-	const {
-		clientId,
-		requestId,
+	return executor({
 		nodeType,
 		code,
-		clientUserId,
-		query: { upsert, lockFields },
-		body,
-	} = input;
+		method,
+		upsert,
+		isCreate: true,
 
-	try {
-		const lockedFields = lockFields
-			? mergeLockedFields(nodeType, clientId, lockFields)
-			: null;
-
-		const properties = inputHelpers.getWriteProperties(
+		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			body,
+			newContent: body,
 			code,
-		);
-
-		const queryParts = [
+		}),
+		lockedFields,
+		relationshipsToCreate: recordAnalysis.diffRelationships({
+			nodeType,
+			newContent: body,
+		}).addedRelationships,
+		queryParts: [
 			stripIndents`CREATE (node:${nodeType} $properties)
 				SET ${metaPropertiesForCreate('node')}
 			WITH node`,
-		];
+		],
+	});
+};
 
-		return await executor({
-			parameters: {
-				clientId,
-				timestamp: new Date().toISOString(),
-				requestId,
-				code,
-				clientUserId,
-				properties,
-				lockedFields,
-			},
-			queryParts,
-			method: 'POST',
-			upsert,
+const create = async input => {
+	validateParams(input);
+	validatePayload(input);
+
+	const { nodeType, code, clientId, query, body } = input;
+
+	try {
+		return await createNewNode(
 			nodeType,
-			writeRelationships: inputHelpers.getWriteRelationships(
-				nodeType,
-				body,
-			),
-		});
+			code,
+			clientId,
+			query,
+			body,
+			'POST',
+		);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
 		dbErrorHandlers.nodeUpsert(err);
@@ -63,3 +67,5 @@ const create = async input => {
 };
 
 module.exports = create;
+
+module.exports.createNewNode = createNewNode;

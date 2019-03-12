@@ -1,14 +1,20 @@
 const { getType } = require('@financial-times/biz-ops-schema');
-const uniqBy = require('lodash.uniqby');
-const { logger } = require('./request-context');
+const groupBy = require('lodash.groupby');
+const { logger, getContext } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');
+
+const {
+	findPropertyNames,
+	findInversePropertyNames,
+	invertDirection,
+	addRecursiveProperties,
+} = require('./schema-helpers');
 
 const kinesisClient = new Kinesis(
 	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name',
 );
 const eventLogWriter = new EventLogWriter(kinesisClient);
-const { getContext } = require('./request-context');
 
 const sendEvent = event => {
 	eventLogWriter.sendEvent(event).catch(error => {
@@ -19,11 +25,137 @@ const sendEvent = event => {
 	});
 };
 
-const sendUniqueEvents = events =>
-	uniqBy(
-		events,
-		({ action, code, type }) => `${action}:${code}:${type}`,
-	).forEach(sendEvent);
+const sendUniqueEvents = events => {
+	const { requestId, clientId, clientUserId } = getContext();
+	Object.values(
+		groupBy(
+			events,
+			({ action, code, type }) => `${action}:${code}:${type}`,
+		),
+	).forEach(similarEvents => {
+		sendEvent(
+			Object.assign(
+				similarEvents[0],
+				{ requestId, clientId, clientUserId },
+				{
+					updatedProperties: [
+						...new Set(
+							[].concat(
+								...similarEvents.map(
+									({ updatedProperties }) =>
+										updatedProperties,
+								),
+							),
+						),
+					].sort(),
+				},
+			),
+		);
+	});
+};
+
+const relatedRecordEvents = (newRecords, addedRelationships) => {
+	const nodeType = newRecords[0].get('node').labels[0];
+	const { requestId } = getContext();
+	const { properties: validProperties } = getType(nodeType);
+
+	const addedRelationshipNames = Object.keys(addedRelationships);
+
+	const createdNodes = newRecords
+		.map(record => {
+			// If created the related node, it's a CREATE on it
+			if (record.get('relatedRequestId') === requestId) {
+				return {
+					code: record.relatedCode(),
+					type: record.relatedType(),
+				};
+			}
+		})
+		.filter(it => !!it);
+
+	const events = [];
+
+	Object.entries(validProperties)
+		.filter(([name]) => addedRelationshipNames.includes(name))
+		.forEach(([name, { type, direction, relationship }]) => {
+			const updatedProperties = findPropertyNames({
+				rootType: type,
+				relationship,
+				direction: invertDirection(direction),
+				destinationType: nodeType,
+			});
+
+			addedRelationships[name].forEach(code => {
+				const isCreated = createdNodes.some(
+					({ code: refCode, type: refType }) =>
+						type === refType && code === refCode,
+				);
+				events.push({
+					action: isCreated ? 'CREATE' : 'UPDATE',
+					code,
+					type,
+					updatedProperties: isCreated
+						? ['code'].concat(updatedProperties).sort()
+						: updatedProperties,
+				});
+			});
+		});
+	return events;
+};
+
+const logNodeChanges = ({
+	result,
+	removedRelationships,
+	addedRelationships,
+	updatedProperties = [],
+}) => {
+	const newRecords = result.records;
+	const node = newRecords[0].get('node');
+	const nodeType = node.labels[0];
+	const { requestId } = getContext();
+
+	const events = [];
+
+	if (updatedProperties.length) {
+		events.push({
+			action:
+				node.properties._createdByRequest === requestId
+					? 'CREATE'
+					: 'UPDATE',
+			code: node.properties.code,
+			type: nodeType,
+			updatedProperties: addRecursiveProperties(
+				updatedProperties,
+				nodeType,
+			).sort(),
+		});
+
+		if (Object.keys(addedRelationships).length) {
+			// if (result.hasRelationships()) {
+			events.push(...relatedRecordEvents(newRecords, addedRelationships));
+		}
+	}
+
+	if (removedRelationships) {
+		const { properties } = getType(nodeType);
+
+		Object.entries(removedRelationships).forEach(([propName, codes]) => {
+			codes.forEach(code =>
+				events.push({
+					action: 'UPDATE',
+					code,
+					type: properties[propName].type,
+					updatedProperties: findInversePropertyNames(
+						nodeType,
+						propName,
+					),
+				}),
+			);
+		});
+	}
+
+	sendUniqueEvents(events);
+};
 
 const logNodeDeletion = node => {
 	const { requestId, clientId, clientUserId } = getContext();
@@ -37,158 +169,7 @@ const logNodeDeletion = node => {
 	});
 };
 
-const logNodeChanges = ({ newRecords, nodeType, removedRelationships }) => {
-	const { requestId, clientId, clientUserId } = getContext();
-	const node = newRecords[0].get('node');
-
-	const events = [];
-
-	events.push({
-		action:
-			node.properties._createdByRequest === requestId
-				? 'CREATE'
-				: 'UPDATE',
-		code: node.properties.code,
-		type: node.labels[0],
-		requestId,
-		clientId,
-		clientUserId,
-	});
-
-	if (nodeType && removedRelationships) {
-		const { properties } = getType(nodeType);
-
-		Object.entries(removedRelationships).forEach(([propName, codes]) => {
-			codes.forEach(code =>
-				events.push({
-					action: 'UPDATE',
-					code,
-					type: properties[propName].type,
-					requestId,
-					clientId,
-					clientUserId,
-				}),
-			);
-		});
-	}
-
-	if (
-		newRecords[0] &&
-		newRecords[0].has('relatedCode') &&
-		newRecords[0].get('relatedCode')
-	) {
-		newRecords.forEach(record => {
-			const relatedCode = record.get('relatedCode');
-			const relatedRequestId = record.get('relatedRequestId');
-			const relatedLabels = record.get('relatedLabels');
-			const rel = record.get('relationship');
-
-			// If created the related node, it's an CREATE on it
-			if (relatedRequestId === requestId) {
-				events.push({
-					action: 'CREATE',
-					code: relatedCode,
-					type: relatedLabels[0],
-					requestId,
-					clientId,
-					clientUserId,
-				});
-				// Otherwise, we've just linked to it i.e. an UPDATE
-			} else if (rel.properties._createdByRequest === requestId) {
-				events.push({
-					action: 'UPDATE',
-					code: relatedCode,
-					type: relatedLabels[0],
-					requestId,
-					clientId,
-					clientUserId,
-				});
-			}
-		});
-	}
-
-	sendUniqueEvents(events);
-};
-
-const logMergeChanges = (
-	requestId,
-	clientId,
-	clientUserId,
-	sourceNode,
-	destinationNode,
-	sourceRels,
-	destinationRels,
-) => {
-	sourceNode = sourceNode.records[0].get('node');
-	destinationNode = destinationNode.records[0].get('node');
-
-	const events = [
-		{
-			action: 'DELETE',
-			code: sourceNode.properties.code,
-			type: sourceNode.labels[0],
-			requestId,
-			clientId,
-			clientUserId,
-		},
-		{
-			action: 'UPDATE',
-			code: destinationNode.properties.code,
-			type: destinationNode.labels[0],
-			requestId,
-			clientId,
-			clientUserId,
-		},
-	].concat(
-		sourceRels.records
-			.map(sourceRelsRecord => {
-				const sourceTarget = sourceRelsRecord.get('related');
-				const sourceRel = sourceRelsRecord.get('relationship');
-
-				// reflexive relationships will all be discarded without a new creation event
-				if (sourceTarget.identity === sourceNode.identity) {
-					return;
-				}
-
-				const existingRecord = destinationRels.records.find(
-					destinationRelsRecord => {
-						const destinationTarget = destinationRelsRecord.get(
-							'related',
-						);
-						const destinationRel = destinationRelsRecord.get(
-							'relationship',
-						);
-						if (
-							destinationTarget.identity ===
-								sourceTarget.identity &&
-							destinationRel.type === sourceRel.type &&
-							(destinationRel.start === sourceRel.start ||
-								destinationRel.end === sourceRel.end)
-						) {
-							return true;
-						}
-					},
-				);
-
-				if (!existingRecord) {
-					return {
-						action: 'UPDATE',
-						code: sourceTarget.properties.code,
-						type: sourceTarget.labels[0],
-						requestId,
-						clientId,
-						clientUserId,
-					};
-				}
-			})
-			.filter(node => !!node),
-	);
-
-	sendUniqueEvents(events);
-};
-
 module.exports = {
 	logNodeDeletion,
 	logNodeChanges,
-	logMergeChanges,
 };
