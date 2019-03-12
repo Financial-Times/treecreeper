@@ -19,15 +19,8 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const joinExistingAndNewLockedFields = (existingFields, newFields) => {
-	Object.entries(newFields).forEach(([field, clientId]) => {
-		if (!existingFields[field]) {
-			existingFields[field] = clientId;
-		}
-	});
-
-	return existingFields;
-};
+const joinExistingAndNewLockedFields = (existingFields, newFields) =>
+	Object.assign({}, existingFields, newFields);
 
 const mergeLockedFields = (
 	nodeType,
