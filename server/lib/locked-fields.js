@@ -19,9 +19,6 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const joinExistingAndNewLockedFields = (existingFields, newFields) =>
-	Object.assign({}, existingFields, newFields);
-
 const mergeLockedFields = (
 	nodeType,
 	clientId,
@@ -51,9 +48,10 @@ const mergeLockedFields = (
 		return JSON.stringify(fieldsToLock);
 	}
 
-	const allLockedFields = joinExistingAndNewLockedFields(
-		existingLockedFields,
+	const allLockedFields = Object.assign(
+		{},
 		fieldsToLock,
+		existingLockedFields,
 	);
 
 	return JSON.stringify(allLockedFields);

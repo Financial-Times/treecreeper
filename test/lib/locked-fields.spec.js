@@ -48,7 +48,7 @@ describe('mergeLockedFields', () => {
 
 	it('adds new locked fields to the already existing locked fields', () => {
 		const response =
-			'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
+			'{"teams":"biz-ops-admin","code":"biz-ops-admin","name":"biz-ops-admin"}';
 		expect(
 			mergeLockedFields(
 				nodeType,
