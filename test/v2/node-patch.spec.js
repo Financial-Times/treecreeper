@@ -2041,6 +2041,27 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
+		it('creates a new node with locked fields when no exisitng node exists', async () => {
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				},
+			).expect(
+				201,
+				sandbox.withCreateMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+					_lockedFields:
+						'[{"fieldName":"name","clientId":"v2-node-patch-client"}]',
+				}),
+			);
+		});
+
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 
