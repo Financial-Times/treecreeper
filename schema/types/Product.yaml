@@ -92,8 +92,26 @@ properties:
     type: Product
     relationship: DEPENDS_ON
     direction: incoming
+    deprecationReason: Poorly named - superseded by better named option
     description: Products that depend on this product.
     label: Product dependents
+    fieldset: network
+  dependentProducts:
+    hasMany: true
+    hidden: true
+    type: Product
+    relationship: DEPENDS_ON
+    direction: incoming
+    description: Products that depend on this product.
+    label: Product dependents
+    fieldset: network
+  dependentCapabilities:
+    type: Capability
+    direction: incoming
+    label: Dependent capabilities
+    relationship: DEPENDS_ON
+    description: Business Capabilities that depend on this product.
+    hasMany: true
     fieldset: network
 fieldsets:
   general:
