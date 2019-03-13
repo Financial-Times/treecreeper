@@ -29,6 +29,7 @@ describe('v2 - node PATCH', () => {
 				.namespacedAuth()
 				.send(data);
 	});
+
 	it('update node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
@@ -81,6 +82,7 @@ describe('v2 - node PATCH', () => {
 		);
 		sandbox.expectNoEvents();
 	});
+
 	describe('temporal properties', () => {
 		it('Set Date property when no previous value', async () => {
 			const isoDateString = '2019-01-09';
@@ -155,6 +157,7 @@ describe('v2 - node PATCH', () => {
 				['lastServiceReviewDate'],
 			]);
 		});
+
 		it("Not overwrite when 'same' Date sent", async () => {
 			const isoDateString = '2019-01-09';
 			const date = new Date(isoDateString);
@@ -1835,6 +1838,255 @@ describe('v2 - node PATCH', () => {
 					),
 				).toBe(false);
 				sandbox.expectNoEvents();
+			});
+		});
+	});
+
+	describe('locked fields', () => {
+		const lockedFieldName = '{"name":"v2-node-patch-client"}';
+		const lockedFieldEmail = '{"email":"v2-node-patch-client"}';
+
+		it('throws an error when trying to update a node that is locked by another clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				_lockedFields: '{"name":"admin"}',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(400);
+		});
+
+		it('updates node by updating name and locking ALL fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=all`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
+				}),
+			);
+		});
+
+		it('updates node by updating name and adding it as a locked field', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('updates node that is locked by this clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: lockedFieldName,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('does NOT update node with locked field when it is has already locked it (no duplicates)', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: lockedFieldEmail,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=email`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: lockedFieldEmail,
+				}),
+			);
+		});
+
+		it('adds another field to locked fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: lockedFieldEmail,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields:
+						'{"name":"v2-node-patch-client","email":"v2-node-patch-client"}',
+				}),
+			);
+		});
+
+		it('does NOT lock existing fields when those fields are locked by another clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: lockedFieldEmail,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=email`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: lockedFieldEmail,
+				}),
+			);
+		});
+
+		it('does NOT lock fields when just updating locked and unlocked fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				email: 'email@example.com',
+				slack: 'slack channel',
+				_lockedFields: lockedFieldName,
+			});
+			await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
+				name: 'new name',
+				email: 'tech@lt.com',
+				slack: 'new slack channel',
+			}).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				}),
+			);
+		});
+
+		it('only locks fields that are given in the query but updates all fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				email: 'email@example.com',
+				slack: 'slack channel',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('creates a new node with locked fields when no exisitng node exists', async () => {
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+				},
+			).expect(
+				201,
+				sandbox.withCreateMeta({
+					code: teamCode,
+					name: 'new name',
+					email: 'tech@lt.com',
+					slack: 'new slack channel',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('does NOT overwrite existing locked fields when lockFields=all is set', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: '{"email":"another-api"}',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=all`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"another-api","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
+				}),
+			);
+		});
+
+		describe('no client-id header', () => {
+			setupMocks(sandbox, { namespace }, false);
+
+			it('throws an error when clientId is not set', async () => {
+				await sandbox
+					.request(app)
+					.post(`/v2/node/Team/${teamCode}?lockFields=all`)
+					.namespacedAuth()
+					.send({ name: 'name1' })
+					.expect(
+						400,
+						/clientId needs to be set to a valid system code in order to lock fields/,
+					);
 			});
 		});
 	});

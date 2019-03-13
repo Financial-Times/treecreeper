@@ -5,8 +5,20 @@ const { dbErrorHandlers } = require('../../../lib/error-handling');
 const executor = require('./_post-patch-executor');
 const { metaPropertiesForCreate } = require('../../../data/cypher-helpers');
 const { constructNeo4jProperties } = require('../../../data/data-conversion');
+const { mergeLockedFields } = require('../../../lib/locked-fields');
 
-const createNewNode = (nodeType, code, upsert, body, method) => {
+const createNewNode = (
+	nodeType,
+	code,
+	clientId,
+	{ upsert, lockFields },
+	body,
+	method,
+) => {
+	const lockedFields = lockFields
+		? mergeLockedFields(nodeType, clientId, lockFields)
+		: null;
+
 	return executor({
 		nodeType,
 		code,
@@ -19,6 +31,7 @@ const createNewNode = (nodeType, code, upsert, body, method) => {
 			newContent: body,
 			code,
 		}),
+		lockedFields,
 		relationshipsToCreate: recordAnalysis.diffRelationships({
 			nodeType,
 			newContent: body,
@@ -35,15 +48,17 @@ const create = async input => {
 	validateParams(input);
 	validatePayload(input);
 
-	const {
-		nodeType,
-		code,
-		query: { upsert },
-		body,
-	} = input;
+	const { nodeType, code, clientId, query, body } = input;
 
 	try {
-		return await createNewNode(nodeType, code, upsert, body, 'POST');
+		return await createNewNode(
+			nodeType,
+			code,
+			clientId,
+			query,
+			body,
+			'POST',
+		);
 	} catch (err) {
 		dbErrorHandlers.duplicateNode(err, nodeType, code);
 		dbErrorHandlers.nodeUpsert(err);

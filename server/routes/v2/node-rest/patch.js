@@ -12,6 +12,10 @@ const recordAnalysis = require('../../../data/record-analysis');
 const executor = require('./_post-patch-executor');
 const { constructNeo4jProperties } = require('../../../data/data-conversion');
 const { createNewNode } = require('./post');
+const {
+	mergeLockedFields,
+	validateLockedFields,
+} = require('../../../lib/locked-fields');
 
 const update = async input => {
 	validateParams(input);
@@ -20,7 +24,8 @@ const update = async input => {
 	const {
 		nodeType,
 		code,
-		query: { relationshipAction, upsert },
+		clientId,
+		query: { relationshipAction, upsert, lockFields },
 		body,
 	} = input;
 
@@ -37,7 +42,14 @@ const update = async input => {
 		const existingRecord = prefetch.toApiV2(nodeType);
 
 		if (!existingRecord) {
-			return await createNewNode(nodeType, code, upsert, body, 'PATCH');
+			return await createNewNode(
+				nodeType,
+				code,
+				clientId,
+				{ upsert, lockFields },
+				body,
+				'PATCH',
+			);
 		}
 
 		const propertiesToModify = constructNeo4jProperties({
@@ -46,6 +58,27 @@ const update = async input => {
 			code,
 			initialContent: existingRecord,
 		});
+
+		const existingLockedFields = existingRecord._lockedFields
+			? JSON.parse(existingRecord._lockedFields)
+			: null;
+
+		if (existingLockedFields) {
+			validateLockedFields(
+				clientId,
+				propertiesToModify,
+				existingLockedFields,
+			);
+		}
+
+		const lockedFields = lockFields
+			? mergeLockedFields(
+					nodeType,
+					clientId,
+					lockFields,
+					existingLockedFields,
+			  )
+			: null;
 
 		const {
 			removedRelationships,
@@ -116,6 +149,7 @@ const update = async input => {
 			isCreate: !existingRecord,
 
 			propertiesToModify,
+			lockedFields,
 			relationshipsToCreate: addedRelationships,
 			removedRelationships,
 			parameters,

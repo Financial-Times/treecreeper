@@ -57,6 +57,7 @@ module.exports = async ({
 	isCreate,
 
 	propertiesToModify,
+	lockedFields,
 	relationshipsToCreate,
 	removedRelationships,
 	parameters = {},
@@ -75,6 +76,7 @@ module.exports = async ({
 		{
 			code,
 			properties: propertiesToModify,
+			lockedFields,
 		},
 		relationshipParameters,
 	);

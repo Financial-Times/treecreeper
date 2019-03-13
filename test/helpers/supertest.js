@@ -27,7 +27,9 @@ const request = (app, { useCached = true } = {}) => {
 	return instance;
 };
 
-const getNamespacedSupertest = namespace => (...requestArgs) => {
+const getNamespacedSupertest = (namespace, includeClientId = true) => (
+	...requestArgs
+) => {
 	const req = request(...requestArgs);
 
 	['post', 'patch', 'get', 'delete', 'put'].forEach(methodName => {
@@ -36,10 +38,15 @@ const getNamespacedSupertest = namespace => (...requestArgs) => {
 			const test = method(...methodArgs);
 
 			test.namespacedAuth = function namespacedAuth() {
-				return this.set('API_KEY', API_KEY)
-					.set('client-id', `${namespace}-client`)
+				const headers = this.set('API_KEY', API_KEY)
 					.set('client-user-id', `${namespace}-user`)
 					.set('x-request-id', `${namespace}-request`);
+
+				if (includeClientId) {
+					headers.set('client-id', `${namespace}-client`);
+				}
+
+				return headers;
 			};
 
 			return test;

@@ -21,8 +21,12 @@ const stubKinesis = () => {
 
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
 
-const setupMocks = (sandbox, { withDb = true, namespace } = {}) => {
-	const request = getNamespacedSupertest(namespace);
+const setupMocks = (
+	sandbox,
+	{ withDb = true, namespace } = {},
+	includeClientId,
+) => {
+	const request = getNamespacedSupertest(namespace, includeClientId);
 	let clock;
 	const now = '2019-01-09T09:08:22.908Z';
 	const then = '2015-11-15T08:12:27.908Z';
