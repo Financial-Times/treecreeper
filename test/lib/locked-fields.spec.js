@@ -113,8 +113,7 @@ describe('validateLockedFields', () => {
 });
 
 describe('unlocksFields', () => {
-	const clientId = 'clientId';
-	let existingLockedFieldsString = { code: 'clientId', name: 'clientId' };
+	const clientId = 'biz-ops-admin';
 
 	it('returns _lockedFields unchanged when clientIds do not match', () => {
 		const differentClientId = 'another-api';
@@ -124,9 +123,9 @@ describe('unlocksFields', () => {
 				nodeType,
 				differentClientId,
 				unlockFields,
-				existingLockedFieldsString,
+				existingLockedFields,
 			),
-		).toEqual(JSON.stringify(existingLockedFieldsString));
+		).toEqual(JSON.stringify(existingLockedFields));
 	});
 
 	it('throws an error when clientId is not set', () => {
@@ -145,9 +144,9 @@ describe('unlocksFields', () => {
 				nodeType,
 				clientId,
 				unlockFields,
-				existingLockedFieldsString,
+				existingLockedFields,
 			),
-		).toEqual('{"code":"clientId"}');
+		).toEqual('{"code":"biz-ops-admin"}');
 	});
 
 	it('returns _lockedFields without any fields when all fields are unlocked', () => {
@@ -157,16 +156,16 @@ describe('unlocksFields', () => {
 				nodeType,
 				clientId,
 				unlockFields,
-				existingLockedFieldsString,
+				existingLockedFields,
 			),
 		).toEqual(null);
 	});
 
 	it('returns _lockedFields with fields that are not locked by the requesting clientId', () => {
 		const unlockFields = 'name,code,email';
-		existingLockedFieldsString = {
-			code: 'clientId',
-			name: 'clientId',
+		const otherExistingLockedFields = {
+			code: 'biz-ops-admin',
+			name: 'biz-ops-admin',
 			email: 'another-api',
 		};
 		expect(
@@ -174,7 +173,7 @@ describe('unlocksFields', () => {
 				nodeType,
 				clientId,
 				unlockFields,
-				existingLockedFieldsString,
+				otherExistingLockedFields,
 			),
 		).toEqual('{"email":"another-api"}');
 	});

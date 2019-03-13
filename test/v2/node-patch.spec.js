@@ -2133,7 +2133,7 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('unlocks only all fields that the clientId locked', async () => {
+		it('unlocks only `all` fields that the clientId locked', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
