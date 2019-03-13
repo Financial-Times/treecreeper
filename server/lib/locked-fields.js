@@ -19,25 +19,27 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const mergeLockedFields = (
-	nodeType,
-	clientId,
-	lockFields,
-	existingLockedFields,
-) => {
+const getLockedFields = (nodeType, clientId, fieldnames) => {
 	if (!clientId) {
 		throw new LockedFieldsError(
 			'clientId needs to be set to a valid system code in order to lock fields',
-			lockFields,
+			fieldnames,
 			400,
 		);
 	}
 
-	const fields =
-		lockFields === 'all'
-			? getAllPropertyNames(nodeType)
-			: lockFields.split(',');
+	return fieldnames === 'all'
+		? getAllPropertyNames(nodeType)
+		: fieldnames.split(',');
+};
 
+const mergeLockedFields = (
+	nodeType,
+	clientId,
+	fieldnames,
+	existingLockedFields,
+) => {
+	const fields = getLockedFields(nodeType, clientId, fieldnames);
 	const fieldsToLock = {};
 
 	fields.forEach(field => {
@@ -88,4 +90,24 @@ const validateLockedFields = (
 	}
 };
 
-module.exports = { mergeLockedFields, validateLockedFields, LockedFieldsError };
+const unlockFields = (nodeType, clientId, fieldnames, existingLockedFields) => {
+	const fields = getLockedFields(nodeType, clientId, fieldnames);
+	const lockedFields = JSON.parse(existingLockedFields);
+
+	const fieldsToUnlock = fields.filter(fieldName => {
+		return lockedFields[fieldName] === clientId;
+	});
+
+	fieldsToUnlock.forEach(fieldName => {
+		delete lockedFields[fieldName];
+	});
+
+	return JSON.stringify(lockedFields);
+};
+
+module.exports = {
+	mergeLockedFields,
+	validateLockedFields,
+	unlockFields,
+	LockedFieldsError,
+};
