@@ -15,6 +15,7 @@ const { createNewNode } = require('./post');
 const {
 	mergeLockedFields,
 	validateLockedFields,
+	removeLockedFields,
 } = require('../../../lib/locked-fields');
 
 const update = async input => {
@@ -25,7 +26,7 @@ const update = async input => {
 		nodeType,
 		code,
 		clientId,
-		query: { relationshipAction, upsert, lockFields },
+		query: { relationshipAction, upsert, lockFields, unlockFields },
 		body,
 	} = input;
 
@@ -71,7 +72,7 @@ const update = async input => {
 			);
 		}
 
-		const lockedFields = lockFields
+		let lockedFields = lockFields
 			? mergeLockedFields(
 					nodeType,
 					clientId,
@@ -79,6 +80,15 @@ const update = async input => {
 					existingLockedFields,
 			  )
 			: null;
+
+		if (unlockFields && existingLockedFields) {
+			lockedFields = removeLockedFields(
+				nodeType,
+				clientId,
+				unlockFields,
+				existingLockedFields,
+			);
+		}
 
 		const {
 			removedRelationships,
