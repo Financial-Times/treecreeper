@@ -14,6 +14,9 @@ describe('schema polling updates', () => {
 	describe('api updates', () => {
 		let app;
 		beforeAll(async () => {
+			process.env.NODE_ENV = 'production';
+			schema.sendSchemaToS3 = jest.fn();
+
 			fetch.config.fallbackToNetwork = false;
 			fetch
 				.getOnce(`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`, {})
@@ -54,6 +57,7 @@ describe('schema polling updates', () => {
 			await fetch.flush(true);
 		});
 		afterAll(() => {
+			process.env.NODE_ENV = 'test';
 			fetch.config.fallbackToNetwork = 'always';
 			fetch.reset();
 			jest.resetModules();
@@ -82,39 +86,48 @@ describe('schema polling updates', () => {
 				.expect(400);
 		});
 
+		it('writes the latest schema to the S3 api endpoint', () => {
+			expect(schema.sendSchemaToS3).toHaveBeenCalledWith('api');
+		});
+
 		describe('failure', () => {
+			let schemaVersionCheck;
 			beforeAll(async () => {
-				fetch.getOnce(
-					`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
-					{
-						version: 'new-test2',
-						schema: {
-							types: [
-								{
-									name: 'InvalidType',
-									description: 'An invalid type.',
-									properties: {
-										// have added some bits that'll generate invalid graphql schema
-										'code\nmultiline': {
-											type: 'Code',
-											description: 'The code.',
-										},
-										testProp: {
-											type: 'Paragraph',
-											description: 'A test property.',
+				fetch
+					.getOnce(
+						`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
+						{
+							version: 'new-test2',
+							schema: {
+								types: [
+									{
+										name: 'InvalidType',
+										description: 'An invalid type.',
+										properties: {
+											// have added some bits that'll generate invalid graphql schema
+											'code\nmultiline': {
+												type: 'Code',
+												description: 'The code.',
+											},
+											testProp: {
+												type: 'Paragraph',
+												description: 'A test property.',
+											},
 										},
 									},
-								},
-							],
-							enums: {},
-							stringPatterns: {},
+								],
+								enums: {},
+								stringPatterns: {},
+							},
 						},
-					},
-					{ overwriteRoutes: false },
-				);
+						{ overwriteRoutes: false },
+					)
+					.catch(200);
+				schemaVersionCheck = require('../server/health/schema-version.js');
 				jest.advanceTimersByTime(20001);
 				await fetch.flush(true);
 			});
+
 			it('graphql endpoint still runs on old schema version', async () => {
 				await request(app, { useCached: false })
 					.post('/graphql')
@@ -143,7 +156,12 @@ describe('schema polling updates', () => {
 					.namespacedAuth()
 					.expect(200);
 			});
-			it('triggers healthcheck to fail', () => {});
+
+			it('triggers the healthcheck to fail', async () => {
+				jest.advanceTimersByTime(300001);
+				const checkObj = await schemaVersionCheck;
+				expect(checkObj.getStatus().ok).toEqual(false);
+			});
 		});
 	});
 
