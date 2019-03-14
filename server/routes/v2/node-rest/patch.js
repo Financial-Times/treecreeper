@@ -1,5 +1,4 @@
 const { stripIndents } = require('common-tags');
-const { getType } = require('@financial-times/biz-ops-schema');
 const { validateParams, validatePayload } = require('../../../lib/validation');
 const {
 	dbErrorHandlers,
@@ -9,9 +8,12 @@ const {
 const { logger } = require('../../../lib/request-context');
 const cypherHelpers = require('../../../data/cypher-helpers');
 const recordAnalysis = require('../../../data/record-analysis');
-const executor = require('./_post-patch-executor');
+const {
+	writeNode,
+	prepareRelationshipDeletion,
+	createNewNode,
+} = require('../helpers');
 const { constructNeo4jProperties } = require('../../../data/data-conversion');
-const { createNewNode } = require('./post');
 const {
 	mergeLockedFields,
 	validateLockedFields,
@@ -107,8 +109,6 @@ const update = async input => {
 			return existingRecord;
 		}
 
-		const parameters = {};
-
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
@@ -122,26 +122,17 @@ const update = async input => {
 				SET node += $properties
 			`);
 		}
-
+		const parameters = {};
 		if (willDeleteRelationships) {
-			const schema = getType(nodeType);
-			queryParts.push(
-				...Object.entries(removedRelationships).map(
-					([propName, codes]) => {
-						const def = schema.properties[propName];
-						const key = `Delete${def.relationship}${def.direction}${
-							def.type
-						}`;
-						parameters[key] = codes;
-						return `WITH node
-				${cypherHelpers.deleteRelationships(def, key)}
-				`;
-					},
-				),
-			);
-		}
+			const {
+				parameters: delParams,
+				queryParts: relDeleteQueries,
+			} = prepareRelationshipDeletion(nodeType, removedRelationships);
 
-		return await executor({
+			queryParts.push(...relDeleteQueries);
+			Object.assign(parameters, delParams);
+		}
+		return await writeNode({
 			nodeType,
 			code,
 			method: 'PATCH',
