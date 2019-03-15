@@ -137,8 +137,8 @@ CookieExpiry:
 CapabilityTier:
   description: Level of importance of a business capability
   options:
-    - Brand Critical
-    - Business Critical
-    - Not Critical
+    - BrandCritical
+    - BusinessCritical
+    - NotCritical
 
 
