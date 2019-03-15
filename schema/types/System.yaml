@@ -354,7 +354,7 @@ properties:
     hasMany: true
     fieldset: network
   dependentCapabilities:
-    type: Capability
+    type: BusinessCapability
     direction: incoming
     label: Dependent capabilities
     relationship: DEPENDS_ON

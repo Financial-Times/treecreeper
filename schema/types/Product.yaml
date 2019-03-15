@@ -106,7 +106,7 @@ properties:
     label: Product dependents
     fieldset: network
   dependentCapabilities:
-    type: Capability
+    type: BusinessCapability
     direction: incoming
     label: Dependent capabilities
     relationship: DEPENDS_ON

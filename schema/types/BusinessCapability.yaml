@@ -1,4 +1,4 @@
-name: Capability
+name: BusinessCapability
 description: |
   Some business function carried out at FT e.g. ability to publish the news,
   ability to pay staff...
@@ -52,6 +52,22 @@ properties:
     direction: outgoing
     description: The products the capability directly depends on to be fulfilled.
     label: Product dependencies
+    fieldset: network
+  capabilityDependencies:
+    hasMany: true
+    type: BusinessCapability
+    relationship: DEPENDS_ON
+    direction: outgoing
+    description: Other business capabilities this capability depends on to be fulfilled.
+    label: Capability dependencies
+    fieldset: network
+  dependentCapabilities:
+    hasMany: true
+    type: BusinessCapability
+    relationship: DEPENDS_ON
+    direction: incoming
+    description: Other business capabilities that depend on this capability.
+    label: Capability dependents
     fieldset: network
 fieldsets:
   general:
