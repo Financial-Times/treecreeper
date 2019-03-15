@@ -93,6 +93,9 @@ describe('schema polling updates', () => {
 		describe('failure', () => {
 			let schemaVersionCheck;
 			beforeAll(async () => {
+				process.env.NODE_ENV = 'production';
+				schema.sendSchemaToS3 = jest.fn();
+
 				fetch
 					.getOnce(
 						`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
@@ -127,6 +130,9 @@ describe('schema polling updates', () => {
 				jest.advanceTimersByTime(20001);
 				await fetch.flush(true);
 			});
+			afterAll(() => {
+				process.env.NODE_ENV = 'test';
+			});
 
 			it('graphql endpoint still runs on old schema version', async () => {
 				await request(app, { useCached: false })
@@ -155,6 +161,10 @@ describe('schema polling updates', () => {
 					})
 					.namespacedAuth()
 					.expect(200);
+			});
+
+			it('does not send the schema to s3', () => {
+				expect(schema.sendSchemaToS3).not.toHaveBeenCalled();
 			});
 
 			it('triggers the healthcheck to fail', async () => {
