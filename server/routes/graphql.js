@@ -43,7 +43,7 @@ const constructAPI = () => {
 
 		if (process.env.NODE_ENV === 'production') {
 			schema.sendSchemaToS3('api');
-			logger.info({ event: 'API_SCHEMA_UPDATED_IN_S3' });
+			logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 		}
 	} catch (error) {
 		schemaVersionIsConsistent = false;
