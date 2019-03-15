@@ -353,6 +353,14 @@ properties:
     description: Products which depend on this system.
     hasMany: true
     fieldset: network
+  dependentCapabilities:
+    type: BusinessCapability
+    direction: incoming
+    label: Dependent capabilities
+    relationship: DEPENDS_ON
+    description: Business Capabilities that depend on this system.
+    hasMany: true
+    fieldset: network
   recursiveDependentProducts:
     type: Product
     direction: incoming
