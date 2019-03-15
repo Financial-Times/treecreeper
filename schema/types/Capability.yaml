@@ -47,7 +47,6 @@ properties:
     fieldset: network
   productDependencies:
     hasMany: true
-    hidden: true
     type: Product
     relationship: DEPENDS_ON
     direction: outgoing
