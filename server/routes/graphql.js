@@ -40,6 +40,11 @@ const constructAPI = () => {
 		}));
 		schemaVersionIsConsistent = true;
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
+
+		if (process.env.NODE_ENV === 'production') {
+			schema.sendSchemaToS3('api');
+			logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
+		}
 	} catch (error) {
 		schemaVersionIsConsistent = false;
 		logger.error(
