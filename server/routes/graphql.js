@@ -14,7 +14,7 @@ const { driver } = require('../data/db-connection');
 let api;
 let schemaVersionIsConsistent = true;
 
-const constructAPI = () => {
+const constructAPI = ({ updateToS3 = true } = {}) => {
 	try {
 		const newSchema = createSchema();
 		api = graphqlExpress(({ headers }) => ({
@@ -41,7 +41,7 @@ const constructAPI = () => {
 		schemaVersionIsConsistent = true;
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
-		if (process.env.NODE_ENV === 'production') {
+		if (updateToS3 && process.env.NODE_ENV === 'production') {
 			schema.sendSchemaToS3('api');
 			logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 		}
@@ -63,7 +63,7 @@ schema.poller.on('change', constructAPI);
 
 // useful for testing, but should never be used in production as server waits for
 // schema pollingbefore serving any traffic
-constructAPI();
+constructAPI({ updateToS3: false });
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
