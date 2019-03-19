@@ -42,13 +42,17 @@ const constructAPI = ({ updateToS3 = true } = {}) => {
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
 		if (updateToS3 && process.env.NODE_ENV === 'production') {
-			schema.sendSchemaToS3('api').catch(error => {
-				logger.error({
-					event: 'SENDING_SCHEMA_TO_S3_FAILED',
-					error,
+			schema
+				.sendSchemaToS3('api')
+				.then(() => {
+					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
+				})
+				.catch(error => {
+					logger.error({
+						event: 'SENDING_SCHEMA_TO_S3_FAILED',
+						error,
+					});
 				});
-			});
-			logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 		}
 	} catch (error) {
 		schemaVersionIsConsistent = false;
