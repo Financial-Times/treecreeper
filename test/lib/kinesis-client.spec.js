@@ -35,7 +35,7 @@ describe('AWS kinesis client', () => {
 	});
 
 	describe('put record', () => {
-		it('should write to the given stream name in both AWS accounts', async () => {
+		it('should write to the given stream name', async () => {
 			await kinesis.putRecord({
 				event: 'test',
 			});
