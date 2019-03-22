@@ -1,12 +1,11 @@
 /* eslint-disable global-require */
 jest.useFakeTimers();
 
-describe('poller', () => {
-	let poller;
+describe('raw data polling', () => {
 	let fetch;
 	let rawData;
 	afterEach(() => {
-		poller.stop();
+		rawData.stopPolling();
 		jest.resetModules();
 		jest.clearAllTimers();
 	});
@@ -15,20 +14,20 @@ describe('poller', () => {
 		jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
 			virtual: true,
 		});
-		poller = require('../../lib/poller'); // eslint-disable-line global-require
+		rawData = require('../../lib/raw-data'); // eslint-disable-line global-require
 
-		expect(poller.schemaFileName).toEqual('v1.json');
+		expect(rawData.schemaFileName).toEqual('v1.json');
 	});
 
 	describe('polling', () => {
-		it('fetches url based on baseUrl and package.json', async () => {
+		it.only('fetches url based on baseUrl and package.json', async () => {
 			fetch = require('node-fetch');
 			jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
 				virtual: true,
 			});
-			poller = require('../../lib/poller'); // eslint-disable-line global-require
+			rawData = require('../../lib/raw-data'); // eslint-disable-line global-require
 			fetch.mock('https://base.url/v1.json', { result: true });
-			await poller.start('https://base.url');
+			await rawData.startPolling('https://base.url');
 			expect(fetch.done()).toEqual(true);
 		});
 
@@ -41,9 +40,9 @@ describe('poller', () => {
 				}),
 				{ virtual: true },
 			);
-			poller = require('../../lib/poller'); // eslint-disable-line global-require
+			rawData = require('../../lib/raw-data'); // eslint-disable-line global-require
 			fetch.mock('https://base.url/v1-prerelease.json', { result: true });
-			await poller.start('https://base.url');
+			await rawData.startPolling('https://base.url');
 			expect(fetch.done()).toEqual(true);
 		});
 
@@ -52,9 +51,9 @@ describe('poller', () => {
 			jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
 				virtual: true,
 			});
-			poller = require('../../lib/poller'); // eslint-disable-line global-require
+			rawData = require('../../lib/raw-data'); // eslint-disable-line global-require
 			fetch.mock('https://base.url/v1.json', { result: true });
-			await poller.start('https://base.url');
+			await rawData.startPolling('https://base.url');
 
 			expect(setInterval).toHaveBeenCalledTimes(1);
 			expect(setInterval).toHaveBeenLastCalledWith(
@@ -77,12 +76,12 @@ describe('poller', () => {
 			jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
 				virtual: true,
 			});
-			poller = require('../../lib/poller'); // eslint-disable-line global-require
+			poller = require('../../lib/raw-data'); // eslint-disable-line global-require
 			const listener = jest.fn();
 			fetch.mock('https://base.url/v1.json', { version: 1 });
 
 			poller.on('change', listener);
-			await poller.start('https://base.url');
+			await rawData.startPolling('https://base.url');
 			expect(listener).not.toHaveBeenCalled();
 		});
 		it('overwrites existing schema if has different version', async () => {
@@ -95,11 +94,11 @@ describe('poller', () => {
 			jest.doMock('../../package.json', () => ({ version: '1.2.3' }), {
 				virtual: true,
 			});
-			poller = require('../../lib/poller'); // eslint-disable-line global-require
+			poller = require('../../lib/raw-data'); // eslint-disable-line global-require
 			const listener = jest.fn();
 			fetch.mock('https://base.url/v1.json', { version: 2 });
 			poller.on('change', listener);
-			await poller.start('https://base.url');
+			await rawData.startPolling('https://base.url');
 			expect(listener).toHaveBeenCalled();
 			expect(rawData.set).toHaveBeenCalledWith({ version: 2 });
 		});

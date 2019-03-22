@@ -1,22 +1,27 @@
-const type = require('./methods/get-type');
-const types = require('./methods/get-types');
-const enums = require('./methods/get-enums');
-const graphqlDefs = require('./methods/get-graphql-defs');
 const primitiveTypes = require('./lib/primitive-types-map');
 const sendSchemaToS3 = require('./lib/send-schema-to-s3');
-const poller = require('./lib/poller');
-const validate = require('./lib/validate');
 
-module.exports = Object.assign(
-	{
-		getType: type,
-		getTypes: types,
-		getEnums: enums,
-		getGraphqlDefs: graphqlDefs,
-		normalizeTypeName: name => name,
-		primitiveTypesMap: primitiveTypes,
-		sendSchemaToS3,
-		poller,
+const RawData = require('./lib/raw-data');
+const getDataAccessors = require('./data-accessors');
+const getValidators = require('./lib/validate');
+
+module.exports = {
+	init: opts => {
+		const rawData = new RawData(opts);
+		const dataAccessors = getDataAccessors(RawData);
+		const validate = getValidators(dataAccessors);
+
+		return Object.assign(
+			{
+				on: rawData.on.bind(rawData),
+				startPolling: rawData.startPolling.bind(rawData),
+				stopPolling: rawData.stopPolling.bind(rawData),
+				normalizeTypeName: name => name,
+				primitiveTypesMap: primitiveTypes,
+				sendSchemaToS3: sendSchemaToS3(rawData),
+			},
+			validate,
+			dataAccessors,
+		);
 	},
-	validate,
-);
+};

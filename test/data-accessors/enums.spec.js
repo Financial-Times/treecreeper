@@ -1,19 +1,15 @@
-const { getEnums } = require('../..');
-const rawData = require('../../lib/raw-data');
-const cache = require('../../lib/cache');
+const enums = require('../../data-accessors/enums');
+const RawData = require('../../lib/raw-data');
+
+const enumsFromRawData = data => {
+	const rawData = new RawData();
+	rawData.setRawData({ schema: { enums: data } });
+	return enums(rawData);
+};
 
 describe('get-enums', () => {
-	beforeEach(() => {
-		jest.spyOn(rawData, 'getEnums');
-	});
-
-	afterEach(() => {
-		cache.clear();
-		jest.restoreAllMocks();
-	});
-
 	it('retrieve enums', () => {
-		rawData.getEnums.mockReturnValue({
+		const getEnums = enumsFromRawData({
 			enum1: {
 				description: 'ab',
 				options: ['a'],
@@ -23,7 +19,7 @@ describe('get-enums', () => {
 	});
 
 	it('retrieve enums with metadata', () => {
-		rawData.getEnums.mockReturnValue({
+		const getEnums = enumsFromRawData({
 			enum1: {
 				description: 'ab',
 				options: ['a'],
@@ -35,7 +31,7 @@ describe('get-enums', () => {
 	});
 
 	it('convert arrays into key/value maps', () => {
-		rawData.getEnums.mockReturnValue({
+		const getEnums = enumsFromRawData({
 			enum1: {
 				options: ['a', 'b', 'c'],
 			},
@@ -44,7 +40,7 @@ describe('get-enums', () => {
 	});
 
 	it('retrieve key/value maps unaltered', () => {
-		rawData.getEnums.mockReturnValue({
+		const getEnums = enumsFromRawData({
 			enum1: {
 				options: {
 					a: 1,

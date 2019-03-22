@@ -1,10 +1,8 @@
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
-const rawData = require('../lib/raw-data');
-const cache = require('../lib/cache');
 const getStringValidator = require('../lib/get-string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('./constants');
+const metaProperties = require('../lib/constants');
 
 const META = 'meta';
 const BIZ_OPS = 'biz-ops';
@@ -13,7 +11,7 @@ const SELF = 'self';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const getType = (
+const getType = rawData => (
 	typeName,
 	{
 		primitiveTypes = BIZ_OPS, // graphql
@@ -165,16 +163,17 @@ const getType = (
 	return deepFreeze(typeDefinitionResult);
 };
 
-module.exports = cache.cacheify(
-	getType,
-	(
-		typeName,
-		{
-			primitiveTypes = BIZ_OPS,
-			withRelationships = true,
-			groupProperties = false,
-			includeMetaFields = true,
-		} = {},
-	) =>
-		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
-);
+module.exports = rawData =>
+	rawData.cache.cacheify(
+		getType(rawData),
+		(
+			typeName,
+			{
+				primitiveTypes = BIZ_OPS,
+				withRelationships = true,
+				groupProperties = false,
+				includeMetaFields = true,
+			} = {},
+		) =>
+			`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
+	);

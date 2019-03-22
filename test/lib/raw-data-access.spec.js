@@ -1,6 +1,6 @@
 const rawData = require('../../lib/raw-data');
 
-describe('raw data fetching spec', () => {
+describe('raw data access', () => {
 	const dummySchema = {
 		schema: {
 			types: ['type1', 'type2'],
