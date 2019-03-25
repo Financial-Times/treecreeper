@@ -6,7 +6,7 @@ jest.mock('../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 
 const nextTick = () => new Promise(res => process.nextTick(res));
 

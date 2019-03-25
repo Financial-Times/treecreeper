@@ -1,4 +1,4 @@
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
 const getValidator = (type, enums = {}) => {

@@ -1,4 +1,4 @@
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 
 const enumsFromRawData = data =>
 	init({ rawData: { schema: { enums: data } } }).getEnums;

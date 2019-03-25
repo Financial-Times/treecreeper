@@ -1,5 +1,5 @@
 const primitiveTypesMap = require('../../lib/primitive-types-map');
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 const readYaml = require('../../lib/read-yaml');
 
 const stringPatterns = readYaml.file('string-patterns.yaml');

@@ -9,7 +9,7 @@ jest.doMock('../../data-accessors/type', () => {
 		cacheKeyHelper: name => name,
 	};
 });
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 
 describe('get-types', () => {
 	it('gets all types', () => {

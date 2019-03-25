@@ -1,4 +1,4 @@
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 
 describe('validatePropertyName', () => {
 	const { validatePropertyName } = init();

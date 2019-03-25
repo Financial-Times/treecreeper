@@ -1,5 +1,5 @@
 const { parse } = require('graphql');
-const { init } = require('../..');
+const { init } = require('../../lib/get-instance');
 
 describe('graphql defs', () => {
 	it('should be syntactically correct (can be parsed by graphql parser)', () => {
