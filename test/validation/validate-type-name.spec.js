@@ -1,29 +1,23 @@
-const getType = require('../../methods/get-type');
-const { validateTypeName } = require('../..');
-
-jest.mock('../../methods/get-type');
+const { init } = require('../..');
 
 describe('validateTypeName', () => {
-	beforeEach(() => {
-		jest.mock('../../methods/get-type');
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
-	});
-
-	afterAll(() => {
-		jest.restoreAllMocks();
+	const { validateTypeName } = init({
+		rawData: {
+			schema: {
+				types: [
+					{
+						name: 'Thing',
+					},
+				],
+				enums: {},
+			},
+		},
 	});
 
 	it('accept names in the list', () => {
-		getType.mockReturnValue({
-			name: 'Thing',
-		});
 		expect(() => validateTypeName('Thing')).not.toThrow();
 	});
 	it('reject names not in the list', () => {
-		getType.mockReturnValue();
 		expect(() => validateTypeName('Thingo')).toThrow(/Invalid node type/);
 	});
 });

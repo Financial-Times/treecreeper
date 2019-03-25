@@ -1,4 +1,6 @@
-const cache = require('../../lib/cache');
+const Cache = require('../../lib/cache');
+
+const cache = new Cache();
 
 describe('cache spec', () => {
 	let func;

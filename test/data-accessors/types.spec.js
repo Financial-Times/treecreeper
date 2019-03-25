@@ -3,7 +3,7 @@ typeAccessor.mockImplementation((rawData, name) => ({
 	name: `${name} - retrieved`,
 }));
 
-const type = jest.doMock('../../data-accessors/type', () => {
+jest.doMock('../../data-accessors/type', () => {
 	return {
 		accessor: typeAccessor,
 		cacheKeyHelper: name => name,

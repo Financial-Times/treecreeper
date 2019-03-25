@@ -1,49 +1,47 @@
-const getType = require('../../methods/get-type');
-const getEnums = require('../../methods/get-enums');
-const { validateProperty } = require('../..');
+const { init } = require('../..');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
-jest.mock('../../methods/get-type');
-jest.mock('../../methods/get-enums');
-
-describe('validateProperty', () => {
-	beforeEach(() => {
-		jest.mock('../../methods/get-type');
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
-	});
-
-	afterAll(() => {
-		jest.restoreAllMocks();
-	});
-
-	it('not accept if not in schema', () => {
-		getType.mockReturnValue({
-			name: 'Thing',
-			properties: {
-				prop: {
-					type: 'Boolean',
+const getValidator = (type, enums = {}) => {
+	return init({
+		rawData: {
+			schema: {
+				types: Array.isArray(type) ? type : [type],
+				enums,
+				stringPatterns: {
+					NO_Z: '^[^z]+$',
+					LOWERCASE: '^[a-z]+$',
 				},
 			},
-		});
-		expect(() => validateProperty('Thing', 'prop1', true)).toThrow(
-			/Invalid property `prop1` on type `Thing`/,
-		);
+		},
+	}).validateProperty;
+};
+
+describe('validateProperty', () => {
+	it('not accept if not in schema', () => {
+		expect(() =>
+			getValidator({
+				name: 'Thing',
+				properties: {
+					prop: {
+						type: 'Boolean',
+					},
+				},
+			})('Thing', 'prop1', true),
+		).toThrow(/Invalid property `prop1` on type `Thing`/);
 	});
 
 	describe('validating strings', () => {
 		Object.entries(primitiveTypesMap).forEach(
 			([bizOpsType, graphqlType]) => {
+				let validateProperty;
 				if (graphqlType === 'String') {
 					beforeEach(() => {
-						getType.mockReturnValue({
+						validateProperty = getValidator({
 							name: 'Thing',
 							properties: {
 								prop: {
 									type: bizOpsType,
-									validator: /^[^z]+$/, // exclude the letter z
+									pattern: 'NO_Z',
 								},
 							},
 						});
@@ -85,8 +83,9 @@ describe('validateProperty', () => {
 		);
 	});
 	describe('validating booleans', () => {
+		let validateProperty;
 		beforeEach(() => {
-			getType.mockReturnValue({
+			validateProperty = getValidator({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -119,8 +118,9 @@ describe('validateProperty', () => {
 		});
 	});
 	describe('validating floats', () => {
+		let validateProperty;
 		beforeEach(() => {
-			getType.mockReturnValue({
+			validateProperty = getValidator({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -152,8 +152,9 @@ describe('validateProperty', () => {
 	});
 
 	describe('validating integers', () => {
+		let validateProperty;
 		beforeEach(() => {
-			getType.mockReturnValue({
+			validateProperty = getValidator({
 				name: 'Thing',
 				properties: {
 					prop: {
@@ -186,21 +187,26 @@ describe('validateProperty', () => {
 		});
 	});
 	describe('validating enums', () => {
+		let validateProperty;
 		beforeEach(() => {
-			getType.mockReturnValue({
-				name: 'Thing',
-				properties: {
-					prop: {
-						type: 'MyEnum',
+			validateProperty = getValidator(
+				{
+					name: 'Thing',
+					properties: {
+						prop: {
+							type: 'MyEnum',
+						},
 					},
 				},
-			});
-			getEnums.mockReturnValue({
-				MyEnum: {
-					bear: 'grylls',
-					ray: 'winstone',
+				{
+					MyEnum: {
+						options: {
+							bear: 'grylls',
+							ray: 'winstone',
+						},
+					},
 				},
-			});
+			);
 		});
 		it('accept value defined in a mapping enum', () => {
 			expect(() =>
@@ -216,39 +222,40 @@ describe('validateProperty', () => {
 	});
 
 	describe('validating relationships', () => {
+		let validateProperty;
 		beforeEach(() => {
-			getType.mockImplementation(type =>
-				type === 'StartType'
-					? {
-							name: 'StartType',
-							properties: {
-								testRelationship: {
-									type: 'EndType',
-									direction: 'outgoing',
-									relationship: 'HAS',
-									hasMany: false,
-								},
-							},
-					  }
-					: {
-							name: 'EndType',
-							properties: {
-								code: { validator: /^[a-z]+$/, type: 'String' },
-							},
-					  },
-			);
+			validateProperty = getValidator([
+				{
+					name: 'StartType',
+					properties: {
+						testRelationship: {
+							type: 'EndType',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							hasMany: false,
+						},
+					},
+				},
+				{
+					name: 'EndType',
+					properties: {
+						code: { pattern: 'LOWERCASE', type: 'String' },
+					},
+				},
+			]);
 		});
+
 		it('reject when related node code is invalid', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelationship', 'CODE'),
+				validateProperty('StartType', 'testRelationship', 'UPPERCASE'),
 			).toThrow(
-				/Invalid value `CODE` for property `code` on type `EndType`/,
+				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
 			);
 		});
 
 		it('accept when all is correct', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelationship', 'code'),
+				validateProperty('StartType', 'testRelationship', 'lowercase'),
 			).not.toThrow();
 		});
 	});
