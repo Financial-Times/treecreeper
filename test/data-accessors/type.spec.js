@@ -1,13 +1,15 @@
 const metaProperties = require('../../lib/constants');
-const dataAccessors = require('../../data-accessors');
-const RawData = require('../../lib/raw-data');
+const { init } = require('../..');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
-	const rawData = new RawData();
-	rawData.setRawData({
-		schema: { types: [{ name: 'DummyType' }, typeData], stringPatterns },
-	});
-	return dataAccessors(rawData).getType('Type1', options);
+	return init({
+		rawData: {
+			schema: {
+				types: [{ name: 'DummyType' }, typeData],
+				stringPatterns,
+			},
+		},
+	}).getType('Type1', options);
 };
 
 describe('get-type', () => {

@@ -1,18 +1,19 @@
 const primitiveTypesMap = require('../../lib/primitive-types-map');
-
-const RawData = require('../../lib/raw-data');
-const dataAccessors = require('../../data-accessors');
+const { init } = require('../..');
 const readYaml = require('../../lib/read-yaml');
 
 const stringPatterns = readYaml.file('string-patterns.yaml');
 
-const graphqlFromRawData = schema => {
-	const rawData = new RawData();
-	rawData.setRawData({
-		schema,
-	});
-	return dataAccessors(rawData).getGraphqlDefs();
-};
+const graphqlFromRawData = schema =>
+	init({ rawData: { schema } }).getGraphqlDefs();
+
+// const  = schema => {
+// 	const rawData = new RawData();
+// 	rawData.setRawData({
+// 		schema,
+// 	});
+// 	return dataAccessors(rawData);
+// };
 
 const explodeString = str =>
 	str

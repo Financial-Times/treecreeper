@@ -1,22 +1,16 @@
 const getType = require('../../methods/get-type');
-const { validateCode } = require('../..');
-
-jest.mock('../../methods/get-type');
+const getValidators = require('../../lib/validate');
 
 describe('validateCode', () => {
-	beforeEach(() => {
-		jest.mock('../../methods/get-type');
-
-		getType.mockReturnValue({
-			name: 'Thing',
-			properties: {
-				code: {
-					type: 'String',
-					validator: /^[^z]+$/, // exclude the letter z
-				},
+	const validators = getValidators(() => ({
+		name: 'Thing',
+		properties: {
+			code: {
+				type: 'String',
+				validator: /^[^z]+$/, // exclude the letter z
 			},
-		});
-	});
+		},
+	}));
 
 	afterEach(() => {
 		jest.clearAllMocks();
@@ -27,20 +21,30 @@ describe('validateCode', () => {
 	});
 
 	it('accept strings', () => {
-		expect(() => validateCode('Thing', 'acceptable')).not.toThrow();
+		expect(() =>
+			validators.validateCode('Thing', 'acceptable'),
+		).not.toThrow();
 	});
 	it('not accept booleans', () => {
-		expect(() => validateCode('Thing', true)).toThrow(/Must be a string/);
-		expect(() => validateCode('Thing', false)).toThrow(/Must be a string/);
+		expect(() => validators.validateCode('Thing', true)).toThrow(
+			/Must be a string/,
+		);
+		expect(() => validators.validateCode('Thing', false)).toThrow(
+			/Must be a string/,
+		);
 	});
 	it('not accept floats', () => {
-		expect(() => validateCode('Thing', 1.34)).toThrow(/Must be a string/);
+		expect(() => validators.validateCode('Thing', 1.34)).toThrow(
+			/Must be a string/,
+		);
 	});
 	it('not accept integers', () => {
-		expect(() => validateCode('Thing', 134)).toThrow(/Must be a string/);
+		expect(() => validators.validateCode('Thing', 134)).toThrow(
+			/Must be a string/,
+		);
 	});
 	it('apply string patterns', () => {
-		expect(() => validateCode('Thing', 'zo-no')).toThrow(
+		expect(() => validators.validateCode('Thing', 'zo-no')).toThrow(
 			/Must match pattern/,
 		);
 	});

@@ -9,26 +9,23 @@ const type = jest.doMock('../../data-accessors/type', () => {
 		cacheKeyHelper: name => name,
 	};
 });
-const RawData = require('../../lib/raw-data');
-
-const dataAccessors = require('../../data-accessors');
+const { init } = require('../..');
 
 describe('get-types', () => {
 	it('gets all types', () => {
-		const rawData = new RawData();
-		rawData.setRawData({
-			schema: {
-				types: [
-					{
-						name: 'Type1',
-						description: 'woo1',
-					},
-					{ name: 'Type2', description: 'woo2' },
-				],
+		const types = init({
+			rawData: {
+				schema: {
+					types: [
+						{
+							name: 'Type1',
+							description: 'woo1',
+						},
+						{ name: 'Type2', description: 'woo2' },
+					],
+				},
 			},
-		});
-		const accessors = dataAccessors(rawData);
-		const types = accessors.getTypes({ option: 'value' });
+		}).getTypes({ option: 'value' });
 
 		expect(types).toEqual([
 			{
@@ -39,10 +36,10 @@ describe('get-types', () => {
 			},
 		]);
 
-		expect(typeAccessor).toHaveBeenCalledWith(rawData, 'Type1', {
+		expect(typeAccessor).toHaveBeenCalledWith(expect.any(Object), 'Type1', {
 			option: 'value',
 		});
-		expect(typeAccessor).toHaveBeenCalledWith(rawData, 'Type2', {
+		expect(typeAccessor).toHaveBeenCalledWith(expect.any(Object), 'Type2', {
 			option: 'value',
 		});
 	});

@@ -6,8 +6,11 @@ const getDataAccessors = require('./data-accessors');
 const getValidators = require('./lib/validate');
 
 module.exports = {
-	init: opts => {
+	init: (opts = {}) => {
 		const rawData = new RawData(opts);
+		if (opts.rawData) {
+			rawData.setRawData(opts.rawData);
+		}
 		const dataAccessors = getDataAccessors(rawData);
 		const validate = getValidators(dataAccessors);
 
