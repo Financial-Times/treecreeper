@@ -1,14 +1,14 @@
 const typeAccessor = jest.fn();
 typeAccessor.mockImplementation((rawData, name) => ({
-	name: `${name} - retrieved`
+	name: `${name} - retrieved`,
 }));
 
 const type = jest.doMock('../../data-accessors/type', () => {
 	return {
 		accessor: typeAccessor,
-		cacheKeyHelper: (name) => name
-	}
-})
+		cacheKeyHelper: name => name,
+	};
+});
 const RawData = require('../../lib/raw-data');
 
 const dataAccessors = require('../../data-accessors');

@@ -34,7 +34,7 @@ prod-env:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true jest test/data-accessors/* --testEnvironment=node --watch ; \
+		then DEBUG=true jest test/data-*/* --testEnvironment=node --watch ; \
 		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 

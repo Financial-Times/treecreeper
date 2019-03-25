@@ -11,7 +11,8 @@ const SELF = 'self';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const getType = (rawData,
+const getType = (
+	rawData,
 	typeName,
 	{
 		primitiveTypes = BIZ_OPS, // graphql
@@ -173,13 +174,13 @@ const getType = (rawData,
 module.exports = {
 	accessor: getType,
 	cacheKeyHelper: (
-			typeName,
-			{
-				primitiveTypes = BIZ_OPS,
-				withRelationships = true,
-				groupProperties = false,
-				includeMetaFields = true,
-			} = {},
-		) =>
-			`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
-}
+		typeName,
+		{
+			primitiveTypes = BIZ_OPS,
+			withRelationships = true,
+			groupProperties = false,
+			includeMetaFields = true,
+		} = {},
+	) =>
+		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
+};

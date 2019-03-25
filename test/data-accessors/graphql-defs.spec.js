@@ -1,14 +1,15 @@
-const generateGraphqlDefs = require('../..').getGraphqlDefs;
-const rawData = require('../../lib/raw-data');
-const cache = require('../../lib/cache');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
+const RawData = require('../../lib/raw-data');
+const dataAccessors = require('../../data-accessors');
+const readYaml = require('../../lib/read-yaml');
 
+const stringPatterns = readYaml.file('string-patterns.yaml');
 
-const graphqlFromRawData = (schema) => {
+const graphqlFromRawData = schema => {
 	const rawData = new RawData();
 	rawData.setRawData({
-		schema
+		schema,
 	});
 	return dataAccessors(rawData).getGraphqlDefs();
 };
@@ -21,93 +22,94 @@ const explodeString = str =>
 		.map(string => string.trim());
 
 describe('graphql def creation', () => {
-
 	it('generates expected graphql def given schema', () => {
 		const schema = {
 			types: [
-			{
-				name: 'CostCentre',
-				description: 'A cost centre which groups are costed to',
-				properties: {
-					code: {
-						type: 'Word',
-						required: true,
-						unique: true,
-						canIdentify: true,
-						description: 'Unique code/id for this item',
-						pattern: 'COST_CENTRE',
-					},
-					name: {
-						type: 'Word',
-						canIdentify: true,
-						description: 'The name of the cost centre',
-					},
-					hasGroups: {
-						type: 'Group',
-						relationship: 'PAYS_FOR',
-						direction: 'outgoing',
-						hasMany: true,
-						description:
-							'The groups which are costed to the cost centre',
-					},
-					hasNestedGroups: {
-						type: 'Group',
-						relationship: 'PAYS_FOR',
-						direction: 'outgoing',
-						hasMany: true,
-						isRecursive: true,
-						description:
-							'The recursive groups which are costed to the cost centre',
-					},
-				},
-			},
-			{
-				name: 'Group',
-				description:
-					'An overarching group which contains teams and is costed separately',
-				properties: {
-					code: {
-						type: 'Word',
-						required: true,
-						unique: true,
-						canIdentify: true,
-						description: 'Unique code/id for this item',
-						pattern: 'COST_CENTRE',
-					},
-					name: {
-						type: 'Word',
-						canIdentify: true,
-						description: 'The name of the group',
-					},
-					isActive: {
-						type: 'Boolean',
-						description:
-							'Whether or not the group is still in existence',
-					},
-					hasBudget: {
-						type: 'CostCentre',
-						relationship: 'PAYS_FOR',
-						direction: 'incoming',
-						description:
-							'The Cost Centre associated with the group',
-					},
-					hasEventualBudget: {
-						type: 'CostCentre',
-						description:
-							'The Cost Centre associated with the group in the end',
-						isRecursive: true,
-						relationship: 'PAYS_FOR',
-						direction: 'incoming',
+				{
+					name: 'CostCentre',
+					description: 'A cost centre which groups are costed to',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the cost centre',
+						},
+						hasGroups: {
+							type: 'Group',
+							relationship: 'PAYS_FOR',
+							direction: 'outgoing',
+							hasMany: true,
+							description:
+								'The groups which are costed to the cost centre',
+						},
+						hasNestedGroups: {
+							type: 'Group',
+							relationship: 'PAYS_FOR',
+							direction: 'outgoing',
+							hasMany: true,
+							isRecursive: true,
+							description:
+								'The recursive groups which are costed to the cost centre',
+						},
 					},
 				},
+				{
+					name: 'Group',
+					description:
+						'An overarching group which contains teams and is costed separately',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the group',
+						},
+						isActive: {
+							type: 'Boolean',
+							description:
+								'Whether or not the group is still in existence',
+						},
+						hasBudget: {
+							type: 'CostCentre',
+							relationship: 'PAYS_FOR',
+							direction: 'incoming',
+							description:
+								'The Cost Centre associated with the group',
+						},
+						hasEventualBudget: {
+							type: 'CostCentre',
+							description:
+								'The Cost Centre associated with the group in the end',
+							isRecursive: true,
+							relationship: 'PAYS_FOR',
+							direction: 'incoming',
+						},
+					},
+				},
+			],
+			enums: {
+				Lifecycle: {
+					description: 'The lifecycle stage of a product',
+					options: ['Incubate', 'Sustain', 'Grow', 'Sunset'],
+				},
 			},
-		], enums: {
-			Lifecycle: {
-				description: 'The lifecycle stage of a product',
-				options: ['Incubate', 'Sustain', 'Grow', 'Sunset'],
-			},
-		}
-		}
+			stringPatterns,
+		};
 
 		const generated = [].concat(
 			...graphqlFromRawData(schema).map(explodeString),
@@ -269,24 +271,27 @@ Sunset
 	it('Multiline descriptions', () => {
 		const schema = {
 			types: [
-			{
-				name: 'Dummy',
-				description: 'dummy type description',
-				properties: {
-					prop: {
-						type: 'Boolean',
-						description: 'a description\nmultiline',
+				{
+					name: 'Dummy',
+					description: 'dummy type description',
+					properties: {
+						prop: {
+							type: 'Boolean',
+							description: 'a description\nmultiline',
+						},
 					},
 				},
+			],
+			enums: {
+				AnEnum: {
+					name: 'DummyEnum',
+					description: 'an enum description\nmultiline',
+					options: ['One', 'Two'],
+				},
 			},
-		], enums: {
-			AnEnum: {
-				name: 'DummyEnum',
-				description: 'an enum description\nmultiline',
-				options: ['One', 'Two'],
-			},
-		}};
-		const generated = [].concat(...graphqlFromRawData()).join('');
+			stringPatterns,
+		};
+		const generated = [].concat(...graphqlFromRawData(schema)).join('');
 		// note the regex has a space, not a new line
 		expect(generated).toMatch(/a description multiline/);
 		expect(generated).toMatch(/an enum description multiline/);
@@ -294,20 +299,24 @@ Sunset
 
 	describe('deprecation', () => {
 		it('can deprecate a property', () => {
-			const schema = {types: [
-				{
-					name: 'Dummy',
-					description: 'dummy type description',
-					properties: {
-						prop: {
-							type: 'Boolean',
-							deprecationReason: 'not needed',
-							description: 'a description',
+			const schema = {
+				types: [
+					{
+						name: 'Dummy',
+						description: 'dummy type description',
+						properties: {
+							prop: {
+								type: 'Boolean',
+								deprecationReason: 'not needed',
+								description: 'a description',
+							},
 						},
 					},
-				},
-			], enums: {}});
-			const generated = [].concat(...graphqlFromRawData()).join('');
+				],
+				enums: {},
+				stringPatterns,
+			};
+			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop: Boolean  @deprecated(reason: "not needed")',
@@ -315,23 +324,27 @@ Sunset
 		});
 
 		it('can deprecate a relationship property', () => {
-			const schema = {types: [
-				{
-					name: 'Dummy',
-					description: 'dummy type description',
-					properties: {
-						prop: {
-							type: 'Boolean',
-							deprecationReason: 'not needed',
-							description: 'a description',
-							relationship: 'HAS',
-							direction: 'outgoing',
-							hasMany: true,
+			const schema = {
+				types: [
+					{
+						name: 'Dummy',
+						description: 'dummy type description',
+						properties: {
+							prop: {
+								type: 'Boolean',
+								deprecationReason: 'not needed',
+								description: 'a description',
+								relationship: 'HAS',
+								direction: 'outgoing',
+								hasMany: true,
+							},
 						},
 					},
-				},
-			], enuma: {}};
-			const generated = [].concat(...graphqlFromRawData()).join('');
+				],
+				enums: {},
+				stringPatterns,
+			};
+			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop(first: Int, offset: Int): [Boolean] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
@@ -344,20 +357,24 @@ Sunset
 			([bizopsType, graphqlType]) => {
 				if (bizopsType === 'Document') {
 					it(`Does not expose Document properties`, () => {
-						const schema = {types: [
-							{
-								name: 'Dummy',
-								description: 'dummy type description',
-								properties: {
-									prop: {
-										type: 'Document',
-										description: 'a description',
+						const schema = {
+							types: [
+								{
+									name: 'Dummy',
+									description: 'dummy type description',
+									properties: {
+										prop: {
+											type: 'Document',
+											description: 'a description',
+										},
 									},
 								},
-							},
-						], enums: {}});
+							],
+							enums: {},
+							stringPatterns,
+						};
 						const generated = []
-							.concat(...graphqlFromRawData())
+							.concat(...graphqlFromRawData(schema))
 							.join('');
 
 						expect(generated).not.toMatch(
@@ -366,20 +383,24 @@ Sunset
 					});
 				} else {
 					it(`Outputs correct type for properties using ${bizopsType}`, () => {
-						const schema = {types: [
-							{
-								name: 'Dummy',
-								description: 'dummy type description',
-								properties: {
-									prop: {
-										type: bizopsType,
-										description: 'a description',
+						const schema = {
+							types: [
+								{
+									name: 'Dummy',
+									description: 'dummy type description',
+									properties: {
+										prop: {
+											type: bizopsType,
+											description: 'a description',
+										},
 									},
 								},
-							},
-						], enums: {}};
+							],
+							enums: {},
+							stringPatterns,
+						};
 						const generated = []
-							.concat(...graphqlFromRawData())
+							.concat(...graphqlFromRawData(schema))
 							.join('');
 
 						expect(generated).toMatch(
