@@ -33,6 +33,7 @@ describe('refreshing schema when stale', () => {
 		await fetch.flush();
 		await nextTick();
 		expect(isPending).toEqual(false);
+		schema.stopPolling();
 	});
 
 	it('fetches again after TTL has expired', async () => {
@@ -47,6 +48,7 @@ describe('refreshing schema when stale', () => {
 		fetch.resetHistory();
 		jest.advanceTimersByTime(101);
 		expect(fetch.called()).toBe(true);
+		schema.stopPolling();
 	});
 
 	describe('handle updates', () => {
@@ -73,6 +75,7 @@ describe('refreshing schema when stale', () => {
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
 			expect(schema.getType('It')).toEqual(expect.any(Object));
+			schema.stopPolling();
 		});
 
 		it('updates local data nad triggers event when version has changed', async () => {
@@ -107,6 +110,7 @@ describe('refreshing schema when stale', () => {
 			await fetch.flush();
 			expect(listener).toHaveBeenCalled();
 			expect(schema.getType('NotIt')).toEqual(expect.any(Object));
+			schema.stopPolling();
 		});
 	});
 });
