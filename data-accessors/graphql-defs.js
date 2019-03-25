@@ -137,6 +137,7 @@ module.exports = (getTypes, getEnums) => () => {
 	const typesFromSchema = getTypes({
 		primitiveTypes: 'graphql',
 		relationshipStructure: 'graphql',
+		includeMetaFields: true,
 	});
 	const customDateTimeTypes = stripIndent`
 		scalar DateTime

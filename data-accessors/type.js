@@ -3,71 +3,54 @@ const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/constants');
 
 const BIZ_OPS = 'biz-ops';
-const SELF = 'self';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
 const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
-	const virtualFieldsetProperties = properties.filter(
-		([, { fieldset }]) => fieldset === SELF,
-	);
+	const fieldsetEntries = Object.entries(fieldsets);
 
-	const realFieldsetProperties = properties.filter(
-		([, { fieldset }]) => fieldset && fieldset !== SELF,
-	);
+	const hasRealFieldsets = !!fieldsetEntries.length;
 
-	const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
-
-	fieldsets = Object.entries(fieldsets);
-
-	const hasRealFieldsets = !!fieldsets.length;
+	fieldsetEntries.push([
+		'misc',
+		{
+			heading: hasRealFieldsets ? 'Miscellaneous' : 'General',
+		},
+	]);
 
 	if (includeMetaFields) {
-		fieldsets.push(['meta', { heading: 'Meta Data' }]);
+		fieldsetEntries.push(['meta', { heading: 'Metadata' }]);
 	}
 
-	const realFieldsets = fieldsets
-		.map(([fieldsetName, fieldsetDef]) => {
-			fieldsetDef.properties = entriesArrayToObject(
-				realFieldsetProperties.filter(
-					([, { fieldset }]) => fieldset === fieldsetName,
-				),
-			);
-
-			return [fieldsetName, fieldsetDef];
-		})
-		/* eslint-disable no-shadow */
-		.filter(([, { properties }]) => !!Object.keys(properties).length);
-
-	const virtualFieldsets = virtualFieldsetProperties.map(
-		([propertyName, propertyDef]) => {
-			return [
-				propertyName,
+	properties.forEach(([prop, def]) => {
+		const { fieldset } = def;
+		if (fieldset === 'self') {
+			fieldsetEntries.push([
+				prop,
 				{
-					heading: propertyDef.label,
-					description: propertyDef.description,
+					heading: def.label,
+					description: def.description,
 					isSingleField: true,
-					properties: { [propertyName]: propertyDef },
+					properties: [[prop, def]],
 				},
-			];
-		},
-	);
-
-	const miscellaneous = miscProperties.length
-		? [
-				[
-					'misc',
-					{
-						heading: hasRealFieldsets ? 'Miscellaneous' : 'General',
-						properties: entriesArrayToObject(miscProperties),
-					},
-				],
-		  ]
-		: [];
+			]);
+		} else {
+			const [, targetFieldset] = fieldsetEntries.find(
+				([name]) => name === (fieldset || 'misc'),
+			);
+			targetFieldset.properties = targetFieldset.properties || [];
+			targetFieldset.properties.push([prop, def]);
+		}
+	});
 
 	return entriesArrayToObject(
-		[].concat(realFieldsets, virtualFieldsets, miscellaneous),
+		fieldsetEntries
+			.filter(([, { properties: props }]) => props && props.length)
+			.map(([prop, def]) => {
+				def.properties = entriesArrayToObject(def.properties);
+				return [prop, def];
+			}),
 	);
 };
 
@@ -82,7 +65,7 @@ const cacheKeyHelper = (
 ) =>
 	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
 
-const getTypeDefinition = (typeName, rawData) => {
+const getFromRawData = (typeName, rawData) => {
 	const typeDefinition = rawData
 		.getTypes()
 		.find(type => type.name === typeName);
@@ -105,7 +88,7 @@ const getType = (
 		includeMetaFields = false,
 	} = {},
 ) => {
-	const typeSchema = getTypeDefinition(typeName, rawData);
+	const typeSchema = getFromRawData(typeName, rawData);
 
 	typeSchema.type = typeSchema.name;
 
@@ -117,13 +100,7 @@ const getType = (
 		typeSchema.pluralName = `${typeSchema.name}s`;
 	}
 
-	if (!withRelationships) {
-		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
-				delete typeSchema.properties[propName];
-			}
-		});
-	} else {
+	if (withRelationships) {
 		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
 			if (def.relationship) {
 				if (def.hidden) {
@@ -136,12 +113,18 @@ const getType = (
 				});
 			}
 		});
+	} else {
+		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
+			if (def.relationship) {
+				delete typeSchema.properties[propName];
+			}
+		});
 	}
-
-	metaProperties.forEach(metaProperty => {
-		typeSchema.properties[metaProperty.name] = metaProperty;
-	});
-
+	if (includeMetaFields) {
+		metaProperties.forEach(metaProperty => {
+			typeSchema.properties[metaProperty.name] = metaProperty;
+		});
+	}
 	const properties = Object.entries(typeSchema.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {

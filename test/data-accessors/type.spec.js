@@ -29,7 +29,9 @@ describe('get-type', () => {
 		let compiledType;
 
 		beforeAll(() => {
-			compiledType = typeFromRawData(type1, { includeMetaFields: true });
+			compiledType = typeFromRawData(type1, {
+				options: { includeMetaFields: true },
+			});
 		});
 
 		it('returns name and description and properties of type (excludes meta data)', () => {
@@ -71,10 +73,13 @@ describe('get-type', () => {
 
 	it('returns meta properties when no other properties are set', () => {
 		const metaPropertyName = metaProperties.map(property => property.name);
-		const type = typeFromRawData({
-			name: 'Type1',
-			description: 'I am Type1',
-		});
+		const type = typeFromRawData(
+			{
+				name: 'Type1',
+				description: 'I am Type1',
+			},
+			{ options: { includeMetaFields: true } },
+		);
 
 		expect(type).toHaveProperty('properties');
 		metaPropertyName.forEach(propertyName => {
@@ -400,7 +405,7 @@ describe('get-type', () => {
 		});
 
 		it('returns meta fieldset', () => {
-			expect(type.fieldsets.meta.heading).toBe('Meta Data');
+			expect(type.fieldsets.meta.heading).toBe('Metadata');
 			expect(type.fieldsets.meta.properties).toBeDefined();
 		});
 
