@@ -3,6 +3,16 @@ const rawData = require('../../lib/raw-data');
 const cache = require('../../lib/cache');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
+
+
+const graphqlFromRawData = (schema) => {
+	const rawData = new RawData();
+	rawData.setRawData({
+		schema
+	});
+	return dataAccessors(rawData).getGraphqlDefs();
+};
+
 const explodeString = str =>
 	str
 		.split('\n')
@@ -11,19 +21,10 @@ const explodeString = str =>
 		.map(string => string.trim());
 
 describe('graphql def creation', () => {
-	beforeEach(() => {
-		cache.clear();
-		jest.spyOn(rawData, 'getTypes');
-		jest.spyOn(rawData, 'getEnums');
-	});
-
-	afterEach(() => {
-		cache.clear();
-		jest.restoreAllMocks();
-	});
 
 	it('generates expected graphql def given schema', () => {
-		rawData.getTypes.mockReturnValue([
+		const schema = {
+			types: [
 			{
 				name: 'CostCentre',
 				description: 'A cost centre which groups are costed to',
@@ -100,17 +101,16 @@ describe('graphql def creation', () => {
 					},
 				},
 			},
-		]);
-
-		rawData.getEnums.mockReturnValue({
+		], enums: {
 			Lifecycle: {
 				description: 'The lifecycle stage of a product',
 				options: ['Incubate', 'Sustain', 'Grow', 'Sunset'],
 			},
-		});
+		}
+		}
 
 		const generated = [].concat(
-			...generateGraphqlDefs().map(explodeString),
+			...graphqlFromRawData(schema).map(explodeString),
 		);
 
 		expect(generated).toEqual(
@@ -267,7 +267,8 @@ Sunset
 	});
 
 	it('Multiline descriptions', () => {
-		rawData.getTypes.mockReturnValue([
+		const schema = {
+			types: [
 			{
 				name: 'Dummy',
 				description: 'dummy type description',
@@ -278,15 +279,14 @@ Sunset
 					},
 				},
 			},
-		]);
-		rawData.getEnums.mockReturnValue({
+		], enums: {
 			AnEnum: {
 				name: 'DummyEnum',
 				description: 'an enum description\nmultiline',
 				options: ['One', 'Two'],
 			},
-		});
-		const generated = [].concat(...generateGraphqlDefs()).join('');
+		}};
+		const generated = [].concat(...graphqlFromRawData()).join('');
 		// note the regex has a space, not a new line
 		expect(generated).toMatch(/a description multiline/);
 		expect(generated).toMatch(/an enum description multiline/);
@@ -294,7 +294,7 @@ Sunset
 
 	describe('deprecation', () => {
 		it('can deprecate a property', () => {
-			rawData.getTypes.mockReturnValue([
+			const schema = {types: [
 				{
 					name: 'Dummy',
 					description: 'dummy type description',
@@ -306,9 +306,8 @@ Sunset
 						},
 					},
 				},
-			]);
-			rawData.getEnums.mockReturnValue({});
-			const generated = [].concat(...generateGraphqlDefs()).join('');
+			], enums: {}});
+			const generated = [].concat(...graphqlFromRawData()).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop: Boolean  @deprecated(reason: "not needed")',
@@ -316,7 +315,7 @@ Sunset
 		});
 
 		it('can deprecate a relationship property', () => {
-			rawData.getTypes.mockReturnValue([
+			const schema = {types: [
 				{
 					name: 'Dummy',
 					description: 'dummy type description',
@@ -331,9 +330,8 @@ Sunset
 						},
 					},
 				},
-			]);
-			rawData.getEnums.mockReturnValue({});
-			const generated = [].concat(...generateGraphqlDefs()).join('');
+			], enuma: {}};
+			const generated = [].concat(...graphqlFromRawData()).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop(first: Int, offset: Int): [Boolean] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
@@ -346,7 +344,7 @@ Sunset
 			([bizopsType, graphqlType]) => {
 				if (bizopsType === 'Document') {
 					it(`Does not expose Document properties`, () => {
-						rawData.getTypes.mockReturnValue([
+						const schema = {types: [
 							{
 								name: 'Dummy',
 								description: 'dummy type description',
@@ -357,10 +355,9 @@ Sunset
 									},
 								},
 							},
-						]);
-						rawData.getEnums.mockReturnValue({});
+						], enums: {}});
 						const generated = []
-							.concat(...generateGraphqlDefs())
+							.concat(...graphqlFromRawData())
 							.join('');
 
 						expect(generated).not.toMatch(
@@ -369,7 +366,7 @@ Sunset
 					});
 				} else {
 					it(`Outputs correct type for properties using ${bizopsType}`, () => {
-						rawData.getTypes.mockReturnValue([
+						const schema = {types: [
 							{
 								name: 'Dummy',
 								description: 'dummy type description',
@@ -380,10 +377,9 @@ Sunset
 									},
 								},
 							},
-						]);
-						rawData.getEnums.mockReturnValue({});
+						], enums: {}};
 						const generated = []
-							.concat(...generateGraphqlDefs())
+							.concat(...graphqlFromRawData())
 							.join('');
 
 						expect(generated).toMatch(

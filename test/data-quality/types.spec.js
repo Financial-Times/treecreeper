@@ -6,7 +6,7 @@ const rawData = require('../../lib/raw-data');
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
-const getStringValidator = require('../../lib/get-string-validator');
+const getStringValidator = require('../../data-accessors/string-validator');
 
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');

@@ -11,7 +11,7 @@ const SELF = 'self';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const getType = rawData => (
+const getType = (rawData,
 	typeName,
 	{
 		primitiveTypes = BIZ_OPS, // graphql
@@ -170,10 +170,9 @@ const getType = rawData => (
 // }
 // and thingy happen at a higher level
 
-module.exports = rawData =>
-	rawData.cache.cacheify(
-		getType(rawData),
-		(
+module.exports = {
+	accessor: getType,
+	cacheKeyHelper: (
 			typeName,
 			{
 				primitiveTypes = BIZ_OPS,
@@ -183,4 +182,4 @@ module.exports = rawData =>
 			} = {},
 		) =>
 			`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
-	);
+}
