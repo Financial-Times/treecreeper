@@ -19,6 +19,7 @@ module.exports = {
 				on: rawData.on.bind(rawData),
 				startPolling: rawData.startPolling.bind(rawData),
 				stopPolling: rawData.stopPolling.bind(rawData),
+				refresh: rawData.refresh.bind(rawData),
 				normalizeTypeName: name => name,
 				primitiveTypesMap: primitiveTypes,
 				sendSchemaToS3: sendSchemaToS3(rawData),
