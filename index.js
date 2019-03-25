@@ -1,3 +1,3 @@
-const getInstance = require('./lib/get-instance');
+const { init } = require('./lib/get-instance');
 
-module.exports = getInstance();
+module.exports = init();

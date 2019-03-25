@@ -2,6 +2,7 @@ const mapToObjectResolver = keys =>
 	keys.reduce((resolver, key) => Object.assign(resolver, { [key]: key }), {});
 
 module.exports = {
+	cacheKeyHelper: ({ withMeta = false } = {}) => `enums:${withMeta}`,
 	accessor: (rawData, { withMeta = false } = {}) => {
 		return Object.entries(rawData.getEnums()).reduce(
 			(map, [key, { options, description }]) => {
@@ -20,5 +21,4 @@ module.exports = {
 			{},
 		);
 	},
-	cacheKeyHelper: ({ withMeta = false } = {}) => `enums: ${withMeta}`,
 };

@@ -24,6 +24,8 @@ module.exports = rawData => {
 		getType,
 		getEnums,
 		getTypes,
+		// not cached as it's used once in a blue moon in the api,
+		// and only just after the cache has been cleared
 		getGraphqlDefs: graphqlDefs(getTypes, getEnums),
 	};
 };

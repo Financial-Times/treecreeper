@@ -1,15 +1,89 @@
-const deepFreeze = require('deep-freeze');
 const clone = require('clone');
 const stringValidator = require('./string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/constants');
 
-const META = 'meta';
 const BIZ_OPS = 'biz-ops';
 const SELF = 'self';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
+
+const arrangeFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
+	const virtualFieldsetProperties = properties.filter(
+		([, { fieldset }]) => fieldset === SELF,
+	);
+
+	const realFieldsetProperties = properties.filter(
+		([, { fieldset }]) => fieldset && fieldset !== SELF,
+	);
+
+	const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
+
+	fieldsets = Object.entries(fieldsets);
+
+	if (includeMetaFields) {
+		fieldsets.push(['meta', { heading: 'Meta Data' }]);
+	}
+
+	const realFieldsets = fieldsets
+		.map(([fieldsetName, fieldsetDef]) => {
+			fieldsetDef.properties = entriesArrayToObject(
+				realFieldsetProperties.filter(
+					([, { fieldset }]) => fieldset === fieldsetName,
+				),
+			);
+
+			return [fieldsetName, fieldsetDef];
+		})
+		/* eslint-disable no-shadow */
+		.filter(([, { properties }]) => !!Object.keys(properties).length);
+
+	const virtualFieldsets = virtualFieldsetProperties.map(
+		([propertyName, propertyDef]) => {
+			return [
+				propertyName,
+				{
+					heading: propertyDef.label,
+					description: propertyDef.description,
+					isSingleField: true,
+					properties: { [propertyName]: propertyDef },
+				},
+			];
+		},
+	);
+
+	const miscellaneous = miscProperties.length
+		? [
+				[
+					'misc',
+					{
+						heading:
+							(includeMetaFields && realFieldsets.length > 1) ||
+							(!includeMetaFields && realFieldsets.length)
+								? 'Miscellaneous'
+								: 'General',
+						properties: entriesArrayToObject(miscProperties),
+					},
+				],
+		  ]
+		: [];
+
+	return entriesArrayToObject(
+		[].concat(realFieldsets, virtualFieldsets, miscellaneous),
+	);
+};
+
+const cacheKeyHelper = (
+	typeName,
+	{
+		primitiveTypes = BIZ_OPS,
+		withRelationships = true,
+		groupProperties = false,
+		includeMetaFields = true,
+	} = {},
+) =>
+	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
 
 const getType = (
 	rawData,
@@ -28,52 +102,44 @@ const getType = (
 	if (!typeDefinition) {
 		return;
 	}
-	const typeDefinitionResult = clone(typeDefinition);
-	typeDefinitionResult.type = typeDefinition.name;
+	const enrichedType = clone(typeDefinition);
 
-	if (!('properties' in typeDefinitionResult)) {
-		typeDefinitionResult.properties = {};
+	enrichedType.type = typeDefinition.name;
+
+	if (!('properties' in enrichedType)) {
+		enrichedType.properties = {};
 	}
-	if (!typeDefinitionResult.pluralName) {
-		typeDefinitionResult.pluralName = `${typeDefinition.name}s`;
+
+	if (!enrichedType.pluralName) {
+		enrichedType.pluralName = `${typeDefinition.name}s`;
 	}
 
 	if (!withRelationships) {
-		Object.entries(typeDefinitionResult.properties).forEach(
-			([propName, def]) => {
-				if (def.relationship) {
-					delete typeDefinitionResult.properties[propName];
-				}
-			},
-		);
+		Object.entries(enrichedType.properties).forEach(([propName, def]) => {
+			if (def.relationship) {
+				delete enrichedType.properties[propName];
+			}
+		});
 	} else {
-		Object.entries(typeDefinitionResult.properties).forEach(
-			([propName, def]) => {
-				if (def.relationship) {
-					if (def.hidden) {
-						delete typeDefinitionResult.properties[propName];
-					}
-					Object.assign(def, {
-						hasMany: def.hasMany || false,
-						isRelationship: !!def.relationship,
-						isRecursive: def.isRecursive || false,
-					});
+		Object.entries(enrichedType.properties).forEach(([propName, def]) => {
+			if (def.relationship) {
+				if (def.hidden) {
+					delete enrichedType.properties[propName];
 				}
-			},
-		);
+				Object.assign(def, {
+					hasMany: def.hasMany || false,
+					isRelationship: !!def.relationship,
+					isRecursive: def.isRecursive || false,
+				});
+			}
+		});
 	}
 
 	metaProperties.forEach(metaProperty => {
-		typeDefinitionResult.properties[metaProperty.name] = {
-			type: metaProperty.type,
-			description: metaProperty.description,
-			label: metaProperty.label,
-			fieldset: META,
-			autoPopulated: true,
-		};
+		enrichedType.properties[metaProperty.name] = metaProperty;
 	});
 
-	const properties = Object.entries(typeDefinitionResult.properties)
+	const properties = Object.entries(enrichedType.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -90,97 +156,21 @@ const getType = (
 		})
 		.filter(entry => !!entry);
 
-	if (!groupProperties) {
-		typeDefinitionResult.properties = entriesArrayToObject(properties);
+	if (groupProperties) {
+		enrichedType.fieldsets = arrangeFieldsets(
+			properties,
+			enrichedType.fieldsets,
+			includeMetaFields,
+		);
+		delete enrichedType.properties;
 	} else {
-		const virtualFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset === SELF,
-		);
-
-		const realFieldsetProperties = properties.filter(
-			([, { fieldset }]) => fieldset && fieldset !== SELF,
-		);
-
-		const miscProperties = properties.filter(
-			([, { fieldset }]) => !fieldset,
-		);
-
-		const fieldsets = Object.entries(typeDefinitionResult.fieldsets || {});
-
-		if (includeMetaFields) {
-			fieldsets.push([META, { heading: 'Meta Data' }]);
-		}
-
-		const realFieldsets = fieldsets
-			.map(([fieldsetName, fieldsetDef]) => {
-				fieldsetDef.properties = entriesArrayToObject(
-					realFieldsetProperties.filter(
-						([, { fieldset }]) => fieldset === fieldsetName,
-					),
-				);
-
-				return [fieldsetName, fieldsetDef];
-			})
-			/* eslint-disable no-shadow */
-			.filter(([, { properties }]) => !!Object.keys(properties).length);
-
-		const virtualFieldsets = virtualFieldsetProperties.map(
-			([propertyName, propertyDef]) => {
-				return [
-					propertyName,
-					{
-						heading: propertyDef.label,
-						description: propertyDef.description,
-						isSingleField: true,
-						properties: { [propertyName]: propertyDef },
-					},
-				];
-			},
-		);
-
-		const miscellaneous = miscProperties.length
-			? [
-					[
-						'misc',
-						{
-							heading:
-								(includeMetaFields &&
-									realFieldsets.length > 1) ||
-								(!includeMetaFields && realFieldsets.length)
-									? 'Miscellaneous'
-									: 'General',
-							properties: entriesArrayToObject(miscProperties),
-						},
-					],
-			  ]
-			: [];
-
-		typeDefinitionResult.fieldsets = entriesArrayToObject(
-			[].concat(realFieldsets, virtualFieldsets, miscellaneous),
-		);
-
-		delete typeDefinitionResult.properties;
+		enrichedType.properties = entriesArrayToObject(properties);
 	}
 
-	return deepFreeze(typeDefinitionResult);
+	return enrichedType;
 };
-
-// TDOD move the construct rawData => rawData.cache.cacheify(func, keyFunc) up a level
-// this module shoudl export {
-// 	func, keyFunc
-// }
-// and thingy happen at a higher level
 
 module.exports = {
 	accessor: getType,
-	cacheKeyHelper: (
-		typeName,
-		{
-			primitiveTypes = BIZ_OPS,
-			withRelationships = true,
-			groupProperties = false,
-			includeMetaFields = true,
-		} = {},
-	) =>
-		`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`,
+	cacheKeyHelper,
 };
