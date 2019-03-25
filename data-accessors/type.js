@@ -8,7 +8,7 @@ const SELF = 'self';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const arrangeFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
+const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 	const virtualFieldsetProperties = properties.filter(
 		([, { fieldset }]) => fieldset === SELF,
 	);
@@ -20,6 +20,8 @@ const arrangeFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 	const miscProperties = properties.filter(([, { fieldset }]) => !fieldset);
 
 	fieldsets = Object.entries(fieldsets);
+
+	const hasRealFieldsets = !!fieldsets.length;
 
 	if (includeMetaFields) {
 		fieldsets.push(['meta', { heading: 'Meta Data' }]);
@@ -57,11 +59,7 @@ const arrangeFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 				[
 					'misc',
 					{
-						heading:
-							(includeMetaFields && realFieldsets.length > 1) ||
-							(!includeMetaFields && realFieldsets.length)
-								? 'Miscellaneous'
-								: 'General',
+						heading: hasRealFieldsets ? 'Miscellaneous' : 'General',
 						properties: entriesArrayToObject(miscProperties),
 					},
 				],
@@ -84,6 +82,18 @@ const cacheKeyHelper = (
 ) =>
 	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
 
+const getTypeDefinition = (typeName, rawData) => {
+	const typeDefinition = rawData
+		.getTypes()
+		.find(type => type.name === typeName);
+
+	if (!typeDefinition) {
+		throw new Error(`Invalid type ${typeName}`);
+	}
+
+	return clone(typeDefinition);
+};
+
 const getType = (
 	rawData,
 	getStringValidator,
@@ -95,35 +105,29 @@ const getType = (
 		includeMetaFields = false,
 	} = {},
 ) => {
-	const typeDefinition = rawData
-		.getTypes()
-		.find(type => type.name === typeName);
-	if (!typeDefinition) {
-		return;
-	}
-	const enrichedType = clone(typeDefinition);
+	const typeSchema = getTypeDefinition(typeName, rawData);
 
-	enrichedType.type = typeDefinition.name;
+	typeSchema.type = typeSchema.name;
 
-	if (!('properties' in enrichedType)) {
-		enrichedType.properties = {};
+	if (!('properties' in typeSchema)) {
+		typeSchema.properties = {};
 	}
 
-	if (!enrichedType.pluralName) {
-		enrichedType.pluralName = `${typeDefinition.name}s`;
+	if (!typeSchema.pluralName) {
+		typeSchema.pluralName = `${typeSchema.name}s`;
 	}
 
 	if (!withRelationships) {
-		Object.entries(enrichedType.properties).forEach(([propName, def]) => {
+		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
 			if (def.relationship) {
-				delete enrichedType.properties[propName];
+				delete typeSchema.properties[propName];
 			}
 		});
 	} else {
-		Object.entries(enrichedType.properties).forEach(([propName, def]) => {
+		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
 			if (def.relationship) {
 				if (def.hidden) {
-					delete enrichedType.properties[propName];
+					delete typeSchema.properties[propName];
 				}
 				Object.assign(def, {
 					hasMany: def.hasMany || false,
@@ -135,10 +139,10 @@ const getType = (
 	}
 
 	metaProperties.forEach(metaProperty => {
-		enrichedType.properties[metaProperty.name] = metaProperty;
+		typeSchema.properties[metaProperty.name] = metaProperty;
 	});
 
-	const properties = Object.entries(enrichedType.properties)
+	const properties = Object.entries(typeSchema.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
 				if (def.type === 'Document') {
@@ -156,17 +160,17 @@ const getType = (
 		.filter(entry => !!entry);
 
 	if (groupProperties) {
-		enrichedType.fieldsets = arrangeFieldsets(
+		typeSchema.fieldsets = hydrateFieldsets(
 			properties,
-			enrichedType.fieldsets,
+			typeSchema.fieldsets,
 			includeMetaFields,
 		);
-		delete enrichedType.properties;
+		delete typeSchema.properties;
 	} else {
-		enrichedType.properties = entriesArrayToObject(properties);
+		typeSchema.properties = entriesArrayToObject(properties);
 	}
 
-	return enrichedType;
+	return typeSchema;
 };
 
 module.exports = {

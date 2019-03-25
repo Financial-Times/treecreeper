@@ -18,6 +18,6 @@ describe('validateTypeName', () => {
 		expect(() => validateTypeName('Thing')).not.toThrow();
 	});
 	it('reject names not in the list', () => {
-		expect(() => validateTypeName('Thingo')).toThrow(/Invalid node type/);
+		expect(() => validateTypeName('Thingo')).toThrow(/Invalid type/);
 	});
 });
