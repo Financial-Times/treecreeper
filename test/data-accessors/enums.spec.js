@@ -1,10 +1,10 @@
-const enums = require('../../data-accessors/enums');
+const dataAccessors = require('../../data-accessors');
 const RawData = require('../../lib/raw-data');
 
 const enumsFromRawData = data => {
 	const rawData = new RawData();
 	rawData.setRawData({ schema: { enums: data } });
-	return enums(rawData);
+	return dataAccessors(rawData).getEnums;
 };
 
 describe('get-enums', () => {

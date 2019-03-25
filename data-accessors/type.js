@@ -1,6 +1,6 @@
 const deepFreeze = require('deep-freeze');
 const clone = require('clone');
-const getStringValidator = require('../lib/get-string-validator');
+const stringValidator = require('./string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/constants');
 
@@ -20,6 +20,7 @@ const getType = rawData => (
 		includeMetaFields = true,
 	} = {},
 ) => {
+	const getStringValidator = stringValidator(rawData);
 	const typeDefinition = rawData
 		.getTypes()
 		.find(type => type.name === typeName);
@@ -162,6 +163,12 @@ const getType = rawData => (
 
 	return deepFreeze(typeDefinitionResult);
 };
+
+// TDOD move the construct rawData => rawData.cache.cacheify(func, keyFunc) up a level
+// this module shoudl export {
+// 	func, keyFunc
+// }
+// and thingy happen at a higher level
 
 module.exports = rawData =>
 	rawData.cache.cacheify(
