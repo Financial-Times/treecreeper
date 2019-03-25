@@ -1,5 +1,4 @@
 const clone = require('clone');
-const stringValidator = require('./string-validator');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/constants');
 
@@ -87,6 +86,7 @@ const cacheKeyHelper = (
 
 const getType = (
 	rawData,
+	getStringValidator,
 	typeName,
 	{
 		primitiveTypes = BIZ_OPS, // graphql
@@ -95,7 +95,6 @@ const getType = (
 		includeMetaFields = false,
 	} = {},
 ) => {
-	const getStringValidator = stringValidator(rawData);
 	const typeDefinition = rawData
 		.getTypes()
 		.find(type => type.name === typeName);

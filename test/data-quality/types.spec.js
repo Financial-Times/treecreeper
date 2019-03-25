@@ -9,7 +9,7 @@ const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
 const stringValidator = require('../../data-accessors/string-validator');
 
-const getStringValidator = stringValidator(rawData);
+const getStringValidator = stringValidator.accessor.bind(null, rawData);
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
