@@ -6,7 +6,7 @@ typeAccessor.mockImplementation((rawData, getStringValidator, name) => ({
 jest.doMock('../../data-accessors/type', () => {
 	return {
 		accessor: typeAccessor,
-		cacheKeyHelper: name => name,
+		cacheKeyGenerator: name => name,
 	};
 });
 const { init } = require('../../lib/get-instance');

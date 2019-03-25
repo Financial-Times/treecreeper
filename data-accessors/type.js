@@ -54,17 +54,6 @@ const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 	);
 };
 
-const cacheKeyHelper = (
-	typeName,
-	{
-		primitiveTypes = BIZ_OPS,
-		withRelationships = true,
-		groupProperties = false,
-		includeMetaFields = false,
-	} = {},
-) =>
-	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
-
 const getFromRawData = (typeName, rawData) => {
 	const typeDefinition = rawData
 		.getTypes()
@@ -76,6 +65,17 @@ const getFromRawData = (typeName, rawData) => {
 
 	return clone(typeDefinition);
 };
+
+const cacheKeyGenerator = (
+	typeName,
+	{
+		primitiveTypes = BIZ_OPS,
+		withRelationships = true,
+		groupProperties = false,
+		includeMetaFields = false,
+	} = {},
+) =>
+	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
 
 const getType = (
 	rawData,
@@ -158,5 +158,5 @@ const getType = (
 
 module.exports = {
 	accessor: getType,
-	cacheKeyHelper,
+	cacheKeyGenerator,
 };

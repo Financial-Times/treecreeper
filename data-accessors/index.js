@@ -4,17 +4,21 @@ const stringValidator = require('./string-validator');
 const enums = require('./enums');
 const types = require('./types');
 
-const createCachedMethod = ({ accessor, cacheKeyHelper }, rawData, ...args) =>
+const createCachedAccessor = (
+	{ accessor, cacheKeyGenerator },
+	rawData,
+	...moreBoundArgs
+) =>
 	rawData.cache.cacheify(
-		accessor.bind(null, rawData, ...args),
-		cacheKeyHelper,
+		accessor.bind(null, rawData, ...moreBoundArgs),
+		cacheKeyGenerator,
 	);
 
 module.exports = rawData => {
-	const getStringValidator = createCachedMethod(stringValidator, rawData);
-	const getType = createCachedMethod(type, rawData, getStringValidator);
-	const getEnums = createCachedMethod(enums, rawData);
-	const getTypes = createCachedMethod(types, rawData, getType);
+	const getStringValidator = createCachedAccessor(stringValidator, rawData);
+	const getType = createCachedAccessor(type, rawData, getStringValidator);
+	const getEnums = createCachedAccessor(enums, rawData);
+	const getTypes = createCachedAccessor(types, rawData, getType);
 
 	return {
 		getType,
