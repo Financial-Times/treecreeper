@@ -29,7 +29,7 @@ describe('get-type', () => {
 		let compiledType;
 
 		beforeAll(() => {
-			compiledType = typeFromRawData(type1);
+			compiledType = typeFromRawData(type1, { includeMetaFields: true });
 		});
 
 		it('returns name and description and properties of type (excludes meta data)', () => {
@@ -395,7 +395,7 @@ describe('get-type', () => {
 				{
 					name: 'Type1',
 				},
-				{ options: { groupProperties: true } },
+				{ options: { groupProperties: true, includeMetaFields: true } },
 			);
 		});
 

@@ -80,7 +80,7 @@ const cacheKeyHelper = (
 		primitiveTypes = BIZ_OPS,
 		withRelationships = true,
 		groupProperties = false,
-		includeMetaFields = true,
+		includeMetaFields = false,
 	} = {},
 ) =>
 	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
@@ -92,7 +92,7 @@ const getType = (
 		primitiveTypes = BIZ_OPS, // graphql
 		withRelationships = true,
 		groupProperties = false,
-		includeMetaFields = true,
+		includeMetaFields = false,
 	} = {},
 ) => {
 	const getStringValidator = stringValidator(rawData);
