@@ -1,7 +1,7 @@
 const sendSchemaToS3 = require('../lib/send-schema-to-s3');
-const rawData = require('../lib/raw-data');
+const RawData = require('../lib/raw-data');
 
-const schemaObject = Object.assign({}, rawData.getAll(), {
+const schemaObject = Object.assign({}, new RawData().getAll(), {
 	version: process.env.CIRCLE_TAG,
 });
 
