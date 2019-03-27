@@ -3,12 +3,10 @@ const schema = require('@financial-times/biz-ops-schema');
 const {
 	mergeLockedFields,
 	validateLockedFields,
-	setLockedFields,
-	removeLockedFields,
 	LockedFieldsError,
 } = require('../../server/lib/locked-fields');
 
-describe('locked fields', () => {
+describe('lockedFields', () => {
 	let existingLockedFields;
 
 	beforeEach(() => {
@@ -18,128 +16,110 @@ describe('locked fields', () => {
 		};
 	});
 
-	describe('setLockedFields', () => {
-		const clientId = 'biz-ops-admin';
-		const lockFields = ['code', 'name'];
-
-		beforeEach(() => {
-			jest.spyOn(schema, 'getType');
-			schema.getType.mockReturnValue({
-				properties: { code: {}, name: {}, teams: {} },
-			});
-		});
-
-		it('throws an error when clientId is not set', () => {
-			expect(() =>
-				setLockedFields(undefined, lockFields, undefined),
-			).toThrow(
-				'clientId needs to be set to a valid system code in order to lock fields',
-			);
-		});
-
-		it('returns a JSON string containing fieldname and clientId objects', () => {
-			const response = '{"code":"biz-ops-admin","name":"biz-ops-admin"}';
-			expect(setLockedFields(clientId, lockFields, undefined)).toEqual(
-				response,
-			);
-		});
-
-		it('returns a JSON string containing an object of all fieldname properties and values', () => {
-			const allLockedFields = ['code', 'name', 'teams'];
-			const response =
-				'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
-			expect(
-				setLockedFields(clientId, allLockedFields, undefined),
-			).toEqual(response);
-		});
-
-		it('adds new locked fields to the already existing locked fields', () => {
-			const response =
-				'{"teams":"biz-ops-admin","code":"biz-ops-admin","name":"biz-ops-admin"}';
-			expect(
-				setLockedFields(clientId, ['teams'], existingLockedFields),
-			).toEqual(response);
-		});
-
-		it('does not duplicate locked field values', () => {
-			const response = JSON.stringify(existingLockedFields);
-			expect(
-				setLockedFields(clientId, lockFields, existingLockedFields),
-			).toEqual(response);
-		});
-	});
-
-	describe('removeLockedFields', () => {
-		const unlockFields = ['name'];
-
-		it('returns undefined when no existingLockedFields exists', () => {
-			expect(removeLockedFields(unlockFields, undefined)).toEqual(
-				undefined,
-			);
-		});
-
-		it('returns _lockedFields without the fields that have been unlocked', () => {
-			expect(
-				removeLockedFields(unlockFields, existingLockedFields),
-			).toEqual('{"code":"biz-ops-admin"}');
-		});
-
-		it('returns _lockedFields without any fields when all fields are unlocked', () => {
-			unlockFields.push('code');
-			expect(
-				removeLockedFields(unlockFields, existingLockedFields),
-			).toEqual(null);
-		});
-	});
-
 	describe('mergeLockedFields', () => {
 		const clientId = 'biz-ops-admin';
 		const nodeType = 'Person';
 
-		describe('locked fields', () => {
-			it('returns locked fields', () => {
-				const query = { lockFields: 'code,name' };
-				const response =
-					'{"code":"biz-ops-admin","name":"biz-ops-admin"}';
-				expect(
-					mergeLockedFields(nodeType, clientId, query, undefined),
-				).toEqual(response);
+		describe('setLockedFields', () => {
+			const query = { lockFields: 'code,name' };
+
+			beforeEach(() => {
+				jest.spyOn(schema, 'getType');
+				schema.getType.mockReturnValue({
+					properties: { code: {}, name: {}, teams: {} },
+				});
 			});
 
-			it('adds new lockedfields to exisiting lockedfields', () => {
-				const newClientId = 'newClientId';
-				const query = { lockFields: 'description' };
+			it('throws an error when clientId is not set', () => {
+				expect(() =>
+					mergeLockedFields(nodeType, undefined, query, undefined),
+				).toThrow(
+					'clientId needs to be set to a valid system code in order to lock fields',
+				);
+			});
+
+			it('returns a JSON string containing fieldname and clientId objects', () => {
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					query,
+					undefined,
+				);
 				const response =
-					'{"description":"newClientId","code":"biz-ops-admin","name":"biz-ops-admin"}';
-				expect(
-					mergeLockedFields(
-						nodeType,
-						newClientId,
-						query,
-						existingLockedFields,
-					),
-				).toEqual(response);
+					'{"code":"biz-ops-admin","name":"biz-ops-admin"}';
+				expect(call).toEqual(response);
+			});
+
+			it('returns a JSON string containing an object of all fieldname properties and values', () => {
+				const queryAll = { lockFields: 'all' };
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					queryAll,
+					undefined,
+				);
+				const response =
+					'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
+				expect(call).toEqual(response);
+			});
+
+			it('adds new locked fields to the already existing locked fields', () => {
+				const queryTeams = { lockFields: 'teams' };
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					queryTeams,
+					existingLockedFields,
+				);
+				const response =
+					'{"teams":"biz-ops-admin","code":"biz-ops-admin","name":"biz-ops-admin"}';
+				expect(call).toEqual(response);
+			});
+
+			it('does not duplicate locked field values', () => {
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					query,
+					existingLockedFields,
+				);
+				const response = JSON.stringify(existingLockedFields);
+				expect(call).toEqual(response);
 			});
 		});
 
-		describe('unlocked fields', () => {
+		describe('removeLockedFields', () => {
 			const query = { unlockFields: 'name' };
 
-			it('returns no lockedFields', () => {
-				expect(
-					mergeLockedFields(nodeType, clientId, query, undefined),
-				).toEqual(undefined);
+			it('returns undefined when no existingLockedFields exists', () => {
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					query,
+					undefined,
+				);
+				expect(call).toEqual(undefined);
 			});
 
 			it('returns _lockedFields without the fields that have been unlocked', () => {
-				expect(
-					mergeLockedFields(
-						nodeType,
-						clientId,
-						query,
-						existingLockedFields,
-					),
-				).toEqual('{"code":"biz-ops-admin"}');
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					query,
+					existingLockedFields,
+				);
+				expect(call).toEqual('{"code":"biz-ops-admin"}');
+			});
+
+			it('returns _lockedFields without any fields when all fields are unlocked', () => {
+				const queryAll = { unlockFields: 'all' };
+				const call = mergeLockedFields(
+					nodeType,
+					clientId,
+					queryAll,
+					existingLockedFields,
+				);
+				expect(call).toEqual(null);
 			});
 		});
 	});

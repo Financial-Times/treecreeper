@@ -116,7 +116,5 @@ const validateLockedFields = (
 module.exports = {
 	mergeLockedFields,
 	validateLockedFields,
-	setLockedFields,
-	removeLockedFields,
 	LockedFieldsError,
 };
