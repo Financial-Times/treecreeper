@@ -4,21 +4,53 @@ const stringValidator = require('./string-validator');
 const enums = require('./enums');
 const types = require('./types');
 
+/**
+Probably the most functional magic in this comopnent
+
+- accessor = a function that reads data from the rawSchemaData (which is an instance of the RawData class),
+	enriches it and returns the enriched schema object for use by the application
+- cacheKeyGenerator = a function which has the same signature as accessor and returns a string, which is
+	used to retrieve results from the in memory cache for calls to accessor that match previous ones
+
+What make things more complex is that accessor needs access to rawData (and sometimes other things too),
+but we don't want the end user to have to manually pass this around. This is why `.bind(null, rawSchemaData)`
+is used to populate the first parameter of accessor.
+
+e.g. an accessor which to the end user looks like `getEnums(options)` is actually a pair of functions
+- accessor(rawSchemaData, options)
+- cacheKeyGenerator(options)
+
+accessor.bind(null, rawSchemaData) returns a function with the signature boundAccessor(options)
+
+rawSchemaData.cache.addCacheToFunction returns a function with the signature boundAndCacheEnabledAccessor(options)
+
+This is what's finally exposed to the end user
+
+TODO - consider moving away from using bind towards functions that return functions
+
+* */
 const createCachedAccessor = (
 	{ accessor, cacheKeyGenerator },
-	rawData,
+	rawSchemaData,
 	...moreBoundArgs
 ) =>
-	rawData.cache.addCacheToFunction(
-		accessor.bind(null, rawData, ...moreBoundArgs),
+	rawSchemaData.cache.addCacheToFunction(
+		accessor.bind(null, rawSchemaData, ...moreBoundArgs),
 		cacheKeyGenerator,
 	);
 
-module.exports = rawData => {
-	const getStringValidator = createCachedAccessor(stringValidator, rawData);
-	const getType = createCachedAccessor(type, rawData, getStringValidator);
-	const getEnums = createCachedAccessor(enums, rawData);
-	const getTypes = createCachedAccessor(types, rawData, getType);
+module.exports = rawSchemaData => {
+	const getStringValidator = createCachedAccessor(
+		stringValidator,
+		rawSchemaData,
+	);
+	const getType = createCachedAccessor(
+		type,
+		rawSchemaData,
+		getStringValidator,
+	);
+	const getEnums = createCachedAccessor(enums, rawSchemaData);
+	const getTypes = createCachedAccessor(types, rawSchemaData, getType);
 
 	return {
 		getType,

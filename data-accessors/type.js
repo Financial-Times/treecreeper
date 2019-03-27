@@ -1,6 +1,7 @@
 const clone = require('clone');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/constants');
+const BizOpsError = require('../lib/biz-ops-error');
 
 const BIZ_OPS = 'biz-ops';
 
@@ -60,7 +61,7 @@ const getFromRawData = (typeName, rawData) => {
 		.find(type => type.name === typeName);
 
 	if (!typeDefinition) {
-		throw new Error(`Invalid type ${typeName}`);
+		throw new BizOpsError(`Invalid type \`${typeName}\``);
 	}
 
 	return clone(typeDefinition);
