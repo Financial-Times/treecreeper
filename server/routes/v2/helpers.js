@@ -124,17 +124,9 @@ const writeNode = async ({
 	};
 };
 
-const createNewNode = (
-	nodeType,
-	code,
-	clientId,
-	{ upsert, lockFields },
-	body,
-	method,
-) => {
-	const lockedFields = lockFields
-		? mergeLockedFields(nodeType, clientId, lockFields)
-		: null;
+const createNewNode = (nodeType, code, clientId, query, body, method) => {
+	const { upsert } = query;
+	const lockedFields = mergeLockedFields(nodeType, clientId, query);
 
 	return writeNode({
 		nodeType,

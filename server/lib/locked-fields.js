@@ -78,6 +78,8 @@ const mergeLockedFields = (nodeType, clientId, query, existingLockedFields) => {
 		const fields = getLockedFields(nodeType, unlockFields);
 		return removeLockedFields(fields, existingLockedFields);
 	}
+
+	return null;
 };
 
 const validateLockedFields = (

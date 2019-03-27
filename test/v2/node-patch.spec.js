@@ -1842,7 +1842,7 @@ describe('v2 - node PATCH', () => {
 		});
 	});
 
-	describe('locked fields', () => {
+	describe('lockedFields', () => {
 		const lockedFieldName = '{"name":"v2-node-patch-client"}';
 		const lockedFieldEmail = '{"email":"v2-node-patch-client"}';
 
