@@ -9,6 +9,8 @@ Schema for biz-ops data store and api. It provides two things:
 
 `npm install @financial-times/biz-ops-schema`
 
+In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment
+
 ### Persistent nodejs process (e.g. heroku)
 
 ```js
@@ -45,7 +47,9 @@ const handler = async event => {
 
 Speak to a member of the [biz ops team](https://financialtimes.slack.com/messages/C9S0V2KPV) to obtain a suitable value for `SCHEMA_BASE_URL`.
 
-The component _may_ be used without starting the poller or using the refresh method - it will use a local copy of the schema provided as part of the npm package. However, unless there are specific reasons to want to pin to a specific schema version, it is far better to enable polling/refreshing.
+### Local development
+
+When npm linking to test schema changes in an application, set `updateMode: 'dev'` to retrieve schema files from the local yaml files and disable polling/refersh on stale.
 
 ## Adding to the schema
 
