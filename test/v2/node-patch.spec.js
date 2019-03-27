@@ -2092,7 +2092,7 @@ describe('v2 - node PATCH', () => {
 	});
 
 	describe('unlocking fields', () => {
-		it('unlocks fields when request is given by clientId that locked the field', async () => {
+		it('unlocks fields when request is given', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
@@ -2112,11 +2112,11 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('unlocks only the requested field when request is given by clientId that locked the field', async () => {
+		it('unlocks fields when request is given by a different clientId that locked it', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: `{"code":"v2-node-patch-client", "email":"v2-node-patch-client"}`,
+				_lockedFields: '{"email":"another-api"}',
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?unlockFields=email`,
@@ -2128,12 +2128,11 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: `{"code":"v2-node-patch-client"}`,
 				}),
 			);
 		});
 
-		it('unlocks only `all` fields that the clientId locked', async () => {
+		it('unlocks `all` fields', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
