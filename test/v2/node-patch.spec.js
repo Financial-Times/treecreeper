@@ -2116,7 +2116,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
+				_lockedFields: `{"code":"v2-node-patch-client", "email":"v2-node-patch-client"}`,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?unlockFields=email`,
@@ -2128,7 +2128,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
+					_lockedFields: `{"code":"v2-node-patch-client"}`,
 				}),
 			);
 		});
@@ -2137,7 +2137,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"postman","delivers":"postman","supports":"postman","teamMembers":"postman","_createdByClient":"postman","_createdByUser":"postman","_createdTimestamp":"postman","_updatedByClient":"postman","_updatedByUser":"postman","_updatedTimestamp":"postman","_lockedFields":"postman"}`,
+				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?unlockFields=all`,
@@ -2149,7 +2149,6 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields: `{"parentTeam":"postman","delivers":"postman","supports":"postman","teamMembers":"postman","_createdByClient":"postman","_createdByUser":"postman","_createdTimestamp":"postman","_updatedByClient":"postman","_updatedByUser":"postman","_updatedTimestamp":"postman","_lockedFields":"postman"}`,
 				}),
 			);
 		});
