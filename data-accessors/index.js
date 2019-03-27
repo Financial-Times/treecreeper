@@ -9,7 +9,7 @@ const createCachedAccessor = (
 	rawData,
 	...moreBoundArgs
 ) =>
-	rawData.cache.cacheify(
+	rawData.cache.addCacheToFunction(
 		accessor.bind(null, rawData, ...moreBoundArgs),
 		cacheKeyGenerator,
 	);
