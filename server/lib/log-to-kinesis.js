@@ -1,6 +1,6 @@
 const { getType } = require('@financial-times/biz-ops-schema');
 const groupBy = require('lodash.groupby');
-const { logger, getContext } = require('./request-context');
+const { getContext } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');
 
@@ -14,44 +14,29 @@ const {
 const kinesisClient = new Kinesis(
 	process.env.CRUD_EVENT_LOG_STREAM_NAME || 'test-stream-name',
 );
+
 const eventLogWriter = new EventLogWriter(kinesisClient);
 
-const sendEvent = event => {
-	eventLogWriter.sendEvent(event).catch(error => {
-		logger.error(
-			'Failed to send event to event log',
-			Object.assign({ event, error }),
-		);
+const flatten = arr => [...new Set([].concat(...arr))].sort();
+const pluck = (arr, prop) => arr.map(obj => obj[prop]);
+
+const flattenEvents = ({ requestId, clientId, clientUserId }) => events =>
+	Object.assign(events[0], {
+		requestId,
+		clientId,
+		clientUserId,
+		updatedProperties: flatten(pluck(events, 'updatedProperties')),
 	});
-};
 
 const sendUniqueEvents = events => {
-	const { requestId, clientId, clientUserId } = getContext();
 	Object.values(
 		groupBy(
 			events,
 			({ action, code, type }) => `${action}:${code}:${type}`,
 		),
-	).forEach(similarEvents => {
-		sendEvent(
-			Object.assign(
-				similarEvents[0],
-				{ requestId, clientId, clientUserId },
-				{
-					updatedProperties: [
-						...new Set(
-							[].concat(
-								...similarEvents.map(
-									({ updatedProperties }) =>
-										updatedProperties,
-								),
-							),
-						),
-					].sort(),
-				},
-			),
-		);
-	});
+	)
+		.map(flattenEvents(getContext()))
+		.forEach(event => eventLogWriter.sendEvent(event));
 };
 
 const relatedRecordEvents = (newRecords, addedRelationships) => {
@@ -131,7 +116,6 @@ const logNodeChanges = ({
 		});
 
 		if (Object.keys(addedRelationships).length) {
-			// if (result.hasRelationships()) {
 			events.push(...relatedRecordEvents(newRecords, addedRelationships));
 		}
 	}
@@ -159,7 +143,7 @@ const logNodeChanges = ({
 
 const logNodeDeletion = node => {
 	const { requestId, clientId, clientUserId } = getContext();
-	sendEvent({
+	eventLogWriter.sendEvent({
 		action: 'DELETE',
 		code: node.properties.code,
 		type: node.labels[0],

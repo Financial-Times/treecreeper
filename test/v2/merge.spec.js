@@ -292,7 +292,6 @@ describe('merge', () => {
 			);
 
 			await sandbox.connectNodes(team1, 'HAS_TEAM', team2);
-
 			await sandbox
 				.request(app)
 				.post('/v2/merge')

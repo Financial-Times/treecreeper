@@ -1,10 +1,14 @@
 const { stripIndents } = require('common-tags');
 const { getType } = require('@financial-times/biz-ops-schema');
-const { logNodeChanges } = require('../../../lib/log-to-kinesis');
-const { executeQuery } = require('../../../data/db-connection');
-const cypherHelpers = require('../../../data/cypher-helpers');
-const salesforceSync = require('../../../lib/salesforce-sync');
-const { getDbWriteContext } = require('../../../lib/request-context');
+const { executeQuery } = require('../../data/db-connection');
+const cypherHelpers = require('../../data/cypher-helpers');
+const recordAnalysis = require('../../data/record-analysis');
+const { constructNeo4jProperties } = require('../../data/data-conversion');
+
+const { logNodeChanges } = require('../../lib/log-to-kinesis');
+const salesforceSync = require('../../lib/salesforce-sync');
+const { getDbWriteContext } = require('../../lib/request-context');
+const { mergeLockedFields } = require('../../lib/locked-fields');
 
 const prepareToWriteRelationships = (
 	nodeType,
@@ -49,7 +53,7 @@ const prepareToWriteRelationships = (
 	return { relationshipParameters, relationshipQueries };
 };
 
-module.exports = async ({
+const writeNode = async ({
 	nodeType,
 	code,
 	method,
@@ -118,4 +122,66 @@ module.exports = async ({
 		data: responseData,
 		status: method === 'PATCH' && isCreate ? 201 : 200,
 	};
+};
+
+const createNewNode = (
+	nodeType,
+	code,
+	clientId,
+	{ upsert, lockFields },
+	body,
+	method,
+) => {
+	const lockedFields = lockFields
+		? mergeLockedFields(nodeType, clientId, lockFields)
+		: null;
+
+	return writeNode({
+		nodeType,
+		code,
+		method,
+		upsert,
+		isCreate: true,
+
+		propertiesToModify: constructNeo4jProperties({
+			nodeType,
+			newContent: body,
+			code,
+		}),
+		lockedFields,
+		relationshipsToCreate: recordAnalysis.diffRelationships({
+			nodeType,
+			newContent: body,
+		}).addedRelationships,
+		queryParts: [
+			stripIndents`CREATE (node:${nodeType} $properties)
+				SET ${cypherHelpers.metaPropertiesForCreate('node')}
+			WITH node`,
+		],
+	});
+};
+
+const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
+	const parameters = {};
+	const queryParts = [];
+
+	const schema = getType(nodeType);
+	queryParts.push(
+		...Object.entries(removedRelationships).map(([propName, codes]) => {
+			const def = schema.properties[propName];
+			const key = `Delete${def.relationship}${def.direction}${def.type}`;
+			parameters[key] = codes;
+			return `WITH node
+				${cypherHelpers.deleteRelationships(def, key)}
+				`;
+		}),
+	);
+
+	return { parameters, queryParts };
+};
+
+module.exports = {
+	writeNode,
+	createNewNode,
+	prepareRelationshipDeletion,
 };

@@ -133,6 +133,7 @@ const diffRelationships = ({
 	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
 
 	const schema = getType(nodeType);
+
 	const summary = Object.entries(newRelationships)
 		.map(([relType, newCodes]) => {
 			const isCardinalityOne = !schema.properties[relType].hasMany;

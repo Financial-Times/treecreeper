@@ -6,6 +6,7 @@ const { setContext } = require('../../lib/request-context');
 const { logNodeChanges, logNodeDeletion } = require('../../lib/log-to-kinesis');
 const recordAnalysis = require('../../data/record-analysis');
 const cypherHelpers = require('../../data/cypher-helpers');
+const { prepareRelationshipDeletion } = require('./helpers');
 
 const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 	if (!type) {
@@ -31,7 +32,6 @@ module.exports = async input => {
 
 	// Fetch the nodes to be updated
 	const [sourceNode, destinationNode] = await Promise.all([
-		// TODO dry this out using return node with relationships
 		executeQuery(
 			`MATCH (node:${nodeType} { code: $sourceCode })
 			${cypherHelpers.nodeWithRels()}`,
@@ -101,29 +101,18 @@ module.exports = async input => {
 	});
 	const willDeleteRelationships = !!Object.keys(removedRelationships).length;
 	if (willDeleteRelationships) {
-		const parameters = { sourceCode };
-		const queryParts = [
-			`
-	MATCH (sourceNode:${nodeType} { code: $sourceCode })`,
-		];
+		const queryParts = [`MATCH (node:${nodeType} { code: $code })`];
 
-		const schema = getType(nodeType);
-		queryParts.push(
-			...Object.entries(removedRelationships).map(([propName, codes]) => {
-				const def = schema.properties[propName];
-				const key = `Delete${def.relationship}${def.direction}${
-					def.type
-				}`;
-				parameters[key] = codes;
-				return `WITH sourceNode
-				${cypherHelpers.deleteRelationships(def, key, 'sourceNode')}
+		const {
+			parameters,
+			queryParts: relDeleteQueries,
+		} = prepareRelationshipDeletion(nodeType, removedRelationships);
 
-				`;
-			}),
+		queryParts.push(...relDeleteQueries, 'RETURN node');
+		await executeQuery(
+			queryParts.join('\n'),
+			Object.assign(parameters, { code: sourceCode }),
 		);
-
-		queryParts.push('RETURN sourceNode');
-		await executeQuery(queryParts.join('\n'), parameters);
 		logNodeChanges({
 			result: sourceNode,
 			removedRelationships,
@@ -131,9 +120,8 @@ module.exports = async input => {
 	}
 
 	const result = await executeQuery(
-		`
-		OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
-			CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
+		`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
+	CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
 	YIELD node
 	${cypherHelpers.nodeWithRels({ includeWithStatement: false })}
 	`,

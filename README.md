@@ -25,13 +25,13 @@ To get one, either:
 The API key can then be passed on each request either as a query parameter, e.g.
 
 ```shell
-curl https://api.ft.com/biz-ops/api/__gtg?apiKey=...
+curl https://api.ft.com/biz-ops/__gtg?apiKey=...
 ```
 
 or as an `X-Api-Key` header, e.g.
 
 ```shell
-curl -H "X-Api-Key: ..." https://api.ft.com/biz-ops/api/__gtg
+curl -H "X-Api-Key: ..." https://api.ft.com/biz-ops/__gtg
 ```
 
 You will also need to set a `client-id` header, with the system code of the system calling the api (or some other identifier if not a recognised system).

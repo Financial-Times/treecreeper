@@ -7,9 +7,17 @@ const {
 	AWS_SECRET_ACCESS_KEY,
 } = process.env;
 
-function Kinesis(streamName) {
-	const isProduction = process.env.NODE_ENV === 'production';
+const stubInDevelopment = (action, fn) => (...args) => {
+	if (process.env.NODE_ENV !== 'production') {
+		logger.debug(`Skipped kinesis ${action} as not in production`, {
+			event: args[0].event,
+		});
+		return Promise.resolve();
+	}
+	return fn(...args);
+};
 
+function Kinesis(streamName) {
 	const dyno = process.env.DYNO;
 
 	const kinesisClient = new AWS.Kinesis({
@@ -25,16 +33,6 @@ function Kinesis(streamName) {
 		signatureCache: false,
 	});
 
-	const stubInDevelopment = (action, fn) => (...args) => {
-		if (!isProduction) {
-			logger.debug(`Skipped kinesis ${action} as not in production`, {
-				event: args[0].event,
-			});
-			return Promise.resolve();
-		}
-		return fn(...args);
-	};
-
 	return {
 		putRecord: stubInDevelopment('put record', data => {
 			const options = {
@@ -46,12 +44,14 @@ function Kinesis(streamName) {
 				.putRecord(options)
 				.promise()
 				.catch(error => {
-					logger.error('Kinesis put record failed', {
-						event: 'KINESIS_PUT_RECORD_FAILURE',
-						error,
-						data,
-						env: 'RelEng',
-					});
+					logger.error(
+						{
+							event: 'KINESIS_PUT_RECORD_FAILURE',
+							error,
+							data,
+						},
+						'Kinesis put record failed',
+					);
 				});
 		}),
 	};
