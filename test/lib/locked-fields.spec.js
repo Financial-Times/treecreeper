@@ -161,7 +161,7 @@ describe('unlocksFields', () => {
 		).toEqual(null);
 	});
 
-	it('returns _lockedFields with fields that are not locked by the requesting clientId', () => {
+	it('returns complete _lockedFields set, including any fields that are not locked by the requesting clientId', () => {
 		const unlockFields = 'name,code,email';
 		const otherExistingLockedFields = {
 			code: 'biz-ops-admin',
