@@ -1,5 +1,6 @@
 const schema = require('@financial-times/biz-ops-schema');
 const _isEmpty = require('lodash.isempty');
+const { logger } = require('./request-context');
 
 class LockedFieldsError extends Error {
 	constructor(message, fields, status) {
@@ -39,6 +40,8 @@ const setLockedFields = (clientId, lockFields, existingLockedFields) => {
 		fieldsToLock[field] = clientId;
 	});
 
+	logger.info({ event: 'SET_LOCKED_FIELDS', lockFields, clientId });
+
 	if (!existingLockedFields) {
 		return JSON.stringify(fieldsToLock);
 	}
@@ -52,7 +55,7 @@ const setLockedFields = (clientId, lockFields, existingLockedFields) => {
 	return JSON.stringify(allLockedFields);
 };
 
-const removeLockedFields = (unlockFields, existingLockedFields) => {
+const removeLockedFields = (unlockFields, existingLockedFields, clientId) => {
 	if (!existingLockedFields) {
 		return;
 	}
@@ -60,6 +63,8 @@ const removeLockedFields = (unlockFields, existingLockedFields) => {
 	unlockFields.forEach(fieldName => {
 		delete existingLockedFields[fieldName];
 	});
+
+	logger.info({ event: 'REMOVE_LOCKED_FIELDS', unlockFields, clientId });
 
 	return Object.keys(existingLockedFields).length
 		? JSON.stringify(existingLockedFields)
@@ -76,7 +81,7 @@ const mergeLockedFields = (nodeType, clientId, query, existingLockedFields) => {
 
 	if (unlockFields) {
 		const fields = getLockedFields(nodeType, unlockFields);
-		return removeLockedFields(fields, existingLockedFields);
+		return removeLockedFields(fields, existingLockedFields, clientId);
 	}
 
 	return null;
