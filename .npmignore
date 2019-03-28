@@ -1,0 +1,13 @@
+__mocks__
+.circleci
+schema
+test
+scripts
+/.*rc.js
+.editorconfig
+.snyk
+*.md
+secret-squirrel.js
+.env
+.eslintcache
+junit.xml

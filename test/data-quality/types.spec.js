@@ -1,13 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
-const rawData = require('../../lib/raw-data');
+const RawData = require('../../lib/raw-data');
 
+const rawData = new RawData();
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
-const getStringValidator = require('../../lib/get-string-validator');
+const stringValidator = require('../../data-accessors/string-validator');
 
+const getStringValidator = stringValidator.accessor.bind(null, rawData);
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');

@@ -9,14 +9,47 @@ Schema for biz-ops data store and api. It provides two things:
 
 `npm install @financial-times/biz-ops-schema`
 
+In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment
+
+### Persistent nodejs process (e.g. heroku)
+
 ```js
-const { poller } = require('@financial-times/biz-ops-schema');
-poller.start(process.env.SCHEMA_BASE_URL);
+const { configure, startPolling } = require('@financial-times/biz-ops-schema');
+configure({
+	baseUrl: process.env.SCHEMA_BASE_URL,
+	updateMode: 'poll',
+	logger: require('n-logger'), // or whichever logger you prefer
+	ttl: 10000, // in milliseconds, defaults to 60000
+});
+
+startPolling().then(() => {
+	// you can now start your app and use the schema
+});
+```
+
+### Transient nodejs process (e.g. AWS lambda)
+
+```js
+const { configure, refresh } = require('@financial-times/biz-ops-schema');
+configure({
+	baseUrl: process.env.SCHEMA_BASE_URL,
+	updateMode: 'stale',
+	logger: require('n-lambda-logger'), // or whichever logger you prefer
+	ttl: 10000, // in milliseconds, defaults to 60000
+});
+
+// in your function handler
+const handler = async event => {
+	await refresh();
+	// now go ahead
+};
 ```
 
 Speak to a member of the [biz ops team](https://financialtimes.slack.com/messages/C9S0V2KPV) to obtain a suitable value for `SCHEMA_BASE_URL`.
 
-The component _may_ be used without starting the poller - it will use a local copy of the schema provided as part of the npm package. However, unless there are specific reasons to want to pin to a specific schema version, it is far better to enable polling.
+### Local development
+
+When npm linking to test schema changes in an application, set `updateMode: 'dev'` to retrieve schema files from the local yaml files and disable polling/refersh on stale.
 
 ## Adding to the schema
 
@@ -53,6 +86,7 @@ The full object structure returned by getType() can been seen [here](GETTYPE.md)
 -   `withRelationships` [default: `true`]: Include the relationships for the type, expressed as graphql property definitions.
 -   `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
 -   `groupProperties` [default: `false`]: Each property may have a `fieldset` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `fieldsets`, where all properties are then grouped by fieldset
+-   `includeMetaFields` [default: `false`]: Determines whether to include metadatafields (prefixed with `_`) in the schema object returned
 
 ### getTypes(options)
 
