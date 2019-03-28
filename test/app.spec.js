@@ -1,8 +1,10 @@
 const app = require('../server/app.js');
+const { schemaReady } = require('../server/lib/configure-schema');
 const request = require('./helpers/supertest').getNamespacedSupertest('app');
 const DEFAULT_QUERY = require('../server/data/default-query');
 
 describe('generic app settings', () => {
+	beforeAll(() => schemaReady);
 	it('GET gtg - status code 200', async () => {
 		return request(app)
 			.get('/__gtg')

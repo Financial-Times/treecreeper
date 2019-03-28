@@ -82,7 +82,7 @@ describe('merge', () => {
 					sourceCode: teamCode1,
 					destinationCode: teamCode2,
 				})
-				.expect(400, /Invalid node type/);
+				.expect(400, /Invalid type/);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),

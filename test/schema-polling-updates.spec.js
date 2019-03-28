@@ -4,10 +4,6 @@ const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );
 
-const {
-	poller: { schemaFileName },
-} = schema;
-
 jest.useFakeTimers();
 
 describe('schema polling updates', () => {
@@ -19,9 +15,16 @@ describe('schema polling updates', () => {
 
 			fetch.config.fallbackToNetwork = false;
 			fetch
-				.getOnce(`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`, {})
 				.getOnce(
-					`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
+					`${
+						process.env.SCHEMA_BASE_URL
+					}/${schema.getSchemaFilename()}`,
+					{ version: 'not-null' },
+				)
+				.getOnce(
+					`${
+						process.env.SCHEMA_BASE_URL
+					}/${schema.getSchemaFilename()}`,
 					{
 						version: 'new-test',
 						schema: {
@@ -49,11 +52,11 @@ describe('schema polling updates', () => {
 					{ overwriteRoutes: false },
 				)
 				.catch(200);
-
+			const { schemaReady } = require('../server/lib/configure-schema');
 			app = require('../server/app');
-			schema.poller.start(process.env.SCHEMA_BASE_URL);
-			await fetch.flush(true);
-			jest.advanceTimersByTime(20001);
+			// await fetch.flush(true);
+			await schemaReady;
+			jest.advanceTimersByTime(60001);
 			await fetch.flush(true);
 		});
 		afterAll(() => {
@@ -98,7 +101,9 @@ describe('schema polling updates', () => {
 
 				fetch
 					.getOnce(
-						`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
+						`${
+							process.env.SCHEMA_BASE_URL
+						}/${schema.getSchemaFilename()}`,
 						{
 							version: 'new-test2',
 							schema: {
@@ -179,9 +184,9 @@ describe('schema polling updates', () => {
 	it('reinitialises database contraints', async () => {
 		const on = jest.fn();
 		jest.doMock('@financial-times/biz-ops-schema', () => ({
-			poller: {
-				on,
-			},
+			on,
+			configure: () => null,
+			startPolling: () => Promise.resolve(),
 		}));
 		const { initConstraints } = require('../server/init-db');
 		expect(on).toHaveBeenCalledWith('change', initConstraints);

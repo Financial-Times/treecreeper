@@ -2,11 +2,13 @@
 
 const schema = require('@financial-times/biz-ops-schema');
 const logger = require('@financial-times/n-logger').default;
+const { schemaReady } = require('./lib/configure-schema');
 const { executeQueryWithSharedSession } = require('./data/db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
 const initConstraints = async () => {
+	await schemaReady;
 	const executeQuery = executeQueryWithSharedSession();
 
 	try {
@@ -66,7 +68,7 @@ const initConstraints = async () => {
 	}
 };
 
-schema.poller.on('change', initConstraints);
+schema.on('change', initConstraints);
 
 module.exports = {
 	initConstraints,

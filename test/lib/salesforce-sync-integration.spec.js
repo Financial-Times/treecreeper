@@ -1,5 +1,6 @@
 const salesforceSync = require('../../server/lib/salesforce-sync');
 const app = require('../../server/app.js');
+const { schemaReady } = require('../../server/lib/configure-schema');
 
 const namespace = 'salesforce-sync';
 const { dropDb } = require('../helpers/test-data');
@@ -8,6 +9,7 @@ const request = require('../helpers/supertest').getNamespacedSupertest(
 );
 
 describe('salesforce sync integration', () => {
+	beforeAll(() => schemaReady);
 	beforeEach(async () => {
 		dropDb(namespace);
 		jest.spyOn(salesforceSync, 'setSalesforceIdForSystem');

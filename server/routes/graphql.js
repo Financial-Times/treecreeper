@@ -68,11 +68,12 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-schema.poller.on('change', constructAPI);
-
-// useful for testing, but should never be used in production as server waits for
-// schema pollingbefore serving any traffic
-constructAPI({ updateToS3: false });
+schema.on('change', ({ oldVersion }) => {
+	// on startup the change is from a null version to an actual one
+	// so careful not to send to s3 in that scenario
+	// - not risky, just wasteful
+	constructAPI({ updateToS3: !!oldVersion });
+});
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
