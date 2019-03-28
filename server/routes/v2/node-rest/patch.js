@@ -93,8 +93,16 @@ const update = async input => {
 			.length;
 		const willModifyRelationships =
 			willDeleteRelationships || willCreateRelationships;
+		const willModifyLockedFields =
+			lockedFields && lockedFields !== existingRecord._lockedFields;
 
-		if (!willModifyNode && !willModifyRelationships) {
+		const updateDataBase = !!(
+			willModifyNode ||
+			willModifyRelationships ||
+			willModifyLockedFields
+		);
+
+		if (!updateDataBase) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
 				'No changed properties or relationships - skipping node update',
@@ -109,7 +117,7 @@ const update = async input => {
 				`,
 		];
 
-		if (willModifyNode || willModifyRelationships) {
+		if (updateDataBase) {
 			queryParts.push(stripIndents`ON MATCH SET
 				${cypherHelpers.metaPropertiesForUpdate('node')}
 				SET node += $properties
@@ -125,6 +133,7 @@ const update = async input => {
 			queryParts.push(...relDeleteQueries);
 			Object.assign(parameters, delParams);
 		}
+
 		return await writeNode({
 			nodeType,
 			code,

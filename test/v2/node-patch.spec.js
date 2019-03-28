@@ -1694,7 +1694,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.expectNoEvents();
 		});
 
-		it("doesn't write if no real relationship changes detected in replace mode", async () => {
+		it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode],
@@ -1712,7 +1712,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.expectNoEvents();
 		});
 
-		it("doesn't write if no real relationship changes detected in merge mode", async () => {
+		it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode],
@@ -1727,6 +1727,21 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
+			sandbox.expectNoEvents();
+		});
+
+		it("doesn't write if no real lockField changes detected", async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+			});
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+			).expect(200);
+
+			dbQuerySpy().args.forEach(args => {
+				expect(args[0]).not.toMatch(/MERGE|CREATE/);
+			});
 			sandbox.expectNoEvents();
 		});
 
@@ -2070,6 +2085,21 @@ describe('v2 - node PATCH', () => {
 					code: teamCode,
 					name: 'new name',
 					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"another-api","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","_createdByClient":"v2-node-patch-client","_createdByUser":"v2-node-patch-client","_createdTimestamp":"v2-node-patch-client","_updatedByClient":"v2-node-patch-client","_updatedByUser":"v2-node-patch-client","_updatedTimestamp":"v2-node-patch-client","_lockedFields":"v2-node-patch-client"}`,
+				}),
+			);
+		});
+
+		it('can lock fields without having to make any data changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});
