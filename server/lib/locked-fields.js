@@ -1,5 +1,6 @@
 const schema = require('@financial-times/biz-ops-schema');
 const _isEmpty = require('lodash.isempty');
+const { logger } = require('./request-context');
 
 class LockedFieldsError extends Error {
 	constructor(message, fields, status) {
@@ -19,12 +20,12 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const mergeLockedFields = (
-	nodeType,
-	clientId,
-	lockFields,
-	existingLockedFields,
-) => {
+const getLockedFields = (nodeType, fieldNames) =>
+	fieldNames === 'all'
+		? getAllPropertyNames(nodeType)
+		: fieldNames.split(',');
+
+const setLockedFields = (clientId, lockFields, existingLockedFields) => {
 	if (!clientId) {
 		throw new LockedFieldsError(
 			'clientId needs to be set to a valid system code in order to lock fields',
@@ -33,16 +34,13 @@ const mergeLockedFields = (
 		);
 	}
 
-	const fields =
-		lockFields === 'all'
-			? getAllPropertyNames(nodeType)
-			: lockFields.split(',');
-
 	const fieldsToLock = {};
 
-	fields.forEach(field => {
+	lockFields.forEach(field => {
 		fieldsToLock[field] = clientId;
 	});
+
+	logger.info({ event: 'SET_LOCKED_FIELDS', lockFields, clientId });
 
 	if (!existingLockedFields) {
 		return JSON.stringify(fieldsToLock);
@@ -55,6 +53,38 @@ const mergeLockedFields = (
 	);
 
 	return JSON.stringify(allLockedFields);
+};
+
+const removeLockedFields = (unlockFields, existingLockedFields, clientId) => {
+	if (!existingLockedFields) {
+		return;
+	}
+
+	unlockFields.forEach(fieldName => {
+		delete existingLockedFields[fieldName];
+	});
+
+	logger.info({ event: 'REMOVE_LOCKED_FIELDS', unlockFields, clientId });
+
+	return Object.keys(existingLockedFields).length
+		? JSON.stringify(existingLockedFields)
+		: null;
+};
+
+const mergeLockedFields = (nodeType, clientId, query, existingLockedFields) => {
+	const { lockFields, unlockFields } = query;
+
+	if (lockFields) {
+		const fields = getLockedFields(nodeType, lockFields);
+		return setLockedFields(clientId, fields, existingLockedFields);
+	}
+
+	if (unlockFields) {
+		const fields = getLockedFields(nodeType, unlockFields);
+		return removeLockedFields(fields, existingLockedFields, clientId);
+	}
+
+	return null;
 };
 
 const validateLockedFields = (
@@ -88,4 +118,8 @@ const validateLockedFields = (
 	}
 };
 
-module.exports = { mergeLockedFields, validateLockedFields, LockedFieldsError };
+module.exports = {
+	mergeLockedFields,
+	validateLockedFields,
+	LockedFieldsError,
+};

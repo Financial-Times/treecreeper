@@ -23,13 +23,8 @@ const update = async input => {
 	validateParams(input);
 	validatePayload(input);
 
-	const {
-		nodeType,
-		code,
-		clientId,
-		query: { relationshipAction, upsert, lockFields },
-		body,
-	} = input;
+	const { nodeType, code, clientId, query, body } = input;
+	const { relationshipAction, upsert } = query;
 
 	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
@@ -48,7 +43,7 @@ const update = async input => {
 				nodeType,
 				code,
 				clientId,
-				{ upsert, lockFields },
+				query,
 				body,
 				'PATCH',
 			);
@@ -73,14 +68,12 @@ const update = async input => {
 			);
 		}
 
-		const lockedFields = lockFields
-			? mergeLockedFields(
-					nodeType,
-					clientId,
-					lockFields,
-					existingLockedFields,
-			  )
-			: null;
+		const lockedFields = mergeLockedFields(
+			nodeType,
+			clientId,
+			query,
+			existingLockedFields,
+		);
 
 		const {
 			removedRelationships,

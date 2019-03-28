@@ -1842,7 +1842,7 @@ describe('v2 - node PATCH', () => {
 		});
 	});
 
-	describe('locked fields', () => {
+	describe('lockedFields', () => {
 		const lockedFieldName = '{"name":"v2-node-patch-client"}';
 		const lockedFieldEmail = '{"email":"v2-node-patch-client"}';
 
@@ -2088,6 +2088,68 @@ describe('v2 - node PATCH', () => {
 						/clientId needs to be set to a valid system code in order to lock fields/,
 					);
 			});
+		});
+	});
+
+	describe('unlocking fields', () => {
+		it('unlocks fields when request is given', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: '{"email":"v2-node-patch-client"}',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=email`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+				}),
+			);
+		});
+
+		it('unlocks fields when request is given by a different clientId that locked it', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: '{"email":"another-api"}',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=email`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+				}),
+			);
+		});
+
+		it('unlocks `all` fields', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=all`,
+				{
+					name: 'new name',
+				},
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+				}),
+			);
 		});
 	});
 });
