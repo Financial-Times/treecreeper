@@ -2089,7 +2089,7 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('can lock fields without having to make any data changes', async () => {
+		it('can lock fields without having to send any data changes', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 			});
