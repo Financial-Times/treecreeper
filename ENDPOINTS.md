@@ -11,6 +11,21 @@ When calling through API gateway use the folowing:
 Example:
 https://api-t.ft.com/biz-ops/v2/node/Group/groupid?upsert=true&relationshipAction=merge
 
+## Table of Contents
+
+-   [Node](#Node)
+    -   [Payload structure](#Payload-structure)
+        -   [Deleting while patching](#Deleting-while-patching)
+        -   [Example payload](#Example-payload)
+    -   [Error structure](#Error-structure)
+    -   [GET](#GET)
+    -   [POST](#POST)
+    -   [PATCH](#PATCH)
+    -   [DELETE](#DELETE)
+    -   [Field locking](#Field-locking)
+-   [Merge](#Merge)
+    -   [POST](#POST)
+
 ## Node - {prefix}/v2/node/:nodeType/:code
 
 ### Url parameters
@@ -128,6 +143,23 @@ Used to remove a node. _This method should be used sparingly as most types have 
 | existing, with relationships to other nodes    | 409    | none          |
 | existing, with no relationships to other nodes | 204    | none          |
 
+### Field locking
+
+Field locking is the functionality to restrict any value changes to chosen fields (i.e `name` in `Person`) to the clientId\* that requested the locking of that field.
+
+Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockField=name`;
+
+| query name   | value                               | example                  | request type   |
+| ------------ | ----------------------------------- | ------------------------ | -------------- |
+| lockFields   | comma list of field names to lock   | lockFields={name,code}   | POST and PATCH |
+| lockFields   | all                                 | lockFields=all           | POST and PATCH |
+| unlockFields | comma list of field names to unlock | unlockFields={name,code} | PATCH          |
+| unlockFields | all                                 | unlockFields=all         | PATCH          |
+
+-   `clientId` needs to be set in the request otherwise an LockedFieldsError will be throw with a 400 status.
+    ``
+    Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
+
 ## Merge - {prefix}/v2/merge
 
 This endpoint allows merging two nodes. All relationships defined on the source node will be copied to the destination node. Any properties defined on the source node but _not_ defined on the destination node will be copied across. Properties defined on both nodes will take the value already set on the destination node. The source node will be deleted
@@ -143,20 +175,3 @@ Send a JSON with the following properties, all required
 | destinationCode | string | The code of the destination node                                       |
 
 Responds with a 200 JSON payload for the destination node matching the standard CRUD response https://github.com/Financial-Times/biz-ops-api/blob/master/ENDPOINTS.md#payload-structure
-
-## Field locking
-
-Field locking is the functionality to restrict any value changes to chosen fields (i.e `name` in `Person`) to the clientId\* that requested the locking of that field.
-
-`https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockField=name`;
-
-| query name   | value                               | example                  | request type   |
-| ------------ | ----------------------------------- | ------------------------ | -------------- |
-| lockFields   | comma list of field names to lock   | lockFields={name,code}   | POST and PATCH |
-| lockFields   | all                                 | lockFields=all           | POST and PATCH |
-| unlockFields | comma list of field names to unlock | unlockFields={name,code} | PATCH          |
-| unlockFields | all                                 | unlockFields=all         | PATCH          |
-
--   `clientId` needs to be set in the request otherwise an LockedFieldsError will be throw with a 400 status.
-    ``
-    Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
