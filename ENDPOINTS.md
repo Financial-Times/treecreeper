@@ -143,3 +143,18 @@ Send a JSON with the following properties, all required
 | destinationCode | string | The code of the destination node                                       |
 
 Responds with a 200 JSON payload for the destination node matching the standard CRUD response https://github.com/Financial-Times/biz-ops-api/blob/master/ENDPOINTS.md#payload-structure
+
+### Field locking
+
+Field locking is the functionality to restrict any value changes of chosen fields (i.e `name` in `Person`) to the clientId\* that requested the locking of that field.
+
+`https://api-t.ft.com/biz-ops/v2/node/Group/groupid?upsert=true&relationshipAction=merge&lockField=name`;
+
+| query name   | value                               | example                  | request type   |
+| ------------ | ----------------------------------- | ------------------------ | -------------- |
+| lockFields   | comma list of field names to lock   | lockFields={name,code}   | POST and PATCH |
+| lockFields   | all                                 | lockFields=all           | POST and PATCH |
+| unlockFields | comma list of field names to unlock | unlockFields={name,code} | PATCH          |
+| unlockFields | all                                 | unlockFields=all         | POST           |
+
+-   `clientId` needs to be set in the request otherwise an error will be throw with a 400 status.
