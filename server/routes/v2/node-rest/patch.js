@@ -107,7 +107,7 @@ const update = async input => {
 		if (!updateDataBase) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
-				'No changed properties or relationships - skipping node update',
+				'No changed properties, relationships or field locks - skipping update',
 			);
 			return existingRecord;
 		}
