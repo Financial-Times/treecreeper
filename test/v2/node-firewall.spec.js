@@ -271,7 +271,7 @@ describe('v2 - node generic', () => {
 					.expect(
 						400,
 						new RegExp(
-							`Invalid node type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+							`Invalid type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
 						),
 					);
 			});

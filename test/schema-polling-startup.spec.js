@@ -1,7 +1,5 @@
 const fetch = require('node-fetch');
-const { poller } = require('@financial-times/biz-ops-schema');
-
-const { schemaFileName } = poller;
+const { getSchemaFilename } = require('@financial-times/biz-ops-schema');
 
 jest.useFakeTimers();
 
@@ -24,7 +22,7 @@ describe('schema polling startup', () => {
 		expect(listen).not.toHaveBeenCalled();
 		await fetch.flush(true);
 		expect(fetch.lastUrl()).toEqual(
-			`${process.env.SCHEMA_BASE_URL}/${schemaFileName}`,
+			`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 		);
 		expect(listen).toHaveBeenCalled();
 		fetch.reset();

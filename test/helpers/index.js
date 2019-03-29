@@ -6,6 +6,8 @@ const salesForceSync = require('../../server/lib/salesforce-sync');
 const { getNamespacedSupertest } = require('./supertest');
 const dbConnection = require('./db-connection');
 
+const { schemaReady } = require('../../server/lib/configure-schema');
+
 const stubKinesis = () => {
 	jest.spyOn(EventLogWriter.prototype, 'sendEvent').mockImplementation(
 		data => {
@@ -37,6 +39,10 @@ const setupMocks = (
 	}
 
 	beforeEach(async () => {
+		// have to await in here as supertest doesn't wait for the callback
+		// in app listen to be called, so doesn't await schemaReady where
+		// app.listen does in server/create-app.js
+		await schemaReady;
 		sandbox.sinon = sinon.createSandbox();
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
