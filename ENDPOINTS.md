@@ -20,13 +20,18 @@ https://api-t.ft.com/biz-ops/v2/node/Group/groupid?upsert=true&relationshipActio
     -   [Error structure](#Error-structure)
     -   [GET](#GET)
     -   [POST](#POST)
+    -   [PUT](#PUT)
     -   [PATCH](#PATCH)
     -   [DELETE](#DELETE)
     -   [Field locking](#Field-locking)
 -   [Merge](#Merge)
     -   [POST](#POST)
 
-## Node - {prefix}/v2/node/:nodeType/:code
+## Node
+
+```
+{prefix}/v2/node/:nodeType/:code
+```
 
 ### Url parameters
 
@@ -160,7 +165,11 @@ Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=
     ``
     Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
 
-## Merge - {prefix}/v2/merge
+## Merge
+
+```
+{prefix}/v2/merge
+```
 
 This endpoint allows merging two nodes. All relationships defined on the source node will be copied to the destination node. Any properties defined on the source node but _not_ defined on the destination node will be copied across. Properties defined on both nodes will take the value already set on the destination node. The source node will be deleted
 
