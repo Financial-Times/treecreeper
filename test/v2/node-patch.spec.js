@@ -2104,6 +2104,23 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
+		it('can lock fields when sending values that make no changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 1',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 
@@ -2178,6 +2195,23 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
+				}),
+			);
+		});
+
+		it('unlocks the locked field when value sent make no changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: `{"name":"v2-node-patch-client"}`,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 1',
 				}),
 			);
 		});
