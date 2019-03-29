@@ -25,7 +25,7 @@ https://api-t.ft.com/biz-ops/v2/node/Group/groupid?upsert=true&relationshipActio
     -   [DELETE](#DELETE)
     -   [Field locking](#Field-locking)
 -   [Merge](#Merge)
-    -   [POST](#POST)
+    -   [POST](#POST-1)
 
 ## Node
 
