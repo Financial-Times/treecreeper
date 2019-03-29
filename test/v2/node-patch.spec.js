@@ -1694,7 +1694,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.expectNoEvents();
 		});
 
-		it("doesn't write if no real relationship changes detected in replace mode", async () => {
+		it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode],
@@ -1712,7 +1712,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.expectNoEvents();
 		});
 
-		it("doesn't write if no real relationship changes detected in merge mode", async () => {
+		it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
 			const [team, person] = await sandbox.createNodes(
 				['Team', teamCode],
 				['Person', personCode],
@@ -1727,6 +1727,21 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
+			sandbox.expectNoEvents();
+		});
+
+		it("doesn't write if no real lockField changes detected", async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+			});
+			const dbQuerySpy = spyDbQuery(sandbox);
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+			).expect(200);
+
+			dbQuerySpy().args.forEach(args => {
+				expect(args[0]).not.toMatch(/MERGE|CREATE/);
+			});
 			sandbox.expectNoEvents();
 		});
 
@@ -2074,6 +2089,38 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
+		it('can lock fields without having to send any data changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('can lock fields when sending values that make no changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 1',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 
@@ -2150,6 +2197,55 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 				}),
 			);
+		});
+
+		it('unlocks the locked field when value sent make no changes', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: `{"name":"v2-node-patch-client"}`,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 1',
+				}),
+			);
+		});
+
+		describe('no value changes', () => {
+			it('unlocks `all` fields', async () => {
+				await sandbox.createNode('Team', {
+					code: teamCode,
+					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
+				});
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?unlockFields=all`,
+				).expect(
+					200,
+					sandbox.withMeta({
+						code: teamCode,
+					}),
+				);
+			});
+
+			it('unlocks the only locked field', async () => {
+				await sandbox.createNode('Team', {
+					code: teamCode,
+					_lockedFields: `{"name":"v2-node-patch-client"}`,
+				});
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?unlockFields=name`,
+				).expect(
+					200,
+					sandbox.withMeta({
+						code: teamCode,
+					}),
+				);
+			});
 		});
 	});
 });
