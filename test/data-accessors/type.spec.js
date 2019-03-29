@@ -1,4 +1,4 @@
-const metaProperties = require('../../lib/constants');
+const metaProperties = require('../../lib/meta-properties');
 const { init } = require('../../lib/get-instance');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
@@ -66,7 +66,6 @@ describe('get-type', () => {
 					propertyExpectedResult.label,
 				);
 				expect(propertyActualResult.fieldset).toBe('meta');
-				expect(propertyActualResult.autoPopulated).toBe(true);
 			});
 		});
 	});
@@ -419,7 +418,6 @@ describe('get-type', () => {
 					property.description,
 				);
 				expect(fieldsetProperty.label).toEqual(property.label);
-				expect(fieldsetProperty.autoPopulated).toEqual(true);
 			});
 		});
 	});
