@@ -24,7 +24,7 @@ const update = async input => {
 	validatePayload(input);
 
 	const { nodeType, code, clientId, query, body } = input;
-	const { relationshipAction, upsert } = query;
+	const { relationshipAction, upsert, lockFields, unlockFields } = query;
 
 	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
@@ -93,8 +93,10 @@ const update = async input => {
 			.length;
 		const willModifyRelationships =
 			willDeleteRelationships || willCreateRelationships;
+
 		const willModifyLockedFields =
-			lockedFields && lockedFields !== existingRecord._lockedFields;
+			(unlockFields || lockFields) &&
+			lockedFields !== existingRecord._lockedFields;
 
 		const updateDataBase = !!(
 			willModifyNode ||
