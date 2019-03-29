@@ -1,4 +1,4 @@
-const metaProperties = require('../../lib/constants');
+const metaProperties = require('../../lib/meta-properties');
 const { init } = require('../../lib/get-instance');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
@@ -65,8 +65,6 @@ describe('get-type', () => {
 				expect(propertyActualResult.label).toBe(
 					propertyExpectedResult.label,
 				);
-				expect(propertyActualResult.fieldset).toBe('meta');
-				expect(propertyActualResult.autoPopulated).toBe(true);
 			});
 		});
 	});
@@ -389,38 +387,6 @@ describe('get-type', () => {
 				options: { includeMetaFields: false, groupProperties: true },
 			});
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
-		});
-	});
-
-	describe('can group auto generated meta properties by fieldset', () => {
-		let type;
-
-		beforeEach(() => {
-			type = typeFromRawData(
-				{
-					name: 'Type1',
-				},
-				{ options: { groupProperties: true, includeMetaFields: true } },
-			);
-		});
-
-		it('returns meta fieldset', () => {
-			expect(type.fieldsets.meta.heading).toBe('Metadata');
-			expect(type.fieldsets.meta.properties).toBeDefined();
-		});
-
-		metaProperties.forEach(property => {
-			const propertyName = property.name;
-			it(`returns meta fieldset property ${property.name}`, () => {
-				const fieldsetProperty =
-					type.fieldsets.meta.properties[propertyName];
-				expect(fieldsetProperty.type).toEqual(property.type);
-				expect(fieldsetProperty.description).toEqual(
-					property.description,
-				);
-				expect(fieldsetProperty.label).toEqual(property.label);
-				expect(fieldsetProperty.autoPopulated).toEqual(true);
-			});
 		});
 	});
 

@@ -1,6 +1,6 @@
 const clone = require('clone');
 const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('../lib/constants');
+const metaProperties = require('../lib/meta-properties');
 const BizOpsError = require('../lib/biz-ops-error');
 
 const BIZ_OPS = 'biz-ops';
