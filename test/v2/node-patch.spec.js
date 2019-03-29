@@ -2182,19 +2182,36 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('unlocks `all` fields with out any value changes', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=all`,
-			).expect(
-				200,
-				sandbox.withMeta({
+		describe('no value changes', () => {
+			it('unlocks `all` fields', async () => {
+				await sandbox.createNode('Team', {
 					code: teamCode,
-				}),
-			);
+					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
+				});
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?unlockFields=all`,
+				).expect(
+					200,
+					sandbox.withMeta({
+						code: teamCode,
+					}),
+				);
+			});
+
+			it('unlocks the only locked field', async () => {
+				await sandbox.createNode('Team', {
+					code: teamCode,
+					_lockedFields: `{"name":"v2-node-patch-client"}`,
+				});
+				await authenticatedPatch(
+					`/v2/node/Team/${teamCode}?unlockFields=name`,
+				).expect(
+					200,
+					sandbox.withMeta({
+						code: teamCode,
+					}),
+				);
+			});
 		});
 	});
 });
