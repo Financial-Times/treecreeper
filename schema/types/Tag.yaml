@@ -12,7 +12,7 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    pattern: MAX_LENGTH
+    pattern: MAX_LENGTH_64
     fieldset: main
     autoPopulated: true
 
