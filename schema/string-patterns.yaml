@@ -8,4 +8,5 @@ NO_SPACES: '^(?=.{2,64}$)\S+$'
 STRICT_CODE: '^(?=.{2,64}$)[a-z\d][a-z\d\-]*[a-z\d]$'
 REPO_NAME: '^(github|bitbucket)\:.*$'
 NO_LOWER_CASE: '^(?=.{2,64}$)[^a-z]+$' # ANYTHING:?\NOT LOWERCASE
-MAX_LENGTH: '^.{2,64}$'
+MAX_LENGTH_64: '^.{2,64}$'
+MAX_LENGTH_256: '^.{2,256}$'

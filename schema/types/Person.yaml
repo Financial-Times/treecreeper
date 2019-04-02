@@ -13,7 +13,7 @@ properties:
     description: |
         The unique code for this person. For FT staff this will be their active directory name.
         For third parties, please use firstname.lastname.company.
-    pattern: MAX_LENGTH
+    pattern: MAX_LENGTH_64
     fieldset: general
     autoPopulated: true
   name:
