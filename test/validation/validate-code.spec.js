@@ -1,21 +1,25 @@
-const getType = require('../../methods/get-type');
-const { validateCode } = require('../..');
-
-jest.mock('../../methods/get-type');
+const { init } = require('../../lib/get-instance');
 
 describe('validateCode', () => {
-	beforeEach(() => {
-		jest.mock('../../methods/get-type');
-
-		getType.mockReturnValue({
-			name: 'Thing',
-			properties: {
-				code: {
-					type: 'String',
-					validator: /^[^z]+$/, // exclude the letter z
+	const { validateCode } = init({
+		rawData: {
+			schema: {
+				types: [
+					{
+						name: 'Thing',
+						properties: {
+							code: {
+								type: 'String',
+								pattern: 'NO_Z',
+							},
+						},
+					},
+				],
+				stringPatterns: {
+					NO_Z: '^[^z]+$',
 				},
 			},
-		});
+		},
 	});
 
 	afterEach(() => {

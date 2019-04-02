@@ -1,6 +1,6 @@
-const rawData = require('../../lib/raw-data');
+const RawData = require('../../lib/raw-data');
 
-const enums = rawData.getEnums();
+const enums = new RawData().getEnums();
 
 describe('data quality: enum spec', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {

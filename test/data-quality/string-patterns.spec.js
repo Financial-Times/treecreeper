@@ -1,6 +1,6 @@
-const rawData = require('../../lib/raw-data');
+const RawData = require('../../lib/raw-data');
 
-const stringPatterns = rawData.getStringPatterns();
+const stringPatterns = new RawData().getStringPatterns();
 
 const longString = 'x'.repeat(257);
 
