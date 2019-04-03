@@ -1,103 +1,68 @@
 ProcessType:
   description: The means by which a technique is delivered
   options:
-    - value: FullyAutomated
-      description: FullyAutomated description placeholder
-    - value: PartiallyAutomated
-      description: PartiallyAutomated description placeholder
-    - value: Manual
-      description: Manual description placeholder
-    - value: NotRequired
-      description:  NotRequired description placeholder
+    - FullyAutomated
+    - PartiallyAutomated
+    - Manual
+    - NotRequired
 FailoverArchitectureType:
   description: The design which allows failover
   options:
-    - value: ActiveActive
-      description: ActiveActive description placeholder
-    - value: ActivePassive
-      description: ActivePassive description placeholder
-    - value: None
-      description: None description placeholder
+    - ActiveActive
+    - ActivePassive
+    - None
 TrafficLight:
   description: Quality rating based on Red, Amber and Green.
   options:
-    - value: Red
-      description: Red description placeholder
-    - value: Amber
-      description: Amber description placeholder
-    - value: Green
-      description: Green description placeholder
+    - Red
+    - Amber
+    - Green
 SystemLifecycle:
   description: |
     The lifecycle stage of a system.
     Note that 'Deprecated' should be used for systems that are currently
     not actively used, but may not be fully decommissioned yet
   options:
-    - value: Preproduction
-      description: Preproduction description placeholder
-    - value: Production
-      description: Production description placeholder
-    - value: Deprecated
-      description: Deprecated description placeholder
-    - value: Decommissioned
-      description: Decommissioned description placeholder
+    - Preproduction
+    - Production
+    - Deprecated
+    - Decommissioned
 ServiceTier:
   description: A system's support level
   options:
-    - value: Unsupported
-      description: Unsupported description placeholder
-    - value: Bronze
-      description: Bronze description placeholder
-    - value: Silver
-      description: Silver description placeholder
-    - value: Gold
-      description: Gold description placeholder
-    - value: Platinum
-      description: Platinum description placeholder
+    - Unsupported
+    - Bronze
+    - Silver
+    - Gold
+    - Platinum
 ProductLifecycle:
   description: The lifecycle stage of a product
   options:
-    - value: Incubate
-      description: Incubate description placeholder
-    - value: Sustain
-      description: Sustain description placeholder
-    - value: Grow
-      description: Grow description placeholder
-    - value: Sunset
-      description: Sunset description placeholder
+    - Incubate
+    - Sustain
+    - Grow
+    - Sunset
 PersonSource:
   description: The main origin of information about a Person
   options:
-    - value: workday
-      description: workday description placeholder
-    - value: multi
-      description: multi description placeholder
-    - value: cmdb3
-      description: cmdb3 description placeholder
-    - value: slack
-      description: slack description placeholder
-    - value: salesforce
-      description: salesforce description placeholder
-    - value: github
-      description: github description placeholder
-    - value: ldap
-      description: ldap description placeholder
+    - workday
+    - multi
+    - cmdb3
+    - slack
+    - salesforce
+    - github
+    - ldap
 PersonContract:
   description: Types of employment contract a Person may have with the FT
   options:
-    - value: permanent
-      description: permanent description placeholder
-    - value: contractor
-      description: contractor description placeholder
-    - value: other
-      description: other description placeholder
+    - permanent
+    - contractor
+    - other
 VersionControlSystem:
   description: Version control system that can store source code repositories
   options:
-    - value: bitbucket
-      description: bitbucket description placeholder
-    - value: github
-      description: github description placeholder
+    - bitbucket
+    - github
 GDPRProcess:
   description: Type of process used for handling GDPR erasure and retention requests
   options:
@@ -108,8 +73,7 @@ GDPRProcess:
     # link which the individual can click to confirm the fact they have deleted
     # data. Weekly reminders will be sent until deletion has been confirmed.
     # ACE
-    - value: AutomaticChasingEmail
-      description: AutomaticChasingEmail description placeholder
+    - AutomaticChasingEmail
     # Deletion Table
     # This is a table of people who need to be deleted, either due to retention
     # policy or someone having submitted a request. It is maintained in Data
@@ -117,8 +81,7 @@ GDPRProcess:
     # downstream systems either consume a feed from the table or poll it and
     # delete any new records found since last accessed.
     # DT
-    - value: DeletionTable
-      description: DeletionTable description placeholder
+    - DeletionTable
     # Automatic routine
     # This means the system has an automatic purge routine in place which
     # deletes data older than a specified time. The time varies by system but
@@ -127,69 +90,53 @@ GDPRProcess:
     # requirement to do anything else to implement retention policy and system
     # owners dont need to be notified of erasure requests.
     # Auto
-    - value: ScheduledPurge
-      description: ScheduledPurge description placeholder
+    - ScheduledPurge
     # Manual
     # This means there is no automated routine in place for deletions. For
     # erasure requests, these system owners will receive an ACE message, but
     # for retention, they will need to set a manual trigger and delete data
     # periodically to remain compliant.
-    - value: Manual
-      description: Manual description placeholder
+    - Manual
     # Application Programming Interface
     # Some systems have APIs which are called directly by the Hub. These are
     # called for erasure requests only as retention is not (currently) managed
     # in the Hub.
-    - value: API
-      description: API description placeholder
+    - API
     # Multiple
     # Some systems use a variety of the methods listed above, depending on the
     # types of data they hold. This is only really true for systems holding a
     # large amount of data, e.g. Redshift.
-    - value: Multiple
-      description: Multiple description placeholder
+    - Multiple
     # N/A
     # Some systems are considered too complex to complete erasure/ retention on,
     # so it was decided to not implement standard policy on these systems. The
     # risks of this have (or should have) been agreed by the FT Legal and
     # Compliance teams, but they are marked as n/a here.
     # N/A
-    - value: NotApplicable
-      description: NotApplicable description placeholder
+    - NotApplicable
     # # TBD
     # # Work is still ongoing to define delete methods for a small number of systems.
     # - TBD
 CookieParty:
   description: Cookie party classification type
   options:
-    - value: FirstParty
-      description: FirstParty description placeholder
-    - value: ThirdParty
-      description: ThirdParty description placeholder
+    - FirstParty
+    - ThirdParty
 CookiePurpose:
   description: ICC cookie classification type
   options:
-    - value: StrictlyNecessary
-      description: StrictlyNecessary description placeholder
-    - value: Performance
-      description: Performance description placeholder
-    - value: Functionality
-      description: Functionality description placeholder
-    - value: TargetingOrAdvertising
-      description: TargetingOrAdvertising description placeholder
+    - StrictlyNecessary
+    - Performance
+    - Functionality
+    - TargetingOrAdvertising
 CookieExpiry:
   description: Cookie expiry type
   options:
-    - value: Session
-      description: Session description placeholder
-    - value: Persistent
-      description: Persistent description placeholder
+    - Session
+    - Persistent
 CapabilityTier:
   description: Level of importance of a business capability
   options:
-    - value: BrandCritical
-      description: BrandCritical description placeholder
-    - value: BusinessCritical
-      description: BusinessCritical description placeholder
-    - value: NotCritical
-      description: NotCritical description placeholder
+    - BrandCritical
+    - BusinessCritical
+    - NotCritical
