@@ -37,12 +37,12 @@ const cypherResolver = def => {
 	}
 	if (def.isRecursive) {
 		return `@cypher(
-      statement: "MATCH (this)${relFragment(
-			def.relationship,
-			def.direction,
-			'*1..20',
-		)}(related:${def.type}) RETURN DISTINCT related"
-    )`;
+			statement: "MATCH (this)${relFragment(
+				def.relationship,
+				def.direction,
+				'*1..20',
+			)}(related:${def.type}) RETURN DISTINCT related"
+		)`;
 	}
 	return `@relation(name: "${
 		def.relationship
@@ -102,10 +102,10 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 	"""
 	${description}
 	"""
-  ${name}(
-    ${paginate ? PAGINATE : ''}
-    ${indentMultiline(defineProperties(properties), 4, true)}
-  ): ${type}`;
+	${name}(
+		${paginate ? PAGINATE : ''}
+		${indentMultiline(defineProperties(properties), 4, true)}
+	): ${type}`;
 };
 
 const defineType = config => `
@@ -113,11 +113,7 @@ const defineType = config => `
 ${config.description.replace(/\n/g, ' ')}
 """
 type ${config.name} {
-  ${indentMultiline(
-		defineProperties(Object.entries(config.properties)),
-		2,
-		true,
-  )}
+	${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
 }`;
 
 const defineQueries = config => [
