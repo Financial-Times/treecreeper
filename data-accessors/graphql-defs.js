@@ -127,11 +127,24 @@ const defineQueries = config => [
 	}),
 ];
 
-const defineEnum = ([name, { description, options }]) => `
-# ${description.replace(/\n/g, ' ')}
-enum ${name} {
-${indentMultiline(Object.keys(options).join('\n'), 2)}
-}`;
+const defineEnum = ([name, { description, options }]) => {
+	const enums = Object.entries(options).map(
+		([optionName, optionDescription]) => {
+			return `
+			"""
+			${optionDescription}
+			"""
+			${optionName}
+			`;
+		},
+	);
+
+	return `
+	# ${description.replace(/\n/g, ' ')}
+	enum ${name} {
+	${enums.join('\n')}
+	}`;
+};
 
 module.exports = (getTypes, getEnums) => () => {
 	const typesFromSchema = getTypes({

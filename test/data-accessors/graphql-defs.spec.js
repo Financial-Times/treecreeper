@@ -106,7 +106,24 @@ describe('graphql def creation', () => {
 			enums: {
 				Lifecycle: {
 					description: 'The lifecycle stage of a product',
-					options: ['Incubate', 'Sustain', 'Grow', 'Sunset'],
+					options: [
+						{
+							value: 'Incubate',
+							description: 'description',
+						},
+						{
+							value: 'Sustain',
+							description: 'description',
+						},
+						{
+							value: 'Grow',
+							description: 'description',
+						},
+						{
+							value: 'Sunset',
+							description: 'description',
+						},
+					],
 				},
 			},
 			stringPatterns,
@@ -260,9 +277,21 @@ _lockedFields: String
 }
 # The lifecycle stage of a product
 enum Lifecycle {
+"""
+description
+"""
 Incubate
+"""
+description
+"""
 Sustain
+"""
+description
+"""
 Grow
+"""
+description
+"""
 Sunset
 }`,
 			),

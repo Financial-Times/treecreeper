@@ -8,31 +8,41 @@ describe('get-enums', () => {
 		const getEnums = enumsFromRawData({
 			enum1: {
 				description: 'ab',
-				options: ['a'],
+				options: [{ value: 'a', description: 'description' }],
 			},
 		});
-		expect(getEnums()).toEqual({ enum1: { a: 'a' } });
+		expect(getEnums()).toEqual({ enum1: { a: 'description' } });
 	});
 
 	it('retrieve enums with metadata', () => {
 		const getEnums = enumsFromRawData({
 			enum1: {
 				description: 'ab',
-				options: ['a'],
+				options: [{ value: 'a', description: 'description' }],
 			},
 		});
 		expect(getEnums({ withMeta: true })).toEqual({
-			enum1: { description: 'ab', options: { a: 'a' } },
+			enum1: { description: 'ab', options: { a: 'description' } },
 		});
 	});
 
 	it('convert arrays into key/value maps', () => {
 		const getEnums = enumsFromRawData({
 			enum1: {
-				options: ['a', 'b', 'c'],
+				options: [
+					{ value: 'a', description: 'description' },
+					{ value: 'b', description: 'description' },
+					{ value: 'c', description: 'description' },
+				],
 			},
 		});
-		expect(getEnums()).toEqual({ enum1: { a: 'a', b: 'b', c: 'c' } });
+		expect(getEnums()).toEqual({
+			enum1: {
+				a: 'description',
+				b: 'description',
+				c: 'description',
+			},
+		});
 	});
 
 	it('retrieve key/value maps unaltered', () => {

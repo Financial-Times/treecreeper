@@ -15,11 +15,21 @@ describe('data quality: enum spec', () => {
 				).toBe(true);
 			});
 			if (Array.isArray(options)) {
-				it('has only string keys ', () => {
-					options.forEach(opt => expect(typeof opt).toBe('string'));
+				it('has array of objects', () => {
+					options.forEach(opt => expect(typeof opt).toBe('object'));
+				});
+				it('has property value', () => {
+					options.forEach(opt => expect(opt).toHaveProperty('value'));
+				});
+				it('has property description', () => {
+					options.forEach(opt =>
+						expect(opt).toHaveProperty('description'),
+					);
 				});
 				it('has no keys beginning with numbers', () => {
-					options.forEach(opt => expect(opt).not.toMatch(/^\d/));
+					options.forEach(opt =>
+						expect(opt.value).not.toMatch(/^\d/),
+					);
 				});
 			} else {
 				it('has only string keys', () => {
