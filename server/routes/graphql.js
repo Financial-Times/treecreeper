@@ -14,7 +14,7 @@ const { driver } = require('../data/db-connection');
 let api;
 let schemaVersionIsConsistent = true;
 
-const constructAPI = ({ updateToS3 = true } = {}) => {
+const constructAPI = () => {
 	try {
 		const newSchema = createSchema();
 		api = graphqlExpress(({ headers }) => ({
@@ -41,7 +41,7 @@ const constructAPI = ({ updateToS3 = true } = {}) => {
 		schemaVersionIsConsistent = true;
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
-		if (updateToS3 && process.env.NODE_ENV === 'production') {
+		if (process.env.NODE_ENV === 'production') {
 			schema
 				.sendSchemaToS3('api')
 				.then(() => {
@@ -68,12 +68,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-schema.on('change', ({ oldVersion }) => {
-	// on startup the change is from a null version to an actual one
-	// so careful not to send to s3 in that scenario
-	// - not risky, just wasteful
-	constructAPI({ updateToS3: !!oldVersion });
-});
+schema.on('change', constructAPI);
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
