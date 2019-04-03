@@ -15,21 +15,30 @@ describe('data quality: enum spec', () => {
 				).toBe(true);
 			});
 			if (Array.isArray(options)) {
-				it('has array of objects', () => {
-					options.forEach(opt => expect(typeof opt).toBe('object'));
-				});
-				it('has property value', () => {
-					options.forEach(opt => expect(opt).toHaveProperty('value'));
-				});
-				it('has property description', () => {
-					options.forEach(opt =>
-						expect(opt).toHaveProperty('description'),
-					);
-				});
-				it('has no keys beginning with numbers', () => {
-					options.forEach(opt =>
-						expect(opt.value).not.toMatch(/^\d/),
-					);
+				options.forEach(option => {
+					if (option.value) {
+						it(`${option} is an object`, () => {
+							expect(typeof option).toBe('object');
+						});
+						it(`${option} has a property called value`, () => {
+							expect(option).toHaveProperty('value');
+						});
+						it(`${option} has a property called description`, () => {
+							expect(option).toHaveProperty('description');
+						});
+						it(`key: ${
+							option.value
+						} does not begin with a number`, () => {
+							expect(option.value).not.toMatch(/^\d/);
+						});
+					} else {
+						it(`key: ${option} is a string`, () => {
+							expect(typeof option).toBe('string');
+						});
+						it(`key: ${option} does not begin with a number`, () => {
+							expect(option).not.toMatch(/^\d/);
+						});
+					}
 				});
 			} else {
 				it('has only string keys', () => {
