@@ -136,3 +136,34 @@ StarRating:
   Two: 2
   ...
 ```
+
+### Add Description
+
+There are two ways to add a description:
+
+-   Use the keys `value` and `description`
+
+```yaml
+Office:
+    - value: OSB
+      description: OSB description
+    - value: Manila
+      description: Manila description
+```
+
+This option also allows for not setting a description, if required:
+
+```yaml
+Office:
+    - value: OSB
+      description: OSB description
+    - value: Manila
+```
+
+-   Set as a key value pair:
+
+```yaml
+Office:
+    OSB: OSB description
+    Manila: Manila description
+```
