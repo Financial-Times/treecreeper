@@ -126,6 +126,23 @@ const handleRelationshipActionError = relationshipAction => {
 	}
 };
 
+const toArray = val => (Array.isArray(val) ? val : [val]);
+
+const handleSimultaneousWriteAndDelete = (content = {}) => {
+	Object.entries(content)
+		.filter(([propName]) => propName.startsWith('!'))
+		.forEach(([propName, deletedCodes]) => {
+			const addedCodes = toArray(content[propName.substr(1)]);
+			deletedCodes = toArray(deletedCodes);
+			if (deletedCodes.some(code => addedCodes.includes(code))) {
+				throw httpErrors(
+					400,
+					'Trying to add and remove a relationship to a record at the same time',
+				);
+			}
+		});
+};
+
 module.exports = {
 	preflightChecks: {
 		bailOnDuplicateRelationship: handleDuplicateRelationship,
@@ -133,6 +150,7 @@ module.exports = {
 		bailOnMissingNode: handleMissingNode,
 		bailOnAttachedNode: handleAttachedNode,
 		bailOnMissingRelationship: handleMissingRelationship,
+		handleSimultaneousWriteAndDelete,
 	},
 	dbErrorHandlers: {
 		nodeUpsert: handleUpsertError,
