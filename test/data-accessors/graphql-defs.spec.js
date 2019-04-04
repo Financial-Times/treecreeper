@@ -138,6 +138,22 @@ describe('graphql def creation', () => {
 						bitbucket: 'bitbucket description',
 					},
 				},
+				FailoverArchitectureType: {
+					description: 'The design which allows failover',
+					options: [
+						{
+							value: 'ActiveActive',
+							description: 'description',
+						},
+						{
+							value: 'ActivePassive',
+							description: 'description',
+						},
+						{
+							value: 'None',
+						},
+					],
+				},
 			},
 			stringPatterns,
 		};
@@ -323,6 +339,18 @@ github
 bitbucket description
 """
 bitbucket
+}
+# The design which allows failover
+enum FailoverArchitectureType {
+"""
+description
+"""
+ActiveActive
+"""
+description
+"""
+ActivePassive
+None
 }
 `,
 			),
