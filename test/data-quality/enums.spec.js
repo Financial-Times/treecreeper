@@ -32,10 +32,10 @@ describe('data quality: enum spec', () => {
 							expect(option.value).not.toMatch(/^\d/);
 						});
 					} else {
-						it(`key: ${option} is a string`, () => {
+						it(`element: ${option} is a string`, () => {
 							expect(typeof option).toBe('string');
 						});
-						it(`key: ${option} does not begin with a number`, () => {
+						it(`element: ${option} does not begin with a number`, () => {
 							expect(option).not.toMatch(/^\d/);
 						});
 					}

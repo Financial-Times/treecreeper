@@ -1,9 +1,8 @@
 const mapToObjectResolver = options =>
-	options.reduce(
-		(resolver, option) =>
-			Object.assign(resolver, { [option.value]: option.description }),
-		{},
-	);
+	options.reduce((resolver, option) => {
+		const key = option.value || option;
+		return Object.assign(resolver, { [key]: option.description || null });
+	}, {});
 
 module.exports = {
 	cacheKeyGenerator: ({ withMeta = false } = {}) => `enums:${withMeta}`,

@@ -125,6 +125,19 @@ describe('graphql def creation', () => {
 						},
 					],
 				},
+				TrafficLight: {
+					description:
+						'Quality rating based on Red, Amber and Green.',
+					options: ['Red', 'Amber', 'Green'],
+				},
+				VersionControlSystem: {
+					description:
+						'Version control system that can store source code repositories',
+					options: {
+						github: 'github description',
+						bitbucket: 'bitbucket description',
+					},
+				},
 			},
 			stringPatterns,
 		};
@@ -293,7 +306,25 @@ Grow
 description
 """
 Sunset
-}`,
+}
+# Quality rating based on Red, Amber and Green.
+enum TrafficLight {
+Red
+Amber
+Green
+}
+# Version control system that can store source code repositories
+enum VersionControlSystem {
+"""
+github description
+"""
+github
+"""
+bitbucket description
+"""
+bitbucket
+}
+`,
 			),
 		);
 	});

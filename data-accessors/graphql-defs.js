@@ -130,12 +130,16 @@ const defineQueries = config => [
 const defineEnum = ([name, { description, options }]) => {
 	const enums = Object.entries(options).map(
 		([optionName, optionDescription]) => {
-			return `
-			"""
-			${optionDescription}
-			"""
-			${optionName}
-			`;
+			const optionString = `${optionName}`;
+			if (optionDescription) {
+				return `
+				"""
+				${optionDescription}
+				"""
+				${optionString}`;
+			}
+
+			return optionString;
 		},
 	);
 
