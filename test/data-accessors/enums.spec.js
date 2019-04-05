@@ -4,47 +4,79 @@ const enumsFromRawData = data =>
 	init({ rawData: { schema: { enums: data } } }).getEnums;
 
 describe('get-enums', () => {
-	it('retrieve enums', () => {
-		const getEnums = enumsFromRawData({
-			enum1: {
-				description: 'ab',
-				options: ['a'],
-			},
-		});
-		expect(getEnums()).toEqual({ enum1: { a: 'a' } });
-	});
+	describe('from array', () => {
+		let getEnums;
 
-	it('retrieve enums with metadata', () => {
-		const getEnums = enumsFromRawData({
-			enum1: {
-				description: 'ab',
-				options: ['a'],
-			},
-		});
-		expect(getEnums({ withMeta: true })).toEqual({
-			enum1: { description: 'ab', options: { a: 'a' } },
-		});
-	});
-
-	it('convert arrays into key/value maps', () => {
-		const getEnums = enumsFromRawData({
-			enum1: {
-				options: ['a', 'b', 'c'],
-			},
-		});
-		expect(getEnums()).toEqual({ enum1: { a: 'a', b: 'b', c: 'c' } });
-	});
-
-	it('retrieve key/value maps unaltered', () => {
-		const getEnums = enumsFromRawData({
-			enum1: {
-				options: {
-					a: 1,
-					b: 2,
-					c: 3,
+		beforeEach(() => {
+			getEnums = enumsFromRawData({
+				enum1: {
+					description: 'ab',
+					options: ['a', 'b'],
 				},
-			},
+			});
 		});
-		expect(getEnums()).toEqual({ enum1: { a: 1, b: 2, c: 3 } });
+
+		describe('withMeta: false', () => {
+			it('retrieve enums', () => {
+				expect(getEnums()).toEqual({
+					enum1: {
+						a: 'a',
+						b: 'b',
+					},
+				});
+			});
+		});
+
+		describe('withMeta: true', () => {
+			it('retrieve enums', () => {
+				expect(getEnums({ withMeta: true })).toEqual({
+					enum1: {
+						description: 'ab',
+						options: {
+							a: { value: 'a' },
+							b: { value: 'b' },
+						},
+					},
+				});
+			});
+		});
+	});
+
+	describe('from object', () => {
+		let getEnums;
+
+		beforeEach(() => {
+			getEnums = enumsFromRawData({
+				enum1: {
+					description: 'abc',
+					options: {
+						a: 1,
+						b: 2,
+						c: 3,
+					},
+				},
+			});
+		});
+
+		describe('withMeta: false', () => {
+			it('retrieve enums - unchanged', () => {
+				expect(getEnums()).toEqual({ enum1: { a: 1, b: 2, c: 3 } });
+			});
+		});
+
+		describe('withMeta: true - with description', () => {
+			it('retrieve enums', () => {
+				expect(getEnums({ withMeta: true })).toEqual({
+					enum1: {
+						description: 'abc',
+						options: {
+							a: { value: 'a', description: 1 },
+							b: { value: 'b', description: 2 },
+							c: { value: 'c', description: 3 },
+						},
+					},
+				});
+			});
+		});
 	});
 });

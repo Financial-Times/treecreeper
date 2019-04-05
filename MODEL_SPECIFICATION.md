@@ -136,3 +136,15 @@ StarRating:
   Two: 2
   ...
 ```
+
+### Add Description
+
+To better understand the enum options, you can give them a description
+
+Set as a key value pair:
+
+```yaml
+Office:
+    OSB: OSB description
+    Manila: Manila description
+```
