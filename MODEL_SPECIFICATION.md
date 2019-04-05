@@ -139,28 +139,9 @@ StarRating:
 
 ### Add Description
 
-There are two ways to add a description:
+To better understand the enum options, you can give them a description
 
--   Use the keys `value` and `description`
-
-```yaml
-Office:
-    - value: OSB
-      description: OSB description
-    - value: Manila
-      description: Manila description
-```
-
-This option also allows for not setting a description, if required:
-
-```yaml
-Office:
-    - value: OSB
-      description: OSB description
-    - value: Manila
-```
-
--   Set as a key value pair:
+Set as a key value pair:
 
 ```yaml
 Office:
