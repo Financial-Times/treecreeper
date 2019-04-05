@@ -81,6 +81,14 @@ properties:
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
     autoPopulated: true
+  isPeopleApi:
+    type: Boolean
+    label: Is FT staff
+    fieldset: general
+    description: |
+        Whether or not this person is an FT staff member listed in https://people-finder.in.ft.com/.
+        Please raise in the \#ip-people-api slack channel if details are incorrect.
+    autoPopulated: true
   isActive:
     type: Boolean
     label: Active
@@ -95,14 +103,6 @@ properties:
         The type of employment contract this Person has with the FT.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
-  isPeopleApi:
-    type: Boolean
-    label: Is FT staff
-    fieldset: general
-    description: |
-        Whether or not this person is an FT staff member listed in https://people-finder.in.ft.com/.
-        Please raise in the \#ip-people-api slack channel if details are incorrect.
-    autoPopulated: true
   source:
     type: PersonSource
     label: Source
