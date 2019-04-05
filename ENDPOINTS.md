@@ -162,8 +162,8 @@ Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=
 | unlockFields | all                                 | unlockFields=all         | PATCH          |
 
 -   `clientId` needs to be set in the request otherwise an LockedFieldsError will be throw with a 400 status.
-    ``
-    Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
+
+        Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
 
 ## Merge
 
