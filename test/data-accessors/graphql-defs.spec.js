@@ -106,53 +106,17 @@ describe('graphql def creation', () => {
 			enums: {
 				Lifecycle: {
 					description: 'The lifecycle stage of a product',
-					options: [
-						{
-							value: 'Incubate',
-							description: 'description',
-						},
-						{
-							value: 'Sustain',
-							description: 'description',
-						},
-						{
-							value: 'Grow',
-							description: 'description',
-						},
-						{
-							value: 'Sunset',
-							description: 'description',
-						},
-					],
+					options: {
+						Incubate: 'Incubate description',
+						Sustain: 'Sustain description',
+						Grow: 'Grow description',
+						Sunset: 'Sunset description',
+					},
 				},
 				TrafficLight: {
 					description:
 						'Quality rating based on Red, Amber and Green.',
 					options: ['Red', 'Amber', 'Green'],
-				},
-				VersionControlSystem: {
-					description:
-						'Version control system that can store source code repositories',
-					options: {
-						github: 'github description',
-						bitbucket: 'bitbucket description',
-					},
-				},
-				FailoverArchitectureType: {
-					description: 'The design which allows failover',
-					options: [
-						{
-							value: 'ActiveActive',
-							description: 'description',
-						},
-						{
-							value: 'ActivePassive',
-							description: 'description',
-						},
-						{
-							value: 'None',
-						},
-					],
 				},
 			},
 			stringPatterns,
@@ -307,19 +271,19 @@ _lockedFields: String
 # The lifecycle stage of a product
 enum Lifecycle {
 """
-description
+Incubate description
 """
 Incubate
 """
-description
+Sustain description
 """
 Sustain
 """
-description
+Grow description
 """
 Grow
 """
-description
+Sunset description
 """
 Sunset
 }
@@ -328,29 +292,6 @@ enum TrafficLight {
 Red
 Amber
 Green
-}
-# Version control system that can store source code repositories
-enum VersionControlSystem {
-"""
-github description
-"""
-github
-"""
-bitbucket description
-"""
-bitbucket
-}
-# The design which allows failover
-enum FailoverArchitectureType {
-"""
-description
-"""
-ActiveActive
-"""
-description
-"""
-ActivePassive
-None
 }
 `,
 			),

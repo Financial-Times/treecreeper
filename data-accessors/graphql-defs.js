@@ -128,26 +128,23 @@ const defineQueries = config => [
 ];
 
 const defineEnum = ([name, { description, options }]) => {
-	const enums = Object.entries(options).map(
-		([optionName, optionDescription]) => {
-			const optionString = `${optionName}`;
-			if (optionDescription) {
-				return `
+	const enums = Object.entries(options).map(([, option]) => {
+		if (option.description) {
+			return stripIndent`
 				"""
-				${optionDescription}
+				${option.description}
 				"""
-				${optionString}`;
-			}
+				${option.value}`;
+		}
 
-			return optionString;
-		},
-	);
+		return `${option.value}`;
+	});
 
-	return `
-	# ${description.replace(/\n/g, ' ')}
-	enum ${name} {
-	${enums.join('\n')}
-	}`;
+	return stripIndent`
+		# ${description.replace(/\n/g, ' ')}
+		enum ${name} {
+		${indentMultiline(enums.join('\n'), 3)}
+		}`;
 };
 
 module.exports = (getTypes, getEnums) => () => {
