@@ -24,10 +24,11 @@ const update = async input => {
 	validatePayload(input);
 
 	const { nodeType, code, clientId, query, body } = input;
-	const { relationshipAction, upsert } = query;
+	const { relationshipAction, upsert, lockFields, unlockFields } = query;
 
 	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
+		preflightChecks.handleSimultaneousWriteAndDelete(body);
 	}
 
 	try {
@@ -75,14 +76,16 @@ const update = async input => {
 			existingLockedFields,
 		);
 
-		const {
-			removedRelationships,
-			addedRelationships,
-		} = recordAnalysis.diffRelationships({
+		const removedRelationships = recordAnalysis.getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
 			newContent: body,
 			action: relationshipAction,
+		});
+		const addedRelationships = recordAnalysis.getAddedRelationships({
+			nodeType,
+			initialContent: existingRecord,
+			newContent: body,
 		});
 
 		const willModifyNode = Object.keys(propertiesToModify).length;
@@ -94,10 +97,20 @@ const update = async input => {
 		const willModifyRelationships =
 			willDeleteRelationships || willCreateRelationships;
 
-		if (!willModifyNode && !willModifyRelationships) {
+		const willModifyLockedFields =
+			(unlockFields || lockFields) &&
+			lockedFields !== existingRecord._lockedFields;
+
+		const updateDataBase = !!(
+			willModifyNode ||
+			willModifyRelationships ||
+			willModifyLockedFields
+		);
+
+		if (!updateDataBase) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
-				'No changed properties or relationships - skipping node update',
+				'No changed properties, relationships or field locks - skipping update',
 			);
 			return existingRecord;
 		}
@@ -109,7 +122,7 @@ const update = async input => {
 				`,
 		];
 
-		if (willModifyNode || willModifyRelationships) {
+		if (updateDataBase) {
 			queryParts.push(stripIndents`ON MATCH SET
 				${cypherHelpers.metaPropertiesForUpdate('node')}
 				SET node += $properties
@@ -125,6 +138,7 @@ const update = async input => {
 			queryParts.push(...relDeleteQueries);
 			Object.assign(parameters, delParams);
 		}
+
 		return await writeNode({
 			nodeType,
 			code,

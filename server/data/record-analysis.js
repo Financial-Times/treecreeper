@@ -8,8 +8,7 @@ const isTemporalTypeName = type => ['Date', 'DateTime', 'Time'].includes(type);
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
-const toArrayOrUndefined = it =>
-	typeof it === 'undefined' ? undefined : toArray(it);
+const entryHasValues = ([, values = []]) => values.length;
 
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
@@ -95,95 +94,89 @@ const diffProperties = maybeToObject(
 	},
 );
 
-const avoidSimultaneousWriteAndDelete = (
-	relationshipsToCreate,
-	deleteRelationships,
-) => {
-	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
-		if (
-			deleteRelationships[propName] &&
-			deleteRelationships[propName].some(code => codes.includes(code))
-		) {
-			throw httpErrors(
-				400,
-				'Trying to add and remove a relationship to a record at the same time',
-			);
-		}
-	});
+const findActualDeletions = initialContent => ([propName, codesToDelete]) => {
+	const realPropName = unNegatePropertyName(propName);
+	const isDeleteAll = realPropName === propName && codesToDelete === null;
+	return [
+		realPropName,
+		toArray(
+			isDeleteAll ? initialContent[realPropName] : codesToDelete,
+		).filter(code => (initialContent[realPropName] || []).includes(code)),
+	];
 };
 
-const diffRelationships = ({
+const findImplicitDeletions = (initialContent, schema, action) => ([
+	relType,
+	newCodes,
+]) => {
+	const isCardinalityOne = !schema.properties[relType].hasMany;
+	if (action === 'replace' || isCardinalityOne) {
+		const existingCodes = initialContent[relType];
+		if (!existingCodes) {
+			return;
+		}
+		const existingCodesOnly = arrDiff(existingCodes, newCodes);
+		if (existingCodesOnly.length) {
+			return [relType, existingCodesOnly];
+		}
+	}
+};
+
+const findActualAdditions = (initialContent, schema) => ([
+	relType,
+	newCodes,
+]) => {
+	const isCardinalityOne = !schema.properties[relType].hasMany;
+	if (isCardinalityOne && newCodes.length > 1) {
+		// TODO... this should throw higher up, after calculating the
+		// merge of new & old codes???
+		throw httpErrors(400, `Can only have one ${relType}`);
+	}
+	return [relType, arrDiff(newCodes, initialContent[relType])];
+};
+
+const getRemovedRelationships = ({
 	nodeType,
-	initialContent = {},
+	initialContent,
 	newContent,
-	action = 'merge',
+	action,
 }) => {
+	if (!initialContent) {
+		return {};
+	}
+
 	const newRelationships = Object.entries(newContent)
 		.filter(isWriteRelationship(nodeType))
-		.map(([propName, codes]) => [propName, toArray(codes)])
-		.reduce(entriesToObject, {});
+		.map(([propName, codes]) => [propName, toArray(codes)]);
+
 	const deleteRelationships = Object.entries(newContent)
 		.filter(isDeleteRelationship(nodeType))
-		.map(([propName, codesToDelete]) => [
-			codesToDelete ? unNegatePropertyName(propName) : propName,
-			codesToDelete ? toArray(codesToDelete) : null,
-		])
-		.reduce(entriesToObject, {});
-
-	avoidSimultaneousWriteAndDelete(newRelationships, deleteRelationships);
+		.map(findActualDeletions(initialContent));
 
 	const schema = getType(nodeType);
 
-	const summary = Object.entries(newRelationships)
-		.map(([relType, newCodes]) => {
-			const isCardinalityOne = !schema.properties[relType].hasMany;
-			if (isCardinalityOne && newCodes.length > 1) {
-				throw httpErrors(400, `Can only have one ${relType}`);
-			}
-			const existingCodes = initialContent[relType];
-			if (!existingCodes && newCodes.length) {
-				return [relType, { added: newCodes }];
-			}
-			const newCodesOnly = arrDiff(newCodes, existingCodes);
-			const existingCodesOnly = arrDiff(existingCodes, newCodes);
-			if (newCodesOnly.length || existingCodesOnly.length) {
-				return [
-					relType,
-					{
-						added: newCodesOnly,
-						removed:
-							action === 'replace' || isCardinalityOne
-								? existingCodesOnly
-								: undefined,
-					},
-				];
-			}
-			return [];
-		})
-		.filter(([relType]) => !!relType)
-		.concat(
-			Object.entries(deleteRelationships).map(([relType, codes]) => [
-				relType,
-				{
-					removed: codes
-						? toArray(codes).filter(code =>
-								(initialContent[relType] || []).includes(code),
-						  )
-						: toArrayOrUndefined(initialContent[relType]),
-				},
-			]),
-		);
+	return newRelationships
+		.map(findImplicitDeletions(initialContent, schema, action))
+		.filter(it => !!it)
+		.concat(deleteRelationships)
+		.filter(entryHasValues)
+		.reduce(entriesToObject, {});
+};
 
-	return {
-		addedRelationships: summary
-			.filter(([, { added = [] }]) => added.length)
-			.map(([relType, { added }]) => [relType, added])
-			.reduce(entriesToObject, {}),
-		removedRelationships: summary
-			.filter(([, { removed = [] }]) => removed.length)
-			.map(([relType, { removed }]) => [relType, removed])
-			.reduce(entriesToObject, {}),
-	};
+const getAddedRelationships = ({ nodeType, initialContent, newContent }) => {
+	let newRelationships = Object.entries(newContent)
+		.filter(isWriteRelationship(nodeType))
+		.map(([propName, codes]) => [propName, toArray(codes)]);
+
+	if (initialContent) {
+		const schema = getType(nodeType);
+
+		newRelationships = newRelationships
+			.map(findActualAdditions(initialContent, schema))
+			.filter(entryHasValues);
+	}
+
+	return newRelationships.reduce(entriesToObject, {});
 };
 
 const containsRelationshipData = (nodeType, payload) => {
@@ -194,7 +187,8 @@ const containsRelationshipData = (nodeType, payload) => {
 };
 
 module.exports = {
-	diffRelationships,
+	getAddedRelationships,
+	getRemovedRelationships,
 	diffProperties,
 	containsRelationshipData,
 };

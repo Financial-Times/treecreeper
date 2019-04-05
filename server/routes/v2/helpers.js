@@ -141,10 +141,10 @@ const createNewNode = (nodeType, code, clientId, query, body, method) => {
 			code,
 		}),
 		lockedFields,
-		relationshipsToCreate: recordAnalysis.diffRelationships({
+		relationshipsToCreate: recordAnalysis.getAddedRelationships({
 			nodeType,
 			newContent: body,
-		}).addedRelationships,
+		}),
 		queryParts: [
 			stripIndents`CREATE (node:${nodeType} $properties)
 				SET ${cypherHelpers.metaPropertiesForCreate('node')}
