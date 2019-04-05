@@ -150,9 +150,13 @@ Used to remove a node. _This method should be used sparingly as most types have 
 
 ### Field locking
 
-Field locking is the functionality to restrict any value changes to chosen fields (i.e `name` in `Person`) to the clientId\* that requested the locking of that field.
+When automating writes to Biz Ops API from another system which is a source of truth for some data (e.g. ip-people-api is the source of truth for information about Person records for FT staff), it's desirable to prevent any other system overwriting the values.
 
-Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockField=name`;
+For this reason, fields can be locked by clients writing to the Biz Ops API by using the `lockFields` query parameter. Once locked by a given `client-id`, a field/property can only be overwritten by requests using the same `client-id`. 
+
+Fields can however be unlocked by any `client-id`, using the `unlockFields` query parameter, but this feature should rarely be used; it is only provided in order to make it possible to correct mistakenly locked fields.
+
+Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockFields=name`;
 
 | query name   | value                               | example                  | request type   |
 | ------------ | ----------------------------------- | ------------------------ | -------------- |
