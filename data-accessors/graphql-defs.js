@@ -62,7 +62,7 @@ const defineProperties = properties => {
 			([name, def]) =>
 				stripEmptyFirstLine`
 			"""
-			${def.description.replace(/\n/g, ' ')}
+			${def.description}
 			"""
 			${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
 					def,
@@ -110,7 +110,7 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 
 const defineType = config => `
 """
-${config.description.replace(/\n/g, ' ')}
+${config.description}
 """
 type ${config.name} {
 	${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
@@ -134,7 +134,7 @@ const defineQueries = config => [
 
 const defineEnum = ([name, { description, options }]) => `
 """
-${description.replace(/\n/g, ' ')}
+${description}
 """
 enum ${name} {
 ${indentMultiline(Object.keys(options).join('\n'), 2)}

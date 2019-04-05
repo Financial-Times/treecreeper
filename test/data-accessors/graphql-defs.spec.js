@@ -387,35 +387,6 @@ Sunset
 		);
 	});
 
-	it('Multiline descriptions', () => {
-		const schema = {
-			types: [
-				{
-					name: 'Dummy',
-					description: 'dummy type description',
-					properties: {
-						prop: {
-							type: 'Boolean',
-							description: 'a description\nmultiline',
-						},
-					},
-				},
-			],
-			enums: {
-				AnEnum: {
-					name: 'DummyEnum',
-					description: 'an enum description\nmultiline',
-					options: ['One', 'Two'],
-				},
-			},
-			stringPatterns,
-		};
-		const generated = [].concat(...graphqlFromRawData(schema)).join('');
-		// note the regex has a space, not a new line
-		expect(generated).toMatch(/a description multiline/);
-		expect(generated).toMatch(/an enum description multiline/);
-	});
-
 	describe('deprecation', () => {
 		it('can deprecate a property', () => {
 			const schema = {
