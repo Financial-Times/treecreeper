@@ -141,7 +141,9 @@ const defineEnum = ([name, { description, options }]) => {
 	});
 
 	return stripIndent`
-		# ${description.replace(/\n/g, ' ')}
+		"""
+		${description.replace(/\n/g, ' ')}
+		"""
 		enum ${name} {
 		${indentMultiline(enums.join('\n'), 3)}
 		}`;

@@ -268,7 +268,9 @@ _updatedTimestamp: DateTime
 _lockedFields: String
 ): [Group]
 }
-# The lifecycle stage of a product
+"""
+The lifecycle stage of a product
+"""
 enum Lifecycle {
 """
 Incubate description
@@ -287,7 +289,9 @@ Sunset description
 """
 Sunset
 }
-# Quality rating based on Red, Amber and Green.
+"""
+Quality rating based on Red, Amber and Green.
+"""
 enum TrafficLight {
 Red
 Amber
