@@ -156,7 +156,7 @@ For this reason, fields can be locked by clients writing to the Biz Ops API by u
 
 Fields can however be unlocked by any `client-id`, using the `unlockFields` query parameter, but this feature should rarely be used; it is only provided in order to make it possible to correct mistakenly locked fields.
 
-Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockField=name`;
+Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockFields=name`;
 
 | query name   | value                               | example                  | request type   |
 | ------------ | ----------------------------------- | ------------------------ | -------------- |
