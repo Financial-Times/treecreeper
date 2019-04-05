@@ -152,7 +152,7 @@ Used to remove a node. _This method should be used sparingly as most types have 
 
 When automating writes to Biz Ops API from another system which is a source of truth for some data (e.g. ip-people-api is the source of truth for information about Person records for FT staff), it's desirable to prevent any other system overwriting the values.
 
-For this reason, fields can be locked by clients writing to the Biz Ops API by using the `lockFields` query parameter. Once locked by a given `client-id`, a field/property can only be overwritten by requests using the same `client-id`. 
+For this reason, fields can be locked by clients writing to the Biz Ops API by using the `lockFields` query parameter. Once locked by a given `client-id`, a field/property can only be overwritten by requests using the same `client-id`.
 
 Fields can however be unlocked by any `client-id`, using the `unlockFields` query parameter, but this feature should rarely be used; it is only provided in order to make it possible to correct mistakenly locked fields.
 
