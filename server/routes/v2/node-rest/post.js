@@ -1,5 +1,8 @@
 const { validateParams, validatePayload } = require('../../../lib/validation');
-const { dbErrorHandlers } = require('../../../lib/error-handling');
+const {
+	dbErrorHandlers,
+	preflightChecks,
+} = require('../../../lib/error-handling');
 const { createNewNode } = require('../helpers');
 
 const create = async input => {
@@ -7,6 +10,8 @@ const create = async input => {
 	validatePayload(input);
 
 	const { nodeType, code, clientId, query, body } = input;
+
+	preflightChecks.handleSimultaneousWriteAndDelete(body);
 
 	try {
 		return await createNewNode(

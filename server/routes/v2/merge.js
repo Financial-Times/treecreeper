@@ -75,7 +75,7 @@ module.exports = async input => {
 		}
 	});
 
-	const { removedRelationships } = recordAnalysis.diffRelationships({
+	const removedRelationships = recordAnalysis.getRemovedRelationships({
 		nodeType,
 		initialContent: sourceRecord,
 		newContent: destinationRecord,
@@ -131,11 +131,10 @@ module.exports = async input => {
 
 	const finalState = result.toApiV2(nodeType);
 
-	const { addedRelationships } = recordAnalysis.diffRelationships({
+	const addedRelationships = recordAnalysis.getAddedRelationships({
 		nodeType,
 		initialContent: destinationRecord,
 		newContent: result.toApiV2(nodeType, true),
-		action: 'merge',
 	});
 
 	logNodeDeletion(sourceNode.getNode());

@@ -28,6 +28,7 @@ const update = async input => {
 
 	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
+		preflightChecks.handleSimultaneousWriteAndDelete(body);
 	}
 
 	try {
@@ -75,14 +76,16 @@ const update = async input => {
 			existingLockedFields,
 		);
 
-		const {
-			removedRelationships,
-			addedRelationships,
-		} = recordAnalysis.diffRelationships({
+		const removedRelationships = recordAnalysis.getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
 			newContent: body,
 			action: relationshipAction,
+		});
+		const addedRelationships = recordAnalysis.getAddedRelationships({
+			nodeType,
+			initialContent: existingRecord,
+			newContent: body,
 		});
 
 		const willModifyNode = Object.keys(propertiesToModify).length;
