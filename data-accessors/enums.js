@@ -7,7 +7,7 @@ const convertArrayToOject = (options, withMeta) => {
 	}, {});
 };
 
-const structureOptions = (options, withMeta) => {
+const restructureOptions = (options, withMeta) => {
 	if (Array.isArray(options)) {
 		return convertArrayToOject(options, withMeta);
 	}
@@ -28,7 +28,7 @@ module.exports = {
 	accessor: (rawData, { withMeta = false } = {}) => {
 		return Object.entries(rawData.getEnums()).reduce(
 			(map, [key, { options, description }]) => {
-				options = structureOptions(options, withMeta);
+				options = restructureOptions(options, withMeta);
 				const entry = withMeta
 					? {
 							description,
