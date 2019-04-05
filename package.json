@@ -20,7 +20,6 @@
   "homepage": "https://github.com/Financial-Times/biz-ops-schema#readme",
   "devDependencies": {
     "@financial-times/rel-engage": "^5.1.0-beta.13",
-    "aws-sdk": "^2.395.0",
     "fetch-mock": "^7.3.1",
     "graphql": "^14.1.1",
     "jest": "^23.6.0",
@@ -29,6 +28,7 @@
   },
   "dependencies": {
     "@financial-times/n-logger": "^5.7.2",
+    "aws-sdk": "^2.395.0",
     "clone": "^2.1.2",
     "common-tags": "^1.8.0",
     "deep-freeze": "0.0.1",
