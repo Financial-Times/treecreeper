@@ -11,11 +11,10 @@ FailoverArchitectureType:
     ActiveActive: |
       The service is running and serving traffic in multiple regions during normal operation.
       Failover is accomplished by turning off the unhealthy region and all traffic
-      is routed to the remaining region.
+      is routed to the remaining regions.
     ActivePassive: |
-      The service is running and serving traffic in the primary region, and may
-      be running, or can be started quickly, in the secondary region.
-      Failover is accomplished by routing all traffic to the secondary region.
+      The service only serves traffic from a single region, but has one or more standby regions 
+      which can be quickly started (if necessary) and routed to instead. 
     None: |
       No failover process defined
 TrafficLight:
