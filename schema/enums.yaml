@@ -23,10 +23,18 @@ SystemLifecycle:
     Note that 'Deprecated' should be used for systems that are currently
     not actively used, but may not be fully decommissioned yet
   options:
-    - Preproduction
-    - Production
-    - Deprecated
-    - Decommissioned
+    Preproduction: |
+      Not yet ready for use. May be unstable, subject to unannounced changes,
+      or not yet fully built.
+    Production: |
+      Ready for use by its intended users, and supported appropriately.
+    Deprecated: |
+      In the process of being replaced or retired. May still be functional,
+      but should not be added as a new dependency to systems.
+    Revoked: |
+      No longer functional. Attempts to interact with the system will be unsuccessful.
+    Decommissioned: |
+      All parts of the system have been removed from all the environments it ran in.
 ServiceTier:
   description: A system's support level
   options:
