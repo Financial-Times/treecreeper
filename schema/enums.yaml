@@ -31,7 +31,7 @@ SystemLifecycle:
     Deprecated: |
       In the process of being replaced or retired. May still be functional,
       but should not be added as a new dependency to systems.
-    Revoked: |
+    Discontinued: |
       No longer functional. Attempts to interact with the system will be unsuccessful.
     Decommissioned: |
       All parts of the system have been removed from all the environments it ran in.
