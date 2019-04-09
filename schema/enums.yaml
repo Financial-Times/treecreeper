@@ -9,7 +9,7 @@ FailoverArchitectureType:
   description: The design which allows failover
   options:
     ActiveActive: |
-      The service is running and serving traffic in both regions at all times.
+      The service is running and serving traffic in multiple regions during normal operation.
       Failover is accomplished by turning off the unhealthy region and all traffic
       is routed to the remaining region.
     ActivePassive: |
