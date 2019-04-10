@@ -10,6 +10,7 @@ const getValidator = (type, enums = {}) => {
 				stringPatterns: {
 					NO_Z: '^[^z]+$',
 					LOWERCASE: '^[a-z]+$',
+					MAX_LENGTH_4: '^.{2,4}$',
 				},
 			},
 		},
@@ -42,6 +43,10 @@ describe('validateProperty', () => {
 								prop: {
 									type: bizOpsType,
 									pattern: 'NO_Z',
+								},
+								shortprop: {
+									type: bizOpsType,
+									pattern: 'MAX_LENGTH_4',
 								},
 							},
 						});
@@ -76,7 +81,16 @@ describe('validateProperty', () => {
 					it('apply string patterns', () => {
 						expect(() =>
 							validateProperty('Thing', 'prop', 'I am zebbedee'),
-						).toThrow(/Must match pattern/);
+						).toThrow('Must match pattern /^[^z]+$/');
+						expect(() =>
+							validateProperty(
+								'Thing',
+								'shortprop',
+								'13 characters',
+							),
+						).toThrow(
+							'Must match pattern /^.{2,4}$/ and be no more than 4 characters',
+						);
 					});
 				}
 			},
@@ -210,7 +224,7 @@ describe('validateProperty', () => {
 		});
 		it('accept value defined in a mapping enum', () => {
 			expect(() =>
-				validateProperty('Thing', 'prop', 'grylls'),
+				validateProperty('Thing', 'prop', 'bear'),
 			).not.toThrow();
 		});
 
