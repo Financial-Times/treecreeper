@@ -224,7 +224,7 @@ describe('validateProperty', () => {
 		});
 		it('accept value defined in a mapping enum', () => {
 			expect(() =>
-				validateProperty('Thing', 'prop', 'grylls'),
+				validateProperty('Thing', 'prop', 'bear'),
 			).not.toThrow();
 		});
 
