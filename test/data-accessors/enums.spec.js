@@ -60,7 +60,9 @@ describe('get-enums', () => {
 
 		describe('withMeta: false', () => {
 			it('retrieve enums - unchanged', () => {
-				expect(getEnums()).toEqual({ enum1: { a: 1, b: 2, c: 3 } });
+				expect(getEnums()).toEqual({
+					enum1: { a: 'a', b: 'b', c: 'c' },
+				});
 			});
 		});
 
