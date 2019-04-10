@@ -1,26 +1,28 @@
-const convertArrayToOject = (options, withMeta) => {
-	return options.reduce((resolver, option) => {
-		if (withMeta) {
-			return Object.assign(resolver, { [option]: { value: option } });
-		}
-		return Object.assign(resolver, { [option]: option });
-	}, {});
-};
-
 const restructureOptions = (options, withMeta) => {
+	let optionsArray;
 	if (Array.isArray(options)) {
-		return convertArrayToOject(options, withMeta);
+		optionsArray = options.map(value => ({
+			value,
+		}));
+	} else {
+		optionsArray = Object.entries(options).map(([value, description]) => ({
+			value,
+			description,
+		}));
 	}
 
 	if (withMeta) {
-		return Object.entries(options).reduce((resolver, [key, value]) => {
-			return Object.assign(resolver, {
-				[key]: { value: key, description: value },
-			});
-		}, {});
+		return optionsArray.reduce(
+			(result, option) =>
+				Object.assign(result, { [option.value]: option }),
+			{},
+		);
 	}
-
-	return options;
+	return optionsArray.reduce(
+		(result, option) =>
+			Object.assign(result, { [option.value]: option.value }),
+		{},
+	);
 };
 
 module.exports = {
