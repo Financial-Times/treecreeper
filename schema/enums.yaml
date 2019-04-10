@@ -8,9 +8,15 @@ ProcessType:
 FailoverArchitectureType:
   description: The design which allows failover
   options:
-    - ActiveActive
-    - ActivePassive
-    - None
+    ActiveActive: |
+      The service is running and serving traffic in multiple regions during normal operation.
+      Failover is accomplished by turning off the unhealthy region and all traffic
+      is routed to the remaining regions.
+    ActivePassive: |
+      The service only serves traffic from a single region, but has one or more standby regions 
+      which can be quickly started (if necessary) and routed to instead. 
+    None: |
+      No failover process defined
 TrafficLight:
   description: Quality rating based on Red, Amber and Green.
   options:
@@ -30,18 +36,38 @@ SystemLifecycle:
 ServiceTier:
   description: A system's support level
   options:
-    - Unsupported
-    - Bronze
-    - Silver
-    - Gold
-    - Platinum
+    Unsupported:
+      No availability target, no formal support
+    Bronze:
+      No availability target, office hours support
+    Silver:
+      99.5% availability, office hours support
+    Gold:
+      99.7% availability, 24/7 support
+    Platinum:
+      99.9% availability, 24/7 support, runs in at least 2 regions
 ProductLifecycle:
   description: The lifecycle stage of a product
   options:
-    - Incubate
-    - Sustain
-    - Grow
-    - Sunset
+    Incubate: |
+      Low investment.
+      Experimental with high failure rate.
+      Prioritise quick learning over fidelity and quality
+      Strategically aligned; financial ROI not expected
+    Grow: |
+      Medium to low investment.
+      Working known lines of inquiry for modest KPI gains
+      Stable quality & SLA
+    Sustain: |
+      High investment.
+      Experimentation combined with scaling and SLAs
+      Rising quality
+      Metrics moving more than 10%
+      Accountable for ROI
+    Sunset: |
+      Low investment
+      No new features
+      Decommissioning begins
 PersonSource:
   description: The main origin of information about a Person
   options:
@@ -64,59 +90,27 @@ VersionControlSystem:
     - bitbucket
     - github
 GDPRProcess:
-  description: Type of process used for handling GDPR erasure and retention requests
+  description: A process used for handling GDPR erasure and retention requests
   options:
-    # Automatic Chasing Email
-    # This is an auto-generated email sent from the GDPR Hub to System Owners,
-    # instructing them to erasure data for an individual. System owners who need
-    # to do deletions manually will receive this message. The email contains a
-    # link which the individual can click to confirm the fact they have deleted
-    # data. Weekly reminders will be sent until deletion has been confirmed.
-    # ACE
-    - AutomaticChasingEmail
-    # Deletion Table
-    # This is a table of people who need to be deleted, either due to retention
-    # policy or someone having submitted a request. It is maintained in Data
-    # Platform and populated when they are deleted in Membership. Some
-    # downstream systems either consume a feed from the table or poll it and
-    # delete any new records found since last accessed.
-    # DT
-    - DeletionTable
-    # Automatic routine
-    # This means the system has an automatic purge routine in place which
-    # deletes data older than a specified time. The time varies by system but
-    # should not be longer than 30 days as this is the length of time we have
-    # to fulfil a deletion request. With auto delete routines there is no
-    # requirement to do anything else to implement retention policy and system
-    # owners dont need to be notified of erasure requests.
-    # Auto
-    - ScheduledPurge
-    # Manual
-    # This means there is no automated routine in place for deletions. For
-    # erasure requests, these system owners will receive an ACE message, but
-    # for retention, they will need to set a manual trigger and delete data
-    # periodically to remain compliant.
-    - Manual
-    # Application Programming Interface
-    # Some systems have APIs which are called directly by the Hub. These are
-    # called for erasure requests only as retention is not (currently) managed
-    # in the Hub.
-    - API
-    # Multiple
-    # Some systems use a variety of the methods listed above, depending on the
-    # types of data they hold. This is only really true for systems holding a
-    # large amount of data, e.g. Redshift.
-    - Multiple
-    # N/A
-    # Some systems are considered too complex to complete erasure/ retention on,
-    # so it was decided to not implement standard policy on these systems. The
-    # risks of this have (or should have) been agreed by the FT Legal and
-    # Compliance teams, but they are marked as n/a here.
-    # N/A
-    - NotApplicable
-    # # TBD
-    # # Work is still ongoing to define delete methods for a small number of systems.
-    # - TBD
+    AutomaticChasingEmail: |
+      Auto-generated emails sent from the GDPR Hub to System Owners,
+      instructing them to erase data for an individual.
+    DeletionTable: |
+      Automatically reacts to entries in a table of people who need to be deleted,
+      maintained by the Data Platform and populated when they are deleted in Membership.
+    ScheduledPurge: |
+      The system has a routine in place which deletes data older than a specified time.
+      The time varies by system but should not be longer than 30 days.
+    API: |
+      System has a delete APIs which is called directly by the GDPR Hub.
+    Manual: |
+      No automated routine in place for deletions.
+    Multiple: |
+      Uses a variety of the methods listed above.
+    NotApplicable: |
+      System is considered too complex to complete erasure/retention on.
+      The risks _must_ be agreed by the FT Legal and Compliance teams.
+
 CookieParty:
   description: Cookie party classification type
   options:
@@ -125,10 +119,35 @@ CookieParty:
 CookiePurpose:
   description: ICC cookie classification type
   options:
-    - StrictlyNecessary
-    - Performance
-    - Functionality
-    - TargetingOrAdvertising
+    StrictlyNecessary: |
+      These cookies are essential in order to enable you to move around the website
+      and use its features, such as accessing secure areas of the website. Without
+      these cookies services you have asked for, like shopping baskets or e-billing,
+      cannot be provided.
+    Performance: |
+      These cookies collect information about how visitors use a website, for instance
+      which pages visitors go to most often, and if they get error messages from web pages.
+      These cookies don’t collect information that identifies a visitor. All information
+      these cookies collect is aggregated and therefore anonymous. It is only used to
+      improve how a website works.
+    Functionality: |
+      These cookies allow the website to remember choices you make (such as your user
+      name, language or the region you are in) and provide enhanced, more personal
+      features. For instance, a website may be able to provide you with local weather
+      reports or traffic news by storing in a cookie the region in which you are
+      currently located. These cookies can also be used to remember changes you have
+      made to text size, fonts and other parts of web pages that you can customise.
+      They may also be used to provide services you have asked for such as watching
+      a video or commenting on a blog. The information these cookies collect may be
+      anonymised and they cannot track your browsing activity on other websites.
+    TargetingOrAdvertising: |
+      These cookies are used to deliver adverts more relevant to you and your interests
+      They are also used to limit the number of times you see an advertisement as well
+      as help measure the effectiveness of the advertising campaign. They are usually
+      placed by advertising networks with the website operator’s permission. They remember
+      that you have visited a website and this information is shared with other organisations
+      such as advertisers. Quite often targeting or advertising cookies will be linked
+      to site functionality provided by the other organisation.
 CookieExpiry:
   description: Cookie expiry type
   options:
@@ -137,6 +156,14 @@ CookieExpiry:
 CapabilityTier:
   description: Level of importance of a business capability
   options:
-    - BrandCritical
-    - BusinessCritical
-    - NotCritical
+    BrandCritical: |
+      Failure to be able to execute this capability risks long-term damage to the FT
+      e.g. publishing content to ft.com
+    BusinessCritical: |
+      Failure to be able to execute this capability risks significant short-term damage
+      to the FT and its sources of revenue which are difficult to rectify, even after
+      the capability has been restored e.g. processing subscriptions
+    NotCritical: |
+      Failure to be able to execute this capability, although harmful to the FT, can
+      be managed, and any damage is temporary and generally possible to rectify after the
+      capability has been recovered e.g. producing a monthly financial report
