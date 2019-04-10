@@ -41,7 +41,7 @@ SystemLifecycle:
       No longer functional. Attempts to interact with the system will be unsuccessful.
     Decommissioned: |
       For a self hosted/installed system, all its parts have been removed from all the environments it ran in.
-      For SaaS, our relationship with the supplier is terminated, and we no longer pay for or use the system.
+      For SaaS, we no longer pay for or have the ability to use the system.
 ServiceTier:
   description: A system's support level
   options:
