@@ -1,6 +1,6 @@
 name: DataAttribute
 pluralName: DataAttributes
-description: At the basic level, an individual item of data. What would usually be called a field, an attribute or a property. May also be a higher level grouping of DataAttributes like a record, object or database row.
+description: At the basic level, a place where items of a particular data type are stored. What would usually be called a field, an attribute or a property. May also be a higher level grouping of DataAttributes like a record, object or database row.
 properties:
     code:
         type: Code
@@ -15,7 +15,7 @@ properties:
         label: Description
         description: |
             A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
-    updates:
+    isUpdatedBy:
       type: System
       relationship: UPDATES
       direction: incoming
@@ -28,7 +28,7 @@ properties:
       type: DataAttribute
       relationship: CONTAINS
       direction: outgoing
-    isPartOf:
+    containedIn:
       type: DataAttribute
       relationship: CONTAINS
       direction: incoming

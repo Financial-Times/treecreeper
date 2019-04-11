@@ -146,7 +146,7 @@ properties:
     type: DataType
     direction: incoming
     relationship: IS_PURCHASED_BY
-  valuesGovernedBy:
+  governsValuesOf:
     type: DataType
     direction: incoming
     relationship: VALUES_GOVERNED_BY
