@@ -7,14 +7,6 @@ const stringPatterns = readYaml.file('string-patterns.yaml');
 const graphqlFromRawData = schema =>
 	init({ rawData: { schema } }).getGraphqlDefs();
 
-// const  = schema => {
-// 	const rawData = new RawData();
-// 	rawData.setRawData({
-// 		schema,
-// 	});
-// 	return dataAccessors(rawData);
-// };
-
 const explodeString = str =>
 	str
 		.split('\n')
