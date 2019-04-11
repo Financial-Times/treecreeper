@@ -7,6 +7,7 @@ const maintenance = require('../../middleware/maintenance');
 const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
 const { logger, setContext } = require('../../lib/request-context');
+const helpers = require('./helpers');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
@@ -66,6 +67,7 @@ const deleteHandler = require('./node-rest/delete');
 const mergeHandler = require('./merge');
 
 module.exports = router => {
+	helpers.initSalesforceSync(patchHandler);
 	router.use(timeout(TIMEOUT));
 	router.use(clientId);
 	router.use(security.requireApiKey);

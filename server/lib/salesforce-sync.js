@@ -1,5 +1,4 @@
 const jsforce = require('jsforce');
-const dbConnection = require('../data/db-connection');
 const { logger } = require('./request-context');
 
 const login = () => {
@@ -12,7 +11,10 @@ const login = () => {
 		.then(() => conn);
 };
 
-module.exports.setSalesforceIdForSystem = async ({ code, name, SF_ID }) => {
+module.exports.setSalesforceIdForSystem = async (
+	{ code, name, SF_ID },
+	patchHandler,
+) => {
 	if (!process.env.SALESFORCE_USER) {
 		logger.info(
 			'Skipping salesforce system creation - no salesforce user defined',
@@ -46,10 +48,15 @@ module.exports.setSalesforceIdForSystem = async ({ code, name, SF_ID }) => {
 			},
 			'Create system in salesforce',
 		);
-		await dbConnection.executeQuery(
-			'MATCH (s:System {code: $code}) SET s.SF_ID = $SF_ID RETURN s',
-			{ code, SF_ID: newSalesforceId },
-		);
+		await patchHandler({
+			nodeType: 'System',
+			code,
+			clientId: 'biz-ops-api',
+			query: {
+				lockFields: 'SF_ID',
+			},
+			body: { SF_ID: newSalesforceId },
+		});
 		logger.info(
 			{
 				event: 'SALESFORCE_SYSTEM_ID_SAVED',

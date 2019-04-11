@@ -102,14 +102,21 @@ describe('salesforce sync unit', () => {
 			});
 		});
 		it('saves SF_ID to system', async () => {
-			await salesforceSync.setSalesforceIdForSystem({
-				code: 'elephants',
-				name: 'We Elephants',
-			});
-			expect(dbConnection.executeQuery).toHaveBeenCalledWith(
-				'MATCH (s:System {code: $code}) SET s.SF_ID = $SF_ID RETURN s',
-				{ code: 'elephants', SF_ID: 'test-id' },
+			const patchHandlerSpy = jest.fn();
+			await salesforceSync.setSalesforceIdForSystem(
+				{
+					code: 'elephants',
+					name: 'We Elephants',
+				},
+				patchHandlerSpy,
 			);
+			expect(patchHandlerSpy).toHaveBeenCalledWith({
+				body: { SF_ID: 'test-id' },
+				clientId: 'biz-ops-api',
+				code: 'elephants',
+				nodeType: 'System',
+				query: { lockFields: 'SF_ID' },
+			});
 		});
 	});
 });

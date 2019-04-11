@@ -10,6 +10,8 @@ const salesforceSync = require('../../lib/salesforce-sync');
 const { getDbWriteContext } = require('../../lib/request-context');
 const { mergeLockedFields } = require('../../lib/locked-fields');
 
+let setSalesforceIdForSystem;
+
 const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
@@ -102,7 +104,7 @@ const writeNode = async ({
 	// another update stream consumer, particularly while avoiding race conditions when
 	// migrating from cmdb
 	if (nodeType === 'System') {
-		salesforceSync.setSalesforceIdForSystem(responseData);
+		setSalesforceIdForSystem(responseData);
 	}
 
 	logNodeChanges({
@@ -172,8 +174,14 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 	return { parameters, queryParts };
 };
 
+const initSalesforceSync = patchHandler => {
+	setSalesforceIdForSystem = input =>
+		salesforceSync.setSalesforceIdForSystem(input, patchHandler);
+};
+
 module.exports = {
 	writeNode,
 	createNewNode,
 	prepareRelationshipDeletion,
+	initSalesforceSync,
 };
