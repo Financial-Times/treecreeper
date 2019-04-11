@@ -2,6 +2,8 @@ name: TagInstance
 description: |
   A node with Tag relationship data specific to a Tag attached to a domain/product website. Data includes the last seen date.
 rank: 100
+createPermissions:
+  - ip-cookie-audit
 properties:
   code:
     type: Code
@@ -12,7 +14,6 @@ properties:
     unique: true
     pattern: MAX_LENGTH_64
     fieldset: main
-    autoPopulated: true
 
   resourceType:
     type: Word
