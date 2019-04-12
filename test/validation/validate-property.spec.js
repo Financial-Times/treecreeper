@@ -267,6 +267,15 @@ describe('validateProperty', () => {
 			);
 		});
 
+		it('reject when sending multiple codes and not is hasMany', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', [
+					'lowercase1',
+					'lowercase2',
+				]),
+			).toThrow(/Can only have one testRelationship/);
+		});
+
 		it('accept when all is correct', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelationship', 'lowercase'),
