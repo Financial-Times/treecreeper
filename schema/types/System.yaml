@@ -152,7 +152,6 @@ properties:
     type: Word
     label: Salesforce ID
     description: ID of this system in salesforce.
-    autoPopulated: true
     fieldset: miscellaneous
   architectureDiagram:
     type: Document
