@@ -63,7 +63,13 @@ Create an appropriate semver tag:
 -   for additions to the api relase as a minor
 -   breaking changes to the API or changes to the structure of data in the yaml files should be released as major
 
-This will release a new version of the library and push a JSON copy of the latest version of the schema up to an s3 bucket, at the path `/latest/v{major version}.json`. As soon as the API has picked up this latest version, it will push a copy to `/api/v{major version}.json`, which can then be safely consumed by other applications.
+### Release process details
+
+![image](https://user-images.githubusercontent.com/447559/55995243-e4d77800-5cab-11e9-8713-8d0ea7485108.png)
+
+Creating a github tag (1.) triggers a circleci build (2.) which, on success, publishes the schema files to s3 on the path `/latest/vX.json` (where X is the major version) (3a.), and publishes the javascript library to NPM (3b.). biz-ops-api polls `/latest/vX.json` (4.) and when an update is detected, it constructs and updated graphQL api, then publishes the schema file to `/api/vX.json` (5.). biz-ops-admin and other secondary consumers of the data poll `/api/vX.json` for updates to the schema (6.).
+
+The reasoning behind this solution can be seen [in this gist](https://gist.github.com/wheresrhys/dd4c5d856812e0fb8c705feeabffd754)
 
 ## API
 

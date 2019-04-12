@@ -1,9 +1,11 @@
 name: Repository
 pluralName: Repositories
 description: |
-  A source code repository. Should generally not be manually created as we have a 
+  A source code repository. Should generally not be manually created as we have a
   cron job that regularly syncs from github and bitbucket to Biz Ops
 rank: 27
+createPermissions:
+  - biz-ops-github-importer
 properties:
   code:
     type: Code
@@ -24,13 +26,11 @@ properties:
     label: Name
     fieldset: general
     description: Display name for the repository, taken from the system it is stored in.
-    autoPopulated: true
   description:
     type: Paragraph
     label: Description
     fieldset: general
     description: Description of what is in the repository, taken from the system it is stored in.
-    autoPopulated: true
   url:
     type: Url
     # required: true
@@ -39,7 +39,6 @@ properties:
     label: URL
     fieldset: general
     description: Web page URL for the repository.
-    autoPopulated: true
   systems:
     type: System
     direction: incoming
@@ -53,19 +52,16 @@ properties:
     label: Version control system
     fieldset: general
     description: Version control system the repository is stored in.
-    autoPopulated: true
   lastSeenInSynk:
     type: Date
     label: Last Seen In Snyk
     description: The date on which this repository was last listed in Synk as being actively scanned for vulnerabilities.
-    autoPopulated: true
     fieldset: general
     deprecationReason: typo in field name
   lastSeenInSnyk:
     type: Date
     label: Last seen in Snyk
     description: The date on which this repository was last listed in Snyk as being actively scanned for vulnerabilities.
-    autoPopulated: true
     fieldset: general
   isPrivate:
     type: Boolean
@@ -73,20 +69,17 @@ properties:
     label: Private
     description: Is the repository private.
     fieldset: technical
-    autoPopulated: true
   isArchived:
     type: Boolean
     isCore: true
     label: Archived
     description: Is the repository archived.
     fieldset: technical
-    autoPopulated: true
   vcsID:
     type: Word
     label: VCS ID
     description: The internal ID for the repository in the version control system that it's stored in.
     fieldset: technical
-    autoPopulated: true
   sshUrl:
     type: Url
     # required: true
@@ -94,19 +87,16 @@ properties:
     label: SSH URL
     description: SSH URL to checkout the source.
     fieldset: technical
-    autoPopulated: true
   createdAt:
     type: DateTime
     label: Created
     description: The timestamp when the repository was created.
     fieldset: technical
-    autoPopulated: true
   pushedAt:
     type: DateTime
     label: Updated
     description: The timestamp when the repository was last pushed to.
     fieldset: technical
-    autoPopulated: true
   projectName:
     type: Word
     label: Project name
@@ -125,7 +115,6 @@ properties:
     deprecationReason: The storedIn relationship is now replaced by the versionControlSystem property
     relationship: STORED_IN
     description: VCS provider that the repository is hosted by.
-    autoPopulated: true
 
 fieldsets:
   general:

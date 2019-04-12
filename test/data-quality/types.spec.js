@@ -51,6 +51,23 @@ describe('data quality: types', () => {
 
 	types.forEach(type => {
 		describe(`${type.name}`, () => {
+			it('has no unrecognised properties', () => {
+				Object.keys(type).forEach(key => {
+					expect(key).toMatch(
+						arrayToRegExp([
+							'name',
+							'description',
+							'moreInformation',
+							'pluralName',
+							'rank',
+							'creationURL',
+							'fieldsets',
+							'properties',
+							'createPermissions',
+						]),
+					);
+				});
+			});
 			it('has a name', () => {
 				expect(typeof type.name).toBe('string');
 			});
@@ -60,6 +77,15 @@ describe('data quality: types', () => {
 			it('may have a moreInformation', () => {
 				if ('moreInformation' in type) {
 					expect(typeof type.moreInformation).toBe('string');
+				}
+			});
+
+			it('may have a createPermissions', () => {
+				if ('createPermissions' in type) {
+					expect(Array.isArray(type.createPermissions)).toBe(true);
+					type.createPermissions.forEach(systemCode => {
+						expect(typeof systemCode).toBe('string');
+					});
 				}
 			});
 			it('may have a plural name', () => {
@@ -293,22 +319,6 @@ describe('data quality: types', () => {
 							});
 						}
 					});
-				});
-			});
-			it('has no unrecognised properties', () => {
-				Object.keys(type).forEach(key => {
-					expect(key).toMatch(
-						arrayToRegExp([
-							'name',
-							'description',
-							'moreInformation',
-							'pluralName',
-							'rank',
-							'creationURL',
-							'fieldsets',
-							'properties',
-						]),
-					);
 				});
 			});
 		});
