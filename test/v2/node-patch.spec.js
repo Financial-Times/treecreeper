@@ -15,6 +15,7 @@ describe('v2 - node PATCH', () => {
 	const namespace = 'v2-node-patch';
 
 	const teamCode = `${namespace}-team`;
+	const repoCode = `github:${namespace}`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
 	const systemCode = `${namespace}-system`;
@@ -264,6 +265,53 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['name', 'code']]);
+	});
+
+	it('Not create when patching non-existent restricted node', async () => {
+		await authenticatedPatch(`/v2/node/Repository/${repoCode}`, {
+			name: 'name1',
+		}).expect(
+			400,
+			new RegExp(
+				`Repositories can only be created by biz-ops-github-importer`,
+			),
+		);
+
+		verifyNotExists('Repository', repoCode);
+		sandbox.expectNoEvents();
+	});
+
+	it('Create when patching non-existent restricted node with correct client-id', async () => {
+		const result = Object.assign(
+			sandbox.withCreateMeta({
+				name: 'name1',
+				code: repoCode,
+			}),
+			{
+				_createdByClient: 'biz-ops-github-importer',
+				_updatedByClient: 'biz-ops-github-importer',
+			},
+		);
+		await sandbox
+			.request(app)
+			.patch(`/v2/node/Repository/${repoCode}`)
+			.set('API_KEY', process.env.API_KEY)
+			.set('client-user-id', `${namespace}-user`)
+			.set('x-request-id', `${namespace}-request`)
+			.set('client-id', 'biz-ops-github-importer')
+			.send({
+				name: 'name1',
+			})
+			.expect(201, result);
+
+		await testNode('Repository', repoCode, result);
+		sandbox.expectEvents([
+			'CREATE',
+			repoCode,
+			'Repository',
+			['name', 'code'],
+			'biz-ops-github-importer',
+		]);
 	});
 
 	it('error when conflicting code values', async () => {

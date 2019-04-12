@@ -16,6 +16,7 @@ describe('v2 - node POST', () => {
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
 	const systemCode = `${namespace}-group`;
+	const repoCode = `github:${namespace}`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -53,6 +54,56 @@ describe('v2 - node POST', () => {
 			}),
 		);
 		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code', 'name']]);
+	});
+
+	it('Not create when patching non-existent restricted node', async () => {
+		await sandbox
+			.request(app)
+			.post(`/v2/node/Repository/${repoCode}`)
+			.namespacedAuth()
+			.send({ name: 'name1' })
+			.expect(
+				400,
+				new RegExp(
+					`Repositories can only be created by biz-ops-github-importer`,
+				),
+			);
+
+		verifyNotExists('Repository', repoCode);
+		sandbox.expectNoEvents();
+	});
+
+	it('Create when patching non-existent restricted node with correct client-id', async () => {
+		const result = Object.assign(
+			sandbox.withCreateMeta({
+				name: 'name1',
+				code: repoCode,
+			}),
+			{
+				_createdByClient: 'biz-ops-github-importer',
+				_updatedByClient: 'biz-ops-github-importer',
+			},
+		);
+		await sandbox
+			.request(app)
+			.post(`/v2/node/Repository/${repoCode}`)
+			.set('API_KEY', process.env.API_KEY)
+			.set('client-user-id', `${namespace}-user`)
+			.set('x-request-id', `${namespace}-request`)
+			.set('client-id', 'biz-ops-github-importer')
+			.send({
+				name: 'name1',
+			})
+			.expect(200, result);
+
+		await testNode('Repository', repoCode, result);
+		sandbox.expectEvents([
+			'CREATE',
+			repoCode,
+			'Repository',
+			['name', 'code'],
+			'biz-ops-github-importer',
+		]);
 	});
 
 	it('Not set property when empty string provided', async () => {

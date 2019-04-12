@@ -1,4 +1,5 @@
 const { stripIndents } = require('common-tags');
+const httpError = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
 const { executeQuery } = require('../../data/db-connection');
 const cypherHelpers = require('../../data/cypher-helpers');
@@ -128,6 +129,17 @@ const writeNode = async ({
 
 const createNewNode = (nodeType, code, clientId, query, body, method) => {
 	const { upsert } = query;
+
+	const { createPermissions, pluralName } = getType(nodeType);
+	if (createPermissions && !createPermissions.includes(clientId)) {
+		throw httpError(
+			400,
+			`${pluralName} can only be created by ${createPermissions.join(
+				', ',
+			)}`,
+		);
+	}
+
 	const lockedFields = mergeLockedFields(nodeType, clientId, query);
 
 	return writeNode({
