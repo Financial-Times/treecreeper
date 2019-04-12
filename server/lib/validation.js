@@ -18,7 +18,6 @@ const validation = Object.entries(schema)
 	}, {});
 
 const validateParams = ({ nodeType, code }) => {
-	// TODO: move these into middleware
 	module.exports.validateTypeName(nodeType);
 	module.exports.validateCode(nodeType, code);
 };

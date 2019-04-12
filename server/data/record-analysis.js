@@ -1,4 +1,3 @@
-const httpErrors = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 
@@ -122,18 +121,10 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 	}
 };
 
-const findActualAdditions = (initialContent, schema) => ([
+const findActualAdditions = initialContent => ([relType, newCodes]) => [
 	relType,
-	newCodes,
-]) => {
-	const isCardinalityOne = !schema.properties[relType].hasMany;
-	if (isCardinalityOne && newCodes.length > 1) {
-		// TODO... this should throw higher up, after calculating the
-		// merge of new & old codes???
-		throw httpErrors(400, `Can only have one ${relType}`);
-	}
-	return [relType, arrDiff(newCodes, initialContent[relType])];
-};
+	arrDiff(newCodes, initialContent[relType]),
+];
 
 const getRemovedRelationships = ({
 	nodeType,
@@ -169,10 +160,8 @@ const getAddedRelationships = ({ nodeType, initialContent, newContent }) => {
 		.map(([propName, codes]) => [propName, toArray(codes)]);
 
 	if (initialContent) {
-		const schema = getType(nodeType);
-
 		newRelationships = newRelationships
-			.map(findActualAdditions(initialContent, schema))
+			.map(findActualAdditions(initialContent))
 			.filter(entryHasValues);
 	}
 
