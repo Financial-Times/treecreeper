@@ -73,6 +73,13 @@ properties:
         The telephone number that can be used to contact this person.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
+  isPeopleApi:
+    type: Boolean
+    label: Is FT staff
+    fieldset: general
+    description: |
+        Whether or not this person is an FT staff member listed in https://people-finder.in.ft.com/.
+        Please raise in the \#ip-people-api slack channel if details are incorrect.
   isActive:
     type: Boolean
     label: Active
@@ -87,12 +94,6 @@ properties:
         The type of employment contract this Person has with the FT.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
-  isPeopleApi:
-    type: Boolean
-    label: Is in people api
-    description: |
-        Whether or not this person exists in https://who.in.ft.com.
-        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
   source:
     type: PersonSource
     label: Source
@@ -100,6 +101,7 @@ properties:
   proposedId:
     type: Word
     label: Proposed ID
+    deprecationReason: Only needed during migration to new ids
     description: The ID of this person in Workday, ldap, github or Slack. If no ID is found, it is `name.lastname`.
   techDirectorFor:
     type: Group
