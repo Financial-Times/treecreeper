@@ -240,16 +240,6 @@ properties:
     label: More Information
     description: Any additional information about this system.
     fieldset: moreInformation
-  stakeholders:
-    type: Person
-    direction: outgoing
-    label: Stakeholders
-    relationship: HAS_STAKEHOLDER
-    description: |
-      People who have an interest in knowing about the status of or changes to this system.
-      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
-    fieldset: ownership
-    hasMany: true
   repositories:
     type: Repository
     direction: outgoing
@@ -300,6 +290,16 @@ properties:
       responsible).
     hasMany: false
     fieldset: ownership
+  stakeholders:
+    type: Person
+    direction: outgoing
+    label: Stakeholders
+    relationship: HAS_STAKEHOLDER
+    description: |
+      People who have an interest in knowing about the status of or changes to this system.
+      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
+    fieldset: ownership
+    hasMany: true
   knownAboutBy:
     type: Person
     direction: outgoing
