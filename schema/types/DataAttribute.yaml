@@ -5,30 +5,37 @@ properties:
     code:
         type: Code
         label: Code
-        description: The unique code for this data attribute
+        description: The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     name:
         type: String
         label: Name
-        description: A name
+        description: The name of the data item being stored. Whilst ideally this should be easy to related to the underlying database it needes to be understandable by someone reading the BizOps entry so even if, for example, your database entry is called custom23 this name should be Marketing Consent By Post
     description:
         type: String
         label: Description
-        description: |
-            A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
+        description: A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
     isUpdatedBy:
       type: System
       relationship: UPDATES
       direction: incoming
       hasMany: true
+      label: UpdatedBy
+      description: Systems that update this data item.
     isInstanceOf:
       type: DataType
       relationship: IS_INSTANCE_OF
       direction: outgoing
+      label: InstanceOf
+      description: What type of data is this?
     contains:
       type: DataAttribute
       relationship: CONTAINS
       direction: outgoing
+      label: Contains
+      description: Used to create a hieratchy of data. For example a contact address may contain a country and a postcode.
     containedIn:
       type: DataAttribute
       relationship: CONTAINS
       direction: incoming
+      label: Contains
+      description: Used to create a hieratchy of data. For example postcode may be part of a contract address.
