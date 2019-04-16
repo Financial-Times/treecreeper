@@ -142,14 +142,6 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
-  isPurchasedBy:
-    type: DataType
-    direction: incoming
-    relationship: IS_PURCHASED_BY
-  governsValuesOf:
-    type: DataType
-    direction: incoming
-    relationship: VALUES_GOVERNED_BY
 fieldsets:
   general:
     heading: General information

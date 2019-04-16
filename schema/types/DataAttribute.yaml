@@ -14,28 +14,3 @@ properties:
         type: String
         label: Description
         description: A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
-    isUpdatedBy:
-        type: System
-        relationship: UPDATES
-        direction: incoming
-        hasMany: true
-        label: UpdatedBy
-        description: Systems that update this data item.
-    isInstanceOf:
-        type: DataType
-        relationship: IS_INSTANCE_OF
-        direction: outgoing
-        label: InstanceOf
-        description: What type of data is this?
-    contains:
-        type: DataAttribute
-        relationship: CONTAINS
-        direction: outgoing
-        label: Contains
-        description: Used to create a hieratchy of data. For example a contact address may contain a country and a postcode.
-    containedIn:
-        type: DataAttribute
-        relationship: CONTAINS
-        direction: incoming
-        label: Contains
-        description: Used to create a hieratchy of data. For example postcode may be part of a contract address.
