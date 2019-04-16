@@ -16,3 +16,10 @@ properties:
         type: Paragraph
         label: Description
         description: A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification not just that it's an industry code.
+    isInstanceOf:
+        type: DataAttribute
+        relationship: IS_INSTANCE_OF
+        direction: incoming
+        hasMany: true
+        label: InstancesOf
+        description: Things that are of this type.
