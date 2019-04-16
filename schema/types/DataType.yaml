@@ -33,7 +33,7 @@ properties:
         relationship: IS_PURCHASED_BY
         direction: outgoing
         label: PurchasedBy
-        description: People involved in purchasing the underlying data that supports this type, if something has to be bought. For example Factset used to support people in Content.
+        description: People involved in purchasing the underlying data that supports this type, if something has to be bought. For example the UPP team buy Factset to support people in Content.
     valuesGovernedBy:
         type: Team
         relationship: VALUES_GOVERNED_BY
