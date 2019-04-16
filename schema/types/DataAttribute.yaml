@@ -27,3 +27,10 @@ properties:
         direction: outgoing
         label: InstanceOf
         description: What type of data is this?
+     isUpdatedBy:
+        type: System
+        relationship: UPDATES
+        direction: incoming
+        hasMany: true
+        label: UpdatedBy
+        description: Systems that update this data item.
