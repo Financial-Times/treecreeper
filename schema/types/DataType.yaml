@@ -1,4 +1,5 @@
 name: DataType
+rank: 101
 pluralName: DataTypes
 description: The type of DataAttribute. A grouping for the domain of values that a DataAttribute may take.
 properties:
@@ -8,10 +9,10 @@ properties:
         label: Code
         description: The unique code for this data type. This should be the type's name hyphenated in lower case, e.g. iso3-country-code.
     name:
-        type: String
+        type: Name
         label: Name
         description: The data type's name, e.g. Royal Mail Postcode or SIC Industry.
     description:
-        type: String
+        type: Paragraph
         label: Description
         description: A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification not just that it's an industry code.
