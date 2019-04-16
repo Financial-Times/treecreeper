@@ -13,7 +13,6 @@ properties:
         label: Name
         description: |
            The name of the data item being stored. Whilst ideally this should be easy to related to the underlying database it needes to be understandable by someone reading the BizOps entry so even if, for example, your database entry is called custom23 this name should be Marketing Consent By Post
-        description: 
     description:
         type: String
         label: Description
