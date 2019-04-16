@@ -1,8 +1,8 @@
-name: DataAttribute
+name: AuditableData
 rank: 100
 
-pluralName: DataAttributes
-description: At the basic level, a place where items of a particular data type are stored. What would usually be called a field, an attribute or a property. May also be a higher level grouping of DataAttributes like a record, object or database row.
+pluralName: AuditableData
+description: At the basic level, a place where items of a particular data type are stored. What would usually be called a field, an attribute or a property. May also be a higher level grouping of AuditableData like a record, object or database row.
 
 properties:
     code:
@@ -22,7 +22,7 @@ properties:
         description: |
            A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
     isInstanceOf:
-        type: DataType
+        type: AuditableDataType
         relationship: IS_INSTANCE_OF
         direction: outgoing
         label: InstanceOf

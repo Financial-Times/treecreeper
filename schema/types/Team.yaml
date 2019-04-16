@@ -143,7 +143,7 @@ properties:
     hasMany: true
     fieldset: people
   governsValuesOf:
-    type: DataType
+    type: AuditableDataType
     direction: incoming
     label: Governs data
     relationship: VALUES_GOVERNED_BY

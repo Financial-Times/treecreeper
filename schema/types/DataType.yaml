@@ -1,7 +1,7 @@
-name: DataType
+name: AuditableDataType
 rank: 101
 pluralName: DataTypes
-description: The type of DataAttribute. A grouping for the domain of values that a DataAttribute may take.
+description: The type of AuditableData. A grouping for the domain of values that a AuditableData may take.
 properties:
     code:
         type: Code
@@ -17,7 +17,7 @@ properties:
         label: Description
         description: A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification not just that it's an industry code.
     isInstanceOf:
-        type: DataAttribute
+        type: AuditableData
         relationship: IS_INSTANCE_OF
         direction: incoming
         hasMany: true
