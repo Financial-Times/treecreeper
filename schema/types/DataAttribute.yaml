@@ -4,13 +4,18 @@ description: At the basic level, a place where items of a particular data type a
 properties:
     code:
         type: Code
+        canIdentify: true
         label: Code
-        description: The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
+        description: |
+           TThe unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     name:
         type: String
         label: Name
-        description: The name of the data item being stored. Whilst ideally this should be easy to related to the underlying database it needes to be understandable by someone reading the BizOps entry so even if, for example, your database entry is called custom23 this name should be Marketing Consent By Post
+        description: |
+           The name of the data item being stored. Whilst ideally this should be easy to related to the underlying database it needes to be understandable by someone reading the BizOps entry so even if, for example, your database entry is called custom23 this name should be Marketing Consent By Post
+        description: 
     description:
         type: String
         label: Description
-        description: A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
+        description: |
+           A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.

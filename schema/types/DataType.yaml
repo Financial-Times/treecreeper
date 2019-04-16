@@ -4,6 +4,7 @@ description: The type of DataAttribute. A grouping for the domain of values that
 properties:
     code:
         type: Code
+        canIdentify: true
         label: Code
         description: The unique code for this data type. This should be the type's name hyphenated in lower case, e.g. iso3-country-code.
     name:
