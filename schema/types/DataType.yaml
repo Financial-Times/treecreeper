@@ -26,6 +26,6 @@ properties:
     valuesGovernedBy:
         type: Team
         relationship: VALUES_GOVERNED_BY
-        direaction: outgoing
+        direction: outgoing
         label: ValuesGovernedBy
         description: The team responsible for deciding what acceptable values for this type are, and for keeping that range of values up-to-date.
