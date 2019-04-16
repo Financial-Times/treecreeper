@@ -10,12 +10,12 @@ properties:
         canIdentify: true
         label: Code
         description: |
-           TThe unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
+           The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     name:
         type: String
         label: Name
         description: |
-           The name of the data item being stored. Whilst ideally this should be easy to related to the underlying database it needes to be understandable by someone reading the BizOps entry so even if, for example, your database entry is called custom23 this name should be Marketing Consent By Post
+           The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     description:
         type: String
         label: Description
