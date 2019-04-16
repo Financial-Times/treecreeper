@@ -21,7 +21,7 @@ properties:
         label: Description
         description: |
            A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
- isInstanceOf:
+    isInstanceOf:
         type: DataType
         relationship: IS_INSTANCE_OF
         direction: outgoing
