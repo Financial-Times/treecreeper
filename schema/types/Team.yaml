@@ -142,6 +142,12 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
+  governsValuesOf:
+    type: DataType
+    direction: incoming
+    label: Governs data
+    relationship: VALUES_GOVERNED_BY
+    description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
 fieldsets:
   general:
     heading: General information
