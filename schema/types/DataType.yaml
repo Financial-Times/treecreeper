@@ -40,7 +40,7 @@ properties:
         direaction: outgoing
         label: ValuesGovernedBy
         description: The team responsible for deciding what acceptable values for this type are, and for keeping that range of values up-to-date.
-
+    broader:
         type: DataType
         relationship: BROADER
         direction: incoming
