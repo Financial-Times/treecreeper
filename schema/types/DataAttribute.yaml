@@ -12,12 +12,12 @@ properties:
         description: |
            The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     name:
-        type: String
+        type: Name
         label: Name
         description: |
            The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     description:
-        type: String
+        type: Paragraph
         label: Description
         description: |
            A description of what this data item stores. Please be specific - i.e. say that it's the country that a user is resident in for tax purposes rather than just country.
