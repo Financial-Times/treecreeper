@@ -160,13 +160,13 @@ properties:
     fieldset: architectureDiagram
   troubleshooting:
     type: Document
+    deprecationReason: Replaced by firstLineTroubleshooting and secondLineTroubleshooting fields
     label: Troubleshooting
     description: Guidance for troubleshooting problems with this system.
     fieldset: troubleshooting
   firstLineTroubleshooting:
     type: Document
     label: First line troubleshooting
-    deprecationReason: Temporarily hidden while migrating content
     description: |
       Troubleshooting information for members of the operations team. You can assume
       - access to most applications and tools widely used at FT
@@ -177,7 +177,6 @@ properties:
   secondLineTroubleshooting:
     type: Document
     label: Second line troubleshooting
-    deprecationReason: Temporarily hidden while migrating content
     description: Troubleshooting information for members of the system's support or delivery team.
     fieldset: troubleshooting
   monitoring:
