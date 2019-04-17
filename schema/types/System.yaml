@@ -168,11 +168,11 @@ properties:
     type: Document
     label: First line troubleshooting
     description: |
-      Troubleshooting information for members of the operations team. You can assume
+      Troubleshooting information for members of the Operations Support Team. You can assume
       - access to most applications and tools widely used at FT
       - admin privileges for most infrastructure we run systems on
-      - familiarity with the command line and admin interfaces for our infrastructure
-      In general, do _not_ assume any familiarity with the system's source code.
+      - familiarity with the command line and admin interfaces for our applications
+      In general, do _not_ assume any familiarity with the system's source code
     fieldset: troubleshooting
   secondLineTroubleshooting:
     type: Document
