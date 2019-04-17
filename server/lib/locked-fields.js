@@ -20,12 +20,19 @@ const getAllPropertyNames = nodeType => {
 	);
 };
 
-const getLockedFields = (nodeType, fieldNames) =>
-	fieldNames === 'all'
+const getFieldList = (nodeType, fieldNames) => {
+	if (!fieldNames) {
+		return [];
+	}
+	return fieldNames === 'all'
 		? getAllPropertyNames(nodeType)
 		: fieldNames.split(',');
+};
 
-const setLockedFields = (clientId, lockFields, existingLockedFields) => {
+const setLockedFields = (lockFields, existingLockedFields = {}, clientId) => {
+	if (!lockFields.length) {
+		return existingLockedFields;
+	}
 	if (!clientId) {
 		throw new LockedFieldsError(
 			'clientId needs to be set to a valid system code in order to lock fields',
@@ -33,72 +40,14 @@ const setLockedFields = (clientId, lockFields, existingLockedFields) => {
 			400,
 		);
 	}
-
-	const fieldsToLock = {};
-
-	lockFields.forEach(field => {
-		fieldsToLock[field] = clientId;
-	});
-
-	logger.info({ event: 'SET_LOCKED_FIELDS', lockFields, clientId });
-
-	if (!existingLockedFields) {
-		return JSON.stringify(fieldsToLock);
-	}
-
-	const allLockedFields = Object.assign(
-		{},
-		fieldsToLock,
-		existingLockedFields,
-	);
-
-	return JSON.stringify(allLockedFields);
-};
-
-const removeLockedFields = (unlockFields, existingLockedFields, clientId) => {
-	if (!existingLockedFields) {
-		return;
-	}
-
-	unlockFields.forEach(fieldName => {
-		delete existingLockedFields[fieldName];
-	});
-
-	logger.info({ event: 'REMOVE_LOCKED_FIELDS', unlockFields, clientId });
-
-	return Object.keys(existingLockedFields).length
-		? JSON.stringify(existingLockedFields)
-		: null;
-};
-
-const mergeLockedFields = (nodeType, clientId, query, existingLockedFields) => {
-	const { lockFields, unlockFields } = query;
-
-	if (lockFields) {
-		const fields = getLockedFields(nodeType, lockFields);
-		return setLockedFields(clientId, fields, existingLockedFields);
-	}
-
-	if (unlockFields) {
-		const fields = getLockedFields(nodeType, unlockFields);
-		return removeLockedFields(fields, existingLockedFields, clientId);
-	}
-
-	return null;
-};
-
-const validateLockedFields = (
-	clientId,
-	propertiesToModify,
-	existingLockedFields,
-) => {
 	const fieldsThatCannotBeUpdated = {};
 
-	Object.keys(propertiesToModify).forEach(property => {
-		const lockedByExistingClientId = existingLockedFields[property];
+	lockFields.forEach(fieldName => {
+		const lockedByExistingClientId = existingLockedFields[fieldName];
 		if (lockedByExistingClientId && lockedByExistingClientId !== clientId) {
-			fieldsThatCannotBeUpdated[property] = lockedByExistingClientId;
+			fieldsThatCannotBeUpdated[fieldName] = lockedByExistingClientId;
 		}
+		existingLockedFields[fieldName] = clientId;
 	});
 
 	if (!_isEmpty(fieldsThatCannotBeUpdated)) {
@@ -116,10 +65,52 @@ const validateLockedFields = (
 			400,
 		);
 	}
+
+	logger.info({ event: 'SET_LOCKED_FIELDS', lockFields, clientId });
+	return existingLockedFields;
 };
+
+const stringifyObject = obj =>
+	Object.keys(obj).length ? JSON.stringify(obj) : null;
+
+const removeLockedFields = (
+	unlockFields,
+	existingLockedFields = {},
+	clientId,
+) => {
+	if (!existingLockedFields) {
+		return {};
+	}
+
+	unlockFields.forEach(fieldName => {
+		delete existingLockedFields[fieldName];
+	});
+
+	logger.info({ event: 'REMOVE_LOCKED_FIELDS', unlockFields, clientId });
+
+	return existingLockedFields;
+};
+
+const mergeLockedFields = ({
+	nodeType,
+	clientId,
+	lockFields,
+	unlockFields,
+	existingLockedFields,
+}) =>
+	stringifyObject(
+		setLockedFields(
+			getFieldList(nodeType, lockFields),
+			removeLockedFields(
+				getFieldList(nodeType, unlockFields),
+				existingLockedFields,
+				clientId,
+			),
+			clientId,
+		),
+	);
 
 module.exports = {
 	mergeLockedFields,
-	validateLockedFields,
 	LockedFieldsError,
 };

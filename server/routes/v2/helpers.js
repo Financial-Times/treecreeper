@@ -140,7 +140,9 @@ const createNewNode = (nodeType, code, clientId, query, body, method) => {
 		);
 	}
 
-	const lockedFields = mergeLockedFields(nodeType, clientId, query);
+	const lockedFields = mergeLockedFields(
+		Object.assign({ nodeType, clientId }, query),
+	);
 
 	return writeNode({
 		nodeType,

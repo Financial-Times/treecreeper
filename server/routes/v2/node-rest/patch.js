@@ -14,10 +14,7 @@ const {
 	createNewNode,
 } = require('../helpers');
 const { constructNeo4jProperties } = require('../../../data/data-conversion');
-const {
-	mergeLockedFields,
-	validateLockedFields,
-} = require('../../../lib/locked-fields');
+const { mergeLockedFields } = require('../../../lib/locked-fields');
 
 const update = async input => {
 	validateParams(input);
@@ -61,20 +58,13 @@ const update = async input => {
 			? JSON.parse(existingRecord._lockedFields)
 			: null;
 
-		if (existingLockedFields) {
-			validateLockedFields(
-				clientId,
-				propertiesToModify,
-				existingLockedFields,
-			);
-		}
-
-		const lockedFields = mergeLockedFields(
+		const lockedFields = mergeLockedFields({
 			nodeType,
 			clientId,
-			query,
+			lockFields,
+			unlockFields,
 			existingLockedFields,
-		);
+		});
 
 		const removedRelationships = recordAnalysis.getRemovedRelationships({
 			nodeType,

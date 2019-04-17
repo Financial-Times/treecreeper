@@ -2021,7 +2021,7 @@ describe('v2 - node PATCH', () => {
 					code: teamCode,
 					name: 'new name',
 					_lockedFields:
-						'{"name":"v2-node-patch-client","email":"v2-node-patch-client"}',
+						'{"email":"v2-node-patch-client","name":"v2-node-patch-client"}',
 				}),
 			);
 		});
@@ -2047,7 +2047,7 @@ describe('v2 - node PATCH', () => {
 			);
 		});
 
-		it('does NOT lock fields when just updating locked and unlocked fields', async () => {
+		it('does NOT modify lock fields when just updating locked and unlocked fields', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
@@ -2066,6 +2066,7 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 					email: 'tech@lt.com',
 					slack: 'new slack channel',
+					_lockedFields: '{"name":"v2-node-patch-client"}',
 				}),
 			);
 		});
@@ -2128,12 +2129,8 @@ describe('v2 - node PATCH', () => {
 					name: 'new name',
 				},
 			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"another-api","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client"}`,
-				}),
+				400,
+				/The following fields cannot be updated because they are locked by another client: email is locked by another-api/,
 			);
 		});
 
@@ -2260,6 +2257,43 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'name 1',
+				}),
+			);
+		});
+
+		it('unlocks a locked field and writes new value in same request', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: `{"name":"v2-node-patch-client2"}`,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=name`,
+				{ name: 'name 2' },
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 2',
+				}),
+			);
+		});
+
+		it('unlocks a locked field and writes new locked value in same request', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields: `{"name":"v2-node-patch-client"}`,
+			});
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?unlockFields=name&lockFields=name`,
+				{ name: 'name 2' },
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 2',
+					_lockedFields: `{"name":"v2-node-patch-client"}`,
 				}),
 			);
 		});
