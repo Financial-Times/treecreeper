@@ -152,7 +152,6 @@ properties:
     type: Word
     label: Salesforce ID
     description: ID of this system in salesforce.
-    autoPopulated: true
     fieldset: miscellaneous
   architectureDiagram:
     type: Document
@@ -161,8 +160,24 @@ properties:
     fieldset: architectureDiagram
   troubleshooting:
     type: Document
+    deprecationReason: Replaced by firstLineTroubleshooting and secondLineTroubleshooting fields
     label: Troubleshooting
     description: Guidance for troubleshooting problems with this system.
+    fieldset: troubleshooting
+  firstLineTroubleshooting:
+    type: Document
+    label: First line troubleshooting
+    description: |
+      Troubleshooting information for members of the Operations Support Team. You can assume
+      - access to most applications and tools widely used at FT
+      - admin privileges for most infrastructure we run systems on
+      - familiarity with the command line and admin interfaces for our applications
+      In general, do _not_ assume any familiarity with the system's source code.
+    fieldset: troubleshooting
+  secondLineTroubleshooting:
+    type: Document
+    label: Second line troubleshooting
+    description: Troubleshooting information for members of the system's support or delivery team.
     fieldset: troubleshooting
   monitoring:
     type: Document
@@ -241,16 +256,6 @@ properties:
     label: More Information
     description: Any additional information about this system.
     fieldset: moreInformation
-  stakeholders:
-    type: Person
-    direction: outgoing
-    label: Stakeholders
-    relationship: HAS_STAKEHOLDER
-    description: |
-      People who have an interest in knowing about the status of or changes to this system.
-      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
-    fieldset: ownership
-    hasMany: true
   repositories:
     type: Repository
     direction: outgoing
@@ -301,6 +306,16 @@ properties:
       responsible).
     hasMany: false
     fieldset: ownership
+  stakeholders:
+    type: Person
+    direction: outgoing
+    label: Stakeholders
+    relationship: HAS_STAKEHOLDER
+    description: |
+      People who have an interest in knowing about the status of or changes to this system.
+      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
+    fieldset: ownership
+    hasMany: true
   knownAboutBy:
     type: Person
     direction: outgoing
@@ -351,6 +366,14 @@ properties:
     label: Dependent products
     relationship: DEPENDS_ON
     description: Products which depend on this system.
+    hasMany: true
+    fieldset: network
+  dependentCapabilities:
+    type: BusinessCapability
+    direction: incoming
+    label: Dependent capabilities
+    relationship: DEPENDS_ON
+    description: Business Capabilities that depend on this system.
     hasMany: true
     fieldset: network
   recursiveDependentProducts:

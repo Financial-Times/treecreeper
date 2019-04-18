@@ -1,4 +1,6 @@
-const cache = require('../../lib/cache');
+const Cache = require('../../lib/cache');
+
+const cache = new Cache();
 
 describe('cache spec', () => {
 	let func;
@@ -11,7 +13,7 @@ describe('cache spec', () => {
 
 		keyGetter = jest.fn(val => `key:${val}`);
 
-		cacheified = cache.cacheify(func, keyGetter);
+		cacheified = cache.addCacheToFunction(func, keyGetter);
 	});
 
 	afterEach(() => jest.clearAllMocks());

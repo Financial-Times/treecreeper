@@ -1,7 +1,8 @@
 name: CookieInstance
 description: |
   A node with cookie relationship data specific to a cookie attached to a domain/product website. Data includes cookie path and last seen date.
-
+createPermissions:
+  - ip-cookie-audit
 rank: 100
 properties:
   code:
@@ -11,9 +12,8 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    pattern: MAX_LENGTH
+    pattern: MAX_LENGTH_64
     fieldset: main
-    autoPopulated: true
 
   path:
     type: Word

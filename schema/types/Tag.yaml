@@ -4,6 +4,8 @@ description: |
   In the context of marketing/advertising tags and pixels, they are often collecting some information about the
   visitor to a website and their behavior on the site.
 rank: 100
+createPermissions:
+  - ip-cookie-audit
 properties:
   code:
     type: Code
@@ -12,9 +14,8 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    pattern: MAX_LENGTH
+    pattern: MAX_LENGTH_64
     fieldset: main
-    autoPopulated: true
 
   name:
     type: Name

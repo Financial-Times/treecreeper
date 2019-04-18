@@ -1,6 +1,6 @@
-const rawData = require('../../lib/raw-data');
+const RawData = require('../../lib/raw-data');
 
-const enums = rawData.getEnums();
+const enums = new RawData().getEnums();
 
 describe('data quality: enum spec', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {
@@ -15,11 +15,13 @@ describe('data quality: enum spec', () => {
 				).toBe(true);
 			});
 			if (Array.isArray(options)) {
-				it('has only string keys ', () => {
-					options.forEach(opt => expect(typeof opt).toBe('string'));
-				});
-				it('has no keys beginning with numbers', () => {
-					options.forEach(opt => expect(opt).not.toMatch(/^\d/));
+				options.forEach(option => {
+					it(`element: ${option} is a string`, () => {
+						expect(typeof option).toBe('string');
+					});
+					it(`element: ${option} does not begin with a number`, () => {
+						expect(option).not.toMatch(/^\d/);
+					});
 				});
 			} else {
 				it('has only string keys', () => {

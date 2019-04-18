@@ -1,46 +1,48 @@
-const { getType } = require('../..');
-const rawData = require('../../lib/raw-data');
-const cache = require('../../lib/cache');
-const metaProperties = require('../../methods/constants');
+const metaProperties = require('../../lib/meta-properties');
+const { init } = require('../../lib/get-instance');
+
+const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
+	return init({
+		rawData: {
+			schema: {
+				types: [{ name: 'DummyType' }, typeData],
+				stringPatterns,
+			},
+		},
+	}).getType('Type1', options);
+};
 
 describe('get-type', () => {
-	beforeEach(() => {
-		jest.spyOn(rawData, 'getTypes');
-		jest.spyOn(rawData, 'getStringPatterns');
-	});
-
-	afterEach(() => {
-		cache.clear();
-		jest.restoreAllMocks();
-	});
-
 	describe('returns all properties', () => {
-		let type;
-
-		beforeEach(() => {
-			const type1 = {
-				name: 'Type1',
-				description: 'I am Type1',
-				properties: {
-					property1: {
-						type: 'String',
-					},
-					property2: {
-						type: 'Boolean',
-					},
+		const type1 = {
+			name: 'Type1',
+			description: 'I am Type1',
+			properties: {
+				property1: {
+					type: 'String',
 				},
-			};
-			rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
-			type = getType('Type1');
+				property2: {
+					type: 'Boolean',
+				},
+			},
+		};
+		let compiledType;
+
+		beforeAll(() => {
+			compiledType = typeFromRawData(type1, {
+				options: { includeMetaFields: true },
+			});
 		});
 
 		it('returns name and description and properties of type (excludes meta data)', () => {
-			expect(type.name).toBe('Type1');
-			expect(type.description).toBe('I am Type1');
-			expect(type.properties).toHaveProperty('property1');
-			expect(type.properties.property1).toMatchObject({ type: 'String' });
-			expect(type.properties).toHaveProperty('property2');
-			expect(type.properties.property2).toMatchObject({
+			expect(compiledType.name).toBe('Type1');
+			expect(compiledType.description).toBe('I am Type1');
+			expect(compiledType.properties).toHaveProperty('property1');
+			expect(compiledType.properties.property1).toMatchObject({
+				type: 'String',
+			});
+			expect(compiledType.properties).toHaveProperty('property2');
+			expect(compiledType.properties.property2).toMatchObject({
 				type: 'Boolean',
 			});
 		});
@@ -52,7 +54,8 @@ describe('get-type', () => {
 				const propertyExpectedResult = metaProperties.find(
 					prop => prop.name === propertyName,
 				);
-				const propertyActualResult = type.properties[property.name];
+				const propertyActualResult =
+					compiledType.properties[property.name];
 				expect(propertyActualResult.type).toBe(
 					propertyExpectedResult.type,
 				);
@@ -63,19 +66,20 @@ describe('get-type', () => {
 					propertyExpectedResult.label,
 				);
 				expect(propertyActualResult.fieldset).toBe('meta');
-				expect(propertyActualResult.autoPopulated).toBe(true);
 			});
 		});
 	});
 
 	it('returns meta properties when no other properties are set', () => {
 		const metaPropertyName = metaProperties.map(property => property.name);
-		const type1 = {
-			name: 'Type1',
-			description: 'I am Type1',
-		};
-		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
-		const type = getType('Type1');
+		const type = typeFromRawData(
+			{
+				name: 'Type1',
+				description: 'I am Type1',
+			},
+			{ options: { includeMetaFields: true } },
+		);
+
 		expect(type).toHaveProperty('properties');
 		metaPropertyName.forEach(propertyName => {
 			expect(type.properties).toHaveProperty(propertyName);
@@ -83,40 +87,32 @@ describe('get-type', () => {
 	});
 
 	it('returns a type property to alias the name field', async () => {
-		const type1 = {
+		const type = typeFromRawData({
 			name: 'Type1',
 			description: 'I am Type1',
-		};
-		rawData.getTypes.mockReturnValue([{ name: 'DummyType' }, type1]);
-		const type = getType('Type1');
+		});
 		expect(type.name).toBe('Type1');
 		expect(type.type).toBe('Type1');
 		expect(type.description).toBe('I am Type1');
 	});
 
 	it('generates plural name if necessary', async () => {
-		rawData.getTypes.mockReturnValue([
-			{
-				name: 'Type1',
-			},
-		]);
-		const type = getType('Type1');
+		const type = typeFromRawData({
+			name: 'Type1',
+		});
 		expect(type.pluralName).toBe('Type1s');
 	});
 
 	it('does not override manually set plural name', async () => {
-		rawData.getTypes.mockReturnValue([
-			{
-				name: 'Type1',
-				pluralName: 'Type1ticles',
-			},
-		]);
-		const type = getType('Type1');
+		const type = typeFromRawData({
+			name: 'Type1',
+			pluralName: 'Type1ticles',
+		});
 		expect(type.pluralName).toBe('Type1ticles');
 	});
 
 	it('converts string patterns to regex based function', async () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -126,11 +122,12 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
-		rawData.getStringPatterns.mockReturnValue({
-			CODE: '^ab$',
-		});
-		const type = getType('Type1');
+			{
+				stringPatterns: {
+					CODE: '^ab$',
+				},
+			},
+		);
 		const { validator } = type.properties.code;
 		expect(validator.test('ay')).toBe(false);
 		expect(validator.test('zb')).toBe(false);
@@ -138,7 +135,7 @@ describe('get-type', () => {
 	});
 
 	it('converts string patterns with regex flags to regex based function', async () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -148,46 +145,44 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
-		rawData.getStringPatterns.mockReturnValue({
-			CODE2: {
-				pattern: '^ab$',
-				flags: 'i',
+			{
+				stringPatterns: {
+					CODE2: {
+						pattern: '^ab$',
+						flags: 'i',
+					},
+				},
 			},
-		});
-		const type = getType('Type1');
+		);
 		const { validator } = type.properties.code;
 		expect(validator.test('AB')).toBe(true);
 	});
 
 	it('it returns read-only properties', async () => {
-		rawData.getTypes.mockReturnValue([
-			{
-				name: 'Type1',
-				properties: {
-					primitiveProp: {
-						type: 'Word',
-						autoPopulated: true,
-					},
-					paragraphProp: {
-						type: 'Paragraph',
-						autoPopulated: false,
-					},
-					enumProp: {
-						type: 'SomeEnum',
-					},
+		const type = typeFromRawData({
+			name: 'Type1',
+			properties: {
+				primitiveProp: {
+					type: 'Word',
+					autoPopulated: true,
+				},
+				paragraphProp: {
+					type: 'Paragraph',
+					autoPopulated: false,
+				},
+				enumProp: {
+					type: 'SomeEnum',
 				},
 			},
-		]);
+		});
 
-		const type = getType('Type1', { primitiveTypes: 'graphql' });
 		expect(type.properties.primitiveProp.autoPopulated).toBe(true);
 		expect(type.properties.paragraphProp.autoPopulated).toBe(false);
 		expect(type.properties.enumProp.autoPopulated).toBeFalsy();
 	});
 
 	it('it maps types to graphql properties', async () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -202,16 +197,16 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
+			{ options: { primitiveTypes: 'graphql' } },
+		);
 
-		const type = getType('Type1', { primitiveTypes: 'graphql' });
 		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
 		expect(type.properties.documentProp).toBeFalsy();
 		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
 	});
 
 	it('groups properties by fieldset', () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -240,9 +235,9 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
+			{ options: { groupProperties: true } },
+		);
 
-		const type = getType('Type1', { groupProperties: true });
 		expect(type.properties).toBeFalsy();
 		expect(type.fieldsets.main.properties.mainProp).toBeDefined();
 		expect(type.fieldsets.main.properties.mainProp.label).toBe('A word');
@@ -264,7 +259,7 @@ describe('get-type', () => {
 	});
 
 	it('not have empty fieldsets', () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -284,16 +279,16 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
+			{ options: { groupProperties: true } },
+		);
 
-		const type = getType('Type1', { groupProperties: true });
 		expect(type.properties).toBeFalsy();
 		expect(type.fieldsets.secondary).toBeFalsy();
 		expect(type.fieldsets.misc).toBeFalsy();
 	});
 
 	it('handle lack of custom fieldsets well when grouping', () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 				properties: {
@@ -309,9 +304,9 @@ describe('get-type', () => {
 					},
 				},
 			},
-		]);
+			{ options: { groupProperties: true } },
+		);
 
-		const type = getType('Type1', { groupProperties: true });
 		expect(type.properties).toBeFalsy();
 		expect(type.fieldsets.misc.properties.mainProp).toBeDefined();
 		expect(type.fieldsets.misc.properties.secondaryProp).toBeDefined();
@@ -320,8 +315,8 @@ describe('get-type', () => {
 	});
 
 	describe('misc heading of GENERAL for fieldset', () => {
-		beforeEach(() => {
-			rawData.getTypes.mockReturnValue([
+		it('is returned when includeMetaFields is TRUE', () => {
+			const type = typeFromRawData(
 				{
 					name: 'Type1',
 					properties: {
@@ -331,59 +326,66 @@ describe('get-type', () => {
 						},
 					},
 				},
-			]);
-		});
-
-		it('is returned when includeMetaFields is TRUE', () => {
-			const type = getType('Type1', { groupProperties: true });
+				{ options: { groupProperties: true } },
+			);
 			expect(type.fieldsets.misc.heading).toBe('General');
 		});
 
 		it('is returned when includeMetaFields is FALSE', () => {
-			const type = getType('Type1', {
-				groupProperties: true,
-				includeMetaFields: false,
-			});
+			const type = typeFromRawData(
+				{
+					name: 'Type1',
+					properties: {
+						miscProp: {
+							type: 'SomeEnum',
+							relationship: 'HAS',
+						},
+					},
+				},
+				{
+					options: {
+						includeMetaFields: false,
+						groupProperties: true,
+					},
+				},
+			);
 			expect(type.fieldsets.misc.heading).toBe('General');
 		});
 	});
 
 	describe('misc heading of MISCELLANEOUS for fieldset', () => {
-		beforeEach(() => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						mainProp: {
-							type: 'Word',
-							fieldset: 'main',
-							relationship: 'HAS',
-							label: 'A word relationship',
-						},
-						miscProp: {
-							type: 'SomeEnum',
-							relationship: 'HAS',
-						},
-					},
-					fieldsets: {
-						main: {
-							heading: 'Main properties',
-							description: 'Fill these out please',
-						},
-					},
+		const typeData = {
+			name: 'Type1',
+			properties: {
+				mainProp: {
+					type: 'Word',
+					fieldset: 'main',
+					relationship: 'HAS',
+					label: 'A word relationship',
 				},
-			]);
-		});
+				miscProp: {
+					type: 'SomeEnum',
+					relationship: 'HAS',
+				},
+			},
+			fieldsets: {
+				main: {
+					heading: 'Main properties',
+					description: 'Fill these out please',
+				},
+			},
+		};
 
 		it('is returned when includeMetaFields is TRUE', () => {
-			const type = getType('Type1', { groupProperties: true });
+			const type = typeFromRawData(typeData, {
+				options: { groupProperties: true },
+			});
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 		});
 
 		it('is returned when includeMetaFields is FALSE', () => {
-			const type = getType('Type1', {
-				groupProperties: true,
-				includeMetaFields: false,
+			const type = typeFromRawData(typeData, {
+				options: { includeMetaFields: false, groupProperties: true },
 			});
 			expect(type.fieldsets.misc.heading).toBe('Miscellaneous');
 		});
@@ -393,17 +395,16 @@ describe('get-type', () => {
 		let type;
 
 		beforeEach(() => {
-			rawData.getTypes.mockReturnValue([
+			type = typeFromRawData(
 				{
 					name: 'Type1',
 				},
-			]);
-
-			type = getType('Type1', { groupProperties: true });
+				{ options: { groupProperties: true, includeMetaFields: true } },
+			);
 		});
 
 		it('returns meta fieldset', () => {
-			expect(type.fieldsets.meta.heading).toBe('Meta Data');
+			expect(type.fieldsets.meta.heading).toBe('Metadata');
 			expect(type.fieldsets.meta.properties).toBeDefined();
 		});
 
@@ -417,27 +418,28 @@ describe('get-type', () => {
 					property.description,
 				);
 				expect(fieldsetProperty.label).toEqual(property.label);
-				expect(fieldsetProperty.autoPopulated).toEqual(true);
 			});
 		});
 	});
 
 	it('does not create meta data fieldset when includeMetaFields is set to FALSE', () => {
-		rawData.getTypes.mockReturnValue([
+		const type = typeFromRawData(
 			{
 				name: 'Type1',
 			},
-		]);
-		const type = getType('Type1', {
-			groupProperties: true,
-			includeMetaFields: false,
-		});
+			{
+				options: {
+					groupProperties: true,
+					includeMetaFields: false,
+				},
+			},
+		);
 		expect(type.fieldsets).toEqual({});
 	});
 
 	describe('relationships', () => {
 		it('it can exclude relationships', async () => {
-			rawData.getTypes.mockReturnValue([
+			const type = typeFromRawData(
 				{
 					name: 'Type1',
 					properties: {
@@ -450,28 +452,26 @@ describe('get-type', () => {
 						},
 					},
 				},
-			]);
+				{ options: { withRelationships: false } },
+			);
 
-			const type = getType('Type1', { withRelationships: false });
 			expect(type.properties.testName).toBeFalsy();
 		});
 
 		it('retrieve relationships pointing away from the node', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						testName: {
-							type: 'Type2',
-							direction: 'outgoing',
-							relationship: 'HAS',
-							label: 'test label',
-							description: 'test description',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description',
 					},
 				},
-			]);
-			expect(getType('Type1').properties.testName).toEqual({
+			});
+			expect(type.properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'outgoing',
 				type: 'Type2',
@@ -484,24 +484,22 @@ describe('get-type', () => {
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type2',
-					properties: {
-						testName: {
-							type: 'Type1',
-							direction: 'incoming',
-							relationship: 'HAS',
-							label: 'test label',
-							description: 'test description',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'incoming',
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description',
 					},
 				},
-			]);
-			expect(getType('Type2').properties.testName).toEqual({
+			});
+			expect(type.properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'incoming',
-				type: 'Type1',
+				type: 'Type2',
 				isRelationship: true,
 				isRecursive: false,
 				hasMany: false,
@@ -511,69 +509,61 @@ describe('get-type', () => {
 		});
 
 		it('retrieve multiple relationships with same name', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						testName1: {
-							type: 'Type2',
-							direction: 'outgoing',
-							relationship: 'HAS',
-						},
-						testName2: {
-							type: 'Type3',
-							direction: 'incoming',
-							relationship: 'HAS',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName1: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+					},
+					testName2: {
+						type: 'Type3',
+						direction: 'incoming',
+						relationship: 'HAS',
 					},
 				},
-			]);
-			const result = getType('Type1').properties;
-			expect(result.testName1.direction).toBe('outgoing');
-			expect(result.testName2.direction).toBe('incoming');
+			});
+			expect(type.properties.testName1.direction).toBe('outgoing');
+			expect(type.properties.testName2.direction).toBe('incoming');
 		});
 
 		it('retrieve two relationships when pointing at self', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						testName1: {
-							type: 'Type1',
-							direction: 'outgoing',
-							relationship: 'HAS',
-						},
-						testName2: {
-							type: 'Type1',
-							direction: 'incoming',
-							relationship: 'HAS',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName1: {
+						type: 'Type1',
+						direction: 'outgoing',
+						relationship: 'HAS',
+					},
+					testName2: {
+						type: 'Type1',
+						direction: 'incoming',
+						relationship: 'HAS',
 					},
 				},
-			]);
-			const result = getType('Type1').properties;
-			expect(result.testName1.direction).toBe('outgoing');
-			expect(result.testName2.direction).toBe('incoming');
+			});
+			expect(type.properties.testName1.direction).toBe('outgoing');
+			expect(type.properties.testName2.direction).toBe('incoming');
 		});
 
 		it('define recursive relationships', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						testName: {
-							type: 'Type2',
-							direction: 'outgoing',
-							isRecursive: true,
-							relationship: 'HAS',
-							label: 'test label',
-							description: 'test description',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						isRecursive: true,
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description',
 					},
 				},
-			]);
+			});
 
-			expect(getType('Type1').properties.testName).toEqual({
+			expect(type.properties.testName).toEqual({
 				type: 'Type2',
 				hasMany: false,
 				direction: 'outgoing',
@@ -586,25 +576,23 @@ describe('get-type', () => {
 		});
 
 		it('cardinality', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						many: {
-							type: 'Type2',
-							hasMany: true,
-							direction: 'outgoing',
-							relationship: 'HAS',
-						},
-						singular: {
-							type: 'Type2',
-							direction: 'incoming',
-							relationship: 'HAS',
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					many: {
+						type: 'Type2',
+						hasMany: true,
+						direction: 'outgoing',
+						relationship: 'HAS',
+					},
+					singular: {
+						type: 'Type2',
+						direction: 'incoming',
+						relationship: 'HAS',
 					},
 				},
-			]);
-			expect(getType('Type1').properties.many).toEqual({
+			});
+			expect(type.properties.many).toEqual({
 				isRecursive: false,
 				isRelationship: true,
 				type: 'Type2',
@@ -612,7 +600,7 @@ describe('get-type', () => {
 				direction: 'outgoing',
 				hasMany: true,
 			});
-			expect(getType('Type1').properties.singular).toEqual({
+			expect(type.properties.singular).toEqual({
 				isRecursive: false,
 				isRelationship: true,
 				type: 'Type2',
@@ -623,26 +611,24 @@ describe('get-type', () => {
 		});
 
 		it('hidden relationships', () => {
-			rawData.getTypes.mockReturnValue([
-				{
-					name: 'Type1',
-					properties: {
-						testName: {
-							type: 'Type2',
-							direction: 'outgoing',
-							relationship: 'HAS',
-							label: 'test label',
-							description: 'test description',
-							hidden: true,
-						},
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						description: 'test description',
+						hidden: true,
 					},
 				},
-			]);
-			expect(getType('Type1').properties.testName).toBeFalsy();
+			});
+			expect(type.properties.testName).toBeFalsy();
 		});
 
 		it('can group relationship properties by fieldset', () => {
-			rawData.getTypes.mockReturnValue([
+			const type = typeFromRawData(
 				{
 					name: 'Type1',
 					properties: {
@@ -674,9 +660,9 @@ describe('get-type', () => {
 						},
 					},
 				},
-			]);
+				{ options: { groupProperties: true } },
+			);
 
-			const type = getType('Type1', { groupProperties: true });
 			expect(type.properties).toBeFalsy();
 			expect(type.fieldsets.main.properties.mainProp).toBeDefined();
 			expect(type.fieldsets.main.properties.mainProp.label).toBe(

@@ -13,9 +13,8 @@ properties:
     description: |
         The unique code for this person. For FT staff this will be their active directory name.
         For third parties, please use firstname.lastname.company.
-    pattern: MAX_LENGTH
+    pattern: MAX_LENGTH_64
     fieldset: general
-    autoPopulated: true
   name:
     type: Name
     canIdentify: true
@@ -25,7 +24,6 @@ properties:
         The name by which this person is known.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
-    autoPopulated: true
   email:
     type: Email
     canIdentify: true
@@ -35,7 +33,6 @@ properties:
         The email address that can be used to contact this person.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
-    autoPopulated: true
   slack:
     type: Word
     label: Slack
@@ -45,7 +42,6 @@ properties:
         The Slack link for this person (deprecated).
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
-    autoPopulated: true
   slackName:
     type: Word
     canIdentify: true
@@ -54,7 +50,6 @@ properties:
         The Slack name for this person.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
-    autoPopulated: true
   slackID:
     type: Word
     canIdentify: true
@@ -63,14 +58,12 @@ properties:
         The Slack id for this person.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
-    autoPopulated: true
   githubName:
     type: Word
     canIdentify: true
     label: Github Username
     description: The Github user name for this person.
     fieldset: contact
-    autoPopulated: true
   phone:
     type: Word
     canIdentify: true
@@ -80,7 +73,13 @@ properties:
         The telephone number that can be used to contact this person.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: contact
-    autoPopulated: true
+  isPeopleApi:
+    type: Boolean
+    label: Is FT staff
+    fieldset: general
+    description: |
+        Whether or not this person is an FT staff member listed in https://people-finder.in.ft.com/.
+        Please raise in the \#ip-people-api slack channel if details are incorrect.
   isActive:
     type: Boolean
     label: Active
@@ -95,23 +94,15 @@ properties:
         The type of employment contract this Person has with the FT.
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
     fieldset: general
-  isPeopleApi:
-    type: Boolean
-    label: Is in people api
-    description: |
-        Whether or not this person exists in https://who.in.ft.com.
-        For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
-    autoPopulated: true
   source:
     type: PersonSource
     label: Source
     description: The primary data source used to provide information for this person - Workday, Salesforce, ldap, github, Slack or multiple.
-    autoPopulated: true
   proposedId:
     type: Word
     label: Proposed ID
+    deprecationReason: Only needed during migration to new ids
     description: The ID of this person in Workday, ldap, github or Slack. If no ID is found, it is `name.lastname`.
-    autoPopulated: true
   techDirectorFor:
     type: Group
     label: Tech director for group

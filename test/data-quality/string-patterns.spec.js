@@ -1,8 +1,8 @@
-const rawData = require('../../lib/raw-data');
+const RawData = require('../../lib/raw-data');
 
-const stringPatterns = rawData.getStringPatterns();
+const stringPatterns = new RawData().getStringPatterns();
 
-const longString = 'x'.repeat(65);
+const longString = 'x'.repeat(257);
 
 describe('data quality: string patterns', () => {
 	Object.entries(stringPatterns).forEach(([name, pattern]) => {
