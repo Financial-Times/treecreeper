@@ -142,7 +142,7 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
-  governsValuesOf:
+  governsAuditableData:
     type: AuditableDataType
     direction: incoming
     label: Governs data
