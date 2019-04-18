@@ -15,7 +15,9 @@ properties:
     description:
         type: Paragraph
         label: Description
-        description: A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification not just that it's an industry code.
+        description: >
+            A description of what this data item stores. Please be specific - i.e. say that it's a six-digit SIC classification
+            not just that it's an industry code.
     isInstanceOf:
         type: AuditableData
         relationship: IS_INSTANCE_OF
