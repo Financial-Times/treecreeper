@@ -406,7 +406,8 @@ describe('v2 - node POST', () => {
 					sandbox.withCreateMeta({
 						code: 'v2-node-post-team',
 						name: 'name1',
-						_lockedFields: `{"code":"v2-node-post-client","name":"v2-node-post-client","description":"v2-node-post-client","email":"v2-node-post-client","slack":"v2-node-post-client","phone":"v2-node-post-client","isActive":"v2-node-post-client","isThirdParty":"v2-node-post-client","supportRota":"v2-node-post-client","contactPref":"v2-node-post-client","techLeads":"v2-node-post-client","productOwners":"v2-node-post-client","parentGroup":"v2-node-post-client","group":"v2-node-post-client","subTeams":"v2-node-post-client","parentTeam":"v2-node-post-client","delivers":"v2-node-post-client","supports":"v2-node-post-client","teamMembers":"v2-node-post-client"}`,
+						_lockedFields:
+							'{"code":"v2-node-post-client","name":"v2-node-post-client","description":"v2-node-post-client","email":"v2-node-post-client","slack":"v2-node-post-client","phone":"v2-node-post-client","isActive":"v2-node-post-client","isThirdParty":"v2-node-post-client","supportRota":"v2-node-post-client","contactPref":"v2-node-post-client","techLeads":"v2-node-post-client","productOwners":"v2-node-post-client","parentGroup":"v2-node-post-client","group":"v2-node-post-client","subTeams":"v2-node-post-client","parentTeam":"v2-node-post-client","delivers":"v2-node-post-client","supports":"v2-node-post-client","teamMembers":"v2-node-post-client","governsAuditableData":"v2-node-post-client"}',
 					}),
 				);
 		});
