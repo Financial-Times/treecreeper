@@ -301,7 +301,7 @@ properties:
   repositories:
     type: Repository
     direction: outgoing
-    label: Repositories
+    label: Source code repositories
     relationship: HAS_REPO
     fieldset: technicalOverview
     description: The repositories which store this system's source code and/or configuration.
