@@ -13,6 +13,10 @@ fieldsets:
     heading: Ownership & knowledge
   technicalOverview:
     heading: Technical overview
+  personalData:
+    heading: Personal Identifiable Data (PII)
+  network:
+    heading: Related resources
   failover:
     heading: Failover
   dataRecovery:
@@ -21,14 +25,8 @@ fieldsets:
     heading: Release
   keyManagement:
     heading: Key Management
-  personalData:
-    heading: Personal Identifiable Data (PII)
   monitoring:
     heading: Monitoring
-  network:
-    heading: Related resources
-  architectureDiagram:
-    heading: Architecture Diagram
   troubleshooting:
     heading: Troubleshooting
   moreInformation:
