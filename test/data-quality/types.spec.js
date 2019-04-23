@@ -91,6 +91,7 @@ describe('data quality: types', () => {
 			it('may have a plural name', () => {
 				if ('pluralName' in type) {
 					expect(typeof type.pluralName).toBe('string');
+					expect(type.pluralName).not.toEqual(type.name);
 				}
 			});
 			it('has a rank', () => {
