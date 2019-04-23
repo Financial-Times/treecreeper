@@ -13,6 +13,10 @@ fieldsets:
     heading: Ownership & knowledge
   technicalOverview:
     heading: Technical overview
+  personalData:
+    heading: Personal Identifiable Data (PII)
+  network:
+    heading: Related resources
   failover:
     heading: Failover
   dataRecovery:
@@ -21,14 +25,8 @@ fieldsets:
     heading: Release
   keyManagement:
     heading: Key Management
-  personalData:
-    heading: Personal Identifiable Data (PII)
   monitoring:
     heading: Monitoring
-  network:
-    heading: Related resources
-  architectureDiagram:
-    heading: Architecture Diagram
   troubleshooting:
     heading: Troubleshooting
   moreInformation:
@@ -190,7 +188,7 @@ properties:
     deprecationReason: Replaced by architecture field
     label: Architecture Diagram
     description: A diagram of the system's architecture (either a link to one or embedded directly).
-    fieldset: architectureDiagram
+    fieldset: technicalOverview
   troubleshooting:
     type: Document
     deprecationReason: Replaced by firstLineTroubleshooting and secondLineTroubleshooting fields
