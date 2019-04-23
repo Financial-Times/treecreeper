@@ -92,7 +92,10 @@ const constraintsCheck = async () => {
 				lastUpdated: new Date().toUTCString(),
 				checkOutput: 'Database is missing required constraints',
 				panicGuide: stripIndents`Go via the biz-ops-api dashboard on heroku https://dashboard.heroku.com/apps/biz-ops-api/resources
-						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries} ${propertyConstraintQueries}`,
+						to the grapheneDB instance. Launch the Neo4j browser and run the following queries ${uniqueConstraintQueries
+							.concat(propertyConstraintQueries)
+							.join(', ')}.
+						Note that each query must be run separately`,
 			};
 		}
 	} catch (error) {
