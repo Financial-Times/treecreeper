@@ -62,7 +62,10 @@ properties:
     type: Paragraph
     canIdentify: true
     label: Description
-    description: A brief overview of what the system does and how from the user's perspective.
+    description: |
+      A brief overview of what the system does and why, from the user's perspective.
+      Note that multiple paragraphs and other markdown features are not supported in this field.
+      Any technical details about how it works should be added in the [technical overview section](#technical-overview).
     fieldset: general
   primaryURL:
     type: Url
