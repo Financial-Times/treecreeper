@@ -6,38 +6,6 @@ moreInformation: |
     Systems are owned by Teams (not individuals) from either a delivery and support perspective (or both). A well managed productionised System will be linked to its Repository and its Healthchecks.
 
 rank: 20
-fieldsets:
-  general:
-    heading: General information
-  ownership:
-    heading: Ownership & knowledge
-  technicalOverview:
-    heading: Technical overview
-  failover:
-    heading: Failover
-  dataRecovery:
-    heading: Data recovery
-  release:
-    heading: Release
-  keyManagement:
-    heading: Key Management
-  personalData:
-    heading: Personal Identifiable Data (PII)
-  monitoring:
-    heading: Monitoring
-  network:
-    heading: Related resources
-  architectureDiagram:
-    heading: Architecture Diagram
-  troubleshooting:
-    heading: Troubleshooting
-  moreInformation:
-    heading: More Information
-  miscellaneous:
-    heading: Miscellaneous
-  review:
-    heading: Service Operability Review
-
 properties:
   code:
     type: Code
@@ -288,25 +256,14 @@ properties:
     label: More Information
     description: Any additional information about this system.
     fieldset: moreInformation
-
-  architecture:
-    type: Document
-    label: Architecture
-    deprecationReason: Temporarily hidden while moving from architectureDiagram field
-    description: |
-      Brief description of the system's architecture.
-      It's recommended that one or more diagrams are included here.
-      Please include link(s) to where the diagrams can be edited.
-    fieldset: technicalOverview
   repositories:
     type: Repository
     direction: outgoing
-    label: Source code repositories
+    label: Repositories
     relationship: HAS_REPO
-    fieldset: technicalOverview
+    fieldset: network
     description: The repositories which store this system's source code and/or configuration.
     hasMany: true
-
   monitoredBy:
     type: Healthcheck
     direction: outgoing
@@ -480,4 +437,32 @@ properties:
     label: Updates data
     relationship: UPDATES
     description: A set of governed data items that this system updates.
-
+fieldsets:
+  general:
+    heading: General information
+  ownership:
+    heading: Ownership & knowledge
+  failover:
+    heading: Failover
+  dataRecovery:
+    heading: Data recovery
+  release:
+    heading: Release
+  keyManagement:
+    heading: Key Management
+  personalData:
+    heading: Personal Identifiable Data (PII)
+  monitoring:
+    heading: Monitoring
+  network:
+    heading: Related resources
+  architectureDiagram:
+    heading: Architecture Diagram
+  troubleshooting:
+    heading: Troubleshooting
+  moreInformation:
+    heading: More Information
+  miscellaneous:
+    heading: Miscellaneous
+  review:
+    heading: Service Operability Review
