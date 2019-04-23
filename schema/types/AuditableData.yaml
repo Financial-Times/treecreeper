@@ -11,6 +11,7 @@ properties:
         type: Code
         canIdentify: true
         label: Code
+        pattern: CODE
         description: |
            The unique code for this data attribute. This should be the attribue name in lower case with words separated by hyphens, e.g. billing-country.
     name:

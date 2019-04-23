@@ -111,6 +111,22 @@ describe('get-type', () => {
 		expect(type.pluralName).toBe('Type1ticles');
 	});
 
+	it('forces `code` property to have constraints', () => {
+		const type = typeFromRawData({
+			name: 'Type1',
+			properties: {
+				code: {},
+			},
+		});
+		expect(type.properties.code).toEqual({
+			type: 'Code',
+			required: true,
+			unique: true,
+			canIdentify: true,
+			isCore: true,
+		});
+	});
+
 	it('converts string patterns to regex based function', async () => {
 		const type = typeFromRawData(
 			{

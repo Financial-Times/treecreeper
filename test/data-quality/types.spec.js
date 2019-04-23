@@ -138,6 +138,10 @@ describe('data quality: types', () => {
 					expect(type.properties.code).toBeDefined();
 					expect(type.properties.code.canIdentify).toEqual(true);
 				});
+
+				it('has a code that respects a pattern', () => {
+					expect(type.properties.code.pattern).toBeDefined();
+				});
 				Object.entries(type.properties).forEach(([name, config]) => {
 					describe(`${name}`, () => {
 						it('has no unrecognised properties in its config', () => {
