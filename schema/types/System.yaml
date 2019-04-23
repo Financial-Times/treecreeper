@@ -187,6 +187,7 @@ properties:
     fieldset: miscellaneous
   architectureDiagram:
     type: Document
+    deprecationReason: Replaced by architecture field
     label: Architecture Diagram
     description: A diagram of the system's architecture (either a link to one or embedded directly).
     fieldset: architectureDiagram
@@ -292,7 +293,6 @@ properties:
   architecture:
     type: Document
     label: Architecture
-    deprecationReason: Temporarily hidden while moving from architectureDiagram field
     description: |
       Brief description of the system's architecture.
       It's recommended that one or more diagrams are included here.
