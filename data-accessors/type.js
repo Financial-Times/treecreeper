@@ -101,6 +101,16 @@ const getType = (
 		typeSchema.pluralName = `${typeSchema.name}s`;
 	}
 
+	if (typeSchema.properties.code) {
+		Object.assign(typeSchema.properties.code, {
+			type: 'Code',
+			required: true,
+			unique: true,
+			canIdentify: true,
+			isCore: true,
+		});
+	}
+
 	if (withRelationships) {
 		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
 			if (def.relationship) {
