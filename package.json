@@ -10,8 +10,8 @@
 		"url": "git+https://github.com/Financial-Times/biz-ops-api.git"
 	},
 	"engines": {
-		"node": ">= 10.15.1",
-		"npm": ">= 6.4.1"
+		"node": "^10.15.1",
+		"npm": "^6.4.1"
 	},
 	"nyc": {
 		"exclude": [
