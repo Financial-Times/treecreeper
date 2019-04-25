@@ -1,5 +1,5 @@
 NODE_TYPE: '^(?=.{2,64}$)([A-Z][a-z]+)+$' # NodeType
-CODE: '^(?=.{2,64}$)[a-z\d][a-z\d\-\.]*[a-z\d]$' # system-code.1
+CODE: '^(?=.{2,64}$)[a-z0-9]+(?:-[a-z0-9]+)*$' # system-code.1
 RELATIONSHIP_NAME: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$' # HAS_A_RELATIONSHIP
 ATTRIBUTE_NAME: '^(?=.{2,64}$)[a-z][a-zA-Z\d]+$' # attributeName
 COST_CENTRE: '^(?=.{2,64}$)[A-Z][A-Z]\d\d\d' # XT100
