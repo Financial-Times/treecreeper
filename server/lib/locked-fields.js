@@ -1,4 +1,3 @@
-const schema = require('@financial-times/biz-ops-schema');
 const _isEmpty = require('lodash.isempty');
 const { logger } = require('./request-context');
 
@@ -14,19 +13,14 @@ class LockedFieldsError extends Error {
 	}
 }
 
-const getAllPropertyNames = nodeType => {
-	return Object.entries(schema.getType(nodeType).properties).map(
-		([propName]) => propName,
-	);
-};
-
-const getFieldList = (nodeType, fieldNames) => {
+const getLockFieldList = (body = {}, fieldNames) => {
 	if (!fieldNames) {
 		return [];
 	}
-	return fieldNames === 'all'
-		? getAllPropertyNames(nodeType)
-		: fieldNames.split(',');
+	return (fieldNames === 'all'
+		? Object.keys(body)
+		: fieldNames.split(',')
+	).filter(name => name !== 'code');
 };
 
 const setLockedFields = (lockFields, existingLockedFields = {}, clientId) => {
@@ -74,15 +68,15 @@ const stringifyObject = obj =>
 	Object.keys(obj).length ? JSON.stringify(obj) : null;
 
 const removeLockedFields = (
-	unlockFields,
+	unlockFields = '',
 	existingLockedFields = {},
 	clientId,
 ) => {
-	if (!existingLockedFields) {
+	if (!existingLockedFields || unlockFields === 'all') {
 		return {};
 	}
 
-	unlockFields.forEach(fieldName => {
+	unlockFields.split(',').forEach(fieldName => {
 		delete existingLockedFields[fieldName];
 	});
 
@@ -92,7 +86,7 @@ const removeLockedFields = (
 };
 
 const mergeLockedFields = ({
-	nodeType,
+	body,
 	clientId,
 	lockFields,
 	unlockFields,
@@ -100,12 +94,8 @@ const mergeLockedFields = ({
 }) =>
 	stringifyObject(
 		setLockedFields(
-			getFieldList(nodeType, lockFields),
-			removeLockedFields(
-				getFieldList(nodeType, unlockFields),
-				existingLockedFields,
-				clientId,
-			),
+			getLockFieldList(body, lockFields),
+			removeLockedFields(unlockFields, existingLockedFields, clientId),
 			clientId,
 		),
 	);

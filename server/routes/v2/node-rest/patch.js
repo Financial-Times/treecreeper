@@ -59,7 +59,7 @@ const update = async input => {
 			: null;
 
 		const lockedFields = mergeLockedFields({
-			nodeType,
+			body,
 			clientId,
 			lockFields,
 			unlockFields,

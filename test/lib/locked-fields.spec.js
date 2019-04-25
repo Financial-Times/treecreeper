@@ -14,7 +14,7 @@ describe('lockedFields', () => {
 
 	describe('mergeLockedFields', () => {
 		const clientId = 'biz-ops-admin';
-		const nodeType = 'Person';
+		const body = { name: 'audrey', teams: ['team1'] };
 
 		describe('setLockedFields', () => {
 			beforeEach(() => {
@@ -26,7 +26,7 @@ describe('lockedFields', () => {
 
 			it('throws an error when clientId is not set', () => {
 				expect(() =>
-					mergeLockedFields({ nodeType, lockFields: 'code,name' }),
+					mergeLockedFields({ body, lockFields: 'code,name' }),
 				).toThrow(
 					'clientId needs to be set to a valid system code in order to lock fields',
 				);
@@ -34,29 +34,29 @@ describe('lockedFields', () => {
 
 			it('returns a JSON string containing fieldname and clientId objects', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
-					lockFields: 'code,name',
+					lockFields: 'description,name',
 				});
 				const response =
-					'{"code":"biz-ops-admin","name":"biz-ops-admin"}';
+					'{"description":"biz-ops-admin","name":"biz-ops-admin"}';
 				expect(call).toEqual(response);
 			});
 
 			it('returns a JSON string containing an object of all fieldname properties and values', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					lockFields: 'all',
 				});
 				const response =
-					'{"code":"biz-ops-admin","name":"biz-ops-admin","teams":"biz-ops-admin"}';
+					'{"name":"biz-ops-admin","teams":"biz-ops-admin"}';
 				expect(call).toEqual(response);
 			});
 
 			it('adds new locked fields to the already existing locked fields', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					lockFields: 'teams',
 					existingLockedFields,
@@ -68,7 +68,7 @@ describe('lockedFields', () => {
 
 			it('does not duplicate locked field values', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					lockFields: 'code,name',
 					existingLockedFields,
@@ -81,7 +81,7 @@ describe('lockedFields', () => {
 		describe('removeLockedFields', () => {
 			it('returns null when no existingLockedFields exists', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					unlockFields: 'name',
 				});
@@ -90,7 +90,7 @@ describe('lockedFields', () => {
 
 			it('returns _lockedFields without the fields that have been unlocked', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					unlockFields: 'name',
 					existingLockedFields,
@@ -100,7 +100,7 @@ describe('lockedFields', () => {
 
 			it('returns _lockedFields without any fields when all fields are unlocked', () => {
 				const call = mergeLockedFields({
-					nodeType,
+					body,
 					clientId,
 					unlockFields: 'all',
 					existingLockedFields,

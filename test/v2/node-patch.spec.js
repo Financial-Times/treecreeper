@@ -1922,7 +1922,7 @@ describe('v2 - node PATCH', () => {
 			).expect(400);
 		});
 
-		it('updates node by updating name and locking ALL fields', async () => {
+		it('updates node by updating field and locking ALL edited fields', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
@@ -1937,8 +1937,7 @@ describe('v2 - node PATCH', () => {
 				sandbox.withMeta({
 					code: teamCode,
 					name: 'new name',
-					_lockedFields:
-						'{"code":"v2-node-patch-client","name":"v2-node-patch-client","description":"v2-node-patch-client","email":"v2-node-patch-client","slack":"v2-node-patch-client","phone":"v2-node-patch-client","isActive":"v2-node-patch-client","isThirdParty":"v2-node-patch-client","supportRota":"v2-node-patch-client","contactPref":"v2-node-patch-client","techLeads":"v2-node-patch-client","productOwners":"v2-node-patch-client","parentGroup":"v2-node-patch-client","group":"v2-node-patch-client","subTeams":"v2-node-patch-client","parentTeam":"v2-node-patch-client","delivers":"v2-node-patch-client","supports":"v2-node-patch-client","teamMembers":"v2-node-patch-client","governsAuditableData":"v2-node-patch-client"}',
+					_lockedFields: lockedFieldName,
 				}),
 			);
 		});
@@ -2122,7 +2121,7 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				name: 'name 1',
-				_lockedFields: '{"email":"another-api"}',
+				_lockedFields: '{"name":"another-api"}',
 			});
 			await authenticatedPatch(
 				`/v2/node/Team/${teamCode}?lockFields=all`,
@@ -2131,7 +2130,7 @@ describe('v2 - node PATCH', () => {
 				},
 			).expect(
 				400,
-				/The following fields cannot be updated because they are locked by another client: email is locked by another-api/,
+				/The following fields cannot be updated because they are locked by another client: name is locked by another-api/,
 			);
 		});
 
@@ -2165,6 +2164,33 @@ describe('v2 - node PATCH', () => {
 					_lockedFields: lockedFieldName,
 				}),
 			);
+		});
+
+		it("doesn't write when 'changing order' of locked fields", async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'name 1',
+				_lockedFields:
+					'{"name":"v2-node-patch-client","description":"other-client","email":"v2-node-patch-client"}',
+			});
+
+			const dbQuerySpy = spyDbQuery(sandbox);
+
+			await authenticatedPatch(
+				`/v2/node/Team/${teamCode}?lockFields=email,name`,
+			).expect(
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'name 1',
+					_lockedFields:
+						'{"name":"v2-node-patch-client","description":"other-client","email":"v2-node-patch-client"}',
+				}),
+			);
+
+			dbQuerySpy().args.forEach(args => {
+				expect(args[0]).not.toMatch(/MERGE|CREATE/);
+			});
 		});
 
 		describe('no client-id header', () => {

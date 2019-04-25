@@ -375,7 +375,7 @@ describe('v2 - node POST', () => {
 		it('creates a node with 4 fields but ONLY locks the name field', async () => {
 			await sandbox
 				.request(app)
-				.post(`/v2/node/Team/${teamCode}?lockFields=name,code`)
+				.post(`/v2/node/Team/${teamCode}?lockFields=name`)
 				.namespacedAuth()
 				.send({
 					name: 'name1',
@@ -389,13 +389,12 @@ describe('v2 - node POST', () => {
 						name: 'name1',
 						email: 'tech@lt.com',
 						slack: 'slack channel',
-						_lockedFields:
-							'{"name":"v2-node-post-client","code":"v2-node-post-client"}',
+						_lockedFields: '{"name":"v2-node-post-client"}',
 					}),
 				);
 		});
 
-		it('creates a node and locks ALL fields', async () => {
+		it('creates a node and locks ALL fields that are written', async () => {
 			await sandbox
 				.request(app)
 				.post(`/v2/node/Team/${teamCode}?lockFields=all`)
@@ -406,8 +405,7 @@ describe('v2 - node POST', () => {
 					sandbox.withCreateMeta({
 						code: 'v2-node-post-team',
 						name: 'name1',
-						_lockedFields:
-							'{"code":"v2-node-post-client","name":"v2-node-post-client","description":"v2-node-post-client","email":"v2-node-post-client","slack":"v2-node-post-client","phone":"v2-node-post-client","isActive":"v2-node-post-client","isThirdParty":"v2-node-post-client","supportRota":"v2-node-post-client","contactPref":"v2-node-post-client","techLeads":"v2-node-post-client","productOwners":"v2-node-post-client","parentGroup":"v2-node-post-client","group":"v2-node-post-client","subTeams":"v2-node-post-client","parentTeam":"v2-node-post-client","delivers":"v2-node-post-client","supports":"v2-node-post-client","teamMembers":"v2-node-post-client","governsAuditableData":"v2-node-post-client"}',
+						_lockedFields: '{"name":"v2-node-post-client"}',
 					}),
 				);
 		});

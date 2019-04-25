@@ -158,14 +158,14 @@ Fields can however be unlocked by any `client-id`, using the `unlockFields` quer
 
 Example: `https://api-t.ft.com/biz-ops/v2/node/Group/groupid?relationshipAction=merge&lockFields=name`;
 
-| query name   | value                               | example                  | request type   |
-| ------------ | ----------------------------------- | ------------------------ | -------------- |
-| lockFields   | comma list of field names to lock   | lockFields={name,code}   | POST and PATCH |
-| lockFields   | all                                 | lockFields=all           | POST and PATCH |
-| unlockFields | comma list of field names to unlock | unlockFields={name,code} | PATCH          |
-| unlockFields | all                                 | unlockFields=all         | PATCH          |
+| query name   | value                               | example                                                                                            | request type   |
+| ------------ | ----------------------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
+| lockFields   | comma list of field names to lock   | lockFields={name,email}                                                                            | POST and PATCH |
+| lockFields   | all                                 | lockFields=all, will lock all fields sent in the request body                                      | POST and PATCH |
+| unlockFields | comma list of field names to unlock | unlockFields={name,code}                                                                           | PATCH          |
+| unlockFields | all                                 | unlockFields=all, will unlock all previously locked fields, regardless of which client locked them | PATCH          |
 
--   `clientId` needs to be set in the request otherwise an LockedFieldsError will be throw with a 400 status.
+-   `clientId` needs to be set in the request otherwise a `LockedFieldsError` will be throw with a 400 status.
 
         Log events: `SET_LOCKED_FIELDS` and `REMOVE_LOCKED_FIELDS`.
 

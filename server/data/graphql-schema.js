@@ -36,7 +36,7 @@ const createSchema = () => {
 	const typeDefs = getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
-	const makeGraphqlSchema = makeExecutableSchema({
+	const graphqlSchema = makeExecutableSchema({
 		typeDefs,
 		resolvers: resolvers.all,
 		logger: {
@@ -49,7 +49,7 @@ const createSchema = () => {
 	});
 
 	const config = { query: true, mutation: false };
-	const schema = makeAugmentedSchema({ schema: makeGraphqlSchema, config });
+	const schema = makeAugmentedSchema({ schema: graphqlSchema, config });
 	return schema;
 };
 
