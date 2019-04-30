@@ -92,7 +92,17 @@ module.exports = router => {
 		});
 		next();
 	});
-	router.post('/', (...args) => api(...args));
+
+	router.use((req, res, next) => {
+		if (req.method === 'GET') {
+			router.get('/', (...args) => api(...args));
+		}
+		if (req.method === 'POST') {
+			router.post('/', (...args) => api(...args));
+		}
+		next();
+	});
+
 	return router;
 };
 
