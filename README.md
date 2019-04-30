@@ -55,7 +55,7 @@ Read about these requests in the [GraphQL docs](https://graphql.org/learn/servin
 
 To read via a GET, you must specify your graphql query as query-parameter in the request. For example:
 
-Endpoint: `https://api-t.ft.com/biz-ops/graphql?query={Teams{code name}}`
+-   Endpoint: `https://api-t.ft.com/biz-ops/graphql?query={Teams{code name}}`
 
 Will fetch all `Teams` with their relevant `code` and `name`.
 
@@ -63,9 +63,9 @@ Will fetch all `Teams` with their relevant `code` and `name`.
 
 To read via a POST, you must specify your query as JSON in the `Body` of the request. For example:
 
-Endpoint: `https://api-t.ft.com/biz-ops/graphql`
+-   Endpoint: `https://api-t.ft.com/biz-ops/graphql`
 
-Body: `{"query": "{Teams { code name }}"}`
+-   Body: `{"query": "{Teams { code name }}"}`
 
 ### GraphiQL
 
