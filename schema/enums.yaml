@@ -13,8 +13,8 @@ FailoverArchitectureType:
       Failover is accomplished by turning off the unhealthy region and all traffic
       is routed to the remaining regions.
     ActivePassive: |
-      The service only serves traffic from a single region, but has one or more standby regions 
-      which can be quickly started (if necessary) and routed to instead. 
+      The service only serves traffic from a single region, but has one or more standby regions
+      which can be quickly started (if necessary) and routed to instead.
     None: |
       No failover process defined
 TrafficLight:
@@ -162,6 +162,24 @@ CookieExpiry:
   options:
     - Session
     - Persistent
+
+TagPurpose:
+  description: The purpose of a tag or pixel
+  options:
+    - AdNetwork
+    - AffiliateMarketing
+    - Analytics
+    - Content
+    - ECommerce
+    - MarketingAutomation
+    - OptimizationAndPersonalization
+    - PPCTracking
+    - Retargeting
+    - Search
+    - SocialMedia
+    - TagManagement
+    - Widget
+    - Other
 CapabilityTier:
   description: Level of importance of a business capability
   options:

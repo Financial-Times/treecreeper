@@ -28,7 +28,7 @@ properties:
     fieldset: main
 
   category:
-    type: Word
+    type: TagPurpose
     label: Tag Purpose
     description: Purpose of the tag.
     required: true
