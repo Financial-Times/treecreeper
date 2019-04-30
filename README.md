@@ -40,14 +40,34 @@ Passing a request id using the `x-request-id` header is also recommended for aud
 
 ### GraphQL
 
-The API exposes a [GraphQL](https://graphql.org/) API, which allows querying the underlying graph nodes and relationships in a single request. The read api is available by POSTing queries to the path `/biz-ops/graphql`. At present, there is no write api for graphql.
+The API exposes a [GraphQL](https://graphql.org/) API, which allows querying the underlying graph nodes and relationships in a single request. The read api is available by GET/POST queries to the path `/biz-ops/graphql`. At present, there is no write api for graphql.
 
 | Environment | Url                                    |
 | ----------- | -------------------------------------- |
 | Production  | `https://api.ft.com/biz-ops/graphql`   |
 | Test        | `https://api-t.ft.com/biz-ops/graphql` |
 
-#### GraphiQL
+You will still require `API_KEY/X-API-KEY`(dev/test or production) and `client-id` headers for these requests.
+
+Read about these requests in the [GraphQL docs](https://graphql.org/learn/serving-over-http/#http-methods-headers-and-body)
+
+#### GET Example
+
+To read via a GET, you must specify your graphql query as query-parameter in the request. For example:
+
+Endpoint: `https://api-t.ft.com/biz-ops/graphql?query={Teams{code name}}`
+
+Will fetch all `Teams` with their relevant `code` and `name`.
+
+#### POST Example
+
+To read via a POST, you must specify your query as JSON in the `Body` of the request. For example:
+
+Endpoint: `https://api-t.ft.com/biz-ops/graphql`
+
+Body: `{"query": "{Teams { code name }}"}`
+
+### GraphiQL
 
 To complement graphql, the api exposes the [graphiql](https://github.com/graphql/graphiql) IDE, which supports autocomplete and is the recommended way to explore the underlying data.
 
