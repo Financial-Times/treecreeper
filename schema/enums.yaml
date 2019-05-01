@@ -16,8 +16,8 @@ FailoverArchitectureType:
     ActivePassive: |
       The service only serves traffic from a single region, but has one or more standby regions
       which can be quickly started (if necessary) and routed to instead.
-    NotApplicable: |
-      Failover is not managed by FT Technology.
+    NotRequired: |
+      Failover is not undertaken by FT Technology.
     None: |
       No failover process defined
 TrafficLight:
