@@ -16,7 +16,7 @@ FailoverArchitectureType:
       The service only serves traffic from a single region, but has one or more standby regions
       which can be quickly started (if necessary) and routed to instead.
     NotRequired: |
-      Failover is not undertaken by FT Technology.
+      No failover procedure required - please add details in the free text area to explain why not.
     None: |
       No failover process defined
 TrafficLight:
