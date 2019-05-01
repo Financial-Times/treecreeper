@@ -1,0 +1,46 @@
+name: Package
+description: A library, component, toolkit or other group of code which can be used by systems.
+rank: 25
+properties:
+  code:
+    type: Code
+    required: true
+    unique: true
+    canIdentify: true
+    isCore: true
+    pattern: CODE
+    label: Code
+    description: |
+      The unique identification for this package.
+  name:
+    type: Name
+    canIdentify: true
+    isCore: true
+    label: Name
+    description: The short name for the package which will be output on screens and reports.
+  description:
+    type: Paragraph
+    canIdentify: true
+    label: Description
+    description: |
+      A brief overview of what the package does and why, from the user's perspective.
+      Note that multiple paragraphs and other markdown features are not supported in this field.
+  repositories:
+    type: Repository
+    direction: outgoing
+    label: Source code repositories
+    relationship: HAS_REPO
+    description: The repositories which store this package's source code and/or configuration.
+  maintainedBy:
+    type: Team
+    direction: outgoing
+    label: Maintained by team
+    relationship: MAINTAINED_BY
+    description: The team which maintained the package.
+  installedBy:
+    type: System
+    direction: incoming
+    label: Installed by system
+    relationship: INSTALLS
+    description: System which installs this package.
+    hasMany: true
