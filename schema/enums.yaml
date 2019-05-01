@@ -4,7 +4,6 @@ ProcessType:
     - FullyAutomated
     - PartiallyAutomated
     - Manual
-    - NotApplicable
     - NotRequired
 FailoverArchitectureType:
   description: The design which allows failover
