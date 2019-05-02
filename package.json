@@ -65,7 +65,7 @@
 		"uuid": "^3.2.1"
 	},
 	"devDependencies": {
-		"@financial-times/rel-engage": "^7.0.0",
+		"@financial-times/rel-engage": "^7.1.0",
 		"artillery": "^1.6.0-22",
 		"artillery-plugin-statsd": "^2.2.0",
 		"chai": "^4.2.0",
