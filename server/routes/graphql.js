@@ -92,12 +92,13 @@ module.exports = router => {
 		});
 		next();
 	});
-// Note that we wrap the api controller in a function that passes
-// the original args through because a new api controller is generated
-// every time the schema changes. We can't pass express a direct 
-// reference to the api controller on startup, or it will 
-// never update the reference to point at the latest version of the
-// controller using the latest schema
+
+	// Note that we wrap the api controller in a function that passes
+	// the original args through because a new api controller is generated
+	// every time the schema changes. We can't pass express a direct
+	// reference to the api controller on startup, or it will
+	// never update the reference to point at the latest version of the
+	// controller using the latest schema
 	router
 		.route('/')
 		.get((...args) => api(...args))
