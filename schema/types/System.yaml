@@ -365,7 +365,8 @@ properties:
     direction: outgoing
     label: Known about by
     relationship: KNOWN_ABOUT_BY
-    description: People who know about this system.
+    description: |
+      People who have technical knowledge of the system, though may no longer work on it.
     fieldset: ownership
     hasMany: true
   dependencies:
