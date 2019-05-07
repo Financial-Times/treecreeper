@@ -330,7 +330,9 @@ properties:
     direction: outgoing
     label: Delivered by team
     relationship: DELIVERED_BY
-    description: The team which delivers the system.
+    description: |
+      The team which delivers the system. Costs related to this system will be allocated to the 
+      Group this Team is a part of.
     fieldset: ownership
   supportedBy:
     type: Team
