@@ -13,8 +13,8 @@ fieldsets:
     heading: Ownership & knowledge
   technicalOverview:
     heading: Technical overview
-  personalData:
-    heading: Personal Identifiable Data (PII)
+  dataGovernance:
+    heading: Data governance
   network:
     heading: Related resources
   failover:
@@ -31,8 +31,6 @@ fieldsets:
     heading: Troubleshooting
   moreInformation:
     heading: More Information
-  miscellaneous:
-    heading: Miscellaneous
   review:
     heading: Service Operability Review
 
@@ -100,12 +98,12 @@ properties:
   dataOwner:
     type: Person
     direction: outgoing
-    label: GPDR data owner
+    label: GDPR data owner
     relationship: HAS_DATA_OWNER
     description: |
       The individual responsible for managing GDPR requests for this system.
     hasMany: false
-    fieldset: personalData
+    fieldset: dataGovernance
   containsPersonalData:
     type: Boolean
     label: Does this system handle Personal Data?
@@ -118,7 +116,7 @@ properties:
       device finger prints, username and passwords), government identifiers
       (e.g. passport, drivers license), signatures, workplace data (e.g.
       salary/bonus/annual reviews), gender, date of birth.
-    fieldset: personalData
+    fieldset: dataGovernance
   containsSensitiveData:
     type: Boolean
     label: Does this system handle Sensitive Data?
@@ -131,7 +129,7 @@ properties:
       in this category.
       For more details, see the Information Commissioner's definition:
       https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/what-is-personal-data/what-is-personal-data/.
-    fieldset: personalData
+    fieldset: dataGovernance
   piiSources:
     type: System
     direction: incoming
@@ -139,7 +137,7 @@ properties:
     relationship: PII_DATA_FLOW
     description: |
       The systems that produce/store the PII data that is used by this system (other kinds of data flow do not need to be noted here).
-    fieldset: personalData
+    fieldset: dataGovernance
     hasMany: true
   piiDestinations:
     type: System
@@ -148,33 +146,33 @@ properties:
     relationship: PII_DATA_FLOW
     description: |
       The systems that consume the PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here).
-    fieldset: personalData
+    fieldset: dataGovernance
     hasMany: true
   canDownloadPersonalData:
     type: Boolean
     label: Downloadable personal data
     description: Does this system allow users to download personal data?
-    fieldset: personalData
+    fieldset: dataGovernance
   canContactIndividuals:
     type: Boolean
     label: Contactable individuals
     description: Does this system have the capability to contact individuals?
-    fieldset: personalData
+    fieldset: dataGovernance
   gdprRetentionProcess:
     type: GDPRProcess
     label: Retention process
     description: The type of process used to handle GDPR data retention.
-    fieldset: personalData
+    fieldset: dataGovernance
   gdprErasureProcess:
     type: GDPRProcess
     label: Erasure process
     description: The type of process used to handle GDPR data erasure requests.
-    fieldset: personalData
+    fieldset: dataGovernance
   risk:
     type: Paragraph
     label: Data - more information
-    description: More details of what kind of data is held/processesed in this system, and what the associated risks are.
-    fieldset: personalData
+    description: More details of what kind of data is held/processed in this system, and what the associated risks are.
+    fieldset: dataGovernance
   lifecycleStage:
     type: SystemLifecycle
     isCore: true
@@ -185,7 +183,6 @@ properties:
     type: Word
     label: Salesforce ID
     description: ID of this system in salesforce.
-    fieldset: miscellaneous
   architectureDiagram:
     type: Document
     deprecationReason: Replaced by architecture field
@@ -331,7 +328,7 @@ properties:
     label: Delivered by team
     relationship: DELIVERED_BY
     description: |
-      The team which delivers the system. Costs related to this system will be allocated to the 
+      The team which delivers the system. Costs related to this system will be allocated to the
       Group this Team is a part of.
     fieldset: ownership
   supportedBy:
@@ -483,5 +480,6 @@ properties:
     hasMany: true
     label: Updates data
     relationship: UPDATES
+    fieldset: dataGovernance
     description: A set of governed data items that this system updates.
 

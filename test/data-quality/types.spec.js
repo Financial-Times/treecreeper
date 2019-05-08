@@ -121,6 +121,15 @@ describe('data quality: types', () => {
 										'string',
 									);
 								});
+								it('is not miscellaneous', () => {
+									expect(fieldsetConfig.heading).not.toBe(
+										'Miscellaneous',
+									);
+									expect(fieldsetConfig.heading).not.toBe(
+										'General',
+									);
+									expect(name).not.toBe('misc');
+								});
 								it('may have a description', () => {
 									if ('description' in fieldsetConfig) {
 										expect(
