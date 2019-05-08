@@ -1,10 +1,23 @@
 ProcessType:
-  description: The means by which a technique is delivered
+  description: The means by which a procedure is delivered
   options:
-    - FullyAutomated
-    - PartiallyAutomated
-    - Manual
-    - NotRequired
+    FullyAutomated: |
+      The procedure is completed without any need for human intervention.
+    PartiallyAutomated: |
+      The procedure requires minimal, easily repeatable human intervention to
+      be completed, e.g. clicking a button to start the process, following
+      a simple wizard
+    Manual: |
+      The procedure requires non-trivial human intervention to be completed,
+      e.g. output of previous step requires analysis before deciding how to
+      continue the process. Even if some parts of the process are automated,
+      it should still be categorised as Manual (not PartiallyAutomated) if the
+      non-automated parts require such higher degrees of human intervention
+    NotApplicable: |
+      No process defined, with good reason. If provide, please add details in
+      the free text area to explain why not.
+    None: |
+      No process defined.
 FailoverArchitectureType:
   description: The design which allows failover
   options:
@@ -15,10 +28,10 @@ FailoverArchitectureType:
     ActivePassive: |
       The service only serves traffic from a single region, but has one or more standby regions
       which can be quickly started (if necessary) and routed to instead.
-    NotRequired: |
+    NotApplicable: |
       No failover procedure required - please add details in the free text area to explain why not.
     None: |
-      No failover process defined
+      No failover process defined.
 TrafficLight:
   description: Quality rating based on Red, Amber and Green.
   options:
