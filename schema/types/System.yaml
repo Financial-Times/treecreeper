@@ -94,7 +94,7 @@ properties:
     type: Word
     label: Host platform
     description: The technology platform used to host the service, e.g. Heroku.
-    fieldset: general
+    fieldset: technicalOverview
   dataOwner:
     type: Person
     direction: outgoing
