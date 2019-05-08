@@ -14,10 +14,12 @@ ProcessType:
       it should still be categorised as Manual (not PartiallyAutomated) if the
       non-automated parts require such higher degrees of human intervention
     NotApplicable: |
-      No process defined, with good reason. If provide, please add details in
+      No process defined, with good reason. If provided, please add details in
       the free text area to explain why not.
     None: |
       No process defined.
+    NotRequired: |
+      Deprecated. Do not use this value.
 FailoverArchitectureType:
   description: The design which allows failover
   options:
