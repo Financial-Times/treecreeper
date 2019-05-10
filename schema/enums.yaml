@@ -18,8 +18,6 @@ ProcessType:
       the free text area to explain why not.
     None: |
       No process defined.
-    NotRequired: |
-      Deprecated. Do not use this value.
 FailoverArchitectureType:
   description: The design which allows failover
   options:
