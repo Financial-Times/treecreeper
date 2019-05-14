@@ -10,4 +10,4 @@ REPO_NAME: '^(github|bitbucket)\:.*$'
 NO_LOWER_CASE: '^(?=.{2,64}$)[^a-z]+$' # ANYTHING:?\NOT LOWERCASE
 MAX_LENGTH_64: '^.{2,64}$'
 MAX_LENGTH_256: '^.{2,256}$'
-PACKAGE_NAME: '^(npm|composer)\:.*$'
+PACKAGE_NAME: '^(npm|composer|github)\:.*$'
