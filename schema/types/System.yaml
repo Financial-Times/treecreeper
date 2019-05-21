@@ -429,6 +429,14 @@ properties:
     hasMany: true
     isRecursive: true
     fieldset: network
+  installs:
+    type: Package
+    direction: outgoing
+    label: Installs packages
+    relationship: INSTALLS
+    description: The shared packages (libraries, components, toolkits, etc.) which this system installs and is dependent on.
+    hasMany: true
+    fieldset: network
   stores:
     type: Repository
     direction: incoming

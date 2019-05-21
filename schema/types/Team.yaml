@@ -126,6 +126,14 @@ properties:
     description: The list of systems the team delivers.
     hasMany: true
     fieldset: ownership
+  maintainsPackages:
+    type: Package
+    direction: incoming
+    label: Maintains packages
+    relationship: MAINTAINED_BY
+    description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
+    hasMany: true
+    fieldset: ownership
   supports:
     type: System
     direction: incoming

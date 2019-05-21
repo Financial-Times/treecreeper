@@ -47,6 +47,14 @@ properties:
     relationship: HAS_REPO
     description: Systems which the repository holds source code for.
     hasMany: true
+  packages:
+    type: Package
+    direction: incoming
+    hasMany: true
+    label: Packages
+    fieldset: general
+    relationship: HAS_REPO
+    description: Packages which the repository holds source code for.
   versionControlSystem:
     type: VersionControlSystem
     label: Version control system
