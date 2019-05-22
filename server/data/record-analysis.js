@@ -114,7 +114,7 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 		if (!existingCodes) {
 			return;
 		}
-		const existingCodesOnly = arrDiff(existingCodes, newCodes);
+		const existingCodesOnly = arrDiff(existingCodes, toArray(newCodes));
 		if (existingCodesOnly.length) {
 			return [relType, existingCodesOnly];
 		}
@@ -136,20 +136,22 @@ const getRemovedRelationships = ({
 		return {};
 	}
 
-	const newRelationships = Object.entries(newContent)
-		.filter(isWriteRelationship(nodeType))
-		.map(([propName, codes]) => [propName, toArray(codes)]);
+	const schema = getType(nodeType);
 
-	const deleteRelationships = Object.entries(newContent)
+	// deletes because of a replace action or because the relationship
+	// is a __-to-one
+	const implicitDeletes = Object.entries(newContent)
+		.filter(isWriteRelationship(nodeType))
+		.map(findImplicitDeletions(initialContent, schema, action))
+		.filter(it => !!it);
+
+	// deletes explictly expressed using the payload null and ! conventions
+	const explictDeletes = Object.entries(newContent)
 		.filter(isDeleteRelationship(nodeType))
 		.map(findActualDeletions(initialContent));
 
-	const schema = getType(nodeType);
-
-	return newRelationships
-		.map(findImplicitDeletions(initialContent, schema, action))
-		.filter(it => !!it)
-		.concat(deleteRelationships)
+	return implicitDeletes
+		.concat(explictDeletes)
 		.filter(entryHasValues)
 		.reduce(entriesToObject, {});
 };
