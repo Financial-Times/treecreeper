@@ -3,7 +3,7 @@ const { stripIndents } = require('common-tags');
 const { setContext } = require('../lib/request-context');
 
 const CLIENT_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
-const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
+const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d-.']*[a-z\d]$/;
 
 const validateHeader = (header, errorMessage, expectedValueFormat) => {
 	if (!expectedValueFormat.test(header)) {
