@@ -153,6 +153,7 @@ properties:
   governsAuditableData:
     type: AuditableDataType
     direction: incoming
+    hasMany: true
     label: Governs data
     relationship: VALUES_GOVERNED_BY
     description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
