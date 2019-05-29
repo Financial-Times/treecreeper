@@ -47,7 +47,7 @@ The API exposes a [GraphQL](https://graphql.org/) API, which allows querying the
 | Production  | `https://api.ft.com/biz-ops/graphql`   |
 | Test        | `https://api-t.ft.com/biz-ops/graphql` |
 
-You will still require `API_KEY/X-API-KEY`(dev/test or production) and `client-id` headers for these requests.
+You will still require `X-API-KEY`(dev/test or production) and `client-id` headers for these requests.
 
 Read about these requests in the [GraphQL docs](https://graphql.org/learn/serving-over-http/#http-methods-headers-and-body)
 
@@ -135,6 +135,12 @@ make test
 ```
 
 Will start jest in watch mode
+
+# Accessing the application from other local applications
+
+The application runs on `http://loclhost:8888`. There are 2 differences in how the api is called compared to production environments:
+- the clinet will need to send an `API_KEY` header (not `x-api-key`). A value for this can be found in the `.env` file of this project after running `make .env`
+- all example urls in the documentation should have the `/biz-ops` stripped out
 
 ## Update AWS CloudFormation template
 
