@@ -434,6 +434,15 @@ properties:
     direction: outgoing
     label: Installs packages
     relationship: INSTALLS
+    deprecationReason: Repaced by installsPackages, which is clearer in intent
+    description: The shared packages (libraries, components, toolkits, etc.) which this system installs and is dependent on.
+    hasMany: true
+    fieldset: network
+  installsPackages:
+    type: Package
+    direction: outgoing
+    label: Installs packages
+    relationship: INSTALLS
     description: The shared packages (libraries, components, toolkits, etc.) which this system installs and is dependent on.
     hasMany: true
     fieldset: network
