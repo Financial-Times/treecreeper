@@ -85,7 +85,7 @@ properties:
     direction: outgoing
     label: Product owners
     relationship: HAS_PRODUCT_OWNER
-    description: The individuals who drive the business aspects of the systems owned by the teamm.
+    description: The individuals who drive the business aspects of the systems owned by the team.
     hasMany: true
     fieldset: people
   parentGroup:
