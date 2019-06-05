@@ -146,6 +146,37 @@ describe('merge', () => {
 			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
 		});
 
+		it("doesn't error when unrecognised properties exist", async () => {
+			await sandbox.createNodes(
+				['Team', teamCode1, { someProp: 'someVal' }],
+				['Team', teamCode2],
+			);
+
+			await sandbox
+				.request(app)
+				.post('/v2/merge')
+				.namespacedAuth()
+				.send({
+					type: 'Team',
+					sourceCode: teamCode1,
+					destinationCode: teamCode2,
+				})
+				.expect(200);
+			await Promise.all([
+				verifyNotExists('Team', teamCode1),
+				verifyExists('Team', teamCode2),
+			]);
+
+			await testNode(
+				'Team',
+				teamCode2,
+				sandbox.withUpdateMeta({
+					code: teamCode2,
+				}),
+			);
+			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
+		});
+
 		it('move outgoing relationships', async () => {
 			const [team1, , person] = await sandbox.createNodes(
 				['Team', teamCode1],

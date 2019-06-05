@@ -31,7 +31,8 @@ const datesAreEqual = (date1, date2, neo4jConstructor) =>
 
 const identifyRelationships = nodeType => {
 	const { properties } = getType(nodeType);
-	return propName => properties[propName].relationship;
+	return propName =>
+		properties[propName] && properties[propName].isRelationship;
 };
 
 const isProperty = nodeType => {
@@ -63,7 +64,7 @@ const detectPropertyChanges = (nodeType, initialContent = {}) => {
 	const { properties } = getType(nodeType);
 
 	return ([propName, val]) => {
-		const { type } = properties[propName];
+		const { type } = properties[propName] || {};
 
 		if (!(propName in initialContent)) {
 			return !isNullValue(val);
