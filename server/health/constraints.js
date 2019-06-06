@@ -19,7 +19,8 @@ const constraintsCheck = async () => {
 				lastUpdated: new Date().toUTCString(),
 				checkOutput:
 					'Error retrieving database constraints: no constraints found!',
-				panicGuide: "Don't panic",
+				panicGuide:
+					'Investigate whether a recent change has been made to the Neo4j database, or biz-ops schema.  It may be neccessary to restore from a backup if data has been lost from the database.',
 			};
 		}
 
@@ -56,7 +57,8 @@ const constraintsCheck = async () => {
 				ok: true,
 				lastUpdated: new Date().toUTCString(),
 				checkOutput: 'Successfully retrieved all database constraints',
-				panicGuide: "Don't panic",
+				panicGuide:
+					"This panic guide is dynamically generated based on the type of error returned from the database.\nIf you're seeing this message in combination with an alert, check the /__health endpoint directly on the biz-ops-api backend.",
 			};
 		}
 		if (
@@ -114,7 +116,7 @@ const constraintsCheck = async () => {
 				error.message ? error.message : error
 			}`,
 			panicGuide:
-				'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName: "CONSTRAINTS"`',
+				'First look at the `Biz-Ops API read query` check.  If that is also erroring (or has been recently) ignore this check and focus on that one.\n Otherwise, check the logs in splunk using the following: `index=heroku source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="CONSTRAINTS"`',
 		};
 	}
 };
