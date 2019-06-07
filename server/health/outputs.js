@@ -8,7 +8,7 @@ module.exports = {
 		technicalSummary:
 			'Runs a cypher read query to check that a successful response comes back from the Biz-Ops API',
 		panicGuide:
-			'Please check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="READ_QUERY',
+			'Please check the logs in splunk using the following query: `index=heroku source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="READ_QUERY"`',
 	},
 	constraints: {
 		id: 'biz-ops-api-constraints',
@@ -17,6 +17,7 @@ module.exports = {
 		severity: 2,
 		technicalSummary:
 			'Makes an API call which checks that all the required constraints exist.',
+		// panicGuide for this check is generated dynamically based on error: see constraints.js for details
 		_dependencies: ['grapheneDB'],
 	},
 	apiCall: type => ({
@@ -26,7 +27,7 @@ module.exports = {
 		severity: 1,
 		technicalSummary: `Makes a call to the Biz-Ops API via ${type} and checks that the response code is equal to 200`,
 		panicGuide:
-			'Check the logs in splunk using the following: `source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="API_CALL"`',
+			'Check the logs in splunk using the following query: `index=heroku source="/var/log/apps/heroku/ft-biz-ops-api.log" event="BIZ_OPS_HEALTHCHECK_FAILURE" healthCheckName="API_CALL"`',
 		_dependencies: ['GrapheneDB'],
 	}),
 	schemaVersion: {
@@ -38,7 +39,7 @@ module.exports = {
 		technicalSummary:
 			'Surfaces the value of a boolean variable which is set to false if any attempt to update the schema from s3 fails',
 		panicGuide:
-			'Check splunk logs, running the following query to look for the underlying cause: index=heroku source=*biz-ops-api* event=GRAPHQL_SCHEMA_UPDATE_FAILED',
+			'Check splunk logs, running the following query to look for the underlying cause: `index=heroku source=*biz-ops-api* event=GRAPHQL_SCHEMA_UPDATE_FAILED`',
 		_dependencies: [],
 	},
 };
