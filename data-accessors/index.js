@@ -5,24 +5,31 @@ const enums = require('./enums');
 const types = require('./types');
 
 /**
-Probably the most functional magic in this comopnent
+Probably the most functional magic in this entire package
 
-- accessor = a function that reads data from the rawSchemaData (which is an instance of the RawData class),
-	enriches it and returns the enriched schema object for use by the application
-- cacheKeyGenerator = a function which has the same signature as accessor and returns a string, which is
-	used to retrieve results from the in memory cache for calls to accessor that match previous ones
+- accessor = a function that reads data from the rawSchemaData (which is an
+	instance of the RawData class), enriches it and returns the enriched schema
+	object for use by the application
+- cacheKeyGenerator = a function which has a similar signature as accessor
+	(but ommitting the first 1 or more parameters) and returns a string, which
+	is used to retrieve results from the in memory cache for calls to accessor
+	that match previous ones
 
-What make things more complex is that accessor needs access to rawData (and sometimes other things too),
-but we don't want the end user to have to manually pass this around. This is why `.bind(null, rawSchemaData)`
-is used to populate the first parameter of accessor.
+What make things complex is that accessor needs access to rawData (and sometimes
+other things too), but we don't want the end user to have to manually pass this
+around. This is why `.bind(null, rawSchemaData)` is used to populate the first
+parameter of accessor.
 
-e.g. an accessor which to the end user looks like `getEnums(options)` is actually a pair of functions
+e.g. an accessor which to the end user looks like `getEnums(options)` is
+actually a pair of functions
 - accessor(rawSchemaData, options)
 - cacheKeyGenerator(options)
 
-accessor.bind(null, rawSchemaData) returns a function with the signature boundAccessor(options)
+accessor.bind(null, rawSchemaData) returns a function with the signature
+boundAccessor(options)
 
-rawSchemaData.cache.addCacheToFunction returns a function with the signature boundAndCacheEnabledAccessor(options)
+rawSchemaData.cache.addCacheToFunction returns a function with the signature
+boundAndCacheEnabledAccessor(options)
 
 This is what's finally exposed to the end user
 
@@ -56,7 +63,7 @@ module.exports = rawSchemaData => {
 		getType,
 		getEnums,
 		getTypes,
-		// not cached as it's used once in a blue moon in the api,
+		// not cached as it's very infrequently, when constructing the graophql api,
 		// and only just after the cache has been cleared
 		getGraphqlDefs: graphqlDefs(getTypes, getEnums),
 	};

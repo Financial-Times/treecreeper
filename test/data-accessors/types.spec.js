@@ -52,4 +52,8 @@ describe('get-types', () => {
 			},
 		);
 	});
+
+	it('expects to be returned in order of type hiererchy', () => {
+		throw 'No'
+	})
 });
