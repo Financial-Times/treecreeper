@@ -3,7 +3,6 @@ pluralName: Repositories
 description: |
   A source code repository. Should generally not be manually created as we have a
   cron job that regularly syncs from github and bitbucket to Biz Ops
-rank: 27
 createPermissions:
   - biz-ops-github-importer
 properties:

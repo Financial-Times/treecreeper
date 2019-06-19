@@ -1,7 +1,6 @@
 name: Group
 description: |
   An overarching group, responsible for an area of the FT's activities, which contains teams and is costed separately
-rank: 50
 properties:
   code:
     type: Code
