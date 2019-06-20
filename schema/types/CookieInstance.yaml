@@ -3,6 +3,7 @@ description: |
   A node with cookie relationship data specific to a cookie attached to a domain/product website. Data includes cookie path and last seen date.
 createPermissions:
   - ip-cookie-audit
+rank: 100
 properties:
   code:
     type: Code

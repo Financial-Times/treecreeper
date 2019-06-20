@@ -2,6 +2,7 @@ name: BusinessCapability
 pluralName: BusinessCapabilities
 description: |
   Some business function carried out at FT e.g. ability to publish the news, ability to pay staff...
+rank: 10
 properties:
   code:
     type: Code

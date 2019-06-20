@@ -1,4 +1,5 @@
 name: AuditableDataType
+rank: 101
 pluralName: DataTypes
 description: The type of AuditableData. A grouping for the domain of values that a AuditableData may take.
 properties:

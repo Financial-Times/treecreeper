@@ -1,5 +1,6 @@
 name: Cookie
 description: A small packet of information sent by a web host to your computer when you visit a website.
+rank: 100
 createPermissions:
   - ip-cookie-audit
 properties:

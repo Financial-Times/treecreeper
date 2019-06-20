@@ -1,5 +1,6 @@
 name: Healthcheck
 description: The configuration used to provide monitoring/healthchecks for a system.
+rank: 25
 creationURL: https://monitoring-manager.in.ft.com/add-healthcheck
 properties:
   code:
