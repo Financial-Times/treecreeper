@@ -26,9 +26,7 @@ const constraintsCheck = async () => {
 
 		getTypes().forEach(type => {
 			const node = type.name.toLowerCase();
-			const uniqueConstraintQuery = `CONSTRAINT ON ( ${node}:${
-				type.name
-			} ) ASSERT ${node}.code IS UNIQUE`;
+			const uniqueConstraintQuery = `CONSTRAINT ON ( ${node}:${type.name} ) ASSERT ${node}.code IS UNIQUE`;
 
 			const hasUniqueConstraint = actualConstraint =>
 				actualConstraint._fields[0] === uniqueConstraintQuery;
@@ -67,17 +65,13 @@ const constraintsCheck = async () => {
 		) {
 			const uniqueConstraintQueries = missingUniqueConstraints.map(
 				missingConstraint => {
-					return stripIndents`CREATE CONSTRAINT ON ( n:${
-						missingConstraint.name
-					} ) ASSERT n.code IS UNIQUE`;
+					return stripIndents`CREATE CONSTRAINT ON ( n:${missingConstraint.name} ) ASSERT n.code IS UNIQUE`;
 				},
 			);
 
 			const propertyConstraintQueries = missingPropertyConstraints.map(
 				missingConstraint => {
-					return stripIndents`CREATE CONSTRAINT ON ( n:${
-						missingConstraint.name
-					} ) ASSERT exists(n.code)`;
+					return stripIndents`CREATE CONSTRAINT ON ( n:${missingConstraint.name} ) ASSERT exists(n.code)`;
 				},
 			);
 			logger.error(

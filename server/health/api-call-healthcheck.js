@@ -15,9 +15,7 @@ module.exports = async ({ headers, url, type }) => {
 			};
 		}
 		throw new Error(
-			`Unsuccessful call to Biz-Ops API via ${type} with status code equal to ${
-				response.status
-			}`,
+			`Unsuccessful call to Biz-Ops API via ${type} with status code equal to ${response.status}`,
 		);
 	} catch (error) {
 		logger.error(

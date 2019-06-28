@@ -1,6 +1,4 @@
 const logger = require('@financial-times/n-logger').default;
-const { makeExecutableSchema } = require('graphql-tools');
-
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
 const {
@@ -32,13 +30,17 @@ const getResolvers = () => {
 };
 
 const createSchema = () => {
-	const resolvers = getResolvers();
 	const typeDefs = getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
-	const graphqlSchema = makeExecutableSchema({
-		typeDefs,
-		resolvers: resolvers.all,
+
+	typeDefs.unshift(`
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`);
+
+	const schema = makeAugmentedSchema({
+		typeDefs: typeDefs.join('\n'),
 		logger: {
 			log(message) {
 				logger.error(`GraphQL Schema: ${message}`, {
@@ -46,10 +48,8 @@ const createSchema = () => {
 				});
 			},
 		},
+		config: { query: true, mutation: false, debug: true },
 	});
-
-	const config = { query: true, mutation: false };
-	const schema = makeAugmentedSchema({ schema: graphqlSchema, config });
 	return schema;
 };
 

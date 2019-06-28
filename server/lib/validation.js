@@ -26,9 +26,7 @@ const validatePayload = ({ nodeType, code, body: newContent }) => {
 	if (newContent.code && newContent.code !== code) {
 		throw httpErrors(
 			400,
-			`Conflicting code property \`${
-				newContent.code
-			}\` in payload for ${nodeType} ${code}`,
+			`Conflicting code property \`${newContent.code}\` in payload for ${nodeType} ${code}`,
 		);
 	}
 

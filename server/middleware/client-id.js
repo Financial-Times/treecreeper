@@ -23,9 +23,7 @@ module.exports = (req, res, next) => {
 	res.locals.clientUserId = req.get('client-user-id');
 
 	if (res.locals.clientId) {
-		const errorMessage = stripIndents`Invalid client id \`${
-			res.locals.clientId
-		}\`.
+		const errorMessage = stripIndents`Invalid client id \`${res.locals.clientId}\`.
 			Must be a string containing only a-z, 0-9, . and -, not beginning or ending with -.`;
 
 		setContext('clientId', res.locals.clientId);
@@ -33,9 +31,7 @@ module.exports = (req, res, next) => {
 	}
 
 	if (res.locals.clientUserId) {
-		const errorMessage = stripIndents`Invalid client user id \`${
-			res.locals.clientUserId
-		}\`.
+		const errorMessage = stripIndents`Invalid client user id \`${res.locals.clientUserId}\`.
 			It does not appear to be an LDAP user, expecting firstname.surname`;
 
 		setContext('clientUserId', res.locals.clientUserId);
