@@ -143,6 +143,14 @@ properties:
     description: The team(s) this person is a Product Owner for.
     hasMany: true
     fieldset: team
+  deliveryManagerForTeams:
+    type: Team
+    label: Delivery manager for team
+    direction: incoming
+    relationship: HAS_DELIVERY_MANAGER
+    description: The team(s) whose delivery this person is accountable for.
+    hasMany: true
+    fieldset: team
   ownedProducts:
     type: Product
     direction: incoming

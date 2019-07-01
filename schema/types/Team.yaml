@@ -88,6 +88,14 @@ properties:
     description: The individuals who drive the business aspects of the systems owned by the team.
     hasMany: true
     fieldset: people
+  deliveryManagers:
+    type: Person
+    direction: outgoing
+    label: Delivery Managers
+    relationship: HAS_DELIVERY_MANAGER
+    description: The individuals who are accountable for the delivery of products and services by the team.
+    hasMany: true
+    fieldset: people
   parentGroup:
     type: Group
     direction: incoming
