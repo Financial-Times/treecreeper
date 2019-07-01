@@ -9,7 +9,9 @@ Schema for biz-ops data store and api. It provides two things:
 
 `npm install @financial-times/biz-ops-schema`
 
-In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment
+In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment.
+
+The component should be initialised *once and once only per application*. The component is a singleton, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application, and will already be hydrated with schema data.
 
 ### Persistent nodejs process (e.g. heroku)
 
