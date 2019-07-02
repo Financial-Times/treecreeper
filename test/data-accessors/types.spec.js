@@ -74,7 +74,7 @@ describe('get-types', () => {
 						},
 					},
 				},
-			}).getTypes({ option: 'value' });
+			}).getTypes();
 
 			expect(types).toEqual([
 				{
@@ -86,6 +86,44 @@ describe('get-types', () => {
 			]);
 		});
 
-		it('gets all types grouped by category', () => {});
+		it('gets all types grouped by category', () => {
+			const types = init({
+				rawData: {
+					schema: {
+						types: [
+							{
+								name: 'Type1',
+							},
+							{ name: 'Type2' },
+						],
+						typeHierarchy: {
+							category1: {
+								types: ['Type2'],
+							},
+							category2: {
+								types: ['Type1'],
+							},
+						},
+					},
+				},
+			}).getTypes({ groupTypes: true });
+
+			expect(types).toEqual({
+				category1: {
+					types: [
+						{
+							name: 'Type2 - retrieved',
+						},
+					],
+				},
+				category2: {
+					types: [
+						{
+							name: 'Type1 - retrieved',
+						},
+					],
+				},
+			});
+		});
 	});
 });
