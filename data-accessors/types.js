@@ -2,20 +2,34 @@ const type = require('./type');
 
 module.exports = {
 	// todo move to object rest parameters for options when upgrading node
-	accessor: (rawData, getType, options) => {
+	accessor: (rawData, getType, options = {}) => {
 		const hierarchy = rawData.getTypeHierarchy();
 		const groupTypes = options.groupTypes || false;
+		if (!hierarchy) {
+			return rawData.getTypes().map(({ name }) => getType(name, options));
+		}
 
-		return hierarchy.reduce((result, {name, description, types}) => {
-			types = types.map(type => getType(name, options));
-			return groupTypes ? result.concat({name, description, types}) : result.concat(types)
-		}, []);
+		if (!groupTypes) {
+			return [].concat(
+				...Object.values(hierarchy).map(({ types }) =>
+					types.map(name => getType(name, options)),
+				),
+			);
+		}
 
-		rawData.getTypes().map(({ name }) => getType(name, options)),
-	}
+		return Object.entries(hierarchy).reduce(
+			(result, [categoryName, { label, description, types }]) => {
+				types = types.map(name => getType(name, options));
+				return Object.assign(result, {
+					[categoryName]: { label, description, types },
+				});
+			},
+			{},
+		);
+	},
 	// todo move to object rest parameters for options when upgrading node
-	cacheKeyGenerator: options => {
+	cacheKeyGenerator: (options = {}) => {
 		const groupTypes = options.groupTypes || false;
-		return `${groupTypes}:${type.cacheKeyGenerator('all', options)}`
+		return `${groupTypes}:${type.cacheKeyGenerator('all', options)}`;
 	},
 };
