@@ -85,7 +85,15 @@ properties:
     direction: outgoing
     label: Product owners
     relationship: HAS_PRODUCT_OWNER
-    description: The individuals who drive the business aspects of the systems owned by the teamm.
+    description: The individuals who drive the business aspects of the systems owned by the team.
+    hasMany: true
+    fieldset: people
+  deliveryManagers:
+    type: Person
+    direction: outgoing
+    label: Delivery Managers
+    relationship: HAS_DELIVERY_MANAGER
+    description: The individuals who are accountable for the delivery of products and services by the team.
     hasMany: true
     fieldset: people
   parentGroup:
@@ -126,6 +134,14 @@ properties:
     description: The list of systems the team delivers.
     hasMany: true
     fieldset: ownership
+  maintainsPackages:
+    type: Package
+    direction: incoming
+    label: Maintains packages
+    relationship: MAINTAINED_BY
+    description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
+    hasMany: true
+    fieldset: ownership
   supports:
     type: System
     direction: incoming
@@ -145,9 +161,14 @@ properties:
   governsAuditableData:
     type: AuditableDataType
     direction: incoming
+    hasMany: true
     label: Governs data
     relationship: VALUES_GOVERNED_BY
     description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
+  okrLink:
+    type: Url
+    label: OKR Link
+    description: "A url linking to the Objectives & Key Results this team is currently focusing on."
 fieldsets:
   general:
     heading: General information

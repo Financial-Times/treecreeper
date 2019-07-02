@@ -55,6 +55,10 @@ properties:
     label: Delivery Manager
     relationship: HAS_DELIVERY_MANAGER
     description: The delivery manager for the group.
+  okrLink:
+    type: Url
+    label: OKR Link
+    description: "A url linking to the Objectives & Key Results this group is currently focusing on."
   topLevelTeams:
     type: Team
     direction: outgoing

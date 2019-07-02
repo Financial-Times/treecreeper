@@ -106,7 +106,7 @@ workflows:
           filters:
             <<: *triggerable-by-tag
       - verify:
-          context: rel-eng-creds
+          context: rel-eng-snyk
           requires:
             - install
           filters:
