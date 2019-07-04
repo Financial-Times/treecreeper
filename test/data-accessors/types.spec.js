@@ -106,7 +106,7 @@ describe('get-types', () => {
 						},
 					},
 				},
-			}).getTypes({ groupTypes: true });
+			}).getTypes({ grouped: true });
 
 			expect(types).toEqual({
 				category1: {
