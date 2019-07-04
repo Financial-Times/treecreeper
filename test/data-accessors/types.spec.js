@@ -12,7 +12,7 @@ jest.doMock('../../data-accessors/type', () => {
 const { init } = require('../../lib/get-instance');
 
 describe('get-types', () => {
-	it('gets all types', () => {
+	it('gets all types (hierarchyless)', () => {
 		const types = init({
 			rawData: {
 				schema: {
@@ -51,5 +51,79 @@ describe('get-types', () => {
 				option: 'value',
 			},
 		);
+	});
+
+	describe('with hierarchy', () => {
+		it('expects to be returned in order of type hiererchy', () => {
+			const types = init({
+				rawData: {
+					schema: {
+						types: [
+							{
+								name: 'Type1',
+							},
+							{ name: 'Type2' },
+						],
+						typeHierarchy: {
+							category1: {
+								types: ['Type2'],
+							},
+							category2: {
+								types: ['Type1'],
+							},
+						},
+					},
+				},
+			}).getTypes();
+
+			expect(types).toEqual([
+				{
+					name: 'Type2 - retrieved',
+				},
+				{
+					name: 'Type1 - retrieved',
+				},
+			]);
+		});
+
+		it('gets all types grouped by category', () => {
+			const types = init({
+				rawData: {
+					schema: {
+						types: [
+							{
+								name: 'Type1',
+							},
+							{ name: 'Type2' },
+						],
+						typeHierarchy: {
+							category1: {
+								types: ['Type2'],
+							},
+							category2: {
+								types: ['Type1'],
+							},
+						},
+					},
+				},
+			}).getTypes({ grouped: true });
+
+			expect(types).toEqual({
+				category1: {
+					types: [
+						{
+							name: 'Type2 - retrieved',
+						},
+					],
+				},
+				category2: {
+					types: [
+						{
+							name: 'Type1 - retrieved',
+						},
+					],
+				},
+			});
+		});
 	});
 });

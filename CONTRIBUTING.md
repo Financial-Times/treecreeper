@@ -28,6 +28,8 @@ pluralName: BirdsOfParadise
 description: A bird of the family Paradisaeidae of the order Passeriformes.
 ```
 
+1. Add your type name to one of the categories in `./schema/type-hierarchy.yaml`. If it doens't really fit well in any of the existing ones, speak to the reliability engineering team about creating a new category
+
 ## Thinking about properties
 
 You could dive right in adding properties to your yaml file, but it pays to pause and think about each piece of information you want to store. You will be adding to a platform that others will be using, so try to get into the mindset of not just what makes sense to you at this stage, but also what will be useful to others from now on.

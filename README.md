@@ -98,7 +98,9 @@ The full object structure returned by getType() can been seen [here](GETTYPE.md)
 
 ### getTypes(options)
 
-Get an array of objects defining the structure of all types. `options` are the same as for `getType`
+Get an array of objects defining the structure of all types. All `options` for `getType` are supported and determine the internal structure of each type. Additionally, the following options can be specified:
+
+-   `grouped` [default: `false`] - determines whether to return the types as a flat array, or an object grouping types in categories. Each category specifies a label, description and list of types.
 
 ### getEnums(options)
 
