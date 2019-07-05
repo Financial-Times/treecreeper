@@ -123,24 +123,6 @@ describe('get-type', () => {
 			required: true,
 			unique: true,
 			canIdentify: true,
-			isCore: true,
-			useInSummary: true,
-		});
-	});
-
-	it('forces `useInSummary` properties to be `isCore`', () => {
-		const type = typeFromRawData({
-			name: 'Type1',
-			properties: {
-				name: {
-					useInSummary: true,
-					type: 'String',
-				},
-			},
-		});
-		expect(type.properties.name).toEqual({
-			type: 'String',
-			isCore: true,
 			useInSummary: true,
 		});
 	});
