@@ -1,6 +1,5 @@
 name: CostCentre
 description: A financial cost centre which pays for the budget of one or more groups
-rank: 55
 properties:
   code:
     type: Code

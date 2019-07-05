@@ -3,7 +3,6 @@ description: |
   A tag (or often called pixel) is a short snippet of javascript (code) that does something on a website.
   In the context of marketing/advertising tags and pixels, they are often collecting some information about the
   visitor to a website and their behavior on the site.
-rank: 100
 createPermissions:
   - ip-cookie-audit
 properties:

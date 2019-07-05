@@ -1,7 +1,6 @@
 name: TagInstance
 description: |
   A node with Tag relationship data specific to a Tag attached to a domain/product website. Data includes the last seen date.
-rank: 100
 createPermissions:
   - ip-cookie-audit
 properties:

@@ -1,6 +1,5 @@
 name: Package
 description: A library, component, toolkit or other group of code which can be used by systems.
-rank: 25
 properties:
   code:
     type: Code
