@@ -40,7 +40,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     pattern: CODE
     label: Code
     fieldset: general
@@ -52,7 +52,7 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: The short name for the system which will be output on screens and reports.
     fieldset: general
@@ -68,7 +68,7 @@ properties:
   primaryURL:
     type: Url
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Primary URL
     description: The main url served by the system.
     fieldset: general
@@ -80,7 +80,7 @@ properties:
     fieldset: general
   serviceTier:
     type: ServiceTier
-    isCore: true
+    useInSummary: true
     label: Service tier
     description: The service tier (level of support) given to this system.
     fieldset: general
@@ -175,7 +175,7 @@ properties:
     fieldset: dataGovernance
   lifecycleStage:
     type: SystemLifecycle
-    isCore: true
+    useInSummary: true
     label: Lifecycle stage
     description: How far this system has progressed through its lifecycle from Preproduction to Decommissioned.
     fieldset: general

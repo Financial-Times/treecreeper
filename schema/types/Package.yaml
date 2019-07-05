@@ -7,7 +7,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     pattern: PACKAGE_NAME
     label: Code
     description: |
@@ -15,7 +15,7 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: The short name for the package which will be output on screens and reports.
   description:

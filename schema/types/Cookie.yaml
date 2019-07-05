@@ -21,7 +21,7 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   party:
@@ -29,7 +29,7 @@ properties:
     label: Type
     description: First or Third party cookie.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   classification:
@@ -37,7 +37,7 @@ properties:
     label: ICC Classification
     description: ICC classification of cookie.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   description:
@@ -45,7 +45,7 @@ properties:
     label: Description
     description: Short description of what the cookie does and data it stores.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   provider:
@@ -53,7 +53,7 @@ properties:
     label: Provider
     description: Team/person or provider who set the cookie.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   hasCookieInstanceOf:

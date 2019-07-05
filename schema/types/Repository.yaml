@@ -13,7 +13,7 @@ properties:
     unique: true
     pattern: REPO_NAME # can't find any published rules on github repo names, so must be loose
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Code
     fieldset: general
     description: |
@@ -22,7 +22,7 @@ properties:
         and that system's id for the repository.
   name:
     type: Name
-    isCore: true
+    useInSummary: true
     label: Name
     fieldset: general
     description: Display name for the repository, taken from the system it is stored in.
@@ -35,7 +35,7 @@ properties:
     type: Url
     # required: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: URL
     fieldset: general
     description: Web page URL for the repository.
@@ -73,13 +73,13 @@ properties:
     fieldset: general
   isPrivate:
     type: Boolean
-    isCore: true
+    useInSummary: true
     label: Private
     description: Is the repository private.
     fieldset: technical
   isArchived:
     type: Boolean
-    isCore: true
+    useInSummary: true
     label: Archived
     description: Is the repository archived.
     fieldset: technical
