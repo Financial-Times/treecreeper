@@ -1,13 +1,13 @@
 business:
   label: Business
-  description: Relating to how the FT makes and spends its money
+  description: Relating to how the FT operates and makes and spends its money
   types:
     - BusinessCapability
     - CostCentre
     - Product
 technology:
   label: Technology
-  description: blah blah
+  description: Relating to the technology and infrastructure the FT uses
   types:
     - System
     - Package
