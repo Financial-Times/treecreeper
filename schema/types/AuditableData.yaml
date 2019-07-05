@@ -1,6 +1,4 @@
 name: AuditableData
-rank: 100
-
 pluralName: AuditableDatas
 description: >
     At the basic level, a place where items of a particular data type are stored. What would usually be called a field, an
