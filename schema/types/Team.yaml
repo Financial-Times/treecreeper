@@ -10,7 +10,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     pattern: NO_SPACES
     label: Code
     description: |
@@ -20,7 +20,7 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: The short title for the team which will be output on screens and reports.
     fieldset: general
@@ -33,21 +33,21 @@ properties:
   email:
     type: Email
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Email
     description: The email address to use to contact the team.
     fieldset: general
   slack:
     type: Word
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Slack
     description: The slack channel to use to contact the team.
     fieldset: general
   phone:
     type: Word
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Phone
     description: The phone number to use to contact the team.
     fieldset: general

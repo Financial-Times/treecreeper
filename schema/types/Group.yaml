@@ -7,7 +7,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     pattern: STRICT_CODE
     label: Code
     description: |
@@ -16,12 +16,12 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: The official name of the group.
   description:
     type: Paragraph
-    isCore: true
+    useInSummary: true
     label: Description
     description:
       A description of what the group's areas of responsibility and activities

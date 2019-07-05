@@ -23,7 +23,7 @@ properties:
     canIdentify: true
     required: true
     unique: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   category:
@@ -31,7 +31,7 @@ properties:
     label: Tag Purpose
     description: Purpose of the tag.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   provider:
@@ -39,7 +39,7 @@ properties:
     label: Provider
     description: Team/person or provider who set the tag.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   description:
@@ -47,7 +47,7 @@ properties:
     label: Description
     description: Short description of what the tag does and data it stores.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   hasTagInstanceOf:

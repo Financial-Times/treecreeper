@@ -31,7 +31,7 @@ properties:
     label: Product
     description: The product / website the cookie is found on.
     required: true
-    isCore: true
+    useInSummary: true
 
   expiry:
     type: CookieExpiry
@@ -39,7 +39,7 @@ properties:
     description: |
       Information taken from cookie audit confirming if cookie found as a session or persistent cookie at time of last audit.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   isInstanceOfCookie:

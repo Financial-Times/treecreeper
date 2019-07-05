@@ -19,7 +19,7 @@ properties:
     label: Resource Type
     description: Defines the type of tag, e.g image/pixel, script, document.
     required: true
-    isCore: true
+    useInSummary: true
     fieldset: main
 
   lastSeen:
@@ -33,7 +33,7 @@ properties:
     label: Product
     description: The product / website the tag is found on.
     required: true
-    isCore: true
+    useInSummary: true
 
   isInstanceOfTag:
     type: Tag

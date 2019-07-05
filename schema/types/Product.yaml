@@ -8,7 +8,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     pattern: STRICT_CODE
     label: Code
     description: |
@@ -18,28 +18,28 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: |
       The name generally used to refer to the product.
     fieldset: general
   description:
     type: Paragraph
-    isCore: true
+    useInSummary: true
     label: Description
     description: |
       Brief description of what the product is and why it exists.
     fieldset: general
   serviceTier:
     type: ServiceTier
-    isCore: true
+    useInSummary: true
     label: Service tier
     description: The service tier (level of support) given to the product.
     fieldset: general
   primaryURL:
     type: Url
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Primary URL
     description: The main url the product is served on.
     fieldset: general

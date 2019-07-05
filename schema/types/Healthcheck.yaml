@@ -7,7 +7,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Code
     description:
       The unique identification code for the healthcheck. When creating a new healthcheck,
@@ -16,7 +16,7 @@ properties:
     pattern: MAX_LENGTH_256
   isLive:
     type: Boolean
-    isCore: true
+    useInSummary: true
     label: Surface results to our Operations Support team?
     description: |
       All our production systems which are used by any customer (internal or external)
@@ -29,7 +29,7 @@ properties:
     type: Url
     # required: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: URL of the healthcheck endpoint
     description: The full URL of the endpoint. You should include the "__health" part of the url, if relevant.
     examples:

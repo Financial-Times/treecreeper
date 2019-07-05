@@ -7,7 +7,7 @@ properties:
     required: true
     unique: true
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Code
     description: |
         The unique code for this person. For FT staff this will be their active directory name.
@@ -17,7 +17,7 @@ properties:
   name:
     type: Name
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Name
     description: |
         The name by which this person is known.
@@ -26,7 +26,7 @@ properties:
   email:
     type: Email
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Email
     description: |
         The email address that can be used to contact this person.
@@ -36,7 +36,7 @@ properties:
     type: Word
     label: Slack
     canIdentify: true
-    isCore: true
+    useInSummary: true
     description: |
         The Slack link for this person (deprecated).
         For FT staff, if details are incorrect please raise this in the \#ip-people-api slack channel.
@@ -66,7 +66,7 @@ properties:
   phone:
     type: Word
     canIdentify: true
-    isCore: true
+    useInSummary: true
     label: Phone
     description: |
         The telephone number that can be used to contact this person.
