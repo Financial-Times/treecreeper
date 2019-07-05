@@ -149,8 +149,6 @@ const getType = (
 			if (def.pattern) {
 				def.validator = getStringValidator(def.pattern);
 			}
-			// todod remove this deprecated feature once no longer used anywhere
-			def.isCore = def.useInSummary;
 			return [name, def];
 		})
 		.filter(entry => !!entry);
