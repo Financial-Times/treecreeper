@@ -1,7 +1,6 @@
 name: Person
 pluralName: People
 description: A member of staff at the FT, or a contact from a relevant third party. FT staff members' details are imported daily from https://who.in.ft.com, so manual additions/updates are not needed.
-rank: 40
 properties:
   code:
     type: Code

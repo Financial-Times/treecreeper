@@ -59,7 +59,6 @@ describe('data quality: types', () => {
 							'description',
 							'moreInformation',
 							'pluralName',
-							'rank',
 							'creationURL',
 							'fieldsets',
 							'properties',
@@ -93,9 +92,6 @@ describe('data quality: types', () => {
 					expect(typeof type.pluralName).toBe('string');
 					expect(type.pluralName).not.toEqual(type.name);
 				}
-			});
-			it('has a rank', () => {
-				expect(typeof type.rank).toBe('number');
 			});
 			it('may have a creation URL', () => {
 				if ('creationURL' in type) {
