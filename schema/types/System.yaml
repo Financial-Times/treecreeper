@@ -373,7 +373,7 @@ properties:
     relationship: DEPENDS_ON
     description: |
       The other systems this system directly depends on. In general, this means systems 
-      that this system sends requests to, or that provide some sort of platform that
+      that this system makes requests to, or that provide some sort of platform that
       this system runs on. More exotic dependency relationships may exist, where it can 
       be hard to decide which way the dependency arrow points, but if either of the 
       conditions above describe the relationship between this system and the other 
