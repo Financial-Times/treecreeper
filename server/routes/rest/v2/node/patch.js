@@ -1,20 +1,28 @@
 const { stripIndents } = require('common-tags');
-const { validateParams, validatePayload } = require('../../../lib/validation');
+const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,
 	preflightChecks,
-} = require('../../../lib/error-handling');
+} = require('../../lib/error-handling');
 
-const { logger } = require('../../../lib/request-context');
-const cypherHelpers = require('../../../data/cypher-helpers');
-const recordAnalysis = require('../../../data/record-analysis');
+const { logger } = require('../../../../lib/request-context');
 const {
-	writeNode,
+	metaPropertiesForUpdate,
+	metaPropertiesForCreate,
+} = require('../../lib/metadata-helpers');
+const {
+	containsRelationshipData,
+	getRemovedRelationships,
+	getAddedRelationships,
+} = require('../../lib/diff-helpers');
+const { writeNode, createNewNode } = require('../../lib/write-helpers');
+
+const {
 	prepareRelationshipDeletion,
-	createNewNode,
-} = require('../helpers');
-const { constructNeo4jProperties } = require('../../../data/data-conversion');
-const { mergeLockedFields } = require('../../../lib/locked-fields');
+} = require('../../lib/relationship-write-helpers');
+const { getNodeWithRelationships } = require('../../lib/read-helpers');
+const { constructNeo4jProperties } = require('../../lib/neo4j-type-conversion');
+const { mergeLockedFields } = require('../../lib/locked-fields');
 
 const update = async input => {
 	validateParams(input);
@@ -23,28 +31,25 @@ const update = async input => {
 	const { nodeType, code, clientId, query, body } = input;
 	const { relationshipAction, upsert, lockFields, unlockFields } = query;
 
-	if (recordAnalysis.containsRelationshipData(nodeType, body)) {
+	if (containsRelationshipData(nodeType, body)) {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 		preflightChecks.handleSimultaneousWriteAndDelete(body);
 	}
 
 	try {
-		const prefetch = await cypherHelpers.getNodeWithRelationships(
-			nodeType,
-			code,
-		);
+		const prefetch = await getNodeWithRelationships(nodeType, code);
 
 		const existingRecord = prefetch.toApiV2(nodeType);
 
 		if (!existingRecord) {
-			return await createNewNode(
+			return await createNewNode({
 				nodeType,
 				code,
 				clientId,
 				query,
 				body,
-				'PATCH',
-			);
+				method: 'PATCH',
+			});
 		}
 
 		const propertiesToModify = constructNeo4jProperties({
@@ -66,13 +71,13 @@ const update = async input => {
 			existingLockedFields,
 		});
 
-		const removedRelationships = recordAnalysis.getRemovedRelationships({
+		const removedRelationships = getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
 			newContent: body,
 			action: relationshipAction,
 		});
-		const addedRelationships = recordAnalysis.getAddedRelationships({
+		const addedRelationships = getAddedRelationships({
 			nodeType,
 			initialContent: existingRecord,
 			newContent: body,
@@ -108,13 +113,13 @@ const update = async input => {
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
 					ON CREATE SET
-						${cypherHelpers.metaPropertiesForCreate('node')}
+						${metaPropertiesForCreate('node')}
 				`,
 		];
 
 		if (updateDataBase) {
 			queryParts.push(stripIndents`ON MATCH SET
-				${cypherHelpers.metaPropertiesForUpdate('node')}
+				${metaPropertiesForUpdate('node')}
 				SET node += $properties
 			`);
 		}

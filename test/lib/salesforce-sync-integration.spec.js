@@ -1,6 +1,6 @@
 const salesforceSync = require('../../server/lib/salesforce-sync');
 const app = require('../../server/app.js');
-const { schemaReady } = require('../../server/lib/configure-schema');
+const { schemaReady } = require('../../server/lib/init-schema');
 
 const namespace = 'salesforce-sync';
 const { dropDb } = require('../helpers/test-data');

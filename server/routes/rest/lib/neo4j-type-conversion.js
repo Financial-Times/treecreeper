@@ -5,7 +5,7 @@ const {
 	isTime,
 } = require('neo4j-driver/lib/v1/temporal-types');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const { diffProperties } = require('./record-analysis');
+const { diffProperties } = require('./diff-helpers');
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 

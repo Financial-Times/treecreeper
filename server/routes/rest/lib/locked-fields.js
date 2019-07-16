@@ -1,5 +1,5 @@
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('./request-context');
+const { logger } = require('../../../lib/request-context');
 
 class LockedFieldsError extends Error {
 	constructor(message, fields, status) {

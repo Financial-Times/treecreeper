@@ -1,6 +1,6 @@
-const { validateParams } = require('../../../lib/validation');
-const { preflightChecks } = require('../../../lib/error-handling');
-const { getNodeWithRelationships } = require('../../../data/cypher-helpers');
+const { validateParams } = require('../../lib/validation');
+const { preflightChecks } = require('../../lib/error-handling');
+const { getNodeWithRelationships } = require('../../lib/read-helpers');
 
 const read = async input => {
 	validateParams(input);

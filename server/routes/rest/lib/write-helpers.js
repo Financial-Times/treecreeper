@@ -1,58 +1,23 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
-const { executeQuery } = require('../../data/db-connection');
-const cypherHelpers = require('../../data/cypher-helpers');
-const recordAnalysis = require('../../data/record-analysis');
-const { constructNeo4jProperties } = require('../../data/data-conversion');
-
-const { logNodeChanges } = require('../../lib/log-to-kinesis');
-const salesforceSync = require('../../lib/salesforce-sync');
-const { getDbWriteContext } = require('../../lib/request-context');
-const { mergeLockedFields } = require('../../lib/locked-fields');
+const { executeQuery } = require('./neo4j-model');
+const { getAddedRelationships } = require('./diff-helpers');
+const { constructNeo4jProperties } = require('./neo4j-type-conversion');
+const {
+	metaPropertiesForCreate,
+	getDbWriteContext,
+} = require('./metadata-helpers');
+const {
+	nodeWithRelsCypher,
+	getNodeWithRelationships,
+} = require('./read-helpers');
+const { logNodeChanges } = require('../../../lib/log-to-kinesis');
+const { prepareToWriteRelationships } = require('./relationship-write-helpers');
+const { mergeLockedFields } = require('./locked-fields');
+const salesforceSync = require('../../../lib/salesforce-sync');
 
 let setSalesforceIdForSystem;
-
-const prepareToWriteRelationships = (
-	nodeType,
-	relationshipsToCreate,
-	upsert,
-) => {
-	const { properties: validProperties } = getType(nodeType);
-
-	const relationshipParameters = {};
-	const relationshipQueries = [];
-
-	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
-		const propDef = validProperties[propName];
-
-		const key = `${propDef.relationship}${propDef.direction}${propDef.type}`;
-
-		// make sure the parameter referenced in the query exists on the
-		// globalParameters object passed to the db driver
-		Object.assign(relationshipParameters, { [key]: codes });
-
-		const defWithKey = Object.assign({ key }, propDef);
-
-		// Note on the limitations of cypher:
-		// It would be so nice to use UNWIND to create all these from a list parameter,
-		// but unfortunately parameters cannot be used to specify relationship labels
-		relationshipQueries.push(
-			stripIndents`
-			WITH node
-			${
-				upsert
-					? cypherHelpers.mergeNode(defWithKey)
-					: cypherHelpers.optionalMatchNode(defWithKey)
-			}
-			WITH node, related
-			${cypherHelpers.mergeRelationship(defWithKey)}
-		`,
-		);
-	});
-
-	return { relationshipParameters, relationshipQueries };
-};
 
 const writeNode = async ({
 	nodeType,
@@ -86,14 +51,14 @@ const writeNode = async ({
 		relationshipParameters,
 	);
 
-	queryParts.push(...relationshipQueries, cypherHelpers.nodeWithRels());
+	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
 	let result = await executeQuery(queryParts.join('\n'), parameters, true);
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
 	if (willDeleteRelationships) {
-		result = await cypherHelpers.getNodeWithRelationships(nodeType, code);
+		result = await getNodeWithRelationships(nodeType, code);
 	}
 	const responseData = result.toApiV2(nodeType);
 
@@ -125,7 +90,7 @@ const writeNode = async ({
 	};
 };
 
-const createNewNode = (nodeType, code, clientId, query, body, method) => {
+const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
 
 	const { createPermissions, pluralName } = getType(nodeType);
@@ -148,44 +113,34 @@ const createNewNode = (nodeType, code, clientId, query, body, method) => {
 		method,
 		upsert,
 		isCreate: true,
-
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
 			newContent: body,
 			code,
 		}),
 		lockedFields,
-		relationshipsToCreate: recordAnalysis.getAddedRelationships({
+		relationshipsToCreate: getAddedRelationships({
 			nodeType,
 			newContent: body,
 		}),
 		queryParts: [
-			stripIndents`CREATE (node:${nodeType} $properties)
-				SET ${cypherHelpers.metaPropertiesForCreate('node')}
+			stripIndents`
+			CREATE (node:${nodeType} $properties)
+				SET ${metaPropertiesForCreate('node')}
 			WITH node`,
 		],
 	});
 };
 
-const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
-	const parameters = {};
-	const queryParts = [];
-
-	const schema = getType(nodeType);
-	queryParts.push(
-		...Object.entries(removedRelationships).map(([propName, codes]) => {
-			const def = schema.properties[propName];
-			const key = `Delete${def.relationship}${def.direction}${def.type}`;
-			parameters[key] = codes;
-			return `WITH node
-				${cypherHelpers.deleteRelationships(def, key)}
-				`;
-		}),
-	);
-
-	return { parameters, queryParts };
-};
-
+// For new Systems, we set salesforceId asynchronously after returning the response
+// The simplest way to do so is to use the patch handler (ie the function)
+// that handles PATCH requests to the api) to patch the record once we have
+// an ID back from salesforce.
+// This leads to circular dependencies unless we use something like the below
+// to inject the patchHandler into here
+// Might be worth refactoring to be more event based and decoupled, but once
+// we get rid of remedyforce it can all be deleted anyway, so perhaps worth
+// just putting up with the ugliness for now
 const initSalesforceSync = patchHandler => {
 	setSalesforceIdForSystem = input =>
 		salesforceSync.setSalesforceIdForSystem(input, patchHandler);
@@ -194,6 +149,5 @@ const initSalesforceSync = patchHandler => {
 module.exports = {
 	writeNode,
 	createNewNode,
-	prepareRelationshipDeletion,
 	initSalesforceSync,
 };

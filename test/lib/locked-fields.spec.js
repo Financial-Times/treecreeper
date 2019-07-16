@@ -1,6 +1,8 @@
 const schema = require('@financial-times/biz-ops-schema');
 
-const { mergeLockedFields } = require('../../server/lib/locked-fields');
+const {
+	mergeLockedFields,
+} = require('../../server/routes/rest/lib/locked-fields');
 
 describe('lockedFields', () => {
 	let existingLockedFields;

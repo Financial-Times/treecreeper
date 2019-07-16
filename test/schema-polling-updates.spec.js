@@ -52,7 +52,7 @@ describe('schema polling updates', () => {
 					{ overwriteRoutes: false },
 				)
 				.catch(200);
-			const { schemaReady } = require('../server/lib/configure-schema');
+			const { schemaReady } = require('../server/lib/init-schema');
 			app = require('../server/app');
 			// await fetch.flush(true);
 			await schemaReady;

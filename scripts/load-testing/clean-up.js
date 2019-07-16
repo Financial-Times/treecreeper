@@ -1,5 +1,5 @@
 const logger = require('@financial-times/n-logger').default;
-const { driver } = require('../../server/data/db-connection');
+const { driver } = require('../../server/lib/db-connection');
 
 const cleanUp = async () => {
 	const session = driver.session();

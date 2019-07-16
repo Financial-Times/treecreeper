@@ -24,7 +24,7 @@ class JsforceConnection {
 
 jsforce.Connection = jest.fn(() => new JsforceConnection());
 
-const dbConnection = require('../../server/data/db-connection');
+const dbConnection = require('../../server/lib/db-connection');
 
 jest.spyOn(dbConnection, 'executeQuery').mockReturnValue(Promise.resolve('ok'));
 

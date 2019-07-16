@@ -1,9 +1,9 @@
 const { stripIndents } = require('common-tags');
-const { validateParams } = require('../../../lib/validation');
-const { preflightChecks } = require('../../../lib/error-handling');
-const { executeQuery } = require('../../../data/db-connection');
-const { logNodeDeletion } = require('../../../lib/log-to-kinesis');
-const { getNodeWithRelationships } = require('../../../data/cypher-helpers');
+const { validateParams } = require('../../lib/validation');
+const { preflightChecks } = require('../../lib/error-handling');
+const { executeQuery } = require('../../lib/neo4j-model');
+const { logNodeDeletion } = require('../../../../lib/log-to-kinesis');
+const { getNodeWithRelationships } = require('../../lib/read-helpers');
 
 module.exports = async input => {
 	validateParams(input);

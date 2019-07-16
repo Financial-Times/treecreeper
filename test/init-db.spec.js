@@ -1,6 +1,6 @@
 const schema = require('@financial-times/biz-ops-schema');
 const { initConstraints } = require('../server/init-db');
-const { driver } = require('../server/data/db-connection');
+const { driver } = require('../server/lib/db-connection');
 
 const mockConstraints = (stub, constraints, writeResponse) => {
 	stub.mockImplementation(query => {

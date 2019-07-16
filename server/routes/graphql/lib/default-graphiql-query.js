@@ -1,4 +1,4 @@
-const DEFAULT_QUERY = `{
+exports.DEFAULT_QUERY = `{
   System(code: "biz-ops-api") {
     name
     serviceTier
@@ -35,5 +35,3 @@ const DEFAULT_QUERY = `{
     }
   }
 }`;
-
-module.exports = DEFAULT_QUERY;

@@ -1,5 +1,6 @@
 const { getType } = require('@financial-times/biz-ops-schema');
-const { convertNeo4jTypes } = require('./data-conversion');
+const { convertNeo4jTypes } = require('./neo4j-type-conversion');
+const { executeQuery } = require('../../../lib/db-connection');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
@@ -93,4 +94,5 @@ const addBizOpsEnhancements = result => {
 	return result;
 };
 
-module.exports = addBizOpsEnhancements;
+module.exports.executeQuery = async (query, params) =>
+	addBizOpsEnhancements(await executeQuery(query, params));

@@ -1,5 +1,5 @@
 const { logger } = require('../lib/request-context');
-const { executeQuery } = require('../data/db-connection');
+const { executeQuery } = require('../lib/db-connection');
 const healthcheck = require('./healthcheck');
 
 const runQueryCheck = async () => {

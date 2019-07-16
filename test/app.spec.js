@@ -1,7 +1,9 @@
 const app = require('../server/app.js');
-const { schemaReady } = require('../server/lib/configure-schema');
+const { schemaReady } = require('../server/lib/init-schema');
 const request = require('./helpers/supertest').getNamespacedSupertest('app');
-const DEFAULT_QUERY = require('../server/data/default-query');
+const {
+	DEFAULT_QUERY,
+} = require('../server/routes/graphql/lib/default-graphiql-query');
 
 describe('generic app settings', () => {
 	beforeAll(() => schemaReady);

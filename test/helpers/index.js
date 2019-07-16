@@ -6,7 +6,7 @@ const salesForceSync = require('../../server/lib/salesforce-sync');
 const { getNamespacedSupertest } = require('./supertest');
 const dbConnection = require('./db-connection');
 
-const { schemaReady } = require('../../server/lib/configure-schema');
+const { schemaReady } = require('../../server/lib/init-schema');
 
 const stubKinesis = () => {
 	jest.spyOn(EventLogWriter.prototype, 'sendEvent').mockImplementation(

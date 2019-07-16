@@ -1,5 +1,5 @@
 const cluster = require('cluster');
-const { schemaReady } = require('./lib/configure-schema');
+const { schemaReady } = require('./lib/init-schema');
 const { logger } = require('./lib/request-context');
 const createApp = require('./create-app');
 // required here as it adds a listener to schema changes, so needs

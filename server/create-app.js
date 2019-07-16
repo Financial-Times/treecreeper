@@ -1,9 +1,9 @@
 const express = require('express');
 require('express-async-errors');
 const metrics = require('next-metrics');
-const graphiql = require('./routes/graphiql');
-const graphql = require('./routes/graphql');
-const v2 = require('./routes/v2');
+const graphiql = require('./routes/graphql/graphiql');
+const graphql = require('./routes/graphql/api');
+const v2 = require('./routes/rest/v2');
 const health = require('./health');
 const { middleware: contextMiddleware } = require('./lib/request-context');
 

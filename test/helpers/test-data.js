@@ -1,6 +1,8 @@
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-const { executeQuery } = require('../../server/data/db-connection');
-const { convertNeo4jTypes } = require('../../server/data/data-conversion');
+const { executeQuery } = require('../../server/lib/db-connection');
+const {
+	convertNeo4jTypes,
+} = require('../../server/routes/rest/lib/neo4j-type-conversion');
 
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,

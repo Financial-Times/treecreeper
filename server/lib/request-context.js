@@ -98,24 +98,9 @@ const setContext = (key, val) => {
 	}
 };
 
-const getDbWriteContext = () => {
-	// TODO ned to add timestamp when request starts ad expose here too
-	// Default to null rather than undefined because it avoids a 'missing
-	// parameter' error and it unsets any previous values when updating.
-	const { requestId, clientId = null, clientUserId = null } = getContext();
-
-	return {
-		requestId,
-		clientId,
-		clientUserId,
-		timestamp: new Date().toISOString(),
-	};
-};
-
 module.exports = {
 	setContext,
 	getContext,
-	getDbWriteContext,
 	middleware,
 	logger,
 };

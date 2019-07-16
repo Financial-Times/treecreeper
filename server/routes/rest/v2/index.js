@@ -2,19 +2,19 @@ const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const httpErrors = require('http-errors');
 
-const security = require('../../middleware/security');
-const maintenance = require('../../middleware/maintenance');
-const clientId = require('../../middleware/client-id');
-const { TIMEOUT } = require('../../constants');
-const { logger, setContext } = require('../../lib/request-context');
-const helpers = require('./helpers');
+const security = require('../../../middleware/security');
+const maintenance = require('../../../middleware/maintenance');
+const clientId = require('../../../middleware/client-id');
+const { TIMEOUT } = require('../../../constants');
+const { logger, setContext } = require('../../../lib/request-context');
+const { initSalesforceSync } = require('../lib/write-helpers');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-const { errorToErrors } = require('../../middleware/errors');
+const { errorToErrors } = require('../../../middleware/errors');
 
 const requestLog = (endpointName, method, req) => {
 	setContext({ endpointName, method, params: req.params });
@@ -60,14 +60,14 @@ const controller = (endpointName, method, controllerImplementation) => (
 		.catch(next);
 };
 
-const getHandler = require('./node-rest/get');
-const postHandler = require('./node-rest/post');
-const patchHandler = require('./node-rest/patch');
-const deleteHandler = require('./node-rest/delete');
+const getHandler = require('./node/get');
+const postHandler = require('./node/post');
+const patchHandler = require('./node/patch');
+const deleteHandler = require('./node/delete');
 const mergeHandler = require('./merge');
 
 module.exports = router => {
-	helpers.initSalesforceSync(patchHandler);
+	initSalesforceSync(patchHandler);
 	router.use(timeout(TIMEOUT));
 	router.use(clientId);
 	router.use(security.requireApiKey);

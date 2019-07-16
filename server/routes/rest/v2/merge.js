@@ -1,12 +1,21 @@
 const { getType } = require('@financial-times/biz-ops-schema');
 const httpErrors = require('http-errors');
-const { validateTypeName } = require('../../lib/validation');
-const { executeQuery } = require('../../data/db-connection');
-const { setContext } = require('../../lib/request-context');
-const { logNodeChanges, logNodeDeletion } = require('../../lib/log-to-kinesis');
-const recordAnalysis = require('../../data/record-analysis');
-const cypherHelpers = require('../../data/cypher-helpers');
-const { prepareRelationshipDeletion } = require('./helpers');
+const { validateTypeName } = require('../lib/validation');
+const { executeQuery } = require('../lib/neo4j-model');
+const { setContext } = require('../../../lib/request-context');
+const {
+	logNodeChanges,
+	logNodeDeletion,
+} = require('../../../lib/log-to-kinesis');
+const {
+	diffProperties,
+	getRemovedRelationships,
+	getAddedRelationships,
+} = require('../lib/diff-helpers');
+const { nodeWithRelsCypher } = require('../lib/read-helpers');
+const {
+	prepareRelationshipDeletion,
+} = require('../lib/relationship-write-helpers');
 
 const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 	if (!type) {
@@ -34,13 +43,13 @@ module.exports = async input => {
 	const [sourceNode, destinationNode] = await Promise.all([
 		executeQuery(
 			`MATCH (node:${nodeType} { code: $sourceCode })
-			${cypherHelpers.nodeWithRels()}`,
+			${nodeWithRelsCypher()}`,
 			{ sourceCode },
 			true,
 		),
 		executeQuery(
 			`MATCH (node:${nodeType} { code: $destinationCode })
-			${cypherHelpers.nodeWithRels()}`,
+			${nodeWithRelsCypher()}`,
 			{ destinationCode },
 			true,
 		),
@@ -63,7 +72,7 @@ module.exports = async input => {
 	const sourceRecord = sourceNode.toApiV2(nodeType, true);
 	const destinationRecord = destinationNode.toApiV2(nodeType, true);
 
-	const writeProperties = recordAnalysis.diffProperties({
+	const writeProperties = diffProperties({
 		nodeType,
 		newContent: sourceRecord,
 		initialContent: destinationRecord,
@@ -75,7 +84,7 @@ module.exports = async input => {
 		}
 	});
 
-	const removedRelationships = recordAnalysis.getRemovedRelationships({
+	const removedRelationships = getRemovedRelationships({
 		nodeType,
 		initialContent: sourceRecord,
 		newContent: destinationRecord,
@@ -123,7 +132,7 @@ module.exports = async input => {
 		`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
 	CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
 	YIELD node
-	${cypherHelpers.nodeWithRels({ includeWithStatement: false })}
+	${nodeWithRelsCypher({ includeWithStatement: false })}
 	`,
 		{ sourceCode, destinationCode },
 		true,
@@ -131,7 +140,7 @@ module.exports = async input => {
 
 	const finalState = result.toApiV2(nodeType);
 
-	const addedRelationships = recordAnalysis.getAddedRelationships({
+	const addedRelationships = getAddedRelationships({
 		nodeType,
 		initialContent: destinationRecord,
 		newContent: result.toApiV2(nodeType, true),

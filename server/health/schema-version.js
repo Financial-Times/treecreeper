@@ -1,4 +1,4 @@
-const { checkSchemaConsistency } = require('../routes/graphql');
+const { checkSchemaConsistency } = require('../routes/graphql/api');
 const healthcheck = require('./healthcheck');
 
 const schemaVersionCheck = () => {
