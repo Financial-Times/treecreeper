@@ -44,6 +44,7 @@
 		"@financial-times/s3o-middleware": "^3.0.0",
 		"apollo-server-express": "^1.4.0",
 		"aws-sdk": "^2.441.0",
+		"babel-plugin-transform-runtime": "^6.23.0",
 		"body-parser": "^1.18.3",
 		"common-tags": "^1.7.2",
 		"connect-timeout": "^1.9.0",
