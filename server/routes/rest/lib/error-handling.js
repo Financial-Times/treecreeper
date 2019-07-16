@@ -1,5 +1,6 @@
 const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
+const schema = require('@financial-times/biz-ops-schema');
 const { executeQuery } = require('./neo4j-model');
 
 const ERROR_RX = Object.freeze({
@@ -99,17 +100,22 @@ const handleMissingRelationship = ({
 	}
 };
 
-const handleAttachedNode = ({ result, nodeType, code }) => {
+const handleAttachedNode = ({ record, nodeType, code }) => {
+	const typeSchema = schema.getType(nodeType);
+	const relationshipsThatExist = Object.entries(typeSchema.properties)
+		.map(([name, { isRelationship }]) => {
+			if (isRelationship && record[name]) {
+				return name;
+			}
+		})
+		.filter(name => !!name);
 	// use has so that get doesn't error, and get to check if null or not
-	if (
-		result.records.length &&
-		result.records[0].has('relatedCode') &&
-		result.records[0].get('relatedCode')
-	) {
+	if (relationshipsThatExist.length) {
 		throw httpErrors(
 			409,
-			`Cannot delete - ${nodeType} ${code} has relationships. Delete all relationships before attempting to delete this record.`,
-			{ relationships: result.records },
+			`Cannot delete - ${nodeType} ${code} has relationships. Remove all ${relationshipsThatExist.join(
+				', ',
+			)} relationships before attempting to delete this record.`,
 		);
 	}
 };

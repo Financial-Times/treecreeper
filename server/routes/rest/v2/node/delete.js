@@ -18,7 +18,7 @@ module.exports = async input => {
 		status: 404,
 	});
 	preflightChecks.bailOnAttachedNode({
-		result: existingRecord,
+		record: existingRecord.toApiV2(nodeType),
 		nodeType,
 		code,
 	});

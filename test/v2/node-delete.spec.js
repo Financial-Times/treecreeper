@@ -50,7 +50,7 @@ describe('v2 - node DELETE', () => {
 			.expect(
 				409,
 				new RegExp(
-					`Cannot delete - Team ${namespace}-team has relationships`,
+					`Cannot delete - Team ${namespace}-team has relationships. Remove all techLeads relationships before attempting to delete this record.`,
 				),
 			);
 
