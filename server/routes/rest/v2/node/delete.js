@@ -1,4 +1,5 @@
 const { stripIndents } = require('common-tags');
+const AWS = require('aws-sdk');
 const { validateParams } = require('../../lib/validation');
 const { preflightChecks } = require('../../lib/error-handling');
 const { executeQuery } = require('../../lib/neo4j-model');
@@ -10,6 +11,25 @@ module.exports = async input => {
 	const { nodeType, code } = input;
 
 	const existingRecord = await getNodeWithRelationships(nodeType, code);
+
+	const s3 = new AWS.S3({
+		accessKeyId: process.env.AWS_ACCESS_KEY,
+		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+	});
+
+	const params = {
+		Bucket: 'biz-ops-documents.510688331160',
+		Key: `${nodeType}/${code}`,
+	};
+
+	s3.deleteObject(params, function(err, data) {
+		if (err) {
+			console.log(err, err.stack);
+		} else {
+			console.log(data);
+			console.log('delete');
+		}
+	});
 
 	preflightChecks.bailOnMissingNode({
 		result: existingRecord,
