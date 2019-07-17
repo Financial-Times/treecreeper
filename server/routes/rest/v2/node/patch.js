@@ -1,4 +1,6 @@
 const { stripIndents } = require('common-tags');
+const AWS = require('aws-sdk');
+const { diff } = require('deep-diff');
 const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,
@@ -35,6 +37,42 @@ const update = async input => {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 		preflightChecks.handleSimultaneousWriteAndDelete(body);
 	}
+
+	const s3 = new AWS.S3({
+		accessKeyId: process.env.AWS_ACCESS_KEY,
+		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+	});
+
+	const params = {
+		Bucket: 'biz-ops-documents.510688331160',
+		Key: `${nodeType}/${code}`,
+	};
+	s3.getObject(params, function(readErr, readData) {
+		console.log(readErr, readData);
+		if (readErr) {
+			console.log(readErr, readErr.stack);
+			s3.upload(
+				Object.assign({ Body: JSON.stringify(body) }, params),
+				function(writeErr, writeData) {
+					console.log(writeErr, writeData);
+					console.log("patch, node doesn't exist");
+				},
+			);
+		} else {
+			// console.log("dataaaa ", JSON.parse(data.Body));
+			if (diff(JSON.parse(readData.Body), body)) {
+				s3.upload(
+					Object.assign({ Body: JSON.stringify(body) }, params),
+					function(writeErr, writeData) {
+						console.log(writeErr, writeData);
+						console.log('patch, node updated');
+					},
+				);
+			} else {
+				console.log('patch, node is unchanged');
+			}
+		}
+	});
 
 	try {
 		const prefetch = await getNodeWithRelationships(nodeType, code);
