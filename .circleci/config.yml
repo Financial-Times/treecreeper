@@ -1,5 +1,7 @@
-version: 2
+version: 2.1
 
+orbs:
+  change-api: financial-times/change-api@0.24.0
 
 references:
   triggerable-by-tag: &triggerable-by-tag
@@ -94,7 +96,6 @@ jobs:
           command: make s3-publish
 
 workflows:
-  version: 2
   build-and-deploy:
     jobs:
       - install:
@@ -117,6 +118,18 @@ workflows:
             - install
             - test
             - verify
+          filters:
+            <<: *triggerable-by-tag
+            branches:
+              ignore: /.*/
+      - change-api/release-log:
+          name: 'change_log_prod'
+          context: 'rel-eng-creds'
+          systemCode: 'biz-ops-schema'
+          environment: 'prod'
+          slackChannels: 'rel-eng-changes'
+          requires:
+            - release
           filters:
             <<: *triggerable-by-tag
             branches:
