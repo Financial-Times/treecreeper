@@ -371,7 +371,13 @@ properties:
     direction: outgoing
     label: Dependencies
     relationship: DEPENDS_ON
-    description: The other systems this system directly depends on.
+    description: |
+      The other systems this system directly depends on. In general, this means systems
+      that this system makes requests to, or that provide some sort of platform that
+      this system runs on. More exotic dependency relationships may exist, where it can
+      be hard to decide which way the dependency arrow points, but if either of the
+      conditions above describe the relationship between this system and the other
+      reasonably well, then the other system can be said to be a dependency of this one.
     hasMany: true
     fieldset: network
   recursiveDependencies:
@@ -388,7 +394,9 @@ properties:
     direction: incoming
     label: Dependents
     relationship: DEPENDS_ON
-    description: The other systems which directly depend on this system.
+    description: |
+      The other systems which directly depend on this system. See the description for the
+      'dependencies' field for more details.
     hasMany: true
     fieldset: network
   recursiveDependents:
