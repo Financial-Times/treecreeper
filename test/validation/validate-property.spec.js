@@ -248,6 +248,13 @@ describe('validateProperty', () => {
 							relationship: 'HAS',
 							hasMany: false,
 						},
+						testRecursiveRelationship: {
+							type: 'EndType',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							isRecursive: true,
+							hasMany: false,
+						},
 					},
 				},
 				{
@@ -274,6 +281,18 @@ describe('validateProperty', () => {
 					'lowercase2',
 				]),
 			).toThrow(/Can only have one testRelationship/);
+		});
+
+		it('reject when writing to recursive relationship', () => {
+			expect(() =>
+				validateProperty(
+					'StartType',
+					'testRecursiveRelationship',
+					'code',
+				),
+			).toThrow(
+				/Cannot write recursive relationship `testRecursiveRelationship`/,
+			);
 		});
 
 		it('accept when all is correct', () => {
