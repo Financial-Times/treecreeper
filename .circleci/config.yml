@@ -1,7 +1,4 @@
-version: 2.1
-
-orbs:
-  change-api: financial-times/change-api@0.24.0
+version: 2
 
 references:
 

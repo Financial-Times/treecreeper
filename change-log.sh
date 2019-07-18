@@ -2,7 +2,7 @@ PAYLOAD='{
   "systemCode": "'"$SYSTEM_CODE"'",
   "environment": "'"$RELEASE_ENV"'",
   "notifications": {
-    "slackChannels": ["ft-changes-test"]
+    "slackChannels": ["rel-eng-changes"]
   },
   "user": {
     "email": "heroku-deploy-hook@ft.com"
