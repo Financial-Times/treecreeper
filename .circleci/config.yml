@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+
+orbs:
+  change-api: financial-times/change-api@0.24.0
 
 references:
 
@@ -91,7 +94,6 @@ jobs:
           command: make verify -j 3
 
 workflows:
-  version: 2
   build-and-deploy:
     jobs:
       - install:
