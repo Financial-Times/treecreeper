@@ -126,11 +126,11 @@ workflows:
           name: 'change_log_prod'
           context: 'rel-eng-creds'
           systemCode: 'biz-ops-schema'
-          environment: 'prod'
-          slackChannels: 'rel-eng-changes'
-          requires:
-            - release
-          filters:
-            <<: *triggerable-by-tag
-            branches:
-              ignore: /.*/
+          environment: 'test'
+          slackChannels: 'rel-eng-changes-test'
+          # requires:
+          #   - release
+          # filters:
+          #   <<: *triggerable-by-tag
+          #   branches:
+          #     ignore: /.*/
