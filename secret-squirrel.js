@@ -19,7 +19,7 @@ module.exports = {
 			'33cba7fc-1d19-11e8-8417-7c85b306fa17', // doc/MODEL.md:21
 			'd5deb97d-5fa2-45f2-99fa-cd155328320d', // doc/db-upgrade.md:67
 			'tech@lt\\.com', // scripts/load-testing/lib/generate/team.js:29
-			'email@example.com' // test/v2/node-patch.spec.js:1812|1839
+			'email@example.com', // test/v2/node-patch.spec.js:1812|1839
 		]
 	}
 };

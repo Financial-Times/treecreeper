@@ -1,76 +1,99 @@
 const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
 
-const s3DocumentsBucket = () => {
+const s3BucketReal = () => {
 	return new AWS.S3({
 		accessKeyId: process.env.AWS_ACCESS_KEY,
 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 	});
 };
 
-const writeFileToS3 = (nodeType, code, body) => {
+const s3BucketName = 'biz-ops-documents';
+
+const writeFileToS3 = async (
+	nodeType,
+	code,
+	body,
+	s3DocumentsBucket = s3BucketReal,
+) => {
 	const s3 = s3DocumentsBucket();
 	const params = {
-		Bucket: 'biz-ops-documents.510688331160',
+		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
 		Key: `${nodeType}/${code}`,
 		Body: JSON.stringify(body),
 	};
-	s3.upload(params, function(err, data) {
+	try {
+		await s3.upload(params).promise();
 		console.log('post');
-		console.log(err, data);
-	});
+	} catch (err) {
+		console.log(err);
+	}
 };
 
-const patchS3file = (nodeType, code, body) => {
+const patchS3file = async (
+	nodeType,
+	code,
+	body,
+	s3DocumentsBucket = s3BucketReal,
+) => {
 	const s3 = s3DocumentsBucket();
 	const params = {
-		Bucket: 'biz-ops-documents.510688331160',
+		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
 		Key: `${nodeType}/${code}`,
 	};
-	s3.getObject(params, function(readErr, readData) {
-		console.log(readErr, readData);
-		if (readErr) {
-			console.log(readErr, readErr.stack);
-			s3.upload(
-				Object.assign({ Body: JSON.stringify(body) }, params),
-				function(writeErr, writeData) {
-					console.log(writeErr, writeData);
-					console.log("patch, node doesn't exist");
-				},
-			);
-		} else {
-			// console.log("dataaaa ", JSON.parse(data.Body));
-			if (diff(JSON.parse(readData.Body), body)) {
-				s3.upload(
-					Object.assign({ Body: JSON.stringify(body) }, params),
-					function(writeErr, writeData) {
-						console.log(writeErr, writeData);
-						console.log('patch, node updated');
-					},
-				);
-			} else {
-				console.log('patch, node is unchanged');
+	try {
+		const existingNode = await s3.getObject(params).promise();
+		const existingBody = JSON.parse(existingNode.Body);
+		if (diff(existingBody, body)) {
+			const newBody = Object.assign(existingBody, body);
+			try {
+				await s3
+					.upload(
+						Object.assign(
+							{ Body: JSON.stringify(newBody) },
+							params,
+						),
+					)
+					.promise();
+				console.log('patch, node updated');
+			} catch (uploadErr) {
+				console.log(uploadErr);
 			}
+		} else {
+			console.log('patch, node is unchanged');
 		}
-	});
+	} catch (err) {
+		console.log(err);
+
+		try {
+			await s3
+				.upload(Object.assign({ Body: JSON.stringify(body) }, params))
+				.promise();
+			console.log("patch, node doesn't exist");
+		} catch (uploadErr) {
+			console.log(uploadErr);
+		}
+	}
 };
 
-const deleteFileFromS3 = (nodeType, code) => {
+const deleteFileFromS3 = async (
+	nodeType,
+	code,
+	s3DocumentsBucket = s3BucketReal,
+) => {
 	const s3 = s3DocumentsBucket();
 
 	const params = {
-		Bucket: 'biz-ops-documents.510688331160',
+		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
 		Key: `${nodeType}/${code}`,
 	};
 
-	s3.deleteObject(params, function(err, data) {
-		if (err) {
-			console.log(err, err.stack);
-		} else {
-			console.log(data);
-			console.log('delete');
-		}
-	});
+	try {
+		await s3.deleteObject(params).promise();
+		console.log('delete');
+	} catch (err) {
+		console.log(err);
+	}
 };
 
 module.exports = {
