@@ -64,7 +64,7 @@ describe('S3 Documents Helper', () => {
 		});
 	});
 
-	it('patches a file from S3 when the node exists and is unchanged (do not call upload)', async () => {
+	it('does not patch a file in S3 when the node exists but is unchanged', async () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const savedBody = requestBody; // requestBody is the same as savedBody existsing in S3
 		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
