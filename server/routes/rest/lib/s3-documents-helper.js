@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
+const { logger } = require('../../../lib/request-context');
 
 const s3BucketReal = () => {
 	return new AWS.S3({
@@ -23,10 +24,10 @@ const writeFileToS3 = async (
 		Body: JSON.stringify(body),
 	};
 	try {
-		await s3.upload(params).promise();
-		console.log('post');
+		const res = await s3.upload(params).promise();
+		logger.info(res, 'POST: S3 Upload successful');
 	} catch (err) {
-		console.log(err);
+		logger.info(err, 'POST: S3 Upload failed');
 	}
 };
 
@@ -47,7 +48,7 @@ const patchS3file = async (
 		if (diff(existingBody, body)) {
 			const newBody = Object.assign(existingBody, body);
 			try {
-				await s3
+				const res = await s3
 					.upload(
 						Object.assign(
 							{ Body: JSON.stringify(newBody) },
@@ -55,23 +56,33 @@ const patchS3file = async (
 						),
 					)
 					.promise();
-				console.log('patch, node updated');
+				logger.info(
+					res,
+					'PATCH: S3 Upload successful - file has been updated',
+				);
 			} catch (uploadErr) {
-				console.log(uploadErr);
+				logger.info(
+					uploadErr,
+					'PATCH: S3 Upload failed - could not update file',
+				);
 			}
 		} else {
-			console.log('patch, node is unchanged');
+			logger.info('PATCH: No S3 Upload as file is unchanged');
 		}
 	} catch (err) {
-		console.log(err);
-
 		try {
-			await s3
+			const res = await s3
 				.upload(Object.assign({ Body: JSON.stringify(body) }, params))
 				.promise();
-			console.log("patch, node doesn't exist");
+			logger.info(
+				res,
+				'PATCH: S3 Upload successful - file has been created',
+			);
 		} catch (uploadErr) {
-			console.log(uploadErr);
+			logger.info(
+				uploadErr,
+				'PATCH: S3 Upload failed - could not create file',
+			);
 		}
 	}
 };
@@ -89,10 +100,10 @@ const deleteFileFromS3 = async (
 	};
 
 	try {
-		await s3.deleteObject(params).promise();
-		console.log('delete');
+		const res = await s3.deleteObject(params).promise();
+		logger.info(res, 'DELETE: S3 Delete successful');
 	} catch (err) {
-		console.log(err);
+		logger.info(err, 'DELETE: S3 Delete failed');
 	}
 };
 
