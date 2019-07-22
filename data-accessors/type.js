@@ -15,8 +15,6 @@ const hydrateFieldsets = ({
 	useMinimumViableRecord,
 	minimumViableRecord = [],
 }) => {
-	console.log({ useMinimumViableRecord, minimumViableRecord });
-
 	const fieldsetEntries = Object.entries(fieldsets);
 
 	const hasRealFieldsets = !!fieldsetEntries.length;
@@ -190,7 +188,6 @@ const getType = (
 	} else {
 		typeSchema.properties = entriesArrayToObject(properties);
 	}
-	console.log(typeSchema);
 	return typeSchema;
 };
 
