@@ -118,7 +118,7 @@ describe('S3 Documents Helper', () => {
 		});
 	});
 
-	it('patches a file from S3 when the node does not exist', async () => {
+	it('patch creates a file in S3 when the node does not already exist', async () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
 			false,
