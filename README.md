@@ -95,6 +95,7 @@ The full object structure returned by getType() can been seen [here](GETTYPE.md)
 -   `primitiveTypes` [default: `'biz-ops'`]: Graphql only has 4 primitive types - String, Boolean, Int and Float - whereas the biz-ops ecosystem recognises a richer variety e.g Document, Url. They are stored in the schema as these biz-ops types. Setting `primitiveTypes: 'graphql'` will output property type names converted to their graphql equivalent. This option shouldn't really be needed by anywhere other than the graphql server
 -   `groupProperties` [default: `false`]: Each property may have a `fieldset` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `fieldsets`, where all properties are then grouped by fieldset
 -   `includeMetaFields` [default: `false`]: Determines whether to include metadatafields (prefixed with `_`) in the schema object returned
+-   `useMinimumViableRecord` [default: `false`]: If `groupProperties` is `true`, this will put any fields defined as being part of the minimum viable record (see [model spec](MODEL_SPECIFICATION.md#types)) together in a single fieldset
 
 ### getTypes(options)
 

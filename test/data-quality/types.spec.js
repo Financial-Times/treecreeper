@@ -63,6 +63,7 @@ describe('data quality: types', () => {
 							'fieldsets',
 							'properties',
 							'createPermissions',
+							'minimumViableRecord',
 						]),
 					);
 				});
@@ -84,6 +85,16 @@ describe('data quality: types', () => {
 					expect(Array.isArray(type.createPermissions)).toBe(true);
 					type.createPermissions.forEach(systemCode => {
 						expect(typeof systemCode).toBe('string');
+					});
+				}
+			});
+
+			it('may have a minimumViableRecord', () => {
+				if ('minimumViableRecord' in type) {
+					expect(Array.isArray(type.minimumViableRecord)).toBe(true);
+					type.minimumViableRecord.forEach(propertyName => {
+						expect(typeof propertyName).toBe('string');
+						expect(type.properties[propertyName]).toBeDefined();
 					});
 				}
 			});

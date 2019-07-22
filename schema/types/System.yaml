@@ -4,6 +4,11 @@ moreInformation: |
     Systems are hierachical and represent the deployable units of our business. A Product may well be formed from a number of Systems each of which is itself formed from lower level Systems.
     Examples of system include: FT.com Router, Content Annotator, Origami Registry, and Biz Ops Admin. Exmaples of products include: FT.com, Content API, Biz Ops, and Origami.
     Systems are owned by Teams (not individuals) from either a delivery and support perspective (or both). A well managed productionised System will be linked to its Repository and its Healthchecks.
+minimumViableRecord:
+  - code
+  - name
+  - description
+  - deliveredBy
 fieldsets:
   general:
     heading: General information
