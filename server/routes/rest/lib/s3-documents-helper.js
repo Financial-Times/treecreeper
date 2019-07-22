@@ -9,7 +9,7 @@ const s3BucketReal = () => {
 	});
 };
 
-const s3BucketName = 'biz-ops-documents';
+const s3BucketName = `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`;
 
 const uploadToS3 = async (s3, params, requestType) => {
 	try {
