@@ -94,12 +94,6 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
 
 	const { createPermissions, pluralName } = getType(nodeType);
-	console.log(
-		'createPermissions',
-		createPermissions,
-		'pluralName',
-		pluralName,
-	);
 	if (createPermissions && !createPermissions.includes(clientId)) {
 		throw httpError(
 			400,
