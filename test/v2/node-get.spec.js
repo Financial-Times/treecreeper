@@ -8,22 +8,25 @@ describe('v2 - node GET', () => {
 	const namespace = 'v2-node-get';
 	setupMocks(sandbox, { namespace });
 
+	const testGetRequest = (...expectations) =>
+		sandbox
+			.request(app)
+			.get(`/v2/node/Team/${namespace}-team`)
+			.namespacedAuth()
+			.expect(...expectations);
+
 	it('gets node without relationships', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
 			name: 'name1',
 		});
-		return sandbox
-			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(
-				200,
-				sandbox.withMeta({
-					code: `${namespace}-team`,
-					name: 'name1',
-				}),
-			);
+		return testGetRequest(
+			200,
+			sandbox.withMeta({
+				code: `${namespace}-team`,
+				name: 'name1',
+			}),
+		);
 	});
 
 	it('gets node with relationships', async () => {
@@ -38,34 +41,22 @@ describe('v2 - node GET', () => {
 			[team, 'HAS_TECH_LEAD', person],
 		);
 
-		return sandbox
-			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(
-				200,
-				sandbox.withMeta({
-					code: `${namespace}-team`,
-					techLeads: [`${namespace}-person`],
-					parentGroup: `${namespace}-group`,
-				}),
-			);
+		return testGetRequest(
+			200,
+			sandbox.withMeta({
+				code: `${namespace}-team`,
+				techLeads: [`${namespace}-person`],
+				parentGroup: `${namespace}-group`,
+			}),
+		);
 	});
 
 	it('responds with 404 if no node', async () => {
-		return sandbox
-			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(404);
+		return testGetRequest(404);
 	});
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return sandbox
-			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(500);
+		return testGetRequest(500);
 	});
 });

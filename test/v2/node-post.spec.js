@@ -20,30 +20,30 @@ describe('v2 - node POST', () => {
 
 	setupMocks(sandbox, { namespace });
 
+	const testPostRequest = (url, data, ...expectations) =>
+		sandbox
+			.request(app)
+			.post(url)
+			.namespacedAuth()
+			.send(data)
+			.expect(...expectations);
+
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({})
-			.expect(500);
+		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
 		sandbox.expectNoEvents();
 	});
 
 	it('create node', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ name: 'name1' })
-			.expect(
-				200,
-				sandbox.withCreateMeta({
-					code: teamCode,
-					name: 'name1',
-				}),
-			);
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{ name: 'name1' },
+			200,
+			sandbox.withCreateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
 
 		await testNode(
 			'Team',
@@ -57,17 +57,14 @@ describe('v2 - node POST', () => {
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Repository/${repoCode}`)
-			.namespacedAuth()
-			.send({ name: 'name1' })
-			.expect(
-				400,
-				new RegExp(
-					`Repositories can only be created by biz-ops-github-importer`,
-				),
-			);
+		await testPostRequest(
+			`/v2/node/Repository/${repoCode}`,
+			{ name: 'name1' },
+			400,
+			new RegExp(
+				`Repositories can only be created by biz-ops-github-importer`,
+			),
+		);
 
 		verifyNotExists('Repository', repoCode);
 		sandbox.expectNoEvents();
@@ -107,18 +104,15 @@ describe('v2 - node POST', () => {
 	});
 
 	it('Not set property when empty string provided', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ name: 'name1', description: '' })
-			.expect(
-				200,
-				sandbox.withCreateMeta({
-					code: teamCode,
-					name: 'name1',
-				}),
-			);
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{ name: 'name1', description: '' },
+			200,
+			sandbox.withCreateMeta({
+				code: teamCode,
+				name: 'name1',
+			}),
+		);
 
 		await testNode(
 			'Team',
@@ -135,18 +129,15 @@ describe('v2 - node POST', () => {
 	it('Set Date property', async () => {
 		const isoDateString = '2019-01-09';
 		const date = new Date(isoDateString);
-		await sandbox
-			.request(app)
-			.post(`/v2/node/System/${systemCode}`)
-			.namespacedAuth()
-			.send({ lastServiceReviewDate: date.toISOString() })
-			.expect(
-				200,
-				sandbox.withCreateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
-				}),
-			);
+		await testPostRequest(
+			`/v2/node/System/${systemCode}`,
+			{ lastServiceReviewDate: date.toISOString() },
+			200,
+			sandbox.withCreateMeta({
+				code: systemCode,
+				lastServiceReviewDate: isoDateString,
+			}),
+		);
 
 		await testNode(
 			'System',
@@ -168,71 +159,64 @@ describe('v2 - node POST', () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 		});
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({})
-			.expect(409, new RegExp(`Team ${teamCode} already exists`));
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{},
+			409,
+			new RegExp(`Team ${teamCode} already exists`),
+		);
 		sandbox.expectNoEvents();
 	});
 
 	it('error when conflicting code values', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ code: 'wrong-code' })
-			.expect(
-				400,
-				new RegExp(
-					`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
-				),
-			);
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{ code: 'wrong-code' },
+			400,
+			new RegExp(
+				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
+			),
+		);
 		sandbox.expectNoEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
 	it('error when unrecognised property', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ foo: 'unrecognised' })
-			.expect(400, /Invalid property `foo` on type `Team`/);
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{ foo: 'unrecognised' },
+			400,
+			/Invalid property `foo` on type `Team`/,
+		);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		await verifyNotExists('Team', teamCode);
 	});
 
 	it('not error when non-conflicting code values', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({ code: teamCode })
-			.expect(200);
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{ code: teamCode },
+			200,
+		);
 		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code']]);
 		await verifyExists('Team', teamCode);
 	});
 
 	it('create node related to existing nodes', async () => {
 		await sandbox.createNodes(['Person', personCode], ['Group', groupCode]);
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
 				techLeads: [personCode],
 				parentGroup: groupCode,
-			})
-			.expect(
-				200,
-				sandbox.withCreateMeta({
-					code: teamCode,
-					techLeads: [personCode],
-					parentGroup: groupCode,
-				}),
-			);
+			},
+			200,
+			sandbox.withCreateMeta({
+				code: teamCode,
+				techLeads: [personCode],
+				parentGroup: groupCode,
+			}),
+		);
 
 		await testNode(
 			'Team',
@@ -277,36 +261,33 @@ describe('v2 - node POST', () => {
 	});
 
 	it('error when creating node related to non-existent nodes', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}`)
-			.namespacedAuth()
-			.send({
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
 				techLeads: [personCode],
 				parentGroup: groupCode,
-			})
-			.expect(400, /Missing related node/);
+			},
+			400,
+			/Missing related node/,
+		);
 		sandbox.expectNoEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {
-		await sandbox
-			.request(app)
-			.post(`/v2/node/Team/${teamCode}?upsert=true`)
-			.namespacedAuth()
-			.send({
+		await testPostRequest(
+			`/v2/node/Team/${teamCode}?upsert=true`,
+			{
 				techLeads: [personCode],
 				parentGroup: groupCode,
-			})
-			.expect(
-				200,
-				sandbox.withCreateMeta({
-					code: teamCode,
-					techLeads: [personCode],
-					parentGroup: groupCode,
-				}),
-			);
+			},
+			200,
+			sandbox.withCreateMeta({
+				code: teamCode,
+				techLeads: [personCode],
+				parentGroup: groupCode,
+			}),
+		);
 
 		await testNode(
 			'Team',
@@ -357,72 +338,56 @@ describe('v2 - node POST', () => {
 
 	describe('locked Fields', () => {
 		it('creates a node with _lockedFields', async () => {
-			await sandbox
-				.request(app)
-				.post(`/v2/node/Team/${teamCode}?lockFields=name`)
-				.namespacedAuth()
-				.send({ name: 'name1' })
-				.expect(
-					200,
-					sandbox.withCreateMeta({
-						code: 'v2-node-post-team',
-						name: 'name1',
-						_lockedFields: '{"name":"v2-node-post-client"}',
-					}),
-				);
+			await testPostRequest(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{ name: 'name1' },
+				200,
+				sandbox.withCreateMeta({
+					code: 'v2-node-post-team',
+					name: 'name1',
+					_lockedFields: '{"name":"v2-node-post-client"}',
+				}),
+			);
 		});
 
 		it('creates a node with 4 fields but ONLY locks the name field', async () => {
-			await sandbox
-				.request(app)
-				.post(`/v2/node/Team/${teamCode}?lockFields=name`)
-				.namespacedAuth()
-				.send({
+			await testPostRequest(
+				`/v2/node/Team/${teamCode}?lockFields=name`,
+				{ name: 'name1', email: 'tech@lt.com', slack: 'slack channel' },
+				200,
+				sandbox.withCreateMeta({
+					code: 'v2-node-post-team',
 					name: 'name1',
 					email: 'tech@lt.com',
 					slack: 'slack channel',
-				})
-				.expect(
-					200,
-					sandbox.withCreateMeta({
-						code: 'v2-node-post-team',
-						name: 'name1',
-						email: 'tech@lt.com',
-						slack: 'slack channel',
-						_lockedFields: '{"name":"v2-node-post-client"}',
-					}),
-				);
+					_lockedFields: '{"name":"v2-node-post-client"}',
+				}),
+			);
 		});
 
 		it('creates a node and locks ALL fields that are written', async () => {
-			await sandbox
-				.request(app)
-				.post(`/v2/node/Team/${teamCode}?lockFields=all`)
-				.namespacedAuth()
-				.send({ name: 'name1' })
-				.expect(
-					200,
-					sandbox.withCreateMeta({
-						code: 'v2-node-post-team',
-						name: 'name1',
-						_lockedFields: '{"name":"v2-node-post-client"}',
-					}),
-				);
+			await testPostRequest(
+				`/v2/node/Team/${teamCode}?lockFields=all`,
+				{ name: 'name1' },
+				200,
+				sandbox.withCreateMeta({
+					code: 'v2-node-post-team',
+					name: 'name1',
+					_lockedFields: '{"name":"v2-node-post-client"}',
+				}),
+			);
 		});
 
 		describe('no client-id header', () => {
 			setupMocks(sandbox, { namespace }, false);
 
 			it('throws an error when clientId is not set', async () => {
-				await sandbox
-					.request(app)
-					.post(`/v2/node/Team/${teamCode}?lockFields=all`)
-					.namespacedAuth()
-					.send({ name: 'name1' })
-					.expect(
-						400,
-						/clientId needs to be set to a valid system code in order to lock fields/,
-					);
+				await testPostRequest(
+					`/v2/node/Team/${teamCode}?lockFields=all`,
+					{ name: 'name1' },
+					400,
+					/clientId needs to be set to a valid system code in order to lock fields/,
+				);
 			});
 		});
 	});
