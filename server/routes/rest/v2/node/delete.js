@@ -12,8 +12,6 @@ module.exports = async input => {
 
 	const existingRecord = await getNodeWithRelationships(nodeType, code);
 
-	deleteFileFromS3(nodeType, code);
-
 	preflightChecks.bailOnMissingNode({
 		result: existingRecord,
 		nodeType,
@@ -31,7 +29,10 @@ module.exports = async input => {
 	DELETE node
 	`;
 
-	await executeQuery(query, { code });
+	await Promise.all([
+		executeQuery(query, { code }),
+		deleteFileFromS3(nodeType, code),
+	]);
 	logNodeDeletion(existingRecord.getNode());
 
 	return { status: 204 };

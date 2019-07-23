@@ -4,7 +4,6 @@ const {
 	preflightChecks,
 } = require('../../lib/error-handling');
 const { createNewNode } = require('../../lib/write-helpers');
-const { writeFileToS3 } = require('../../lib/s3-documents-helper');
 
 const create = async input => {
 	validateParams(input);
@@ -13,8 +12,6 @@ const create = async input => {
 	const { nodeType, code, clientId, query, body } = input;
 
 	preflightChecks.handleSimultaneousWriteAndDelete(body);
-
-	writeFileToS3(nodeType, code, body);
 
 	try {
 		return await createNewNode({

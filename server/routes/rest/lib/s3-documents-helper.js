@@ -9,7 +9,8 @@ const s3BucketReal = () => {
 	});
 };
 
-const s3BucketName = `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`;
+const s3BucketPrefixCode = 'biz-ops-documents';
+const s3BucketName = `${s3BucketPrefixCode}.${process.env.AWS_ACCOUNT_ID}`;
 
 const uploadToS3 = async (s3, params, requestType) => {
 	try {
@@ -28,7 +29,7 @@ const writeFileToS3 = async (
 ) => {
 	const s3 = s3DocumentsBucket();
 	const params = {
-		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
+		Bucket: s3BucketName,
 		Key: `${nodeType}/${code}`,
 		Body: JSON.stringify(body),
 	};
@@ -43,7 +44,7 @@ const patchS3file = async (
 ) => {
 	const s3 = s3DocumentsBucket();
 	const params = {
-		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
+		Bucket: s3BucketName,
 		Key: `${nodeType}/${code}`,
 	};
 	try {
@@ -68,6 +69,11 @@ const patchS3file = async (
 	}
 };
 
+const sendDocumentsToS3 = async (method, nodeType, code, body) => {
+	const send = method === 'POST' ? writeFileToS3 : patchS3file;
+	send(nodeType, code, body);
+};
+
 const deleteFileFromS3 = async (
 	nodeType,
 	code,
@@ -76,7 +82,7 @@ const deleteFileFromS3 = async (
 	const s3 = s3DocumentsBucket();
 
 	const params = {
-		Bucket: `${s3BucketName}.${process.env.AWS_ACCOUNT_ID}`,
+		Bucket: s3BucketName,
 		Key: `${nodeType}/${code}`,
 	};
 
@@ -91,5 +97,6 @@ const deleteFileFromS3 = async (
 module.exports = {
 	writeFileToS3,
 	patchS3file,
+	sendDocumentsToS3,
 	deleteFileFromS3,
 };

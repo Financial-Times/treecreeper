@@ -16,12 +16,14 @@ const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const { prepareToWriteRelationships } = require('./relationship-write-helpers');
 const { mergeLockedFields } = require('./locked-fields');
 const salesforceSync = require('../../../lib/salesforce-sync');
+const { sendDocumentsToS3 } = require('../../rest/lib/s3-documents-helper');
 
 let setSalesforceIdForSystem;
 
 const writeNode = async ({
 	nodeType,
 	code,
+	body,
 	method,
 	upsert,
 	isCreate,
@@ -53,7 +55,11 @@ const writeNode = async ({
 
 	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
-	let result = await executeQuery(queryParts.join('\n'), parameters, true);
+	const results = await Promise.all([
+		executeQuery(queryParts.join('\n'), parameters, true),
+		sendDocumentsToS3(method, nodeType, code, body),
+	]);
+	let result = results[0];
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
@@ -110,6 +116,7 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	return writeNode({
 		nodeType,
 		code,
+		body,
 		method,
 		upsert,
 		isCreate: true,

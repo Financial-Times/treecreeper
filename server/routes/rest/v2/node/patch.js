@@ -23,7 +23,6 @@ const {
 const { getNodeWithRelationships } = require('../../lib/read-helpers');
 const { constructNeo4jProperties } = require('../../lib/neo4j-type-conversion');
 const { mergeLockedFields } = require('../../lib/locked-fields');
-const { patchS3file } = require('../../lib/s3-documents-helper');
 
 const update = async input => {
 	validateParams(input);
@@ -36,8 +35,6 @@ const update = async input => {
 		preflightChecks.bailOnMissingRelationshipAction(relationshipAction);
 		preflightChecks.handleSimultaneousWriteAndDelete(body);
 	}
-
-	patchS3file(nodeType, code, body);
 
 	try {
 		const prefetch = await getNodeWithRelationships(nodeType, code);
@@ -140,6 +137,7 @@ const update = async input => {
 		return await writeNode({
 			nodeType,
 			code,
+			body,
 			method: 'PATCH',
 			upsert,
 			isCreate: !existingRecord,
