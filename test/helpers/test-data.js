@@ -137,8 +137,6 @@ const testIsolatedNode = async (type, code, props) => {
 	const { records: rels } = await executeQuery(
 		`MATCH (node:${type} { code: "${code}" })-[r]-(n2) RETURN r`,
 	);
-	console.log(rels[0]);
-
 	expect(rels.length).toBe(0);
 };
 

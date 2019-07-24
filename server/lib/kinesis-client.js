@@ -9,9 +9,7 @@ const {
 
 const stubInDevelopment = (action, fn) => (...args) => {
 	if (process.env.NODE_ENV !== 'production') {
-		logger.debug(`Skipped kinesis ${action} as not in production`, {
-			event: args[0].event,
-		});
+		logger.debug(`Skipped kinesis ${action} as not in production`, ...args);
 		return Promise.resolve();
 	}
 	return fn(...args);

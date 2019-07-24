@@ -17,7 +17,13 @@ const bodyParsers = [
 const { errorToErrors } = require('../../../middleware/errors');
 
 const requestLog = (endpointName, method, req) => {
-	setContext({ endpointName, method, params: req.params });
+	setContext({
+		endpointName,
+		method,
+		params: req.params,
+		query: req.query,
+		bodyKeys: Object.keys(req.body || {}),
+	});
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
