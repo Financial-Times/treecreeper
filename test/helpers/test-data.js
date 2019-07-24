@@ -209,7 +209,6 @@ module.exports = {
 	dropDb,
 	testDataCheckers: {
 		testNode,
-		testConnectedNode,
 		verifyNotExists,
 		verifyExists,
 	},
