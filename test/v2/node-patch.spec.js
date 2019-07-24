@@ -19,26 +19,32 @@ describe('v2 - node PATCH', () => {
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
 	const systemCode = `${namespace}-system`;
-	let authenticatedPatch;
 
 	setupMocks(sandbox, { namespace });
-	beforeEach(() => {
-		authenticatedPatch = (url, data) =>
-			sandbox
-				.request(app)
-				.patch(url)
-				.namespacedAuth()
-				.send(data);
-	});
+
+	const testPatchRequest = (url, data, ...expectations) => {
+		let req = sandbox
+			.request(app)
+			.patch(url)
+			.namespacedAuth();
+
+		if (data) {
+			req = req.send(data);
+		}
+
+		return req.expect(...expectations);
+	};
 
 	it('update node', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 			name: 'name1',
 		});
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: 'name2',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				name: 'name2',
+			},
 			200,
 			sandbox.withUpdateMeta({
 				name: 'name2',
@@ -63,9 +69,11 @@ describe('v2 - node PATCH', () => {
 			code: teamCode,
 			name: 'name1',
 		});
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			description: '',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				description: '',
+			},
 			200,
 			sandbox.withUpdateMeta({
 				code: teamCode,
@@ -91,18 +99,15 @@ describe('v2 - node PATCH', () => {
 			await sandbox.createNode('System', {
 				code: systemCode,
 			});
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/System/${systemCode}`)
-				.namespacedAuth()
-				.send({ lastServiceReviewDate: date.toISOString() })
-				.expect(
-					200,
-					sandbox.withUpdateMeta({
-						code: systemCode,
-						lastServiceReviewDate: isoDateString,
-					}),
-				);
+			await testPatchRequest(
+				`/v2/node/System/${systemCode}`,
+				{ lastServiceReviewDate: date.toISOString() },
+				200,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
 
 			await testNode(
 				'System',
@@ -130,18 +135,15 @@ describe('v2 - node PATCH', () => {
 				),
 			});
 
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/System/${systemCode}`)
-				.namespacedAuth()
-				.send({ lastServiceReviewDate: date.toISOString() })
-				.expect(
-					200,
-					sandbox.withUpdateMeta({
-						code: systemCode,
-						lastServiceReviewDate: isoDateString,
-					}),
-				);
+			await testPatchRequest(
+				`/v2/node/System/${systemCode}`,
+				{ lastServiceReviewDate: date.toISOString() },
+				200,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
 
 			await testNode(
 				'System',
@@ -169,18 +171,15 @@ describe('v2 - node PATCH', () => {
 				),
 			});
 
-			await sandbox
-				.request(app)
-				.patch(`/v2/node/System/${systemCode}`)
-				.namespacedAuth()
-				.send({ lastServiceReviewDate: '2019-01-09' })
-				.expect(
-					200,
-					sandbox.withUpdateMeta({
-						code: systemCode,
-						lastServiceReviewDate: isoDateString,
-					}),
-				);
+			await testPatchRequest(
+				`/v2/node/System/${systemCode}`,
+				{ lastServiceReviewDate: '2019-01-09' },
+				200,
+				sandbox.withUpdateMeta({
+					code: systemCode,
+					lastServiceReviewDate: isoDateString,
+				}),
+			);
 
 			await testNode(
 				'System',
@@ -200,9 +199,11 @@ describe('v2 - node PATCH', () => {
 			name: 'name1',
 			description: 'description',
 		});
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			description: '',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				description: '',
+			},
 			200,
 			sandbox.withUpdateMeta({
 				code: teamCode,
@@ -225,9 +226,11 @@ describe('v2 - node PATCH', () => {
 			code: teamCode,
 			isActive: true,
 		});
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			isActive: false,
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				isActive: false,
+			},
 			200,
 			sandbox.withUpdateMeta({
 				code: teamCode,
@@ -246,9 +249,11 @@ describe('v2 - node PATCH', () => {
 	});
 
 	it('Create when patching non-existent node', async () => {
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: 'name1',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				name: 'name1',
+			},
 			201,
 			sandbox.withCreateMeta({
 				name: 'name1',
@@ -268,9 +273,11 @@ describe('v2 - node PATCH', () => {
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
-		await authenticatedPatch(`/v2/node/Repository/${repoCode}`, {
-			name: 'name1',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Repository/${repoCode}`,
+			{
+				name: 'name1',
+			},
 			400,
 			new RegExp(
 				`Repositories can only be created by biz-ops-github-importer`,
@@ -315,9 +322,11 @@ describe('v2 - node PATCH', () => {
 	});
 
 	it('error when conflicting code values', async () => {
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			code: 'wrong-code',
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				code: 'wrong-code',
+			},
 			400,
 			new RegExp(
 				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
@@ -329,25 +338,34 @@ describe('v2 - node PATCH', () => {
 
 	it('not error when non-conflicting code values', async () => {
 		await sandbox.createNode('Team', teamCode);
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: 'name1',
-			code: teamCode,
-		}).expect(200);
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				name: 'name1',
+				code: teamCode,
+			},
+			200,
+		);
 
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('error when unrecognised attribute', async () => {
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			foo: 'unrecognised',
-		}).expect(400, /Invalid property `foo` on type `Team`/);
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				foo: 'unrecognised',
+			},
+			400,
+			/Invalid property `foo` on type `Team`/,
+		);
 		verifyNotExists('Team', teamCode);
 		sandbox.expectNoEvents();
 	});
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {}).expect(500);
+		await testPatchRequest(`/v2/node/Team/${teamCode}`, {}, 500);
 		sandbox.expectNoEvents();
 	});
 
@@ -356,9 +374,11 @@ describe('v2 - node PATCH', () => {
 			code: teamCode,
 			name: 'name1',
 		});
-		await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-			name: null,
-		}).expect(
+		await testPatchRequest(
+			`/v2/node/Team/${teamCode}`,
+			{
+				name: null,
+			},
 			200,
 			sandbox.withUpdateMeta({
 				code: teamCode,
@@ -419,9 +439,11 @@ describe('v2 - node PATCH', () => {
 		describe('deleting', () => {
 			it('errors if no relationshipAction query string when deleting relationship set', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					techLeads: null,
-				}).expect(
+				await testPatchRequest(
+					`/v2/node/Team/${teamCode}`,
+					{
+						techLeads: null,
+					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
@@ -430,9 +452,11 @@ describe('v2 - node PATCH', () => {
 
 			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					'!techLeads': [personCode],
-				}).expect(
+				await testPatchRequest(
+					`/v2/node/Team/${teamCode}`,
+					{
+						'!techLeads': [personCode],
+					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
@@ -455,10 +479,9 @@ describe('v2 - node PATCH', () => {
 								[team, 'HAS_TECH_LEAD', person1],
 								[team, 'HAS_TECH_LEAD', person2],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{ '!techLeads': [`${personCode}-1`] },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -499,10 +522,9 @@ describe('v2 - node PATCH', () => {
 
 						it("can attempt to delete a specific relationship of type that doesn't exist", async () => {
 							await sandbox.createNode('Team', teamCode);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{ '!techLeads': [personCode] },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -529,10 +551,9 @@ describe('v2 - node PATCH', () => {
 								'HAS_TECH_LEAD',
 								person1,
 							]);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{ '!techLeads': [`${personCode}-2`] },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -580,7 +601,7 @@ describe('v2 - node PATCH', () => {
 								[team, 'HAS_TECH_LEAD', person2],
 								[team, 'HAS_TECH_LEAD', person3],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									'!techLeads': [
@@ -588,7 +609,6 @@ describe('v2 - node PATCH', () => {
 										`${personCode}-3`,
 									],
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -646,13 +666,12 @@ describe('v2 - node PATCH', () => {
 								[team, 'HAS_TECH_LEAD', person],
 								[group, 'HAS_TEAM', team],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									'!techLeads': [personCode],
 									'!parentGroup': groupCode,
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -701,10 +720,9 @@ describe('v2 - node PATCH', () => {
 								[team1, 'HAS_TEAM', team2],
 								[team2, 'HAS_TEAM', team3],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
 								{ '!subTeams': [`${teamCode}-3`] },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: `${teamCode}-2`,
@@ -758,13 +776,12 @@ describe('v2 - node PATCH', () => {
 								'HAS_TECH_LEAD',
 								person1,
 							]);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									'!techLeads': [`${personCode}-1`],
 									techLeads: [`${personCode}-2`],
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -813,13 +830,12 @@ describe('v2 - node PATCH', () => {
 								['Team', teamCode],
 								['Person', personCode],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									techLeads: [personCode],
 									'!techLeads': [personCode],
 								},
-							).expect(
 								400,
 								/Trying to add and remove a relationship to a record at the same time/,
 							);
@@ -838,10 +854,9 @@ describe('v2 - node PATCH', () => {
 					describe('bulk relationship delete', () => {
 						it('can delete empty relationship set', async () => {
 							await sandbox.createNode('Team', teamCode);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{ techLeads: null },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -873,10 +888,9 @@ describe('v2 - node PATCH', () => {
 								[group, 'HAS_TEAM', team],
 								[team, 'HAS_TECH_LEAD', person],
 							);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{ techLeads: null, parentGroup: null },
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -913,6 +927,75 @@ describe('v2 - node PATCH', () => {
 							);
 						});
 
+						it('leaves other similar relationships on destination node untouched when deleting', async () => {
+							const [
+								team1,
+								team2,
+								person,
+							] = await sandbox.createNodes(
+								['Team', `${teamCode}-1`],
+								['Team', `${teamCode}-2`],
+								['Person', personCode],
+							);
+							await sandbox.connectNodes([
+								team1,
+								'HAS_TECH_LEAD',
+								person,
+							]);
+							await sandbox.connectNodes([
+								team2,
+								'HAS_TECH_LEAD',
+								person,
+							]);
+
+							await testPatchRequest(
+								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
+								{
+									techLeads: null,
+								},
+								200,
+								sandbox.withMeta({
+									code: `${teamCode}-2`,
+								}),
+							);
+
+							await testNode(
+								'Team',
+								`${teamCode}-1`,
+								sandbox.withMeta({
+									code: `${teamCode}-1`,
+								}),
+								[
+									{
+										type: 'HAS_TECH_LEAD',
+										direction: 'outgoing',
+										props: sandbox.withMeta({}),
+									},
+									{
+										type: 'Person',
+										props: sandbox.withMeta({
+											code: personCode,
+										}),
+									},
+								],
+							);
+
+							sandbox.expectEvents(
+								[
+									'UPDATE',
+									`${teamCode}-2`,
+									'Team',
+									['techLeads'],
+								],
+								[
+									'UPDATE',
+									personCode,
+									'Person',
+									['techLeadFor'],
+								],
+							);
+						});
+
 						it('leaves relationships in other direction and of other types untouched when deleting', async () => {
 							const [
 								team1,
@@ -941,12 +1024,11 @@ describe('v2 - node PATCH', () => {
 								person,
 							]);
 
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
 								{
 									subTeams: null,
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: `${teamCode}-2`,
@@ -1011,9 +1093,11 @@ describe('v2 - node PATCH', () => {
 		describe('creating', () => {
 			it('errors if updating relationships without relationshipAction query string', async () => {
 				await sandbox.createNode('Team', teamCode);
-				await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-					techLeads: [personCode],
-				}).expect(
+				await testPatchRequest(
+					`/v2/node/Team/${teamCode}`,
+					{
+						techLeads: [personCode],
+					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
@@ -1033,12 +1117,11 @@ describe('v2 - node PATCH', () => {
 							['Team', teamCode],
 							['Group', groupCode],
 						);
-						await authenticatedPatch(
+						await testPatchRequest(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
 								parentGroup: groupCode,
 							},
-						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
@@ -1087,12 +1170,11 @@ describe('v2 - node PATCH', () => {
 							['Team', teamCode],
 							['Group', groupCode],
 						);
-						await authenticatedPatch(
+						await testPatchRequest(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
 								parentGroup: [groupCode],
 							},
-						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
@@ -1142,7 +1224,7 @@ describe('v2 - node PATCH', () => {
 							['Group', `${groupCode}-1`],
 							['Group', `${groupCode}-2`],
 						);
-						await authenticatedPatch(
+						await testPatchRequest(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
 								parentGroup: [
@@ -1150,7 +1232,9 @@ describe('v2 - node PATCH', () => {
 									`${groupCode}-2`,
 								],
 							},
-						).expect(400, /Can only have one parentGroup/);
+							400,
+							/Can only have one parentGroup/,
+						);
 
 						await testNode(
 							'Team',
@@ -1171,12 +1255,11 @@ describe('v2 - node PATCH', () => {
 						);
 
 						await sandbox.connectNodes(group1, 'HAS_TEAM', team);
-						await authenticatedPatch(
+						await testPatchRequest(
 							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 							{
 								parentGroup: [`${groupCode}-2`],
 							},
-						).expect(
 							200,
 							sandbox.withMeta({
 								code: teamCode,
@@ -1239,12 +1322,11 @@ describe('v2 - node PATCH', () => {
 						['Team', teamCode],
 						['Person', personCode],
 					);
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
 						{
 							techLeads: [personCode],
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
@@ -1287,12 +1369,11 @@ describe('v2 - node PATCH', () => {
 						person1,
 					);
 
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
 						{
 							techLeads: [`${personCode}-2`],
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
@@ -1351,12 +1432,11 @@ describe('v2 - node PATCH', () => {
 						['Team', teamCode],
 						['Person', personCode],
 					);
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
 						{
 							techLeads: [personCode],
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
@@ -1401,12 +1481,11 @@ describe('v2 - node PATCH', () => {
 						person1,
 					);
 
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
 						{
 							techLeads: [`${personCode}-2`],
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: teamCode,
@@ -1465,12 +1544,11 @@ describe('v2 - node PATCH', () => {
 						person,
 					]);
 
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
 						{
 							subTeams: [`${teamCode}-3`],
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: `${teamCode}-2`,
@@ -1540,13 +1618,12 @@ describe('v2 - node PATCH', () => {
 					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
 					await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
 
-					await authenticatedPatch(
+					await testPatchRequest(
 						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
 						{
 							subTeams: [`${teamCode}-1`],
 							parentTeam: `${teamCode}-3`,
 						},
-					).expect(
 						200,
 						sandbox.withMeta({
 							code: `${teamCode}-2`,
@@ -1615,23 +1692,24 @@ describe('v2 - node PATCH', () => {
 				['merge', 'replace'].forEach(action => {
 					describe(`with ${action}`, () => {
 						it(`error when relationship to non-existent node`, async () => {
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
 								{
 									techLeads: [personCode],
 								},
-							).expect(400, /Missing related node/);
+								400,
+								/Missing related node/,
+							);
 							sandbox.expectNoEvents();
 						});
 
 						it('create node related to non-existent nodes when using upsert=true', async () => {
 							await sandbox.createNode('Team', teamCode);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
 								{
 									techLeads: [personCode],
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -1673,12 +1751,11 @@ describe('v2 - node PATCH', () => {
 						it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
 							await sandbox.createNode('Team', teamCode);
 							await sandbox.createNode('Person', personCode);
-							await authenticatedPatch(
+							await testPatchRequest(
 								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
 								{
 									techLeads: [personCode],
 								},
-							).expect(
 								200,
 								sandbox.withMeta({
 									code: teamCode,
@@ -1729,12 +1806,13 @@ describe('v2 - node PATCH', () => {
 				name: 'name-1',
 			});
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
 				{
 					name: 'name-1',
 				},
-			).expect(200);
+				200,
+			);
 
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
@@ -1749,10 +1827,11 @@ describe('v2 - node PATCH', () => {
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
 				{ techLeads: [personCode] },
-			).expect(200);
+				200,
+			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
@@ -1767,10 +1846,11 @@ describe('v2 - node PATCH', () => {
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 				{ techLeads: [personCode] },
-			).expect(200);
+				200,
+			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
@@ -1783,9 +1863,11 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			});
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
-			).expect(200);
+				{},
+				200,
+			);
 
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
@@ -1800,10 +1882,11 @@ describe('v2 - node PATCH', () => {
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 				{ name: 'new-name', techLeads: [personCode] },
-			).expect(200);
+				200,
+			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
@@ -1819,10 +1902,11 @@ describe('v2 - node PATCH', () => {
 			);
 			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 				{ name: 'name', techLeads: [`${personCode}-2`] },
-			).expect(200);
+				200,
+			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
@@ -1836,10 +1920,11 @@ describe('v2 - node PATCH', () => {
 		it('detects deleted property as a change', async () => {
 			await sandbox.createNode('Team', { code: teamCode, name: 'name' });
 			const dbQuerySpy = spyDbQuery(sandbox);
-			await authenticatedPatch(
+			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 				{ name: null },
-			).expect(200);
+				200,
+			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
@@ -1859,12 +1944,13 @@ describe('v2 - node PATCH', () => {
 					[team, 'HAS_TECH_LEAD', person2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
-				await authenticatedPatch(
+				await testPatchRequest(
 					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
 					{
 						techLeads: [`${personCode}-1`],
 					},
-				).expect(200);
+					200,
+				);
 
 				expect(
 					dbQuerySpy().args.some(args =>
@@ -1888,12 +1974,13 @@ describe('v2 - node PATCH', () => {
 					[team, 'HAS_TECH_LEAD', person2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
-				await authenticatedPatch(
+				await testPatchRequest(
 					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
 					{
 						techLeads: [`${personCode}-1`],
 					},
-				).expect(200);
+					200,
+				);
 
 				expect(
 					dbQuerySpy().args.some(args =>
@@ -1901,459 +1988,6 @@ describe('v2 - node PATCH', () => {
 					),
 				).toBe(false);
 				sandbox.expectNoEvents();
-			});
-		});
-	});
-
-	describe('lockedFields', () => {
-		const lockedFieldName = '{"name":"v2-node-patch-client"}';
-		const lockedFieldEmail = '{"email":"v2-node-patch-client"}';
-
-		it('throws an error when trying to update a node that is locked by another clientId', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				_lockedFields: '{"name":"admin"}',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-				},
-			).expect(400);
-		});
-
-		it('updates node by updating field and locking ALL edited fields', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=all`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('updates node by updating name and adding it as a locked field', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('updates node that is locked by this clientId', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: lockedFieldName,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('does NOT update node with locked field when it is has already locked it (no duplicates)', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: lockedFieldEmail,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=email`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: lockedFieldEmail,
-				}),
-			);
-		});
-
-		it('adds another field to locked fields', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: lockedFieldEmail,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields:
-						'{"email":"v2-node-patch-client","name":"v2-node-patch-client"}',
-				}),
-			);
-		});
-
-		it('does NOT lock existing fields when those fields are locked by another clientId', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: lockedFieldEmail,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=email`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					_lockedFields: lockedFieldEmail,
-				}),
-			);
-		});
-
-		it('does NOT modify lock fields when just updating locked and unlocked fields', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				email: 'email@example.com',
-				slack: 'slack channel',
-				_lockedFields: lockedFieldName,
-			});
-			await authenticatedPatch(`/v2/node/Team/${teamCode}`, {
-				name: 'new name',
-				email: 'tech@lt.com',
-				slack: 'new slack channel',
-			}).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					email: 'tech@lt.com',
-					slack: 'new slack channel',
-					_lockedFields: '{"name":"v2-node-patch-client"}',
-				}),
-			);
-		});
-
-		it('only locks fields that are given in the query but updates all fields', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				email: 'email@example.com',
-				slack: 'slack channel',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-					email: 'tech@lt.com',
-					slack: 'new slack channel',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-					email: 'tech@lt.com',
-					slack: 'new slack channel',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('creates a new node with locked fields when no exisitng node exists', async () => {
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-				{
-					name: 'new name',
-					email: 'tech@lt.com',
-					slack: 'new slack channel',
-				},
-			).expect(
-				201,
-				sandbox.withCreateMeta({
-					code: teamCode,
-					name: 'new name',
-					email: 'tech@lt.com',
-					slack: 'new slack channel',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('does NOT overwrite existing locked fields when lockFields=all is set', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: '{"name":"another-api"}',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=all`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				400,
-				/The following fields cannot be updated because they are locked by another client: name is locked by another-api/,
-			);
-		});
-
-		it('can lock fields without having to send any data changes', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it('can lock fields when sending values that make no changes', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=name`,
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'name 1',
-					_lockedFields: lockedFieldName,
-				}),
-			);
-		});
-
-		it("doesn't write when 'changing order' of locked fields", async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields:
-					'{"name":"v2-node-patch-client","description":"other-client","email":"v2-node-patch-client"}',
-			});
-
-			const dbQuerySpy = spyDbQuery(sandbox);
-
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?lockFields=email,name`,
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'name 1',
-					_lockedFields:
-						'{"name":"v2-node-patch-client","description":"other-client","email":"v2-node-patch-client"}',
-				}),
-			);
-
-			dbQuerySpy().args.forEach(args => {
-				expect(args[0]).not.toMatch(/MERGE|CREATE/);
-			});
-		});
-
-		describe('no client-id header', () => {
-			setupMocks(sandbox, { namespace }, false);
-
-			it('throws an error when clientId is not set', async () => {
-				await sandbox
-					.request(app)
-					.post(`/v2/node/Team/${teamCode}?lockFields=all`)
-					.namespacedAuth()
-					.send({ name: 'name1' })
-					.expect(
-						400,
-						/clientId needs to be set to a valid system code in order to lock fields/,
-					);
-			});
-		});
-	});
-
-	describe('unlocking fields', () => {
-		it('unlocks fields when request is given', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: '{"email":"v2-node-patch-client"}',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=email`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-				}),
-			);
-		});
-
-		it('unlocks fields when request is given by a different clientId that locked it', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: '{"email":"another-api"}',
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=email`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-				}),
-			);
-		});
-
-		it('unlocks `all` fields', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=all`,
-				{
-					name: 'new name',
-				},
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'new name',
-				}),
-			);
-		});
-
-		it('unlocks the locked field when value sent make no changes', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: `{"name":"v2-node-patch-client"}`,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=name`,
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'name 1',
-				}),
-			);
-		});
-
-		it('unlocks a locked field and writes new value in same request', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: `{"name":"v2-node-patch-client2"}`,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=name`,
-				{ name: 'name 2' },
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'name 2',
-				}),
-			);
-		});
-
-		it('unlocks a locked field and writes new locked value in same request', async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name 1',
-				_lockedFields: `{"name":"v2-node-patch-client"}`,
-			});
-			await authenticatedPatch(
-				`/v2/node/Team/${teamCode}?unlockFields=name&lockFields=name`,
-				{ name: 'name 2' },
-			).expect(
-				200,
-				sandbox.withMeta({
-					code: teamCode,
-					name: 'name 2',
-					_lockedFields: `{"name":"v2-node-patch-client"}`,
-				}),
-			);
-		});
-
-		describe('no value changes', () => {
-			it('unlocks `all` fields', async () => {
-				await sandbox.createNode('Team', {
-					code: teamCode,
-					_lockedFields: `{"code":"v2-node-patch-client","name":"v2-node-patch-client"}`,
-				});
-				await authenticatedPatch(
-					`/v2/node/Team/${teamCode}?unlockFields=all`,
-				).expect(
-					200,
-					sandbox.withMeta({
-						code: teamCode,
-					}),
-				);
-			});
-
-			it('unlocks the only locked field', async () => {
-				await sandbox.createNode('Team', {
-					code: teamCode,
-					_lockedFields: `{"name":"v2-node-patch-client"}`,
-				});
-				await authenticatedPatch(
-					`/v2/node/Team/${teamCode}?unlockFields=name`,
-				).expect(
-					200,
-					sandbox.withMeta({
-						code: teamCode,
-					}),
-				);
 			});
 		});
 	});

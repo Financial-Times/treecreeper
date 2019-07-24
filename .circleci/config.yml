@@ -20,13 +20,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v3-dependency-npm-{{ checksum "package.json" }}-
-        - v3-dependency-npm-{{ checksum "package.json" }}
-        - v3-dependency-npm-
+        - v5-dependency-npm-{{ checksum "package.json" }}-
+        - v5-dependency-npm-{{ checksum "package.json" }}
+        - v5-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v3-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v5-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
@@ -42,7 +42,6 @@ jobs:
           name: Install dependencies
           command: |
             npm install --no-save
-            npm update --no-save
       - run:
           name: Get test env vars
           command: make env

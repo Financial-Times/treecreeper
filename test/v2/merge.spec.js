@@ -17,21 +17,30 @@ describe('merge', () => {
 
 	setupMocks(sandbox, { namespace });
 
+	const testMergeRequest = (payload, ...expectations) => {
+		expectations[0] = expectations[0] || 200;
+		return sandbox
+			.request(app)
+			.post('/v2/merge')
+			.namespacedAuth()
+			.send(payload)
+			.expect(...expectations);
+	};
+
 	describe('error handling', () => {
 		beforeEach(() =>
 			sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]),
 		);
 
 		it('errors if no type supplied', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					sourceCode: teamCode1,
 					destinationCode: teamCode2,
-				})
-				.expect(400, /No type/);
+				},
+				400,
+				/No type/,
+			);
 
 			await Promise.all([
 				verifyExists('Team', teamCode1),
@@ -41,15 +50,14 @@ describe('merge', () => {
 		});
 
 		it('errors if no source code supplied', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					type: 'Team',
 					destinationCode: teamCode2,
-				})
-				.expect(400, /No sourceCode/);
+				},
+				400,
+				/No sourceCode/,
+			);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -57,15 +65,14 @@ describe('merge', () => {
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		});
 		it('errors if no destination code supplied', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					type: 'Team',
 					sourceCode: teamCode1,
-				})
-				.expect(400, /No destinationCode/);
+				},
+				400,
+				/No destinationCode/,
+			);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -73,16 +80,15 @@ describe('merge', () => {
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		});
 		it('errors if type invalid', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					type: 'NotTeam',
 					sourceCode: teamCode1,
 					destinationCode: teamCode2,
-				})
-				.expect(400, /Invalid type/);
+				},
+				400,
+				/Invalid type/,
+			);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -91,16 +97,15 @@ describe('merge', () => {
 		});
 
 		it('errors if source code does not exist', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					type: 'Team',
 					sourceCode: 'not-team1',
 					destinationCode: teamCode2,
-				})
-				.expect(404, /record missing/);
+				},
+				404,
+				/record missing/,
+			);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -108,16 +113,15 @@ describe('merge', () => {
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		});
 		it('errors if destination code does not exist', async () => {
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
+			await testMergeRequest(
+				{
 					type: 'Team',
 					sourceCode: teamCode1,
 					destinationCode: 'not-team2',
-				})
-				.expect(404, /record missing/);
+				},
+				404,
+				/record missing/,
+			);
 			await Promise.all([
 				verifyExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -129,16 +133,11 @@ describe('merge', () => {
 		it('merge unconnected nodes', async () => {
 			await sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await Promise.all([
 				verifyNotExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -152,16 +151,11 @@ describe('merge', () => {
 				['Team', teamCode2],
 			);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await Promise.all([
 				verifyNotExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
@@ -186,16 +180,11 @@ describe('merge', () => {
 
 			await sandbox.connectNodes(team1, 'HAS_TECH_LEAD', person);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await verifyNotExists('Team', teamCode1);
 
 			await testNode(
@@ -233,16 +222,11 @@ describe('merge', () => {
 
 			await sandbox.connectNodes(group, 'HAS_TEAM', team1);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await verifyNotExists('Team', teamCode1);
 
 			await testNode(
@@ -283,16 +267,11 @@ describe('merge', () => {
 				[team2, 'HAS_TECH_LEAD', person],
 			);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await verifyNotExists('Team', teamCode1);
 
 			await testNode(
@@ -323,16 +302,11 @@ describe('merge', () => {
 			);
 
 			await sandbox.connectNodes(team1, 'HAS_TEAM', team2);
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await verifyNotExists('Team', teamCode1);
 
 			await testNode(
@@ -353,16 +327,11 @@ describe('merge', () => {
 				['Team', { code: teamCode1, name: 'potato' }],
 				['Team', { code: teamCode2, name: 'tomato' }],
 			);
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await testNode(
 				'Team',
 				teamCode2,
@@ -380,16 +349,11 @@ describe('merge', () => {
 				['Team', { code: teamCode1, name: 'potato' }],
 				['Team', { code: teamCode2 }],
 			);
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'Team',
+				sourceCode: teamCode1,
+				destinationCode: teamCode2,
+			});
 			await testNode(
 				'Team',
 				teamCode2,
@@ -423,16 +387,11 @@ describe('merge', () => {
 				[system2, 'HAS_TECHNICAL_OWNER', person2],
 			);
 
-			await sandbox
-				.request(app)
-				.post('/v2/merge')
-				.namespacedAuth()
-				.send({
-					type: 'System',
-					sourceCode: `${namespace}-system-1`,
-					destinationCode: `${namespace}-system-2`,
-				})
-				.expect(200);
+			await testMergeRequest({
+				type: 'System',
+				sourceCode: `${namespace}-system-1`,
+				destinationCode: `${namespace}-system-2`,
+			});
 			await verifyNotExists('Team', teamCode1);
 
 			await testNode(

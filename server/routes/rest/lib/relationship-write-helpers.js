@@ -78,10 +78,10 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 			// Must use OPTIONAL MATCH because 'cypher'
 			return stripIndents`
 				WITH node
-					OPTIONAL MATCH (${nodeType})${relationshipFragment(
-				def.relationship,
-				def.direction,
-			)}(related:${def.type})
+					OPTIONAL MATCH (node)${relationshipFragment(
+						def.relationship,
+						def.direction,
+					)}(related:${def.type})
 				WHERE related.code IN $${key}
 				DELETE relationship
 			`;

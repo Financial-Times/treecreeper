@@ -77,6 +77,7 @@ const update = async input => {
 			newContent: body,
 			action: relationshipAction,
 		});
+
 		const addedRelationships = getAddedRelationships({
 			nodeType,
 			initialContent: existingRecord,

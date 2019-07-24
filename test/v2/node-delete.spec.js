@@ -12,27 +12,26 @@ describe('v2 - node DELETE', () => {
 
 	setupMocks(sandbox, { namespace });
 
+	const testDeleteRequest = (...expectations) =>
+		sandbox
+			.request(app)
+			.delete(`/v2/node/Team/${namespace}-team`)
+			.namespacedAuth()
+			.expect(...expectations);
+
 	it('deletes a detached node', async () => {
 		await sandbox.createNode('Team', {
 			code: `${namespace}-team`,
 			name: 'name1',
 		});
-		await sandbox
-			.request(app)
-			.delete(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(204);
+		await testDeleteRequest(204);
 
 		await verifyNotExists('Team', `${namespace}-team`);
 		sandbox.expectEvents(['DELETE', `${namespace}-team`, 'Team']);
 	});
 
 	it('404 when deleting non-existent node', async () => {
-		await sandbox
-			.request(app)
-			.delete(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(404);
+		await testDeleteRequest(404);
 		sandbox.expectNoEvents();
 	});
 
@@ -43,16 +42,12 @@ describe('v2 - node DELETE', () => {
 		);
 		await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person]);
 
-		await sandbox
-			.request(app)
-			.delete(`/v2/node/Team/${namespace}-team`)
-			.namespacedAuth()
-			.expect(
-				409,
-				new RegExp(
-					`Cannot delete - Team ${namespace}-team has relationships. Remove all techLeads relationships before attempting to delete this record.`,
-				),
-			);
+		await testDeleteRequest(
+			409,
+			new RegExp(
+				`Cannot delete - Team ${namespace}-team has relationships. Remove all techLeads relationships before attempting to delete this record.`,
+			),
+		);
 
 		await verifyExists('Team', `${namespace}-team`);
 		sandbox.expectNoEvents();
@@ -60,11 +55,7 @@ describe('v2 - node DELETE', () => {
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await sandbox
-			.request(app)
-			.delete(`/v2/node/Team/${namespace}-team`)
-			.auth()
-			.expect(500);
+		await testDeleteRequest(500);
 		sandbox.expectNoEvents();
 	});
 });
