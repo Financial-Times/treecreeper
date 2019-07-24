@@ -1,8 +1,4 @@
-const {
-	writeFileToS3,
-	patchS3file,
-	deleteFileFromS3,
-} = require('../../server/routes/rest/lib/s3-documents-helper');
+const S3DocumentsHelper = require('../../server/routes/rest/lib/s3-documents-helper');
 
 describe('S3 Documents Helper', () => {
 	const stubOutS3 = (resolved, value) => {
@@ -22,11 +18,11 @@ describe('S3 Documents Helper', () => {
 					.mockRejectedValueOnce(new Error("node doesn't exist")),
 			});
 		}
-		const mockS3Bucket = () => ({
+		const mockS3Bucket = {
 			upload: stubUpload,
 			deleteObject: stubDelete,
 			getObject: stubGetObject,
-		});
+		};
 		return { stubUpload, stubDelete, stubGetObject, mockS3Bucket };
 	};
 
@@ -44,7 +40,12 @@ describe('S3 Documents Helper', () => {
 	it('writes a file to S3', () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const { stubUpload, mockS3Bucket } = stubOutS3(false, null);
-		writeFileToS3(requestNodeType, requestCode, requestBody, mockS3Bucket);
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		s3DocumentsHelper.writeFileToS3(
+			requestNodeType,
+			requestCode,
+			requestBody,
+		);
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload.mock.calls[0][0]).toEqual({
 			Bucket: 'biz-ops-documents.510688331160',
@@ -56,7 +57,8 @@ describe('S3 Documents Helper', () => {
 	it('deletes a file from S3', () => {
 		const { requestNodeType, requestCode } = exampleRequest();
 		const { stubDelete, mockS3Bucket } = stubOutS3(false, null);
-		deleteFileFromS3(requestNodeType, requestCode, mockS3Bucket);
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		s3DocumentsHelper.deleteFileFromS3(requestNodeType, requestCode);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete.mock.calls[0][0]).toEqual({
 			Bucket: 'biz-ops-documents.510688331160',
@@ -71,7 +73,8 @@ describe('S3 Documents Helper', () => {
 			true,
 			JSON.stringify(savedBody),
 		);
-		await patchS3file(
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
@@ -98,7 +101,10 @@ describe('S3 Documents Helper', () => {
 			true,
 			JSON.stringify(savedBody),
 		);
-		await patchS3file(
+
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+
+		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
@@ -124,7 +130,8 @@ describe('S3 Documents Helper', () => {
 			false,
 			new Error("node doesn't exist"),
 		);
-		await patchS3file(
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,

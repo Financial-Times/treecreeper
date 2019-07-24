@@ -16,7 +16,7 @@ const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const { prepareToWriteRelationships } = require('./relationship-write-helpers');
 const { mergeLockedFields } = require('./locked-fields');
 const salesforceSync = require('../../../lib/salesforce-sync');
-const { sendDocumentsToS3 } = require('../../rest/lib/s3-documents-helper');
+const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
 
 let setSalesforceIdForSystem;
 
@@ -55,9 +55,11 @@ const writeNode = async ({
 
 	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
+	const s3DocumentsHelper = new S3DocumentsHelper();
+
 	const results = await Promise.all([
 		executeQuery(queryParts.join('\n'), parameters, true),
-		sendDocumentsToS3(method, nodeType, code, body),
+		s3DocumentsHelper.sendDocumentsToS3(method, nodeType, code, body),
 	]);
 	let result = results[0];
 	// In _theory_ we could return the above all the time (it works most of the time)

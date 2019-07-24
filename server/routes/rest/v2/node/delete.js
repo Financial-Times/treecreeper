@@ -4,7 +4,7 @@ const { preflightChecks } = require('../../lib/error-handling');
 const { executeQuery } = require('../../lib/neo4j-model');
 const { logNodeDeletion } = require('../../../../lib/log-to-kinesis');
 const { getNodeWithRelationships } = require('../../lib/read-helpers');
-const { deleteFileFromS3 } = require('../../lib/s3-documents-helper');
+const S3DocumentsHelper = require('../../lib/s3-documents-helper');
 
 module.exports = async input => {
 	validateParams(input);
@@ -29,9 +29,11 @@ module.exports = async input => {
 	DELETE node
 	`;
 
+	const s3DocumentsHelper = new S3DocumentsHelper();
+
 	await Promise.all([
 		executeQuery(query, { code }),
-		deleteFileFromS3(nodeType, code),
+		s3DocumentsHelper.deleteFileFromS3(nodeType, code),
 	]);
 	logNodeDeletion(existingRecord.getNode());
 
