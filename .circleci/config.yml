@@ -42,7 +42,6 @@ jobs:
           name: Install dependencies
           command: |
             npm install --no-save
-            npm update --no-save
       - run:
           name: Get test env vars
           command: make env
