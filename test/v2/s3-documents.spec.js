@@ -3,7 +3,13 @@ const S3DocumentsHelper = require('../../server/routes/rest/lib/s3-documents-hel
 describe('S3 Documents Helper', () => {
 	const stubOutS3 = (resolved, value) => {
 		const stubUpload = jest.fn();
+		stubUpload.mockReturnValueOnce({
+			promise: jest.fn().mockResolvedValueOnce(true),
+		});
 		const stubDelete = jest.fn();
+		stubDelete.mockReturnValueOnce({
+			promise: jest.fn().mockResolvedValueOnce(true),
+		});
 		const stubGetObject = jest.fn();
 		if (resolved) {
 			stubGetObject.mockReturnValueOnce({
