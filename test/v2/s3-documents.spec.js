@@ -53,7 +53,7 @@ describe('S3 Documents Helper', () => {
 			requestBody,
 		);
 		expect(stubUpload).toHaveBeenCalledTimes(1);
-		expect(stubUpload.mock.calls[0][0]).toEqual({
+		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),
@@ -66,7 +66,7 @@ describe('S3 Documents Helper', () => {
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		s3DocumentsHelper.deleteFileFromS3(requestNodeType, requestCode);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
-		expect(stubDelete.mock.calls[0][0]).toEqual({
+		expect(stubDelete).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 		});
@@ -87,7 +87,7 @@ describe('S3 Documents Helper', () => {
 			mockS3Bucket,
 		);
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject.mock.calls[0][0]).toEqual({
+		expect(stubGetObject).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 		});
@@ -118,12 +118,12 @@ describe('S3 Documents Helper', () => {
 		);
 		const mergedBody = Object.assign(savedBody, requestBody);
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject.mock.calls[0][0]).toEqual({
+		expect(stubGetObject).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
-		expect(stubUpload.mock.calls[0][0]).toEqual({
+		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(mergedBody),
@@ -144,12 +144,12 @@ describe('S3 Documents Helper', () => {
 			mockS3Bucket,
 		);
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject.mock.calls[0][0]).toEqual({
+		expect(stubGetObject).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
-		expect(stubUpload.mock.calls[0][0]).toEqual({
+		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),

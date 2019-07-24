@@ -57,18 +57,17 @@ const writeNode = async ({
 
 	const s3DocumentsHelper = new S3DocumentsHelper();
 
-	const results = await Promise.all([
+	let [neo4jWriteResult] = await Promise.all([
 		executeQuery(queryParts.join('\n'), parameters, true),
 		s3DocumentsHelper.sendDocumentsToS3(method, nodeType, code, body),
 	]);
-	let result = results[0];
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
 	if (willDeleteRelationships) {
-		result = await getNodeWithRelationships(nodeType, code);
+		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
-	const responseData = result.toApiV2(nodeType);
+	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
@@ -80,7 +79,7 @@ const writeNode = async ({
 	}
 
 	logNodeChanges({
-		result,
+		result: neo4jWriteResult,
 		removedRelationships,
 		updatedProperties: [
 			...new Set([

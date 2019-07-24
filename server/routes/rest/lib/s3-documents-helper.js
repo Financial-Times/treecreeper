@@ -2,13 +2,13 @@ const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
 const { logger } = require('../../../lib/request-context');
 
-const s3BucketReal = new AWS.S3({
+const s3BucketInstance = new AWS.S3({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
 class S3DocumentsHelper {
-	constructor(s3Bucket = s3BucketReal) {
+	constructor(s3Bucket = s3BucketInstance) {
 		const s3BucketPrefixCode = 'biz-ops-documents';
 		this.s3BucketName = `${s3BucketPrefixCode}.${process.env.AWS_ACCOUNT_ID}`;
 		this.s3Bucket = s3Bucket;
