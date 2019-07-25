@@ -8,7 +8,13 @@ const BIZ_OPS = 'biz-ops';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
+const hydrateFieldsets = ({
+	properties,
+	fieldsets = {},
+	includeMetaFields,
+	useMinimumViableRecord,
+	minimumViableRecord = [],
+}) => {
 	const fieldsetEntries = Object.entries(fieldsets);
 
 	const hasRealFieldsets = !!fieldsetEntries.length;
@@ -20,13 +26,32 @@ const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 		},
 	]);
 
+	if (useMinimumViableRecord && minimumViableRecord.length) {
+		fieldsetEntries.unshift([
+			'minimumViableRecord',
+			{ heading: 'Minimum viable record' },
+		]);
+	}
+
 	if (includeMetaFields) {
 		fieldsetEntries.push(['meta', { heading: 'Metadata' }]);
 	}
 
+	const insertIntoFieldset = (fieldsetName = 'misc', prop, def) => {
+		const [, targetFieldset] = fieldsetEntries.find(
+			([name]) => name === fieldsetName,
+		);
+
+		targetFieldset.properties = targetFieldset.properties || [];
+		targetFieldset.properties.push([prop, def]);
+	};
+
 	properties.forEach(([prop, def]) => {
 		const { fieldset } = def;
-		if (fieldset === 'self') {
+
+		if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {
+			insertIntoFieldset('minimumViableRecord', prop, def);
+		} else if (fieldset === 'self') {
 			fieldsetEntries.push([
 				prop,
 				{
@@ -37,11 +62,7 @@ const hydrateFieldsets = (properties, fieldsets = {}, includeMetaFields) => {
 				},
 			]);
 		} else {
-			const [, targetFieldset] = fieldsetEntries.find(
-				([name]) => name === (fieldset || 'misc'),
-			);
-			targetFieldset.properties = targetFieldset.properties || [];
-			targetFieldset.properties.push([prop, def]);
+			insertIntoFieldset(fieldset, prop, def);
 		}
 	});
 
@@ -74,9 +95,10 @@ const cacheKeyGenerator = (
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
+		useMinimumViableRecord = false,
 	} = {},
 ) =>
-	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}`;
+	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}:${useMinimumViableRecord}`;
 
 const getType = (
 	rawData,
@@ -87,6 +109,7 @@ const getType = (
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
+		useMinimumViableRecord = false,
 	} = {},
 ) => {
 	const typeSchema = getFromRawData(typeName, rawData);
@@ -154,16 +177,17 @@ const getType = (
 		.filter(entry => !!entry);
 
 	if (groupProperties) {
-		typeSchema.fieldsets = hydrateFieldsets(
+		typeSchema.fieldsets = hydrateFieldsets({
 			properties,
-			typeSchema.fieldsets,
+			fieldsets: typeSchema.fieldsets,
 			includeMetaFields,
-		);
+			useMinimumViableRecord,
+			minimumViableRecord: typeSchema.minimumViableRecord,
+		});
 		delete typeSchema.properties;
 	} else {
 		typeSchema.properties = entriesArrayToObject(properties);
 	}
-
 	return typeSchema;
 };
 

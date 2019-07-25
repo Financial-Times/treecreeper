@@ -330,6 +330,139 @@ describe('get-type', () => {
 		expect(type.fieldsets.misc.heading).toBe('General');
 	});
 
+	describe('minimum viable record', () => {
+		it('creates fieldset for minimum viable record fields', () => {
+			const type = typeFromRawData(
+				{
+					name: 'Type1',
+					minimumViableRecord: ['secondaryProp', 'miscProp'],
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+						},
+						secondaryProp: {
+							type: 'Document',
+							label: 'Standalone',
+							fieldset: 'main',
+						},
+						miscProp: {
+							type: 'SomeEnum',
+						},
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please',
+						},
+						secondary: {
+							heading: 'Secondary properties',
+							description: 'Fill these out optionally',
+						},
+					},
+				},
+				{
+					options: {
+						groupProperties: true,
+						useMinimumViableRecord: true,
+					},
+				},
+			);
+			console.log(Object.keys(type.fieldsets));
+			expect(
+				type.fieldsets.minimumViableRecord.properties.secondaryProp,
+			).toBeDefined();
+			expect(
+				type.fieldsets.minimumViableRecord.properties.miscProp,
+			).toBeDefined();
+			expect(type.fieldsets.misc).not.toBeDefined();
+			expect(
+				type.fieldsets.main.properties.secondaryProp,
+			).not.toBeDefined();
+
+			expect(Object.keys(type.fieldsets)[0]).toEqual(
+				'minimumViableRecord',
+			);
+			expect(type.fieldsets.minimumViableRecord.heading).toEqual(
+				'Minimum viable record',
+			);
+		});
+
+		it('skips creating minimum viable record fieldset if option not passed in', () => {
+			const type = typeFromRawData(
+				{
+					name: 'Type1',
+					minimumViableRecord: ['secondaryProp', 'miscProp'],
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+						},
+						secondaryProp: {
+							type: 'Document',
+							label: 'Standalone',
+							fieldset: 'main',
+						},
+						miscProp: {
+							type: 'SomeEnum',
+						},
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please',
+						},
+						secondary: {
+							heading: 'Secondary properties',
+							description: 'Fill these out optionally',
+						},
+					},
+				},
+				{ options: { groupProperties: true } },
+			);
+			expect(type.fieldsets.minimumViableRecord).not.toBeDefined();
+		});
+
+		it('skips creating minimum viable record fieldset if no list of fields defined in schema', () => {
+			const type = typeFromRawData(
+				{
+					name: 'Type1',
+					properties: {
+						mainProp: {
+							type: 'Word',
+							fieldset: 'main',
+						},
+						secondaryProp: {
+							type: 'Document',
+							label: 'Standalone',
+							fieldset: 'main',
+						},
+						miscProp: {
+							type: 'SomeEnum',
+						},
+					},
+					fieldsets: {
+						main: {
+							heading: 'Main properties',
+							description: 'Fill these out please',
+						},
+						secondary: {
+							heading: 'Secondary properties',
+							description: 'Fill these out optionally',
+						},
+					},
+				},
+				{
+					options: {
+						groupProperties: true,
+						useMinimumViableRecord: true,
+					},
+				},
+			);
+			expect(type.fieldsets.minimumViableRecord).not.toBeDefined();
+		});
+	});
+
 	describe('misc heading of GENERAL for fieldset', () => {
 		it('is returned when includeMetaFields is TRUE', () => {
 			const type = typeFromRawData(
