@@ -4,24 +4,24 @@ const { schemaReady } = require('../../server/lib/init-schema');
 
 const namespace = 'salesforce-sync';
 const { dropDb } = require('../helpers/test-data');
-const request = require('../helpers/supertest').getNamespacedSupertest(
-	namespace,
-);
+const { setupMocks } = require('../helpers');
 
 describe('salesforce sync integration', () => {
 	beforeAll(() => schemaReady);
 	beforeEach(async () => {
 		dropDb(namespace);
-		jest.spyOn(salesforceSync, 'setSalesforceIdForSystem');
 	});
 
 	afterEach(async () => {
 		dropDb(namespace);
-		salesforceSync.setSalesforceIdForSystem.mockRestore();
 	});
 
+	const sandbox = {};
+	setupMocks(sandbox, { namespace });
+
 	it('should call when POSTing System', async () => {
-		await request(app)
+		await sandbox
+			.request(app)
 			.post(`/v2/node/System/${namespace}-system`)
 			.namespacedAuth()
 			.send({
@@ -36,7 +36,8 @@ describe('salesforce sync integration', () => {
 	});
 
 	it.skip('should call when PATCHing System', async () => {
-		await request(app)
+		await sandbox
+			.request(app)
 			.patch(`/v2/node/System/${namespace}-system`)
 			.namespacedAuth()
 			.send({
@@ -51,7 +52,8 @@ describe('salesforce sync integration', () => {
 	});
 
 	it('should not call when POSTing non System', async () => {
-		await request(app)
+		await sandbox
+			.request(app)
 			.post(`/v2/node/Team/${namespace}-system`)
 			.namespacedAuth()
 			.send({
@@ -61,7 +63,8 @@ describe('salesforce sync integration', () => {
 	});
 
 	it('should not call when PATCHing non System', async () => {
-		await request(app)
+		await sandbox
+			.request(app)
 			.patch(`/v2/node/Team/${namespace}-system`)
 			.namespacedAuth()
 			.send({

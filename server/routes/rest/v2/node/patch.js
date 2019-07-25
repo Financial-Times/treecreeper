@@ -138,6 +138,7 @@ const update = async input => {
 		return await writeNode({
 			nodeType,
 			code,
+			body,
 			method: 'PATCH',
 			upsert,
 			isCreate: !existingRecord,

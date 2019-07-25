@@ -5,6 +5,7 @@ const EventLogWriter = require('../../server/lib/event-log-writer');
 const salesForceSync = require('../../server/lib/salesforce-sync');
 const { getNamespacedSupertest } = require('./supertest');
 const dbConnection = require('./db-connection');
+const S3DocumentsHelper = require('../../server/routes/rest/lib/s3-documents-helper');
 
 const { schemaReady } = require('../../server/lib/init-schema');
 
@@ -19,6 +20,43 @@ const stubKinesis = () => {
 	);
 
 	return EventLogWriter.prototype.sendEvent;
+};
+
+const stubS3Delete = () => {
+	jest.spyOn(
+		S3DocumentsHelper.prototype,
+		'deleteFileFromS3',
+	).mockImplementation(data => {
+		logger.debug('S3DocumentsHelper stub deleteFileFromS3 called', {
+			event: data.event,
+		});
+		return Promise.resolve();
+	});
+	return S3DocumentsHelper.prototype.deleteFileFromS3;
+};
+
+const stubS3Patch = () => {
+	jest.spyOn(S3DocumentsHelper.prototype, 'patchS3file').mockImplementation(
+		data => {
+			logger.debug('S3DocumentsHelper stub patchS3file called', {
+				event: data.event,
+			});
+			return Promise.resolve();
+		},
+	);
+	return S3DocumentsHelper.prototype.patchS3file;
+};
+
+const stubS3Upload = () => {
+	jest.spyOn(S3DocumentsHelper.prototype, 'uploadToS3').mockImplementation(
+		data => {
+			logger.debug('S3DocumentsHelper stub uploadToS3 called', {
+				event: data.event,
+			});
+			return Promise.resolve();
+		},
+	);
+	return S3DocumentsHelper.prototype.uploadToS3;
 };
 
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
@@ -47,6 +85,9 @@ const setupMocks = (
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis(sandbox.sinon);
+		sandbox.stubPatchS3file = stubS3Patch(sandbox.sinon);
+		sandbox.stubDeleteFileFromS3 = stubS3Delete(sandbox.sinon);
+		sandbox.stubS3Upload = stubS3Upload(sandbox.sinon);
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
