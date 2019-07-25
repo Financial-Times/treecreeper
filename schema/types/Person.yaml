@@ -198,6 +198,10 @@ properties:
     description: The teams this person is a member of.
     hasMany: true
     fieldset: team
+  okrLink:
+    type: Url
+    label: OKR Link
+    description: "A url linking to this person's Objectives & Key Results."
 fieldsets:
   general:
     heading: General information
