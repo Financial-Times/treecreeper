@@ -31,7 +31,23 @@ describe('v2 - node POST', () => {
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
 		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
+		sandbox.expectS3Actions([
+			{
+				action: 'upload',
+				params: {
+					Body: JSON.stringify({ code: teamCode }),
+					Bucket: 'biz-ops-documents.510688331160',
+					Key: `Team/${teamCode}`,
+				},
+				requestType: 'POST',
+			},
+			{
+				action: 'delete',
+				nodeType: 'Team',
+				code: teamCode,
+			},
+		]);
 	});
 
 	it('create node', async () => {
@@ -53,7 +69,12 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code', 'name']]);
+		sandbox.expectKinesisEvents([
+			'CREATE',
+			teamCode,
+			'Team',
+			['code', 'name'],
+		]);
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -67,7 +88,7 @@ describe('v2 - node POST', () => {
 		);
 
 		verifyNotExists('Repository', repoCode);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
@@ -94,7 +115,7 @@ describe('v2 - node POST', () => {
 			.expect(200, result);
 
 		await testNode('Repository', repoCode, result);
-		sandbox.expectEvents([
+		sandbox.expectKinesisEvents([
 			'CREATE',
 			repoCode,
 			'Repository',
@@ -122,7 +143,12 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code', 'name']]);
+		sandbox.expectKinesisEvents([
+			'CREATE',
+			teamCode,
+			'Team',
+			['code', 'name'],
+		]);
 	});
 
 	// TODO - once we have a test schema, need to test other temporal types
@@ -147,7 +173,7 @@ describe('v2 - node POST', () => {
 				lastServiceReviewDate: isoDateString,
 			}),
 		);
-		sandbox.expectEvents([
+		sandbox.expectKinesisEvents([
 			'CREATE',
 			systemCode,
 			'System',
@@ -165,7 +191,7 @@ describe('v2 - node POST', () => {
 			409,
 			new RegExp(`Team ${teamCode} already exists`),
 		);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
 	});
 
 	it('error when conflicting code values', async () => {
@@ -177,7 +203,7 @@ describe('v2 - node POST', () => {
 				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
 			),
 		);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
@@ -198,7 +224,7 @@ describe('v2 - node POST', () => {
 			{ code: teamCode },
 			200,
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['code']]);
+		sandbox.expectKinesisEvents(['CREATE', teamCode, 'Team', ['code']]);
 		await verifyExists('Team', teamCode);
 	});
 
@@ -248,7 +274,7 @@ describe('v2 - node POST', () => {
 			],
 		);
 
-		sandbox.expectEvents(
+		sandbox.expectKinesisEvents(
 			[
 				'CREATE',
 				teamCode,
@@ -270,7 +296,7 @@ describe('v2 - node POST', () => {
 			400,
 			/Missing related node/,
 		);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
 	});
 
@@ -319,7 +345,7 @@ describe('v2 - node POST', () => {
 			],
 		);
 
-		sandbox.expectEvents(
+		sandbox.expectKinesisEvents(
 			[
 				'CREATE',
 				teamCode,

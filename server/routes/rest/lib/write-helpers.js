@@ -16,12 +16,17 @@ const { logNodeChanges } = require('../../../lib/log-to-kinesis');
 const { prepareToWriteRelationships } = require('./relationship-write-helpers');
 const { mergeLockedFields } = require('./locked-fields');
 const salesforceSync = require('../../../lib/salesforce-sync');
+const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
+
+const s3DocumentsHelper = new S3DocumentsHelper();
+const { logger } = require('../../../lib/request-context');
 
 let setSalesforceIdForSystem;
 
 const writeNode = async ({
 	nodeType,
 	code,
+	body,
 	method,
 	upsert,
 	isCreate,
@@ -53,14 +58,30 @@ const writeNode = async ({
 
 	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
-	let result = await executeQuery(queryParts.join('\n'), parameters, true);
+	let neo4jWriteResult;
+	await s3DocumentsHelper.sendDocumentsToS3(method, nodeType, code, body);
+	try {
+		neo4jWriteResult = await executeQuery(
+			queryParts.join('\n'),
+			parameters,
+			true,
+		);
+	} catch (err) {
+		logger.info(
+			err,
+			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+		);
+		s3DocumentsHelper.deleteFileFromS3(nodeType, code);
+		throw new Error(err);
+	}
+
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
 	if (willDeleteRelationships) {
-		result = await getNodeWithRelationships(nodeType, code);
+		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
-	const responseData = result.toApiV2(nodeType);
+	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
@@ -72,7 +93,7 @@ const writeNode = async ({
 	}
 
 	logNodeChanges({
-		result,
+		result: neo4jWriteResult,
 		removedRelationships,
 		updatedProperties: [
 			...new Set([
@@ -110,6 +131,7 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	return writeNode({
 		nodeType,
 		code,
+		body,
 		method,
 		upsert,
 		isCreate: true,

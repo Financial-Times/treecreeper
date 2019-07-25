@@ -4,6 +4,10 @@ const { preflightChecks } = require('../../lib/error-handling');
 const { executeQuery } = require('../../lib/neo4j-model');
 const { logNodeDeletion } = require('../../../../lib/log-to-kinesis');
 const { getNodeWithRelationships } = require('../../lib/read-helpers');
+const S3DocumentsHelper = require('../../lib/s3-documents-helper');
+
+const s3DocumentsHelper = new S3DocumentsHelper();
+const { logger } = require('../../../../lib/request-context');
 
 module.exports = async input => {
 	validateParams(input);
@@ -28,7 +32,18 @@ module.exports = async input => {
 	DELETE node
 	`;
 
-	await executeQuery(query, { code });
+	await s3DocumentsHelper.deleteFileFromS3(nodeType, code);
+	try {
+		await executeQuery(query, { code });
+	} catch (err) {
+		logger.info(
+			err,
+			'DELETE: Neo4j Delete unsuccessful, attempting to rollback S3 delete',
+		);
+		s3DocumentsHelper.restoreToPreviousVersion(nodeType, code);
+		throw new Error(err);
+	}
+
 	logNodeDeletion(existingRecord.getNode());
 
 	return { status: 204 };

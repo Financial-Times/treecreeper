@@ -61,7 +61,7 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('Not create property when passed empty string', async () => {
@@ -89,7 +89,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
 	});
 
 	describe('temporal properties', () => {
@@ -117,7 +117,7 @@ describe('v2 - node PATCH', () => {
 					lastServiceReviewDate: isoDateString,
 				}),
 			);
-			sandbox.expectEvents([
+			sandbox.expectKinesisEvents([
 				'UPDATE',
 				systemCode,
 				'System',
@@ -153,7 +153,7 @@ describe('v2 - node PATCH', () => {
 					lastServiceReviewDate: isoDateString,
 				}),
 			);
-			sandbox.expectEvents([
+			sandbox.expectKinesisEvents([
 				'UPDATE',
 				systemCode,
 				'System',
@@ -189,7 +189,7 @@ describe('v2 - node PATCH', () => {
 					lastServiceReviewDate: isoDateString,
 				}),
 			);
-			sandbox.expectNoEvents();
+			sandbox.expectNoKinesisEvents();
 		});
 	});
 
@@ -218,7 +218,12 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['description']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			teamCode,
+			'Team',
+			['description'],
+		]);
 	});
 
 	it('Not remove property when falsy value sent in payload', async () => {
@@ -245,7 +250,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['isActive']]);
+		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['isActive']]);
 	});
 
 	it('Create when patching non-existent node', async () => {
@@ -269,7 +274,12 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['CREATE', teamCode, 'Team', ['name', 'code']]);
+		sandbox.expectKinesisEvents([
+			'CREATE',
+			teamCode,
+			'Team',
+			['name', 'code'],
+		]);
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -284,8 +294,8 @@ describe('v2 - node PATCH', () => {
 			),
 		);
 
-		verifyNotExists('Repository', repoCode);
-		sandbox.expectNoEvents();
+		await verifyNotExists('Repository', repoCode);
+		sandbox.expectNoKinesisEvents();
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
@@ -312,7 +322,7 @@ describe('v2 - node PATCH', () => {
 			.expect(201, result);
 
 		await testNode('Repository', repoCode, result);
-		sandbox.expectEvents([
+		sandbox.expectKinesisEvents([
 			'CREATE',
 			repoCode,
 			'Repository',
@@ -332,8 +342,8 @@ describe('v2 - node PATCH', () => {
 				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
 			),
 		);
-		verifyNotExists('Team', teamCode);
-		sandbox.expectNoEvents();
+		await verifyNotExists('Team', teamCode);
+		sandbox.expectNoKinesisEvents();
 	});
 
 	it('not error when non-conflicting code values', async () => {
@@ -347,7 +357,7 @@ describe('v2 - node PATCH', () => {
 			200,
 		);
 
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('error when unrecognised attribute', async () => {
@@ -359,14 +369,33 @@ describe('v2 - node PATCH', () => {
 			400,
 			/Invalid property `foo` on type `Team`/,
 		);
-		verifyNotExists('Team', teamCode);
-		sandbox.expectNoEvents();
+		await verifyNotExists('Team', teamCode);
+		sandbox.expectNoKinesisEvents();
 	});
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
 		await testPatchRequest(`/v2/node/Team/${teamCode}`, {}, 500);
-		sandbox.expectNoEvents();
+		sandbox.expectNoKinesisEvents();
+		sandbox.expectS3Actions([
+			{
+				action: 'patch',
+				nodeType: 'Team',
+				code: teamCode,
+				body: { code: teamCode },
+				// params: {
+				// 	Body: JSON.stringify({code: teamCode}),
+				// 	Bucket: "biz-ops-documents.510688331160",
+				// 	Key: `Team/${teamCode}`
+				// },
+				// requestType: 'PATCH'
+			},
+			{
+				action: 'delete',
+				nodeType: 'Team',
+				code: teamCode,
+			},
+		]);
 	});
 
 	it("deletes attributes which are provided as 'null'", async () => {
@@ -392,7 +421,7 @@ describe('v2 - node PATCH', () => {
 				code: teamCode,
 			}),
 		);
-		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
@@ -447,7 +476,7 @@ describe('v2 - node PATCH', () => {
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
-				sandbox.expectNoEvents();
+				sandbox.expectNoKinesisEvents();
 			});
 
 			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
@@ -460,7 +489,7 @@ describe('v2 - node PATCH', () => {
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
-				sandbox.expectNoEvents();
+				sandbox.expectNoKinesisEvents();
 			});
 			['merge', 'replace'].forEach(action =>
 				describe(`with ${action} action`, () => {
@@ -509,7 +538,7 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								['UPDATE', teamCode, 'Team', ['techLeads']],
 								[
 									'UPDATE',
@@ -538,7 +567,7 @@ describe('v2 - node PATCH', () => {
 									code: teamCode,
 								}),
 							);
-							sandbox.expectNoEvents();
+							sandbox.expectNoKinesisEvents();
 						});
 
 						it("can attempt to delete a specific relationship that doesn't exist", async () => {
@@ -581,7 +610,7 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectNoEvents();
+							sandbox.expectNoKinesisEvents();
 						});
 
 						it('can delete multiple specific relationships of the same kind', async () => {
@@ -635,7 +664,7 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								['UPDATE', teamCode, 'Team', ['techLeads']],
 								[
 									'UPDATE',
@@ -685,7 +714,7 @@ describe('v2 - node PATCH', () => {
 									code: teamCode,
 								}),
 							);
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
 									teamCode,
@@ -750,7 +779,7 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
 									`${teamCode}-3`,
@@ -809,7 +838,7 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								['UPDATE', teamCode, 'Team', ['techLeads']],
 								[
 									'UPDATE',
@@ -847,7 +876,7 @@ describe('v2 - node PATCH', () => {
 									code: teamCode,
 								}),
 							);
-							sandbox.expectNoEvents();
+							sandbox.expectNoKinesisEvents();
 						});
 					});
 
@@ -870,7 +899,7 @@ describe('v2 - node PATCH', () => {
 									code: teamCode,
 								}),
 							);
-							sandbox.expectNoEvents();
+							sandbox.expectNoKinesisEvents();
 						});
 
 						it('can delete entire relationship sets', async () => {
@@ -905,7 +934,7 @@ describe('v2 - node PATCH', () => {
 								}),
 							);
 
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
 									teamCode,
@@ -980,7 +1009,7 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
 									`${teamCode}-2`,
@@ -1071,7 +1100,7 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
 									`${teamCode}-2`,
@@ -1107,7 +1136,7 @@ describe('v2 - node PATCH', () => {
 					teamCode,
 					sandbox.withMeta({ code: teamCode }),
 				);
-				sandbox.expectNoEvents();
+				sandbox.expectNoKinesisEvents();
 			});
 
 			describe('__-to-one relationships', () => {
@@ -1150,7 +1179,7 @@ describe('v2 - node PATCH', () => {
 							],
 						);
 
-						sandbox.expectEvents(
+						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
 								teamCode,
@@ -1203,7 +1232,7 @@ describe('v2 - node PATCH', () => {
 							],
 						);
 
-						sandbox.expectEvents(
+						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
 								teamCode,
@@ -1244,7 +1273,7 @@ describe('v2 - node PATCH', () => {
 							}),
 						);
 
-						sandbox.expectNoEvents();
+						sandbox.expectNoKinesisEvents();
 					});
 
 					it('replace existing relationship', async () => {
@@ -1288,7 +1317,7 @@ describe('v2 - node PATCH', () => {
 							],
 						);
 
-						sandbox.expectEvents(
+						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
 								teamCode,
@@ -1352,7 +1381,7 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
@@ -1414,7 +1443,7 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						[
 							'UPDATE',
@@ -1463,7 +1492,7 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
@@ -1513,7 +1542,7 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						[
 							'UPDATE',
@@ -1603,7 +1632,7 @@ describe('v2 - node PATCH', () => {
 						],
 					);
 
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						['UPDATE', `${teamCode}-2`, 'Team', ['subTeams']],
 						['UPDATE', `${teamCode}-3`, 'Team', ['parentTeam']],
 					);
@@ -1665,7 +1694,7 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectEvents(
+					sandbox.expectKinesisEvents(
 						[
 							'UPDATE',
 							`${teamCode}-1`,
@@ -1700,7 +1729,7 @@ describe('v2 - node PATCH', () => {
 								400,
 								/Missing related node/,
 							);
-							sandbox.expectNoEvents();
+							sandbox.expectNoKinesisEvents();
 						});
 
 						it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -1737,7 +1766,7 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								['UPDATE', teamCode, 'Team', ['techLeads']],
 								[
 									'CREATE',
@@ -1783,7 +1812,7 @@ describe('v2 - node PATCH', () => {
 								],
 							);
 
-							sandbox.expectEvents(
+							sandbox.expectKinesisEvents(
 								['UPDATE', teamCode, 'Team', ['techLeads']],
 								[
 									'UPDATE',
@@ -1817,7 +1846,7 @@ describe('v2 - node PATCH', () => {
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
-			sandbox.expectNoEvents();
+			sandbox.expectNoKinesisEvents();
 		});
 
 		it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
@@ -1836,7 +1865,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
-			sandbox.expectNoEvents();
+			sandbox.expectNoKinesisEvents();
 		});
 
 		it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
@@ -1855,7 +1884,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
-			sandbox.expectNoEvents();
+			sandbox.expectNoKinesisEvents();
 		});
 
 		it("doesn't write if no real lockField changes detected", async () => {
@@ -1872,7 +1901,7 @@ describe('v2 - node PATCH', () => {
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
-			sandbox.expectNoEvents();
+			sandbox.expectNoKinesisEvents();
 		});
 
 		it('writes if property but no relationship changes detected', async () => {
@@ -1891,7 +1920,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
+			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
@@ -1911,7 +1940,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['UPDATE', teamCode, 'Team', ['techLeads']],
 				['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 			);
@@ -1929,7 +1958,7 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
+			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 		});
 
 		describe('patching with fewer relationships', () => {
@@ -1957,7 +1986,7 @@ describe('v2 - node PATCH', () => {
 						/MERGE|CREATE/.test(args[0]),
 					),
 				).toBe(true);
-				sandbox.expectEvents(
+				sandbox.expectKinesisEvents(
 					['UPDATE', teamCode, 'Team', ['techLeads']],
 					['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 				);
@@ -1987,7 +2016,7 @@ describe('v2 - node PATCH', () => {
 						/MERGE|CREATE/.test(args[0]),
 					),
 				).toBe(false);
-				sandbox.expectNoEvents();
+				sandbox.expectNoKinesisEvents();
 			});
 		});
 	});
