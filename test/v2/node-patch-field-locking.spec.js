@@ -26,7 +26,43 @@ describe('v2 - node PATCH - field locking', () => {
 	describe('lockedFields', () => {
 		const lockedFieldName = '{"name":"v2-node-locking-client"}';
 		const lockedFieldEmail = '{"email":"v2-node-locking-client"}';
-		it('throws an error when trying to update a node that is locked by another clientId', async () => {
+
+		it('throws an error when trying to write a field that is locked by another clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'old name',
+				_lockedFields: '{"name":"admin"}',
+			});
+			await testPatchRequest(
+				`/v2/node/Team/${teamCode}`,
+				{
+					name: 'new name',
+				},
+				400,
+			);
+		});
+
+		it('writes a field that is locked by the same clientId', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'old name',
+				_lockedFields: lockedFieldName,
+			});
+			await testPatchRequest(
+				`/v2/node/Team/${teamCode}`,
+				{
+					name: 'new name',
+				},
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'new name',
+					_lockedFields: lockedFieldName,
+				}),
+			);
+		});
+
+		it('throws an error when trying to lock a field that is locked by another clientId', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
 				_lockedFields: '{"name":"admin"}',
@@ -34,7 +70,7 @@ describe('v2 - node PATCH - field locking', () => {
 			await testPatchRequest(
 				`/v2/node/Team/${teamCode}?lockFields=name`,
 				{
-					name: 'new name',
+					description: 'not relevant to the test',
 				},
 				400,
 			);
@@ -241,7 +277,7 @@ describe('v2 - node PATCH - field locking', () => {
 					name: 'new name',
 				},
 				400,
-				/The following fields cannot be updated because they are locked by another client: name is locked by another-api/,
+				/The following fields cannot be locked because they are locked by another client: name is locked by another-api/,
 			);
 		});
 

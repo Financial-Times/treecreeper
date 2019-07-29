@@ -66,7 +66,7 @@ describe('v2 - node POST', () => {
 			),
 		);
 
-		verifyNotExists('Repository', repoCode);
+		await verifyNotExists('Repository', repoCode);
 		sandbox.expectNoEvents();
 	});
 

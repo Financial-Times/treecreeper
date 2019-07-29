@@ -284,7 +284,7 @@ describe('v2 - node PATCH', () => {
 			),
 		);
 
-		verifyNotExists('Repository', repoCode);
+		await verifyNotExists('Repository', repoCode);
 		sandbox.expectNoEvents();
 	});
 
@@ -332,7 +332,7 @@ describe('v2 - node PATCH', () => {
 				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
 			),
 		);
-		verifyNotExists('Team', teamCode);
+		await verifyNotExists('Team', teamCode);
 		sandbox.expectNoEvents();
 	});
 
@@ -346,7 +346,14 @@ describe('v2 - node PATCH', () => {
 			},
 			200,
 		);
-
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
 		sandbox.expectEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 
@@ -359,7 +366,7 @@ describe('v2 - node PATCH', () => {
 			400,
 			/Invalid property `foo` on type `Team`/,
 		);
-		verifyNotExists('Team', teamCode);
+		await verifyNotExists('Team', teamCode);
 		sandbox.expectNoEvents();
 	});
 
