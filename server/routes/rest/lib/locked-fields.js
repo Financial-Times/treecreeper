@@ -85,7 +85,7 @@ const validatePropertiesAgainstLocks = (body, clientId, newLockedFields) => {
 		.filter(({ locker }) => locker && locker !== clientId);
 
 	if (clashes.length) {
-		const erroredFields = Object.entries(clashes).map(
+		const erroredFields = Object.values(clashes).map(
 			({ name, locker }) => `${name} is locked by ${locker}`,
 		);
 

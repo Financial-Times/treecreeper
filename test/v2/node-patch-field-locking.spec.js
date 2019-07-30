@@ -42,6 +42,27 @@ describe('v2 - node PATCH - field locking', () => {
 			);
 		});
 
+		it('writes a field that is unlocked', async () => {
+			await sandbox.createNode('Team', {
+				code: teamCode,
+				name: 'old name',
+				_lockedFields: '{"name":"admin"}',
+			});
+			await testPatchRequest(
+				`/v2/node/Team/${teamCode}`,
+				{
+					description: 'okey dokey',
+				},
+				200,
+				sandbox.withMeta({
+					code: teamCode,
+					name: 'old name',
+					description: 'okey dokey',
+					_lockedFields: '{"name":"admin"}',
+				}),
+			);
+		});
+
 		it('writes a field that is locked by the same clientId', async () => {
 			await sandbox.createNode('Team', {
 				code: teamCode,
