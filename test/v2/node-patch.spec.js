@@ -356,7 +356,14 @@ describe('v2 - node PATCH', () => {
 			},
 			200,
 		);
-
+		await testNode(
+			'Team',
+			teamCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: teamCode,
+			}),
+		);
 		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
 	});
 

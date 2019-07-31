@@ -1,5 +1,8 @@
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-const { executeQuery } = require('../../server/lib/db-connection');
+const { driver } = require('../../server/lib/db-connection');
+
+const executeQuery = (query, parameters) =>
+	driver.session().run(query, parameters);
 const {
 	convertNeo4jTypes,
 } = require('../../server/routes/rest/lib/neo4j-type-conversion');

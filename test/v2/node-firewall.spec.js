@@ -38,7 +38,7 @@ describe('v2 - node generic', () => {
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			verifyNotExists('Team', teamCode);
+			await verifyNotExists('Team', teamCode);
 		});
 
 		it('PATCH no api_key returns 401', async () => {
@@ -48,7 +48,7 @@ describe('v2 - node generic', () => {
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			verifyNotExists('Team', teamCode);
+			await verifyNotExists('Team', teamCode);
 		});
 
 		it('DELETE no api_key returns 401', async () => {
@@ -57,7 +57,7 @@ describe('v2 - node generic', () => {
 				.delete(teamRestUrl)
 				.set('client-id', 'test-client-id')
 				.expect(401);
-			verifyNotExists('Team', teamCode);
+			await verifyNotExists('Team', teamCode);
 		});
 
 		describe('client headers', () => {
@@ -76,7 +76,7 @@ describe('v2 - node generic', () => {
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				verifyNotExists('Team', teamCode);
+				await verifyNotExists('Team', teamCode);
 			});
 
 			it('PATCH no client-id or client-user-id returns 400', async () => {
@@ -86,7 +86,7 @@ describe('v2 - node generic', () => {
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				verifyNotExists('Team', teamCode);
+				await verifyNotExists('Team', teamCode);
 			});
 
 			it('DELETE no client-id or client-user-id returns 400', async () => {
@@ -95,7 +95,7 @@ describe('v2 - node generic', () => {
 					.delete(teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.expect(400);
-				verifyNotExists('Team', teamCode);
+				await verifyNotExists('Team', teamCode);
 			});
 
 			it('GET client-id but no client-user-id returns 200', async () => {
@@ -345,7 +345,7 @@ describe('v2 - node generic', () => {
 							.expect(({ status }) =>
 								/20(0|1)/.test(String(status)),
 							);
-						verifyNotExists('Team', teamCode);
+						await verifyNotExists('Team', teamCode);
 					});
 
 					it('should error when attribute name is suspicious', async () => {
