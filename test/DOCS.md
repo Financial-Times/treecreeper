@@ -8,6 +8,9 @@ Almost all the tests are integration tests for the e2e result of calling the API
 -   writing large properties to s3
 -   generating an ID in salesforce
 
+### Why not more unit tests?
+A lot of logic is implemented by concatenating lots of strings together into a large cypher query. Alongside this there is reliance on naming parameters correctly, defining indexes on the database correctly and handling errors of the type sent by neo4j. Any unit tests would need to mock most of this - which is tantamount to reimplementing a large chunk of neo4j in javascript - and without integration tests to verify that the complex queries generated actually have the desired tests, there is  a real risk (as there often is with unit tests) of over-reliance on test fixtures that are a poor imitation of reality e.g. expecting a method to generate a string which is in fact syntactically invalid cypher. So integration tests on a similar scale would need to be written anyway, in which case why bother with unit tests at all?
+
 ### Parallelisation & test data
 
 We use Jest as the test runner so that test suites can run in parallel. However, we have a single database instance that these tests all use, so great care is taken to ensure tests are isolated from one another.
