@@ -2,9 +2,8 @@ const _isEmpty = require('lodash.isempty');
 const { logger } = require('../../../lib/request-context');
 
 class LockedFieldsError extends Error {
-	constructor(message, fields, status) {
+	constructor(message, status) {
 		super(message);
-		this.lockedFields = fields;
 		this.status = status;
 	}
 
@@ -30,7 +29,6 @@ const setLockedFields = (lockFields, existingLockedFields = {}, clientId) => {
 	if (!clientId) {
 		throw new LockedFieldsError(
 			'clientId needs to be set to a valid system code in order to lock fields',
-			lockFields,
 			400,
 		);
 	}
@@ -45,21 +43,18 @@ const setLockedFields = (lockFields, existingLockedFields = {}, clientId) => {
 	});
 
 	if (!_isEmpty(fieldsThatCannotBeUpdated)) {
-		const errorMessage =
-			'The following fields cannot be updated because they are locked by another client: ';
 		const erroredFields = Object.entries(fieldsThatCannotBeUpdated).map(
 			([fieldName, lockedFieldClientId]) =>
 				`${fieldName} is locked by ${lockedFieldClientId}`,
 		);
 
 		throw new LockedFieldsError(
-			errorMessage +
-				erroredFields.join(', ').replace(/,(?!.*,)/g, ' and'),
-			fieldsThatCannotBeUpdated,
+			`The following fields cannot be locked because they are locked by another client: ${erroredFields.join(
+				', ',
+			)}`,
 			400,
 		);
 	}
-
 	logger.info({ event: 'SET_LOCKED_FIELDS', lockFields, clientId });
 	return existingLockedFields;
 };
@@ -81,8 +76,26 @@ const removeLockedFields = (
 	});
 
 	logger.info({ event: 'REMOVE_LOCKED_FIELDS', unlockFields, clientId });
-
 	return existingLockedFields;
+};
+
+const validatePropertiesAgainstLocks = (body, clientId, newLockedFields) => {
+	const clashes = Object.keys(body)
+		.map(name => ({ name, locker: newLockedFields[name] }))
+		.filter(({ locker }) => locker && locker !== clientId);
+
+	if (clashes.length) {
+		const erroredFields = Object.values(clashes).map(
+			({ name, locker }) => `${name} is locked by ${locker}`,
+		);
+
+		throw new LockedFieldsError(
+			`The following fields cannot be written because they are locked by another client: ${erroredFields.join(
+				', ',
+			)}`,
+			400,
+		);
+	}
 };
 
 const mergeLockedFields = ({
@@ -91,14 +104,20 @@ const mergeLockedFields = ({
 	lockFields,
 	unlockFields,
 	existingLockedFields,
-}) =>
-	stringifyObject(
-		setLockedFields(
-			getLockFieldList(body, lockFields),
-			removeLockedFields(unlockFields, existingLockedFields, clientId),
-			clientId,
-		),
+	validateInput = false,
+}) => {
+	const newLockedFields = setLockedFields(
+		getLockFieldList(body, lockFields),
+		removeLockedFields(unlockFields, existingLockedFields, clientId),
+		clientId,
 	);
+
+	if (validateInput) {
+		validatePropertiesAgainstLocks(body, clientId, newLockedFields);
+	}
+
+	return stringifyObject(newLockedFields);
+};
 
 module.exports = {
 	mergeLockedFields,

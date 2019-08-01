@@ -69,6 +69,7 @@ const update = async input => {
 			lockFields,
 			unlockFields,
 			existingLockedFields,
+			validateInput: true,
 		});
 
 		const removedRelationships = getRemovedRelationships({

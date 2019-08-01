@@ -176,9 +176,9 @@ const setupMocks = (
 	});
 };
 
-const stubS3Unavailable = ({ sandbox }) => {
+const stubS3Unavailable = ({ sinon }) => {
 	Object.getOwnPropertyNames(S3DocumentsHelper.prototype).forEach(method => {
-		sandbox.stub(S3DocumentsHelper.prototype, method).throws();
+		sinon.stub(S3DocumentsHelper.prototype, method).throws();
 	});
 };
 
