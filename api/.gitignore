@@ -1,0 +1,15 @@
+.DS_Store
+.vscode
+*.env*
+.eslintrc.js
+.scss-lint.yml
+
+/bower_components/
+/node_modules/
+yarn-error.log
+/coverage
+
+# local neo4j docker volume mounts
+/neo4j
+.eslintcache
+junit.xml

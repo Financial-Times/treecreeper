@@ -1,0 +1,110 @@
+version: 2
+
+references:
+
+  default_container_config: &default_container_config
+    working_directory: ~/biz-ops-api
+    docker:
+      # need -browsers as it bundles selenium, which bundles java, which we need
+      - image: circleci/node:10.15.3-browsers
+    environment:
+      NEO4J_VERSION: "3.5.0"
+
+  workspace_root: &workspace_root
+    ~/
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+  restore_node_modules: &restore_node_modules
+    restore_cache:
+      keys:
+        - v5-dependency-npm-{{ checksum "package.json" }}-
+        - v5-dependency-npm-{{ checksum "package.json" }}
+        - v5-dependency-npm-
+
+  cache_node_modules: &cache_node_modules
+    save_cache:
+      key: v5-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      paths:
+        - ./node_modules/
+
+jobs:
+  install:
+    <<: *default_container_config
+    steps:
+      - checkout
+
+      - *restore_node_modules
+
+      - run:
+          name: Install dependencies
+          command: |
+            npm install --no-save
+      - run:
+          name: Get test env vars
+          command: make env
+
+      - *cache_node_modules
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - biz-ops-api
+
+  test:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+
+      - run:
+          name: Prepare neo4j database
+          command: |
+            java -version
+            mkdir -p neo4j
+            wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
+            tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
+            sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf
+            ./scripts/neo4j-plugins
+            dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start
+            ./scripts/neo4j-wait-for-start
+            make init-db
+      - run:
+          name: Run v2 tests
+          command: make test
+          environment:
+            JEST_JUNIT_OUTPUT: "junit/test-results.xml"
+      - store_test_results:
+          path: junit
+
+      - store_artifacts:
+          path: junit
+
+  verify:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+      - run:
+          name: Verify
+          command: make verify -j 3
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - install:
+          context: rel-eng-creds
+      - test:
+          requires:
+            - install
+      - verify:
+          context: rel-eng-creds
+          requires:
+            - install
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
