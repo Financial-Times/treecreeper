@@ -21,15 +21,21 @@ describe('S3 Documents Helper', () => {
 			stubGetObject.mockReturnValueOnce({
 				promise: jest
 					.fn()
-					.mockRejectedValueOnce(new Error("node doesn't exist")),
+					.mockRejectedValueOnce(new Error("Node doesn't exist")),
 			});
 		}
+
 		const mockS3Bucket = {
 			upload: stubUpload,
 			deleteObject: stubDelete,
 			getObject: stubGetObject,
 		};
-		return { stubUpload, stubDelete, stubGetObject, mockS3Bucket };
+		return {
+			stubUpload,
+			stubDelete,
+			stubGetObject,
+			mockS3Bucket,
+		};
 	};
 
 	const exampleRequest = () => {
@@ -134,7 +140,7 @@ describe('S3 Documents Helper', () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
 			false,
-			new Error("node doesn't exist"),
+			new Error("Node doesn't exist"),
 		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		await s3DocumentsHelper.patchS3file(

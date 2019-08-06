@@ -30,7 +30,7 @@ const stubS3Delete = () => {
 		logger.debug('S3DocumentsHelper stub deleteFileFromS3 called', {
 			event: data.event,
 		});
-		return Promise.resolve();
+		return Promise.resolve('FakeDeleteMarker');
 	});
 	return S3DocumentsHelper.prototype.deleteFileFromS3;
 };
@@ -41,7 +41,7 @@ const stubS3Patch = () => {
 			logger.debug('S3DocumentsHelper stub patchS3file called', {
 				event: data.event,
 			});
-			return Promise.resolve();
+			return Promise.resolve('FakePatchVersionId');
 		},
 	);
 	return S3DocumentsHelper.prototype.patchS3file;
@@ -53,7 +53,7 @@ const stubS3Upload = () => {
 			logger.debug('S3DocumentsHelper stub uploadToS3 called', {
 				event: data.event,
 			});
-			return Promise.resolve();
+			return Promise.resolve('FakeVersionId');
 		},
 	);
 	return S3DocumentsHelper.prototype.uploadToS3;
@@ -84,16 +84,16 @@ const setupMocks = (
 		sandbox.sinon = sinon.createSandbox();
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
-		sandbox.stubSendEvent = stubKinesis(sandbox.sinon);
-		sandbox.stubPatchS3file = stubS3Patch(sandbox.sinon);
-		sandbox.stubDeleteFileFromS3 = stubS3Delete(sandbox.sinon);
-		sandbox.stubS3Upload = stubS3Upload(sandbox.sinon);
+		sandbox.stubSendEvent = stubKinesis();
+		sandbox.stubPatchS3file = stubS3Patch();
+		sandbox.stubDeleteFileFromS3 = stubS3Delete();
+		sandbox.stubS3Upload = stubS3Upload();
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
 		}
 
-		sandbox.expectEvents = (...events) => {
+		sandbox.expectKinesisEvents = (...events) => {
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(events.length);
 			events.forEach(
 				([action, code, type, updatedProperties, clientId]) => {
@@ -111,7 +111,67 @@ const setupMocks = (
 			);
 		};
 
-		sandbox.expectNoEvents = () =>
+		sandbox.expectS3Actions = (...actions) => {
+			actions.forEach(action => {
+				switch (action.action) {
+					case 'upload':
+						expect(sandbox.stubS3Upload).toHaveBeenCalledWith(
+							action.params,
+							action.requestType,
+						);
+						break;
+					case 'patch':
+						expect(sandbox.stubPatchS3file).toHaveBeenCalledWith(
+							action.nodeType,
+							action.code,
+							action.body,
+						);
+						break;
+					case 'delete':
+						if (action.versionId) {
+							expect(
+								sandbox.stubDeleteFileFromS3,
+							).toHaveBeenCalledWith(
+								action.nodeType,
+								action.code,
+								action.versionId,
+							);
+						} else {
+							expect(
+								sandbox.stubDeleteFileFromS3,
+							).toHaveBeenCalledWith(
+								action.nodeType,
+								action.code,
+							);
+						}
+
+						break;
+					default:
+				}
+			});
+		};
+
+		sandbox.expectNoS3Actions = (...actions) =>
+			actions.forEach(action => {
+				switch (action) {
+					case 'upload':
+						expect(sandbox.stubS3Upload).toHaveBeenCalledTimes(0);
+						break;
+					case 'patch':
+						expect(sandbox.stubPatchS3file).toHaveBeenCalledTimes(
+							0,
+						);
+						break;
+					case 'delete':
+						expect(
+							sandbox.stubDeleteFileFromS3,
+						).toHaveBeenCalledTimes(0);
+						break;
+					default:
+				}
+			});
+
+		sandbox.expectNoKinesisEvents = () =>
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(0);
 	});
 	afterEach(async () => {
@@ -124,10 +184,17 @@ const setupMocks = (
 	});
 };
 
+const stubS3Unavailable = sandbox => {
+	Object.getOwnPropertyNames(S3DocumentsHelper.prototype).forEach(method => {
+		sandbox.sinon.stub(S3DocumentsHelper.prototype, method).throws();
+	});
+};
+
 module.exports = Object.assign(
 	{
 		stubKinesis,
 		setupMocks,
+		stubS3Unavailable,
 	},
 	dbConnection,
 	testDataCheckers,

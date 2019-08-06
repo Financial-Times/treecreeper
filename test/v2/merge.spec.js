@@ -142,7 +142,7 @@ describe('merge', () => {
 				verifyNotExists('Team', teamCode1),
 				verifyExists('Team', teamCode2),
 			]);
-			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
+			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it("doesn't error when unrecognised properties exist", async () => {
@@ -168,7 +168,7 @@ describe('merge', () => {
 					code: teamCode2,
 				}),
 			);
-			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
+			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('move outgoing relationships', async () => {
@@ -206,7 +206,7 @@ describe('merge', () => {
 				],
 			);
 
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['techLeads']],
 				['UPDATE', personCode, 'Person', ['techLeadFor']],
@@ -248,7 +248,7 @@ describe('merge', () => {
 				],
 			);
 
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['group', 'parentGroup']],
 				['UPDATE', groupCode, 'Group', ['topLevelTeams', 'allTeams']],
@@ -292,7 +292,7 @@ describe('merge', () => {
 					},
 				],
 			);
-			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
+			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('discard any newly reflexive relationships', async () => {
@@ -316,7 +316,7 @@ describe('merge', () => {
 					code: teamCode2,
 				}),
 			);
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['parentTeam']],
 			);
@@ -341,7 +341,7 @@ describe('merge', () => {
 				}),
 			);
 
-			sandbox.expectEvents(['DELETE', teamCode1, 'Team']);
+			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
 		});
 
 		it('add new properties to destination node', async () => {
@@ -363,7 +363,7 @@ describe('merge', () => {
 				}),
 			);
 
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['name']],
 			);
@@ -414,7 +414,7 @@ describe('merge', () => {
 					},
 				],
 			);
-			sandbox.expectEvents(
+			sandbox.expectKinesisEvents(
 				['DELETE', `${namespace}-system-1`, 'System'],
 				[
 					'UPDATE',

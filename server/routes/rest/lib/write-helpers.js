@@ -18,6 +18,9 @@ const { mergeLockedFields } = require('./locked-fields');
 const salesforceSync = require('../../../lib/salesforce-sync');
 const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
 
+const s3DocumentsHelper = new S3DocumentsHelper();
+const { logger } = require('../../../lib/request-context');
+
 let setSalesforceIdForSystem;
 
 const writeNode = async ({
@@ -55,12 +58,35 @@ const writeNode = async ({
 
 	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
-	const s3DocumentsHelper = new S3DocumentsHelper();
+	// Prefer simplicity/readability over optimisation here -
+	// S3 and neo4j writes are in series instead of parallel
+	// so we don't have to bother thinking about rolling back actions for
+	// all the different possible combinations of successes/failures
+	// in different orders. S3 requests are more reliable than neo4j
+	// requests so try s3 first, and roll back S3 if neo4j write fails.
+	let neo4jWriteResult;
+	const versionId = await s3DocumentsHelper.sendDocumentsToS3(
+		method,
+		nodeType,
+		code,
+		body,
+	);
+	try {
+		neo4jWriteResult = await executeQuery(
+			queryParts.join('\n'),
+			parameters,
+			true,
+		);
+	} catch (err) {
+		logger.info(
+			err,
+			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+		);
+		if (versionId)
+			s3DocumentsHelper.deleteFileFromS3(nodeType, code, versionId);
+		throw new Error(err);
+	}
 
-	let [neo4jWriteResult] = await Promise.all([
-		executeQuery(queryParts.join('\n'), parameters, true),
-		s3DocumentsHelper.sendDocumentsToS3(method, nodeType, code, body),
-	]);
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
