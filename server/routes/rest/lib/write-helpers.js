@@ -58,7 +58,7 @@ const writeNode = async ({
 
 	queryParts.push(...relationshipQueries, nodeWithRelsCypher());
 
-	// Prefer simplicity/readabilitiy over optimisation here -
+	// Prefer simplicity/readability over optimisation here -
 	// S3 and neo4j writes are in series instead of parallel
 	// so we don't have to bother thinking about rolling back actions for
 	// all the different possible combinations of successes/failures

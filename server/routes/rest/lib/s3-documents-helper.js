@@ -66,7 +66,7 @@ class S3DocumentsHelper {
 		return versionId;
 	}
 
-	async deleteFileFromS3(nodeType, code, versionId = false) {
+	async deleteFileFromS3(nodeType, code, versionId) {
 		const params = {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
