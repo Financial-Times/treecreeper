@@ -1,17 +1,17 @@
 module.exports = {
 	files: {
 		allow: [
-			'doc/model.cql',
-			'doc/model.grass',
-			'scripts/neo4j-plugins',
-			'scripts/neo4j-wait-for-start',
-			'test/mocha.opts'
+			'api/scripts/neo4j-plugins',
+			'api/scripts/neo4j-wait-for-start',
+			'api/__tests__/mocha.opts'
 		],
 		allowOverrides: []
 	},
 	strings: {
 		deny: [],
 		denyOverrides: [
+					'dd4c5d856812e0fb8c705feeabffd754', //gist link in readme
+			'e4d77800-5cab-11e9-8713-8d0ea7485108', // image in readme
 			'd5deb97d-5fa2-45f2-99fa-cd155328320d', // uuid for biz-ops-api dashboard url
 			'dba88780-1a7d-11e9-9f6b-e867440c3985', // README.md:4
 			'32e6ad1a-210f-11e8-89cc-978cb917c4e7', // doc/MODEL.md:5

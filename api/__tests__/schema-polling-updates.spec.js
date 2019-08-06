@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const schema = require('@financial-times/biz-ops-schema');
+const schema = require('../../schema');
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );

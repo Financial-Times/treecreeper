@@ -1,12 +1,8 @@
 const logger = require('@financial-times/n-logger').default;
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
-const {
-	getTypes,
-	getEnums,
-	getGraphqlDefs,
-} = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
+const { getTypes, getEnums, getGraphqlDefs } = require('../../../../../schema');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
 

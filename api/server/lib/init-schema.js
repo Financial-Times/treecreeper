@@ -1,4 +1,4 @@
-const schema = require('@financial-times/biz-ops-schema');
+const schema = require('../../../schema');
 const { logger } = require('./request-context');
 
 schema.configure({

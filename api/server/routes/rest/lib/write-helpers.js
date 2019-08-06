@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
-const { getType } = require('@financial-times/biz-ops-schema');
+const { getType } = require('../../../../../schema');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');

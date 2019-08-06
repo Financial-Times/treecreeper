@@ -1,5 +1,5 @@
-const { getType } = require('@financial-times/biz-ops-schema');
 const groupBy = require('lodash.groupby');
+const { getType } = require('../../../schema');
 const { getContext } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');

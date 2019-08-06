@@ -1,4 +1,4 @@
-const schema = require('@financial-times/biz-ops-schema');
+const schema = require('../../schema');
 const { initConstraints } = require('../server/init-db');
 const { driver } = require('../server/lib/db-connection');
 

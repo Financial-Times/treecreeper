@@ -1,5 +1,5 @@
-const { getType } = require('@financial-times/biz-ops-schema');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
+const { getType } = require('../../../../../schema');
 
 const isNullValue = val => val === null || val === '';
 

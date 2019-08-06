@@ -1,5 +1,5 @@
-const { getType } = require('@financial-times/biz-ops-schema');
 const httpErrors = require('http-errors');
+const { getType } = require('../../../../../schema');
 const { validateTypeName } = require('../lib/validation');
 const { executeQuery } = require('../lib/neo4j-model');
 const { setContext } = require('../../../lib/request-context');

@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('@financial-times/biz-ops-schema');
+const { getSchemaFilename } = require('../../schema');
 
 jest.useFakeTimers();
 

@@ -4,7 +4,7 @@ const deepFreeze = require('deep-freeze');
 const Cache = require('./cache');
 const readYaml = require('./read-yaml');
 const getSchemaFilename = require('./get-schema-filename');
-const { version: libVersion } = require('../package.json');
+const { version: libVersion } = require('../../package.json');
 
 class RawData {
 	constructor(options) {
