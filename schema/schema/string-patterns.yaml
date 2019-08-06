@@ -1,0 +1,13 @@
+NODE_TYPE: '^(?=.{2,64}$)([A-Z][a-z]+)+$' # NodeType
+CODE: '^(?=.{2,64}$)[a-z0-9]+(?:-[a-z0-9]+)*$' # system-code.1
+RELATIONSHIP_NAME: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$' # HAS_A_RELATIONSHIP
+ATTRIBUTE_NAME: '^(?=.{2,64}$)[a-z][a-zA-Z\d]+$' # attributeName
+COST_CENTRE: '^(?=.{2,64}$)[A-Z][A-Z]\d\d\d' # XT100
+PERMISSIVE: '^(?=.{2,64}$).*$'
+NO_SPACES: '^(?=.{2,64}$)\S+$'
+STRICT_CODE: '^(?=.{2,64}$)[a-z\d][a-z\d\-]*[a-z\d]$'
+REPO_NAME: '^(github|bitbucket)\:.*$'
+NO_LOWER_CASE: '^(?=.{2,64}$)[^a-z]+$' # ANYTHING:?\NOT LOWERCASE
+MAX_LENGTH_64: '^.{2,64}$'
+MAX_LENGTH_256: '^.{2,256}$'
+PACKAGE_NAME: '^(npm|composer|github)\:.*$'

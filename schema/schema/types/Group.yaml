@@ -1,0 +1,81 @@
+name: Group
+description: |
+  An overarching group, responsible for an area of the FT's activities, which contains teams and is costed separately
+properties:
+  code:
+    type: Code
+    required: true
+    unique: true
+    canIdentify: true
+    useInSummary: true
+    pattern: STRICT_CODE
+    label: Code
+    description: |
+      The unique identification code for the group. When creating a new group,
+      choose a lower case, hyphenated string similar to the name people call the group.
+  name:
+    type: Name
+    canIdentify: true
+    useInSummary: true
+    label: Name
+    description: The official name of the group.
+  description:
+    type: Paragraph
+    useInSummary: true
+    label: Description
+    description:
+      A description of what the group's areas of responsibility and activities
+      are.
+  isActive:
+    type: Boolean
+    label: Active
+    description: Whether or not the group still exists.
+  costCentre:
+    type: CostCentre
+    direction: incoming
+    label: Cost Centre
+    relationship: PAYS_FOR
+    description: The cost centre that pays for this groups's budget.
+  techDirector:
+    type: Person
+    direction: outgoing
+    label: Tech Director
+    relationship: HAS_TECH_DIRECTOR
+    description: The technical director for the group.
+  productOwner:
+    type: Person
+    direction: outgoing
+    label: Product Owner
+    relationship: HAS_PRODUCT_OWNER
+    description: The product owner for the group.
+  deliveryManager:
+    type: Person
+    direction: outgoing
+    label: Delivery Manager
+    relationship: HAS_DELIVERY_MANAGER
+    description: The delivery manager for the group.
+  okrLink:
+    type: Url
+    label: OKR Link
+    description: "A url linking to the Objectives & Key Results this group is currently focusing on."
+  topLevelTeams:
+    type: Team
+    direction: outgoing
+    label: Top level teams
+    relationship: HAS_TEAM
+    description: |
+      The top level teams that form the main subdivisions of the group. In
+      groups that are too small to have a hierarchical structure, this may
+      list all the groups teams.
+    hasMany: true
+  allTeams:
+    type: Team
+    label: All teams
+    direction: outgoing
+    relationship: HAS_TEAM
+    description: |
+      All the teams that are part of this group. This is populated by traversing
+      the team hierarchy in the group and the list does not need to be manually
+      maintained.
+    hasMany: true
+    isRecursive: true
