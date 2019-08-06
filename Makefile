@@ -41,7 +41,7 @@ test:
 	fi
 
 run:
-	nodemon --inspect server/app.js
+	nodemon --inspect api/server/app.js
 
 run-db:
 	docker-compose up

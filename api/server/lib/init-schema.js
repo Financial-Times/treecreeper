@@ -3,7 +3,7 @@ const { logger } = require('./request-context');
 
 schema.configure({
 	baseUrl: process.env.SCHEMA_BASE_URL,
-	updateMode: 'poll',
+	updateMode: 'dev',
 	logger,
 	ttl: 60000,
 });
