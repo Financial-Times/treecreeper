@@ -1,4 +1,4 @@
-const { getType } = require('@financial-times/biz-ops-schema');
+const { getType } = require('../../../../../schema');
 const { convertNeo4jTypes } = require('./neo4j-type-conversion');
 const { executeQuery } = require('../../../lib/db-connection');
 

@@ -1,5 +1,5 @@
 const semver = require('semver');
-const { version: libVersion } = require('../package.json');
+const { version: libVersion } = require('../../package.json');
 
 const getSchemaFilename = (version = libVersion) => {
 	const majorVersion = semver.major(version);

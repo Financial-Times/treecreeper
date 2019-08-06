@@ -1,4 +1,4 @@
-const schema = require('@financial-times/biz-ops-schema');
+const schema = require('../../../schema');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

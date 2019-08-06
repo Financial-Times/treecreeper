@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const schema = require('@financial-times/biz-ops-schema');
+const schema = require('../../../../../schema');
 
 const validation = Object.entries(schema)
 	.filter(([key]) => key.startsWith('validate'))

@@ -1,0 +1,67 @@
+{
+  "name": "treecreeper",
+  "version": "0.0.0",
+  "description": "A set of tools for building adnmin interfaces on top of graph data",
+  "main": "index.js",
+  "dependencies": {
+    "@financial-times/n-cluster": "^1.0.0",
+    "@financial-times/n-logger": "^6.1.0",
+    "@financial-times/s3o-middleware": "^3.0.1",
+    "apollo-server-express": "^1.4.0",
+    "aws-sdk": "^2.504.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "body-parser": "^1.19.0",
+    "clone": "^2.1.2",
+    "common-tags": "^1.8.0",
+    "connect-timeout": "^1.9.0",
+    "deep-diff": "^1.0.2",
+    "deep-freeze": "0.0.1",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "graphql": "^14.4.2",
+    "graphql-server-express": "^1.4.1",
+    "http-errors": "^1.7.3",
+    "js-yaml": "^3.13.1",
+    "jsforce": "^1.9.2",
+    "lodash": "^4.17.15",
+    "lodash.groupby": "^4.6.0",
+    "lodash.isempty": "^4.4.0",
+    "lodash.uniqby": "^4.7.0",
+    "neo4j-driver": "^1.7.5",
+    "neo4j-graphql-js": "^2.6.3",
+    "next-metrics": "^3.1.9",
+    "node-fetch": "^2.6.0",
+    "semver": "^6.3.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@financial-times/rel-engage": "^7.1.2",
+    "artillery": "^1.6.0-28",
+    "artillery-plugin-statsd": "^2.2.1",
+    "chai": "^4.2.0",
+    "dotenv": "^8.0.0",
+    "fetch-mock": "^7.3.9",
+    "jest": "^24.8.0",
+    "jest-junit": "^7.0.0",
+    "lolex": "^4.2.0",
+    "nodemon": "^1.19.1",
+    "proxyquire": "^2.1.1",
+    "sinon": "^7.4.1",
+    "sinon-chai": "^3.3.0",
+    "supertest": "^4.0.2",
+    "valid-url": "^1.0.9"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Financial-Times/treecreeper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Financial-Times/treecreeper/issues"
+  },
+  "homepage": "https://github.com/Financial-Times/treecreeper#readme"
+}

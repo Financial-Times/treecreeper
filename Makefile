@@ -41,7 +41,7 @@ test:
 	fi
 
 run:
-	nodemon --inspect server/app.js
+	nodemon --inspect api/server/app.js
 
 run-db:
 	docker-compose up
@@ -72,3 +72,15 @@ load-test-writeQueriesForTeams:
 
 load-test-cleanUp:
 	node scripts/load-testing/clean-up
+
+
+
+test-schema:
+	@if [ -z $(CI) ]; \
+		then DEBUG=true jest schema/test --testEnvironment=node --watch ; \
+		else jest schema/test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+	fi
+
+s3-publish:
+	@node schema/scripts/deploy
+

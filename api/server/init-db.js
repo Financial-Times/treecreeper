@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const schema = require('@financial-times/biz-ops-schema');
 const logger = require('@financial-times/n-logger').default;
+const schema = require('../../schema');
 const { schemaReady } = require('./lib/init-schema');
 const { executeQueryWithSharedSession } = require('./lib/db-connection');
 
