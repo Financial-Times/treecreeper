@@ -6,7 +6,6 @@ const {
 	stubS3Unavailable,
 	testNode,
 	verifyNotExists,
-	verifyExists,
 } = require('../helpers');
 
 describe('v2 - node POST', () => {
@@ -33,7 +32,7 @@ describe('v2 - node POST', () => {
 		stubDbUnavailable(sandbox);
 		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions([
+		sandbox.expectS3Actions(
 			{
 				action: 'upload',
 				params: {
@@ -47,15 +46,18 @@ describe('v2 - node POST', () => {
 				action: 'delete',
 				nodeType: 'Team',
 				code: teamCode,
+				versionId: 'FakeVersionId',
 			},
-		]);
+		);
+		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
 		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectNoS3Actions();
+		// S3DocumentsHelper throws on instantiation
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('creates node and writes to s3', async () => {
@@ -84,17 +86,19 @@ describe('v2 - node POST', () => {
 			['code', 'name'],
 		]);
 
-		sandbox.expectS3Actions([
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({ code: teamCode }),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `Team/${teamCode}`,
-				},
-				requestType: 'POST',
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					name: 'name1',
+					code: teamCode,
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `Team/${teamCode}`,
 			},
-		]);
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -109,6 +113,7 @@ describe('v2 - node POST', () => {
 
 		verifyNotExists('Repository', repoCode);
 		sandbox.expectNoKinesisEvents();
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // as this error will throw before s3 actions
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
@@ -142,6 +147,19 @@ describe('v2 - node POST', () => {
 			['name', 'code'],
 			'biz-ops-github-importer',
 		]);
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					name: 'name1',
+					code: repoCode,
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `Repository/${repoCode}`,
+			},
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -212,12 +230,31 @@ describe('v2 - node POST', () => {
 			new RegExp(`Team ${teamCode} already exists`),
 		);
 		sandbox.expectNoKinesisEvents();
+		sandbox.expectS3Actions(
+			{
+				action: 'upload',
+				params: {
+					Body: JSON.stringify({ code: teamCode }),
+					Bucket: 'biz-ops-documents.510688331160',
+					Key: `Team/${teamCode}`,
+				},
+				requestType: 'POST',
+			},
+			{
+				action: 'delete',
+				nodeType: 'Team',
+				code: teamCode,
+				versionId: 'FakeVersionId',
+			},
+		);
+		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('error when conflicting code values', async () => {
+		const wrongCode = 'wrong-code';
 		await testPostRequest(
 			`/v2/node/Team/${teamCode}`,
-			{ code: 'wrong-code' },
+			{ code: wrongCode },
 			400,
 			new RegExp(
 				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
@@ -225,6 +262,7 @@ describe('v2 - node POST', () => {
 		);
 		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
+		sandbox.expectNoS3Actions('upload', 'patch', 'delete'); // as this error will throw before s3 actions
 	});
 
 	it('error when unrecognised property', async () => {
@@ -236,16 +274,7 @@ describe('v2 - node POST', () => {
 		);
 		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 		await verifyNotExists('Team', teamCode);
-	});
-
-	it('not error when non-conflicting code values', async () => {
-		await testPostRequest(
-			`/v2/node/Team/${teamCode}`,
-			{ code: teamCode },
-			200,
-		);
-		sandbox.expectKinesisEvents(['CREATE', teamCode, 'Team', ['code']]);
-		await verifyExists('Team', teamCode);
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // as this error will throw before s3 actions
 	});
 
 	it('create node related to existing nodes', async () => {
@@ -304,6 +333,21 @@ describe('v2 - node POST', () => {
 			['UPDATE', personCode, 'Person', ['techLeadFor']],
 			['UPDATE', groupCode, 'Group', ['allTeams', 'topLevelTeams']],
 		);
+
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					techLeads: [personCode],
+					parentGroup: groupCode,
+					code: teamCode,
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `Team/${teamCode}`,
+			},
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('error when creating node related to non-existent nodes', async () => {
@@ -318,6 +362,28 @@ describe('v2 - node POST', () => {
 		);
 		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
+		sandbox.expectS3Actions(
+			{
+				action: 'upload',
+				params: {
+					Body: JSON.stringify({
+						techLeads: [personCode],
+						parentGroup: groupCode,
+						code: teamCode,
+					}),
+					Bucket: 'biz-ops-documents.510688331160',
+					Key: `Team/${teamCode}`,
+				},
+				requestType: 'POST',
+			},
+			{
+				action: 'delete',
+				nodeType: 'Team',
+				code: teamCode,
+				versionId: 'FakeVersionId',
+			},
+		);
+		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -380,6 +446,20 @@ describe('v2 - node POST', () => {
 				['code', 'allTeams', 'topLevelTeams'],
 			],
 		);
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					techLeads: [personCode],
+					parentGroup: groupCode,
+					code: teamCode,
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `Team/${teamCode}`,
+			},
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	describe('locked Fields', () => {
@@ -434,6 +514,7 @@ describe('v2 - node POST', () => {
 					400,
 					/clientId needs to be set to a valid system code in order to lock fields/,
 				);
+				sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // mergeLockedFields throws an error before s3 actions
 			});
 		});
 	});

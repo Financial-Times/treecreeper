@@ -65,7 +65,12 @@ const writeNode = async ({
 	// in different orders. S3 requests are more reliable than neo4j
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
-	await s3DocumentsHelper.sendDocumentsToS3(method, nodeType, code, body);
+	const versionId = await s3DocumentsHelper.sendDocumentsToS3(
+		method,
+		nodeType,
+		code,
+		body,
+	);
 	try {
 		neo4jWriteResult = await executeQuery(
 			queryParts.join('\n'),
@@ -77,7 +82,8 @@ const writeNode = async ({
 			err,
 			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
 		);
-		s3DocumentsHelper.deleteFileFromS3(nodeType, code);
+		if (versionId)
+			s3DocumentsHelper.deleteFileFromS3(nodeType, code, versionId);
 		throw new Error(err);
 	}
 

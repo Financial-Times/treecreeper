@@ -30,7 +30,7 @@ const stubS3Delete = () => {
 		logger.debug('S3DocumentsHelper stub deleteFileFromS3 called', {
 			event: data.event,
 		});
-		return Promise.resolve();
+		return Promise.resolve('FakeDeleteMarker');
 	});
 	return S3DocumentsHelper.prototype.deleteFileFromS3;
 };
@@ -41,7 +41,7 @@ const stubS3Patch = () => {
 			logger.debug('S3DocumentsHelper stub patchS3file called', {
 				event: data.event,
 			});
-			return Promise.resolve();
+			return Promise.resolve('FakePatchVersionId');
 		},
 	);
 	return S3DocumentsHelper.prototype.patchS3file;
@@ -53,22 +53,9 @@ const stubS3Upload = () => {
 			logger.debug('S3DocumentsHelper stub uploadToS3 called', {
 				event: data.event,
 			});
-			return Promise.resolve();
+			return Promise.resolve('FakeVersionId');
 		},
 	);
-	return S3DocumentsHelper.prototype.uploadToS3;
-};
-
-const stubS3Restore = () => {
-	jest.spyOn(
-		S3DocumentsHelper.prototype,
-		'restoreToPreviousVersion',
-	).mockImplementation(data => {
-		logger.debug('S3DocumentsHelper stub restoreToPreviousVersion called', {
-			event: data.event,
-		});
-		return Promise.resolve();
-	});
 	return S3DocumentsHelper.prototype.uploadToS3;
 };
 
@@ -101,7 +88,6 @@ const setupMocks = (
 		sandbox.stubPatchS3file = stubS3Patch(sandbox.sinon);
 		sandbox.stubDeleteFileFromS3 = stubS3Delete(sandbox.sinon);
 		sandbox.stubS3Upload = stubS3Upload(sandbox.sinon);
-		sandbox.stubS3Restore = stubS3Restore(sandbox.sinon);
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
@@ -142,26 +128,48 @@ const setupMocks = (
 						);
 						break;
 					case 'delete':
-						expect(
-							sandbox.stubDeleteFileFromS3,
-						).toHaveBeenCalledWith(action.nodeType, action.code);
-						break;
-					case 'restore':
-						expect(sandbox.stubS3Restore).toHaveBeenCalledWith(
-							action.nodeType,
-							action.code,
-						);
+						if (action.versionId) {
+							expect(
+								sandbox.stubDeleteFileFromS3,
+							).toHaveBeenCalledWith(
+								action.nodeType,
+								action.code,
+								action.versionId,
+							);
+						} else {
+							expect(
+								sandbox.stubDeleteFileFromS3,
+							).toHaveBeenCalledWith(
+								action.nodeType,
+								action.code,
+							);
+						}
+
 						break;
 					default:
 				}
 			});
 		};
 
-		sandbox.expectNoS3Actions = () =>
-			expect(sandbox.stubS3Upload).toHaveBeenCalledTimes(0);
-		expect(sandbox.stubDeleteFileFromS3).toHaveBeenCalledTimes(0);
-		expect(sandbox.stubPatchS3file).toHaveBeenCalledTimes(0);
-		expect(sandbox.stubS3Restore).toHaveBeenCalledTimes(0);
+		sandbox.expectNoS3Actions = (...actions) =>
+			actions.forEach(action => {
+				switch (action) {
+					case 'upload':
+						expect(sandbox.stubS3Upload).toHaveBeenCalledTimes(0);
+						break;
+					case 'patch':
+						expect(sandbox.stubPatchS3file).toHaveBeenCalledTimes(
+							0,
+						);
+						break;
+					case 'delete':
+						expect(
+							sandbox.stubDeleteFileFromS3,
+						).toHaveBeenCalledTimes(0);
+						break;
+					default:
+				}
+			});
 
 		sandbox.expectNoKinesisEvents = () =>
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(0);

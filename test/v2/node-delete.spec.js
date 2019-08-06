@@ -30,18 +30,19 @@ describe('v2 - node DELETE', () => {
 
 		await verifyNotExists('Team', teamCode);
 		sandbox.expectKinesisEvents(['DELETE', teamCode, 'Team']);
-		sandbox.expectS3Actions([
-			{
-				action: 'delete',
-				nodeType: 'Team',
-				code: teamCode,
-			},
-		]);
+		sandbox.expectS3Actions({
+			action: 'delete',
+			nodeType: 'Team',
+			code: teamCode,
+		});
+		sandbox.expectNoS3Actions('upload', 'patch');
 	});
 
 	it('404 when deleting non-existent node', async () => {
 		await testDeleteRequest(404);
 		sandbox.expectNoKinesisEvents();
+		// bailOnMissingNode throws error before s3 delete
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
@@ -60,24 +61,16 @@ describe('v2 - node DELETE', () => {
 
 		await verifyExists('Team', teamCode);
 		sandbox.expectNoKinesisEvents();
+		// bailOnAttachedNode throws error before s3 delete
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
 		await testDeleteRequest(500);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions([
-			{
-				action: 'delete',
-				nodeType: 'Team',
-				code: teamCode,
-			},
-			{
-				action: 'restore',
-				nodeType: 'Team',
-				code: teamCode,
-			},
-		]);
+		// getNodeWithRelationships throws error before s3 delete
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('responds with 500 if s3 query fails', async () => {
@@ -88,6 +81,7 @@ describe('v2 - node DELETE', () => {
 		});
 		await testDeleteRequest(500);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectNoS3Actions();
+		// S3DocumentsHelper throws on instantiation
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 });

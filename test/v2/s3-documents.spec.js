@@ -24,24 +24,16 @@ describe('S3 Documents Helper', () => {
 					.mockRejectedValueOnce(new Error("Node doesn't exist")),
 			});
 		}
-		const stubListObjectVersions = jest.fn();
-		stubListObjectVersions.mockReturnValueOnce({
-			promise: jest.fn().mockResolvedValueOnce({
-				DeleteMarkers: [{ VersionId: 'fakeVersionId' }],
-			}),
-		});
 
 		const mockS3Bucket = {
 			upload: stubUpload,
 			deleteObject: stubDelete,
 			getObject: stubGetObject,
-			listObjectVersions: stubListObjectVersions,
 		};
 		return {
 			stubUpload,
 			stubDelete,
 			stubGetObject,
-			stubListObjectVersions,
 			mockS3Bucket,
 		};
 	};
@@ -167,30 +159,6 @@ describe('S3 Documents Helper', () => {
 			Bucket: 'biz-ops-documents.510688331160',
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),
-		});
-	});
-
-	it(`restores an S3 object to it's previous version`, async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
-		const { stubListObjectVersions, stubDelete, mockS3Bucket } = stubOutS3(
-			false,
-			null,
-		);
-		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		await s3DocumentsHelper.restoreToPreviousVersion(
-			requestNodeType,
-			requestCode,
-		);
-		expect(stubListObjectVersions).toHaveBeenCalledTimes(1);
-		expect(stubListObjectVersions).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
-			Prefix: `${requestNodeType}/${requestCode}`,
-		});
-		expect(stubDelete).toHaveBeenCalledTimes(1);
-		expect(stubDelete).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
-			Key: `${requestNodeType}/${requestCode}`,
-			VersionId: 'fakeVersionId',
 		});
 	});
 });

@@ -18,6 +18,7 @@ class S3DocumentsHelper {
 		try {
 			const res = await this.s3Bucket.upload(params).promise();
 			logger.info(res, `${requestType}: S3 Upload successful`);
+			return res.VersionId;
 		} catch (err) {
 			logger.info(err, `${requestType}: S3 Upload failed`);
 		}
@@ -29,7 +30,8 @@ class S3DocumentsHelper {
 			Key: `${nodeType}/${code}`,
 			Body: JSON.stringify(body),
 		};
-		this.uploadToS3(params, 'POST');
+		const res = await this.uploadToS3(params, 'POST');
+		return res;
 	}
 
 	async patchS3file(nodeType, code, body) {
@@ -44,15 +46,14 @@ class S3DocumentsHelper {
 			const existingBody = JSON.parse(existingNode.Body);
 			if (diff(existingBody, body)) {
 				const newBody = Object.assign(existingBody, body);
-				this.uploadToS3(
+				return await this.uploadToS3(
 					Object.assign({ Body: JSON.stringify(newBody) }, params),
 					'PATCH',
 				);
-			} else {
-				logger.info('PATCH: No S3 Upload as file is unchanged');
 			}
+			logger.info('PATCH: No S3 Upload as file is unchanged');
 		} catch (err) {
-			this.uploadToS3(
+			return await this.uploadToS3(
 				Object.assign({ Body: JSON.stringify(body) }, params),
 				'PATCH',
 			);
@@ -61,7 +62,8 @@ class S3DocumentsHelper {
 
 	async sendDocumentsToS3(method, nodeType, code, body) {
 		const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
-		send.call(this, nodeType, code, body);
+		const versionId = await send.call(this, nodeType, code, body);
+		return versionId;
 	}
 
 	async deleteFileFromS3(nodeType, code, versionId = false) {
@@ -75,25 +77,9 @@ class S3DocumentsHelper {
 		try {
 			const res = await this.s3Bucket.deleteObject(params).promise();
 			logger.info(res, 'DELETE: S3 Delete successful');
+			return res.VersionId;
 		} catch (err) {
 			logger.info(err, 'DELETE: S3 Delete failed');
-		}
-	}
-
-	async restoreToPreviousVersion(nodeType, code) {
-		const params = {
-			Bucket: this.s3BucketName,
-			Prefix: `${nodeType}/${code}`,
-		};
-		let data;
-		try {
-			data = await this.s3Bucket.listObjectVersions(params).promise();
-		} catch (err) {
-			logger.info(err, 'DELETE: S3 Delete rollback unsuccessful');
-		}
-		if (data && data.DeleteMarkers) {
-			const deleteMarkerVersionId = data.DeleteMarkers[0].VersionId;
-			this.deleteFileFromS3(nodeType, code, deleteMarkerVersionId);
 		}
 	}
 }

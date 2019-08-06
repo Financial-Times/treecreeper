@@ -38,7 +38,10 @@ module.exports = async input => {
 	// all the different possible combinations of successes/failures
 	// in different orders. S3 requests are more reliable than neo4j
 	// requests so try s3 first, and roll back S3 if neo4j delete fails.
-	await s3DocumentsHelper.deleteFileFromS3(nodeType, code);
+	const deleteMarker = await s3DocumentsHelper.deleteFileFromS3(
+		nodeType,
+		code,
+	);
 	try {
 		await executeQuery(query, { code });
 	} catch (err) {
@@ -46,7 +49,7 @@ module.exports = async input => {
 			err,
 			'DELETE: Neo4j Delete unsuccessful, attempting to rollback S3 delete',
 		);
-		s3DocumentsHelper.restoreToPreviousVersion(nodeType, code);
+		s3DocumentsHelper.deleteFileFromS3(nodeType, code, deleteMarker);
 		throw new Error(err);
 	}
 
