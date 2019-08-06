@@ -46,14 +46,14 @@ class S3DocumentsHelper {
 			const existingBody = JSON.parse(existingNode.Body);
 			if (diff(existingBody, body)) {
 				const newBody = Object.assign(existingBody, body);
-				return await this.uploadToS3(
+				return this.uploadToS3(
 					Object.assign({ Body: JSON.stringify(newBody) }, params),
 					'PATCH',
 				);
 			}
 			logger.info('PATCH: No S3 Upload as file is unchanged');
 		} catch (err) {
-			return await this.uploadToS3(
+			return this.uploadToS3(
 				Object.assign({ Body: JSON.stringify(body) }, params),
 				'PATCH',
 			);

@@ -84,10 +84,10 @@ const setupMocks = (
 		sandbox.sinon = sinon.createSandbox();
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
-		sandbox.stubSendEvent = stubKinesis(sandbox.sinon);
-		sandbox.stubPatchS3file = stubS3Patch(sandbox.sinon);
-		sandbox.stubDeleteFileFromS3 = stubS3Delete(sandbox.sinon);
-		sandbox.stubS3Upload = stubS3Upload(sandbox.sinon);
+		sandbox.stubSendEvent = stubKinesis();
+		sandbox.stubPatchS3file = stubS3Patch();
+		sandbox.stubDeleteFileFromS3 = stubS3Delete();
+		sandbox.stubS3Upload = stubS3Upload();
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
@@ -184,9 +184,9 @@ const setupMocks = (
 	});
 };
 
-const stubS3Unavailable = ({ sinon }) => {
+const stubS3Unavailable = sandbox => {
 	Object.getOwnPropertyNames(S3DocumentsHelper.prototype).forEach(method => {
-		sinon.stub(S3DocumentsHelper.prototype, method).throws();
+		sandbox.sinon.stub(S3DocumentsHelper.prototype, method).throws();
 	});
 };
 
