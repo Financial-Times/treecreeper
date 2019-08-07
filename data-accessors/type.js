@@ -145,7 +145,7 @@ const getType = (
 					isRelationship: !!def.relationship,
 					isRecursive: def.isRecursive || false,
 					writeInactive:
-						'showInactive' in def ? def.showInactive : false,
+						'writeInactive' in def ? def.writeInactive : false,
 					showInactive:
 						'showInactive' in def ? def.showInactive : true,
 				});
