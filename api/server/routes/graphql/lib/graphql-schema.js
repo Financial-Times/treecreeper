@@ -25,10 +25,11 @@ const getResolvers = () => {
 	};
 };
 
-const createSchema = () => {
+const createSchema = (defs) => {
 	const typeDefs = getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
+require('fs').writeFileSync('schema.gql', typeDefs.join('\n'));
 
 	typeDefs.unshift(`
 directive @deprecated(
@@ -36,7 +37,7 @@ directive @deprecated(
 ) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`);
 
 	const schema = makeAugmentedSchema({
-		typeDefs: typeDefs.join('\n'),
+		typeDefs: defs || typeDefs.join('\n'),
 		logger: {
 			log(message) {
 				logger.error(`GraphQL Schema: ${message}`, {
