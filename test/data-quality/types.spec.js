@@ -192,6 +192,7 @@ describe('data quality: types', () => {
 												'hidden',
 												'autoPopulated',
 												'showInactive',
+												'writeInactive',
 											]),
 										),
 									);
@@ -285,10 +286,18 @@ describe('data quality: types', () => {
 								});
 
 								it('may hide inactive records', () => {
-									if (config.howInactive) {
+									if (config.showInactive) {
 										expect(typeof config.showInactive).toBe(
 											'boolean',
 										);
+									}
+								});
+
+								it('may allow writing of inactive records', () => {
+									if (config.writeInactive) {
+										expect(
+											typeof config.writeInactive,
+										).toBe('boolean');
 									}
 								});
 
