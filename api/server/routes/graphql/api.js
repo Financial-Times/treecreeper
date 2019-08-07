@@ -1,7 +1,6 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const { formatError } = require('graphql');
-const { graphqlExpress } = require('apollo-server-express');
 const schema = require('../../../../schema');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
@@ -11,20 +10,24 @@ const { TIMEOUT } = require('../../constants');
 const { createSchema } = require('./lib/graphql-schema');
 const { driver } = require('../../lib/db-connection');
 
+
+
+const { ApolloServer, gql } = require('apollo-server-express');
+
+
 let api;
 let schemaVersionIsConsistent = true;
 
 const constructAPI = () => {
 	try {
 		const newSchema = createSchema();
-		api = graphqlExpress(({ headers }) => ({
+		api = new ApolloServer({
 			schema: newSchema,
-			rootValue: {},
-			context: {
+			context: ({req}) => ({
 				driver,
-				headers,
-			},
-			formatError(error) {
+		    headers: req.headers,
+		  }),
+		  formatError(error) {
 				const isS3oError = /Forbidden/i.test(error.message);
 				logger.error('GraphQL Error', {
 					event: 'GRAPHQL_ERROR',
@@ -37,7 +40,18 @@ const constructAPI = () => {
 					: error;
 				return formatError(displayedError);
 			},
-		}));
+		})
+
+		console.log({api})
+		// (({ headers }) => ({
+		// 	schema: newSchema,
+		// 	rootValue: {},
+		// 	context: {
+		// 		driver,
+		// 		headers,
+		// 	},
+
+		// }));
 		schemaVersionIsConsistent = true;
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
@@ -55,6 +69,7 @@ const constructAPI = () => {
 				});
 		}
 	} catch (error) {
+		console.log(error)
 		schemaVersionIsConsistent = false;
 		logger.error(
 			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
