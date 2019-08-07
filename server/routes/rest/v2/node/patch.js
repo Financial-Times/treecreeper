@@ -1,11 +1,11 @@
 const { stripIndents } = require('common-tags');
+const { getType } = require('@financial-times/biz-ops-schema');
 const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,
 	preflightChecks,
 } = require('../../lib/error-handling');
 
-const { logger } = require('../../../../lib/request-context');
 const {
 	metaPropertiesForUpdate,
 	metaPropertiesForCreate,
@@ -52,9 +52,23 @@ const update = async input => {
 			});
 		}
 
+		const nodeProperties = getType(nodeType).properties;
+		const bodyNoDocs = {};
+		const bodyDocuments = {};
+		Object.keys(body).forEach(prop => {
+			if (
+				nodeProperties[prop] &&
+				nodeProperties[prop].type === 'Document'
+			) {
+				bodyDocuments[prop] = body[prop];
+			} else {
+				bodyNoDocs[prop] = body[prop];
+			}
+		});
+
 		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 			initialContent: existingRecord,
 		});
@@ -64,7 +78,7 @@ const update = async input => {
 			: null;
 
 		const lockedFields = mergeLockedFields({
-			body,
+			body: bodyNoDocs,
 			clientId,
 			lockFields,
 			unlockFields,
@@ -75,14 +89,14 @@ const update = async input => {
 		const removedRelationships = getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: body,
+			newContent: bodyNoDocs,
 			action: relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: body,
+			newContent: bodyNoDocs,
 		});
 
 		const willModifyNode = Object.keys(propertiesToModify).length;
@@ -103,14 +117,6 @@ const update = async input => {
 			willModifyRelationships ||
 			willModifyLockedFields
 		);
-
-		if (!updateDataBase) {
-			logger.info(
-				{ event: 'SKIP_NODE_UPDATE' },
-				'No changed properties, relationships or field locks - skipping update',
-			);
-			return existingRecord;
-		}
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
@@ -139,7 +145,8 @@ const update = async input => {
 		return await writeNode({
 			nodeType,
 			code,
-			body,
+			bodyDocuments,
+			updateDataBase,
 			method: 'PATCH',
 			upsert,
 			isCreate: !existingRecord,

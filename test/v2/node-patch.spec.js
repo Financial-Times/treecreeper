@@ -36,7 +36,7 @@ describe('v2 - node PATCH', () => {
 		return req.expect(...expectations);
 	};
 
-	it('update node in neo4j and s3', async () => {
+	it('update node in neo4j with non-document properties only', async () => {
 		await sandbox.createNode('Team', {
 			code: teamCode,
 			name: 'name1',
@@ -63,13 +63,86 @@ describe('v2 - node PATCH', () => {
 		);
 
 		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		// sandbox.expectS3Actions({
+		// 	action: 'patch',
+		// 	nodeType: 'Team',
+		// 	code: teamCode,
+		// 	body: {
+		// 		code: teamCode,
+		// 		name: 'name2',
+		// 	},
+		// });
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+	});
+
+	it('update node in s3 with document properties only', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+		});
+		await testPatchRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				troubleshooting: 'Another Fake Document',
+			},
+			200,
+			sandbox.withUpdateMeta({
+				code: systemCode,
+			}),
+		);
+
+		await testNode(
+			'System',
+			systemCode,
+			sandbox.withUpdateMeta({
+				code: systemCode,
+			}),
+		);
+		sandbox.expectNoKinesisEvents();
+		// sandbox.expectKinesisEvents(['UPDATE', systemCode, 'System', ['name']]);
 		sandbox.expectS3Actions({
 			action: 'patch',
-			nodeType: 'Team',
-			code: teamCode,
+			nodeType: 'System',
+			code: systemCode,
 			body: {
-				code: teamCode,
-				name: 'name2',
+				troubleshooting: 'Another Fake Document',
+			},
+		});
+		sandbox.expectNoS3Actions('upload', 'delete');
+	});
+
+	it('update node in neo4j and s3 with document and non-document properties', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+		});
+		await testPatchRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				name: 'name1',
+				troubleshooting: 'Another Fake Document',
+			},
+			200,
+			sandbox.withUpdateMeta({
+				code: systemCode,
+				name: 'name1',
+			}),
+		);
+
+		await testNode(
+			'System',
+			systemCode,
+			sandbox.withUpdateMeta({
+				name: 'name1',
+				code: systemCode,
+			}),
+		);
+
+		sandbox.expectKinesisEvents(['UPDATE', systemCode, 'System', ['name']]);
+		sandbox.expectS3Actions({
+			action: 'patch',
+			nodeType: 'System',
+			code: systemCode,
+			body: {
+				troubleshooting: 'Another Fake Document',
 			},
 		});
 		sandbox.expectNoS3Actions('upload', 'delete');
@@ -135,16 +208,7 @@ describe('v2 - node PATCH', () => {
 				'System',
 				['lastServiceReviewDate'],
 			]);
-			sandbox.expectS3Actions({
-				action: 'patch',
-				nodeType: 'System',
-				code: systemCode,
-				body: {
-					code: systemCode,
-					lastServiceReviewDate: date.toISOString(),
-				},
-			});
-			sandbox.expectNoS3Actions('upload', 'delete');
+			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('Overwrite existing Date property', async () => {
@@ -181,16 +245,7 @@ describe('v2 - node PATCH', () => {
 				'System',
 				['lastServiceReviewDate'],
 			]);
-			sandbox.expectS3Actions({
-				action: 'patch',
-				nodeType: 'System',
-				code: systemCode,
-				body: {
-					code: systemCode,
-					lastServiceReviewDate: date.toISOString(),
-				},
-			});
-			sandbox.expectNoS3Actions('upload', 'delete');
+			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it("Not overwrite when 'same' Date sent", async () => {
@@ -257,16 +312,7 @@ describe('v2 - node PATCH', () => {
 			'Team',
 			['description'],
 		]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'Team',
-			code: teamCode,
-			body: {
-				code: teamCode,
-				description: '',
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not remove property when falsy value sent in payload', async () => {
@@ -294,16 +340,7 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['isActive']]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'Team',
-			code: teamCode,
-			body: {
-				isActive: false,
-				code: teamCode,
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Create when patching non-existent node', async () => {
@@ -333,16 +370,7 @@ describe('v2 - node PATCH', () => {
 			'Team',
 			['name', 'code'],
 		]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'Team',
-			code: teamCode,
-			body: {
-				name: 'name1',
-				code: teamCode,
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -393,16 +421,7 @@ describe('v2 - node PATCH', () => {
 			['name', 'code'],
 			'biz-ops-github-importer',
 		]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'Repository',
-			code: repoCode,
-			body: {
-				name: 'name1',
-				code: repoCode,
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when conflicting code values', async () => {
@@ -447,7 +466,13 @@ describe('v2 - node PATCH', () => {
 
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
-		await testPatchRequest(`/v2/node/Team/${teamCode}`, {}, 500);
+		await testPatchRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				troubleshooting: 'Fake Document',
+			},
+			500,
+		);
 		sandbox.expectNoKinesisEvents();
 		// S3DocumentsHelper throws on instantiation
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -477,16 +502,7 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'Team',
-			code: teamCode,
-			body: {
-				name: null,
-				code: teamCode,
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
@@ -585,45 +601,45 @@ describe('v2 - node PATCH', () => {
 								}),
 							);
 
-							await testNode(
-								'Team',
-								teamCode,
-								sandbox.withMeta({
-									code: teamCode,
-								}),
-								[
-									{
-										type: 'HAS_TECH_LEAD',
-										direction: 'outgoing',
-										props: sandbox.withMeta({}),
-									},
-									{
-										type: 'Person',
-										props: sandbox.withMeta({
-											code: `${personCode}-2`,
-										}),
-									},
-								],
-							);
-							sandbox.expectKinesisEvents(
-								['UPDATE', teamCode, 'Team', ['techLeads']],
-								[
-									'UPDATE',
-									`${personCode}-1`,
-									'Person',
-									['techLeadFor'],
-								],
-							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									'!techLeads': [`${personCode}-1`],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							// await testNode(
+							// 	'Team',
+							// 	teamCode,
+							// 	sandbox.withMeta({
+							// 		code: teamCode,
+							// 	}),
+							// 	[
+							// 		{
+							// 			type: 'HAS_TECH_LEAD',
+							// 			direction: 'outgoing',
+							// 			props: sandbox.withMeta({}),
+							// 		},
+							// 		{
+							// 			type: 'Person',
+							// 			props: sandbox.withMeta({
+							// 				code: `${personCode}-2`,
+							// 			}),
+							// 		},
+							// 	],
+							// );
+							// sandbox.expectKinesisEvents(
+							// 	['UPDATE', teamCode, 'Team', ['techLeads']],
+							// 	[
+							// 		'UPDATE',
+							// 		`${personCode}-1`,
+							// 		'Person',
+							// 		['techLeadFor'],
+							// 	],
+							// );
+							// sandbox.expectS3Actions({
+							// 	action: 'patch',
+							// 	nodeType: 'Team',
+							// 	code: teamCode,
+							// 	body: {
+							// 		code: teamCode,
+							// 		'!techLeads': [`${personCode}-1`],
+							// 	},
+							// });
+							// sandbox.expectNoS3Actions('upload', 'delete');
 						});
 
 						it("can attempt to delete a specific relationship of type that doesn't exist", async () => {
@@ -766,19 +782,11 @@ describe('v2 - node PATCH', () => {
 									['techLeadFor'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									'!techLeads': [
-										`${personCode}-1`,
-										`${personCode}-3`,
-									],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 
 						it('can delete multiple specific relationships of different kinds', async () => {
@@ -834,17 +842,11 @@ describe('v2 - node PATCH', () => {
 									['allTeams', 'topLevelTeams'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									'!techLeads': [personCode],
-									'!parentGroup': groupCode,
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 						it('leaves relationships in the opposite direction unaffected', async () => {
 							const [
@@ -904,16 +906,11 @@ describe('v2 - node PATCH', () => {
 									['subTeams'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: `${teamCode}-2`,
-								body: {
-									code: `${teamCode}-2`,
-									'!subTeams': [`${teamCode}-3`],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 						it('can add and remove relationships of the same type at the same time', async () => {
 							const [team, person1] = await sandbox.createNodes(
@@ -974,17 +971,11 @@ describe('v2 - node PATCH', () => {
 									['techLeadFor'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									'!techLeads': [`${personCode}-1`],
-									techLeads: [`${personCode}-2`],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 						it('errors if deleting and adding the same relationship to the same record', async () => {
 							await sandbox.createNodes(
@@ -1096,17 +1087,11 @@ describe('v2 - node PATCH', () => {
 									['allTeams', 'topLevelTeams'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									techLeads: null,
-									parentGroup: null,
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 
 						it('leaves other similar relationships on destination node untouched when deleting', async () => {
@@ -1176,16 +1161,11 @@ describe('v2 - node PATCH', () => {
 									['techLeadFor'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: `${teamCode}-2`,
-								body: {
-									code: `${teamCode}-2`,
-									techLeads: null,
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 
 						it('leaves relationships in other direction and of other types untouched when deleting', async () => {
@@ -1277,16 +1257,11 @@ describe('v2 - node PATCH', () => {
 									['parentTeam'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: `${teamCode}-2`,
-								body: {
-									code: `${teamCode}-2`,
-									subTeams: null,
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 					});
 				}),
@@ -1367,16 +1342,7 @@ describe('v2 - node PATCH', () => {
 								['allTeams', 'topLevelTeams'],
 							],
 						);
-						sandbox.expectS3Actions({
-							action: 'patch',
-							nodeType: 'Team',
-							code: teamCode,
-							body: {
-								code: teamCode,
-								parentGroup: groupCode,
-							},
-						});
-						sandbox.expectNoS3Actions('upload', 'delete');
+						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('accept an array of length one', async () => {
 						await sandbox.createNodes(
@@ -1430,16 +1396,7 @@ describe('v2 - node PATCH', () => {
 								['allTeams', 'topLevelTeams'],
 							],
 						);
-						sandbox.expectS3Actions({
-							action: 'patch',
-							nodeType: 'Team',
-							code: teamCode,
-							body: {
-								code: teamCode,
-								parentGroup: [groupCode],
-							},
-						});
-						sandbox.expectNoS3Actions('upload', 'delete');
+						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('error if trying to write multiple relationships', async () => {
 						await sandbox.createNodes(
@@ -1532,16 +1489,7 @@ describe('v2 - node PATCH', () => {
 								['allTeams', 'topLevelTeams'],
 							],
 						);
-						sandbox.expectS3Actions({
-							action: 'patch',
-							nodeType: 'Team',
-							code: teamCode,
-							body: {
-								code: teamCode,
-								parentGroup: [`${groupCode}-2`],
-							},
-						});
-						sandbox.expectNoS3Actions('upload', 'delete');
+						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 
 					it.skip('not replace existing relationship in opposite direction', async () => {
@@ -1590,16 +1538,7 @@ describe('v2 - node PATCH', () => {
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: teamCode,
-						body: {
-							code: teamCode,
-							techLeads: [personCode],
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
 					const [team, person1] = await sandbox.createNodes(
@@ -1667,16 +1606,7 @@ describe('v2 - node PATCH', () => {
 							['techLeadFor'],
 						],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: teamCode,
-						body: {
-							code: teamCode,
-							techLeads: [`${personCode}-2`],
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 			});
 
@@ -1721,16 +1651,7 @@ describe('v2 - node PATCH', () => {
 						['UPDATE', teamCode, 'Team', ['techLeads']],
 						['UPDATE', personCode, 'Person', ['techLeadFor']],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: teamCode,
-						body: {
-							code: teamCode,
-							techLeads: [personCode],
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('can replace relationships if relationshipAction=replace', async () => {
@@ -1792,16 +1713,7 @@ describe('v2 - node PATCH', () => {
 							['techLeadFor'],
 						],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: teamCode,
-						body: {
-							code: teamCode,
-							techLeads: [`${personCode}-2`],
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('leaves relationships in other direction and of other types untouched when replacing', async () => {
@@ -1881,16 +1793,7 @@ describe('v2 - node PATCH', () => {
 						['UPDATE', `${teamCode}-2`, 'Team', ['subTeams']],
 						['UPDATE', `${teamCode}-3`, 'Team', ['parentTeam']],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: `${teamCode}-2`,
-						body: {
-							code: `${teamCode}-2`,
-							subTeams: [`${teamCode}-3`],
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('replaces relationships in multiple directions', async () => {
@@ -1969,17 +1872,7 @@ describe('v2 - node PATCH', () => {
 							['subTeams', 'parentTeam'],
 						],
 					);
-					sandbox.expectS3Actions({
-						action: 'patch',
-						nodeType: 'Team',
-						code: `${teamCode}-2`,
-						body: {
-							code: `${teamCode}-2`,
-							subTeams: [`${teamCode}-1`],
-							parentTeam: `${teamCode}-3`,
-						},
-					});
-					sandbox.expectNoS3Actions('upload', 'delete');
+					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 			});
 
@@ -1996,24 +1889,11 @@ describe('v2 - node PATCH', () => {
 								/Missing related node/,
 							);
 							sandbox.expectNoKinesisEvents();
-							sandbox.expectS3Actions(
-								{
-									action: 'patch',
-									nodeType: 'Team',
-									code: teamCode,
-									body: {
-										code: teamCode,
-										techLeads: [personCode],
-									},
-								},
-								{
-									action: 'delete',
-									nodeType: 'Team',
-									code: teamCode,
-									versionId: 'FakePatchVersionId',
-								},
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
 							);
-							sandbox.expectNoS3Actions('upload');
 						});
 
 						it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -2059,16 +1939,11 @@ describe('v2 - node PATCH', () => {
 									['code', 'techLeadFor'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									techLeads: [personCode],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 
 						it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
@@ -2115,16 +1990,11 @@ describe('v2 - node PATCH', () => {
 									['techLeadFor'],
 								],
 							);
-							sandbox.expectS3Actions({
-								action: 'patch',
-								nodeType: 'Team',
-								code: teamCode,
-								body: {
-									code: teamCode,
-									techLeads: [personCode],
-								},
-							});
-							sandbox.expectNoS3Actions('upload', 'delete');
+							sandbox.expectNoS3Actions(
+								'upload',
+								'delete',
+								'patch',
+							);
 						});
 					});
 				});
@@ -2229,17 +2099,7 @@ describe('v2 - node PATCH', () => {
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
 			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
-			sandbox.expectS3Actions({
-				action: 'patch',
-				nodeType: 'Team',
-				code: teamCode,
-				body: {
-					code: teamCode,
-					name: 'new-name',
-					techLeads: [personCode],
-				},
-			});
-			sandbox.expectNoS3Actions('upload', 'delete');
+			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
@@ -2263,17 +2123,7 @@ describe('v2 - node PATCH', () => {
 				['UPDATE', teamCode, 'Team', ['techLeads']],
 				['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 			);
-			sandbox.expectS3Actions({
-				action: 'patch',
-				nodeType: 'Team',
-				code: teamCode,
-				body: {
-					code: teamCode,
-					name: 'name',
-					techLeads: [`${personCode}-2`],
-				},
-			});
-			sandbox.expectNoS3Actions('upload', 'delete');
+			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('detects deleted property as a change', async () => {
@@ -2289,16 +2139,7 @@ describe('v2 - node PATCH', () => {
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
 			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
-			sandbox.expectS3Actions({
-				action: 'patch',
-				nodeType: 'Team',
-				code: teamCode,
-				body: {
-					code: teamCode,
-					name: null,
-				},
-			});
-			sandbox.expectNoS3Actions('upload', 'delete');
+			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		describe('patching with fewer relationships', () => {
@@ -2330,16 +2171,7 @@ describe('v2 - node PATCH', () => {
 					['UPDATE', teamCode, 'Team', ['techLeads']],
 					['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
 				);
-				sandbox.expectS3Actions({
-					action: 'patch',
-					nodeType: 'Team',
-					code: teamCode,
-					body: {
-						code: teamCode,
-						techLeads: [`${personCode}-1`],
-					},
-				});
-				sandbox.expectNoS3Actions('upload', 'delete');
+				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 
 			it('treats fewer relationships as no change when merging relationships', async () => {

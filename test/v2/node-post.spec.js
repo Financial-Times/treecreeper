@@ -32,35 +32,39 @@ describe('v2 - node POST', () => {
 		stubDbUnavailable(sandbox);
 		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions(
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({ code: teamCode }),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `Team/${teamCode}`,
-				},
-				requestType: 'POST',
-			},
-			{
-				action: 'delete',
-				nodeType: 'Team',
-				code: teamCode,
-				versionId: 'FakeVersionId',
-			},
-		);
-		sandbox.expectNoS3Actions('patch');
+		// sandbox.expectS3Actions(
+		// 	{
+		// 		action: 'upload',
+		// 		params: {
+		// 			Body: JSON.stringify({ code: teamCode }),
+		// 			Bucket: 'biz-ops-documents.510688331160',
+		// 			Key: `Team/${teamCode}`,
+		// 		},
+		// 		requestType: 'POST',
+		// 	},
+		// 	{
+		// 		action: 'delete',
+		// 		nodeType: 'Team',
+		// 		code: teamCode,
+		// 		versionId: 'FakeVersionId',
+		// 	},
+		// );
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
-		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
+		await testPostRequest(
+			`/v2/node/System/${systemCode}`,
+			{ name: 'name1', troubleshooting: 'Fake Document' },
+			500,
+		);
 		sandbox.expectNoKinesisEvents();
 		// S3DocumentsHelper throws on instantiation
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
-	it('creates node and writes to s3', async () => {
+	it('creates node with non-document properties only', async () => {
 		await testPostRequest(
 			`/v2/node/Team/${teamCode}`,
 			{ name: 'name1' },
@@ -85,16 +89,77 @@ describe('v2 - node POST', () => {
 			'Team',
 			['code', 'name'],
 		]);
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+	});
+
+	it('creates node with only document properties and writes to s3', async () => {
+		await testPostRequest(
+			`/v2/node/System/${systemCode}`,
+			{ troubleshooting: 'Fake Document' },
+			200,
+			sandbox.withCreateMeta({
+				code: systemCode,
+				// troubleshooting: 'Fake Document',
+			}),
+		);
+
+		await testNode(
+			'System',
+			systemCode,
+			sandbox.withCreateMeta({
+				code: systemCode,
+			}),
+		);
+		sandbox.expectKinesisEvents(['CREATE', systemCode, 'System', ['code']]);
 
 		sandbox.expectS3Actions({
 			action: 'upload',
 			params: {
 				Body: JSON.stringify({
-					name: 'name1',
-					code: teamCode,
+					troubleshooting: 'Fake Document',
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
-				Key: `Team/${teamCode}`,
+				Key: `System/${systemCode}`,
+			},
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
+	});
+
+	it('creates node with document and non-document properties and writes to s3', async () => {
+		await testPostRequest(
+			`/v2/node/System/${systemCode}`,
+			{ name: 'name1', troubleshooting: 'Fake Document' },
+			200,
+			sandbox.withCreateMeta({
+				code: systemCode,
+				name: 'name1',
+			}),
+		);
+
+		await testNode(
+			'System',
+			systemCode,
+			sandbox.withCreateMeta({
+				code: systemCode,
+				name: 'name1',
+			}),
+		);
+		sandbox.expectKinesisEvents([
+			'CREATE',
+			systemCode,
+			'System',
+			['code', 'name'],
+		]);
+
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					troubleshooting: 'Fake Document',
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `System/${systemCode}`,
 			},
 			requestType: 'POST',
 		});
@@ -147,19 +212,19 @@ describe('v2 - node POST', () => {
 			['name', 'code'],
 			'biz-ops-github-importer',
 		]);
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					name: 'name1',
-					code: repoCode,
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `Repository/${repoCode}`,
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
+		// sandbox.expectS3Actions({
+		// 	action: 'upload',
+		// 	params: {
+		// 		Body: JSON.stringify({
+		// 			name: 'name1',
+		// 			code: repoCode,
+		// 		}),
+		// 		Bucket: 'biz-ops-documents.510688331160',
+		// 		Key: `Repository/${repoCode}`,
+		// 	},
+		// 	requestType: 'POST',
+		// });
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -230,24 +295,24 @@ describe('v2 - node POST', () => {
 			new RegExp(`Team ${teamCode} already exists`),
 		);
 		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions(
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({ code: teamCode }),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `Team/${teamCode}`,
-				},
-				requestType: 'POST',
-			},
-			{
-				action: 'delete',
-				nodeType: 'Team',
-				code: teamCode,
-				versionId: 'FakeVersionId',
-			},
-		);
-		sandbox.expectNoS3Actions('patch');
+		// sandbox.expectS3Actions(
+		// 	{
+		// 		action: 'upload',
+		// 		params: {
+		// 			Body: JSON.stringify({ code: teamCode }),
+		// 			Bucket: 'biz-ops-documents.510688331160',
+		// 			Key: `Team/${teamCode}`,
+		// 		},
+		// 		requestType: 'POST',
+		// 	},
+		// 	{
+		// 		action: 'delete',
+		// 		nodeType: 'Team',
+		// 		code: teamCode,
+		// 		versionId: 'FakeVersionId',
+		// 	},
+		// );
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when conflicting code values', async () => {
@@ -334,20 +399,20 @@ describe('v2 - node POST', () => {
 			['UPDATE', groupCode, 'Group', ['allTeams', 'topLevelTeams']],
 		);
 
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					techLeads: [personCode],
-					parentGroup: groupCode,
-					code: teamCode,
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `Team/${teamCode}`,
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
+		// sandbox.expectS3Actions({
+		// 	action: 'upload',
+		// 	params: {
+		// 		Body: JSON.stringify({
+		// 			techLeads: [personCode],
+		// 			parentGroup: groupCode,
+		// 			code: teamCode,
+		// 		}),
+		// 		Bucket: 'biz-ops-documents.510688331160',
+		// 		Key: `Team/${teamCode}`,
+		// 	},
+		// 	requestType: 'POST',
+		// });
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when creating node related to non-existent nodes', async () => {
@@ -362,28 +427,28 @@ describe('v2 - node POST', () => {
 		);
 		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
-		sandbox.expectS3Actions(
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({
-						techLeads: [personCode],
-						parentGroup: groupCode,
-						code: teamCode,
-					}),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `Team/${teamCode}`,
-				},
-				requestType: 'POST',
-			},
-			{
-				action: 'delete',
-				nodeType: 'Team',
-				code: teamCode,
-				versionId: 'FakeVersionId',
-			},
-		);
-		sandbox.expectNoS3Actions('patch');
+		// sandbox.expectS3Actions(
+		// 	{
+		// 		action: 'upload',
+		// 		params: {
+		// 			Body: JSON.stringify({
+		// 				techLeads: [personCode],
+		// 				parentGroup: groupCode,
+		// 				code: teamCode,
+		// 			}),
+		// 			Bucket: 'biz-ops-documents.510688331160',
+		// 			Key: `Team/${teamCode}`,
+		// 		},
+		// 		requestType: 'POST',
+		// 	},
+		// 	{
+		// 		action: 'delete',
+		// 		nodeType: 'Team',
+		// 		code: teamCode,
+		// 		versionId: 'FakeVersionId',
+		// 	},
+		// );
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -446,20 +511,20 @@ describe('v2 - node POST', () => {
 				['code', 'allTeams', 'topLevelTeams'],
 			],
 		);
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					techLeads: [personCode],
-					parentGroup: groupCode,
-					code: teamCode,
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `Team/${teamCode}`,
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
+		// sandbox.expectS3Actions({
+		// 	action: 'upload',
+		// 	params: {
+		// 		Body: JSON.stringify({
+		// 			techLeads: [personCode],
+		// 			parentGroup: groupCode,
+		// 			code: teamCode,
+		// 		}),
+		// 		Bucket: 'biz-ops-documents.510688331160',
+		// 		Key: `Team/${teamCode}`,
+		// 	},
+		// 	requestType: 'POST',
+		// });
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	describe('locked Fields', () => {

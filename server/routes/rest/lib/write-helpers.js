@@ -1,6 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');
@@ -26,7 +27,8 @@ let setSalesforceIdForSystem;
 const writeNode = async ({
 	nodeType,
 	code,
-	body,
+	bodyDocuments,
+	updateDataBase,
 	method,
 	upsert,
 	isCreate,
@@ -65,32 +67,43 @@ const writeNode = async ({
 	// in different orders. S3 requests are more reliable than neo4j
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
-	const versionId = await s3DocumentsHelper.sendDocumentsToS3(
-		method,
-		nodeType,
-		code,
-		body,
-	);
+	let versionId;
+	if (!_isEmpty(bodyDocuments)) {
+		versionId = await s3DocumentsHelper.sendDocumentsToS3(
+			method,
+			nodeType,
+			code,
+			bodyDocuments,
+		);
+	}
 	try {
-		neo4jWriteResult = await executeQuery(
-			queryParts.join('\n'),
-			parameters,
-			true,
-		);
+		if (!updateDataBase) {
+			logger.info(
+				{ event: 'SKIP_NODE_UPDATE' },
+				'No changed properties, relationships or field locks - skipping update',
+			);
+		} else {
+			neo4jWriteResult = await executeQuery(
+				queryParts.join('\n'),
+				parameters,
+				true,
+			);
+		}
 	} catch (err) {
-		logger.info(
-			err,
-			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
-		);
-		if (versionId)
+		if (!_isEmpty(bodyDocuments) && versionId) {
+			logger.info(
+				err,
+				`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			);
 			s3DocumentsHelper.deleteFileFromS3(nodeType, code, versionId);
+		}
 		throw new Error(err);
 	}
 
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved
-	if (willDeleteRelationships) {
+	if (willDeleteRelationships || !updateDataBase) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
@@ -127,6 +140,16 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
 
 	const { createPermissions, pluralName } = getType(nodeType);
+	const nodeProperties = getType(nodeType).properties;
+	const bodyNoDocs = {};
+	const bodyDocuments = {};
+	Object.keys(body).forEach(prop => {
+		if (nodeProperties[prop].type === 'Document') {
+			bodyDocuments[prop] = body[prop];
+		} else {
+			bodyNoDocs[prop] = body[prop];
+		}
+	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
 		throw httpError(
 			400,
@@ -137,25 +160,26 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	}
 
 	const lockedFields = mergeLockedFields(
-		Object.assign({ clientId, body }, query),
+		Object.assign({ clientId, body: bodyNoDocs }, query),
 	);
 
 	return writeNode({
 		nodeType,
 		code,
-		body,
+		bodyDocuments,
+		updateDataBase: true,
 		method,
 		upsert,
 		isCreate: true,
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 		}),
 		lockedFields,
 		relationshipsToCreate: getAddedRelationships({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 		}),
 		queryParts: [
 			stripIndents`
