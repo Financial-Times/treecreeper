@@ -64,6 +64,7 @@ describe('data quality: types', () => {
 							'properties',
 							'createPermissions',
 							'minimumViableRecord',
+							'inactiveRule',
 						]),
 					);
 				});
@@ -96,6 +97,12 @@ describe('data quality: types', () => {
 						expect(typeof propertyName).toBe('string');
 						expect(type.properties[propertyName]).toBeDefined();
 					});
+				}
+			});
+
+			it('may have an inactiveRule', () => {
+				if ('inactiveRule' in type) {
+					expect(typeof type.inactiveRule).toBe('object');
 				}
 			});
 			it('may have a plural name', () => {
@@ -184,6 +191,7 @@ describe('data quality: types', () => {
 												'isRecursive',
 												'hidden',
 												'autoPopulated',
+												'showInactive',
 											]),
 										),
 									);
@@ -272,6 +280,14 @@ describe('data quality: types', () => {
 									if (config.pattern) {
 										expect(config.pattern).toMatch(
 											validStringPatternsRX,
+										);
+									}
+								});
+
+								it('may hide inactive records', () => {
+									if (config.howInactive) {
+										expect(typeof config.showInactive).toBe(
+											'boolean',
 										);
 									}
 								});

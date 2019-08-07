@@ -63,6 +63,7 @@ properties:
     direction: outgoing
     label: Top level teams
     relationship: HAS_TEAM
+    showInactive: false
     description: |
       The top level teams that form the main subdivisions of the group. In
       groups that are too small to have a hierarchical structure, this may
@@ -73,6 +74,7 @@ properties:
     label: All teams
     direction: outgoing
     relationship: HAS_TEAM
+    showInactive: false
     description: |
       All the teams that are part of this group. This is populated by traversing
       the team hierarchy in the group and the list does not need to be manually

@@ -144,6 +144,8 @@ const getType = (
 					hasMany: def.hasMany || false,
 					isRelationship: !!def.relationship,
 					isRecursive: def.isRecursive || false,
+					showInactive:
+						'showInactive' in def ? def.showInactive : true,
 				});
 			}
 		});

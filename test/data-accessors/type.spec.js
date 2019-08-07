@@ -626,6 +626,7 @@ describe('get-type', () => {
 				type: 'Type2',
 				hasMany: false,
 				isRelationship: true,
+				showInactive: true,
 				isRecursive: false,
 				description: 'test description',
 				label: 'test label',
@@ -651,6 +652,7 @@ describe('get-type', () => {
 				type: 'Type2',
 				isRelationship: true,
 				isRecursive: false,
+				showInactive: true,
 				hasMany: false,
 				description: 'test description',
 				label: 'test label',
@@ -716,6 +718,7 @@ describe('get-type', () => {
 				type: 'Type2',
 				hasMany: false,
 				direction: 'outgoing',
+				showInactive: true,
 				isRecursive: true,
 				isRelationship: true,
 				relationship: 'HAS',
@@ -744,6 +747,7 @@ describe('get-type', () => {
 			expect(type.properties.many).toEqual({
 				isRecursive: false,
 				isRelationship: true,
+				showInactive: true,
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'outgoing',
@@ -752,11 +756,29 @@ describe('get-type', () => {
 			expect(type.properties.singular).toEqual({
 				isRecursive: false,
 				isRelationship: true,
+				showInactive: true,
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
 			});
+		});
+
+		it('relationships can hide inactive records', () => {
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						showInactive: false,
+						description: 'test description',
+					},
+				},
+			});
+			expect(type.properties.testName.showInactive).toBe(false);
 		});
 
 		it('hidden relationships', () => {
