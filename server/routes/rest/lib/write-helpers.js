@@ -102,7 +102,10 @@ const writeNode = async ({
 
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
-	// obtain consistent results, so for safety do a fresh get when deletes are involved
+	// obtain consistent results, so for safety do a fresh get when deletes are involved.
+	// 
+	// Also, if we didn't update the database already we need to do a get to obtain the
+	// record at all
 	if (willDeleteRelationships || !updateDataBase) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
