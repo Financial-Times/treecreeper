@@ -123,6 +123,7 @@ const writeNode = async ({
 		updatedProperties: [
 			...new Set([
 				...Object.keys(propertiesToModify),
+				...Object.keys(bodyDocuments),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
 			]),

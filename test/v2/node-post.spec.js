@@ -30,26 +30,33 @@ describe('v2 - node POST', () => {
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await testPostRequest(`/v2/node/Team/${teamCode}`, {}, 500);
+		await testPostRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				name: 'name1',
+				troubleshooting: 'Fake Document',
+			},
+			500,
+		);
 		sandbox.expectNoKinesisEvents();
-		// sandbox.expectS3Actions(
-		// 	{
-		// 		action: 'upload',
-		// 		params: {
-		// 			Body: JSON.stringify({ code: teamCode }),
-		// 			Bucket: 'biz-ops-documents.510688331160',
-		// 			Key: `Team/${teamCode}`,
-		// 		},
-		// 		requestType: 'POST',
-		// 	},
-		// 	{
-		// 		action: 'delete',
-		// 		nodeType: 'Team',
-		// 		code: teamCode,
-		// 		versionId: 'FakeVersionId',
-		// 	},
-		// );
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		sandbox.expectS3Actions(
+			{
+				action: 'upload',
+				params: {
+					Body: JSON.stringify({ troubleshooting: 'Fake Document' }),
+					Bucket: 'biz-ops-documents.510688331160',
+					Key: `System/${systemCode}`,
+				},
+				requestType: 'POST',
+			},
+			{
+				action: 'delete',
+				nodeType: 'System',
+				code: systemCode,
+				versionId: 'FakeVersionId',
+			},
+		);
+		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('responds with 500 if s3 query fails', async () => {
@@ -99,7 +106,6 @@ describe('v2 - node POST', () => {
 			200,
 			sandbox.withCreateMeta({
 				code: systemCode,
-				// troubleshooting: 'Fake Document',
 			}),
 		);
 
@@ -110,7 +116,12 @@ describe('v2 - node POST', () => {
 				code: systemCode,
 			}),
 		);
-		sandbox.expectKinesisEvents(['CREATE', systemCode, 'System', ['code']]);
+		sandbox.expectKinesisEvents([
+			'CREATE',
+			systemCode,
+			'System',
+			['code', 'troubleshooting'],
+		]);
 
 		sandbox.expectS3Actions({
 			action: 'upload',
@@ -149,7 +160,7 @@ describe('v2 - node POST', () => {
 			'CREATE',
 			systemCode,
 			'System',
-			['code', 'name'],
+			['code', 'name', 'troubleshooting'],
 		]);
 
 		sandbox.expectS3Actions({
@@ -185,7 +196,7 @@ describe('v2 - node POST', () => {
 		const result = Object.assign(
 			sandbox.withCreateMeta({
 				name: 'name1',
-				code: repoCode,
+				code: systemCode,
 			}),
 			{
 				_createdByClient: 'biz-ops-github-importer',
@@ -194,37 +205,37 @@ describe('v2 - node POST', () => {
 		);
 		await sandbox
 			.request(app)
-			.post(`/v2/node/Repository/${repoCode}`)
+			.post(`/v2/node/System/${systemCode}`)
 			.set('API_KEY', process.env.API_KEY)
 			.set('client-user-id', `${namespace}-user`)
 			.set('x-request-id', `${namespace}-request`)
 			.set('client-id', 'biz-ops-github-importer')
 			.send({
 				name: 'name1',
+				troubleshooting: 'Fake Document',
 			})
 			.expect(200, result);
 
-		await testNode('Repository', repoCode, result);
+		await testNode('System', systemCode, result);
 		sandbox.expectKinesisEvents([
 			'CREATE',
-			repoCode,
-			'Repository',
-			['name', 'code'],
+			systemCode,
+			'System',
+			['name', 'code', 'troubleshooting'],
 			'biz-ops-github-importer',
 		]);
-		// sandbox.expectS3Actions({
-		// 	action: 'upload',
-		// 	params: {
-		// 		Body: JSON.stringify({
-		// 			name: 'name1',
-		// 			code: repoCode,
-		// 		}),
-		// 		Bucket: 'biz-ops-documents.510688331160',
-		// 		Key: `Repository/${repoCode}`,
-		// 	},
-		// 	requestType: 'POST',
-		// });
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		sandbox.expectS3Actions({
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					troubleshooting: 'Fake Document',
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `System/${systemCode}`,
+			},
+			requestType: 'POST',
+		});
+		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -285,48 +296,50 @@ describe('v2 - node POST', () => {
 	});
 
 	it('error when creating duplicate node', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
+		await sandbox.createNode('System', {
+			code: systemCode,
 		});
 		await testPostRequest(
-			`/v2/node/Team/${teamCode}`,
-			{},
+			`/v2/node/System/${systemCode}`,
+			{
+				troubleshooting: 'Fake Document',
+			},
 			409,
-			new RegExp(`Team ${teamCode} already exists`),
+			new RegExp(`System ${systemCode} already exists`),
 		);
 		sandbox.expectNoKinesisEvents();
-		// sandbox.expectS3Actions(
-		// 	{
-		// 		action: 'upload',
-		// 		params: {
-		// 			Body: JSON.stringify({ code: teamCode }),
-		// 			Bucket: 'biz-ops-documents.510688331160',
-		// 			Key: `Team/${teamCode}`,
-		// 		},
-		// 		requestType: 'POST',
-		// 	},
-		// 	{
-		// 		action: 'delete',
-		// 		nodeType: 'Team',
-		// 		code: teamCode,
-		// 		versionId: 'FakeVersionId',
-		// 	},
-		// );
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		sandbox.expectS3Actions(
+			{
+				action: 'upload',
+				params: {
+					Body: JSON.stringify({ troubleshooting: 'Fake Document' }),
+					Bucket: 'biz-ops-documents.510688331160',
+					Key: `System/${systemCode}`,
+				},
+				requestType: 'POST',
+			},
+			{
+				action: 'delete',
+				nodeType: 'System',
+				code: systemCode,
+				versionId: 'FakeVersionId',
+			},
+		);
+		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('error when conflicting code values', async () => {
 		const wrongCode = 'wrong-code';
 		await testPostRequest(
-			`/v2/node/Team/${teamCode}`,
-			{ code: wrongCode },
+			`/v2/node/System/${systemCode}`,
+			{ code: wrongCode, troubleshooting: 'Fake Document' },
 			400,
 			new RegExp(
-				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
+				`Conflicting code property \`wrong-code\` in payload for System ${systemCode}`,
 			),
 		);
 		sandbox.expectNoKinesisEvents();
-		await verifyNotExists('Team', teamCode);
+		await verifyNotExists('System', systemCode);
 		sandbox.expectNoS3Actions('upload', 'patch', 'delete'); // as this error will throw before s3 actions
 	});
 
@@ -398,20 +411,6 @@ describe('v2 - node POST', () => {
 			['UPDATE', personCode, 'Person', ['techLeadFor']],
 			['UPDATE', groupCode, 'Group', ['allTeams', 'topLevelTeams']],
 		);
-
-		// sandbox.expectS3Actions({
-		// 	action: 'upload',
-		// 	params: {
-		// 		Body: JSON.stringify({
-		// 			techLeads: [personCode],
-		// 			parentGroup: groupCode,
-		// 			code: teamCode,
-		// 		}),
-		// 		Bucket: 'biz-ops-documents.510688331160',
-		// 		Key: `Team/${teamCode}`,
-		// 	},
-		// 	requestType: 'POST',
-		// });
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
@@ -427,27 +426,6 @@ describe('v2 - node POST', () => {
 		);
 		sandbox.expectNoKinesisEvents();
 		await verifyNotExists('Team', teamCode);
-		// sandbox.expectS3Actions(
-		// 	{
-		// 		action: 'upload',
-		// 		params: {
-		// 			Body: JSON.stringify({
-		// 				techLeads: [personCode],
-		// 				parentGroup: groupCode,
-		// 				code: teamCode,
-		// 			}),
-		// 			Bucket: 'biz-ops-documents.510688331160',
-		// 			Key: `Team/${teamCode}`,
-		// 		},
-		// 		requestType: 'POST',
-		// 	},
-		// 	{
-		// 		action: 'delete',
-		// 		nodeType: 'Team',
-		// 		code: teamCode,
-		// 		versionId: 'FakeVersionId',
-		// 	},
-		// );
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
@@ -511,19 +489,6 @@ describe('v2 - node POST', () => {
 				['code', 'allTeams', 'topLevelTeams'],
 			],
 		);
-		// sandbox.expectS3Actions({
-		// 	action: 'upload',
-		// 	params: {
-		// 		Body: JSON.stringify({
-		// 			techLeads: [personCode],
-		// 			parentGroup: groupCode,
-		// 			code: teamCode,
-		// 		}),
-		// 		Bucket: 'biz-ops-documents.510688331160',
-		// 		Key: `Team/${teamCode}`,
-		// 	},
-		// 	requestType: 'POST',
-		// });
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
@@ -574,8 +539,8 @@ describe('v2 - node POST', () => {
 
 			it('throws an error when clientId is not set', async () => {
 				await testPostRequest(
-					`/v2/node/Team/${teamCode}?lockFields=all`,
-					{ name: 'name1' },
+					`/v2/node/System/${systemCode}?lockFields=all`,
+					{ name: 'name1', troubleshooting: 'Fake Document' },
 					400,
 					/clientId needs to be set to a valid system code in order to lock fields/,
 				);

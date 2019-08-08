@@ -63,15 +63,6 @@ describe('v2 - node PATCH', () => {
 		);
 
 		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
-		// sandbox.expectS3Actions({
-		// 	action: 'patch',
-		// 	nodeType: 'Team',
-		// 	code: teamCode,
-		// 	body: {
-		// 		code: teamCode,
-		// 		name: 'name2',
-		// 	},
-		// });
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
@@ -97,8 +88,12 @@ describe('v2 - node PATCH', () => {
 				code: systemCode,
 			}),
 		);
-		sandbox.expectNoKinesisEvents();
-		// sandbox.expectKinesisEvents(['UPDATE', systemCode, 'System', ['name']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			systemCode,
+			'System',
+			['troubleshooting'],
+		]);
 		sandbox.expectS3Actions({
 			action: 'patch',
 			nodeType: 'System',
@@ -136,7 +131,12 @@ describe('v2 - node PATCH', () => {
 			}),
 		);
 
-		sandbox.expectKinesisEvents(['UPDATE', systemCode, 'System', ['name']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			systemCode,
+			'System',
+			['name', 'troubleshooting'],
+		]);
 		sandbox.expectS3Actions({
 			action: 'patch',
 			nodeType: 'System',
@@ -426,16 +426,17 @@ describe('v2 - node PATCH', () => {
 
 	it('error when conflicting code values', async () => {
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/System/${systemCode}`,
 			{
 				code: 'wrong-code',
+				troubleshooting: 'Fake Document',
 			},
 			400,
 			new RegExp(
-				`Conflicting code property \`wrong-code\` in payload for Team ${teamCode}`,
+				`Conflicting code property \`wrong-code\` in payload for System ${systemCode}`,
 			),
 		);
-		await verifyNotExists('Team', teamCode);
+		await verifyNotExists('System', systemCode);
 		sandbox.expectNoKinesisEvents();
 		// validatePayload throws before S3 actions
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -458,7 +459,13 @@ describe('v2 - node PATCH', () => {
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
-		await testPatchRequest(`/v2/node/Team/${teamCode}`, {}, 500);
+		await testPatchRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				troubleshooting: 'Fake Document',
+			},
+			500,
+		);
 		sandbox.expectNoKinesisEvents();
 		// getNodeWithRelationships throws error before s3 delete
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -600,46 +607,6 @@ describe('v2 - node PATCH', () => {
 									techLeads: [`${personCode}-2`],
 								}),
 							);
-
-							// await testNode(
-							// 	'Team',
-							// 	teamCode,
-							// 	sandbox.withMeta({
-							// 		code: teamCode,
-							// 	}),
-							// 	[
-							// 		{
-							// 			type: 'HAS_TECH_LEAD',
-							// 			direction: 'outgoing',
-							// 			props: sandbox.withMeta({}),
-							// 		},
-							// 		{
-							// 			type: 'Person',
-							// 			props: sandbox.withMeta({
-							// 				code: `${personCode}-2`,
-							// 			}),
-							// 		},
-							// 	],
-							// );
-							// sandbox.expectKinesisEvents(
-							// 	['UPDATE', teamCode, 'Team', ['techLeads']],
-							// 	[
-							// 		'UPDATE',
-							// 		`${personCode}-1`,
-							// 		'Person',
-							// 		['techLeadFor'],
-							// 	],
-							// );
-							// sandbox.expectS3Actions({
-							// 	action: 'patch',
-							// 	nodeType: 'Team',
-							// 	code: teamCode,
-							// 	body: {
-							// 		code: teamCode,
-							// 		'!techLeads': [`${personCode}-1`],
-							// 	},
-							// });
-							// sandbox.expectNoS3Actions('upload', 'delete');
 						});
 
 						it("can attempt to delete a specific relationship of type that doesn't exist", async () => {
