@@ -8,25 +8,30 @@ describe('v2 - node GET', () => {
 	const namespace = 'v2-node-get';
 	setupMocks(sandbox, { namespace });
 
-	const testGetRequest = (...expectations) =>
+	const testGetRequest = (url, ...expectations) =>
 		sandbox
 			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
+			.get(url)
 			.namespacedAuth()
 			.expect(...expectations);
 
 	it('gets node without relationships', async () => {
-		await sandbox.createNode('Team', {
-			code: `${namespace}-team`,
+		await sandbox.createNode('System', {
+			code: `${namespace}-system`,
 			name: 'name1',
+			troubleshooting: 'Fake Document',
 		});
-		return testGetRequest(
+		await testGetRequest(
+			`/v2/node/System/${namespace}-system`,
 			200,
 			sandbox.withMeta({
-				code: `${namespace}-team`,
+				code: `${namespace}-system`,
 				name: 'name1',
+				troubleshooting: 'Fake Document',
 			}),
 		);
+		// Check that documents are retrieved from neo4j - remove after S3 migration
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('gets node with relationships', async () => {
@@ -42,6 +47,7 @@ describe('v2 - node GET', () => {
 		);
 
 		return testGetRequest(
+			`/v2/node/Team/${namespace}-team`,
 			200,
 			sandbox.withMeta({
 				code: `${namespace}-team`,
@@ -52,11 +58,11 @@ describe('v2 - node GET', () => {
 	});
 
 	it('responds with 404 if no node', async () => {
-		return testGetRequest(404);
+		return testGetRequest(`/v2/node/Team/${namespace}-team`, 404);
 	});
 
 	it('responds with 500 if query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return testGetRequest(500);
+		return testGetRequest(`/v2/node/Team/${namespace}-team`, 500);
 	});
 });

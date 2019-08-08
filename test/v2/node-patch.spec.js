@@ -78,6 +78,7 @@ describe('v2 - node PATCH', () => {
 			200,
 			sandbox.withUpdateMeta({
 				code: systemCode,
+				troubleshooting: 'Another Fake Document',
 			}),
 		);
 
@@ -86,6 +87,7 @@ describe('v2 - node PATCH', () => {
 			systemCode,
 			sandbox.withUpdateMeta({
 				code: systemCode,
+				troubleshooting: 'Another Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -119,6 +121,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.withUpdateMeta({
 				code: systemCode,
 				name: 'name1',
+				troubleshooting: 'Another Fake Document',
 			}),
 		);
 
@@ -128,6 +131,7 @@ describe('v2 - node PATCH', () => {
 			sandbox.withUpdateMeta({
 				name: 'name1',
 				code: systemCode,
+				troubleshooting: 'Another Fake Document',
 			}),
 		);
 
@@ -146,6 +150,26 @@ describe('v2 - node PATCH', () => {
 			},
 		});
 		sandbox.expectNoS3Actions('upload', 'delete');
+	});
+
+	// Remove this test after S3 migration
+	it('Reads documents from neo4j', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+			troubleshooting: 'Fake Document that is not in S3',
+		});
+		await testPatchRequest(
+			`/v2/node/System/${systemCode}`,
+			{
+				architectureDiagram: 'New Fake Document',
+			},
+			200,
+			sandbox.withUpdateMeta({
+				code: systemCode,
+				troubleshooting: 'Fake Document that is not in S3',
+				architectureDiagram: 'New Fake Document',
+			}),
+		);
 	});
 
 	it('Not create property when passed empty string', async () => {

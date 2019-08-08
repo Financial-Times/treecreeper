@@ -28,7 +28,7 @@ const writeNode = async ({
 	nodeType,
 	code,
 	bodyDocuments,
-	updateDataBase,
+	willUpdateNeo4j,
 	method,
 	upsert,
 	isCreate,
@@ -77,7 +77,7 @@ const writeNode = async ({
 		);
 	}
 	try {
-		if (!updateDataBase) {
+		if (!willUpdateNeo4j) {
 			logger.info(
 				{ event: 'SKIP_NODE_UPDATE' },
 				'No changed properties, relationships or field locks - skipping update',
@@ -88,10 +88,16 @@ const writeNode = async ({
 				parameters,
 				true,
 			);
+			logger.info(
+				{ event: `${method}_NEO4J_SUCCESS` },
+				neo4jWriteResult,
+				`${method}: neo4j write successful`,
+			);
 		}
 	} catch (err) {
 		if (!_isEmpty(bodyDocuments) && versionId) {
 			logger.info(
+				{ event: `${method}_NEO4J_FAILURE` },
 				err,
 				`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
 			);
@@ -103,10 +109,10 @@ const writeNode = async ({
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
 	// obtain consistent results, so for safety do a fresh get when deletes are involved.
-	// 
+	//
 	// Also, if we didn't update the database already we need to do a get to obtain the
 	// record at all
-	if (willDeleteRelationships || !updateDataBase) {
+	if (willDeleteRelationships || !willUpdateNeo4j) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
@@ -126,7 +132,6 @@ const writeNode = async ({
 		updatedProperties: [
 			...new Set([
 				...Object.keys(propertiesToModify),
-				...Object.keys(bodyDocuments),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
 			]),
@@ -145,13 +150,10 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 
 	const { createPermissions, pluralName } = getType(nodeType);
 	const nodeProperties = getType(nodeType).properties;
-	const bodyNoDocs = {};
 	const bodyDocuments = {};
 	Object.keys(body).forEach(prop => {
 		if (nodeProperties[prop].type === 'Document') {
 			bodyDocuments[prop] = body[prop];
-		} else {
-			bodyNoDocs[prop] = body[prop];
 		}
 	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
@@ -164,26 +166,26 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	}
 
 	const lockedFields = mergeLockedFields(
-		Object.assign({ clientId, body: bodyNoDocs }, query),
+		Object.assign({ clientId, body }, query),
 	);
 
 	return writeNode({
 		nodeType,
 		code,
 		bodyDocuments,
-		updateDataBase: true,
+		willUpdateNeo4j: true,
 		method,
 		upsert,
 		isCreate: true,
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			newContent: bodyNoDocs,
+			newContent: body,
 			code,
 		}),
 		lockedFields,
 		relationshipsToCreate: getAddedRelationships({
 			nodeType,
-			newContent: bodyNoDocs,
+			newContent: body,
 		}),
 		queryParts: [
 			stripIndents`

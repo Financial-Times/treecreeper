@@ -106,6 +106,7 @@ describe('v2 - node POST', () => {
 			200,
 			sandbox.withCreateMeta({
 				code: systemCode,
+				troubleshooting: 'Fake Document',
 			}),
 		);
 
@@ -114,6 +115,7 @@ describe('v2 - node POST', () => {
 			systemCode,
 			sandbox.withCreateMeta({
 				code: systemCode,
+				troubleshooting: 'Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -145,6 +147,7 @@ describe('v2 - node POST', () => {
 			sandbox.withCreateMeta({
 				code: systemCode,
 				name: 'name1',
+				troubleshooting: 'Fake Document',
 			}),
 		);
 
@@ -154,6 +157,7 @@ describe('v2 - node POST', () => {
 			sandbox.withCreateMeta({
 				code: systemCode,
 				name: 'name1',
+				troubleshooting: 'Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -197,6 +201,7 @@ describe('v2 - node POST', () => {
 			sandbox.withCreateMeta({
 				name: 'name1',
 				code: systemCode,
+				troubleshooting: 'Fake Document',
 			}),
 			{
 				_createdByClient: 'biz-ops-github-importer',

@@ -53,7 +53,6 @@ const update = async input => {
 		}
 
 		const nodeProperties = getType(nodeType).properties;
-		const bodyNoDocs = {};
 		const bodyDocuments = {};
 		Object.keys(body).forEach(prop => {
 			if (
@@ -61,14 +60,12 @@ const update = async input => {
 				nodeProperties[prop].type === 'Document'
 			) {
 				bodyDocuments[prop] = body[prop];
-			} else {
-				bodyNoDocs[prop] = body[prop];
 			}
 		});
 
 		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
-			newContent: bodyNoDocs,
+			newContent: body,
 			code,
 			initialContent: existingRecord,
 		});
@@ -78,7 +75,7 @@ const update = async input => {
 			: null;
 
 		const lockedFields = mergeLockedFields({
-			body: bodyNoDocs,
+			body,
 			clientId,
 			lockFields,
 			unlockFields,
@@ -89,14 +86,14 @@ const update = async input => {
 		const removedRelationships = getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: bodyNoDocs,
+			newContent: body,
 			action: relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: bodyNoDocs,
+			newContent: body,
 		});
 
 		const willModifyNode = Object.keys(propertiesToModify).length;
@@ -112,7 +109,7 @@ const update = async input => {
 			(unlockFields || lockFields) &&
 			lockedFields !== existingRecord._lockedFields;
 
-		const updateDataBase = !!(
+		const willUpdateNeo4j = !!(
 			willModifyNode ||
 			willModifyRelationships ||
 			willModifyLockedFields
@@ -125,7 +122,7 @@ const update = async input => {
 				`,
 		];
 
-		if (updateDataBase) {
+		if (willUpdateNeo4j) {
 			queryParts.push(stripIndents`ON MATCH SET
 				${metaPropertiesForUpdate('node')}
 				SET node += $properties
@@ -146,7 +143,7 @@ const update = async input => {
 			nodeType,
 			code,
 			bodyDocuments,
-			updateDataBase,
+			willUpdateNeo4j,
 			method: 'PATCH',
 			upsert,
 			isCreate: !existingRecord,
