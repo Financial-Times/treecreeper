@@ -75,6 +75,11 @@ const writeNode = async ({
 			code,
 			bodyDocuments,
 		);
+	} else {
+		logger.info(
+				{ event: 'SKIP_S3_UPDATE' },
+				'No changed Document properties - skipping update'
+		);
 	}
 	try {
 		if (!willUpdateNeo4j) {
