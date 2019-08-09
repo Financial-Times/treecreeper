@@ -12,6 +12,7 @@ module.exports = {
 	strings: {
 		deny: [],
 		denyOverrides: [
+			'support@graphenedb.com', // support email address from runbook
 			'd5deb97d-5fa2-45f2-99fa-cd155328320d', // uuid for biz-ops-api dashboard url
 			'dba88780-1a7d-11e9-9f6b-e867440c3985', // README.md:4
 			'32e6ad1a-210f-11e8-89cc-978cb917c4e7', // doc/MODEL.md:5
