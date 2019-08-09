@@ -156,3 +156,5 @@ If the problem does not resolve and searching splunk for `index=heroku source=*b
 ## Second line troubleshooting
 
 No real repeatable patterns to report in here. Best adbice is to search the logs (see Monitoring section of this runbook).
+
+If there appears to be a specific bug with the app's behaviour, rather than som egeneral unhealthy state, always begin with the tests. This application's development is heavily driven by high integration test coverage. Try to replicate the exact error by adding/adjusting a test, then tackle the problem in the source code.
