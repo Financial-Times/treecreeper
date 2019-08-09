@@ -79,7 +79,7 @@ const writeNode = async ({
 	try {
 		if (!willUpdateNeo4j) {
 			logger.info(
-				{ event: 'SKIP_NODE_UPDATE' },
+				{ event: 'SKIP_NEO4J_UPDATE' },
 				'No changed properties, relationships or field locks - skipping update',
 			);
 		} else {
