@@ -1,11 +1,11 @@
 const { stripIndents } = require('common-tags');
+const { getType } = require('@financial-times/biz-ops-schema');
 const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,
 	preflightChecks,
 } = require('../../lib/error-handling');
 
-const { logger } = require('../../../../lib/request-context');
 const {
 	metaPropertiesForUpdate,
 	metaPropertiesForCreate,
@@ -51,6 +51,17 @@ const update = async input => {
 				method: 'PATCH',
 			});
 		}
+
+		const nodeProperties = getType(nodeType).properties;
+		const bodyDocuments = {};
+		Object.keys(body).forEach(prop => {
+			if (
+				nodeProperties[prop] &&
+				nodeProperties[prop].type === 'Document'
+			) {
+				bodyDocuments[prop] = body[prop];
+			}
+		});
 
 		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
@@ -98,19 +109,11 @@ const update = async input => {
 			(unlockFields || lockFields) &&
 			lockedFields !== existingRecord._lockedFields;
 
-		const updateDataBase = !!(
+		const willUpdateNeo4j = !!(
 			willModifyNode ||
 			willModifyRelationships ||
 			willModifyLockedFields
 		);
-
-		if (!updateDataBase) {
-			logger.info(
-				{ event: 'SKIP_NODE_UPDATE' },
-				'No changed properties, relationships or field locks - skipping update',
-			);
-			return existingRecord;
-		}
 
 		const queryParts = [
 			stripIndents`MERGE (node:${nodeType} { code: $code })
@@ -119,7 +122,7 @@ const update = async input => {
 				`,
 		];
 
-		if (updateDataBase) {
+		if (willUpdateNeo4j) {
 			queryParts.push(stripIndents`ON MATCH SET
 				${metaPropertiesForUpdate('node')}
 				SET node += $properties
@@ -139,7 +142,8 @@ const update = async input => {
 		return await writeNode({
 			nodeType,
 			code,
-			body,
+			bodyDocuments,
+			willUpdateNeo4j,
 			method: 'PATCH',
 			upsert,
 			isCreate: !existingRecord,

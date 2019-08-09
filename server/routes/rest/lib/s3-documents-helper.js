@@ -17,10 +17,18 @@ class S3DocumentsHelper {
 	async uploadToS3(params, requestType) {
 		try {
 			const res = await this.s3Bucket.upload(params).promise();
-			logger.info(res, `${requestType}: S3 Upload successful`);
+			logger.info(
+				{ event: `${requestType}_S3_SUCCESS` },
+				res,
+				`${requestType}: S3 Upload successful`,
+			);
 			return res.VersionId;
 		} catch (err) {
-			logger.info(err, `${requestType}: S3 Upload failed`);
+			logger.info(
+				{ event: `${requestType}_S3_FAILURE` },
+				err,
+				`${requestType}: S3 Upload failed`,
+			);
 		}
 	}
 
@@ -51,7 +59,6 @@ class S3DocumentsHelper {
 					'PATCH',
 				);
 			}
-			logger.info('PATCH: No S3 Upload as file is unchanged');
 		} catch (err) {
 			return this.uploadToS3(
 				Object.assign({ Body: JSON.stringify(body) }, params),
@@ -76,10 +83,18 @@ class S3DocumentsHelper {
 		}
 		try {
 			const res = await this.s3Bucket.deleteObject(params).promise();
-			logger.info(res, 'DELETE: S3 Delete successful');
+			logger.info(
+				{ event: `DELETE_S3_SUCCESS` },
+				res,
+				'DELETE: S3 Delete successful',
+			);
 			return res.VersionId;
 		} catch (err) {
-			logger.info(err, 'DELETE: S3 Delete failed');
+			logger.info(
+				{ event: `DELETE_S3_FAILURE` },
+				err,
+				'DELETE: S3 Delete failed',
+			);
 		}
 	}
 }

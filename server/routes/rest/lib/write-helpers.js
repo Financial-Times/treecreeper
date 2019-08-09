@@ -1,6 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
 const { getType } = require('@financial-times/biz-ops-schema');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');
@@ -26,7 +27,8 @@ let setSalesforceIdForSystem;
 const writeNode = async ({
 	nodeType,
 	code,
-	body,
+	bodyDocuments,
+	willUpdateNeo4j,
 	method,
 	upsert,
 	isCreate,
@@ -65,32 +67,57 @@ const writeNode = async ({
 	// in different orders. S3 requests are more reliable than neo4j
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
-	const versionId = await s3DocumentsHelper.sendDocumentsToS3(
-		method,
-		nodeType,
-		code,
-		body,
-	);
-	try {
-		neo4jWriteResult = await executeQuery(
-			queryParts.join('\n'),
-			parameters,
-			true,
+	let versionId;
+	if (!_isEmpty(bodyDocuments)) {
+		versionId = await s3DocumentsHelper.sendDocumentsToS3(
+			method,
+			nodeType,
+			code,
+			bodyDocuments,
 		);
-	} catch (err) {
+	} else {
 		logger.info(
-			err,
-			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			{ event: 'SKIP_S3_UPDATE' },
+			'No changed Document properties - skipping update',
 		);
-		if (versionId)
+	}
+	try {
+		if (!willUpdateNeo4j) {
+			logger.info(
+				{ event: 'SKIP_NEO4J_UPDATE' },
+				'No changed properties, relationships or field locks - skipping update',
+			);
+		} else {
+			neo4jWriteResult = await executeQuery(
+				queryParts.join('\n'),
+				parameters,
+				true,
+			);
+			logger.info(
+				{ event: `${method}_NEO4J_SUCCESS` },
+				neo4jWriteResult,
+				`${method}: neo4j write successful`,
+			);
+		}
+	} catch (err) {
+		if (!_isEmpty(bodyDocuments) && versionId) {
+			logger.info(
+				{ event: `${method}_NEO4J_FAILURE` },
+				err,
+				`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			);
 			s3DocumentsHelper.deleteFileFromS3(nodeType, code, versionId);
+		}
 		throw new Error(err);
 	}
 
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
-	// obtain consistent results, so for safety do a fresh get when deletes are involved
-	if (willDeleteRelationships) {
+	// obtain consistent results, so for safety do a fresh get when deletes are involved.
+	//
+	// Also, if we didn't update the database already we need to do a get to obtain the
+	// record at all
+	if (willDeleteRelationships || !willUpdateNeo4j) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
@@ -127,6 +154,13 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
 
 	const { createPermissions, pluralName } = getType(nodeType);
+	const nodeProperties = getType(nodeType).properties;
+	const bodyDocuments = {};
+	Object.keys(body).forEach(prop => {
+		if (nodeProperties[prop].type === 'Document') {
+			bodyDocuments[prop] = body[prop];
+		}
+	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
 		throw httpError(
 			400,
@@ -143,7 +177,8 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	return writeNode({
 		nodeType,
 		code,
-		body,
+		bodyDocuments,
+		willUpdateNeo4j: true,
 		method,
 		upsert,
 		isCreate: true,
