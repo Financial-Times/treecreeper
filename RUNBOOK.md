@@ -115,6 +115,7 @@ Keys are stored in [vault](https://vault.in.ft.com:8080/ui/vault/secrets/secret/
 Whenever the grapheneDb neo4j instance is upgraded/changed it generates new keys under new names automatically, which need copying into vault and back into heroku under our stable environment variable names. [Full DB change guide](https://github.com/Financial-Times/biz-ops-api/blob/master/doc/db-upgrade.md).
 
 ## Data Recovery Process Type
+
 Manual
 
 ## Data Recovery Details
