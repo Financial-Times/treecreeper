@@ -77,8 +77,8 @@ const writeNode = async ({
 		);
 	} else {
 		logger.info(
-				{ event: 'SKIP_S3_UPDATE' },
-				'No changed Document properties - skipping update'
+			{ event: 'SKIP_S3_UPDATE' },
+			'No changed Document properties - skipping update',
 		);
 	}
 	try {
