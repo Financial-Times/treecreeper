@@ -155,7 +155,7 @@ If the response time chart here https://dashboard.heroku.com/apps/biz-ops-api/me
 
 If the problem persists, click the graphenedb link on this page https://dashboard.heroku.com/apps/biz-ops-api/resources, then navigate to admin and click 'restart database'
 
-If the problem does not resolve and searching splunk for `index=heroku source=*biz-ops-api* error` has lots of mentions of "neo4j" or "database", escalate to support@graphenedb.com, quoting application instance in the url of the graphenedb admin screens e.g. **app12345678-ABCDEF**.
+If the problem does not resolve and searching splunk for `index=heroku source=*biz-ops-api* error` has lots of mentions of "neo4j" or "database", escalate to support@graphenedb.com, quoting application instance in the url of the graphenedb admin screens e.g. **app12345678-ABCDEF**
 
 ## Second line troubleshooting
 
