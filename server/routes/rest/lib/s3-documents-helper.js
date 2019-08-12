@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
+const _isEmpty = require('lodash.isempty');
 const { logger } = require('../../../lib/request-context');
+const { diffProperties } = require('../lib/diff-helpers');
 
 const s3BucketInstance = new AWS.S3({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -96,6 +98,46 @@ class S3DocumentsHelper {
 				'DELETE: S3 Delete failed',
 			);
 		}
+	}
+
+	async mergeFilesInS3(nodeType, sourceCode, destinationCode) {
+		const sourceNodeParams = {
+			Bucket: this.s3BucketName,
+			Key: `${nodeType}/${sourceCode}`,
+		};
+		const destinationCodeParams = {
+			Bucket: this.s3BucketName,
+			Key: `${nodeType}/${destinationCode}`,
+		};
+
+		const [sourceNode, destinationNode] = await Promise.all([
+			this.s3Bucket.getObject(sourceNodeParams).promise(),
+			this.s3Bucket.getObject(destinationCodeParams).promise(),
+		]);
+		const sourceNodeBody = JSON.parse(sourceNode.Body);
+		const destinationNodeBody = JSON.parse(destinationNode.Body);
+
+		const writeProperties = diffProperties({
+			nodeType,
+			newContent: sourceNodeBody,
+			initialContent: destinationNodeBody,
+		});
+		Object.keys(sourceNodeBody).forEach(name => {
+			if (name in destinationNodeBody) {
+				delete writeProperties[name];
+			}
+		});
+		if (!_isEmpty(writeProperties)) {
+			Object.keys(writeProperties).forEach(property => {
+				destinationNodeBody[property] = writeProperties[property];
+			});
+			await this.writeFileToS3(
+				nodeType,
+				destinationCode,
+				destinationNodeBody,
+			);
+		}
+		await this.deleteFileFromS3(nodeType, sourceCode);
 	}
 }
 

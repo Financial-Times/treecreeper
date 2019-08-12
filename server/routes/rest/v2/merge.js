@@ -16,6 +16,9 @@ const { nodeWithRelsCypher } = require('../lib/read-helpers');
 const {
 	prepareRelationshipDeletion,
 } = require('../lib/relationship-write-helpers');
+const S3DocumentsHelper = require('../lib/s3-documents-helper');
+
+const s3DocumentsHelper = new S3DocumentsHelper();
 
 const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 	if (!type) {
@@ -83,7 +86,6 @@ module.exports = async input => {
 			delete writeProperties[name];
 		}
 	});
-
 	const removedRelationships = getRemovedRelationships({
 		nodeType,
 		initialContent: sourceRecord,
@@ -127,7 +129,7 @@ module.exports = async input => {
 			removedRelationships,
 		});
 	}
-
+	s3DocumentsHelper.mergeFilesInS3(nodeType, sourceCode, destinationCode);
 	const result = await executeQuery(
 		`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
 	CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
