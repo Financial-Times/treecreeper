@@ -127,17 +127,23 @@ class S3DocumentsHelper {
 				delete writeProperties[name];
 			}
 		});
+		const mergeResults = [this.deleteFileFromS3(nodeType, sourceCode)];
 		if (!_isEmpty(writeProperties)) {
 			Object.keys(writeProperties).forEach(property => {
 				destinationNodeBody[property] = writeProperties[property];
 			});
-			await this.writeFileToS3(
-				nodeType,
-				destinationCode,
-				destinationNodeBody,
+			mergeResults.push(
+				this.writeFileToS3(
+					nodeType,
+					destinationCode,
+					destinationNodeBody,
+				),
 			);
 		}
-		await this.deleteFileFromS3(nodeType, sourceCode);
+		const [deleteVersionId, writeVersionId] = await Promise.all(
+			mergeResults,
+		);
+		return { deleteVersionId, writeVersionId };
 	}
 }
 

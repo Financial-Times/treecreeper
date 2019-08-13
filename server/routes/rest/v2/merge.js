@@ -17,6 +17,7 @@ const {
 	prepareRelationshipDeletion,
 } = require('../lib/relationship-write-helpers');
 const S3DocumentsHelper = require('../lib/s3-documents-helper');
+const { logger } = require('../../../lib/request-context');
 
 const s3DocumentsHelper = new S3DocumentsHelper();
 
@@ -129,16 +130,49 @@ module.exports = async input => {
 			removedRelationships,
 		});
 	}
-	s3DocumentsHelper.mergeFilesInS3(nodeType, sourceCode, destinationCode);
-	const result = await executeQuery(
-		`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
-	CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
-	YIELD node
-	${nodeWithRelsCypher({ includeWithStatement: false })}
-	`,
-		{ sourceCode, destinationCode },
-		true,
+	const {
+		deleteVersionId,
+		writeVersionId,
+	} = await s3DocumentsHelper.mergeFilesInS3(
+		nodeType,
+		sourceCode,
+		destinationCode,
 	);
+	let result;
+	try {
+		result = await executeQuery(
+			`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
+		CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
+		YIELD node
+		${nodeWithRelsCypher({ includeWithStatement: false })}
+		`,
+			{ sourceCode, destinationCode },
+			true,
+		);
+	} catch (err) {
+		logger.info(
+			{ event: `MERGE_NEO4J_FAILURE` },
+			err,
+			`Neo4j merge unsuccessful, attempting to rollback S3 delete of source node`,
+		);
+		s3DocumentsHelper.deleteFileFromS3(
+			nodeType,
+			sourceCode,
+			deleteVersionId,
+		);
+		if (writeVersionId) {
+			logger.info(
+				{ event: `MERGE_NEO4J_FAILURE` },
+				err,
+				`Neo4j merge unsuccessful, attempting to rollback S3 update of destination node`,
+			);
+			s3DocumentsHelper.deleteFileFromS3(
+				nodeType,
+				destinationCode,
+				writeVersionId,
+			);
+		}
+	}
 
 	const finalState = result.toApiV2(nodeType);
 

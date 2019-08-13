@@ -67,7 +67,10 @@ const stubS3Merge = () => {
 		logger.debug('S3DocumentsHelper stub mergeFilesInS3 called', {
 			event: data.event,
 		});
-		return Promise.resolve();
+		return Promise.resolve({
+			deleteVersionId: 'FakeDeleteVersionId',
+			writeVersionId: 'FakeWriteVersionId',
+		});
 	});
 	return S3DocumentsHelper.prototype.mergeFilesInS3;
 };
