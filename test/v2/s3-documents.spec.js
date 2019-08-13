@@ -203,7 +203,7 @@ describe('S3 Documents Helper', () => {
 		});
 	});
 
-	it('does not upload to s3 when the source node and the destination node have the same keys', async () => {
+	it('when merging, it does not upload to s3 when the source node and the destination node have the same keys', async () => {
 		const { requestNodeType, requestCode } = exampleRequest();
 		const sourceRequestBody = {
 			troubleshooting: 'Fake Document',
