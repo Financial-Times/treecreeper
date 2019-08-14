@@ -2,33 +2,47 @@ const S3DocumentsHelper = require('../../server/routes/rest/lib/s3-documents-hel
 const { schemaReady } = require('../../server/lib/init-schema');
 
 describe('S3 Documents Helper', () => {
-	const stubOutS3 = (resolved, value, secondValue) => {
+	const stubOutS3 = (resolved, value, secondResolved, secondValue) => {
 		const stubUpload = jest.fn();
 		stubUpload.mockReturnValueOnce({
-			promise: jest.fn().mockResolvedValueOnce(true),
+			promise: jest
+				.fn()
+				.mockResolvedValueOnce({ VersionId: 'FakeUploadVersionId' }),
 		});
 		const stubDelete = jest.fn();
 		stubDelete.mockReturnValueOnce({
-			promise: jest.fn().mockResolvedValueOnce(true),
+			promise: jest
+				.fn()
+				.mockResolvedValueOnce({ VersionId: 'FakeDeleteVersionId' }),
 		});
 		const stubGetObject = jest.fn();
 		if (resolved) {
-			stubGetObject
-				.mockReturnValueOnce({
-					promise: jest.fn().mockResolvedValueOnce({
-						Body: value,
-					}),
-				})
-				.mockReturnValueOnce({
-					promise: jest.fn().mockResolvedValueOnce({
-						Body: secondValue,
-					}),
-				});
+			stubGetObject.mockReturnValueOnce({
+				promise: jest.fn().mockResolvedValueOnce({
+					Body: value,
+				}),
+			});
+		} else {
+			console.log('stub out s3.............');
+			stubGetObject.mockReturnValueOnce({
+				promise: jest
+					.fn()
+					// .mockRejectedValueOnce(new Error("Node doesn't exist")),
+					.mockRejectedValueOnce({ code: 'NoSuchKey' }),
+			});
+		}
+		if (secondResolved) {
+			stubGetObject.mockReturnValueOnce({
+				promise: jest.fn().mockResolvedValueOnce({
+					Body: secondValue,
+				}),
+			});
 		} else {
 			stubGetObject.mockReturnValueOnce({
 				promise: jest
 					.fn()
-					.mockRejectedValueOnce(new Error("Node doesn't exist")),
+					// .mockRejectedValueOnce(new Error("Node doesn't exist")),
+					.mockRejectedValueOnce({ code: 'NoSuchKey' }),
 			});
 		}
 
@@ -59,7 +73,7 @@ describe('S3 Documents Helper', () => {
 
 	it('writes a file to S3', () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
-		const { stubUpload, mockS3Bucket } = stubOutS3(false, null);
+		const { stubUpload, mockS3Bucket } = stubOutS3(false);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		s3DocumentsHelper.writeFileToS3(
 			requestNodeType,
@@ -76,7 +90,7 @@ describe('S3 Documents Helper', () => {
 
 	it('deletes a file from S3', () => {
 		const { requestNodeType, requestCode } = exampleRequest();
-		const { stubDelete, mockS3Bucket } = stubOutS3(false, null);
+		const { stubDelete, mockS3Bucket } = stubOutS3(false);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		s3DocumentsHelper.deleteFileFromS3(requestNodeType, requestCode);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
@@ -179,6 +193,7 @@ describe('S3 Documents Helper', () => {
 		const { stubUpload, stubDelete, mockS3Bucket } = stubOutS3(
 			true,
 			JSON.stringify(sourceRequestBody),
+			true,
 			JSON.stringify(destinationRequestBody),
 		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
@@ -214,6 +229,7 @@ describe('S3 Documents Helper', () => {
 		const { stubUpload, stubDelete, mockS3Bucket } = stubOutS3(
 			true,
 			JSON.stringify(sourceRequestBody),
+			true,
 			JSON.stringify(destinationRequestBody),
 		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
@@ -223,6 +239,118 @@ describe('S3 Documents Helper', () => {
 			'test-system-code-2',
 		);
 		expect(stubUpload).toHaveBeenCalledTimes(0);
+		expect(stubDelete).toHaveBeenCalledTimes(1);
+		expect(stubDelete).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
+	});
+
+	it('when merging, takes no actions if neither the source node nor the destination node have document properties', async () => {
+		const { requestNodeType, requestCode } = exampleRequest();
+		const {
+			stubUpload,
+			stubDelete,
+			stubGetObject,
+			mockS3Bucket,
+		} = stubOutS3(false, null, false, null);
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		const res = await s3DocumentsHelper.mergeFilesInS3(
+			requestNodeType,
+			requestCode,
+			'test-system-code-2',
+		);
+		expect(res).toEqual({ deleteVersionId: false, writeVersionId: false });
+		expect(stubGetObject).toHaveBeenCalledTimes(2);
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/test-system-code-2`,
+		});
+		expect(stubUpload).toHaveBeenCalledTimes(0);
+		expect(stubDelete).toHaveBeenCalledTimes(0);
+	});
+
+	it('when merging, takes no actions if the source node has no document properties but the destination node does', async () => {
+		const { requestNodeType, requestCode } = exampleRequest();
+		const {
+			stubUpload,
+			stubDelete,
+			stubGetObject,
+			mockS3Bucket,
+		} = stubOutS3(
+			false,
+			null,
+			true,
+			JSON.stringify({
+				troubleshooting: 'Fake Document',
+			}),
+		);
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		const res = await s3DocumentsHelper.mergeFilesInS3(
+			requestNodeType,
+			requestCode,
+			'test-system-code-2',
+		);
+		expect(res).toEqual({ deleteVersionId: false, writeVersionId: false });
+		expect(stubGetObject).toHaveBeenCalledTimes(2);
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/test-system-code-2`,
+		});
+		expect(stubUpload).toHaveBeenCalledTimes(0);
+		expect(stubDelete).toHaveBeenCalledTimes(0);
+	});
+
+	it('when merging, deletes the source node and writes to the destination node if the destination node has no document properties but the source node does', async () => {
+		const { requestNodeType, requestCode } = exampleRequest();
+		const {
+			stubUpload,
+			stubDelete,
+			stubGetObject,
+			mockS3Bucket,
+		} = stubOutS3(
+			true,
+			JSON.stringify({
+				troubleshooting: 'Fake Document',
+			}),
+			false,
+			null,
+		);
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		const res = await s3DocumentsHelper.mergeFilesInS3(
+			requestNodeType,
+			requestCode,
+			'test-system-code-2',
+		);
+		expect(res).toEqual({
+			deleteVersionId: 'FakeDeleteVersionId',
+			writeVersionId: 'FakeUploadVersionId',
+		});
+		expect(stubGetObject).toHaveBeenCalledTimes(2);
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
+		expect(stubGetObject).toHaveBeenCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/test-system-code-2`,
+		});
+		expect(stubUpload).toHaveBeenCalledTimes(1);
+		expect(stubUpload).toHaveBeenLastCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/test-system-code-2`,
+			Body: JSON.stringify({
+				troubleshooting: 'Fake Document',
+			}),
+		});
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',

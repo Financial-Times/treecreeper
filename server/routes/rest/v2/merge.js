@@ -150,16 +150,18 @@ module.exports = async input => {
 			true,
 		);
 	} catch (err) {
-		logger.info(
-			{ event: `MERGE_NEO4J_FAILURE` },
-			err,
-			`Neo4j merge unsuccessful, attempting to rollback S3 delete of source node`,
-		);
-		s3DocumentsHelper.deleteFileFromS3(
-			nodeType,
-			sourceCode,
-			deleteVersionId,
-		);
+		if (deleteVersionId) {
+			logger.info(
+				{ event: `MERGE_NEO4J_FAILURE` },
+				err,
+				`Neo4j merge unsuccessful, attempting to rollback S3 delete of source node`,
+			);
+			s3DocumentsHelper.deleteFileFromS3(
+				nodeType,
+				sourceCode,
+				deleteVersionId,
+			);
+		}
 		if (writeVersionId) {
 			logger.info(
 				{ event: `MERGE_NEO4J_FAILURE` },
