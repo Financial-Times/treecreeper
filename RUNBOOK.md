@@ -68,7 +68,8 @@ Data changes are posted into the [biz-ops-crud_v1 kinesis stream in the ft-relia
 
 ## Dependencies
 
--   biz-ops-schema
+- biz-ops-schema
+- apigateway
 
 ## Data Recovery Process Type
 
