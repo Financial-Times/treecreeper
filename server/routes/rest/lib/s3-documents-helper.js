@@ -113,23 +113,22 @@ class S3DocumentsHelper {
 		} catch (err) {
 			// If the node does not exist, we don't want to throw
 			// an error, instead return an empty body
-			if (err.code === 'NoSuchKey') return { Body: '{}' };
+			if (err.code === 'NoSuchKey') return {};
 			throw new Error(err);
 		}
-		return node;
+		const nodeBody = JSON.parse(node.Body);
+		return nodeBody;
 	}
 
 	async mergeFilesInS3(nodeType, sourceCode, destinationCode) {
-		const [sourceNode, destinationNode] = await Promise.all([
+		const [sourceNodeBody, destinationNodeBody] = await Promise.all([
 			this.getNode(nodeType, sourceCode),
 			this.getNode(nodeType, destinationCode),
 		]);
-		const sourceNodeBody = JSON.parse(sourceNode.Body);
-		const destinationNodeBody = JSON.parse(destinationNode.Body);
 		// If the source node has no document properties/does not exist
 		// in s3, take no action and return false in place of version ids
 		if (_isEmpty(sourceNodeBody)) {
-			return { deleteVersionId: false, writeVersionId: false };
+			return {};
 		}
 		const writeProperties = diffProperties({
 			nodeType,
@@ -155,7 +154,6 @@ class S3DocumentsHelper {
 		} else {
 			// If there are no properties to write to s3, no need to write
 			// and return false in place of write version Id
-			mergeResults.push(false);
 			noPropertiesToWrite = true;
 		}
 		const [deleteVersionId, writeVersionId] = await Promise.all(

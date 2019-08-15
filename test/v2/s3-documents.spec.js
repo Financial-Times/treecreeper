@@ -23,7 +23,6 @@ describe('S3 Documents Helper', () => {
 				}),
 			});
 		} else {
-			console.log('stub out s3.............');
 			stubGetObject.mockReturnValueOnce({
 				promise: jest
 					.fn()
@@ -260,7 +259,7 @@ describe('S3 Documents Helper', () => {
 			requestCode,
 			'test-system-code-2',
 		);
-		expect(res).toEqual({ deleteVersionId: false, writeVersionId: false });
+		expect(res).toEqual({});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
@@ -295,7 +294,7 @@ describe('S3 Documents Helper', () => {
 			requestCode,
 			'test-system-code-2',
 		);
-		expect(res).toEqual({ deleteVersionId: false, writeVersionId: false });
+		expect(res).toEqual({});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({
 			Bucket: 'biz-ops-documents.510688331160',
