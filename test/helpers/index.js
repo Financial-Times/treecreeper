@@ -59,6 +59,22 @@ const stubS3Upload = () => {
 	return S3DocumentsHelper.prototype.uploadToS3;
 };
 
+const stubS3Merge = () => {
+	jest.spyOn(
+		S3DocumentsHelper.prototype,
+		'mergeFilesInS3',
+	).mockImplementation(data => {
+		logger.debug('S3DocumentsHelper stub mergeFilesInS3 called', {
+			event: data.event,
+		});
+		return Promise.resolve({
+			deleteVersionId: 'FakeDeleteVersionId',
+			writeVersionId: 'FakeWriteVersionId',
+		});
+	});
+	return S3DocumentsHelper.prototype.mergeFilesInS3;
+};
+
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
 
 const setupMocks = (
@@ -88,6 +104,7 @@ const setupMocks = (
 		sandbox.stubPatchS3file = stubS3Patch();
 		sandbox.stubDeleteFileFromS3 = stubS3Delete();
 		sandbox.stubS3Upload = stubS3Upload();
+		sandbox.stubS3Merge = stubS3Merge();
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
@@ -145,6 +162,13 @@ const setupMocks = (
 							);
 						}
 
+						break;
+					case 'merge':
+						expect(sandbox.stubS3Merge).toHaveBeenCalledWith(
+							action.nodeType,
+							action.sourceCode,
+							action.destinationCode,
+						);
 						break;
 					default:
 				}

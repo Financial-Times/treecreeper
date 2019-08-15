@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
+const _isEmpty = require('lodash.isempty');
 const { logger } = require('../../../lib/request-context');
+const { diffProperties } = require('../lib/diff-helpers');
 
 const s3BucketInstance = new AWS.S3({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -29,6 +31,7 @@ class S3DocumentsHelper {
 				err,
 				`${requestType}: S3 Upload failed`,
 			);
+			return false;
 		}
 	}
 
@@ -95,7 +98,79 @@ class S3DocumentsHelper {
 				err,
 				'DELETE: S3 Delete failed',
 			);
+			return false;
 		}
+	}
+
+	async getNode(nodeType, code) {
+		const params = {
+			Bucket: this.s3BucketName,
+			Key: `${nodeType}/${code}`,
+		};
+		let node;
+		try {
+			node = await this.s3Bucket.getObject(params).promise();
+		} catch (err) {
+			// If the node does not exist, we don't want to throw
+			// an error, instead return an empty body
+			if (err.code === 'NoSuchKey') return {};
+			throw new Error(err);
+		}
+		const nodeBody = JSON.parse(node.Body);
+		return nodeBody;
+	}
+
+	async mergeFilesInS3(nodeType, sourceCode, destinationCode) {
+		const [sourceNodeBody, destinationNodeBody] = await Promise.all([
+			this.getNode(nodeType, sourceCode),
+			this.getNode(nodeType, destinationCode),
+		]);
+		// If the source node has no document properties/does not exist
+		// in s3, take no action and return false in place of version ids
+		if (_isEmpty(sourceNodeBody)) {
+			return {};
+		}
+		const writeProperties = diffProperties({
+			nodeType,
+			newContent: sourceNodeBody,
+			initialContent: destinationNodeBody,
+		});
+		Object.keys(sourceNodeBody).forEach(name => {
+			if (name in destinationNodeBody) {
+				delete writeProperties[name];
+			}
+		});
+		const mergeResults = [this.deleteFileFromS3(nodeType, sourceCode)];
+		let noPropertiesToWrite;
+		if (!_isEmpty(writeProperties)) {
+			Object.assign(destinationNodeBody, writeProperties);
+			mergeResults.push(
+				this.writeFileToS3(
+					nodeType,
+					destinationCode,
+					destinationNodeBody,
+				),
+			);
+		} else {
+			// If there are no properties to write to s3, no need to write
+			// and return false in place of write version Id
+			noPropertiesToWrite = true;
+		}
+		const [deleteVersionId, writeVersionId] = await Promise.all(
+			mergeResults,
+		);
+		if (!deleteVersionId && !writeVersionId) {
+			throw new Error('MERGE FAILED: Write and delete failed in S3');
+		}
+		if (!deleteVersionId) {
+			this.deleteFileFromS3(nodeType, destinationCode, writeVersionId);
+			throw new Error('MERGE FAILED: Delete failed in S3');
+		}
+		if (!writeVersionId && !noPropertiesToWrite) {
+			this.deleteFileFromS3(nodeType, sourceCode, deleteVersionId);
+			throw new Error('MERGE FAILED: Write failed in S3');
+		}
+		return { deleteVersionId, writeVersionId };
 	}
 }
 
