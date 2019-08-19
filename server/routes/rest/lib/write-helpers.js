@@ -68,12 +68,13 @@ const writeNode = async ({
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
 	let versionId;
+	const existingS3File = await s3DocumentsHelper.getNode(nodeType, code);
 	if (!_isEmpty(bodyDocuments)) {
 		versionId = await s3DocumentsHelper.sendDocumentsToS3(
-			method,
 			nodeType,
 			code,
 			bodyDocuments,
+			existingS3File,
 		);
 	} else {
 		logger.info(
@@ -120,7 +121,11 @@ const writeNode = async ({
 	if (willDeleteRelationships || !willUpdateNeo4j) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
+	console.log('neo4jWriteResult................', neo4jWriteResult);
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
+
+	Object.assign(existingS3File, bodyDocuments);
+	Object.assign(responseData, existingS3File);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
@@ -143,6 +148,7 @@ const writeNode = async ({
 		],
 		addedRelationships: relationshipsToCreate,
 	});
+	console.log('responseData..........', responseData);
 
 	return {
 		data: responseData,
@@ -156,9 +162,12 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { createPermissions, pluralName } = getType(nodeType);
 	const nodeProperties = getType(nodeType).properties;
 	const bodyDocuments = {};
+	const bodyNoDocs = {};
 	Object.keys(body).forEach(prop => {
 		if (nodeProperties[prop].type === 'Document') {
 			bodyDocuments[prop] = body[prop];
+		} else {
+			bodyNoDocs[prop] = body[prop];
 		}
 	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
@@ -184,13 +193,13 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 		isCreate: true,
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 		}),
 		lockedFields,
 		relationshipsToCreate: getAddedRelationships({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 		}),
 		queryParts: [
 			stripIndents`

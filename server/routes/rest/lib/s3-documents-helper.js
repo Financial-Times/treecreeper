@@ -45,16 +45,17 @@ class S3DocumentsHelper {
 		return res;
 	}
 
-	async patchS3file(nodeType, code, body) {
+	async patchS3file(nodeType, code, body, existingBody) {
 		const params = {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
 		};
 		try {
-			const existingNode = await this.s3Bucket
-				.getObject(params)
-				.promise();
-			const existingBody = JSON.parse(existingNode.Body);
+			// const existingNode = await this.s3Bucket
+			// 	.getObject(params)
+			// 	.promise();
+			// const existingBody = JSON.parse(existingNode.Body);
+			// const existingBody = await this.getNode(nodeType, code)
 			if (diff(existingBody, body)) {
 				const newBody = Object.assign(existingBody, body);
 				return this.uploadToS3(
@@ -70,9 +71,20 @@ class S3DocumentsHelper {
 		}
 	}
 
-	async sendDocumentsToS3(method, nodeType, code, body) {
-		const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
-		const versionId = await send.call(this, nodeType, code, body);
+	async sendDocumentsToS3(nodeType, code, body, existingBody) {
+		let versionId;
+		if (_isEmpty(existingBody)) {
+			versionId = await this.writeFileToS3(nodeType, code, body);
+		} else {
+			versionId = await this.patchS3file(
+				nodeType,
+				code,
+				body,
+				existingBody,
+			);
+		}
+		// const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
+		// const versionId = await send.call(this, nodeType, code, body);
 		return versionId;
 	}
 
