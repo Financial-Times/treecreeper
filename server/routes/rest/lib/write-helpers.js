@@ -68,7 +68,10 @@ const writeNode = async ({
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
 	let versionId;
-	const existingS3File = await s3DocumentsHelper.getNode(nodeType, code);
+	const existingS3File = await s3DocumentsHelper.getFileFromS3(
+		nodeType,
+		code,
+	);
 	if (!_isEmpty(bodyDocuments)) {
 		versionId = await s3DocumentsHelper.sendDocumentsToS3(
 			nodeType,
@@ -121,7 +124,6 @@ const writeNode = async ({
 	if (willDeleteRelationships || !willUpdateNeo4j) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
-	console.log('neo4jWriteResult................', neo4jWriteResult);
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
 	Object.assign(existingS3File, bodyDocuments);
@@ -144,11 +146,11 @@ const writeNode = async ({
 				...Object.keys(propertiesToModify),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
+				...Object.keys(bodyDocuments),
 			]),
 		],
 		addedRelationships: relationshipsToCreate,
 	});
-	console.log('responseData..........', responseData);
 
 	return {
 		data: responseData,
@@ -158,7 +160,6 @@ const writeNode = async ({
 
 const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
-
 	const { createPermissions, pluralName } = getType(nodeType);
 	const nodeProperties = getType(nodeType).properties;
 	const bodyDocuments = {};

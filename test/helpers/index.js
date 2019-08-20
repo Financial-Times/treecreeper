@@ -22,6 +22,18 @@ const stubKinesis = () => {
 	return EventLogWriter.prototype.sendEvent;
 };
 
+const stubS3Get = () => {
+	jest.spyOn(S3DocumentsHelper.prototype, 'getFileFromS3').mockImplementation(
+		data => {
+			logger.debug('S3DocumentsHelper stub getFileFromS3 called', {
+				event: data.event,
+			});
+			return Promise.resolve({});
+		},
+	);
+	return S3DocumentsHelper.prototype.getFileFromS3;
+};
+
 const stubS3Delete = () => {
 	jest.spyOn(
 		S3DocumentsHelper.prototype,
@@ -101,6 +113,7 @@ const setupMocks = (
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis();
+		sandbox.stubS3Get = stubS3Get();
 		sandbox.stubPatchS3file = stubS3Patch();
 		sandbox.stubDeleteFileFromS3 = stubS3Delete();
 		sandbox.stubS3Upload = stubS3Upload();

@@ -87,7 +87,6 @@ describe('v2 - node PATCH', () => {
 			systemCode,
 			sandbox.withUpdateMeta({
 				code: systemCode,
-				troubleshooting: 'Another Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -97,14 +96,17 @@ describe('v2 - node PATCH', () => {
 			['troubleshooting'],
 		]);
 		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'System',
-			code: systemCode,
-			body: {
-				troubleshooting: 'Another Fake Document',
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					troubleshooting: 'Another Fake Document',
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `System/${systemCode}`,
 			},
+			requestType: 'POST',
 		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('patch', 'delete');
 	});
 
 	it('update node in neo4j and s3 with document and non-document properties', async () => {
@@ -131,7 +133,6 @@ describe('v2 - node PATCH', () => {
 			sandbox.withUpdateMeta({
 				name: 'name1',
 				code: systemCode,
-				troubleshooting: 'Another Fake Document',
 			}),
 		);
 
@@ -142,14 +143,17 @@ describe('v2 - node PATCH', () => {
 			['name', 'troubleshooting'],
 		]);
 		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'System',
-			code: systemCode,
-			body: {
-				troubleshooting: 'Another Fake Document',
+			action: 'upload',
+			params: {
+				Body: JSON.stringify({
+					troubleshooting: 'Another Fake Document',
+				}),
+				Bucket: 'biz-ops-documents.510688331160',
+				Key: `System/${systemCode}`,
 			},
+			requestType: 'POST',
 		});
-		sandbox.expectNoS3Actions('upload', 'delete');
+		sandbox.expectNoS3Actions('patch', 'delete');
 	});
 
 	// Remove this test after S3 migration

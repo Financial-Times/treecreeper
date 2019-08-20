@@ -65,14 +65,20 @@ describe('S3 Documents Helper', () => {
 			troubleshooting: 'Fake Document',
 			architectureDiagram: 'Another Fake Document',
 		};
-		return { requestNodeType, requestCode, requestBody };
+		const bucket = 'biz-ops-documents.510688331160';
+		return { requestNodeType, requestCode, requestBody, bucket };
 	};
 
 	beforeAll(() => schemaReady);
 
 	it('writes a file to S3', () => {
-		const { requestNodeType, requestCode, requestBody } = exampleRequest();
-		const { stubUpload, mockS3Bucket } = stubOutS3(false);
+		const {
+			requestNodeType,
+			requestCode,
+			requestBody,
+			bucket,
+		} = exampleRequest();
+		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		s3DocumentsHelper.writeFileToS3(
 			requestNodeType,
@@ -81,20 +87,32 @@ describe('S3 Documents Helper', () => {
 		);
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),
 		});
 	});
 
 	it('deletes a file from S3', () => {
-		const { requestNodeType, requestCode } = exampleRequest();
-		const { stubDelete, mockS3Bucket } = stubOutS3(false);
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
+		const { stubDelete, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		s3DocumentsHelper.deleteFileFromS3(requestNodeType, requestCode);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
+			Key: `${requestNodeType}/${requestCode}`,
+		});
+	});
+
+	it('gets a file from S3', () => {
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
+		const { stubGetObject, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
+		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
+		s3DocumentsHelper.getFileFromS3(requestNodeType, requestCode);
+		expect(stubGetObject).toHaveBeenCalledTimes(1);
+		expect(stubGetObject).toHaveBeenLastCalledWith({
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 	});
@@ -102,35 +120,29 @@ describe('S3 Documents Helper', () => {
 	it('does not patch a file in S3 when the node exists but is unchanged', async () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const savedBody = requestBody; // requestBody is the same as savedBody existsing in S3
-		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
-			true,
-			JSON.stringify(savedBody),
-		);
+		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
-			mockS3Bucket,
+			savedBody,
 		);
-		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
-			Key: `${requestNodeType}/${requestCode}`,
-		});
 		expect(stubUpload).not.toHaveBeenCalled();
 	});
 
 	it('patches a file from S3 when the node exists and has changed', async () => {
-		const { requestNodeType, requestCode, requestBody } = exampleRequest();
+		const {
+			requestNodeType,
+			requestCode,
+			requestBody,
+			bucket,
+		} = exampleRequest();
 		const savedBody = {
 			troubleshooting: 'Fake Document',
 			architectureDiagram: 'A Different Fake Document',
 		};
-		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
-			true,
-			JSON.stringify(savedBody),
-		);
+		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 
@@ -138,50 +150,42 @@ describe('S3 Documents Helper', () => {
 			requestNodeType,
 			requestCode,
 			requestBody,
-			mockS3Bucket,
+			savedBody,
 		);
 		const mergedBody = Object.assign(savedBody, requestBody);
-		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
-			Key: `${requestNodeType}/${requestCode}`,
-		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(mergedBody),
 		});
 	});
 
 	it('patch creates a file in S3 when the node does not already exist', async () => {
-		const { requestNodeType, requestCode, requestBody } = exampleRequest();
-		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
-			false,
-			new Error("Node doesn't exist"),
-		);
+		const {
+			requestNodeType,
+			requestCode,
+			requestBody,
+			bucket,
+		} = exampleRequest();
+		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
-			mockS3Bucket,
+			{},
 		);
-		expect(stubGetObject).toHaveBeenCalledTimes(1);
-		expect(stubGetObject).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
-			Key: `${requestNodeType}/${requestCode}`,
-		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),
 		});
 	});
 
 	it('merges a file to s3', async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const sourceRequestBody = {
 			troubleshooting: 'Fake Document',
 			architectureDiagram: 'Another Fake Document',
@@ -203,7 +207,7 @@ describe('S3 Documents Helper', () => {
 		);
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/test-system-code-2`,
 			Body: JSON.stringify({
 				troubleshooting: 'A Third Fake Document',
@@ -212,13 +216,13 @@ describe('S3 Documents Helper', () => {
 		});
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 	});
 
 	it('when merging, it does not upload to s3 when the source node and the destination node have the same keys', async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const sourceRequestBody = {
 			troubleshooting: 'Fake Document',
 		};
@@ -240,13 +244,13 @@ describe('S3 Documents Helper', () => {
 		expect(stubUpload).toHaveBeenCalledTimes(0);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 	});
 
 	it('when merging, takes no actions if neither the source node nor the destination node have document properties', async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const {
 			stubUpload,
 			stubDelete,
@@ -262,11 +266,11 @@ describe('S3 Documents Helper', () => {
 		expect(res).toEqual({});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/test-system-code-2`,
 		});
 		expect(stubUpload).toHaveBeenCalledTimes(0);
@@ -274,7 +278,7 @@ describe('S3 Documents Helper', () => {
 	});
 
 	it('when merging, takes no actions if the source node has no document properties but the destination node does', async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const {
 			stubUpload,
 			stubDelete,
@@ -297,11 +301,11 @@ describe('S3 Documents Helper', () => {
 		expect(res).toEqual({});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/test-system-code-2`,
 		});
 		expect(stubUpload).toHaveBeenCalledTimes(0);
@@ -309,7 +313,7 @@ describe('S3 Documents Helper', () => {
 	});
 
 	it('when merging, deletes the source node and writes to the destination node if the destination node has no document properties but the source node does', async () => {
-		const { requestNodeType, requestCode } = exampleRequest();
+		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const {
 			stubUpload,
 			stubDelete,
@@ -335,16 +339,16 @@ describe('S3 Documents Helper', () => {
 		});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 		expect(stubGetObject).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/test-system-code-2`,
 		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/test-system-code-2`,
 			Body: JSON.stringify({
 				troubleshooting: 'Fake Document',
@@ -352,7 +356,7 @@ describe('S3 Documents Helper', () => {
 		});
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
-			Bucket: 'biz-ops-documents.510688331160',
+			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 	});

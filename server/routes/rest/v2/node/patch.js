@@ -141,7 +141,6 @@ const update = async input => {
 			queryParts.push(...relDeleteQueries);
 			Object.assign(parameters, delParams);
 		}
-
 		return await writeNode({
 			nodeType,
 			code,

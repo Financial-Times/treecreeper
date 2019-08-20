@@ -51,11 +51,6 @@ class S3DocumentsHelper {
 			Key: `${nodeType}/${code}`,
 		};
 		try {
-			// const existingNode = await this.s3Bucket
-			// 	.getObject(params)
-			// 	.promise();
-			// const existingBody = JSON.parse(existingNode.Body);
-			// const existingBody = await this.getNode(nodeType, code)
 			if (diff(existingBody, body)) {
 				const newBody = Object.assign(existingBody, body);
 				return this.uploadToS3(
@@ -114,7 +109,7 @@ class S3DocumentsHelper {
 		}
 	}
 
-	async getNode(nodeType, code) {
+	async getFileFromS3(nodeType, code) {
 		const params = {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
@@ -134,8 +129,8 @@ class S3DocumentsHelper {
 
 	async mergeFilesInS3(nodeType, sourceCode, destinationCode) {
 		const [sourceNodeBody, destinationNodeBody] = await Promise.all([
-			this.getNode(nodeType, sourceCode),
-			this.getNode(nodeType, destinationCode),
+			this.getFileFromS3(nodeType, sourceCode),
+			this.getFileFromS3(nodeType, destinationCode),
 		]);
 		// If the source node has no document properties/does not exist
 		// in s3, take no action and return false in place of version ids
