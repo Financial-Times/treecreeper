@@ -78,8 +78,6 @@ class S3DocumentsHelper {
 				existingBody,
 			);
 		}
-		// const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
-		// const versionId = await send.call(this, nodeType, code, body);
 		return versionId;
 	}
 

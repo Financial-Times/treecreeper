@@ -126,8 +126,7 @@ const writeNode = async ({
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
-	Object.assign(existingS3File, bodyDocuments);
-	Object.assign(responseData, existingS3File);
+	Object.assign(responseData, existingS3File, bodyDocuments);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
