@@ -41,44 +41,40 @@ class S3DocumentsHelper {
 			Key: `${nodeType}/${code}`,
 			Body: JSON.stringify(body),
 		};
-		const res = await this.uploadToS3(params, 'POST');
-		return res;
+		const versionId = await this.uploadToS3(params, 'POST');
+		return { versionId, newBodyDocs: body };
 	}
 
-	async patchS3file(nodeType, code, body, existingBody) {
+	async patchS3file(nodeType, code, body) {
 		const params = {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
 		};
-		try {
-			if (diff(existingBody, body)) {
-				const newBody = Object.assign(existingBody, body);
-				return this.uploadToS3(
-					Object.assign({ Body: JSON.stringify(newBody) }, params),
-					'PATCH',
-				);
-			}
-		} catch (err) {
-			return this.uploadToS3(
-				Object.assign({ Body: JSON.stringify(body) }, params),
+		const existingBody = await this.getFileFromS3(nodeType, code);
+		// try {
+		if (diff(existingBody, body)) {
+			const newBodyDocs = Object.assign(existingBody, body);
+			const versionId = await this.uploadToS3(
+				Object.assign({ Body: JSON.stringify(newBodyDocs) }, params),
 				'PATCH',
 			);
+			return { versionId, newBodyDocs };
 		}
+		return { newBodyDocs: existingBody };
+		// } catch (err) {
+		// 	return {};
+		// }
 	}
 
-	async sendDocumentsToS3(nodeType, code, body, existingBody) {
-		let versionId;
-		if (_isEmpty(existingBody)) {
-			versionId = await this.writeFileToS3(nodeType, code, body);
-		} else {
-			versionId = await this.patchS3file(
-				nodeType,
-				code,
-				body,
-				existingBody,
-			);
-		}
-		return versionId;
+	async sendDocumentsToS3(method, nodeType, code, body) {
+		const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
+		const { versionId, newBodyDocs } = await send.call(
+			this,
+			nodeType,
+			code,
+			body,
+		);
+		return { versionId, newBodyDocs };
 	}
 
 	async deleteFileFromS3(nodeType, code, versionId) {
@@ -161,9 +157,8 @@ class S3DocumentsHelper {
 			// and return false in place of write version Id
 			noPropertiesToWrite = true;
 		}
-		const [deleteVersionId, writeVersionId] = await Promise.all(
-			mergeResults,
-		);
+		const [deleteVersionId, writeObject] = await Promise.all(mergeResults);
+		const writeVersionId = writeObject && writeObject.versionId;
 		if (!deleteVersionId && !writeVersionId) {
 			throw new Error('MERGE FAILED: Write and delete failed in S3');
 		}

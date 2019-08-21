@@ -24,10 +24,7 @@ describe('S3 Documents Helper', () => {
 			});
 		} else {
 			stubGetObject.mockReturnValueOnce({
-				promise: jest
-					.fn()
-					// .mockRejectedValueOnce(new Error("Node doesn't exist")),
-					.mockRejectedValueOnce({ code: 'NoSuchKey' }),
+				promise: jest.fn().mockRejectedValueOnce({ code: 'NoSuchKey' }),
 			});
 		}
 		if (secondResolved) {
@@ -38,10 +35,7 @@ describe('S3 Documents Helper', () => {
 			});
 		} else {
 			stubGetObject.mockReturnValueOnce({
-				promise: jest
-					.fn()
-					// .mockRejectedValueOnce(new Error("Node doesn't exist")),
-					.mockRejectedValueOnce({ code: 'NoSuchKey' }),
+				promise: jest.fn().mockRejectedValueOnce({ code: 'NoSuchKey' }),
 			});
 		}
 
@@ -120,14 +114,21 @@ describe('S3 Documents Helper', () => {
 	it('does not patch a file in S3 when the node exists but is unchanged', async () => {
 		const { requestNodeType, requestCode, requestBody } = exampleRequest();
 		const savedBody = requestBody; // requestBody is the same as savedBody existsing in S3
-		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
+		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
+			true,
+			JSON.stringify(savedBody),
+		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
-			savedBody,
 		);
+		expect(stubGetObject).toHaveBeenCalledTimes(1);
+		expect(stubGetObject).toHaveBeenLastCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
 		expect(stubUpload).not.toHaveBeenCalled();
 	});
 
@@ -142,17 +143,23 @@ describe('S3 Documents Helper', () => {
 			troubleshooting: 'Fake Document',
 			architectureDiagram: 'A Different Fake Document',
 		};
-		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
-
+		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
+			true,
+			JSON.stringify(savedBody),
+		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 
 		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
-			savedBody,
 		);
 		const mergedBody = Object.assign(savedBody, requestBody);
+		expect(stubGetObject).toHaveBeenCalledTimes(1);
+		expect(stubGetObject).toHaveBeenLastCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: bucket,
@@ -168,14 +175,21 @@ describe('S3 Documents Helper', () => {
 			requestBody,
 			bucket,
 		} = exampleRequest();
-		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
+		const { stubUpload, stubGetObject, mockS3Bucket } = stubOutS3(
+			true,
+			'{}',
+		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
 		await s3DocumentsHelper.patchS3file(
 			requestNodeType,
 			requestCode,
 			requestBody,
-			{},
 		);
+		expect(stubGetObject).toHaveBeenCalledTimes(1);
+		expect(stubGetObject).toHaveBeenLastCalledWith({
+			Bucket: 'biz-ops-documents.510688331160',
+			Key: `${requestNodeType}/${requestCode}`,
+		});
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: bucket,

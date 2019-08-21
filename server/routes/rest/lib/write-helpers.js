@@ -68,17 +68,14 @@ const writeNode = async ({
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
 	let versionId;
-	const existingS3File = await s3DocumentsHelper.getFileFromS3(
-		nodeType,
-		code,
-	);
+	let newBodyDocs;
 	if (!_isEmpty(bodyDocuments)) {
-		versionId = await s3DocumentsHelper.sendDocumentsToS3(
+		({ versionId, newBodyDocs } = await s3DocumentsHelper.sendDocumentsToS3(
+			method,
 			nodeType,
 			code,
 			bodyDocuments,
-			existingS3File,
-		);
+		));
 	} else {
 		logger.info(
 			{ event: 'SKIP_S3_UPDATE' },
@@ -126,7 +123,7 @@ const writeNode = async ({
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
-	Object.assign(responseData, existingS3File, bodyDocuments);
+	Object.assign(responseData, newBodyDocs);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic

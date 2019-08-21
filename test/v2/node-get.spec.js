@@ -1,6 +1,10 @@
 const app = require('../../server/app.js');
 
-const { setupMocks, stubDbUnavailable } = require('../helpers');
+const {
+	setupMocks,
+	stubDbUnavailable,
+	stubS3Unavailable,
+} = require('../helpers');
 
 describe('v2 - node GET', () => {
 	const sandbox = {};
@@ -30,8 +34,12 @@ describe('v2 - node GET', () => {
 				troubleshooting: 'Fake Document',
 			}),
 		);
-		// Check that documents are retrieved from neo4j - remove after S3 migration
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		sandbox.expectS3Actions({
+			action: 'get',
+			nodeType: 'System',
+			code: `${namespace}-system`,
+		});
 	});
 
 	it('gets node with relationships', async () => {
@@ -57,12 +65,19 @@ describe('v2 - node GET', () => {
 		);
 	});
 
+	it('gets node with document properties', async () => {});
+
 	it('responds with 404 if no node', async () => {
 		return testGetRequest(`/v2/node/Team/${namespace}-team`, 404);
 	});
 
-	it('responds with 500 if query fails', async () => {
+	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
 		return testGetRequest(`/v2/node/Team/${namespace}-team`, 500);
+	});
+
+	it('responds with 500 if s3 query fails', async () => {
+		stubS3Unavailable(sandbox);
+		return testGetRequest(`/v2/node/System/${namespace}-system`, 500);
 	});
 });

@@ -96,17 +96,14 @@ describe('v2 - node PATCH', () => {
 			['troubleshooting'],
 		]);
 		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					troubleshooting: 'Another Fake Document',
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `System/${systemCode}`,
+			action: 'patch',
+			nodeType: 'System',
+			code: systemCode,
+			body: {
+				troubleshooting: 'Another Fake Document',
 			},
-			requestType: 'POST',
 		});
-		sandbox.expectNoS3Actions('patch', 'delete');
+		sandbox.expectNoS3Actions('upload', 'delete');
 	});
 
 	it('update node in neo4j and s3 with document and non-document properties', async () => {
@@ -143,37 +140,14 @@ describe('v2 - node PATCH', () => {
 			['name', 'troubleshooting'],
 		]);
 		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					troubleshooting: 'Another Fake Document',
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `System/${systemCode}`,
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('patch', 'delete');
-	});
-
-	// Remove this test after S3 migration
-	it('Reads documents from neo4j', async () => {
-		await sandbox.createNode('System', {
+			action: 'patch',
+			nodeType: 'System',
 			code: systemCode,
-			troubleshooting: 'Fake Document that is not in S3',
-		});
-		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
-			{
-				architectureDiagram: 'New Fake Document',
+			body: {
+				troubleshooting: 'Another Fake Document',
 			},
-			200,
-			sandbox.withUpdateMeta({
-				code: systemCode,
-				troubleshooting: 'Fake Document that is not in S3',
-				architectureDiagram: 'New Fake Document',
-			}),
-		);
+		});
+		sandbox.expectNoS3Actions('upload', 'delete');
 	});
 
 	it('Not create property when passed empty string', async () => {

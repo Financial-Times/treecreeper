@@ -53,7 +53,12 @@ const stubS3Patch = () => {
 			logger.debug('S3DocumentsHelper stub patchS3file called', {
 				event: data.event,
 			});
-			return Promise.resolve('FakePatchVersionId');
+			return Promise.resolve({
+				versionId: 'FakePatchVersionId',
+				newBodyDocs: {
+					troubleshooting: 'Another Fake Document',
+				},
+			});
 		},
 	);
 	return S3DocumentsHelper.prototype.patchS3file;
@@ -174,7 +179,12 @@ const setupMocks = (
 								action.code,
 							);
 						}
-
+						break;
+					case 'get':
+						expect(sandbox.stubS3Get).toHaveBeenCalledWith(
+							action.nodeType,
+							action.code,
+						);
 						break;
 					case 'merge':
 						expect(sandbox.stubS3Merge).toHaveBeenCalledWith(
@@ -203,6 +213,9 @@ const setupMocks = (
 						expect(
 							sandbox.stubDeleteFileFromS3,
 						).toHaveBeenCalledTimes(0);
+						break;
+					case 'get':
+						expect(sandbox.stubS3).toHaveBeenCalledTimes(0);
 						break;
 					default:
 				}
