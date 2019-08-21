@@ -177,7 +177,11 @@ class S3DocumentsHelper {
 			this.deleteFileFromS3(nodeType, sourceCode, deleteVersionId);
 			throw new Error('MERGE FAILED: Write failed in S3');
 		}
-		return { deleteVersionId, writeVersionId };
+		return {
+			deleteVersionId,
+			writeVersionId,
+			updatedBody: destinationNodeBody,
+		};
 	}
 }
 

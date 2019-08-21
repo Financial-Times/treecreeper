@@ -336,6 +336,7 @@ describe('S3 Documents Helper', () => {
 		expect(res).toEqual({
 			deleteVersionId: 'FakeDeleteVersionId',
 			writeVersionId: 'FakeUploadVersionId',
+			updatedBody: { troubleshooting: 'Fake Document' },
 		});
 		expect(stubGetObject).toHaveBeenCalledTimes(2);
 		expect(stubGetObject).toHaveBeenCalledWith({

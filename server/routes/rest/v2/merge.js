@@ -133,6 +133,7 @@ module.exports = async input => {
 	const {
 		deleteVersionId,
 		writeVersionId,
+		updatedBody,
 	} = await s3DocumentsHelper.mergeFilesInS3(
 		nodeType,
 		sourceCode,
@@ -177,6 +178,7 @@ module.exports = async input => {
 	}
 
 	const finalState = result.toApiV2(nodeType);
+	Object.assign(finalState, updatedBody);
 
 	const addedRelationships = getAddedRelationships({
 		nodeType,
