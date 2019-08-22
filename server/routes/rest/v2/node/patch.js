@@ -54,18 +54,21 @@ const update = async input => {
 
 		const nodeProperties = getType(nodeType).properties;
 		const bodyDocuments = {};
+		const bodyNoDocs = {};
 		Object.keys(body).forEach(prop => {
 			if (
 				nodeProperties[prop] &&
 				nodeProperties[prop].type === 'Document'
 			) {
 				bodyDocuments[prop] = body[prop];
+			} else {
+				bodyNoDocs[prop] = body[prop];
 			}
 		});
 
 		const propertiesToModify = constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 			initialContent: existingRecord,
 		});
@@ -86,14 +89,14 @@ const update = async input => {
 		const removedRelationships = getRemovedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: body,
+			newContent: bodyNoDocs,
 			action: relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			nodeType,
 			initialContent: existingRecord,
-			newContent: body,
+			newContent: bodyNoDocs,
 		});
 
 		const willModifyNode = Object.keys(propertiesToModify).length;
@@ -138,7 +141,6 @@ const update = async input => {
 			queryParts.push(...relDeleteQueries);
 			Object.assign(parameters, delParams);
 		}
-
 		return await writeNode({
 			nodeType,
 			code,

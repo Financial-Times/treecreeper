@@ -115,7 +115,6 @@ describe('v2 - node POST', () => {
 			systemCode,
 			sandbox.withCreateMeta({
 				code: systemCode,
-				troubleshooting: 'Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -157,7 +156,6 @@ describe('v2 - node POST', () => {
 			sandbox.withCreateMeta({
 				code: systemCode,
 				name: 'name1',
-				troubleshooting: 'Fake Document',
 			}),
 		);
 		sandbox.expectKinesisEvents([
@@ -197,16 +195,19 @@ describe('v2 - node POST', () => {
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
-		const result = Object.assign(
+		const neo4jResult = Object.assign(
 			sandbox.withCreateMeta({
 				name: 'name1',
 				code: systemCode,
-				troubleshooting: 'Fake Document',
 			}),
 			{
 				_createdByClient: 'biz-ops-github-importer',
 				_updatedByClient: 'biz-ops-github-importer',
 			},
+		);
+		const completeResult = Object.assign(
+			{ troubleshooting: 'Fake Document' },
+			neo4jResult,
 		);
 		await sandbox
 			.request(app)
@@ -219,9 +220,9 @@ describe('v2 - node POST', () => {
 				name: 'name1',
 				troubleshooting: 'Fake Document',
 			})
-			.expect(200, result);
+			.expect(200, completeResult);
 
-		await testNode('System', systemCode, result);
+		await testNode('System', systemCode, neo4jResult);
 		sandbox.expectKinesisEvents([
 			'CREATE',
 			systemCode,

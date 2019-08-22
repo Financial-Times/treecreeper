@@ -41,8 +41,8 @@ class S3DocumentsHelper {
 			Key: `${nodeType}/${code}`,
 			Body: JSON.stringify(body),
 		};
-		const res = await this.uploadToS3(params, 'POST');
-		return res;
+		const versionId = await this.uploadToS3(params, 'POST');
+		return { versionId, newBodyDocs: body };
 	}
 
 	async patchS3file(nodeType, code, body) {
@@ -50,30 +50,27 @@ class S3DocumentsHelper {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
 		};
-		try {
-			const existingNode = await this.s3Bucket
-				.getObject(params)
-				.promise();
-			const existingBody = JSON.parse(existingNode.Body);
-			if (diff(existingBody, body)) {
-				const newBody = Object.assign(existingBody, body);
-				return this.uploadToS3(
-					Object.assign({ Body: JSON.stringify(newBody) }, params),
-					'PATCH',
-				);
-			}
-		} catch (err) {
-			return this.uploadToS3(
-				Object.assign({ Body: JSON.stringify(body) }, params),
+		const existingBody = await this.getFileFromS3(nodeType, code);
+		if (diff(existingBody, body)) {
+			const newBodyDocs = Object.assign(existingBody, body);
+			const versionId = await this.uploadToS3(
+				Object.assign({ Body: JSON.stringify(newBodyDocs) }, params),
 				'PATCH',
 			);
+			return { versionId, newBodyDocs };
 		}
+		return { newBodyDocs: existingBody };
 	}
 
 	async sendDocumentsToS3(method, nodeType, code, body) {
 		const send = method === 'POST' ? this.writeFileToS3 : this.patchS3file;
-		const versionId = await send.call(this, nodeType, code, body);
-		return versionId;
+		const { versionId, newBodyDocs } = await send.call(
+			this,
+			nodeType,
+			code,
+			body,
+		);
+		return { versionId, newBodyDocs };
 	}
 
 	async deleteFileFromS3(nodeType, code, versionId) {
@@ -102,7 +99,7 @@ class S3DocumentsHelper {
 		}
 	}
 
-	async getNode(nodeType, code) {
+	async getFileFromS3(nodeType, code) {
 		const params = {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
@@ -122,8 +119,8 @@ class S3DocumentsHelper {
 
 	async mergeFilesInS3(nodeType, sourceCode, destinationCode) {
 		const [sourceNodeBody, destinationNodeBody] = await Promise.all([
-			this.getNode(nodeType, sourceCode),
-			this.getNode(nodeType, destinationCode),
+			this.getFileFromS3(nodeType, sourceCode),
+			this.getFileFromS3(nodeType, destinationCode),
 		]);
 		// If the source node has no document properties/does not exist
 		// in s3, take no action and return false in place of version ids
@@ -156,9 +153,8 @@ class S3DocumentsHelper {
 			// and return false in place of write version Id
 			noPropertiesToWrite = true;
 		}
-		const [deleteVersionId, writeVersionId] = await Promise.all(
-			mergeResults,
-		);
+		const [deleteVersionId, writeObject] = await Promise.all(mergeResults);
+		const writeVersionId = writeObject && writeObject.versionId;
 		if (!deleteVersionId && !writeVersionId) {
 			throw new Error('MERGE FAILED: Write and delete failed in S3');
 		}
@@ -170,7 +166,11 @@ class S3DocumentsHelper {
 			this.deleteFileFromS3(nodeType, sourceCode, deleteVersionId);
 			throw new Error('MERGE FAILED: Write failed in S3');
 		}
-		return { deleteVersionId, writeVersionId };
+		return {
+			deleteVersionId,
+			writeVersionId,
+			updatedBody: destinationNodeBody,
+		};
 	}
 }
 

@@ -68,13 +68,14 @@ const writeNode = async ({
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
 	let versionId;
+	let newBodyDocs;
 	if (!_isEmpty(bodyDocuments)) {
-		versionId = await s3DocumentsHelper.sendDocumentsToS3(
+		({ versionId, newBodyDocs } = await s3DocumentsHelper.sendDocumentsToS3(
 			method,
 			nodeType,
 			code,
 			bodyDocuments,
-		);
+		));
 	} else {
 		logger.info(
 			{ event: 'SKIP_S3_UPDATE' },
@@ -122,6 +123,8 @@ const writeNode = async ({
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
 
+	Object.assign(responseData, newBodyDocs);
+
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
 	// in how it handles types, but a little hack in here feels preferable to managing
@@ -139,6 +142,7 @@ const writeNode = async ({
 				...Object.keys(propertiesToModify),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
+				...Object.keys(bodyDocuments),
 			]),
 		],
 		addedRelationships: relationshipsToCreate,
@@ -152,13 +156,15 @@ const writeNode = async ({
 
 const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
-
 	const { createPermissions, pluralName } = getType(nodeType);
 	const nodeProperties = getType(nodeType).properties;
 	const bodyDocuments = {};
+	const bodyNoDocs = {};
 	Object.keys(body).forEach(prop => {
 		if (nodeProperties[prop].type === 'Document') {
 			bodyDocuments[prop] = body[prop];
+		} else {
+			bodyNoDocs[prop] = body[prop];
 		}
 	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
@@ -184,13 +190,13 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 		isCreate: true,
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 		}),
 		lockedFields,
 		relationshipsToCreate: getAddedRelationships({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 		}),
 		queryParts: [
 			stripIndents`
