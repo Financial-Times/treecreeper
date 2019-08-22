@@ -51,7 +51,6 @@ class S3DocumentsHelper {
 			Key: `${nodeType}/${code}`,
 		};
 		const existingBody = await this.getFileFromS3(nodeType, code);
-		// try {
 		if (diff(existingBody, body)) {
 			const newBodyDocs = Object.assign(existingBody, body);
 			const versionId = await this.uploadToS3(
