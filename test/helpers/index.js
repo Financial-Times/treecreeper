@@ -87,6 +87,10 @@ const stubS3Merge = () => {
 		return Promise.resolve({
 			deleteVersionId: 'FakeDeleteVersionId',
 			writeVersionId: 'FakeWriteVersionId',
+			updatedBody: {
+				troubleshooting: 'Fake Document',
+				architectureDiagram: 'A Third Fake Document',
+			},
 		});
 	});
 	return S3DocumentsHelper.prototype.mergeFilesInS3;

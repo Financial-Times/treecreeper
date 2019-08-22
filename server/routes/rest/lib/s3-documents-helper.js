@@ -61,9 +61,6 @@ class S3DocumentsHelper {
 			return { versionId, newBodyDocs };
 		}
 		return { newBodyDocs: existingBody };
-		// } catch (err) {
-		// 	return {};
-		// }
 	}
 
 	async sendDocumentsToS3(method, nodeType, code, body) {

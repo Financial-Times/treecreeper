@@ -199,20 +199,35 @@ describe('merge', () => {
 			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
 		});
 
-		it('merges unconnected nodes with document properties in s3', async () => {
+		it('merges unconnected nodes with document properties in s3, updating only keys that do not already exist on the destinationNode', async () => {
 			await sandbox.createNodes(
-				['System', systemCode1, { troubleshooting: 'Fake Document' }],
+				[
+					'System',
+					systemCode1,
+					{
+						troubleshooting: 'Fake Document',
+						architectureDiagram: 'Another Fake Document',
+					},
+				],
 				[
 					'System',
 					systemCode2,
-					{ architectureDiagram: 'Another Fake Document' },
+					{ architectureDiagram: 'A Third Fake Document' },
 				],
 			);
-			await testMergeRequest({
-				type: 'System',
-				sourceCode: systemCode1,
-				destinationCode: systemCode2,
-			});
+			await testMergeRequest(
+				{
+					type: 'System',
+					sourceCode: systemCode1,
+					destinationCode: systemCode2,
+				},
+				200,
+				sandbox.withUpdateMeta({
+					code: systemCode2,
+					troubleshooting: 'Fake Document',
+					architectureDiagram: 'A Third Fake Document',
+				}),
+			);
 			sandbox.expectS3Actions({
 				action: 'merge',
 				nodeType: 'System',
