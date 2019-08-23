@@ -15,28 +15,8 @@ class SDK {
 		this.subscribers = [];
 	}
 
-	async init({ schemaDirectory, schemaUpdater }) {
-		if (schemaDirectory) {
-			const schemaData = {
-				schema: {
-					types: readYaml.directory(schemaDirectory, 'types'),
-					typeHierarchy: readYaml.file(
-						schemaDirectory,
-						'type-hierarchy.yaml',
-					),
-					stringPatterns: readYaml.file(
-						schemaDirectory,
-						'string-patterns.yaml',
-					),
-					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
-				},
-			};
-			this.rawData.set();
-			// firing a one off change event
-			this.subscribers.forEach(handler => {
-				handler(schemaData);
-			});
-		} else {
+	async init({ schemaDirectory, schemaUpdater, schemaData }) {
+		if (schemaUpdater) {
 			// hook up schema updater to this.cache then
 			schemaUpdater.on('change', data => {
 				this.rawData.set(data);
@@ -46,6 +26,29 @@ class SDK {
 			this.updater = schemaUpdater;
 			// TODO universal init method that does first fetch
 			return this.updater.ready();
+		} else {
+
+			if (schemaDirectory) {
+				schemaData = {
+					schema: {
+						types: readYaml.directory(schemaDirectory, 'types'),
+						typeHierarchy: readYaml.file(
+							schemaDirectory,
+							'type-hierarchy.yaml',
+						),
+						stringPatterns: readYaml.file(
+							schemaDirectory,
+							'string-patterns.yaml',
+						),
+						enums: readYaml.file(schemaDirectory, 'enums.yaml'),
+					},
+				};
+			}
+			this.rawData.set(schemaData);
+			// firing a one off change event
+			this.subscribers.forEach(handler => {
+				handler(schemaData);
+			});
 		}
 	}
 

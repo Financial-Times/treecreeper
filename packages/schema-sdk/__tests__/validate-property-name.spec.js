@@ -1,9 +1,9 @@
-const { init } = require('../get-instance');
+const { SDK } = require('../sdk');
 
 describe('validatePropertyName', () => {
 	const {
 		validators: { validatePropertyName },
-	} = init();
+	} = new SDK();
 	it('accept camel case strings', () => {
 		expect(() =>
 			['thing', 'thing2', 'thingWithThing'].map(validatePropertyName),

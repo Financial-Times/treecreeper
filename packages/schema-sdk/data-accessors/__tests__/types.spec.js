@@ -9,12 +9,12 @@ jest.doMock('../../data-accessors/type', () => {
 		cacheKeyGenerator: name => name,
 	};
 });
-const { init } = require('../../get-instance');
+const { SDK } = require('../../sdk');
 
 describe('get-types', () => {
 	it('gets all types (hierarchyless)', () => {
-		const types = init({
-			rawData: {
+		const sdk = new SDK()
+		sdk.init({ schemaData: {
 				schema: {
 					types: [
 						{
@@ -24,7 +24,8 @@ describe('get-types', () => {
 					],
 				},
 			},
-		}).getTypes({ option: 'value' });
+		})
+		const types = sdk.getTypes({ option: 'value' });
 
 		expect(types).toEqual([
 			{
@@ -55,8 +56,8 @@ describe('get-types', () => {
 
 	describe('with hierarchy', () => {
 		it('expects to be returned in order of type hiererchy', () => {
-			const types = init({
-				rawData: {
+			const sdk = new SDK()
+		sdk.init({ schemaData: {
 					schema: {
 						types: [
 							{
@@ -74,7 +75,8 @@ describe('get-types', () => {
 						},
 					},
 				},
-			}).getTypes();
+			})
+		types = sdk.getTypes();
 
 			expect(types).toEqual([
 				{
@@ -87,8 +89,8 @@ describe('get-types', () => {
 		});
 
 		it('gets all types grouped by category', () => {
-			const types = init({
-				rawData: {
+			const sdk =  new SDK()
+			sdk.init({ schemaData: {
 					schema: {
 						types: [
 							{
@@ -106,7 +108,8 @@ describe('get-types', () => {
 						},
 					},
 				},
-			}).getTypes({ grouped: true });
+			})
+			const types = sdk.getTypes({ grouped: true });
 
 			expect(types).toEqual({
 				category1: {

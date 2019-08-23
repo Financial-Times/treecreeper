@@ -1,10 +1,13 @@
-const { init } = require('../get-instance');
+const { SDK } = require('../sdk');
 
 describe('validateTypeName', () => {
+	const sdk = new SDK();
 	const {
 		validators: { validateTypeName },
-	} = init({
-		rawData: {
+	} = sdk;
+
+	sdk.init({
+		schemaData: {
 			schema: {
 				types: [
 					{

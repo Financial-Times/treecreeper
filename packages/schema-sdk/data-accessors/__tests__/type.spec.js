@@ -1,15 +1,16 @@
 const metaProperties = require('../../meta-properties');
-const { init } = require('../../get-instance');
+const { SDK } = require('../../sdk');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
-	return init({
-		rawData: {
+	const sdk = new SDK()
+	sdk.init({ schemaData: {
 			schema: {
 				types: [{ name: 'DummyType' }, typeData],
 				stringPatterns,
 			},
 		},
-	}).getType('Type1', options);
+	})
+	return sdk.getType('Type1', options);
 };
 
 describe('get-type', () => {
