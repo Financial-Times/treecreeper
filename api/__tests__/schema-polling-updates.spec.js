@@ -3,6 +3,7 @@ const schema = require('../../schema');
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );
+const { getSchemaFilename } = require('../../packages/schema-utils');
 
 jest.useFakeTimers();
 
@@ -16,15 +17,11 @@ describe('schema polling updates', () => {
 			fetch.config.fallbackToNetwork = false;
 			fetch
 				.getOnce(
-					`${
-						process.env.SCHEMA_BASE_URL
-					}/${schema.getSchemaFilename()}`,
+					`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 					{ version: 'not-null' },
 				)
 				.getOnce(
-					`${
-						process.env.SCHEMA_BASE_URL
-					}/${schema.getSchemaFilename()}`,
+					`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 					{
 						version: 'new-test',
 						schema: {
@@ -101,9 +98,7 @@ describe('schema polling updates', () => {
 
 				fetch
 					.getOnce(
-						`${
-							process.env.SCHEMA_BASE_URL
-						}/${schema.getSchemaFilename()}`,
+						`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 						{
 							version: 'new-test2',
 							schema: {
@@ -183,13 +178,13 @@ describe('schema polling updates', () => {
 	// Not testing this as directly as I'd like as it's tricky
 	it('reinitialises database contraints', async () => {
 		const on = jest.fn();
-		jest.doMock('@financial-times/biz-ops-schema', () => ({
+		jest.doMock('../../schema', () => ({
 			on,
 			configure: () => null,
 			startPolling: () => Promise.resolve(),
 		}));
 		const { initConstraints } = require('../server/init-db');
 		expect(on).toHaveBeenCalledWith('change', initConstraints);
-		jest.dontMock('@financial-times/biz-ops-schema');
+		jest.dontMock('../../schema');
 	});
 });

@@ -1,6 +1,4 @@
 const primitiveTypes = require('./primitive-types-map');
-const sendSchemaToS3 = require('./send-schema-to-s3');
-const getSchemaFilename = require('./get-schema-filename');
 const RawData = require('./raw-data');
 const getDataAccessors = require('../data-accessors');
 const getValidators = require('./validators');
@@ -25,8 +23,7 @@ module.exports = {
 				refresh: rawData.refresh.bind(rawData),
 				normalizeTypeName: name => name,
 				primitiveTypesMap: primitiveTypes,
-				sendSchemaToS3: env => sendSchemaToS3(env, rawData.getAll()),
-				getSchemaFilename,
+				getRawData: () => rawData.getAll(),
 			},
 
 			dataAccessors,

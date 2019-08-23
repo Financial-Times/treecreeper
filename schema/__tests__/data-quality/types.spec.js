@@ -40,7 +40,7 @@ describe('data quality: types', () => {
 		typeNames,
 	);
 
-	fs.readdirSync(path.join(process.cwd(), 'schema/types'))
+	fs.readdirSync(path.join(process.cwd(), 'schema/schema/types'))
 		.filter(fileName => /\.yaml$/.test(fileName))
 		.forEach(fileName => {
 			it(`${fileName} has consistent name property`, () => {

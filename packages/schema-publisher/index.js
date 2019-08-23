@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const { Readable } = require('stream');
-const getSchemaFilename = require('./get-schema-filename');
+const { getSchemaFilename } = require('../schema-utils');
 
 const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
@@ -27,4 +27,4 @@ const sendSchemaToS3 = async (environment, schemaObject) => {
 		.promise();
 };
 
-module.exports = sendSchemaToS3;
+module.exports = { sendSchemaToS3 };

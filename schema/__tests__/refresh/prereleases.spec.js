@@ -1,12 +1,18 @@
 const fetch = require('node-fetch');
 
-jest.mock('../../package.json', () => ({ version: '8.9.10-beta.1' }), {
+jest.mock('../../../package.json', () => ({ version: '8.9.10-beta.1' }), {
 	virtual: true,
 });
 
 const { init } = require('../../lib/get-instance');
 
 describe('fetching prerelease schemas', () => {
+	beforeAll(() => {
+		fetch.config.fallbackToNetwork = false;
+	});
+	afterAll(() => {
+		fetch.config.fallbackToNetwork = 'always';
+	});
 	afterEach(() => fetch.reset());
 	it('fetches prerelease schemas when using stale update mode', async () => {
 		const schema = init({

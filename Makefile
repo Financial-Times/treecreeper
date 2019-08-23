@@ -36,9 +36,15 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true TIMEOUT=500000 jest test --testEnvironment=node --watch; \
-		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then DEBUG=true TIMEOUT=500000 jest __tests__/**/*.spec.js --testEnvironment=node --watch; \
+		else jest __tests__/**/*.spec.js --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
+
+test-api:
+	DEBUG=true TIMEOUT=500000 jest api/__tests__/**/*.spec.js --testEnvironment=node --watch;
+
+test-schema:
+	jest schema/__tests__/**/*.spec.js --testEnvironment=node --watch; \
 
 run:
 	nodemon --inspect api/server/app.js
@@ -72,14 +78,6 @@ load-test-writeQueriesForTeams:
 
 load-test-cleanUp:
 	node scripts/load-testing/clean-up
-
-
-
-test-schema:
-	@if [ -z $(CI) ]; \
-		then DEBUG=true jest schema/test --testEnvironment=node --watch ; \
-		else jest schema/test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
-	fi
 
 s3-publish:
 	@node schema/scripts/deploy

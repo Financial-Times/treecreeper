@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('../../schema');
+const { getSchemaFilename } = require('../../packages/schema-utils');
 
 jest.useFakeTimers();
 
@@ -21,6 +21,7 @@ describe('schema polling startup', () => {
 		require('../server/app');
 		expect(listen).not.toHaveBeenCalled();
 		await fetch.flush(true);
+		console.log(fetch.calls())
 		expect(fetch.lastUrl()).toEqual(
 			`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 		);

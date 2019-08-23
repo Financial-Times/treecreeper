@@ -8,4 +8,4 @@ const getSchemaFilename = (version = libVersion) => {
 	return `v${majorVersion}${isPrerelease ? '-prerelease' : ''}.json`;
 };
 
-module.exports = getSchemaFilename;
+module.exports = { getSchemaFilename };

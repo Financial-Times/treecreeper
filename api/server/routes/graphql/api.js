@@ -10,6 +10,7 @@ const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
 const { createSchema } = require('./lib/graphql-schema');
 const { driver } = require('../../lib/db-connection');
+const { sendSchemaToS3 } = require('../../../../packages/schema-publisher');
 
 let api;
 let schemaVersionIsConsistent = true;
@@ -42,8 +43,7 @@ const constructAPI = () => {
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
 		if (process.env.NODE_ENV === 'production') {
-			schema
-				.sendSchemaToS3('api')
+			sendSchemaToS3('api', schema.getRawData())
 				.then(() => {
 					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 				})

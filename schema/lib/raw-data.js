@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const deepFreeze = require('deep-freeze');
 const Cache = require('./cache');
 const readYaml = require('./read-yaml');
-const getSchemaFilename = require('./get-schema-filename');
+const { getSchemaFilename } = require('../../packages/schema-utils');
 const { version: libVersion } = require('../../package.json');
 
 class RawData {
@@ -105,6 +105,7 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 		if (this.updateMode !== 'stale') {
 			throw new Error('Cannot refresh when updateMode is not "stale"');
 		}
+
 		if (Date.now() - this.lastRefreshDate > this.ttl) {
 			return this.fetch();
 		}

@@ -1,4 +1,4 @@
-const sendSchemaToS3 = require('../lib/send-schema-to-s3');
+const { sendSchemaToS3 } = require('../../packages/schema-publisher');
 const RawData = require('../lib/raw-data');
 
 const schemaObject = Object.assign({}, new RawData().getAll(), {

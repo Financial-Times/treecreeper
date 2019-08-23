@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 jest.useFakeTimers();
 
-jest.mock('../../package.json', () => ({ version: '8.9.10' }), {
+jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
@@ -11,6 +11,12 @@ const { init } = require('../../lib/get-instance');
 const nextTick = () => new Promise(res => process.nextTick(res));
 
 describe('refreshing schema when stale', () => {
+	beforeAll(() => {
+		fetch.config.fallbackToNetwork = false;
+	});
+	afterAll(() => {
+		fetch.config.fallbackToNetwork = 'always';
+	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on init', async () => {
 		init({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'poll' });
