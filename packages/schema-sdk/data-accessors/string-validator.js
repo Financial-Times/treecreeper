@@ -2,7 +2,7 @@ const dummyRegExp = { test: () => true };
 
 module.exports = {
 	cacheKeyGenerator: patternName => `stringPatterns:${patternName}`,
-	accessor: function (patternName) {
+	accessor(patternName) {
 		if (!patternName) {
 			return dummyRegExp;
 		}

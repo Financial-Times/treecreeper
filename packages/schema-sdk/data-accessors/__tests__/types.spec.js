@@ -1,5 +1,5 @@
 const typeAccessor = jest.fn();
-typeAccessor.mockImplementation((name) => ({
+typeAccessor.mockImplementation(name => ({
 	name: `${name} - retrieved`,
 }));
 
@@ -35,18 +35,12 @@ describe('get-types', () => {
 			},
 		]);
 
-		expect(typeAccessor).toHaveBeenCalledWith(
-			'Type1',
-			{
-				option: 'value',
-			},
-		);
-		expect(typeAccessor).toHaveBeenCalledWith(
-			'Type2',
-			{
-				option: 'value',
-			},
-		);
+		expect(typeAccessor).toHaveBeenCalledWith('Type1', {
+			option: 'value',
+		});
+		expect(typeAccessor).toHaveBeenCalledWith('Type2', {
+			option: 'value',
+		});
 	});
 
 	describe('with hierarchy', () => {

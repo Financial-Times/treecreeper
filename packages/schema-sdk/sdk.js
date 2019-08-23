@@ -3,13 +3,11 @@ const { readYaml } = require('../../packages/schema-consumer');
 const { RawDataWrapper } = require('./raw-data-wrapper');
 const getValidators = require('./validators');
 const BizOpsError = require('./biz-ops-error');
-const {
-	enums,
-	stringValidator,
-	type,
-	types,
-	graphqlDefs,
-} = require('./data-accessors');
+const type = require('./data-accessors/type');
+const graphqlDefs = require('./data-accessors/graphql-defs');
+const stringValidator = require('./data-accessors/string-validator');
+const enums = require('./data-accessors/enums');
+const types = require('./data-accessors/types');
 
 class SDK {
 	constructor(options) {
@@ -30,8 +28,11 @@ class SDK {
 		}
 	}
 
-	createEnrichedAccessor({accessor, cacheKeyGenerator}) {
-		return this.cache.addCacheToFunction(accessor.bind(this), cacheKeyGenerator);
+	createEnrichedAccessor({ accessor, cacheKeyGenerator }) {
+		return this.cache.addCacheToFunction(
+			accessor.bind(this),
+			cacheKeyGenerator,
+		);
 	}
 
 	async init({ schemaDirectory, schemaUpdater, schemaData }) {

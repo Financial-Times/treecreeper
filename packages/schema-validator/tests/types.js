@@ -2,11 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
-const {
-	readYaml,
-} = require('../../../packages/schema-consumer');
+const { readYaml } = require('../../../packages/schema-consumer');
 
-const {SDK} = require('../../../packages/schema-sdk');
+const { SDK } = require('../../../packages/schema-sdk');
 
 const sdk = new SDK({
 	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
@@ -14,7 +12,7 @@ const sdk = new SDK({
 const types = sdk.rawData.getTypes();
 const stringPatterns = sdk.rawData.getStringPatterns();
 const enums = sdk.rawData.getEnums();
-const getStringValidator = sdk.getStringValidator;
+const { getStringValidator } = sdk;
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 
 const primitiveTypesMap = require('../../../packages/schema-sdk/primitive-types-map');
