@@ -40,3 +40,19 @@ static getSingleton: (schemaConsumer) => : sdk
             dataAccessors,
             validators,
         );
+
+
+```
+class DataAccessors {
+    constructor(schemaClient) {
+        this.schemaClient = schemaClient
+        this.cache = new Cache();
+        this.schemaClient.on('change', () => this.cache.clear())
+        this.getType = this.cache.wrap(this.getType.bind(this))
+    }
+
+    getType (type, options = {}){
+        checkCache(type, option1, option2...)
+    }
+}
+```
