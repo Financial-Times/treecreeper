@@ -7,7 +7,7 @@ const deepFreeze = require('deep-freeze');
 const readFile = filePath => {
 	try {
 		const file = fs.readFileSync(
-			path.join(__dirname, '../schema/', filePath),
+			path.join(process.cwd(), 'schema/schema', filePath),
 			'utf8',
 		);
 		return deepFreeze(yaml.load(file));
@@ -22,7 +22,7 @@ const readFile = filePath => {
 
 const readDirectory = directory => {
 	return fs
-		.readdirSync(path.join(__dirname, '../schema/', directory))
+		.readdirSync(path.join(process.cwd(), 'schema/schema', directory))
 		.filter(fileName => /\.yaml$/.test(fileName))
 		.map(fileName => readFile(path.join(directory, fileName)));
 };

@@ -1,4 +1,4 @@
-const Cache = require('../../lib/cache');
+const { Cache } = require('../cache');
 
 const cache = new Cache();
 

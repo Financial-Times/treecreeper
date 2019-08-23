@@ -1,11 +1,11 @@
 const primitiveTypes = require('./primitive-types-map');
-const RawData = require('./raw-data');
+const { SchemaConsumer } = require('../../packages/schema-consumer');
 const getDataAccessors = require('../data-accessors');
 const getValidators = require('./validators');
 
 module.exports = {
 	init: (opts = {}) => {
-		const rawData = new RawData(opts);
+		const rawData = new SchemaConsumer(opts);
 
 		// generally only used in tests
 		if (opts.rawData) {

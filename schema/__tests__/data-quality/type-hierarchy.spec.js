@@ -1,7 +1,9 @@
-const readYaml = require('../../lib/read-yaml');
-const RawData = require('../../lib/raw-data');
+const {
+	SchemaConsumer,
+	readYaml,
+} = require('../../../packages/schema-consumer');
 
-const rawData = new RawData();
+const rawData = new SchemaConsumer();
 
 const typeHierarchy = rawData.getTypeHierarchy();
 

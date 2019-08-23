@@ -1,15 +1,15 @@
 const fetch = require('node-fetch');
 
-jest.useFakeTimers();
-
 jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { init } = require('../../lib/get-instance');
+const { SchemaConsumer } = require('..');
 
+const init = options => new SchemaConsumer(options);
+
+const timer = delay => new Promise(res => setTimeout(res, delay));
 const nextTick = () => new Promise(res => process.nextTick(res));
-
 describe('refreshing schema when stale', () => {
 	beforeAll(() => {
 		fetch.config.fallbackToNetwork = false;
@@ -19,19 +19,19 @@ describe('refreshing schema when stale', () => {
 	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on init', async () => {
-		init({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'poll' });
+		init({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'stale' });
 		fetch.mock('https://base.url/v8.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
-	it('fetches when startPolling method called', async () => {
+	it('fetches when refresh method called', async () => {
 		const schema = init({
 			ttl: 100,
 			baseUrl: 'https://base.url',
-			updateMode: 'poll',
+			updateMode: 'stale',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		let isPending = true;
-		schema.startPolling().then(() => {
+		schema.refresh().then(() => {
 			isPending = false;
 		});
 		expect(fetch.called()).toBe(true);
@@ -39,22 +39,48 @@ describe('refreshing schema when stale', () => {
 		await fetch.flush();
 		await nextTick();
 		expect(isPending).toEqual(false);
-		schema.stopPolling();
 	});
 
-	it('fetches again after TTL has expired', async () => {
+	it('does not fetch if refresh method called within TTL', async () => {
 		const schema = init({
 			ttl: 100,
 			baseUrl: 'https://base.url',
-			updateMode: 'poll',
+			updateMode: 'stale',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
-		schema.startPolling();
+		schema.refresh();
 		await fetch.flush();
 		fetch.resetHistory();
-		jest.advanceTimersByTime(101);
+		await timer(50);
+		let isPending = true;
+		schema.refresh().then(() => {
+			isPending = false;
+		});
+		expect(fetch.called()).toBe(false);
+		expect(isPending).toEqual(true);
+		await nextTick();
+		expect(isPending).toEqual(false);
+	});
+	it('fetches if refresh method called after TTL has expired', async () => {
+		const schema = init({
+			ttl: 100,
+			baseUrl: 'https://base.url',
+			updateMode: 'stale',
+		});
+		fetch.mock('https://base.url/v8.json', { result: true });
+		schema.refresh();
+		await fetch.flush();
+		fetch.resetHistory();
+		await timer(101);
+		let isPending = true;
+		schema.refresh().then(() => {
+			isPending = false;
+		});
 		expect(fetch.called()).toBe(true);
-		schema.stopPolling();
+		expect(isPending).toEqual(true);
+		await fetch.flush();
+		await nextTick();
+		expect(isPending).toEqual(false);
 	});
 
 	describe('handle updates', () => {
@@ -62,7 +88,7 @@ describe('refreshing schema when stale', () => {
 			const schema = init({
 				ttl: 100,
 				baseUrl: 'https://base.url',
-				updateMode: 'poll',
+				updateMode: 'stale',
 				rawData: {
 					version: 'v8.9.10',
 					schema: {
@@ -77,18 +103,17 @@ describe('refreshing schema when stale', () => {
 			const listener = jest.fn();
 			schema.on('change', listener);
 			fetch.mock('https://base.url/v8.json', { version: 'v8.9.10' });
-			schema.startPolling();
+			schema.refresh();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
 			expect(schema.getType('It')).toEqual(expect.any(Object));
-			schema.stopPolling();
 		});
 
 		it('updates local data nad triggers event when version has changed', async () => {
 			const schema = init({
 				ttl: 100,
 				baseUrl: 'https://base.url',
-				updateMode: 'poll',
+				updateMode: 'stale',
 				rawData: {
 					version: 'v8.9.11',
 					schema: {
@@ -112,11 +137,10 @@ describe('refreshing schema when stale', () => {
 					],
 				},
 			});
-			schema.startPolling();
+			schema.refresh();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalled();
 			expect(schema.getType('NotIt')).toEqual(expect.any(Object));
-			schema.stopPolling();
 		});
 	});
 });

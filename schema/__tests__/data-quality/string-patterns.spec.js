@@ -1,6 +1,6 @@
-const RawData = require('../../lib/raw-data');
+const { SchemaConsumer } = require('../../../packages/schema-consumer');
 
-const stringPatterns = new RawData().getStringPatterns();
+const stringPatterns = new SchemaConsumer().getStringPatterns();
 
 const longString = 'x'.repeat(257);
 

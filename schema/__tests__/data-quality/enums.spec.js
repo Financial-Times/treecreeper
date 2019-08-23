@@ -1,6 +1,6 @@
-const RawData = require('../../lib/raw-data');
+const { SchemaConsumer } = require('../../../packages/schema-consumer');
 
-const enums = new RawData().getEnums();
+const enums = new SchemaConsumer().getEnums();
 
 describe('data quality: enum spec', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {

@@ -1,9 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
-const RawData = require('../../lib/raw-data');
+const {
+	SchemaConsumer,
+	readYaml,
+} = require('../../../packages/schema-consumer');
 
-const rawData = new RawData();
+const rawData = new SchemaConsumer();
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
@@ -11,7 +14,6 @@ const stringValidator = require('../../data-accessors/string-validator');
 
 const getStringValidator = stringValidator.accessor.bind(null, rawData);
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
-const readYaml = require('../../lib/read-yaml');
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);

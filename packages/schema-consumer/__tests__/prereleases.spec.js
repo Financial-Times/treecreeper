@@ -4,7 +4,9 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10-beta.1' }), {
 	virtual: true,
 });
 
-const { init } = require('../../lib/get-instance');
+const { SchemaConsumer } = require('..');
+
+const init = options => new SchemaConsumer(options);
 
 describe('fetching prerelease schemas', () => {
 	beforeAll(() => {

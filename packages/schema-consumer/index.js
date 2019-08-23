@@ -1,12 +1,12 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const deepFreeze = require('deep-freeze');
-const Cache = require('./cache');
+const { Cache } = require('../../packages/schema-utils/cache');
 const readYaml = require('./read-yaml');
 const { getSchemaFilename } = require('../../packages/schema-utils');
 const { version: libVersion } = require('../../package.json');
 
-class RawData {
+class SchemaConsumer {
 	constructor(options) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
@@ -29,6 +29,7 @@ class RawData {
 				},
 			});
 		} catch (e) {
+			console.log(e)
 			this.rawData = {};
 		}
 	}
@@ -171,4 +172,4 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 	}
 }
 
-module.exports = RawData;
+module.exports = { SchemaConsumer, readYaml };

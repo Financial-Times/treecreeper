@@ -1,7 +1,8 @@
 const { sendSchemaToS3 } = require('../../packages/schema-publisher');
-const RawData = require('../lib/raw-data');
+const { SchemaConsumer } = require('../../packages/schema-consumer');
 
-const schemaObject = Object.assign({}, new RawData().getAll(), {
+// TODO - should have explicit 'getLocal()' method??
+const schemaObject = Object.assign({}, new SchemaConsumer().getAll(), {
 	version: process.env.CIRCLE_TAG,
 });
 
