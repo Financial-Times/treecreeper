@@ -6,9 +6,9 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { SchemaConsumer } = require('..');
+const { SchemaUpdater } = require('..');
 
-const init = options => new SchemaConsumer(options);
+const init = options => new SchemaUpdater(options);
 
 const nextTick = () => new Promise(res => process.nextTick(res));
 
@@ -65,24 +65,14 @@ describe('refreshing schema when stale', () => {
 				ttl: 100,
 				baseUrl: 'https://base.url',
 				updateMode: 'poll',
-				rawData: {
-					version: 'v8.9.10',
-					schema: {
-						types: [
-							{
-								name: 'It',
-							},
-						],
-					},
-				},
 			});
+			schema.version = 'v8.9.10';
 			const listener = jest.fn();
 			schema.on('change', listener);
 			fetch.mock('https://base.url/v8.json', { version: 'v8.9.10' });
 			schema.startPolling();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
-			expect(schema.getTypes()[0].name).toEqual('It');
 			schema.stopPolling();
 		});
 
@@ -91,20 +81,10 @@ describe('refreshing schema when stale', () => {
 				ttl: 100,
 				baseUrl: 'https://base.url',
 				updateMode: 'poll',
-				rawData: {
-					version: 'v8.9.11',
-					schema: {
-						types: [
-							{
-								name: 'It',
-							},
-						],
-					},
-				},
 			});
 			const listener = jest.fn();
 			schema.on('change', listener);
-			fetch.mock('https://base.url/v8.json', {
+			const data = {
 				version: 'v8.9.10',
 				schema: {
 					types: [
@@ -113,11 +93,15 @@ describe('refreshing schema when stale', () => {
 						},
 					],
 				},
-			});
+			};
+			fetch.mock('https://base.url/v8.json', data);
 			schema.startPolling();
 			await fetch.flush();
-			expect(listener).toHaveBeenCalled();
-			expect(schema.getTypes()[0].name).toEqual('NotIt');
+			expect(listener).toHaveBeenCalledWith({
+				newVersion: 'v8.9.10',
+				oldVersion: undefined,
+				schemaData: data,
+			});
 			schema.stopPolling();
 		});
 	});

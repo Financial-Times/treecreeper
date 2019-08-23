@@ -1,10 +1,10 @@
 const { sendSchemaToS3 } = require('..');
-const { SchemaConsumer } = require('../../../packages/schema-consumer');
+const { SchemaUpdater } = require('../../../packages/schema-updater');
 
 // TODO - should have explicit 'getLocal()' method??
 const schemaObject = Object.assign(
 	{},
-	new SchemaConsumer({
+	new SchemaUpdater({
 		rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 	}).getAll(),
 	{

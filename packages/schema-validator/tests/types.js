@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
-const { readYaml } = require('../../../packages/schema-consumer');
+const { readYaml } = require('../../../packages/schema-updater');
 
 const { SDK } = require('../../../packages/schema-sdk');
 

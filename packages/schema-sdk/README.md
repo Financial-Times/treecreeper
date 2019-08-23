@@ -17,7 +17,7 @@ exports class SchemaSDK {
 static getSingleton: (schemaConsumer) => : sdk
 }
 
-// @treecreeper/schema-consumer
+// @treecreeper/schema-updater
 
 // @treecreeper/schema-publisher
 

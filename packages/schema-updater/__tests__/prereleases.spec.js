@@ -4,9 +4,9 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10-beta.1' }), {
 	virtual: true,
 });
 
-const { SchemaConsumer } = require('..');
+const { SchemaUpdater } = require('..');
 
-const init = options => new SchemaConsumer(options);
+const init = options => new SchemaUpdater(options);
 
 describe('fetching prerelease schemas', () => {
 	beforeAll(() => {

@@ -1,10 +1,7 @@
 /* global it, describe, expect */
-const {
-	SchemaConsumer,
-	readYaml,
-} = require('../../../packages/schema-consumer');
+const { SchemaUpdater, readYaml } = require('../../../packages/schema-updater');
 
-const rawData = new SchemaConsumer({
+const rawData = new SchemaUpdater({
 	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 });
 

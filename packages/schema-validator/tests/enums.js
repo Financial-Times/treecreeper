@@ -1,7 +1,7 @@
 /* global it, describe, expect */
-const { SchemaConsumer } = require('../../../packages/schema-consumer');
+const { SchemaUpdater } = require('../../../packages/schema-updater');
 
-const enums = new SchemaConsumer({
+const enums = new SchemaUpdater({
 	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 }).getEnums();
 

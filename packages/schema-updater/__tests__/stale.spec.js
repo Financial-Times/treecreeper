@@ -4,9 +4,9 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { SchemaConsumer } = require('..');
+const { SchemaUpdater } = require('..');
 
-const init = options => new SchemaConsumer(options);
+const create = options => new SchemaUpdater(options);
 
 const timer = delay => new Promise(res => setTimeout(res, delay));
 const nextTick = () => new Promise(res => process.nextTick(res));
@@ -18,13 +18,13 @@ describe('refreshing schema when stale', () => {
 		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());
-	it('does not fetch on init', async () => {
-		init({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'stale' });
+	it('does not fetch on create', async () => {
+		create({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'stale' });
 		fetch.mock('https://base.url/v8.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
 	it('fetches when refresh method called', async () => {
-		const schema = init({
+		const schema = create({
 			ttl: 100,
 			baseUrl: 'https://base.url',
 			updateMode: 'stale',
@@ -42,7 +42,7 @@ describe('refreshing schema when stale', () => {
 	});
 
 	it('does not fetch if refresh method called within TTL', async () => {
-		const schema = init({
+		const schema = create({
 			ttl: 100,
 			baseUrl: 'https://base.url',
 			updateMode: 'stale',
@@ -62,7 +62,7 @@ describe('refreshing schema when stale', () => {
 		expect(isPending).toEqual(false);
 	});
 	it('fetches if refresh method called after TTL has expired', async () => {
-		const schema = init({
+		const schema = create({
 			ttl: 100,
 			baseUrl: 'https://base.url',
 			updateMode: 'stale',
@@ -85,49 +85,30 @@ describe('refreshing schema when stale', () => {
 
 	describe('handle updates', () => {
 		it('noop if new version is same as old', async () => {
-			const schema = init({
+			const schema = create({
 				ttl: 100,
 				baseUrl: 'https://base.url',
 				updateMode: 'stale',
-				rawData: {
-					version: 'v8.9.10',
-					schema: {
-						types: [
-							{
-								name: 'It',
-							},
-						],
-					},
-				},
 			});
+
+			schema.version = 'v8.9.10';
 			const listener = jest.fn();
 			schema.on('change', listener);
 			fetch.mock('https://base.url/v8.json', { version: 'v8.9.10' });
 			schema.refresh();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
-			expect(schema.getTypes()[0].name).toEqual('It');
 		});
 
 		it('updates local data nad triggers event when version has changed', async () => {
-			const schema = init({
+			const schema = create({
 				ttl: 100,
 				baseUrl: 'https://base.url',
 				updateMode: 'stale',
-				rawData: {
-					version: 'v8.9.11',
-					schema: {
-						types: [
-							{
-								name: 'It',
-							},
-						],
-					},
-				},
 			});
 			const listener = jest.fn();
 			schema.on('change', listener);
-			fetch.mock('https://base.url/v8.json', {
+			const data = {
 				version: 'v8.9.10',
 				schema: {
 					types: [
@@ -136,11 +117,15 @@ describe('refreshing schema when stale', () => {
 						},
 					],
 				},
-			});
+			};
+			fetch.mock('https://base.url/v8.json', data);
 			schema.refresh();
 			await fetch.flush();
-			expect(listener).toHaveBeenCalled();
-			expect(schema.getTypes()[0].name).toEqual('NotIt');
+			expect(listener).toHaveBeenCalledWith({
+				newVersion: 'v8.9.10',
+				oldVersion: undefined,
+				schemaData: data,
+			});
 		});
 	});
 });

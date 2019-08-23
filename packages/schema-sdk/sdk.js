@@ -1,5 +1,5 @@
 const { Cache } = require('../../packages/schema-utils/cache');
-const { readYaml } = require('../../packages/schema-consumer');
+const { readYaml } = require('../../packages/schema-updater');
 const { RawDataWrapper } = require('./raw-data-wrapper');
 const getValidators = require('./validators');
 const BizOpsError = require('./biz-ops-error');
@@ -39,7 +39,7 @@ class SDK {
 		if (schemaUpdater) {
 			// hook up schema updater to this.cache then
 			schemaUpdater.on('change', data => {
-				this.rawData.set(data);
+				this.rawData.set(data.schemaData);
 				this.cache.clear();
 				this.subscribers.forEach(handler => handler(data));
 			});
