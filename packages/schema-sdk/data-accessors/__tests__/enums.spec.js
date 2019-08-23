@@ -1,7 +1,7 @@
-const { init } = require('../../lib/get-instance');
+const { accessors } = require('..');
 
 const enumsFromRawData = data =>
-	init({ rawData: { schema: { enums: data } } }).getEnums;
+	accessors({ rawData: { schema: { enums: data } } }).getEnums;
 
 describe('get-enums', () => {
 	describe('from array', () => {

@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getTypes } = require('../../../schema');
+const { getTypes } = require('../../../packages/schema-sdk');
 const { logger } = require('../lib/request-context');
 const healthcheck = require('./healthcheck');
 const { executeQuery } = require('../lib/db-connection');

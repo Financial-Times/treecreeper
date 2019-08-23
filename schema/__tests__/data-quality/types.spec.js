@@ -10,11 +10,11 @@ const rawData = new SchemaConsumer();
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
-const stringValidator = require('../../data-accessors/string-validator');
+const stringValidator = require('../../../packages/schema-sdk/data-accessors/string-validator');
 
 const getStringValidator = stringValidator.accessor.bind(null, rawData);
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
-const primitiveTypesMap = require('../../lib/primitive-types-map');
+const primitiveTypesMap = require('../../../packages/schema-sdk/primitive-types-map');
 
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
 

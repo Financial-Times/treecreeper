@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getType } = require('../../../../../schema');
+const { getType } = require('../../../../../packages/schema-sdk');
 const { metaPropertiesForCreate } = require('./metadata-helpers');
 
 const relationshipFragment = (type, direction) => {

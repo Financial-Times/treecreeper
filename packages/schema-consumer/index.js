@@ -29,7 +29,7 @@ class SchemaConsumer {
 				},
 			});
 		} catch (e) {
-			console.log(e)
+			console.log(e);
 			this.rawData = {};
 		}
 	}

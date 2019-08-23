@@ -1,4 +1,4 @@
-const { init } = require('../../lib/get-instance');
+const { init } = require('../get-instance');
 
 describe('validateTypeName', () => {
 	const { validateTypeName } = init({

@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const schema = require('../../schema');
+const schema = require('../../packages/schema-sdk');
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );
@@ -178,13 +178,13 @@ describe('schema polling updates', () => {
 	// Not testing this as directly as I'd like as it's tricky
 	it('reinitialises database contraints', async () => {
 		const on = jest.fn();
-		jest.doMock('../../schema', () => ({
+		jest.doMock('../../packages/schema-sdk', () => ({
 			on,
 			configure: () => null,
 			startPolling: () => Promise.resolve(),
 		}));
 		const { initConstraints } = require('../server/init-db');
 		expect(on).toHaveBeenCalledWith('change', initConstraints);
-		jest.dontMock('../../schema');
+		jest.dontMock('../../packages/schema-sdk');
 	});
 });

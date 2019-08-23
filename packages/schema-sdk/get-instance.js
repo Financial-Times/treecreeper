@@ -1,6 +1,6 @@
 const primitiveTypes = require('./primitive-types-map');
 const { SchemaConsumer } = require('../../packages/schema-consumer');
-const getDataAccessors = require('../data-accessors');
+const getDataAccessors = require('./data-accessors');
 const getValidators = require('./validators');
 
 module.exports = {

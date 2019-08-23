@@ -9,11 +9,11 @@ jest.doMock('../../data-accessors/type', () => {
 		cacheKeyGenerator: name => name,
 	};
 });
-const { init } = require('../../lib/get-instance');
+const { accessors } = require('..');
 
 describe('get-types', () => {
 	it('gets all types (hierarchyless)', () => {
-		const types = init({
+		const types = accessors({
 			rawData: {
 				schema: {
 					types: [
@@ -55,7 +55,7 @@ describe('get-types', () => {
 
 	describe('with hierarchy', () => {
 		it('expects to be returned in order of type hiererchy', () => {
-			const types = init({
+			const types = accessors({
 				rawData: {
 					schema: {
 						types: [
@@ -87,7 +87,7 @@ describe('get-types', () => {
 		});
 
 		it('gets all types grouped by category', () => {
-			const types = init({
+			const types = accessors({
 				rawData: {
 					schema: {
 						types: [

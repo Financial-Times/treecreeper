@@ -1,8 +1,8 @@
-const metaProperties = require('../../lib/meta-properties');
-const { init } = require('../../lib/get-instance');
+const metaProperties = require('../../meta-properties');
+const { accessors } = require('..');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
-	return init({
+	return accessors({
 		rawData: {
 			schema: {
 				types: [{ name: 'DummyType' }, typeData],
