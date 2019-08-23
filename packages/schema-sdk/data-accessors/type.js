@@ -100,9 +100,7 @@ const cacheKeyGenerator = (
 ) =>
 	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}:${useMinimumViableRecord}`;
 
-const getType = (
-	rawData,
-	getStringValidator,
+const getType = function(
 	typeName,
 	{
 		primitiveTypes = BIZ_OPS, // graphql
@@ -111,8 +109,8 @@ const getType = (
 		includeMetaFields = false,
 		useMinimumViableRecord = false,
 	} = {},
-) => {
-	const typeSchema = getFromRawData(typeName, rawData);
+) {
+	const typeSchema = getFromRawData(typeName, this.rawData);
 
 	typeSchema.type = typeSchema.name;
 
@@ -170,7 +168,7 @@ const getType = (
 				def.type = primitiveTypesMap[def.type] || def.type;
 			}
 			if (def.pattern) {
-				def.validator = getStringValidator(def.pattern);
+				def.validator = this.getStringValidator(def.pattern);
 			}
 			return [name, def];
 		})

@@ -27,8 +27,8 @@ const restructureOptions = (options, withMeta) => {
 
 module.exports = {
 	cacheKeyGenerator: ({ withMeta = false } = {}) => `enums:${withMeta}`,
-	accessor: (rawData, { withMeta = false } = {}) => {
-		return Object.entries(rawData.getEnums()).reduce(
+	accessor({ withMeta = false } = {}) {
+		return Object.entries(this.rawData.getEnums()).reduce(
 			(map, [key, { options, description }]) => {
 				options = restructureOptions(options, withMeta);
 				const entry = withMeta

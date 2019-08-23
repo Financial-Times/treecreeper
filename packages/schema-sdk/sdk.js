@@ -1,21 +1,37 @@
 const { Cache } = require('../../packages/schema-utils/cache');
 const { readYaml } = require('../../packages/schema-consumer');
 const { RawDataWrapper } = require('./raw-data-wrapper');
-const getDataAccessors = require('./data-accessors');
 const getValidators = require('./validators');
 const BizOpsError = require('./biz-ops-error');
+const {
+	enums,
+	stringValidator,
+	type,
+	types,
+	graphqlDefs,
+} = require('./data-accessors');
 
 class SDK {
 	constructor(options) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
-		Object.assign(this, getDataAccessors(this.rawData, this.cache));
-		this.validators = getValidators(this);
 		this.BizOpsError = BizOpsError;
 		this.subscribers = [];
+
+		this.getEnums = this.createEnrichedAccessor(enums);
+		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
+		this.getType = this.createEnrichedAccessor(type);
+		this.getTypes = this.createEnrichedAccessor(types);
+		this.getGraphqlDefs = this.createEnrichedAccessor(graphqlDefs);
+		this.validators = getValidators(this);
+
 		if (options) {
 			this.init(options);
 		}
+	}
+
+	createEnrichedAccessor({accessor, cacheKeyGenerator}) {
+		return this.cache.addCacheToFunction(accessor.bind(this), cacheKeyGenerator);
 	}
 
 	async init({ schemaDirectory, schemaUpdater, schemaData }) {

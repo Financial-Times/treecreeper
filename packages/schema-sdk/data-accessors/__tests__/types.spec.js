@@ -1,5 +1,5 @@
 const typeAccessor = jest.fn();
-typeAccessor.mockImplementation((rawData, getStringValidator, name) => ({
+typeAccessor.mockImplementation((name) => ({
 	name: `${name} - retrieved`,
 }));
 
@@ -36,16 +36,12 @@ describe('get-types', () => {
 		]);
 
 		expect(typeAccessor).toHaveBeenCalledWith(
-			expect.any(Object),
-			expect.any(Function),
 			'Type1',
 			{
 				option: 'value',
 			},
 		);
 		expect(typeAccessor).toHaveBeenCalledWith(
-			expect.any(Object),
-			expect.any(Function),
 			'Type2',
 			{
 				option: 'value',

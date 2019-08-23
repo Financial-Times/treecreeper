@@ -154,26 +154,31 @@ const defineEnum = ([name, { description, options }]) => {
 		}`;
 };
 
-module.exports = (getTypes, getEnums) => () => {
-	const typesFromSchema = getTypes({
-		primitiveTypes: 'graphql',
-		relationshipStructure: 'graphql',
-		includeMetaFields: true,
-	});
-	const customDateTimeTypes = stripIndent`
+module.exports = {
+	accessor() {
+		const typesFromSchema = this.getTypes({
+			primitiveTypes: 'graphql',
+			relationshipStructure: 'graphql',
+			includeMetaFields: true,
+		});
+		const customDateTimeTypes = stripIndent`
 		scalar DateTime
 		scalar Date
 		scalar Time
 	`;
 
-	const typeNamesAndDescriptions = typesFromSchema.map(defineType);
-	const enums = Object.entries(getEnums({ withMeta: true })).map(defineEnum);
+		const typeNamesAndDescriptions = typesFromSchema.map(defineType);
+		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
+			defineEnum,
+		);
 
-	return [].concat(
-		customDateTimeTypes + typeNamesAndDescriptions,
-		'type Query {\n',
-		...typesFromSchema.map(defineQueries),
-		'}',
-		enums,
-	);
+		return [].concat(
+			customDateTimeTypes + typeNamesAndDescriptions,
+			'type Query {\n',
+			...typesFromSchema.map(defineQueries),
+			'}',
+			enums,
+		);
+	},
+	cacheKeyGenerator: () => 'graphql',
 };

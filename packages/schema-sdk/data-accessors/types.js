@@ -2,24 +2,26 @@ const type = require('./type');
 
 module.exports = {
 	// todo move to object rest parameters for options when upgrading node
-	accessor: (rawData, getType, options = {}) => {
-		const hierarchy = rawData.getTypeHierarchy();
+	accessor(options = {}) {
+		const hierarchy = this.rawData.getTypeHierarchy();
 		const grouped = options.grouped || false;
 		if (!hierarchy) {
-			return rawData.getTypes().map(({ name }) => getType(name, options));
+			return this.rawData
+				.getTypes()
+				.map(({ name }) => this.getType(name, options));
 		}
 
 		if (!grouped) {
 			return [].concat(
 				...Object.values(hierarchy).map(({ types }) =>
-					types.map(name => getType(name, options)),
+					types.map(name => this.getType(name, options)),
 				),
 			);
 		}
 
 		return Object.entries(hierarchy).reduce(
 			(result, [categoryName, { label, description, types }]) => {
-				types = types.map(name => getType(name, options));
+				types = types.map(name => this.getType(name, options));
 				return Object.assign(result, {
 					[categoryName]: { label, description, types },
 				});

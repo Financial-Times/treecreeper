@@ -3,20 +3,20 @@ const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
 const {
-	SchemaConsumer,
 	readYaml,
 } = require('../../../packages/schema-consumer');
 
-const rawData = new SchemaConsumer({
-	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-});
-const types = rawData.getTypes();
-const stringPatterns = rawData.getStringPatterns();
-const enums = rawData.getEnums();
-const stringValidator = require('../../../packages/schema-sdk/data-accessors/string-validator');
+const {SDK} = require('../../../packages/schema-sdk');
 
-const getStringValidator = stringValidator.accessor.bind(null, rawData);
+const sdk = new SDK({
+	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+});
+const types = sdk.rawData.getTypes();
+const stringPatterns = sdk.rawData.getStringPatterns();
+const enums = sdk.rawData.getEnums();
+const getStringValidator = sdk.getStringValidator;
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
+
 const primitiveTypesMap = require('../../../packages/schema-sdk/primitive-types-map');
 
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
