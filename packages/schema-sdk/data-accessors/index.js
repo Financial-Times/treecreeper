@@ -47,7 +47,8 @@ const createCachedAccessor = (
 		cacheKeyGenerator,
 	);
 
-module.exports = rawSchemaData => {
+module.exports = (rawSchemaData, cache) => {
+	rawSchemaData.cache = rawSchemaData.cache || cache;
 	const getStringValidator = createCachedAccessor(
 		stringValidator,
 		rawSchemaData,

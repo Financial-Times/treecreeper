@@ -1,6 +1,3 @@
-const { init } = require('./get-instance');
+const { SDK } = require('./sdk');
 
-module.exports = init();
-
-// const {SDK} = require('./sdk');
-// module.exports = new SDK();
+module.exports = new SDK();

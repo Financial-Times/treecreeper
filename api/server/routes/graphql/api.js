@@ -68,7 +68,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-schema.updater.on('change', constructAPI);
+schema.on('change', constructAPI);
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
