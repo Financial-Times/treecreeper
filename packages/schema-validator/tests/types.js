@@ -1,3 +1,4 @@
+/* global it, describe, expect */
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
@@ -6,7 +7,9 @@ const {
 	readYaml,
 } = require('../../../packages/schema-consumer');
 
-const rawData = new SchemaConsumer({rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY});
+const rawData = new SchemaConsumer({
+	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+});
 const types = rawData.getTypes();
 const stringPatterns = rawData.getStringPatterns();
 const enums = rawData.getEnums();
@@ -42,11 +45,20 @@ describe('types', () => {
 		typeNames,
 	);
 
-	fs.readdirSync(path.join(process.cwd(), process.env.TREECREEPER_SCHEMA_DIRECTORY, 'types'))
+	fs.readdirSync(
+		path.join(
+			process.cwd(),
+			process.env.TREECREEPER_SCHEMA_DIRECTORY,
+			'types',
+		),
+	)
 		.filter(fileName => /\.yaml$/.test(fileName))
 		.forEach(fileName => {
 			it(`${fileName} has consistent name property`, () => {
-				const contents = readYaml.file(process.env.TREECREEPER_SCHEMA_DIRECTORY, path.join('types', fileName));
+				const contents = readYaml.file(
+					process.env.TREECREEPER_SCHEMA_DIRECTORY,
+					path.join('types', fileName),
+				);
 				expect(`${contents.name}.yaml`).toBe(fileName);
 			});
 		});

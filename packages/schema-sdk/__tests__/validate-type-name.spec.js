@@ -1,7 +1,9 @@
 const { init } = require('../get-instance');
 
 describe('validateTypeName', () => {
-	const { validators: {validateTypeName} } = init({
+	const {
+		validators: { validateTypeName },
+	} = init({
 		rawData: {
 			schema: {
 				types: [

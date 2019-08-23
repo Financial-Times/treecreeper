@@ -1,13 +1,19 @@
+/* global it, describe, expect */
 const {
 	SchemaConsumer,
 	readYaml,
 } = require('../../../packages/schema-consumer');
 
-const rawData = new SchemaConsumer({rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY});
+const rawData = new SchemaConsumer({
+	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+});
 
 const typeHierarchy = rawData.getTypeHierarchy();
 
-const rawTypes = readYaml.directory(process.env.TREECREEPER_SCHEMA_DIRECTORY, 'types');
+const rawTypes = readYaml.directory(
+	process.env.TREECREEPER_SCHEMA_DIRECTORY,
+	'types',
+);
 
 if (typeHierarchy) {
 	describe('type hierarchy', () => {

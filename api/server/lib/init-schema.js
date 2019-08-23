@@ -6,7 +6,7 @@ updater.configure({
 	updateMode: 'dev',
 	logger,
 	ttl: 60000,
-	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY
+	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 });
 
 module.exports = {

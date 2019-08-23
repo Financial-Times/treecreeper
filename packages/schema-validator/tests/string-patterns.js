@@ -1,6 +1,9 @@
+/* global it, describe, expect */
 const { SchemaConsumer } = require('../../../packages/schema-consumer');
 
-const stringPatterns = new SchemaConsumer({rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY}).getStringPatterns();
+const stringPatterns = new SchemaConsumer({
+	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+}).getStringPatterns();
 
 const longString = 'x'.repeat(257);
 

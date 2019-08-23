@@ -1,5 +1,5 @@
 const metaProperties = require('../../meta-properties');
-const  {init} = require('../../get-instance');
+const { init } = require('../../get-instance');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
 	return init({

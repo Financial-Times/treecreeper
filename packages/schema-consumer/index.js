@@ -15,8 +15,7 @@ class SchemaConsumer {
 		this.initData(options);
 	}
 
-	initData({rawData,
-		rawDataDirectory}) {
+	initData({ rawData, rawDataDirectory }) {
 		// TODO improve this
 		// currently when creating new instance defaults to dev, so always tries to fetch rawData from
 		// yaml before the app gets a change to call configure to take out of dev mode
@@ -25,14 +24,20 @@ class SchemaConsumer {
 		// Maybe a static method getDevInstance() woudl be useful for tests
 		// but then tests don't use the same code as src... hmmm
 		if (rawData) {
-			this.rawData = rawData
+			this.rawData = rawData;
 		} else if (rawDataDirectory) {
 			try {
 				this.rawData = deepFreeze({
 					schema: {
 						types: readYaml.directory(rawDataDirectory, 'types'),
-						typeHierarchy: readYaml.file(rawDataDirectory, 'type-hierarchy.yaml'),
-						stringPatterns: readYaml.file(rawDataDirectory, 'string-patterns.yaml'),
+						typeHierarchy: readYaml.file(
+							rawDataDirectory,
+							'type-hierarchy.yaml',
+						),
+						stringPatterns: readYaml.file(
+							rawDataDirectory,
+							'string-patterns.yaml',
+						),
 						enums: readYaml.file(rawDataDirectory, 'enums.yaml'),
 					},
 				});
@@ -49,15 +54,14 @@ class SchemaConsumer {
 		baseUrl,
 		logger = console,
 		rawData,
-		rawDataDirectory
+		rawDataDirectory,
 	} = {}) {
 		this.updateMode = updateMode;
 		this.ttl = ttl;
 		this.baseUrl = baseUrl;
 		this.logger = logger;
 		this.url = `${this.baseUrl}/${getSchemaFilename(libVersion)}`;
-		this.initData({rawData,
-		rawDataDirectory})
+		this.initData({ rawData, rawDataDirectory });
 	}
 
 	checkDataExists() {

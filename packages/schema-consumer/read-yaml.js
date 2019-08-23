@@ -22,12 +22,14 @@ const readFile = (rootDirectory, filePath) => {
 
 const readDirectory = (rootDirectory, directory) => {
 	try {
-	return fs
-		.readdirSync(path.join(process.cwd(), rootDirectory, directory))
-		.filter(fileName => /\.yaml$/.test(fileName))
-		.map(fileName => readFile(rootDirectory, path.join(directory, fileName)));
+		return fs
+			.readdirSync(path.join(process.cwd(), rootDirectory, directory))
+			.filter(fileName => /\.yaml$/.test(fileName))
+			.map(fileName =>
+				readFile(rootDirectory, path.join(directory, fileName)),
+			);
 	} catch (e) {
-		console.log(e)
+		console.log(e);
 	}
 };
 

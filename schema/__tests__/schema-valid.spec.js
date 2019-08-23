@@ -1,1 +1,1 @@
-require('../../packages/schema-validator')
+require('../../packages/schema-validator');

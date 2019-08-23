@@ -1,8 +1,11 @@
 const primitiveTypesMap = require('../../primitive-types-map');
-const  {init} = require('../../get-instance');
+const { init } = require('../../get-instance');
 const { readYaml } = require('../../../../packages/schema-consumer');
 
-const stringPatterns = readYaml.file(process.env.TREECREEPER_SCHEMA_DIRECTORY, 'string-patterns.yaml');
+const stringPatterns = readYaml.file(
+	process.env.TREECREEPER_SCHEMA_DIRECTORY,
+	'string-patterns.yaml',
+);
 
 const graphqlFromRawData = schema =>
 	init({ rawData: { schema } }).getGraphqlDefs();
