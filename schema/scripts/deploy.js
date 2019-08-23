@@ -2,7 +2,9 @@ const { sendSchemaToS3 } = require('../../packages/schema-publisher');
 const { SchemaConsumer } = require('../../packages/schema-consumer');
 
 // TODO - should have explicit 'getLocal()' method??
-const schemaObject = Object.assign({}, new SchemaConsumer().getAll(), {
+const schemaObject = Object.assign({}, new SchemaConsumer({
+	rawDataDirectory: process.cwd() + '/schema/schema'
+}).getAll(), {
 	version: process.env.CIRCLE_TAG,
 });
 

@@ -1,10 +1,10 @@
 const { SchemaConsumer } = require('../../../packages/schema-consumer');
 
-const stringPatterns = new SchemaConsumer().getStringPatterns();
+const stringPatterns = new SchemaConsumer({rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY}).getStringPatterns();
 
 const longString = 'x'.repeat(257);
 
-describe('data quality: string patterns', () => {
+describe('string patterns', () => {
 	Object.entries(stringPatterns).forEach(([name, pattern]) => {
 		if (typeof pattern === 'string') {
 			it(`${name} evaluates to valid flagless regex`, () => {

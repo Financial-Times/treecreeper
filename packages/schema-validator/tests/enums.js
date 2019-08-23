@@ -1,8 +1,8 @@
 const { SchemaConsumer } = require('../../../packages/schema-consumer');
 
-const enums = new SchemaConsumer().getEnums();
+const enums = new SchemaConsumer({rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY}).getEnums();
 
-describe('data quality: enum spec', () => {
+describe('enums', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {
 		describe(`${name}`, () => {
 			it('has a description', () => {

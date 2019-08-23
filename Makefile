@@ -36,12 +36,12 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-		else jest "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then TREECREEPER_SCHEMA_DIRECTORY=schema/schema DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		else TREECREEPER_SCHEMA_DIRECTORY=schema/schema jest "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 run:
-	nodemon --inspect api/server/app.js
+	TREECREEPER_SCHEMA_DIRECTORY=schema/schema nodemon --inspect api/server/app.js
 
 run-db:
 	docker-compose up

@@ -4,10 +4,10 @@ const path = require('path');
 const logger = require('@financial-times/n-logger').default;
 const deepFreeze = require('deep-freeze');
 
-const readFile = filePath => {
+const readFile = (rootDirectory, filePath) => {
 	try {
 		const file = fs.readFileSync(
-			path.join(process.cwd(), 'schema/schema', filePath),
+			path.join(process.cwd(), rootDirectory, filePath),
 			'utf8',
 		);
 		return deepFreeze(yaml.load(file));
@@ -20,11 +20,15 @@ const readFile = filePath => {
 	}
 };
 
-const readDirectory = directory => {
+const readDirectory = (rootDirectory, directory) => {
+	try {
 	return fs
-		.readdirSync(path.join(process.cwd(), 'schema/schema', directory))
+		.readdirSync(path.join(process.cwd(), rootDirectory, directory))
 		.filter(fileName => /\.yaml$/.test(fileName))
-		.map(fileName => readFile(path.join(directory, fileName)));
+		.map(fileName => readFile(rootDirectory, path.join(directory, fileName)));
+	} catch (e) {
+		console.log(e)
+	}
 };
 
 module.exports = {

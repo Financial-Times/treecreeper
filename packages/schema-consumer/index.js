@@ -12,6 +12,11 @@ class SchemaConsumer {
 		this.lastRefreshDate = 0;
 		this.cache = new Cache();
 		this.configure(options);
+		this.initData(options);
+	}
+
+	initData({rawData,
+		rawDataDirectory}) {
 		// TODO improve this
 		// currently when creating new instance defaults to dev, so always tries to fetch rawData from
 		// yaml before the app gets a change to call configure to take out of dev mode
@@ -19,16 +24,16 @@ class SchemaConsumer {
 		// Mayeb configure should be called init() instead
 		// Maybe a static method getDevInstance() woudl be useful for tests
 		// but then tests don't use the same code as src... hmmm
-		if (options.rawData) {
-			this.rawData = options.rawData
-		} else {
+		if (rawData) {
+			this.rawData = rawData
+		} else if (rawDataDirectory) {
 			try {
 				this.rawData = deepFreeze({
 					schema: {
-						types: readYaml.directory('types'),
-						typeHierarchy: readYaml.file('type-hierarchy.yaml'),
-						stringPatterns: readYaml.file('string-patterns.yaml'),
-						enums: readYaml.file('enums.yaml'),
+						types: readYaml.directory(rawDataDirectory, 'types'),
+						typeHierarchy: readYaml.file(rawDataDirectory, 'type-hierarchy.yaml'),
+						stringPatterns: readYaml.file(rawDataDirectory, 'string-patterns.yaml'),
+						enums: readYaml.file(rawDataDirectory, 'enums.yaml'),
 					},
 				});
 			} catch (e) {
@@ -43,12 +48,16 @@ class SchemaConsumer {
 		ttl = 60000,
 		baseUrl,
 		logger = console,
+		rawData,
+		rawDataDirectory
 	} = {}) {
 		this.updateMode = updateMode;
 		this.ttl = ttl;
 		this.baseUrl = baseUrl;
 		this.logger = logger;
 		this.url = `${this.baseUrl}/${getSchemaFilename(libVersion)}`;
+		this.initData({rawData,
+		rawDataDirectory})
 	}
 
 	checkDataExists() {
