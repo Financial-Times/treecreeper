@@ -43,7 +43,7 @@ const constructAPI = () => {
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
 		if (process.env.NODE_ENV === 'production') {
-			sendSchemaToS3('api', schema.getRawData())
+			sendSchemaToS3('api', schema.updater.getRawData())
 				.then(() => {
 					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 				})
@@ -68,7 +68,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-schema.on('change', constructAPI);
+schema.updater.on('change', constructAPI);
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));

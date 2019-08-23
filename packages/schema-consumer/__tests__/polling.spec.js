@@ -82,7 +82,7 @@ describe('refreshing schema when stale', () => {
 			schema.startPolling();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
-			expect(schema.getType('It')).toEqual(expect.any(Object));
+			expect(schema.getTypes()[0].name).toEqual('It');
 			schema.stopPolling();
 		});
 
@@ -117,7 +117,7 @@ describe('refreshing schema when stale', () => {
 			schema.startPolling();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalled();
-			expect(schema.getType('NotIt')).toEqual(expect.any(Object));
+			expect(schema.getTypes()[0].name).toEqual('NotIt');
 			schema.stopPolling();
 		});
 	});

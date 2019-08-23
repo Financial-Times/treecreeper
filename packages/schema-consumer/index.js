@@ -7,7 +7,7 @@ const { getSchemaFilename } = require('../../packages/schema-utils');
 const { version: libVersion } = require('../../package.json');
 
 class SchemaConsumer {
-	constructor(options) {
+	constructor(options = {}) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
 		this.cache = new Cache();
@@ -19,18 +19,22 @@ class SchemaConsumer {
 		// Mayeb configure should be called init() instead
 		// Maybe a static method getDevInstance() woudl be useful for tests
 		// but then tests don't use the same code as src... hmmm
-		try {
-			this.rawData = deepFreeze({
-				schema: {
-					types: readYaml.directory('types'),
-					typeHierarchy: readYaml.file('type-hierarchy.yaml'),
-					stringPatterns: readYaml.file('string-patterns.yaml'),
-					enums: readYaml.file('enums.yaml'),
-				},
-			});
-		} catch (e) {
-			console.log(e);
-			this.rawData = {};
+		if (options.rawData) {
+			this.rawData = options.rawData
+		} else {
+			try {
+				this.rawData = deepFreeze({
+					schema: {
+						types: readYaml.directory('types'),
+						typeHierarchy: readYaml.file('type-hierarchy.yaml'),
+						stringPatterns: readYaml.file('string-patterns.yaml'),
+						enums: readYaml.file('enums.yaml'),
+					},
+				});
+			} catch (e) {
+				console.log(e);
+				this.rawData = {};
+			}
 		}
 	}
 
@@ -158,6 +162,7 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 		if (this.firstFetch) {
 			return this.firstFetch;
 		}
+
 		this.logger.info({
 			event: 'STARTING_SCHEMA_POLLER',
 		});

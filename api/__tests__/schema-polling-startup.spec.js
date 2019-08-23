@@ -3,7 +3,8 @@ const { getSchemaFilename } = require('../../packages/schema-utils');
 
 jest.useFakeTimers();
 
-describe('schema polling startup', () => {
+// these tests will always live in the api repo
+describe.skip('schema polling startup', () => {
 	beforeAll(() => {
 		fetch.config.fallbackToNetwork = false;
 	});
@@ -21,7 +22,6 @@ describe('schema polling startup', () => {
 		require('../server/app');
 		expect(listen).not.toHaveBeenCalled();
 		await fetch.flush(true);
-		console.log(fetch.calls());
 		expect(fetch.lastUrl()).toEqual(
 			`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
 		);

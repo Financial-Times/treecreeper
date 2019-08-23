@@ -1,3 +1,4 @@
+const primitiveTypes = require('../primitive-types-map');
 const type = require('./type');
 const graphqlDefs = require('./graphql-defs');
 const stringValidator = require('./string-validator');
@@ -47,6 +48,7 @@ const createCachedAccessor = (
 	);
 
 module.exports = rawSchemaData => {
+
 	const getStringValidator = createCachedAccessor(
 		stringValidator,
 		rawSchemaData,
@@ -63,6 +65,7 @@ module.exports = rawSchemaData => {
 		getType,
 		getEnums,
 		getTypes,
+		getPrimitiveTypes: () => primitiveTypes,
 		// not cached as it's very infrequently, when constructing the graophql api,
 		// and only just after the cache has been cleared
 		getGraphqlDefs: graphqlDefs(getTypes, getEnums),

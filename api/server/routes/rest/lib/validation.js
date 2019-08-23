@@ -1,21 +1,25 @@
 const httpErrors = require('http-errors');
-const schema = require('../../../../../packages/schema-sdk');
+const {
+	validators,
+	BizOpsError,
+} = require('../../../../../packages/schema-sdk');
 
-const validation = Object.entries(schema)
-	.filter(([key]) => key.startsWith('validate'))
-	.reduce((methods, [key, validator]) => {
+const validation = Object.entries(validators).reduce(
+	(methods, [key, validator]) => {
 		methods[key] = (...args) => {
 			try {
 				return validator(...args);
 			} catch (e) {
-				if (e instanceof schema.BizOpsError) {
+				if (e instanceof BizOpsError) {
 					throw httpErrors(400, e.message);
 				}
 				throw e;
 			}
 		};
 		return methods;
-	}, {});
+	},
+	{},
+);
 
 const validateParams = ({ nodeType, code }) => {
 	module.exports.validateTypeName(nodeType);

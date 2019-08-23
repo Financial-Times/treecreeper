@@ -68,7 +68,7 @@ const initConstraints = async () => {
 	}
 };
 
-schema.on('change', initConstraints);
+schema.updater.on('change', initConstraints);
 
 module.exports = {
 	initConstraints,

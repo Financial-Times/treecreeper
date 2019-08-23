@@ -1,11 +1,11 @@
 const primitiveTypesMap = require('../../primitive-types-map');
-const { accessors } = require('..');
+const  {init} = require('../../get-instance');
 const { readYaml } = require('../../../../packages/schema-consumer');
 
 const stringPatterns = readYaml.file('string-patterns.yaml');
 
 const graphqlFromRawData = schema =>
-	accessors({ rawData: { schema } }).getGraphqlDefs();
+	init({ rawData: { schema } }).getGraphqlDefs();
 
 const explodeString = str =>
 	str

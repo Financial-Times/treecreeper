@@ -1,7 +1,7 @@
 const { init } = require('../get-instance');
 
 describe('validatePropertyName', () => {
-	const { validatePropertyName } = init();
+	const { validators: {validatePropertyName} } = init();
 	it('accept camel case strings', () => {
 		expect(() =>
 			['thing', 'thing2', 'thingWithThing'].map(validatePropertyName),

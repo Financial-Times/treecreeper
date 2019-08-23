@@ -14,7 +14,7 @@ const getValidator = (type, enums = {}) => {
 				},
 			},
 		},
-	}).validateProperty;
+	}).validators.validateProperty;
 };
 
 describe('validateProperty', () => {

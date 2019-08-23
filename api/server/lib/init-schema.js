@@ -1,7 +1,7 @@
-const schema = require('../../../packages/schema-sdk');
+const { updater } = require('../../../packages/schema-sdk');
 const { logger } = require('./request-context');
 
-schema.configure({
+updater.configure({
 	baseUrl: process.env.SCHEMA_BASE_URL,
 	updateMode: 'dev',
 	logger,
@@ -9,5 +9,5 @@ schema.configure({
 });
 
 module.exports = {
-	schemaReady: schema.startPolling(),
+	schemaReady: updater.startPolling(),
 };
