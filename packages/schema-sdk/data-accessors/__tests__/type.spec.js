@@ -1,17 +1,15 @@
 const metaProperties = require('../../meta-properties');
 const { SDK } = require('../../sdk');
 
-const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) => {
-	const sdk = new SDK()
-	sdk.init({ schemaData: {
+const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) =>
+	new SDK({
+		schemaData: {
 			schema: {
 				types: [{ name: 'DummyType' }, typeData],
 				stringPatterns,
 			},
 		},
-	})
-	return sdk.getType('Type1', options);
-};
+	}).getType('Type1', options);
 
 describe('get-type', () => {
 	describe('returns all properties', () => {

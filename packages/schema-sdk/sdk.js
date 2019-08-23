@@ -6,13 +6,16 @@ const getValidators = require('./validators');
 const BizOpsError = require('./biz-ops-error');
 
 class SDK {
-	constructor() {
+	constructor(options) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
 		Object.assign(this, getDataAccessors(this.rawData, this.cache));
 		this.validators = getValidators(this);
 		this.BizOpsError = BizOpsError;
 		this.subscribers = [];
+		if (options) {
+			this.init(options);
+		}
 	}
 
 	async init({ schemaDirectory, schemaUpdater, schemaData }) {
@@ -26,30 +29,29 @@ class SDK {
 			this.updater = schemaUpdater;
 			// TODO universal init method that does first fetch
 			return this.updater.ready();
-		} else {
-
-			if (schemaDirectory) {
-				schemaData = {
-					schema: {
-						types: readYaml.directory(schemaDirectory, 'types'),
-						typeHierarchy: readYaml.file(
-							schemaDirectory,
-							'type-hierarchy.yaml',
-						),
-						stringPatterns: readYaml.file(
-							schemaDirectory,
-							'string-patterns.yaml',
-						),
-						enums: readYaml.file(schemaDirectory, 'enums.yaml'),
-					},
-				};
-			}
-			this.rawData.set(schemaData);
-			// firing a one off change event
-			this.subscribers.forEach(handler => {
-				handler(schemaData);
-			});
 		}
+
+		if (schemaDirectory) {
+			schemaData = {
+				schema: {
+					types: readYaml.directory(schemaDirectory, 'types'),
+					typeHierarchy: readYaml.file(
+						schemaDirectory,
+						'type-hierarchy.yaml',
+					),
+					stringPatterns: readYaml.file(
+						schemaDirectory,
+						'string-patterns.yaml',
+					),
+					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
+				},
+			};
+		}
+		this.rawData.set(schemaData);
+		// firing a one off change event
+		this.subscribers.forEach(handler => {
+			handler(schemaData);
+		});
 	}
 
 	async ready() {

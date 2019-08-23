@@ -7,12 +7,8 @@ const stringPatterns = readYaml.file(
 	'string-patterns.yaml',
 );
 
-const graphqlFromRawData = schema => {
-	const sdk = new SDK()
-	sdk.init({ schemaData: { schema } })
-	return sdk.getGraphqlDefs();
-}
-
+const graphqlFromRawData = schema =>
+	new SDK({ schemaData: { schema } }).getGraphqlDefs();
 
 const explodeString = str =>
 	str

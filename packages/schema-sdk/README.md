@@ -41,7 +41,6 @@ static getSingleton: (schemaConsumer) => : sdk
             validators,
         );
 
-
 ```
 class DataAccessors {
     constructor(schemaClient) {

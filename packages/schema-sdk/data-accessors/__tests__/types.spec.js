@@ -13,8 +13,8 @@ const { SDK } = require('../../sdk');
 
 describe('get-types', () => {
 	it('gets all types (hierarchyless)', () => {
-		const sdk = new SDK()
-		sdk.init({ schemaData: {
+		const types = new SDK({
+			schemaData: {
 				schema: {
 					types: [
 						{
@@ -24,8 +24,7 @@ describe('get-types', () => {
 					],
 				},
 			},
-		})
-		const types = sdk.getTypes({ option: 'value' });
+		}).getTypes({ option: 'value' });
 
 		expect(types).toEqual([
 			{
@@ -56,8 +55,8 @@ describe('get-types', () => {
 
 	describe('with hierarchy', () => {
 		it('expects to be returned in order of type hiererchy', () => {
-			const sdk = new SDK()
-		sdk.init({ schemaData: {
+			const types = new SDK({
+				schemaData: {
 					schema: {
 						types: [
 							{
@@ -75,8 +74,7 @@ describe('get-types', () => {
 						},
 					},
 				},
-			})
-		types = sdk.getTypes();
+			}).getTypes();
 
 			expect(types).toEqual([
 				{
@@ -89,8 +87,8 @@ describe('get-types', () => {
 		});
 
 		it('gets all types grouped by category', () => {
-			const sdk =  new SDK()
-			sdk.init({ schemaData: {
+			const types = new SDK({
+				schemaData: {
 					schema: {
 						types: [
 							{
@@ -108,8 +106,7 @@ describe('get-types', () => {
 						},
 					},
 				},
-			})
-			const types = sdk.getTypes({ grouped: true });
+			}).getTypes({ grouped: true });
 
 			expect(types).toEqual({
 				category1: {

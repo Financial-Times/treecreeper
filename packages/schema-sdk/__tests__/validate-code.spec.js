@@ -1,12 +1,9 @@
 const { SDK } = require('../sdk');
 
 describe('validateCode', () => {
-	const sdk = new SDK();
 	const {
 		validators: { validateCode },
-	} = sdk;
-
-	sdk.init({
+	} = new SDK({
 		schemaData: {
 			schema: {
 				types: [

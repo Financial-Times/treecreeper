@@ -1,10 +1,7 @@
 const { SDK } = require('../../sdk');
 
-const enumsFromRawData = data => {
-	const sdk = new SDK()
-	sdk.init({ schemaData: { schema: { enums: data } } })
-	return sdk.getEnums;
-}
+const enumsFromRawData = data =>
+	new SDK({ schemaData: { schema: { enums: data } } }).getEnums;
 
 describe('get-enums', () => {
 	describe('from array', () => {

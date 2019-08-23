@@ -2,9 +2,7 @@ const { SDK } = require('../sdk');
 const primitiveTypesMap = require('../primitive-types-map');
 
 const getValidator = (type, enums = {}) => {
-	const sdk = new SDK();
-
-	sdk.init({
+	const sdk = new SDK({
 		schemaData: {
 			schema: {
 				types: Array.isArray(type) ? type : [type],
@@ -16,7 +14,7 @@ const getValidator = (type, enums = {}) => {
 				},
 			},
 		},
-	})
+	});
 	return sdk.validators.validateProperty;
 };
 
