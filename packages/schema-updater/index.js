@@ -5,7 +5,7 @@ const { getSchemaFilename } = require('../../packages/schema-utils');
 const { version: libVersion } = require('../../package.json');
 
 class SchemaUpdater {
-	constructor(options = {}, rawData, cache) {
+	constructor(options, rawData, cache) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
 		this.rawData = rawData;
@@ -26,7 +26,7 @@ class SchemaUpdater {
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
-		if (schemaDirectory) {
+		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
 					types: readYaml.directory(schemaDirectory, 'types'),

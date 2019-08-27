@@ -10,7 +10,7 @@ const types = require('./data-accessors/types');
 const { SchemaUpdater } = require('../schema-updater');
 
 class SDK {
-	constructor(options) {
+	constructor(options = {}) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
 		this.BizOpsError = BizOpsError;
@@ -23,8 +23,7 @@ class SDK {
 		this.getGraphqlDefs = this.createEnrichedAccessor(graphqlDefs);
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
-
-		if (options) {
+		if (options.init !== false) {
 			this.init(options);
 		}
 	}

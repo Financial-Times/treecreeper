@@ -14,10 +14,13 @@ const create = options =>
 	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
 
 describe('fetching prerelease schemas', () => {
+	const schemaDir = process.env.TREECREEPER_SCHEMA_DIRECTORY;
 	beforeAll(() => {
+		delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
 		fetch.config.fallbackToNetwork = false;
 	});
 	afterAll(() => {
+		process.env.TREECREEPER_SCHEMA_DIRECTORY = schemaDir;
 		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());

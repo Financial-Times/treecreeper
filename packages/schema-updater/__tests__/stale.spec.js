@@ -16,10 +16,13 @@ const create = options =>
 const timer = delay => new Promise(res => setTimeout(res, delay));
 const nextTick = () => new Promise(res => process.nextTick(res));
 describe('refreshing schema when stale', () => {
+	const schemaDir = process.env.TREECREEPER_SCHEMA_DIRECTORY;
 	beforeAll(() => {
+		delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
 		fetch.config.fallbackToNetwork = false;
 	});
 	afterAll(() => {
+		process.env.TREECREEPER_SCHEMA_DIRECTORY = schemaDir;
 		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());
