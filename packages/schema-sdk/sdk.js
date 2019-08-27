@@ -22,6 +22,7 @@ class SDK {
 		this.getTypes = this.createEnrichedAccessor(types);
 		this.getGraphqlDefs = this.createEnrichedAccessor(graphqlDefs);
 		this.validators = getValidators(this);
+		this.ready = this.ready.bind(this);
 
 		if (options) {
 			this.init(options);
@@ -47,12 +48,10 @@ class SDK {
 			this.subscribers.forEach(handler => handler(data));
 		});
 		this.updater = schemaUpdater;
-		// TODO universal init method that does first fetch
-		return this.updater.ready();
 	}
 
 	async ready() {
-		return this.updater ? this.updater.ready() : true;
+		return this.updater.ready();
 	}
 
 	// TODO ditch this in favour of using OnChange everywhere
