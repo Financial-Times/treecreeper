@@ -1,9 +1,7 @@
 /* global it, describe, expect */
 const { SDK } = require('../../../packages/schema-sdk');
 
-const enums = new SDK({
-	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-}).rawData.getEnums();
+const enums = new SDK().rawData.getEnums();
 
 describe('enums', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {

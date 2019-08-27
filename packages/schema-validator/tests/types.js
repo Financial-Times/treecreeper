@@ -6,9 +6,7 @@ const { readYaml } = require('../../../packages/schema-updater');
 
 const { SDK } = require('../../../packages/schema-sdk');
 
-const sdk = new SDK({
-	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-});
+const sdk = new SDK();
 
 const types = sdk.rawData.getTypes();
 const stringPatterns = sdk.rawData.getStringPatterns();

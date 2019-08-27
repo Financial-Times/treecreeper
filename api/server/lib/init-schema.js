@@ -1,8 +1,6 @@
 const schema = require('../../../packages/schema-sdk');
 
-schema.init({
-	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-});
+schema.init({ updateMode: 'poll' });
 
 module.exports = {
 	schemaReady: schema.ready(),

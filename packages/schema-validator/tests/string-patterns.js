@@ -1,9 +1,7 @@
 /* global it, describe, expect */
 const { SDK } = require('../../../packages/schema-sdk');
 
-const stringPatterns = new SDK({
-	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-}).rawData.getStringPatterns();
+const stringPatterns = new SDK().rawData.getStringPatterns();
 
 const longString = 'x'.repeat(257);
 

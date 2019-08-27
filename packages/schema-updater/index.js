@@ -20,15 +20,14 @@ class SchemaUpdater {
 		version,
 		schemaBaseUrl,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
+		schemaData,
 	} = {}) {
 		this.updateMode = updateMode;
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
-
 		if (schemaDirectory) {
-			this.isStatic = true;
-			const schemaData = {
+			schemaData = {
 				schema: {
 					types: readYaml.directory(schemaDirectory, 'types'),
 					typeHierarchy: readYaml.file(
@@ -42,9 +41,13 @@ class SchemaUpdater {
 					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
 				},
 			};
+		}
+		if (schemaData) {
+			this.isStatic = true;
 			this.rawData.set(schemaData);
 			return;
 		}
+
 		this.url = `${schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
 	}
 
