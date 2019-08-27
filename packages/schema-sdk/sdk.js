@@ -71,20 +71,4 @@ class SDK {
 	}
 }
 
-// Simplify cache keys to be concat args and stringified Obj.entries of options
-// don't worry about things using default optiosn not sharing same cache as those
-// explicitly passing it - really not that big a saving
-// class DataAccessors {
-// 	constructor(schemaClient) {
-// 		this.schemaClient = schemaClient;
-// 		this.cache = new Cache();
-// 		this.schemaClient.on('change', () => this.cache.clear());
-// 		this.getType = this.cache.wrap(this.getType.bind(this));
-// 	}
-
-// 	getType(type, options = {}) {
-// 		// checkCache(type, option1, option2...)
-// 	}
-// }
-
 module.exports = { SDK };
