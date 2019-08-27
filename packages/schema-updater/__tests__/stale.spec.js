@@ -6,7 +6,12 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 
 const { SchemaUpdater } = require('..');
 
-const create = options => new SchemaUpdater(options);
+// TODO move into schema-utils
+const { RawDataWrapper } = require('../../schema-sdk/raw-data-wrapper');
+const { Cache } = require('../../schema-utils');
+
+const create = options =>
+	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
 
 const timer = delay => new Promise(res => setTimeout(res, delay));
 const nextTick = () => new Promise(res => process.nextTick(res));
@@ -19,19 +24,23 @@ describe('refreshing schema when stale', () => {
 	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on create', async () => {
-		create({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'stale' });
+		create({
+			ttl: 100,
+			schemaBaseUrl: 'https://base.url',
+			updateMode: 'stale',
+		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
-	it('fetches when refresh method called', async () => {
+	it('fetches when ready method called', async () => {
 		const schema = create({
 			ttl: 100,
-			baseUrl: 'https://base.url',
+			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		let isPending = true;
-		schema.refresh().then(() => {
+		schema.ready().then(() => {
 			isPending = false;
 		});
 		expect(fetch.called()).toBe(true);
@@ -41,19 +50,19 @@ describe('refreshing schema when stale', () => {
 		expect(isPending).toEqual(false);
 	});
 
-	it('does not fetch if refresh method called within TTL', async () => {
+	it('does not fetch if ready method called within TTL', async () => {
 		const schema = create({
 			ttl: 100,
-			baseUrl: 'https://base.url',
+			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
-		schema.refresh();
+		schema.ready();
 		await fetch.flush();
 		fetch.resetHistory();
 		await timer(50);
 		let isPending = true;
-		schema.refresh().then(() => {
+		schema.ready().then(() => {
 			isPending = false;
 		});
 		expect(fetch.called()).toBe(false);
@@ -61,19 +70,19 @@ describe('refreshing schema when stale', () => {
 		await nextTick();
 		expect(isPending).toEqual(false);
 	});
-	it('fetches if refresh method called after TTL has expired', async () => {
+	it('fetches if ready method called after TTL has expired', async () => {
 		const schema = create({
 			ttl: 100,
-			baseUrl: 'https://base.url',
+			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
-		schema.refresh();
+		schema.ready();
 		await fetch.flush();
 		fetch.resetHistory();
 		await timer(101);
 		let isPending = true;
-		schema.refresh().then(() => {
+		schema.ready().then(() => {
 			isPending = false;
 		});
 		expect(fetch.called()).toBe(true);
@@ -87,7 +96,7 @@ describe('refreshing schema when stale', () => {
 		it('noop if new version is same as old', async () => {
 			const schema = create({
 				ttl: 100,
-				baseUrl: 'https://base.url',
+				schemaBaseUrl: 'https://base.url',
 				updateMode: 'stale',
 			});
 
@@ -95,7 +104,7 @@ describe('refreshing schema when stale', () => {
 			const listener = jest.fn();
 			schema.on('change', listener);
 			fetch.mock('https://base.url/v8.json', { version: 'v8.9.10' });
-			schema.refresh();
+			schema.ready();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
 		});
@@ -103,7 +112,7 @@ describe('refreshing schema when stale', () => {
 		it('updates local data nad triggers event when version has changed', async () => {
 			const schema = create({
 				ttl: 100,
-				baseUrl: 'https://base.url',
+				schemaBaseUrl: 'https://base.url',
 				updateMode: 'stale',
 			});
 			const listener = jest.fn();
@@ -119,12 +128,11 @@ describe('refreshing schema when stale', () => {
 				},
 			};
 			fetch.mock('https://base.url/v8.json', data);
-			schema.refresh();
+			schema.ready();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalledWith({
 				newVersion: 'v8.9.10',
 				oldVersion: undefined,
-				schemaData: data,
 			});
 		});
 	});

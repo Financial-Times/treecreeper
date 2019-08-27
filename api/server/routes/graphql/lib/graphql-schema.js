@@ -34,13 +34,15 @@ const createSchema = () => {
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
 
-	typeDefs.unshift(`
+	const schema = makeAugmentedSchema({
+		typeDefs: [
+			`
 directive @deprecated(
   reason: String = "No longer supported"
-) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`);
-
-	const schema = makeAugmentedSchema({
-		typeDefs: typeDefs.join('\n'),
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`,
+		]
+			.concat(typeDefs)
+			.join('\n'),
 		logger: {
 			log(message) {
 				logger.error(`GraphQL Schema: ${message}`, {

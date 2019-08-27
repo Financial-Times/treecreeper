@@ -1,5 +1,4 @@
 const { Cache } = require('../../packages/schema-utils/cache');
-const { readYaml } = require('../../packages/schema-updater');
 const { RawDataWrapper } = require('./raw-data-wrapper');
 const getValidators = require('./validators');
 const BizOpsError = require('./biz-ops-error');
@@ -8,6 +7,7 @@ const graphqlDefs = require('./data-accessors/graphql-defs');
 const stringValidator = require('./data-accessors/string-validator');
 const enums = require('./data-accessors/enums');
 const types = require('./data-accessors/types');
+const { SchemaUpdater } = require('../schema-updater');
 
 class SDK {
 	constructor(options) {
@@ -35,40 +35,20 @@ class SDK {
 		);
 	}
 
-	async init({ schemaDirectory, schemaUpdater, schemaData }) {
-		if (schemaUpdater) {
-			// hook up schema updater to this.cache then
-			schemaUpdater.on('change', data => {
-				this.rawData.set(data.schemaData);
-				this.cache.clear();
-				this.subscribers.forEach(handler => handler(data));
-			});
-			this.updater = schemaUpdater;
-			// TODO universal init method that does first fetch
-			return this.updater.ready();
-		}
+	async init(options) {
+		const schemaUpdater = new SchemaUpdater(
+			options,
+			this.rawData,
+			this.cache,
+		);
 
-		if (schemaDirectory) {
-			schemaData = {
-				schema: {
-					types: readYaml.directory(schemaDirectory, 'types'),
-					typeHierarchy: readYaml.file(
-						schemaDirectory,
-						'type-hierarchy.yaml',
-					),
-					stringPatterns: readYaml.file(
-						schemaDirectory,
-						'string-patterns.yaml',
-					),
-					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
-				},
-			};
-		}
-		this.rawData.set(schemaData);
-		// firing a one off change event
-		this.subscribers.forEach(handler => {
-			handler(schemaData);
+		// hook up schema updater to this.cache then
+		schemaUpdater.on('change', data => {
+			this.subscribers.forEach(handler => handler(data));
 		});
+		this.updater = schemaUpdater;
+		// TODO universal init method that does first fetch
+		return this.updater.ready();
 	}
 
 	async ready() {
@@ -78,15 +58,15 @@ class SDK {
 	// TODO ditch this in favour of using OnChange everywhere
 	on(event, handler) {
 		if (event === 'change') {
-			return this.onChange(handler);
+			return this.onChange(handler, event);
 		}
 	}
 
-	onChange(handler) {
+	onChange(handler, event) {
 		// handle the cas ewhere thinsg are listening for an asynchronous
 		// load event, but it has already happened
 		if (this.rawData.isHydrated) {
-			handler();
+			handler(event);
 		}
 		this.subscribers.push(handler);
 	}

@@ -1,9 +1,9 @@
 /* global it, describe, expect */
-const { SchemaUpdater } = require('../../../packages/schema-updater');
+const { SDK } = require('../../../packages/schema-sdk');
 
-const stringPatterns = new SchemaUpdater({
-	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
-}).getStringPatterns();
+const stringPatterns = new SDK({
+	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+}).rawData.getStringPatterns();
 
 const longString = 'x'.repeat(257);
 

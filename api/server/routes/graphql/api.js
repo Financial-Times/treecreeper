@@ -16,6 +16,7 @@ let api;
 let schemaVersionIsConsistent = true;
 
 const constructAPI = () => {
+	console.log('haz chaing');
 	try {
 		const newSchema = createSchema();
 		api = graphqlExpress(({ headers }) => ({
@@ -55,6 +56,7 @@ const constructAPI = () => {
 				});
 		}
 	} catch (error) {
+		console.log(error);
 		schemaVersionIsConsistent = false;
 		logger.error(
 			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
@@ -84,6 +86,7 @@ module.exports = router => {
 	router.use(bodyParsers);
 
 	router.use((req, res, next) => {
+		console.log('haz accllled');
 		res.nextMetricsName = 'graphql';
 		setContext({ endpoint: 'graphql', method: req.method });
 		logger.info({

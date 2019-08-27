@@ -7,8 +7,12 @@ jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
 });
 
 const { SchemaUpdater } = require('..');
+// TODO move into schema-utils
+const { RawDataWrapper } = require('../../schema-sdk/raw-data-wrapper');
+const { Cache } = require('../../schema-utils');
 
-const init = options => new SchemaUpdater(options);
+const create = options =>
+	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
 
 const nextTick = () => new Promise(res => process.nextTick(res));
 
@@ -21,14 +25,18 @@ describe('refreshing schema when stale', () => {
 	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on init', async () => {
-		init({ ttl: 100, baseUrl: 'https://base.url', updateMode: 'poll' });
+		create({
+			ttl: 100,
+			schemaBaseUrl: 'https://base.url',
+			updateMode: 'poll',
+		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
 	it('fetches when startPolling method called', async () => {
-		const schema = init({
+		const schema = create({
 			ttl: 100,
-			baseUrl: 'https://base.url',
+			schemaBaseUrl: 'https://base.url',
 			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
@@ -45,9 +53,9 @@ describe('refreshing schema when stale', () => {
 	});
 
 	it('fetches again after TTL has expired', async () => {
-		const schema = init({
+		const schema = create({
 			ttl: 100,
-			baseUrl: 'https://base.url',
+			schemaBaseUrl: 'https://base.url',
 			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
@@ -61,9 +69,9 @@ describe('refreshing schema when stale', () => {
 
 	describe('handle updates', () => {
 		it('noop if new version is same as old', async () => {
-			const schema = init({
+			const schema = create({
 				ttl: 100,
-				baseUrl: 'https://base.url',
+				schemaBaseUrl: 'https://base.url',
 				updateMode: 'poll',
 			});
 			schema.version = 'v8.9.10';
@@ -77,9 +85,9 @@ describe('refreshing schema when stale', () => {
 		});
 
 		it('updates local data nad triggers event when version has changed', async () => {
-			const schema = init({
+			const schema = create({
 				ttl: 100,
-				baseUrl: 'https://base.url',
+				schemaBaseUrl: 'https://base.url',
 				updateMode: 'poll',
 			});
 			const listener = jest.fn();
@@ -100,7 +108,6 @@ describe('refreshing schema when stale', () => {
 			expect(listener).toHaveBeenCalledWith({
 				newVersion: 'v8.9.10',
 				oldVersion: undefined,
-				schemaData: data,
 			});
 			schema.stopPolling();
 		});

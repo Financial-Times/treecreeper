@@ -6,8 +6,6 @@ const createApp = require('./create-app');
 // to be included prior to the app starting
 require('./init-db');
 
-console.log(schemaReady);
-
 if (require.main === module || cluster.isWorker || process.env.TEST_STARTUP) {
 	const PORT = process.env.PORT || 8888;
 	const app = createApp();

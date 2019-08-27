@@ -9,6 +9,7 @@ const { SDK } = require('../../../packages/schema-sdk');
 const sdk = new SDK({
 	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 });
+
 const types = sdk.rawData.getTypes();
 const stringPatterns = sdk.rawData.getStringPatterns();
 const enums = sdk.rawData.getEnums();

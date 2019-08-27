@@ -1,8 +1,9 @@
 /* global it, describe, expect */
-const { SchemaUpdater, readYaml } = require('../../../packages/schema-updater');
+const { readYaml } = require('../../../packages/schema-updater');
+const { SDK } = require('../../schema-sdk');
 
-const rawData = new SchemaUpdater({
-	rawDataDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
+const { rawData } = new SDK({
+	schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY,
 });
 
 const typeHierarchy = rawData.getTypeHierarchy();

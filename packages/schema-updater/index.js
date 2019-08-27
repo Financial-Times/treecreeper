@@ -5,25 +5,50 @@ const { getSchemaFilename } = require('../../packages/schema-utils');
 const { version: libVersion } = require('../../package.json');
 
 class SchemaUpdater {
-	constructor(options = {}) {
+	constructor(options = {}, rawData, cache) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
+		this.rawData = rawData;
+		this.cache = cache;
 		this.configure(options);
 	}
 
 	configure({
 		updateMode = 'dev', // also 'stale' or 'poll'
 		ttl = 60000,
-		baseUrl,
 		logger = console,
 		version,
+		schemaBaseUrl,
+		schemaDirectory,
+		schemaData,
 	} = {}) {
 		this.updateMode = updateMode;
 		this.ttl = ttl;
-		this.baseUrl = baseUrl;
+		this.schemaBaseUrl = schemaBaseUrl;
 		this.logger = logger;
 		this.version = version;
-		this.url = `${this.baseUrl}/${getSchemaFilename(libVersion)}`;
+
+		if (schemaDirectory) {
+			schemaData = {
+				schema: {
+					types: readYaml.directory(schemaDirectory, 'types'),
+					typeHierarchy: readYaml.file(
+						schemaDirectory,
+						'type-hierarchy.yaml',
+					),
+					stringPatterns: readYaml.file(
+						schemaDirectory,
+						'string-patterns.yaml',
+					),
+					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
+				},
+			};
+		}
+		if (schemaData) {
+			this.rawData.set(schemaData);
+			return;
+		}
+		this.url = `${this.schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
 	}
 
 	on(event, func) {
@@ -35,11 +60,6 @@ class SchemaUpdater {
 	}
 
 	refresh() {
-		if (this.updateMode === 'dev') {
-			return Promise.resolve().then(() =>
-				this.eventEmitter.emit('change', { oldVersion: false }),
-			);
-		}
 		if (this.updateMode !== 'stale') {
 			throw new Error('Cannot refresh when updateMode is not "stale"');
 		}
@@ -65,6 +85,10 @@ class SchemaUpdater {
 					return;
 				}
 				this.version = schemaData.version;
+
+				this.rawData.set(schemaData);
+				this.cache.clear();
+
 				this.logger.info({
 					event: 'SCHEMA_UPDATED',
 					newVersion: schemaData.version,
@@ -73,7 +97,6 @@ class SchemaUpdater {
 				this.eventEmitter.emit('change', {
 					newVersion: schemaData.version,
 					oldVersion,
-					schemaData,
 				});
 			})
 			.catch(error =>
@@ -82,11 +105,6 @@ class SchemaUpdater {
 	}
 
 	startPolling() {
-		if (this.updateMode === 'dev') {
-			return Promise.resolve().then(() =>
-				this.eventEmitter.emit('change', { oldVersion: false }),
-			);
-		}
 		if (this.updateMode !== 'poll') {
 			throw new Error(
 				'Cannot start polling when updateMode is not "poll"',
@@ -107,6 +125,20 @@ class SchemaUpdater {
 	stopPolling() {
 		clearInterval(this.timer);
 		delete this.firstFetch;
+	}
+
+	ready() {
+		if (this.updateMode === 'dev') {
+			return Promise.resolve().then(() =>
+				this.eventEmitter.emit('change', {
+					oldVersion: undefined,
+					newVersion: this.version,
+				}),
+			);
+		}
+		return this.updateMode === 'poll'
+			? this.startPolling()
+			: this.refresh();
 	}
 }
 
