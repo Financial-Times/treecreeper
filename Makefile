@@ -36,12 +36,19 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then DEBUG=true TIMEOUT=500000 jest test --testEnvironment=node --watch; \
-		else jest test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
+test-pkg:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+
+test-schema:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+
+
 run:
-	nodemon --inspect api/server/app.js
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
 run-db:
 	docker-compose up
@@ -72,14 +79,6 @@ load-test-writeQueriesForTeams:
 
 load-test-cleanUp:
 	node scripts/load-testing/clean-up
-
-
-
-test-schema:
-	@if [ -z $(CI) ]; \
-		then DEBUG=true jest schema/test --testEnvironment=node --watch ; \
-		else jest schema/test --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
-	fi
 
 s3-publish:
 	@node schema/scripts/deploy

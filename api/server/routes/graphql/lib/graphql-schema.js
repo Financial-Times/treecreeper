@@ -2,7 +2,11 @@ const logger = require('@financial-times/n-logger').default;
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
 const { parse } = require('graphql');
-const { getTypes, getEnums, getGraphqlDefs } = require('../../../../../schema');
+const {
+	getTypes,
+	getEnums,
+	getGraphqlDefs,
+} = require('../../../../../packages/schema-sdk');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
 
@@ -30,13 +34,15 @@ const createSchema = () => {
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
 
-	typeDefs.unshift(`
+	const schema = makeAugmentedSchema({
+		typeDefs: [
+			`
 directive @deprecated(
   reason: String = "No longer supported"
-) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`);
-
-	const schema = makeAugmentedSchema({
-		typeDefs: typeDefs.join('\n'),
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`,
+		]
+			.concat(typeDefs)
+			.join('\n'),
 		logger: {
 			log(message) {
 				logger.error(`GraphQL Schema: ${message}`, {

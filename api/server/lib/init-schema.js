@@ -1,13 +1,7 @@
-const schema = require('../../../schema');
-const { logger } = require('./request-context');
+const schema = require('../../../packages/schema-sdk');
 
-schema.configure({
-	baseUrl: process.env.SCHEMA_BASE_URL,
-	updateMode: 'dev',
-	logger,
-	ttl: 60000,
-});
+schema.init({ updateMode: 'poll' });
 
 module.exports = {
-	schemaReady: schema.startPolling(),
+	schemaReady: schema.ready(),
 };

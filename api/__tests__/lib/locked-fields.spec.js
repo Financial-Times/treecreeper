@@ -1,4 +1,4 @@
-const schema = require('../../../schema');
+const schema = require('../../../packages/schema-sdk');
 
 const {
 	mergeLockedFields,

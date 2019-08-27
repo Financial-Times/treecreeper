@@ -10,6 +10,7 @@ if (require.main === module || cluster.isWorker || process.env.TEST_STARTUP) {
 	const PORT = process.env.PORT || 8888;
 	const app = createApp();
 	schemaReady.then(() => {
+		console.log(schemaReady);
 		app.listen(PORT, () => {
 			logger.info(`Listening on ${PORT}`);
 		});
