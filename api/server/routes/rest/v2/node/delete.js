@@ -43,9 +43,15 @@ module.exports = async input => {
 		code,
 	);
 	try {
-		await executeQuery(query, { code });
+		const res = await executeQuery(query, { code });
+		logger.info(
+			{ event: 'DELETE_NEO4J_SUCCESS' },
+			res,
+			'DELETE: Neo4j Delete successful',
+		);
 	} catch (err) {
 		logger.info(
+			{ event: 'DELETE_NEO4J_FAILURE' },
 			err,
 			'DELETE: Neo4j Delete unsuccessful, attempting to rollback S3 delete',
 		);

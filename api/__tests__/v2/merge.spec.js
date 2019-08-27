@@ -4,6 +4,8 @@ const {
 	verifyExists,
 	verifyNotExists,
 	testNode,
+	stubDbUnavailable,
+	stubS3Unavailable,
 } = require('../helpers');
 
 describe('merge', () => {
@@ -14,6 +16,8 @@ describe('merge', () => {
 	const teamCode2 = `${namespace}-team-2`;
 	const personCode = `${namespace}-person`;
 	const groupCode = `${namespace}-group`;
+	const systemCode1 = `${namespace}-system-1`;
+	const systemCode2 = `${namespace}-system-2`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -32,6 +36,50 @@ describe('merge', () => {
 			sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]),
 		);
 
+		it('responds with 500 if neo4j query fails', async () => {
+			await sandbox.createNodes(
+				['System', systemCode1, { troubleshooting: 'Fake Document' }],
+				[
+					'System',
+					systemCode2,
+					{ architectureDiagram: 'Another Fake Document' },
+				],
+			);
+			stubDbUnavailable(sandbox);
+			await testMergeRequest(
+				{
+					type: 'System',
+					sourceCode: systemCode1,
+					destinationCode: systemCode2,
+				},
+				500,
+			);
+			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
+		});
+
+		it('responds with 500 if s3 query fails', async () => {
+			stubS3Unavailable(sandbox);
+			await sandbox.createNodes(
+				['System', systemCode1, { troubleshooting: 'Fake Document' }],
+				[
+					'System',
+					systemCode2,
+					{ architectureDiagram: 'Another Fake Document' },
+				],
+			);
+			await testMergeRequest(
+				{
+					type: 'System',
+					sourceCode: systemCode1,
+					destinationCode: systemCode2,
+				},
+				500,
+			);
+			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
+		});
+
 		it('errors if no type supplied', async () => {
 			await testMergeRequest(
 				{
@@ -47,6 +95,7 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 
 		it('errors if no source code supplied', async () => {
@@ -63,6 +112,7 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 		it('errors if no destination code supplied', async () => {
 			await testMergeRequest(
@@ -78,6 +128,7 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 		it('errors if type invalid', async () => {
 			await testMergeRequest(
@@ -94,6 +145,7 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 
 		it('errors if source code does not exist', async () => {
@@ -111,6 +163,7 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 		it('errors if destination code does not exist', async () => {
 			await testMergeRequest(
@@ -127,10 +180,11 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 	});
 	describe('successful application', () => {
-		it('merge unconnected nodes', async () => {
+		it('merges unconnected nodes', async () => {
 			await sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]);
 
 			await testMergeRequest({
@@ -143,6 +197,43 @@ describe('merge', () => {
 				verifyExists('Team', teamCode2),
 			]);
 			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
+		});
+
+		it('merges unconnected nodes with document properties in s3, updating only keys that do not already exist on the destinationNode', async () => {
+			await sandbox.createNodes(
+				[
+					'System',
+					systemCode1,
+					{
+						troubleshooting: 'Fake Document',
+						architectureDiagram: 'Another Fake Document',
+					},
+				],
+				[
+					'System',
+					systemCode2,
+					{ architectureDiagram: 'A Third Fake Document' },
+				],
+			);
+			await testMergeRequest(
+				{
+					type: 'System',
+					sourceCode: systemCode1,
+					destinationCode: systemCode2,
+				},
+				200,
+				sandbox.withUpdateMeta({
+					code: systemCode2,
+					troubleshooting: 'Fake Document',
+					architectureDiagram: 'A Third Fake Document',
+				}),
+			);
+			sandbox.expectS3Actions({
+				action: 'merge',
+				nodeType: 'System',
+				sourceCode: systemCode1,
+				destinationCode: systemCode2,
+			});
 		});
 
 		it("doesn't error when unrecognised properties exist", async () => {
