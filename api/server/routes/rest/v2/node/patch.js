@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getType } = require('@financial-times/biz-ops-schema');
+const { getType } = require('../../../../../../packages/schema-sdk');
 const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,
