@@ -160,10 +160,6 @@ const getType = function(
 	const properties = Object.entries(typeSchema.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
-				if (def.type === 'Document') {
-					// documents are too big to be served by graphql
-					return;
-				}
 				// If not a primitive type we assume it's an enum and leave it unaltered
 				def.type = primitiveTypesMap[def.type] || def.type;
 			}
