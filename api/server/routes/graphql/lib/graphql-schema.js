@@ -7,7 +7,7 @@ const {
 	getEnums,
 	getGraphqlDefs,
 } = require('../../../../../packages/schema-sdk');
-
+const fetch = require('node-fetch');
 const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
 const s3 = new S3DocumentsHelper();
 
@@ -45,7 +45,16 @@ directive @deprecated(
 						console.log(docs)
 						return docs[context.fieldName]
 					}
-				}
+				},
+				Healthcheck: {
+					code: async (query,resultSoFar,c,context) => {
+						const url = query.url || resultSoFar.url;
+						if (!url) {
+							throw new Error('must include url in body of query that requests large docs');
+						}
+						return fetch(url).then(res => res.text());
+					}
+				},
 			// }
 		},
 		config: { query: true, mutation: false, debug: true },
