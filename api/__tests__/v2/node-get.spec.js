@@ -1,6 +1,10 @@
 const app = require('../../server/app.js');
 
-const { setupMocks, stubDbUnavailable } = require('../helpers');
+const {
+	setupMocks,
+	stubDbUnavailable,
+	stubS3Unavailable,
+} = require('../helpers');
 
 describe('v2 - node GET', () => {
 	const sandbox = {};
@@ -8,25 +12,34 @@ describe('v2 - node GET', () => {
 	const namespace = 'v2-node-get';
 	setupMocks(sandbox, { namespace });
 
-	const testGetRequest = (...expectations) =>
+	const testGetRequest = (url, ...expectations) =>
 		sandbox
 			.request(app)
-			.get(`/v2/node/Team/${namespace}-team`)
+			.get(url)
 			.namespacedAuth()
 			.expect(...expectations);
 
 	it('gets node without relationships', async () => {
-		await sandbox.createNode('Team', {
-			code: `${namespace}-team`,
+		await sandbox.createNode('System', {
+			code: `${namespace}-system`,
 			name: 'name1',
+			troubleshooting: 'Fake Document',
 		});
-		return testGetRequest(
+		await testGetRequest(
+			`/v2/node/System/${namespace}-system`,
 			200,
 			sandbox.withMeta({
-				code: `${namespace}-team`,
+				code: `${namespace}-system`,
 				name: 'name1',
+				troubleshooting: 'Fake Document',
 			}),
 		);
+		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		sandbox.expectS3Actions({
+			action: 'get',
+			nodeType: 'System',
+			code: `${namespace}-system`,
+		});
 	});
 
 	it('gets node with relationships', async () => {
@@ -42,6 +55,7 @@ describe('v2 - node GET', () => {
 		);
 
 		return testGetRequest(
+			`/v2/node/Team/${namespace}-team`,
 			200,
 			sandbox.withMeta({
 				code: `${namespace}-team`,
@@ -51,12 +65,19 @@ describe('v2 - node GET', () => {
 		);
 	});
 
+	it('gets node with document properties', async () => {});
+
 	it('responds with 404 if no node', async () => {
-		return testGetRequest(404);
+		return testGetRequest(`/v2/node/Team/${namespace}-team`, 404);
 	});
 
-	it('responds with 500 if query fails', async () => {
+	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return testGetRequest(500);
+		return testGetRequest(`/v2/node/Team/${namespace}-team`, 500);
+	});
+
+	it('responds with 500 if s3 query fails', async () => {
+		stubS3Unavailable(sandbox);
+		return testGetRequest(`/v2/node/System/${namespace}-system`, 500);
 	});
 });

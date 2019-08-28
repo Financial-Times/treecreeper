@@ -22,6 +22,18 @@ const stubKinesis = () => {
 	return EventLogWriter.prototype.sendEvent;
 };
 
+const stubS3Get = () => {
+	jest.spyOn(S3DocumentsHelper.prototype, 'getFileFromS3').mockImplementation(
+		data => {
+			logger.debug('S3DocumentsHelper stub getFileFromS3 called', {
+				event: data.event,
+			});
+			return Promise.resolve({});
+		},
+	);
+	return S3DocumentsHelper.prototype.getFileFromS3;
+};
+
 const stubS3Delete = () => {
 	jest.spyOn(
 		S3DocumentsHelper.prototype,
@@ -41,7 +53,12 @@ const stubS3Patch = () => {
 			logger.debug('S3DocumentsHelper stub patchS3file called', {
 				event: data.event,
 			});
-			return Promise.resolve('FakePatchVersionId');
+			return Promise.resolve({
+				versionId: 'FakePatchVersionId',
+				newBodyDocs: {
+					troubleshooting: 'Another Fake Document',
+				},
+			});
 		},
 	);
 	return S3DocumentsHelper.prototype.patchS3file;
@@ -57,6 +74,26 @@ const stubS3Upload = () => {
 		},
 	);
 	return S3DocumentsHelper.prototype.uploadToS3;
+};
+
+const stubS3Merge = () => {
+	jest.spyOn(
+		S3DocumentsHelper.prototype,
+		'mergeFilesInS3',
+	).mockImplementation(data => {
+		logger.debug('S3DocumentsHelper stub mergeFilesInS3 called', {
+			event: data.event,
+		});
+		return Promise.resolve({
+			deleteVersionId: 'FakeDeleteVersionId',
+			writeVersionId: 'FakeWriteVersionId',
+			updatedBody: {
+				troubleshooting: 'Fake Document',
+				architectureDiagram: 'A Third Fake Document',
+			},
+		});
+	});
+	return S3DocumentsHelper.prototype.mergeFilesInS3;
 };
 
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
@@ -85,9 +122,11 @@ const setupMocks = (
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis();
+		sandbox.stubS3Get = stubS3Get();
 		sandbox.stubPatchS3file = stubS3Patch();
 		sandbox.stubDeleteFileFromS3 = stubS3Delete();
 		sandbox.stubS3Upload = stubS3Upload();
+		sandbox.stubS3Merge = stubS3Merge();
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
@@ -144,7 +183,19 @@ const setupMocks = (
 								action.code,
 							);
 						}
-
+						break;
+					case 'get':
+						expect(sandbox.stubS3Get).toHaveBeenCalledWith(
+							action.nodeType,
+							action.code,
+						);
+						break;
+					case 'merge':
+						expect(sandbox.stubS3Merge).toHaveBeenCalledWith(
+							action.nodeType,
+							action.sourceCode,
+							action.destinationCode,
+						);
 						break;
 					default:
 				}
@@ -166,6 +217,9 @@ const setupMocks = (
 						expect(
 							sandbox.stubDeleteFileFromS3,
 						).toHaveBeenCalledTimes(0);
+						break;
+					case 'get':
+						expect(sandbox.stubS3).toHaveBeenCalledTimes(0);
 						break;
 					default:
 				}
