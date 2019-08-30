@@ -1,8 +1,7 @@
 const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
-const { getType, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
+const { getTypes, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
-const fetch = require('node-fetch');
 const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
 
 const s3 = new S3DocumentsHelper();
@@ -19,27 +18,21 @@ const getDocs = async (query, resultSoFar, c, context) => {
 };
 
 const getResolvers = () => {
-	const nodeProperties = getType('System').properties;
-	const documentResolvers = {};
-	Object.keys(nodeProperties).forEach(prop => {
-		if (nodeProperties[prop].type === 'Document') {
-			documentResolvers[prop] = getDocs;
-		}
+	// const nodeProperties = getType('System').properties;
+	const types = getTypes();
+	const typeResolvers = {};
+	types.forEach(type => {
+		const nodeProperties = type.properties;
+		const documentResolvers = {};
+		Object.keys(nodeProperties).forEach(prop => {
+			if (nodeProperties[prop].type === 'Document') {
+				documentResolvers[prop] = getDocs;
+			}
+		});
+		typeResolvers[type.name] = documentResolvers;
 	});
-	return {
-		System: documentResolvers,
-		Healthcheck: {
-			code: async (query, resultSoFar) => {
-				const url = query.url || resultSoFar.url;
-				if (!url) {
-					throw new Error(
-						'must include url in body of query that requests large docs',
-					);
-				}
-				return fetch(url).then(res => res.text());
-			},
-		},
-	};
+
+	return typeResolvers;
 };
 
 const createSchema = () => {
