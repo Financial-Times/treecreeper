@@ -1,31 +1,44 @@
 const logger = require('@financial-times/n-logger').default;
-const partialRight = require('lodash/partialRight');
-const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
-const {
-	getTypes,
-	getEnums,
-	getGraphqlDefs,
-} = require('@financial-times/biz-ops-schema');
+const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const { getType, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
+const fetch = require('node-fetch');
+const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
 
-const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
+const s3 = new S3DocumentsHelper();
+
+const getDocs = async (query, resultSoFar, c, context) => {
+	const code = query.code || resultSoFar.code;
+	if (!code) {
+		throw new Error(
+			'must include code in body of query that requests large docs',
+		);
+	}
+	const docs = await s3.getFileFromS3(context.parentType.name, code);
+	return docs[context.fieldName];
+};
 
 const getResolvers = () => {
-	const enumResolvers = getEnums();
-
-	const queryResolvers = getTypes().reduce(
-		(query, type) =>
-			Object.assign(query, {
-				[type.name]: mapToNeo4j,
-				[type.pluralName]: mapToNeo4j,
-			}),
-		{},
-	);
-
+	const nodeProperties = getType('System').properties;
+	const documentResolvers = {};
+	Object.keys(nodeProperties).forEach(prop => {
+		if (nodeProperties[prop].type === 'Document') {
+			documentResolvers[prop] = getDocs;
+		}
+	});
 	return {
-		enumResolvers,
-		queryResolvers,
-		all: Object.assign({}, enumResolvers, { Query: queryResolvers }),
+		System: documentResolvers,
+		Healthcheck: {
+			code: async (query, resultSoFar) => {
+				const url = query.url || resultSoFar.url;
+				if (!url) {
+					throw new Error(
+						'must include url in body of query that requests large docs',
+					);
+				}
+				return fetch(url).then(res => res.text());
+			},
+		},
 	};
 };
 
@@ -48,9 +61,10 @@ directive @deprecated(
 				});
 			},
 		},
+		resolvers: getResolvers(),
 		config: { query: true, mutation: false, debug: true },
 	});
 	return schema;
 };
 
-module.exports = { getResolvers, createSchema };
+module.exports = { createSchema };
