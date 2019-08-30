@@ -133,6 +133,8 @@ GrapheneDB heroku add-on generates backups. Each one has a _restore_ link, and t
 4. Click restore on the backup taken before data problems were uncovered
 5. Set `DISABLE_READS` to false. If the the cause of the initial data problems has been found and fixed, `DISABLE_WRITES` can also be set to false
 
+Document properties stored in the S3 bucket biz-ops-documents.{aws-account-id} (EU West) are backed up to a replication bucket: biz-ops-documents.{aws-account-id}.backup (US East) in case of loss of the whole EU bucket. Both buckets have versioning on for recovery of inividual nodes/properties.
+
 ## Monitoring
 
 You can see the API activity/performance/load in Heroku https://dashboard.heroku.com/apps/biz-ops-api/metrics/web
