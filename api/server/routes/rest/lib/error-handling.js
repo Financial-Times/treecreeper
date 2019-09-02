@@ -1,6 +1,6 @@
 const { stripIndents } = require('common-tags');
 const httpErrors = require('http-errors');
-const schema = require('../../../../../schema');
+const schema = require('../../../../../packages/schema-sdk');
 const { executeQuery } = require('./neo4j-model');
 
 const ERROR_RX = Object.freeze({

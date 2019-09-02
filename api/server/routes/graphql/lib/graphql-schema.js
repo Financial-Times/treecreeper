@@ -2,7 +2,11 @@ const logger = require('@financial-times/n-logger').default;
 const partialRight = require('lodash/partialRight');
 const { neo4jgraphql, makeAugmentedSchema } = require('neo4j-graphql-js');
 const { parse } = require('graphql');
-const { getTypes, getEnums, getGraphqlDefs } = require('../../../../../schema');
+const {
+	getTypes,
+	getEnums,
+	getGraphqlDefs,
+} = require('../../../../../packages/schema-sdk');
 
 const mapToNeo4j = partialRight(neo4jgraphql, process.env.DEBUG || false);
 
@@ -25,19 +29,21 @@ const getResolvers = () => {
 	};
 };
 
-const createSchema = (defs) => {
-	const typeDefs = getGraphqlDefs();
+const createSchema = defs => {
+	const typeDefs = defs || getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
-require('fs').writeFileSync('schema.gql', typeDefs.join('\n'));
-
-	typeDefs.unshift(`
-directive @deprecated(
-  reason: String = "No longer supported"
-) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`);
+	require('fs').writeFileSync('schema.gql', typeDefs.join('\n'));
 
 	const schema = makeAugmentedSchema({
-		typeDefs: defs || typeDefs.join('\n'),
+		typeDefs: [
+			`
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`,
+		]
+			.concat(typeDefs)
+			.join('\n'),
 		logger: {
 			log(message) {
 				logger.error(`GraphQL Schema: ${message}`, {

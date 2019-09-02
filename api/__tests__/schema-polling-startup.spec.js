@@ -1,9 +1,10 @@
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('../../schema');
+const { getSchemaFilename } = require('../../packages/schema-utils');
 
 jest.useFakeTimers();
 
-describe('schema polling startup', () => {
+// these tests will always live in the api repo
+describe.skip('schema polling startup', () => {
 	beforeAll(() => {
 		fetch.config.fallbackToNetwork = false;
 	});

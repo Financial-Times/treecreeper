@@ -1,7 +1,8 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
 const { formatError } = require('graphql');
-const schema = require('../../../../schema');
+const { ApolloServer } = require('apollo-server-express');
+const schema = require('../../../../packages/schema-sdk');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
@@ -9,11 +10,7 @@ const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
 const { createSchema } = require('./lib/graphql-schema');
 const { driver } = require('../../lib/db-connection');
-
-
-
-const { ApolloServer, gql } = require('apollo-server-express');
-
+const { sendSchemaToS3 } = require('../../../../packages/schema-publisher');
 
 let apollo;
 let schemaVersionIsConsistent = true;
@@ -24,11 +21,11 @@ const constructAPI = () => {
 		if (!apollo) {
 			apollo = new ApolloServer({
 				schema: newSchema,
-				context: ({req}) => ({
+				context: ({ req }) => ({
 					driver,
-			    headers: req.headers,
-			  }),
-			  formatError(error) {
+					headers: req.headers,
+				}),
+				formatError(error) {
 					const isS3oError = /Forbidden/i.test(error.message);
 					logger.error('GraphQL Error', {
 						event: 'GRAPHQL_ERROR',
@@ -41,7 +38,7 @@ const constructAPI = () => {
 						: error;
 					return formatError(displayedError);
 				},
-			})
+			});
 		} else {
 			apollo.schema = newSchema;
 		}
@@ -50,8 +47,7 @@ const constructAPI = () => {
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
 		if (process.env.NODE_ENV === 'production') {
-			schema
-				.sendSchemaToS3('api')
+			sendSchemaToS3('api', schema.updater.getRawData())
 				.then(() => {
 					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 				})
@@ -63,7 +59,7 @@ const constructAPI = () => {
 				});
 		}
 	} catch (error) {
-		console.log(error)
+		console.log(error);
 		schemaVersionIsConsistent = false;
 		logger.error(
 			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
@@ -228,8 +224,8 @@ type Query {
 
 }
 
-	`)
-}, 20000)
+	`);
+}, 20000);
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
 	router.use((req, res, next) => {
@@ -253,7 +249,7 @@ module.exports = router => {
 		next();
 	});
 	constructAPI();
-	apollo.applyMiddleware({app: router, path:'/'})
+	apollo.applyMiddleware({ app: router, path: '/' });
 
 	return router;
 };

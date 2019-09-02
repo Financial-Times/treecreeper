@@ -1,6 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
-const { getType } = require('../../../../../schema');
+const _isEmpty = require('lodash.isempty');
+const { getType } = require('../../../../../packages/schema-sdk');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');
@@ -26,7 +27,8 @@ let setSalesforceIdForSystem;
 const writeNode = async ({
 	nodeType,
 	code,
-	body,
+	bodyDocuments,
+	willUpdateNeo4j,
 	method,
 	upsert,
 	isCreate,
@@ -65,35 +67,63 @@ const writeNode = async ({
 	// in different orders. S3 requests are more reliable than neo4j
 	// requests so try s3 first, and roll back S3 if neo4j write fails.
 	let neo4jWriteResult;
-	const versionId = await s3DocumentsHelper.sendDocumentsToS3(
-		method,
-		nodeType,
-		code,
-		body,
-	);
-	try {
-		neo4jWriteResult = await executeQuery(
-			queryParts.join('\n'),
-			parameters,
-			true,
-		);
-	} catch (err) {
+	let versionId;
+	let newBodyDocs;
+	if (!_isEmpty(bodyDocuments)) {
+		({ versionId, newBodyDocs } = await s3DocumentsHelper.sendDocumentsToS3(
+			method,
+			nodeType,
+			code,
+			bodyDocuments,
+		));
+	} else {
 		logger.info(
-			err,
-			`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			{ event: 'SKIP_S3_UPDATE' },
+			'No changed Document properties - skipping update',
 		);
-		if (versionId)
+	}
+	try {
+		if (!willUpdateNeo4j) {
+			logger.info(
+				{ event: 'SKIP_NEO4J_UPDATE' },
+				'No changed properties, relationships or field locks - skipping update',
+			);
+		} else {
+			neo4jWriteResult = await executeQuery(
+				queryParts.join('\n'),
+				parameters,
+				true,
+			);
+			logger.info(
+				{ event: `${method}_NEO4J_SUCCESS` },
+				neo4jWriteResult,
+				`${method}: neo4j write successful`,
+			);
+		}
+	} catch (err) {
+		if (!_isEmpty(bodyDocuments) && versionId) {
+			logger.info(
+				{ event: `${method}_NEO4J_FAILURE` },
+				err,
+				`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			);
 			s3DocumentsHelper.deleteFileFromS3(nodeType, code, versionId);
+		}
 		throw new Error(err);
 	}
 
 	// In _theory_ we could return the above all the time (it works most of the time)
 	// but behaviour when deleting relationships is confusing, and difficult to
-	// obtain consistent results, so for safety do a fresh get when deletes are involved
-	if (willDeleteRelationships) {
+	// obtain consistent results, so for safety do a fresh get when deletes are involved.
+	//
+	// Also, if we didn't update the database already we need to do a get to obtain the
+	// record at all
+	if (willDeleteRelationships || !willUpdateNeo4j) {
 		neo4jWriteResult = await getNodeWithRelationships(nodeType, code);
 	}
 	const responseData = neo4jWriteResult.toApiV2(nodeType);
+
+	Object.assign(responseData, newBodyDocs);
 
 	// HACK: While salesforce also exists as a rival source of truth for Systems,
 	// we sync with it here. Don't like it being in here as the api should be agnostic
@@ -112,6 +142,7 @@ const writeNode = async ({
 				...Object.keys(propertiesToModify),
 				...Object.keys(removedRelationships || {}),
 				...Object.keys(relationshipsToCreate || {}),
+				...Object.keys(bodyDocuments),
 			]),
 		],
 		addedRelationships: relationshipsToCreate,
@@ -125,8 +156,17 @@ const writeNode = async ({
 
 const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	const { upsert } = query;
-
 	const { createPermissions, pluralName } = getType(nodeType);
+	const nodeProperties = getType(nodeType).properties;
+	const bodyDocuments = {};
+	const bodyNoDocs = {};
+	Object.keys(body).forEach(prop => {
+		if (nodeProperties[prop].type === 'Document') {
+			bodyDocuments[prop] = body[prop];
+		} else {
+			bodyNoDocs[prop] = body[prop];
+		}
+	});
 	if (createPermissions && !createPermissions.includes(clientId)) {
 		throw httpError(
 			400,
@@ -143,19 +183,20 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 	return writeNode({
 		nodeType,
 		code,
-		body,
+		bodyDocuments,
+		willUpdateNeo4j: true,
 		method,
 		upsert,
 		isCreate: true,
 		propertiesToModify: constructNeo4jProperties({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 			code,
 		}),
 		lockedFields,
 		relationshipsToCreate: getAddedRelationships({
 			nodeType,
-			newContent: body,
+			newContent: bodyNoDocs,
 		}),
 		queryParts: [
 			stripIndents`

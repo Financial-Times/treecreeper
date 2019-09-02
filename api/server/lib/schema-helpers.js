@@ -1,4 +1,4 @@
-const schema = require('../../../schema');
+const schema = require('../../../packages/schema-sdk');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

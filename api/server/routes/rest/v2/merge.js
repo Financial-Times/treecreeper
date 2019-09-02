@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { getType } = require('../../../../../schema');
+const { getType } = require('../../../../../packages/schema-sdk');
 const { validateTypeName } = require('../lib/validation');
 const { executeQuery } = require('../lib/neo4j-model');
 const { setContext } = require('../../../lib/request-context');
@@ -16,6 +16,10 @@ const { nodeWithRelsCypher } = require('../lib/read-helpers');
 const {
 	prepareRelationshipDeletion,
 } = require('../lib/relationship-write-helpers');
+const S3DocumentsHelper = require('../lib/s3-documents-helper');
+const { logger } = require('../../../lib/request-context');
+
+const s3DocumentsHelper = new S3DocumentsHelper();
 
 const validate = ({ body: { type, sourceCode, destinationCode } }) => {
 	if (!type) {
@@ -83,7 +87,6 @@ module.exports = async input => {
 			delete writeProperties[name];
 		}
 	});
-
 	const removedRelationships = getRemovedRelationships({
 		nodeType,
 		initialContent: sourceRecord,
@@ -127,18 +130,55 @@ module.exports = async input => {
 			removedRelationships,
 		});
 	}
-
-	const result = await executeQuery(
-		`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
-	CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
-	YIELD node
-	${nodeWithRelsCypher({ includeWithStatement: false })}
-	`,
-		{ sourceCode, destinationCode },
-		true,
+	const {
+		deleteVersionId,
+		writeVersionId,
+		updatedBody,
+	} = await s3DocumentsHelper.mergeFilesInS3(
+		nodeType,
+		sourceCode,
+		destinationCode,
 	);
+	let result;
+	try {
+		result = await executeQuery(
+			`OPTIONAL MATCH (sourceNode:${nodeType} { code: $sourceCode }), (destinationNode:${nodeType} { code: $destinationCode })
+		CALL apoc.refactor.mergeNodes([destinationNode, sourceNode], {properties:"discard", mergeRels:true})
+		YIELD node
+		${nodeWithRelsCypher({ includeWithStatement: false })}
+		`,
+			{ sourceCode, destinationCode },
+			true,
+		);
+	} catch (err) {
+		if (deleteVersionId) {
+			logger.info(
+				{ event: `MERGE_NEO4J_FAILURE` },
+				err,
+				`Neo4j merge unsuccessful, attempting to rollback S3 delete of source node`,
+			);
+			s3DocumentsHelper.deleteFileFromS3(
+				nodeType,
+				sourceCode,
+				deleteVersionId,
+			);
+		}
+		if (writeVersionId) {
+			logger.info(
+				{ event: `MERGE_NEO4J_FAILURE` },
+				err,
+				`Neo4j merge unsuccessful, attempting to rollback S3 update of destination node`,
+			);
+			s3DocumentsHelper.deleteFileFromS3(
+				nodeType,
+				destinationCode,
+				writeVersionId,
+			);
+		}
+	}
 
 	const finalState = result.toApiV2(nodeType);
+	Object.assign(finalState, updatedBody);
 
 	const addedRelationships = getAddedRelationships({
 		nodeType,
