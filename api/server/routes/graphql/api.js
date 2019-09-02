@@ -55,29 +55,28 @@ const apollo = new ApolloServer({
 });
 
 module.exports = router => {
+	router.use(timeout(TIMEOUT));
+	router.use((req, res, next) => {
+		if (req.get('client-id')) {
+			return clientId(req, res, next);
+		}
+		next();
+	});
+	router.use(security.requireApiKeyOrS3o);
+	router.use(maintenance.disableReads);
 	router.use([
-		timeout(TIMEOUT),
-		(req, res, next) => {
-			if (req.get('client-id')) {
-				return clientId(req, res, next);
-			}
-			next();
-		},
-		security.requireApiKeyOrS3o,
-		maintenance.disableReads,
 		bodyParser.json({ limit: '8mb' }),
 		bodyParser.urlencoded({ limit: '8mb', extended: true }),
-
-		(req, res, next) => {
-			res.nextMetricsName = 'graphql';
-			setContext({ endpoint: 'graphql', method: req.method });
-			logger.info({
-				event: 'GRAPHQL_REQUEST',
-				body: req.body,
-			});
-			next();
-		},
 	]);
+	router.use((req, res, next) => {
+		res.nextMetricsName = 'graphql';
+		setContext({ endpoint: 'graphql', method: req.method });
+		logger.info({
+			event: 'GRAPHQL_REQUEST',
+			body: req.body,
+		});
+		next();
+	});
 	apollo.applyMiddleware({ app: router, path: '/' });
 
 	return router;

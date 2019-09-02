@@ -3,6 +3,11 @@ const fetchMock = require('fetch-mock').sandbox();
 
 Object.assign(fetchMock.config, nodeFetch, {
 	fetch: nodeFetch,
+
 	fallbackToNetwork: 'always',
 });
-module.exports = fetchMock;
+module.exports = Object.assign(fetchMock, {
+	Request: nodeFetch.Request,
+	Response: nodeFetch.Response,
+	Headers: nodeFetch.Headers,
+});

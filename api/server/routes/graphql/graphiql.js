@@ -12,11 +12,11 @@ module.exports = router => {
 			settings: {
 				'request.credentials': 'same-origin',
 			},
-			tabs: {
-				endpoint: '/graphiql/example',
-				query: DEFAULT_QUERY,
-				name: 'Example',
-			},
+			// tabs: {
+			// 	endpoint: '/graphiql/example',
+			// 	query: DEFAULT_QUERY,
+			// 	name: 'Example',
+			// },
 		}),
 	);
 	return router;
