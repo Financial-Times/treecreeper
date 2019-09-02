@@ -23,6 +23,8 @@ class SDK {
 		this.getGraphqlDefs = this.createEnrichedAccessor(graphqlDefs);
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
+		this.onChange = this.onChange.bind(this);
+
 		if (options.init !== false) {
 			this.init(options);
 		}

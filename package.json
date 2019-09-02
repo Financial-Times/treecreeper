@@ -24,7 +24,6 @@
     "http-errors": "^1.7.3",
     "js-yaml": "^3.13.1",
     "jsforce": "^1.9.2",
-    "lodash": "^4.17.15",
     "lodash.groupby": "^4.6.0",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqby": "^4.7.0",
