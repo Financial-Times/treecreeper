@@ -48,6 +48,7 @@
 		"body-parser": "^1.18.3",
 		"common-tags": "^1.7.2",
 		"connect-timeout": "^1.9.0",
+		"dataloader": "^1.4.0",
 		"deep-diff": "^1.0.2",
 		"express": "^4.16.3",
 		"express-async-errors": "^3.0.0",

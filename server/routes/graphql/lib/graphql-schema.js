@@ -2,23 +2,14 @@ const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { getTypes, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
-const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
-
-const s3 = new S3DocumentsHelper();
 
 const getDocs = async (query, resultSoFar, c, context) => {
-	const code = query.code || resultSoFar.code;
-	if (!code) {
-		throw new Error(
-			'must include code in body of query that requests large docs',
-		);
-	}
-	const docs = await s3.getFileFromS3(context.parentType.name, code);
-	return docs[context.fieldName];
+	const key = `${context.parentType.name}/${query.code}`;
+	const record = await c.s3DocsDataLoader.load(key);
+	return record[context.fieldName];
 };
 
 const getResolvers = () => {
-	// const nodeProperties = getType('System').properties;
 	const types = getTypes();
 	const typeResolvers = {};
 	types.forEach(type => {
@@ -29,9 +20,10 @@ const getResolvers = () => {
 				documentResolvers[prop] = getDocs;
 			}
 		});
-		typeResolvers[type.name] = documentResolvers;
+		if (Object.keys(documentResolvers).length) {
+			typeResolvers[type.name] = documentResolvers;
+		}
 	});
-
 	return typeResolvers;
 };
 
