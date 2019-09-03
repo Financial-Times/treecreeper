@@ -8,9 +8,8 @@ require('./init-db');
 
 if (require.main === module || cluster.isWorker || process.env.TEST_STARTUP) {
 	const PORT = process.env.PORT || 8888;
-	const app = createApp();
 	schemaReady.then(() => {
-		console.log(schemaReady);
+		const app = createApp();
 		app.listen(PORT, () => {
 			logger.info(`Listening on ${PORT}`);
 		});
