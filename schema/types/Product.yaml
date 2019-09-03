@@ -48,11 +48,6 @@ properties:
     label: Lifecycle stage
     description: The product's current lifecycle stage.
     fieldset: general
-  apiDocumentationLink:
-    type: URL
-    label: API documentation
-    description: The url where documentation for users of this API is located
-    fieldset: general
   productOwners:
     type: Person
     direction: outgoing
