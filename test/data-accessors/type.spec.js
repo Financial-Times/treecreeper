@@ -217,7 +217,7 @@ describe('get-type', () => {
 		);
 
 		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
-		expect(type.properties.documentProp).toBeFalsy();
+		expect(type.properties.documentProp).toEqual({ type: 'String' });
 		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
 	});
 
