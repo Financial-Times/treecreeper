@@ -102,7 +102,7 @@ properties:
     description: The technology platform used to host the service, e.g. Heroku.
     fieldset: technicalOverview
   apiDocumentationLink:
-    type: URL
+    type: Url
     label: API documentation
     description: The url where documentation for users of this API is located.
     fieldset: technicalOverview
