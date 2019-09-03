@@ -104,7 +104,7 @@ properties:
   apiDocumentationLink:
     type: URL
     label: API documentation
-    description: The url where documentation for users of this API is located
+    description: The url where documentation for users of this API is located.
     fieldset: technicalOverview
   dataOwner:
     type: Person
