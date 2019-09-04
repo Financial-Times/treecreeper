@@ -22,11 +22,11 @@ const constructAPI = () => {
 	try {
 		const newSchema = createSchema();
 		api = graphqlExpress(({ headers }) => {
-			const s3DocsDataLoader = new DataLoader(async keys => {
-				const [type, code] = keys[0].split('/');
-				const record = await s3.getFileFromS3(type, code);
-				return [record];
-			});
+			const s3DocsDataLoader = new DataLoader(keys =>
+				Promise.all(
+					keys.map(key => s3.getFileFromS3(...key.split('/'))),
+				),
+			);
 
 			return {
 				schema: newSchema,
