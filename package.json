@@ -13,6 +13,7 @@
     "clone": "^2.1.2",
     "common-tags": "^1.8.0",
     "connect-timeout": "^1.9.0",
+    "dataloader": "^1.4.0",
     "deep-diff": "^1.0.2",
     "deep-freeze": "0.0.1",
     "express": "^4.17.1",

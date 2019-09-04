@@ -111,9 +111,11 @@ Manual
 
 ## Key Management Details
 
-Keys are stored in [vault](https://vault.in.ft.com:8080/ui/vault/secrets/secret/list/teams/reliability-engineering/biz-ops-api/), but are manually copy pasted into heroku.
+Keys and credentials are stored in [vault](https://vault.in.ft.com:8080/ui/vault/secrets/secret/list/teams/reliability-engineering/biz-ops-api/), but are manually copy pasted into heroku.
 
 Whenever the grapheneDb neo4j instance is upgraded/changed it generates new keys under new names automatically, which need copying into vault and back into heroku under our stable environment variable names. [Full DB change guide](https://github.com/Financial-Times/biz-ops-api/blob/master/doc/db-upgrade.md).
+
+If you need to change the Neo4j credentials, access the Graphene DB console through Heroku. In the Connection tab, under Rotate Database Credentials, click Update variables. This will update the following Config Vars (found in Settings) in Heroku: GRAPHENEDB_TEAL_URL, GRAPHENEDB_TEAL_BOLT_USER, GRAPHENEDB_TEAL_BOLT_URL and GRAPHENEDB_TEAL_BOLT_PASSWORD. These need to be copied to the following Config Vars: NEO4J_URL, NEO4J_BOLT_USER, NEO4J_BOLT_URL and NEO4J_BOLT_PASSWORD and also copied to Vault.
 
 ## Data Recovery Process Type
 
@@ -132,6 +134,8 @@ GrapheneDB heroku add-on generates backups. Each one has a _restore_ link, and t
 3. Click take snapshot now and wait for it to confirm it's finished (may need to refresh the page as it somefimes hangs - look for a new backup in the list with a very recent timestamp to confirm it's finished)
 4. Click restore on the backup taken before data problems were uncovered
 5. Set `DISABLE_READS` to false. If the the cause of the initial data problems has been found and fixed, `DISABLE_WRITES` can also be set to false
+
+Document properties stored in the S3 bucket biz-ops-documents.{aws-account-id} (EU West) are backed up to a replication bucket: biz-ops-documents.{aws-account-id}.backup (US East) in case of loss of the whole EU bucket. Both buckets have versioning on for recovery of inividual nodes/properties.
 
 ## Monitoring
 
