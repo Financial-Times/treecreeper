@@ -4,6 +4,7 @@ const { parse } = require('graphql');
 const EventEmitter = require('events');
 const {
 	getGraphqlDefs,
+	getTypes,
 	onChange,
 	rawData,
 } = require('../../../../../packages/schema-sdk');
@@ -15,6 +16,36 @@ let schemaVersionIsConsistent = true;
 const schemaEmitter = new EventEmitter();
 
 let defs;
+
+const getDocs = async (obj, args, context, info) => {
+	const code = obj.code || args.code;
+	if (!code) {
+		throw new Error(
+			'must include code in body of query that requests large docs',
+		);
+	}
+	const key = `${info.parentType.name}/${code}`;
+	const record = await context.s3DocsDataLoader.load(key);
+	return record[info.fieldName];
+};
+
+const getResolvers = () => {
+	const types = getTypes();
+	const typeResolvers = {};
+	types.forEach(type => {
+		const nodeProperties = type.properties;
+		const documentResolvers = {};
+		Object.keys(nodeProperties).forEach(prop => {
+			if (nodeProperties[prop].type === 'Document') {
+				documentResolvers[prop] = getDocs;
+			}
+		});
+		if (Object.keys(documentResolvers).length) {
+			typeResolvers[type.name] = documentResolvers;
+		}
+	});
+	return typeResolvers;
+};
 
 const getAugmentedSchema = () => {
 	try {
@@ -37,6 +68,7 @@ directive @deprecated(
 					});
 				},
 			},
+			resolvers: getResolvers(),
 			config: { query: true, mutation: false, debug: true },
 		});
 		schemaVersionIsConsistent = true;

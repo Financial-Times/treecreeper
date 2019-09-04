@@ -47,6 +47,35 @@ describe('graphql', () => {
 			});
 	});
 
+	it('Return a single system with Document property', async () => {
+		await sandbox.createNode('System', {
+			code: systemCode,
+			troubleshooting: 'Fake Document',
+		});
+		return sandbox
+			.request(app)
+			.post('/graphql')
+			.send({
+				query: `{
+					System(code: "${systemCode}") {
+						code
+						troubleshooting
+					}}`,
+			})
+			.namespacedAuth()
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toEqual({
+					data: {
+						System: {
+							code: systemCode,
+							troubleshooting: 'Fake Document',
+						},
+					},
+				});
+			});
+	});
+
 	it('Return a single system via GET request', async () => {
 		await sandbox.createNode('System', {
 			code: systemCode,

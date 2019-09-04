@@ -10,6 +10,8 @@ minimumViableRecord:
   - description
   - lifecycleStage
   - deliveredBy
+inactiveRule:
+  lifecycleStage: Decommissioned
 fieldsets:
   general:
     heading: General information
@@ -99,6 +101,11 @@ properties:
     label: Host platform
     description: The technology platform used to host the service, e.g. Heroku.
     fieldset: technicalOverview
+  apiDocumentationLink:
+    type: Url
+    label: API documentation
+    description: The url where documentation for users of this API is located.
+    fieldset: technicalOverview
   dataOwner:
     type: Person
     direction: outgoing
@@ -148,6 +155,7 @@ properties:
     direction: outgoing
     label: PII destinations
     relationship: PII_DATA_FLOW
+    showInactive: false
     description: |
       The systems that consume the PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here).
     fieldset: dataGovernance
@@ -302,6 +310,7 @@ properties:
     fieldset: technicalOverview
   repositories:
     type: Repository
+    showInactive: false
     direction: outgoing
     label: Source code repositories
     relationship: HAS_REPO
@@ -357,6 +366,7 @@ properties:
     type: Person
     direction: outgoing
     label: Stakeholders
+    showInactive: false
     relationship: HAS_STAKEHOLDER
     description: |
       People who have an interest in knowing about the status of or changes to this system.
@@ -367,6 +377,7 @@ properties:
     type: Person
     direction: outgoing
     label: Known about by
+    showInactive: false
     relationship: KNOWN_ABOUT_BY
     description: |
       People who have technical knowledge of the system, though may no longer work on it.
@@ -399,6 +410,7 @@ properties:
     type: System
     direction: incoming
     label: Dependents
+    showInactive: false
     relationship: DEPENDS_ON
     description: |
       The other systems which directly depend on this system. See the description for the
@@ -409,6 +421,7 @@ properties:
     type: System
     direction: incoming
     label: Recursive dependents
+    showInactive: false
     relationship: DEPENDS_ON
     description: >-
       The other systems which depend on this system, either directly or
@@ -420,6 +433,7 @@ properties:
     type: Product
     direction: incoming
     label: Dependent products
+    showInactive: false
     relationship: DEPENDS_ON
     description: Products which depend on this system.
     hasMany: true
@@ -428,6 +442,7 @@ properties:
     type: BusinessCapability
     direction: incoming
     label: Dependent capabilities
+    showInactive: false
     relationship: DEPENDS_ON
     description: Business Capabilities that depend on this system.
     hasMany: true
@@ -436,6 +451,7 @@ properties:
     type: Product
     direction: incoming
     label: Recursive dependent products
+    showInactive: false
     relationship: DEPENDS_ON
     description: The products which depend on this system, either directly or indirectly.
     hasMany: true
@@ -474,6 +490,7 @@ properties:
     relationship: REPLACES
     description: System(s) that are, or will be, replaced, at least in part, by this system.
     hasMany: true
+    writeInactive: true
     fieldset: network
   replacedBy:
     type: System

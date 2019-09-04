@@ -216,7 +216,7 @@ describe('get-type', () => {
 		);
 
 		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
-		expect(type.properties.documentProp).toBeFalsy();
+		expect(type.properties.documentProp).toEqual({ type: 'String' });
 		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
 	});
 
@@ -625,6 +625,8 @@ describe('get-type', () => {
 				type: 'Type2',
 				hasMany: false,
 				isRelationship: true,
+				showInactive: true,
+				writeInactive: false,
 				isRecursive: false,
 				description: 'test description',
 				label: 'test label',
@@ -650,6 +652,8 @@ describe('get-type', () => {
 				type: 'Type2',
 				isRelationship: true,
 				isRecursive: false,
+				showInactive: true,
+				writeInactive: false,
 				hasMany: false,
 				description: 'test description',
 				label: 'test label',
@@ -715,6 +719,8 @@ describe('get-type', () => {
 				type: 'Type2',
 				hasMany: false,
 				direction: 'outgoing',
+				showInactive: true,
+				writeInactive: false,
 				isRecursive: true,
 				isRelationship: true,
 				relationship: 'HAS',
@@ -743,6 +749,8 @@ describe('get-type', () => {
 			expect(type.properties.many).toEqual({
 				isRecursive: false,
 				isRelationship: true,
+				showInactive: true,
+				writeInactive: false,
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'outgoing',
@@ -751,11 +759,47 @@ describe('get-type', () => {
 			expect(type.properties.singular).toEqual({
 				isRecursive: false,
 				isRelationship: true,
+				showInactive: true,
+				writeInactive: false,
 				type: 'Type2',
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
 			});
+		});
+
+		it('relationships can hide inactive records', () => {
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						showInactive: false,
+						description: 'test description',
+					},
+				},
+			});
+			expect(type.properties.testName.showInactive).toBe(false);
+		});
+
+		it('relationships can allow adding inactive records', () => {
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName: {
+						type: 'Type2',
+						direction: 'outgoing',
+						relationship: 'HAS',
+						label: 'test label',
+						writeInactive: true,
+						description: 'test description',
+					},
+				},
+			});
+			expect(type.properties.testName.writeInactive).toBe(true);
 		});
 
 		it('hidden relationships', () => {

@@ -132,6 +132,7 @@ properties:
     direction: incoming
     relationship: HAS_TECH_LEAD
     description: The team(s) who own the systems this person drives the technical aspects of.
+    showInactive: false
     hasMany: true
     fieldset: team
   ownedTeams:
@@ -139,6 +140,7 @@ properties:
     direction: incoming
     label: Product owner for teams
     relationship: HAS_PRODUCT_OWNER
+    showInactive: false
     description: The team(s) this person is a Product Owner for.
     hasMany: true
     fieldset: team
@@ -147,6 +149,7 @@ properties:
     label: Delivery manager for team
     direction: incoming
     relationship: HAS_DELIVERY_MANAGER
+    showInactive: false
     description: The team(s) whose delivery this person is accountable for.
     hasMany: true
     fieldset: team
@@ -155,6 +158,7 @@ properties:
     direction: incoming
     label: Product owner for products
     relationship: HAS_PRODUCT_OWNER
+    showInactive: false
     description: The product(s) this person is a Product Owner for.
     hasMany: true
     fieldset: individual
@@ -163,6 +167,7 @@ properties:
     direction: incoming
     label: GDPR Data owner for systems
     relationship: HAS_DATA_OWNER
+    showInactive: false
     description: The systems where this person is responsible for managing GDPR processes related to personal data.
     hasMany: true
     fieldset: individual
@@ -171,6 +176,7 @@ properties:
     direction: incoming
     label: Technical owner for systems
     relationship: HAS_TECHNICAL_OWNER
+    showInactive: false
     description: The systems this person has technical responsibility for.
     hasMany: true
     fieldset: individual
@@ -179,6 +185,7 @@ properties:
     direction: incoming
     label: Stakeholder for systems
     relationship: HAS_STAKEHOLDER
+    showInactive: false
     description: The systems this person is a stakeholder for.
     hasMany: true
     fieldset: individual
@@ -187,6 +194,7 @@ properties:
     direction: incoming
     label: Knows about systems
     relationship: KNOWN_ABOUT_BY
+    showInactive: false
     description: The systems this person knows about.
     hasMany: true
     fieldset: individual
@@ -195,6 +203,7 @@ properties:
     direction: incoming
     label: Teams
     relationship: HAS_TEAM_MEMBER
+    showInactive: false
     description: The teams this person is a member of.
     hasMany: true
     fieldset: team

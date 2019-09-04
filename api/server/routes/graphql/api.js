@@ -3,6 +3,7 @@ const timeout = require('connect-timeout');
 const { formatError } = require('graphql');
 const { ApolloServer } = require('apollo-server-express');
 const graphql = require('graphql');
+const DataLoader = require('dataloader');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
@@ -14,6 +15,10 @@ const {
 } = require('./lib/get-augmented-schema');
 const { driver } = require('../../lib/db-connection');
 
+const S3DocumentsHelper = require('../rest/lib/s3-documents-helper');
+
+const s3 = new S3DocumentsHelper();
+
 const apollo = new ApolloServer({
 	subscriptions: false,
 	gateway: {
@@ -22,11 +27,17 @@ const apollo = new ApolloServer({
 			return Promise.resolve({
 				schema,
 				executor: args => {
+					const s3DocsDataLoader = new DataLoader(async keys => {
+						const [type, code] = keys[0].split('/');
+						const record = await s3.getFileFromS3(type, code);
+						return [record];
+					});
 					return graphql.execute({
 						...args,
 						schema,
 						contextValue: {
 							driver,
+							s3DocsDataLoader,
 							// headers: req.headers,
 						},
 					});

@@ -90,6 +90,7 @@ properties:
     hidden: true
     type: Product
     relationship: DEPENDS_ON
+    showInactive: false
     direction: incoming
     deprecationReason: Poorly named - superseded by better named option
     description: Products that depend on this product.
@@ -99,6 +100,7 @@ properties:
     hasMany: true
     hidden: true
     type: Product
+    showInactive: false
     relationship: DEPENDS_ON
     direction: incoming
     description: Products that depend on this product.
@@ -109,6 +111,7 @@ properties:
     direction: incoming
     label: Dependent capabilities
     relationship: DEPENDS_ON
+    showInactive: false
     description: Business Capabilities that depend on this product.
     hasMany: true
     fieldset: network
