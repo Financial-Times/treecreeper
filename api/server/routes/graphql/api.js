@@ -59,19 +59,21 @@ const apollo = new ApolloServer({
 						return [record];
 					});
 					const trace = new Tracer();
-					const result = graphql.execute({
-						...args,
-						schema,
-						contextValue: {
-							driver,
-							s3DocsDataLoader,
-							trace,
-							// headers: req.headers,
-						},
-					});
-
-					trace.log();
-					return result;
+					return graphql
+						.execute({
+							...args,
+							schema,
+							contextValue: {
+								driver,
+								s3DocsDataLoader,
+								trace,
+								// headers: req.headers,
+							},
+						})
+						.then(result => {
+							trace.log();
+							return result;
+						});
 				},
 
 				formatError(error) {
