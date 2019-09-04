@@ -142,6 +142,10 @@ const getType = function(
 					hasMany: def.hasMany || false,
 					isRelationship: !!def.relationship,
 					isRecursive: def.isRecursive || false,
+					writeInactive:
+						'writeInactive' in def ? def.writeInactive : false,
+					showInactive:
+						'showInactive' in def ? def.showInactive : true,
 				});
 			}
 		});
@@ -160,10 +164,6 @@ const getType = function(
 	const properties = Object.entries(typeSchema.properties)
 		.map(([name, def]) => {
 			if (primitiveTypes === 'graphql') {
-				if (def.type === 'Document') {
-					// documents are too big to be served by graphql
-					return;
-				}
 				// If not a primitive type we assume it's an enum and leave it unaltered
 				def.type = primitiveTypesMap[def.type] || def.type;
 			}

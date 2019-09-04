@@ -48,5 +48,6 @@ properties:
     direction: incoming
     label: Installed by system
     relationship: INSTALLS
+    showInactive: false
     description: System which installs this package.
     hasMany: true

@@ -471,59 +471,31 @@ Green
 	describe('converting types', () => {
 		Object.entries(primitiveTypesMap).forEach(
 			([bizopsType, graphqlType]) => {
-				if (bizopsType === 'Document') {
-					it(`Does not expose Document properties`, () => {
-						const schema = {
-							types: [
-								{
-									name: 'Dummy',
-									description: 'dummy type description',
-									properties: {
-										prop: {
-											type: 'Document',
-											description: 'a description',
-										},
+				it(`Outputs correct type for properties using ${bizopsType}`, () => {
+					const schema = {
+						types: [
+							{
+								name: 'Dummy',
+								description: 'dummy type description',
+								properties: {
+									prop: {
+										type: bizopsType,
+										description: 'a description',
 									},
 								},
-							],
-							enums: {},
-							stringPatterns,
-						};
-						const generated = []
-							.concat(...graphqlFromRawData(schema))
-							.join('');
+							},
+						],
+						enums: {},
+						stringPatterns,
+					};
+					const generated = []
+						.concat(...graphqlFromRawData(schema))
+						.join('');
 
-						expect(generated).not.toMatch(
-							new RegExp(`prop: String`),
-						);
-					});
-				} else {
-					it(`Outputs correct type for properties using ${bizopsType}`, () => {
-						const schema = {
-							types: [
-								{
-									name: 'Dummy',
-									description: 'dummy type description',
-									properties: {
-										prop: {
-											type: bizopsType,
-											description: 'a description',
-										},
-									},
-								},
-							],
-							enums: {},
-							stringPatterns,
-						};
-						const generated = []
-							.concat(...graphqlFromRawData(schema))
-							.join('');
-
-						expect(generated).toMatch(
-							new RegExp(`prop: ${graphqlType}`),
-						);
-					});
-				}
+					expect(generated).toMatch(
+						new RegExp(`prop: ${graphqlType}`),
+					);
+				});
 			},
 		);
 	});

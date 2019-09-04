@@ -115,6 +115,7 @@ properties:
     direction: outgoing
     label: Sub-teams
     relationship: HAS_TEAM
+    showInactive: false
     description: The teams that are sub-divisions of this team.
     hasMany: true
     fieldset: organisation
@@ -130,6 +131,7 @@ properties:
     direction: incoming
     label: Delivers systems
     relationship: DELIVERED_BY
+    showInactive: false
     description: The list of systems the team delivers.
     hasMany: true
     fieldset: ownership
@@ -138,6 +140,7 @@ properties:
     direction: incoming
     label: Maintains packages
     relationship: MAINTAINED_BY
+    showInactive: false
     description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
     hasMany: true
     fieldset: ownership
@@ -146,6 +149,7 @@ properties:
     direction: incoming
     label: Supports systems
     relationship: SUPPORTED_BY
+    showInactive: false
     description: The list of systems the team supports.
     hasMany: true
     fieldset: ownership
@@ -154,6 +158,7 @@ properties:
     direction: outgoing
     label: Team members
     relationship: HAS_TEAM_MEMBER
+    showInactive: false
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
