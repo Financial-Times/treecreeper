@@ -42,30 +42,29 @@ describe('v2 - node GET', () => {
 		});
 	});
 
-	it('gets node with relationships', async () => {
-		const [team, person, group] = await sandbox.createNodes(
-			['Team', `${namespace}-team`],
+	it('gets node with relationships and document properties', async () => {
+		const [system, person, product] = await sandbox.createNodes(
+			['System', `${namespace}-system`],
 			['Person', `${namespace}-person`],
-			['Group', `${namespace}-group`],
+			['Product', `${namespace}-product`],
 		);
 		await sandbox.connectNodes(
 			// tests incoming and outgoing relationships
-			[group, 'HAS_TEAM', team],
-			[team, 'HAS_TECH_LEAD', person],
+			[system, 'HAS_TECHNICAL_OWNER', person],
+			[product, 'DEPENDS_ON', system],
 		);
 
 		return testGetRequest(
-			`/v2/node/Team/${namespace}-team`,
+			`/v2/node/System/${namespace}-system`,
 			200,
 			sandbox.withMeta({
-				code: `${namespace}-team`,
-				techLeads: [`${namespace}-person`],
-				parentGroup: `${namespace}-group`,
+				code: `${namespace}-system`,
+				dependentProducts: [`${namespace}-product`],
+				technicalOwner: `${namespace}-person`,
+				troubleshooting: 'Fake Document',
 			}),
 		);
 	});
-
-	it('gets node with document properties', async () => {});
 
 	it('responds with 404 if no node', async () => {
 		return testGetRequest(`/v2/node/Team/${namespace}-team`, 404);

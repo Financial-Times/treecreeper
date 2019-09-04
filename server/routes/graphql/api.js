@@ -3,6 +3,7 @@ const timeout = require('connect-timeout');
 const { formatError } = require('graphql');
 const { graphqlExpress } = require('apollo-server-express');
 const schema = require('@financial-times/biz-ops-schema');
+const DataLoader = require('dataloader');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
@@ -10,6 +11,9 @@ const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
 const { createSchema } = require('./lib/graphql-schema');
 const { driver } = require('../../lib/db-connection');
+const S3DocumentsHelper = require('../rest/lib/s3-documents-helper');
+
+const s3 = new S3DocumentsHelper();
 
 let api;
 let schemaVersionIsConsistent = true;
@@ -17,27 +21,36 @@ let schemaVersionIsConsistent = true;
 const constructAPI = () => {
 	try {
 		const newSchema = createSchema();
-		api = graphqlExpress(({ headers }) => ({
-			schema: newSchema,
-			rootValue: {},
-			context: {
-				driver,
-				headers,
-			},
-			formatError(error) {
-				const isS3oError = /Forbidden/i.test(error.message);
-				logger.error('GraphQL Error', {
-					event: 'GRAPHQL_ERROR',
-					error,
-				});
-				const displayedError = isS3oError
-					? new Error(
-							'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
-					  )
-					: error;
-				return formatError(displayedError);
-			},
-		}));
+		api = graphqlExpress(({ headers }) => {
+			const s3DocsDataLoader = new DataLoader(async keys => {
+				const [type, code] = keys[0].split('/');
+				const record = await s3.getFileFromS3(type, code);
+				return [record];
+			});
+
+			return {
+				schema: newSchema,
+				rootValue: {},
+				context: {
+					driver,
+					headers,
+					s3DocsDataLoader,
+				},
+				formatError(error) {
+					const isS3oError = /Forbidden/i.test(error.message);
+					logger.error('GraphQL Error', {
+						event: 'GRAPHQL_ERROR',
+						error,
+					});
+					const displayedError = isS3oError
+						? new Error(
+								'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
+						  )
+						: error;
+					return formatError(displayedError);
+				},
+			};
+		});
 		schemaVersionIsConsistent = true;
 		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
