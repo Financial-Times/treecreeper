@@ -8,8 +8,10 @@ const s3DocumentsHelper = new S3DocumentsHelper();
 const read = async input => {
 	validateParams(input);
 	const { nodeType, code } = input;
-	const result = await getNodeWithRelationships(nodeType, code);
-	const s3Result = await s3DocumentsHelper.getFileFromS3(nodeType, code);
+	const [result, s3Result] = await Promise.all([
+		getNodeWithRelationships(nodeType, code),
+		s3DocumentsHelper.getFileFromS3(nodeType, code),
+	]);
 	preflightChecks.bailOnMissingNode({ result, nodeType, code, status: 404 });
 	const responseData = result.toApiV2(nodeType);
 	Object.assign(responseData, s3Result);
