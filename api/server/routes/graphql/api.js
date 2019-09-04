@@ -14,10 +14,36 @@ const {
 	getAugmentedSchema,
 } = require('./lib/get-augmented-schema');
 const { driver } = require('../../lib/db-connection');
-
+const { getType } = require('../../../../packages/schema-sdk');
 const S3DocumentsHelper = require('../rest/lib/s3-documents-helper');
 
 const s3 = new S3DocumentsHelper();
+
+class Tracer {
+	constructor() {
+		this.map = {};
+	}
+
+	collect(type, field) {
+		this.map[type] = this.map[type] || new Set();
+		this.map[type].set(field);
+	}
+
+	log() {
+		Object.entries(this.map).map(([type, fields]) => {
+			const { properties } = getType(type);
+			fields = [...fields];
+			logger.info({
+				event: 'GRAPHQL_TRACE',
+				type,
+				fields,
+				deprecatedFields: fields.filter(
+					name => !!properties[name].deprecationReason,
+				),
+			});
+		});
+	}
+}
 
 const apollo = new ApolloServer({
 	subscriptions: false,
@@ -32,15 +58,20 @@ const apollo = new ApolloServer({
 						const record = await s3.getFileFromS3(type, code);
 						return [record];
 					});
-					return graphql.execute({
+					const trace = new Tracer();
+					const result = graphql.execute({
 						...args,
 						schema,
 						contextValue: {
 							driver,
 							s3DocsDataLoader,
+							trace,
 							// headers: req.headers,
 						},
 					});
+
+					trace.log();
+					return result;
 				},
 
 				formatError(error) {

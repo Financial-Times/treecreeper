@@ -1,6 +1,7 @@
 const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { parse } = require('graphql');
+const { applyMiddleware } = require('graphql-middleware');
 const EventEmitter = require('events');
 const {
 	getGraphqlDefs,
@@ -16,6 +17,10 @@ let schemaVersionIsConsistent = true;
 const schemaEmitter = new EventEmitter();
 
 let defs;
+
+const propertyUsageMiddleware = async (resolve, root, args, context, info) => {
+	context.trace.collect(info.parentType.name, info.fieldName);
+};
 
 const getDocs = async (obj, args, context, info) => {
 	const code = obj.code || args.code;
@@ -86,7 +91,7 @@ directive @deprecated(
 					});
 				});
 		}
-		return schema;
+		return applyMiddleware(schema, propertyUsageMiddleware);
 	} catch (error) {
 		schemaVersionIsConsistent = false;
 		logger.error(
