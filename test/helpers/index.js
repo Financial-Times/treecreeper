@@ -28,7 +28,9 @@ const stubS3Get = () => {
 			logger.debug('S3DocumentsHelper stub getFileFromS3 called', {
 				event: data.event,
 			});
-			return Promise.resolve({});
+			return Promise.resolve({
+				troubleshooting: 'Fake Document',
+			});
 		},
 	);
 	return S3DocumentsHelper.prototype.getFileFromS3;

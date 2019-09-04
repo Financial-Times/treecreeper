@@ -3,10 +3,10 @@ const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { getTypes, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
 
-const getDocs = async (query, resultSoFar, c, context) => {
-	const key = `${context.parentType.name}/${query.code}`;
-	const record = await c.s3DocsDataLoader.load(key);
-	return record[context.fieldName];
+const getDocs = async (obj, args, context, info) => {
+	const key = `${info.parentType.name}/${obj.code}`;
+	const record = await context.s3DocsDataLoader.load(key);
+	return record[info.fieldName];
 };
 
 const getResolvers = () => {

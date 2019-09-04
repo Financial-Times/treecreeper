@@ -3,7 +3,7 @@ const timeout = require('connect-timeout');
 const { formatError } = require('graphql');
 const { graphqlExpress } = require('apollo-server-express');
 const schema = require('@financial-times/biz-ops-schema');
-const S3DocsDataLoader = require('dataloader');
+const DataLoader = require('dataloader');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
@@ -22,7 +22,7 @@ const constructAPI = () => {
 	try {
 		const newSchema = createSchema();
 		api = graphqlExpress(({ headers }) => {
-			const s3DocsDataLoader = new S3DocsDataLoader(async keys => {
+			const s3DocsDataLoader = new DataLoader(async keys => {
 				const [type, code] = keys[0].split('/');
 				const record = await s3.getFileFromS3(type, code);
 				return [record];
