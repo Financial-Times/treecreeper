@@ -1,19 +1,10 @@
 const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { parse } = require('graphql');
-const EventEmitter = require('events');
 const {
 	getGraphqlDefs,
 	getTypes,
-	onChange,
-	rawData,
 } = require('../../../../../packages/schema-sdk');
-
-const { sendSchemaToS3 } = require('../../../../../packages/schema-publisher');
-
-let schemaVersionIsConsistent = true;
-
-const schemaEmitter = new EventEmitter();
 
 let defs;
 
@@ -48,60 +39,34 @@ const getResolvers = () => {
 };
 
 const getAugmentedSchema = () => {
-	try {
-		const typeDefs = defs || getGraphqlDefs();
-		// this should throw meaningfully if the defs are invalid;
-		parse(typeDefs.join('\n'));
-		const schema = makeAugmentedSchema({
-			typeDefs: [
-				`
+	const typeDefs = defs || getGraphqlDefs();
+	// this should throw meaningfully if the defs are invalid;
+	parse(typeDefs.join('\n'));
+	const schema = makeAugmentedSchema({
+		typeDefs: [
+			`
 directive @deprecated(
   reason: String = "No longer supported"
 ) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION`,
-			]
-				.concat(typeDefs)
-				.join('\n'),
-			logger: {
-				log(message) {
-					logger.error(`GraphQL Schema: ${message}`, {
-						event: 'GRAPHQL_SCHEMA_ERROR',
-					});
-				},
-			},
-			resolvers: getResolvers(),
-			config: { query: true, mutation: false, debug: true },
-		});
-		schemaVersionIsConsistent = true;
-		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
-
-		if (process.env.NODE_ENV === 'production') {
-			sendSchemaToS3('api', rawData.getAll())
-				.then(() => {
-					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
-				})
-				.catch(error => {
-					logger.error({
-						event: 'SENDING_SCHEMA_TO_S3_FAILED',
-						error,
-					});
+		]
+			.concat(typeDefs)
+			.join('\n'),
+		logger: {
+			log(message) {
+				logger.error(`GraphQL Schema: ${message}`, {
+					event: 'GRAPHQL_SCHEMA_ERROR',
 				});
-		}
-		return schema;
-	} catch (error) {
-		schemaVersionIsConsistent = false;
-		logger.error(
-			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
-			'Graphql schema update failed',
-		);
-	}
+			},
+		},
+		resolvers: getResolvers(),
+		config: { query: true, mutation: false, debug: true },
+	});
+
+	return schema;
 };
 
-onChange(() => schemaEmitter.emit('schemaUpdate', getAugmentedSchema()));
-
 module.exports = {
-	schemaEmitter,
 	getAugmentedSchema,
-	checkSchemaConsistency: () => schemaVersionIsConsistent,
 };
 
 // setTimeout(() => {
