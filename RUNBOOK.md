@@ -164,6 +164,17 @@ If the problem does not resolve and searching splunk for `index=heroku source=*b
 
 ## Second line troubleshooting
 
-No real repeatable patterns to report in here. Best advice is to search the logs (see Monitoring section of this runbook).
+In general, best advice is to search the logs (see Monitoring section of this runbook).
 
 If there appears to be a specific bug with the app's behaviour, rather than some general unhealthy state, always begin with the tests. This application's development is heavily driven by high integration test coverage. Try to replicate the exact error by adding/adjusting a test, then tackle the problem in the source code.
+
+Some known issues that may occur:
+
+### Missing System records in SalesForce
+
+Sometimes api calls for a particular system will fail because of problems creating a corresponding record for the system in salesforce. Steps to debug:
+
+1. Check there actually is a record for the System in Biz Ops. If not, create one, then wait a few seconds and check to see if SF_ID is populated for the record
+   Steps are
+1. Check to see if the system exists in salesforce (open https://force.ft.com and search for the system code). If it does, click through to the record and copy the hexidecimal id from tbe url. Go to Biz Ops admin and save this value in the SF_ID field
+1. If there is no salesforce record then, in theory, a trivial PATCH to the system record (e.g. a trivial punctuation change in biz ops admin) should trigger creating in SF
