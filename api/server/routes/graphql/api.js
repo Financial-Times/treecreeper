@@ -51,7 +51,7 @@ module.exports = router => {
 		}
 		next();
 	});
-	router.use(security.requireApiKeyOrS3o);
+	// router.use(security.requireApiKeyOrS3o);
 	router.use(maintenance.disableReads);
 	router.use([
 		bodyParser.json({ limit: '8mb' }),

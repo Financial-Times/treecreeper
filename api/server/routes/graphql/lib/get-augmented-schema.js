@@ -10,7 +10,10 @@ const {
 let defs;
 
 const propertyUsageMiddleware = async (resolve, root, args, context, info) => {
-	context.trace.collect(info.parentType.name, info.fieldName);
+	if (info.parentType.name !== 'Query') {
+		console.log(info.parentType.name, info.fieldName);
+		context.trace.collect(info.parentType.name, info.fieldName);
+	}
 };
 
 const getDocs = async (obj, args, context, info) => {

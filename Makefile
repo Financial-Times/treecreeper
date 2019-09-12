@@ -43,12 +43,15 @@ test:
 test-pkg:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 
+test-api:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "api/__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+
 test-schema:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 
 
 run:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true nodemon --inspect api/server/app.js
 
 run-db:
 	docker-compose up

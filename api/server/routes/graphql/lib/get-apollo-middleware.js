@@ -16,22 +16,23 @@ class Tracer {
 
 	collect(type, field) {
 		this.map[type] = this.map[type] || new Set();
-		this.map[type].set(field);
+		this.map[type].add(field);
 	}
 
 	_log(logType) {
 		Object.entries(this.map).map(([type, fields]) => {
-			const { properties } = getType(type);
-			fields = [...fields];
-			logger[logType]({
-				event: 'GRAPHQL_TRACE',
-				success: logType !== 'error',
-				type,
-				fields,
-				deprecatedFields: fields.filter(
-					name => !!properties[name].deprecationReason,
-				),
-			});
+			console.log(type);
+			// const { properties } = getType(type);
+			// 	fields = [...fields];
+			// 	logger[logType]({
+			// 		event: 'GRAPHQL_TRACE',
+			// 		success: logType !== 'error',
+			// 		type,
+			// 		fields,
+			// 		deprecatedFields: fields.filter(
+			// 			name => !!properties[name].deprecationReason,
+			// 		),
+			// 	});
 		});
 	}
 
@@ -67,20 +68,20 @@ const getApolloMiddleware = () => {
 			trace.log();
 			return response;
 		},
-		formatError(error) {
-			const isS3oError = /Forbidden/i.test(error.message);
-			trace.error();
-			logger.error('GraphQL Error', {
-				event: 'GRAPHQL_ERROR',
-				error,
-			});
-			const displayedError = isS3oError
-				? new Error(
-						'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
-				  )
-				: error;
-			return formatError(displayedError);
-		},
+		// formatError(error) {
+		// 	const isS3oError = /Forbidden/i.test(error.message);
+		// 	trace.error();
+		// 	logger.error('GraphQL Error', {
+		// 		event: 'GRAPHQL_ERROR',
+		// 		error,
+		// 	});
+		// 	const displayedError = isS3oError
+		// 		? new Error(
+		// 				'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
+		// 		  )
+		// 		: error;
+		// 	return formatError(displayedError);
+		// },
 	});
 
 	return apollo.getMiddleware({ path: '/' });
