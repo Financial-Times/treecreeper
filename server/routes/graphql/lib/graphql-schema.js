@@ -4,7 +4,13 @@ const { getTypes, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
 
 const getDocs = async (obj, args, context, info) => {
-	const key = `${info.parentType.name}/${obj.code}`;
+	const code = obj.code || args.code;
+	if (!code) {
+		throw new Error(
+			'must include code in body of query that requests large docs',
+		);
+	}
+	const key = `${info.parentType.name}/${code}`;
 	const record = await context.s3DocsDataLoader.load(key);
 	return record[info.fieldName];
 };
