@@ -1,6 +1,4 @@
-const {
-	checkSchemaConsistency,
-} = require('../routes/graphql/lib/get-augmented-schema');
+const { checkSchemaConsistency } = require('../routes/graphql/api');
 const healthcheck = require('./healthcheck');
 
 const schemaVersionCheck = () => {

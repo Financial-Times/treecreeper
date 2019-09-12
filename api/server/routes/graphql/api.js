@@ -1,102 +1,47 @@
 const bodyParser = require('body-parser');
 const timeout = require('connect-timeout');
-const { formatError } = require('graphql');
-const { ApolloServer } = require('apollo-server-express');
-const graphql = require('graphql');
-const DataLoader = require('dataloader');
 const { logger, setContext } = require('../../lib/request-context');
 const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
 const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
-const {
-	schemaEmitter,
-	getAugmentedSchema,
-} = require('./lib/get-augmented-schema');
-const { driver } = require('../../lib/db-connection');
-const { getType } = require('../../../../packages/schema-sdk');
-const S3DocumentsHelper = require('../rest/lib/s3-documents-helper');
+const { onChange } = require('../../../../packages/schema-sdk');
+const { sendSchemaToS3 } = require('../../../../packages/schema-publisher');
 
-const s3 = new S3DocumentsHelper();
+let schemaVersionIsConsistent = true;
+let graphqlAPI;
 
-class Tracer {
-	constructor() {
-		this.map = {};
-	}
+const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
 
-	collect(type, field) {
-		this.map[type] = this.map[type] || new Set();
-		this.map[type].set(field);
-	}
+const updateAPI = () => {
+	try {
+		graphqlAPI = getApolloMiddleware();
 
-	log() {
-		Object.entries(this.map).map(([type, fields]) => {
-			const { properties } = getType(type);
-			fields = [...fields];
-			logger.info({
-				event: 'GRAPHQL_TRACE',
-				type,
-				fields,
-				deprecatedFields: fields.filter(
-					name => !!properties[name].deprecationReason,
-				),
-			});
-		});
-	}
-}
+		schemaVersionIsConsistent = true;
+		logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
-const apollo = new ApolloServer({
-	subscriptions: false,
-	gateway: {
-		load: () => {
-			const schema = getAugmentedSchema();
-			return Promise.resolve({
-				schema,
-				executor: args => {
-					const s3DocsDataLoader = new DataLoader(async keys => {
-						const [type, code] = keys[0].split('/');
-						const record = await s3.getFileFromS3(type, code);
-						return [record];
-					});
-					const trace = new Tracer();
-					return graphql
-						.execute({
-							...args,
-							schema,
-							contextValue: {
-								driver,
-								s3DocsDataLoader,
-								trace,
-								// headers: req.headers,
-							},
-						})
-						.then(result => {
-							trace.log();
-							return result;
-						});
-				},
-
-				formatError(error) {
-					const isS3oError = /Forbidden/i.test(error.message);
-					logger.error('GraphQL Error', {
-						event: 'GRAPHQL_ERROR',
+		if (process.env.NODE_ENV === 'production') {
+			sendSchemaToS3('api')
+				.then(() => {
+					logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
+				})
+				.catch(error => {
+					logger.error({
+						event: 'SENDING_SCHEMA_TO_S3_FAILED',
 						error,
 					});
-					const displayedError = isS3oError
-						? new Error(
-								'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
-						  )
-						: error;
-					return formatError(displayedError);
-				},
-			});
-		},
-		onSchemaChange: callback => {
-			schemaEmitter.on('schemaUpdate', callback);
-			return () => schemaEmitter.off('schemaUpdate', callback);
-		},
-	},
-});
+				});
+		}
+	} catch (error) {
+		schemaVersionIsConsistent = false;
+		logger.error(
+			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
+			'Graphql schema update failed',
+		);
+	}
+};
+
+onChange(updateAPI);
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
@@ -121,9 +66,19 @@ module.exports = router => {
 		});
 		next();
 	});
-	apollo.applyMiddleware({ app: router, path: '/' });
+
+	// Note that we wrap the api controller in a function that passes
+	// the original args through because a new api controller is generated
+	// every time the schema changes. We can't pass express a direct
+	// reference to the api controller on startup, or it will
+	// never update the reference to point at the latest version of the
+	// controller using the latest schema
+	router
+		.route('/')
+		.get((...args) => graphqlAPI(...args))
+		.post((...args) => graphqlAPI(...args));
 
 	return router;
 };
 
-module.exports.checkSchemaConsistency = () => true;
+module.exports.checkSchemaConsistency = () => schemaVersionIsConsistent;
