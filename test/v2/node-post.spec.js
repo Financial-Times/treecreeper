@@ -46,6 +46,7 @@ describe('v2 - node POST', () => {
 					Body: JSON.stringify({ troubleshooting: 'Fake Document' }),
 					Bucket: 'biz-ops-documents.510688331160',
 					Key: `System/${systemCode}`,
+					ContentType: 'application/json',
 				},
 				requestType: 'POST',
 			},
@@ -132,6 +133,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `System/${systemCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -173,6 +175,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `System/${systemCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -238,6 +241,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `System/${systemCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -321,6 +325,7 @@ describe('v2 - node POST', () => {
 					Body: JSON.stringify({ troubleshooting: 'Fake Document' }),
 					Bucket: 'biz-ops-documents.510688331160',
 					Key: `System/${systemCode}`,
+					ContentType: 'application/json',
 				},
 				requestType: 'POST',
 			},

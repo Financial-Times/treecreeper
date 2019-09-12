@@ -84,6 +84,7 @@ describe('S3 Documents Helper', () => {
 			Bucket: bucket,
 			Key: `${requestNodeType}/${requestCode}`,
 			Body: JSON.stringify(requestBody),
+			ContentType: 'application/json',
 		});
 	});
 
@@ -227,6 +228,7 @@ describe('S3 Documents Helper', () => {
 				troubleshooting: 'A Third Fake Document',
 				architectureDiagram: 'Another Fake Document',
 			}),
+			ContentType: 'application/json',
 		});
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
@@ -368,6 +370,7 @@ describe('S3 Documents Helper', () => {
 			Body: JSON.stringify({
 				troubleshooting: 'Fake Document',
 			}),
+			ContentType: 'application/json',
 		});
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith({
