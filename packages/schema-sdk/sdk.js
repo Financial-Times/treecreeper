@@ -20,7 +20,7 @@ class SDK {
 		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
 		this.getType = this.createEnrichedAccessor(type);
 		this.getTypes = this.createEnrichedAccessor(types);
-		this.getGraphqlDefs = this.createEnrichedAccessor(graphqlDefs);
+		this.getGraphqlDefs = graphqlDefs.accessor.bind(this);
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
 		this.onChange = this.onChange.bind(this);
