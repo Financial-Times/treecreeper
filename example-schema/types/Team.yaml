@@ -95,6 +95,21 @@ properties:
     description: The individuals who are accountable for the delivery of products and services by the team.
     hasMany: true
     fieldset: people
+  parentGroup:
+    type: Group
+    direction: incoming
+    label: Parent FT group
+    relationship: HAS_TEAM
+    description: For teams that have a direct association with a Tech Director this field defines the Group the director manages; otherwise blank.
+    fieldset: organisation
+  # group:
+  #   type: Group
+  #   direction: incoming
+  #   label: Associated Group
+  #   relationship: HAS_TEAM
+  #   description: The group that owns the team either through a direct association or as a sub-team.
+  #   isRecursive: true
+  #   fieldset: organisation
   subTeams:
     type: Team
     direction: outgoing
@@ -111,6 +126,33 @@ properties:
     relationship: HAS_TEAM
     description: For child teams this field defines the team they are part of; otherwise blank.
     fieldset: organisation
+  # delivers:
+  #   type: System
+  #   direction: incoming
+  #   label: Delivers systems
+  #   relationship: DELIVERED_BY
+  #   showInactive: false
+  #   description: The list of systems the team delivers.
+  #   hasMany: true
+  #   fieldset: ownership
+  # maintainsPackages:
+  #   type: Package
+  #   direction: incoming
+  #   label: Maintains packages
+  #   relationship: MAINTAINED_BY
+  #   showInactive: false
+  #   description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
+  #   hasMany: true
+  #   fieldset: ownership
+  # supports:
+  #   type: System
+  #   direction: incoming
+  #   label: Supports systems
+  #   relationship: SUPPORTED_BY
+  #   showInactive: false
+  #   description: The list of systems the team supports.
+  #   hasMany: true
+  #   fieldset: ownership
   teamMembers:
     type: Person
     direction: outgoing
@@ -120,6 +162,17 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
+  # governsAuditableData:
+  #   type: AuditableDataType
+  #   direction: incoming
+  #   hasMany: true
+  #   label: Governs data
+  #   relationship: VALUES_GOVERNED_BY
+  #   description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
+  # okrLink:
+  #   type: Url
+  #   label: OKR Link
+  #   description: "A url linking to the Objectives & Key Results this team is currently focusing on."
 fieldsets:
   general:
     heading: General information

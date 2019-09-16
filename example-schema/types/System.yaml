@@ -1,0 +1,530 @@
+name: System
+description: Any combination of software and technical infrastructure used by the business, engineering or operations.
+moreInformation: |
+    Systems are hierachical and represent the deployable units of our business. A Product may well be formed from a number of Systems each of which is itself formed from lower level Systems.
+    Examples of system include: FT.com Router, Content Annotator, Origami Registry, and Biz Ops Admin. Exmaples of products include: FT.com, Content API, Biz Ops, and Origami.
+    Systems are owned by Teams (not individuals) from either a delivery and support perspective (or both). A well managed productionised System will be linked to its Repository and its Healthchecks.
+minimumViableRecord:
+  - code
+  - name
+  - description
+  - lifecycleStage
+  - deliveredBy
+inactiveRule:
+  lifecycleStage: Decommissioned
+fieldsets:
+  general:
+    heading: General information
+  ownership:
+    heading: Ownership & knowledge
+  technicalOverview:
+    heading: Technical overview
+  dataGovernance:
+    heading: Data governance
+  network:
+    heading: Related resources
+  failover:
+    heading: Failover
+  dataRecovery:
+    heading: Data recovery
+  release:
+    heading: Release
+  keyManagement:
+    heading: Key Management
+  monitoring:
+    heading: Monitoring
+  troubleshooting:
+    heading: Troubleshooting
+  moreInformation:
+    heading: More Information
+  review:
+    heading: Service Operability Review
+
+properties:
+  code:
+    type: Code
+    required: true
+    unique: true
+    canIdentify: true
+    useInSummary: true
+    pattern: CODE
+    label: Code
+    fieldset: general
+    description: |
+      The unique identification (systemcode) for this system. Biz Ops is the source of
+      truth for system codes, so if the system does not yet have one, make one up -
+      a lower case, hyphenated string similar to the name people call the system is best.
+      Once assigned it cannot easily be altered, so choose carefully.
+  name:
+    type: Name
+    canIdentify: true
+    useInSummary: true
+    label: Name
+    description: The short name for the system which will be output on screens and reports.
+    fieldset: general
+  description:
+    type: Paragraph
+    canIdentify: true
+    label: Description
+    description: |
+      A brief overview of what the system does and why, from the user's perspective.
+      Note that multiple paragraphs and other markdown features are not supported in this field.
+      Any technical details about how it works should be added in the [technical overview section](#technical-overview).
+    fieldset: general
+  primaryURL:
+    type: Url
+    canIdentify: true
+    useInSummary: true
+    label: Primary URL
+    description: The main url served by the system.
+    fieldset: general
+  systemType:
+    type: Word
+    label: System type
+    description: The system type (don't worry about entering anything here).
+    deprecationReason: 'Was never used or populated'
+    fieldset: general
+  serviceTier:
+    type: ServiceTier
+    useInSummary: true
+    label: Service tier
+    description: The service tier (level of support) given to this system.
+    fieldset: general
+  serviceType:
+    type: Word
+    label: Service type
+    description: The type of service the system provides  (don't worry about entering anything here).
+    deprecationReason: 'Was never used or populated'
+    fieldset: general
+  hostPlatform:
+    type: Word
+    label: Host platform
+    description: The technology platform used to host the service, e.g. Heroku.
+    fieldset: technicalOverview
+  apiDocumentationLink:
+    type: Url
+    label: API documentation
+    description: The url where documentation for users of this API is located.
+    fieldset: technicalOverview
+  dataOwner:
+    type: Person
+    direction: outgoing
+    label: GDPR data owner
+    relationship: HAS_DATA_OWNER
+    description: |
+      The individual responsible for managing GDPR requests for this system.
+    hasMany: false
+    fieldset: dataGovernance
+  containsPersonalData:
+    type: Boolean
+    label: Does this system handle Personal Data?
+    description: |
+      Personal data means any information from which an individual can be
+      identified directly or indirectly.
+      For Personal Data this includes: Full name and title, email address,
+      physical address, contact number, location data, online identifiers
+      (e.g. IP Address, cookies, MAC Addresses, pixel tags, account handles,
+      device finger prints, username and passwords), government identifiers
+      (e.g. passport, drivers license), signatures, workplace data (e.g.
+      salary/bonus/annual reviews), gender, date of birth.
+    fieldset: dataGovernance
+  containsSensitiveData:
+    type: Boolean
+    label: Does this system handle Sensitive Data?
+    description: |
+      Sensitive, or special category data, is a more regulated subset of
+      personal data, including race, ethnic origin, politics, religion,
+      trade union membership, genetics, biometrics (where used for ID purposes),
+      health, sex life or sexual orientation. We also include personal data
+      about children (under 16 years or age) and payment card information
+      in this category.
+      For more details, see the Information Commissioner's definition:
+      https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/what-is-personal-data/what-is-personal-data/.
+    fieldset: dataGovernance
+  piiSources:
+    type: System
+    direction: incoming
+    label: PII sources
+    relationship: PII_DATA_FLOW
+    description: |
+      The systems that produce/store the PII data that is used by this system (other kinds of data flow do not need to be noted here).
+    fieldset: dataGovernance
+    hasMany: true
+  piiDestinations:
+    type: System
+    direction: outgoing
+    label: PII destinations
+    relationship: PII_DATA_FLOW
+    showInactive: false
+    description: |
+      The systems that consume the PII data that is stored in/processed by this system (other kinds of data flow do not need to be noted here).
+    fieldset: dataGovernance
+    hasMany: true
+  canDownloadPersonalData:
+    type: Boolean
+    label: Downloadable personal data
+    description: Does this system allow users to download personal data?
+    fieldset: dataGovernance
+  canContactIndividuals:
+    type: Boolean
+    label: Contactable individuals
+    description: Does this system have the capability to contact individuals?
+    fieldset: dataGovernance
+  gdprRetentionProcess:
+    type: GDPRProcess
+    label: Retention process
+    description: The type of process used to handle GDPR data retention.
+    fieldset: dataGovernance
+  gdprErasureProcess:
+    type: GDPRProcess
+    label: Erasure process
+    description: The type of process used to handle GDPR data erasure requests.
+    fieldset: dataGovernance
+  risk:
+    type: Paragraph
+    label: Data - more information
+    description: More details of what kind of data is held/processed in this system, and what the associated risks are.
+    fieldset: dataGovernance
+  lifecycleStage:
+    type: SystemLifecycle
+    useInSummary: true
+    label: Lifecycle stage
+    description: How far this system has progressed through its lifecycle from Preproduction to Decommissioned.
+    fieldset: general
+  SF_ID:
+    type: Word
+    label: Salesforce ID
+    description: ID of this system in salesforce.
+  architectureDiagram:
+    type: Document
+    deprecationReason: Replaced by architecture field
+    label: Architecture Diagram
+    description: A diagram of the system's architecture (either a link to one or embedded directly).
+    fieldset: technicalOverview
+  troubleshooting:
+    type: Document
+    deprecationReason: Replaced by firstLineTroubleshooting and secondLineTroubleshooting fields
+    label: Troubleshooting
+    description: Guidance for troubleshooting problems with this system.
+    fieldset: troubleshooting
+  firstLineTroubleshooting:
+    type: Document
+    label: First line troubleshooting
+    description: |
+      Troubleshooting information for members of the Operations Support Team. You can assume
+      - access to most applications and tools widely used at FT
+      - admin privileges for most infrastructure we run systems on
+      - familiarity with the command line and admin interfaces for our applications
+      In general, do _not_ assume any familiarity with the system's source code.
+    fieldset: troubleshooting
+  secondLineTroubleshooting:
+    type: Document
+    label: Second line troubleshooting
+    description: Troubleshooting information for members of the system's support or delivery team.
+    fieldset: troubleshooting
+  monitoring:
+    type: Document
+    label: Bespoke Monitoring
+    description: Details of any monitoring this system has.
+    fieldset: monitoring
+  failoverArchitectureType:
+    type: FailoverArchitectureType
+    label: Type of Failover Architecture
+    description: The architecture that enables failover.
+    fieldset: failover
+  failoverProcessType:
+    type: ProcessType
+    label: Type of Failover Process
+    description: The mechanism used to achieve a failover.
+    fieldset: failover
+  failbackProcessType:
+    type: ProcessType
+    label: Type of Failback Process
+    description: The mechanism used to achieve a failback.
+    fieldset: failover
+  failoverDetails:
+    type: Document
+    label: Failover Details
+    description: The actions required to fail this system from one region to another. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    fieldset: failover
+  dataRecoveryProcessType:
+    type: ProcessType
+    label: Type of Data Recovery Process
+    description: The mechanism used to achieve a data recovery.
+    fieldset: dataRecovery
+  dataRecoveryDetails:
+    type: Document
+    label: Data Recovery Details
+    description: The actions required to restore the data for this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    fieldset: dataRecovery
+  releaseProcessType:
+    type: ProcessType
+    label: Type of Release Process
+    description: The mechanism used to achieve a release.
+    fieldset: release
+  rollbackProcessType:
+    type: ProcessType
+    label: Type of Rollback Process
+    description: The mechanism used to reverse a release.
+    fieldset: release
+  releaseDetails:
+    type: Document
+    label: Release Details
+    description: The actions required to deploy a new version of this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    fieldset: release
+  credentialsRefreshProcessType:
+    type: ProcessType
+    label: Type of Credentials Refresh Process
+    description: The mechanism used to achieve a change in credentials.
+    deprecationReason: 'Replaced by keyManagementProcessType property'
+    fieldset: keyManagement
+  credentialsRefreshDetails:
+    type: Document
+    label: Credentials Refresh Details
+    description: The actions required to change the credentials used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    deprecationReason: 'Replaced by keyManagementDetails property'
+    fieldset: keyManagement
+  keyManagementProcessType:
+    type: ProcessType
+    label: Type of Key Management Process
+    description: The mechanism used to create/rotate keys.
+    fieldset: keyManagement
+  keyManagementDetails:
+    type: Document
+    label: Key Management Details
+    description: The actions required to create/change the keys used by this system. Either provide a set of numbered steps or a link to a detailed process that operations can follow.
+    fieldset: keyManagement
+  moreInformation:
+    type: Document
+    label: More Information
+    description: Any additional information about this system.
+    fieldset: moreInformation
+
+  architecture:
+    type: Document
+    label: Architecture
+    description: |
+      Brief description of the system's architecture.
+      It's recommended that one or more diagrams are included here.
+      Please include link(s) to where the diagrams can be edited.
+    fieldset: technicalOverview
+  repositories:
+    type: Repository
+    showInactive: false
+    direction: outgoing
+    label: Source code repositories
+    relationship: HAS_REPO
+    fieldset: technicalOverview
+    description: The repositories which store this system's source code and/or configuration.
+    hasMany: true
+
+  monitoredBy:
+    type: Healthcheck
+    direction: outgoing
+    label: Monitored by
+    relationship: MONITORED_BY
+    deprecationReason: 'Replaced by healthchecks property'
+    description: Endpoints which monitor this system.
+    hasMany: true
+    fieldset: monitoring
+  healthchecks:
+    type: Healthcheck
+    direction: outgoing
+    label: Healthchecks
+    relationship: MONITORED_BY
+    description: Healthchecks which are used to monitor this system.
+    hasMany: true
+    fieldset: monitoring
+  deliveredBy:
+    type: Team
+    direction: outgoing
+    label: Delivered by team
+    relationship: DELIVERED_BY
+    description: |
+      The team which delivers the system. Costs related to this system will be allocated to the
+      Group this Team is a part of.
+    fieldset: ownership
+  supportedBy:
+    type: Team
+    direction: outgoing
+    label: Supported by team
+    relationship: SUPPORTED_BY
+    description: The team which supports the system.
+    fieldset: ownership
+  technicalOwner:
+    type: Person
+    direction: outgoing
+    label: Technical owner
+    relationship: HAS_TECHNICAL_OWNER
+    description: |
+      The individual responsible for technical aspects of this system
+      (optional - if absent, assume the tech lead of the delivery team is
+      responsible).
+    hasMany: false
+    fieldset: ownership
+  stakeholders:
+    type: Person
+    direction: outgoing
+    label: Stakeholders
+    showInactive: false
+    relationship: HAS_STAKEHOLDER
+    description: |
+      People who have an interest in knowing about the status of or changes to this system.
+      Can also be used for people associated with the system who do not fit into the other, more clearly defined roles.
+    fieldset: ownership
+    hasMany: true
+  knownAboutBy:
+    type: Person
+    direction: outgoing
+    label: Known about by
+    showInactive: false
+    relationship: KNOWN_ABOUT_BY
+    description: |
+      People who have technical knowledge of the system, though may no longer work on it.
+    fieldset: ownership
+    hasMany: true
+  dependencies:
+    type: System
+    direction: outgoing
+    label: Dependencies
+    relationship: DEPENDS_ON
+    description: |
+      The other systems this system directly depends on. In general, this means systems
+      that this system makes requests to, or that provide some sort of platform that
+      this system runs on. More exotic dependency relationships may exist, where it can
+      be hard to decide which way the dependency arrow points, but if either of the
+      conditions above describe the relationship between this system and the other
+      reasonably well, then the other system can be said to be a dependency of this one.
+    hasMany: true
+    fieldset: network
+  # recursiveDependencies:
+  #   type: System
+  #   direction: outgoing
+  #   label: Recursive dependencies
+  #   relationship: DEPENDS_ON
+  #   description: The other systems this system depends on, either directly or indirectly.
+  #   hasMany: true
+  #   isRecursive: true
+  #   fieldset: network
+  dependents:
+    type: System
+    direction: incoming
+    label: Dependents
+    showInactive: false
+    relationship: DEPENDS_ON
+    description: |
+      The other systems which directly depend on this system. See the description for the
+      'dependencies' field for more details.
+    hasMany: true
+    fieldset: network
+  # recursiveDependents:
+  #   type: System
+  #   direction: incoming
+  #   label: Recursive dependents
+  #   showInactive: false
+  #   relationship: DEPENDS_ON
+  #   description: >-
+  #     The other systems which depend on this system, either directly or
+  #     indirectly.
+  #   hasMany: true
+  #   isRecursive: true
+  #   fieldset: network
+  dependentProducts:
+    type: Product
+    direction: incoming
+    label: Dependent products
+    showInactive: false
+    relationship: DEPENDS_ON
+    description: Products which depend on this system.
+    hasMany: true
+    fieldset: network
+  dependentCapabilities:
+    type: BusinessCapability
+    direction: incoming
+    label: Dependent capabilities
+    showInactive: false
+    relationship: DEPENDS_ON
+    description: Business Capabilities that depend on this system.
+    hasMany: true
+    fieldset: network
+  # recursiveDependentProducts:
+  #   type: Product
+  #   direction: incoming
+  #   label: Recursive dependent products
+  #   showInactive: false
+  #   relationship: DEPENDS_ON
+  #   description: The products which depend on this system, either directly or indirectly.
+  #   hasMany: true
+  #   isRecursive: true
+  #   fieldset: network
+  installs:
+    type: Package
+    direction: outgoing
+    label: Installs packages
+    relationship: INSTALLS
+    deprecationReason: Replaced by installsPackages, which is clearer in intent
+    description: The shared packages (libraries, components, toolkits, etc.) which this system installs and is dependent on.
+    hasMany: true
+    fieldset: network
+  installsPackages:
+    type: Package
+    direction: outgoing
+    label: Installs packages
+    relationship: INSTALLS
+    description: The shared packages (libraries, components, toolkits, etc.) which this system installs and is dependent on.
+    hasMany: true
+    fieldset: network
+  stores:
+    type: Repository
+    direction: incoming
+    label: Repositories
+    relationship: STORED_IN
+    description: 'If the system is a VCS, the repositories it stores.'
+    deprecationReason: 'Of little value to model as a relationship; repositories will have a property on them detailing whether they are stored in bitbucket or github'
+    hasMany: true
+    fieldset: network
+  replaces:
+    type: System
+    direction: outgoing
+    label: Replaces systems
+    relationship: REPLACES
+    description: System(s) that are, or will be, replaced, at least in part, by this system.
+    hasMany: true
+    writeInactive: true
+    fieldset: network
+  replacedBy:
+    type: System
+    direction: incoming
+    label: Replaced by systems
+    relationship: REPLACES
+    description: System(s) that do, or will, replace all or part of this system.
+    hasMany: true
+    fieldset: network
+  lastServiceReviewDate:
+    type: Date
+    description: The date that Operations last reviewed this system.
+    label: Last review date
+    fieldset: review
+  sosTrafficLight:
+    type: TrafficLight
+    description: The Service Operability Score (SOS) given by Operations during their manual review of the quality of the information contained in this system as presented to them via the runbook.
+    label: SOS Traffic light
+    fieldset: review
+  lastSOSReport:
+    type: Url
+    label: Last SOS Report
+    description: A link to the Service Operability Score (SOS) report detailing the actions required to make the resulting runbook more usable by the Operations team.
+    fieldset: review
+  herokuPipelineName:
+    type: Code
+    label: Heroku pipeline Name
+    description: This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production.
+    fieldset: release
+  updatesData:
+    type: AuditableData
+    direction: outgoing
+    hasMany: true
+    label: Updates data
+    relationship: UPDATES
+    fieldset: dataGovernance
+    description: A set of governed data items that this system updates.

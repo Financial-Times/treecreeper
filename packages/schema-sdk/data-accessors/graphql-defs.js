@@ -34,7 +34,10 @@ const maybePaginate = def =>
 const snakeToCamel = str => {
 	const camel = str
 		.split('_')
-		.map(word => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
+		.map(
+			word =>
+				word.charAt(0).toUpperCase() + word.substring(1).toLowerCase(),
+		)
 		.join('');
 	// const result = str.toLowerCase().replace(/_([a-z])/,function(m){return m.toUpperCase();}).replace(/_/,'');
 	return camel;
@@ -55,21 +58,16 @@ const cypherResolver = (def, originalType) => {
 	}
 	const from = def.direction === 'incoming' ? def.type : originalType;
 	const to = def.direction === 'incoming' ? originalType : def.type;
-	const node = `${from.toUpperCase()}_${def.relationship}_${to.toUpperCase()}`
-	return `type ${snakeToCamel(node)} @relation(name: ${
-		node
-	}) {
+	const node = `${from.toUpperCase()}_${
+		def.relationship
+	}_${to.toUpperCase()}`;
+	return `type ${snakeToCamel(node)} @relation(name: ${node}) {
 		from: ${from}
 		to: ${to}
 	}`;
 	// return `@relation(name: "${
 	// 	def.relationship
 	// }", direction: "${graphqlDirection(def.direction)}")`;
-
-	// type HasTeamMember @relation(name: "HAS_TEAM_MEMBER") {
-	// 	from: Team
-	// 	to: Person
-	// }
 };
 
 const maybeDeprecate = ({ deprecationReason }) => {

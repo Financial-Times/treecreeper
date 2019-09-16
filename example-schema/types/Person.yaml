@@ -102,6 +102,30 @@ properties:
     label: Proposed ID
     deprecationReason: Only needed during migration to new ids
     description: The ID of this person in Workday, ldap, github or Slack. If no ID is found, it is `name.lastname`.
+  techDirectorFor:
+    type: Group
+    label: Tech director for group
+    direction: incoming
+    relationship: HAS_TECH_DIRECTOR
+    description: The group(s) this person is a Technical Director for.
+    hasMany: true
+    fieldset: group
+  productOwnerFor:
+    type: Group
+    label: Product owner for group
+    direction: incoming
+    relationship: HAS_PRODUCT_OWNER
+    description: The group(s) who own the systems this person drives the business aspects of.
+    hasMany: true
+    fieldset: group
+  deliveryManagerFor:
+    type: Group
+    label: Delivery manager for group
+    direction: incoming
+    relationship: HAS_DELIVERY_MANAGER
+    description: The group(s) who own the systems this person drives the delivery of.
+    hasMany: true
+    fieldset: group
   techLeadFor:
     type: Team
     label: Tech lead for teams
@@ -129,6 +153,51 @@ properties:
     description: The team(s) whose delivery this person is accountable for.
     hasMany: true
     fieldset: team
+  # ownedProducts:
+  #   type: Product
+  #   direction: incoming
+  #   label: Product owner for products
+  #   relationship: HAS_PRODUCT_OWNER
+  #   showInactive: false
+  #   description: The product(s) this person is a Product Owner for.
+  #   hasMany: true
+  #   fieldset: individual
+  # dataOwnerFor:
+  #   type: System
+  #   direction: incoming
+  #   label: GDPR Data owner for systems
+  #   relationship: HAS_DATA_OWNER
+  #   showInactive: false
+  #   description: The systems where this person is responsible for managing GDPR processes related to personal data.
+  #   hasMany: true
+  #   fieldset: individual
+  # technicalOwnerFor:
+  #   type: System
+  #   direction: incoming
+  #   label: Technical owner for systems
+  #   relationship: HAS_TECHNICAL_OWNER
+  #   showInactive: false
+  #   description: The systems this person has technical responsibility for.
+  #   hasMany: true
+  #   fieldset: individual
+  # stakeholderFor:
+  #   type: System
+  #   direction: incoming
+  #   label: Stakeholder for systems
+  #   relationship: HAS_STAKEHOLDER
+  #   showInactive: false
+  #   description: The systems this person is a stakeholder for.
+  #   hasMany: true
+  #   fieldset: individual
+  # knowsAbout:
+  #   type: System
+  #   direction: incoming
+  #   label: Knows about systems
+  #   relationship: KNOWN_ABOUT_BY
+  #   showInactive: false
+  #   description: The systems this person knows about.
+  #   hasMany: true
+  #   fieldset: individual
   teams:
     type: Team
     direction: incoming
