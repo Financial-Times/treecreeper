@@ -162,17 +162,17 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
-  # governsAuditableData:
-  #   type: AuditableDataType
-  #   direction: incoming
-  #   hasMany: true
-  #   label: Governs data
-  #   relationship: VALUES_GOVERNED_BY
-  #   description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
-  # okrLink:
-  #   type: Url
-  #   label: OKR Link
-  #   description: "A url linking to the Objectives & Key Results this team is currently focusing on."
+  governsAuditableData:
+    type: AuditableDataType
+    direction: incoming
+    hasMany: true
+    label: Governs data
+    relationship: VALUES_GOVERNED_BY
+    description: The data types that this team governs that values of. i.e. the team curates the range of values for a type.
+  okrLink:
+    type: Url
+    label: OKR Link
+    description: "A url linking to the Objectives & Key Results this team is currently focusing on."
 fieldsets:
   general:
     heading: General information
