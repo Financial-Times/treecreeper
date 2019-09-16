@@ -17,60 +17,60 @@ properties:
         The unique identification code for the team. When creating a new team,
         choose a lower case, hyphenated string similar to the name people call the team.
     fieldset: general
-  # name:
-  #   type: Name
-  #   canIdentify: true
-  #   useInSummary: true
-  #   label: Name
-  #   description: The short title for the team which will be output on screens and reports.
-  #   fieldset: general
-  # description:
-  #   type: Paragraph
-  #   canIdentify: true
-  #   label: Description
-  #   description: A paragraph which explains the purpose of the team using terms that would be understood by all the FT.
-  #   fieldset: general
-  # email:
-  #   type: Email
-  #   canIdentify: true
-  #   useInSummary: true
-  #   label: Email
-  #   description: The email address to use to contact the team.
-  #   fieldset: general
-  # slack:
-  #   type: Word
-  #   canIdentify: true
-  #   useInSummary: true
-  #   label: Slack
-  #   description: The slack channel to use to contact the team.
-  #   fieldset: general
-  # phone:
-  #   type: Word
-  #   canIdentify: true
-  #   useInSummary: true
-  #   label: Phone
-  #   description: The phone number to use to contact the team.
-  #   fieldset: general
-  # isActive:
-  #   type: Boolean
-  #   label: Active
-  #   description: Whether or not the team is still in existence.
-  #   fieldset: general
-  # isThirdParty:
-  #   type: Boolean
-  #   label: Third party
-  #   description: Whether or not the team is a supplier.
-  #   fieldset: general
-  # supportRota:
-  #   type: Url
-  #   label: Support rota
-  #   description: A url linking to the rota the team use to identify which team members support their systems.
-  #   fieldset: general
-  # contactPref:
-  #   type: Word
-  #   label: Preferred contact method
-  #   description: How the team would like to be contacted.
-  #   fieldset: general
+  name:
+    type: Name
+    canIdentify: true
+    useInSummary: true
+    label: Name
+    description: The short title for the team which will be output on screens and reports.
+    fieldset: general
+  description:
+    type: Paragraph
+    canIdentify: true
+    label: Description
+    description: A paragraph which explains the purpose of the team using terms that would be understood by all the FT.
+    fieldset: general
+  email:
+    type: Email
+    canIdentify: true
+    useInSummary: true
+    label: Email
+    description: The email address to use to contact the team.
+    fieldset: general
+  slack:
+    type: Word
+    canIdentify: true
+    useInSummary: true
+    label: Slack
+    description: The slack channel to use to contact the team.
+    fieldset: general
+  phone:
+    type: Word
+    canIdentify: true
+    useInSummary: true
+    label: Phone
+    description: The phone number to use to contact the team.
+    fieldset: general
+  isActive:
+    type: Boolean
+    label: Active
+    description: Whether or not the team is still in existence.
+    fieldset: general
+  isThirdParty:
+    type: Boolean
+    label: Third party
+    description: Whether or not the team is a supplier.
+    fieldset: general
+  supportRota:
+    type: Url
+    label: Support rota
+    description: A url linking to the rota the team use to identify which team members support their systems.
+    fieldset: general
+  contactPref:
+    type: Word
+    label: Preferred contact method
+    description: How the team would like to be contacted.
+    fieldset: general
   techLeads:
     type: Person
     direction: outgoing
@@ -120,13 +120,13 @@ properties:
     description: The list of people who make up this team.
     hasMany: true
     fieldset: people
-# fieldsets:
-#   general:
-#     heading: General information
-#   people:
-#     heading: People
-#   organisation:
-#     heading: Place in the FT
-#   ownership:
-#     heading: System ownership
+fieldsets:
+  general:
+    heading: General information
+  people:
+    heading: People
+  organisation:
+    heading: Place in the FT
+  ownership:
+    heading: System ownership
 

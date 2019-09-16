@@ -91,8 +91,9 @@ const defineProperties = (properties, originalType) => {
 				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDeprecate(def)}`,
 		)
 		.join('');
-	const typesFromRelationships = properties
-		.map(([name, def]) => `\n\t${cypherResolver(def, originalType)}`)
+	const typesFromRelationships = properties.map(
+		([name, def]) => `\n\t${cypherResolver(def, originalType)}`,
+	);
 	return { props, typesFromRelationships };
 	// return properties
 	// 	.map(
