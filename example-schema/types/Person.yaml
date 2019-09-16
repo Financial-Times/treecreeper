@@ -102,33 +102,33 @@ properties:
   #   label: Proposed ID
   #   deprecationReason: Only needed during migration to new ids
   #   description: The ID of this person in Workday, ldap, github or Slack. If no ID is found, it is `name.lastname`.
-  # techLeadFor:
-  #   type: Team
-  #   label: Tech lead for teams
-  #   direction: incoming
-  #   relationship: HAS_TECH_LEAD
-  #   description: The team(s) who own the systems this person drives the technical aspects of.
-  #   showInactive: false
-  #   hasMany: true
-  #   fieldset: team
-  # ownedTeams:
-  #   type: Team
-  #   direction: incoming
-  #   label: Product owner for teams
-  #   relationship: HAS_PRODUCT_OWNER
-  #   showInactive: false
-  #   description: The team(s) this person is a Product Owner for.
-  #   hasMany: true
-  #   fieldset: team
-  # deliveryManagerForTeams:
-  #   type: Team
-  #   label: Delivery manager for team
-  #   direction: incoming
-  #   relationship: HAS_DELIVERY_MANAGER
-  #   showInactive: false
-  #   description: The team(s) whose delivery this person is accountable for.
-  #   hasMany: true
-  #   fieldset: team
+  techLeadFor:
+    type: Team
+    label: Tech lead for teams
+    direction: incoming
+    relationship: HAS_TECH_LEAD
+    description: The team(s) who own the systems this person drives the technical aspects of.
+    showInactive: false
+    hasMany: true
+    fieldset: team
+  ownedTeams:
+    type: Team
+    direction: incoming
+    label: Product owner for teams
+    relationship: HAS_PRODUCT_OWNER
+    showInactive: false
+    description: The team(s) this person is a Product Owner for.
+    hasMany: true
+    fieldset: team
+  deliveryManagerForTeams:
+    type: Team
+    label: Delivery manager for team
+    direction: incoming
+    relationship: HAS_DELIVERY_MANAGER
+    showInactive: false
+    description: The team(s) whose delivery this person is accountable for.
+    hasMany: true
+    fieldset: team
   teams:
     type: Team
     direction: incoming
