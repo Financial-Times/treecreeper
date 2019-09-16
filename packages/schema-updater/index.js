@@ -30,10 +30,10 @@ class SchemaUpdater {
 			schemaData = {
 				schema: {
 					types: readYaml.directory(schemaDirectory, 'types'),
-					typeHierarchy: readYaml.file(
-						schemaDirectory,
-						'type-hierarchy.yaml',
-					),
+					// typeHierarchy: readYaml.file(
+					// 	schemaDirectory,
+					// 	'type-hierarchy.yaml',
+					// ),
 					stringPatterns: readYaml.file(
 						schemaDirectory,
 						'string-patterns.yaml',

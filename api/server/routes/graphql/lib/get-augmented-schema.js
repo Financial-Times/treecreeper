@@ -40,8 +40,10 @@ const getResolvers = () => {
 
 const getAugmentedSchema = () => {
 	const typeDefs = defs || getGraphqlDefs();
+	console.log("typeDefs.....................", typeDefs)
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
+	console.log('parsed typeDefs.................', typeDefs)
 	const schema = makeAugmentedSchema({
 		typeDefs: [
 			`
