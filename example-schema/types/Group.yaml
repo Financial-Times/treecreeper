@@ -31,12 +31,12 @@ properties:
     type: Boolean
     label: Active
     description: Whether or not the group still exists.
-  # costCentre:
-  #   type: CostCentre
-  #   direction: incoming
-  #   label: Cost Centre
-  #   relationship: PAYS_FOR
-  #   description: The cost centre that pays for this groups's budget.
+  costCentre:
+    type: CostCentre
+    direction: incoming
+    label: Cost Centre
+    relationship: PAYS_FOR
+    description: The cost centre that pays for this groups's budget.
   techDirector:
     type: Person
     direction: outgoing

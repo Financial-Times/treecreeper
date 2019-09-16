@@ -126,33 +126,33 @@ properties:
     relationship: HAS_TEAM
     description: For child teams this field defines the team they are part of; otherwise blank.
     fieldset: organisation
-  # delivers:
-  #   type: System
-  #   direction: incoming
-  #   label: Delivers systems
-  #   relationship: DELIVERED_BY
-  #   showInactive: false
-  #   description: The list of systems the team delivers.
-  #   hasMany: true
-  #   fieldset: ownership
-  # maintainsPackages:
-  #   type: Package
-  #   direction: incoming
-  #   label: Maintains packages
-  #   relationship: MAINTAINED_BY
-  #   showInactive: false
-  #   description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
-  #   hasMany: true
-  #   fieldset: ownership
-  # supports:
-  #   type: System
-  #   direction: incoming
-  #   label: Supports systems
-  #   relationship: SUPPORTED_BY
-  #   showInactive: false
-  #   description: The list of systems the team supports.
-  #   hasMany: true
-  #   fieldset: ownership
+  delivers:
+    type: System
+    direction: incoming
+    label: Delivers systems
+    relationship: DELIVERED_BY
+    showInactive: false
+    description: The list of systems the team delivers.
+    hasMany: true
+    fieldset: ownership
+  maintainsPackages:
+    type: Package
+    direction: incoming
+    label: Maintains packages
+    relationship: MAINTAINED_BY
+    showInactive: false
+    description: The list of packages (libraries, components, toolkits, etc.) the team maintains.
+    hasMany: true
+    fieldset: ownership
+  supports:
+    type: System
+    direction: incoming
+    label: Supports systems
+    relationship: SUPPORTED_BY
+    showInactive: false
+    description: The list of systems the team supports.
+    hasMany: true
+    fieldset: ownership
   teamMembers:
     type: Person
     direction: outgoing
