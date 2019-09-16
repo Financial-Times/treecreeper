@@ -34,7 +34,7 @@ const maybePaginate = def =>
 const snakeToCamel = str => {
 	const camel = str
 		.split('_')
-		.map(word => word.charAt(0) + word.substring(1).toLowerCase())
+		.map(word => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
 		.join('');
 	// const result = str.toLowerCase().replace(/_([a-z])/,function(m){return m.toUpperCase();}).replace(/_/,'');
 	return camel;
@@ -53,15 +53,11 @@ const cypherResolver = (def, originalType) => {
 			)}(related:${def.type}) RETURN DISTINCT related"
 		)`;
 	}
-	// console.log('def.............', def)
 	const from = def.direction === 'incoming' ? def.type : originalType;
 	const to = def.direction === 'incoming' ? originalType : def.type;
-	// console.log(`type ${snakeToCamel(def.relationship)} @relation(name: ${def.relationship}) {
-	// 	from: ${from}
-	// 	to: ${to}
-	// }`);
-	return `type ${snakeToCamel(def.relationship)} @relation(name: ${
-		def.relationship
+	const node = `${from.toUpperCase()}_${def.relationship}_${to.toUpperCase()}`
+	return `type ${snakeToCamel(node)} @relation(name: ${
+		node
 	}) {
 		from: ${from}
 		to: ${to}
