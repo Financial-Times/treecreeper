@@ -39,11 +39,29 @@ const snakeToCamel = str => {
 				word.charAt(0).toUpperCase() + word.substring(1).toLowerCase(),
 		)
 		.join('');
-	// const result = str.toLowerCase().replace(/_([a-z])/,function(m){return m.toUpperCase();}).replace(/_/,'');
 	return camel;
 };
 
-const cypherResolver = (def, originalType) => {
+const cypherResolver = def => {
+	if (!def.isRelationship) {
+		return '';
+	}
+	if (def.isRecursive) {
+		return `@cypher(
+			statement: "MATCH (this)${relFragment(
+				def.relationship,
+				def.direction,
+				'*1..20',
+			)}(related:${def.type}) RETURN DISTINCT related"
+		)`;
+	}
+	return `@relation(name: "${
+		def.relationship
+	}", direction: "${graphqlDirection(def.direction)}")`;
+}
+
+const cypherRelationshipResolver = (def, originalType) => {
+	console.log('cypherresolver')
 	if (!def.isRelationship) {
 		return '';
 	}
@@ -78,30 +96,27 @@ const maybeDeprecate = ({ deprecationReason }) => {
 };
 
 const defineProperties = (properties, originalType) => {
+	// console.log('..........originalType ', originalType)
 	const props = properties
 		.map(
-			([name, def]) =>
-				stripEmptyFirstLine`
-				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDeprecate(def)}`,
+			([name, def]) => {
+				// console.log('def..........', name, def)
+				return stripEmptyFirstLine`
+				"""
+				${def.description}
+				"""
+				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${originalType ? '' : cypherResolver(
+						def
+					)}${maybeDeprecate(def)}`
+			}
 		)
-		.join('');
-	const typesFromRelationships = properties.map(
-		([name, def]) => `\n\t${cypherResolver(def, originalType)}`,
-	);
+		.join(' ');
+
+	const typesFromRelationships = originalType ? properties.map(
+		([name, def]) => `\n\t${cypherRelationshipResolver(def, originalType)}`,
+	) : [] ;
+	// console.log(props, typesFromRelationships)
 	return { props, typesFromRelationships };
-	// return properties
-	// 	.map(
-	// 		([name, def]) =>
-	// 			stripEmptyFirstLine`
-	// 		"""
-	// 		${def.description}
-	// 		"""
-	// 		${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
-	// 				def,
-	// 				originalType
-	// 			)} ${maybeDeprecate(def)}`,
-	// 	)
-	// 	.join('');
 };
 
 const PAGINATE = indentMultiline(
@@ -132,6 +147,9 @@ const getFilteringFields = config =>
 
 const defineQuery = ({ name, type, description, properties, paginate }) => {
 	return `
+	"""
+	${description}
+	"""
 	${name}(
 		${paginate ? PAGINATE : ''}
 		${indentMultiline(defineProperties(properties).props, 4, true)}
@@ -139,19 +157,32 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 };
 
 const defineType = config => {
+	// console.log('do we get here.....? ', config.description, config.name, config.properties)
+	return `
+	"""
+	${config.description}
+	"""
+	type ${config.name} {
+		${indentMultiline(defineProperties(Object.entries(config.properties)).props, 2, true)}
+	}`;
+};
+
+const defineTypeWithRelationshipTypes = config => {
 	const { props, typesFromRelationships } = defineProperties(
 		Object.entries(config.properties),
 		config.name,
 	);
-	// console.log('typesFromRelationships...............', typesFromRelationships)
 	return [
 		`
-	type ${config.name} {
-		${indentMultiline(props, 2, true)}
-	}`,
+		"""
+		${config.description}
+		"""
+		type ${config.name} {
+			${indentMultiline(props, 2, true)}
+		}`,
 		...typesFromRelationships,
 	];
-};
+}
 
 const defineQueries = config => [
 	defineQuery({
@@ -173,6 +204,9 @@ const defineEnum = ([name, { description, options }]) => {
 	const enums = Object.entries(options).map(([, option]) => {
 		if (option.description) {
 			return stripIndent`
+				"""
+				${option.description}
+				"""
 				${option.value}`;
 		}
 
@@ -180,40 +214,46 @@ const defineEnum = ([name, { description, options }]) => {
 	});
 
 	return stripIndent`
+		"""
+		${description}
+		"""
 		enum ${name} {
 		${indentMultiline(enums.join('\n'), 3)}
 		}`;
 };
 
 module.exports = {
-	accessor() {
+	accessor(representRelationshipsAsNodes = true) {
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			relationshipStructure: 'graphql',
 			includeMetaFields: true,
 		});
-		// console.log('typesFromSchema....................', typesFromSchema)
-		// console.log(typesFromSchema[0].properties.teams)
+
 		const customDateTimeTypes = stripIndent`
 		scalar DateTime
 		scalar Date
 		scalar Time
 	`;
-
-		const typeNamesAndDescriptions = typesFromSchema.map(defineType).flat();
+		// console.log('.....representRelationshipsAsNodes', representRelationshipsAsNodes)
+		const mapTypes = representRelationshipsAsNodes ? defineTypeWithRelationshipTypes : defineType;
+		console.log('.....LOOK', mapTypes);
+		console.log('.......typesFromSchema', typesFromSchema)
+		const typeNamesAndDescriptions = typesFromSchema.map(mapTypes).flat();
+		console.log("....hello")
 		const uniqueTypeNamesAndDescriptions = [
 			...new Set(typeNamesAndDescriptions),
 		];
-		console.log(
-			'uniqueTypeNamesAndDescriptions........',
-			uniqueTypeNamesAndDescriptions,
-		);
+		// console.log(
+		// 	'uniqueTypeNamesAndDescriptions........',
+		// 	uniqueTypeNamesAndDescriptions,
+		// );
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
 
 		return [].concat(
-			uniqueTypeNamesAndDescriptions,
+			customDateTimeTypes + uniqueTypeNamesAndDescriptions,
 			'type Query {\n',
 			...typesFromSchema.map(defineQueries),
 			'}',
