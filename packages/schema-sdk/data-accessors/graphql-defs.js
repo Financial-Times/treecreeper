@@ -61,7 +61,6 @@ const cypherResolver = def => {
 }
 
 const cypherRelationshipResolver = (def, originalType) => {
-	console.log('cypherresolver')
 	if (!def.isRelationship) {
 		return '';
 	}
@@ -83,9 +82,6 @@ const cypherRelationshipResolver = (def, originalType) => {
 		from: ${from}
 		to: ${to}
 	}`;
-	// return `@relation(name: "${
-	// 	def.relationship
-	// }", direction: "${graphqlDirection(def.direction)}")`;
 };
 
 const maybeDeprecate = ({ deprecationReason }) => {
@@ -156,16 +152,14 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 	): ${type}`;
 };
 
-const defineType = config => {
-	// console.log('do we get here.....? ', config.description, config.name, config.properties)
-	return `
-	"""
-	${config.description}
-	"""
-	type ${config.name} {
-		${indentMultiline(defineProperties(Object.entries(config.properties)).props, 2, true)}
-	}`;
-};
+const defineType = config =>
+`
+"""
+${config.description}
+"""
+type ${config.name} {
+	${indentMultiline(defineProperties(Object.entries(config.properties)).props, 2, true)}
+}`;
 
 const defineTypeWithRelationshipTypes = config => {
 	const { props, typesFromRelationships } = defineProperties(
@@ -223,7 +217,7 @@ const defineEnum = ([name, { description, options }]) => {
 };
 
 module.exports = {
-	accessor(representRelationshipsAsNodes = true) {
+	accessor(representRelationshipsAsNodes = false) {
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			relationshipStructure: 'graphql',
@@ -235,19 +229,11 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		// console.log('.....representRelationshipsAsNodes', representRelationshipsAsNodes)
 		const mapTypes = representRelationshipsAsNodes ? defineTypeWithRelationshipTypes : defineType;
-		console.log('.....LOOK', mapTypes);
-		console.log('.......typesFromSchema', typesFromSchema)
 		const typeNamesAndDescriptions = typesFromSchema.map(mapTypes).flat();
-		console.log("....hello")
 		const uniqueTypeNamesAndDescriptions = [
 			...new Set(typeNamesAndDescriptions),
 		];
-		// console.log(
-		// 	'uniqueTypeNamesAndDescriptions........',
-		// 	uniqueTypeNamesAndDescriptions,
-		// );
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
