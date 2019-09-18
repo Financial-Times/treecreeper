@@ -64,15 +64,15 @@ const cypherRelationshipResolver = (def, originalType) => {
 	if (!def.isRelationship) {
 		return '';
 	}
-	if (def.isRecursive) {
-		return `@cypher(
-			statement: "MATCH (this)${relFragment(
-				def.relationship,
-				def.direction,
-				'*1..20',
-			)}(related:${def.type}) RETURN DISTINCT related"
-		)`;
-	}
+	// if (def.isRecursive) {
+	// 	return `@cypher(
+	// 		statement: "MATCH (this)${relFragment(
+	// 			def.relationship,
+	// 			def.direction,
+	// 			'*1..20',
+	// 		)}(related:${def.type}) RETURN DISTINCT related"
+	// 	)`;
+	// }
 	const from = def.direction === 'incoming' ? def.type : originalType;
 	const to = def.direction === 'incoming' ? originalType : def.type;
 	const node = `${from.toUpperCase()}_${
@@ -92,18 +92,16 @@ const maybeDeprecate = ({ deprecationReason }) => {
 };
 
 const defineProperties = (properties, originalType) => {
-	// console.log('..........originalType ', originalType)
 	const props = properties
 		.map(
 			([name, def]) => {
-				// console.log('def..........', name, def)
 				return stripEmptyFirstLine`
 				"""
 				${def.description}
 				"""
 				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${originalType ? '' : cypherResolver(
 						def
-					)}${maybeDeprecate(def)}`
+					)} ${maybeDeprecate(def)}`
 			}
 		)
 		.join(' ');
@@ -111,7 +109,6 @@ const defineProperties = (properties, originalType) => {
 	const typesFromRelationships = originalType ? properties.map(
 		([name, def]) => `\n\t${cypherRelationshipResolver(def, originalType)}`,
 	) : [] ;
-	// console.log(props, typesFromRelationships)
 	return { props, typesFromRelationships };
 };
 
@@ -216,6 +213,12 @@ const defineEnum = ([name, { description, options }]) => {
 		}`;
 };
 
+function flatten(arr) {
+	return arr.reduce(function (flat, toFlatten) {
+	  return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+	}, []);
+  }
+
 module.exports = {
 	accessor(representRelationshipsAsNodes = false) {
 		const typesFromSchema = this.getTypes({
@@ -230,7 +233,7 @@ module.exports = {
 		scalar Time
 	`;
 		const mapTypes = representRelationshipsAsNodes ? defineTypeWithRelationshipTypes : defineType;
-		const typeNamesAndDescriptions = typesFromSchema.map(mapTypes).flat();
+		const typeNamesAndDescriptions = flatten(typesFromSchema.map(mapTypes));
 		const uniqueTypeNamesAndDescriptions = [
 			...new Set(typeNamesAndDescriptions),
 		];

@@ -102,14 +102,14 @@ properties:
     relationship: HAS_TEAM
     description: For teams that have a direct association with a Tech Director this field defines the Group the director manages; otherwise blank.
     fieldset: organisation
-  # group:
-  #   type: Group
-  #   direction: incoming
-  #   label: Associated Group
-  #   relationship: HAS_TEAM
-  #   description: The group that owns the team either through a direct association or as a sub-team.
-  #   isRecursive: true
-  #   fieldset: organisation
+  group:
+    type: Group
+    direction: incoming
+    label: Associated Group
+    relationship: HAS_TEAM
+    description: The group that owns the team either through a direct association or as a sub-team.
+    isRecursive: true
+    fieldset: organisation
   subTeams:
     type: Team
     direction: outgoing

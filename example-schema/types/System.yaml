@@ -397,15 +397,15 @@ properties:
       reasonably well, then the other system can be said to be a dependency of this one.
     hasMany: true
     fieldset: network
-  # recursiveDependencies:
-  #   type: System
-  #   direction: outgoing
-  #   label: Recursive dependencies
-  #   relationship: DEPENDS_ON
-  #   description: The other systems this system depends on, either directly or indirectly.
-  #   hasMany: true
-  #   isRecursive: true
-  #   fieldset: network
+  recursiveDependencies:
+    type: System
+    direction: outgoing
+    label: Recursive dependencies
+    relationship: DEPENDS_ON
+    description: The other systems this system depends on, either directly or indirectly.
+    hasMany: true
+    isRecursive: true
+    fieldset: network
   dependents:
     type: System
     direction: incoming
@@ -417,18 +417,18 @@ properties:
       'dependencies' field for more details.
     hasMany: true
     fieldset: network
-  # recursiveDependents:
-  #   type: System
-  #   direction: incoming
-  #   label: Recursive dependents
-  #   showInactive: false
-  #   relationship: DEPENDS_ON
-  #   description: >-
-  #     The other systems which depend on this system, either directly or
-  #     indirectly.
-  #   hasMany: true
-  #   isRecursive: true
-  #   fieldset: network
+  recursiveDependents:
+    type: System
+    direction: incoming
+    label: Recursive dependents
+    showInactive: false
+    relationship: DEPENDS_ON
+    description: >-
+      The other systems which depend on this system, either directly or
+      indirectly.
+    hasMany: true
+    isRecursive: true
+    fieldset: network
   dependentProducts:
     type: Product
     direction: incoming
