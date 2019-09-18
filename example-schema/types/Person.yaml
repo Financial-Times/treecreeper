@@ -135,6 +135,7 @@ properties:
     showInactive: false
     hasMany: true
     fieldset: team
+    relationshipProp: String
   ownedTeams:
     type: Team
     direction: incoming

@@ -73,6 +73,7 @@ const cypherRelationshipResolver = (def, originalType) => {
 	// 		)}(related:${def.type}) RETURN DISTINCT related"
 	// 	)`;
 	// }
+	const relationshipPropString = def.relationshipProp ? `relationshipProp: ${def.relationshipProp}` : ''
 	const from = def.direction === 'incoming' ? def.type : originalType;
 	const to = def.direction === 'incoming' ? originalType : def.type;
 	const node = `${from.toUpperCase()}_${
@@ -81,6 +82,7 @@ const cypherRelationshipResolver = (def, originalType) => {
 	return `\n\ttype ${snakeToCamel(node)} @relation(name: ${node}) {
 		from: ${from}
 		to: ${to}
+		${relationshipPropString}
 	}`;
 };
 
@@ -106,8 +108,10 @@ const defineProperties = (properties, originalType) => {
 
 	const typesFromRelationships = originalType
 		? properties
-			.filter(([name, def]) => def.isRelationship)
-			.map(([name, def]) => cypherRelationshipResolver(def, originalType))
+				.filter(([name, def]) => def.isRelationship)
+				.map(([name, def]) =>
+					cypherRelationshipResolver(def, originalType),
+				)
 		: [];
 	return { props, typesFromRelationships };
 };
@@ -227,13 +231,11 @@ function flatten(arr) {
 
 module.exports = {
 	accessor(representRelationshipsAsNodes = true) {
-		console.log('........HELLO')
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			relationshipStructure: 'graphql',
 			includeMetaFields: true,
 		});
-		// console.log('........HELLO2 ', typesFromSchema)
 
 		const customDateTimeTypes = stripIndent`
 		scalar DateTime
@@ -244,15 +246,12 @@ module.exports = {
 			? defineTypeWithRelationshipTypes
 			: defineType;
 
-			// console.log('........HELLO3 ', typesFromSchema.map(mapTypes))
 
 		const typeNamesAndDescriptions = flatten(typesFromSchema.map(mapTypes));
-		// console.log('........HELLO4 ', typeNamesAndDescriptions)
 
 		const uniqueTypeNamesAndDescriptions = [
 			...new Set(typeNamesAndDescriptions),
 		];
-		console.log('........HELLO5 ', uniqueTypeNamesAndDescriptions)
 
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,

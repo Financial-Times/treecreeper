@@ -79,6 +79,7 @@ properties:
     description: The individuals who drive the technical aspects of the systems owned by the team.
     hasMany: true
     fieldset: people
+    relationshipProp: String
   productOwners:
     type: Person
     direction: outgoing
