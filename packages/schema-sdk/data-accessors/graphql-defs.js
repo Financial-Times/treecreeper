@@ -58,12 +58,12 @@ const cypherResolver = def => {
 	return `@relation(name: "${
 		def.relationship
 	}", direction: "${graphqlDirection(def.direction)}")`;
-}
+};
 
 const cypherRelationshipResolver = (def, originalType) => {
-	if (!def.isRelationship) {
-		return '';
-	}
+	// if (!def.isRelationship) {
+	// 	return false;
+	// }
 	// if (def.isRecursive) {
 	// 	return `@cypher(
 	// 		statement: "MATCH (this)${relFragment(
@@ -78,7 +78,7 @@ const cypherRelationshipResolver = (def, originalType) => {
 	const node = `${from.toUpperCase()}_${
 		def.relationship
 	}_${to.toUpperCase()}`;
-	return `type ${snakeToCamel(node)} @relation(name: ${node}) {
+	return `\n\ttype ${snakeToCamel(node)} @relation(name: ${node}) {
 		from: ${from}
 		to: ${to}
 	}`;
@@ -93,22 +93,22 @@ const maybeDeprecate = ({ deprecationReason }) => {
 
 const defineProperties = (properties, originalType) => {
 	const props = properties
-		.map(
-			([name, def]) => {
-				return stripEmptyFirstLine`
+		.map(([name, def]) => {
+			return stripEmptyFirstLine`
 				"""
 				${def.description}
 				"""
-				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${originalType ? '' : cypherResolver(
-						def
-					)} ${maybeDeprecate(def)}`
-			}
-		)
+				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${
+				originalType ? '' : cypherResolver(def)
+			} ${maybeDeprecate(def)}`;
+		})
 		.join(' ');
 
-	const typesFromRelationships = originalType ? properties.map(
-		([name, def]) => `\n\t${cypherRelationshipResolver(def, originalType)}`,
-	) : [] ;
+	const typesFromRelationships = originalType
+		? properties
+			.filter(([name, def]) => def.isRelationship)
+			.map(([name, def]) => cypherRelationshipResolver(def, originalType))
+		: [];
 	return { props, typesFromRelationships };
 };
 
@@ -150,12 +150,16 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 };
 
 const defineType = config =>
-`
+	`
 """
 ${config.description}
 """
 type ${config.name} {
-	${indentMultiline(defineProperties(Object.entries(config.properties)).props, 2, true)}
+	${indentMultiline(
+		defineProperties(Object.entries(config.properties)).props,
+		2,
+		true,
+	)}
 }`;
 
 const defineTypeWithRelationshipTypes = config => {
@@ -173,7 +177,7 @@ const defineTypeWithRelationshipTypes = config => {
 		}`,
 		...typesFromRelationships,
 	];
-}
+};
 
 const defineQueries = config => [
 	defineQuery({
@@ -214,29 +218,42 @@ const defineEnum = ([name, { description, options }]) => {
 };
 
 function flatten(arr) {
-	return arr.reduce(function (flat, toFlatten) {
-	  return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+	return arr.reduce(function(flat, toFlatten) {
+		return flat.concat(
+			Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten,
+		);
 	}, []);
-  }
+}
 
 module.exports = {
-	accessor(representRelationshipsAsNodes = false) {
+	accessor(representRelationshipsAsNodes = true) {
+		console.log('........HELLO')
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			relationshipStructure: 'graphql',
 			includeMetaFields: true,
 		});
+		// console.log('........HELLO2 ', typesFromSchema)
 
 		const customDateTimeTypes = stripIndent`
 		scalar DateTime
 		scalar Date
 		scalar Time
 	`;
-		const mapTypes = representRelationshipsAsNodes ? defineTypeWithRelationshipTypes : defineType;
+		const mapTypes = representRelationshipsAsNodes
+			? defineTypeWithRelationshipTypes
+			: defineType;
+
+			// console.log('........HELLO3 ', typesFromSchema.map(mapTypes))
+
 		const typeNamesAndDescriptions = flatten(typesFromSchema.map(mapTypes));
+		// console.log('........HELLO4 ', typeNamesAndDescriptions)
+
 		const uniqueTypeNamesAndDescriptions = [
 			...new Set(typeNamesAndDescriptions),
 		];
+		console.log('........HELLO5 ', uniqueTypeNamesAndDescriptions)
+
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
