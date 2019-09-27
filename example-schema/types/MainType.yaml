@@ -1,7 +1,7 @@
-name: RootType
-description: Description of RootType.
+name: MainType
+description: Description of MainType.
 moreInformation: |
-    More information for RootType
+    More information for MainType
 properties:
   code:
     type: Code
@@ -48,14 +48,14 @@ properties:
     direction: outgoing
   youngerSiblings:
     relationship: HAS_YOUNGER_SIBLING
-    type: RootType
+    type: MainType
     description: Parents description.
     label: Parents label
     direction: outgoing
     hasMany: true
   olderSiblings:
     relationship: HAS_YOUNGER_SIBLING
-    type: RootType
+    type: MainType
     description: Parents description.
     label: Parents label
     direction: incoming

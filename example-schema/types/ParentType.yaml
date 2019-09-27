@@ -12,7 +12,7 @@ properties:
     pattern: CODE
   isParentOf:
     relationship: HAS_ROOT_CHILD
-    type: RootType
+    type: MainType
     description: Is parent of description.
     label: Is parent of label
     direction: outgoing

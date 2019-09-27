@@ -12,10 +12,10 @@ describe('merge', () => {
 	const sandbox = {};
 	const namespace = 'v2-merge';
 
-	const rootTypeCode1 = `${namespace}-root-1`;
-	const rootTypeCode2 = `${namespace}-root-2`;
-	const childTypeCode = `${namespace}-child-type`;
-	const parentTypeCode = `${namespace}-parent-type`;
+	const mainCode1 = `${namespace}-main1`;
+	const mainCode2 = `${namespace}-main2`;
+	const childCode = `${namespace}-child`;
+	const parentCode = `${namespace}-parent`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -32,8 +32,8 @@ describe('merge', () => {
 	describe('error handling', () => {
 		beforeEach(() =>
 			sandbox.createNodes(
-				['RootType', rootTypeCode1, { someDocument: 'fake1' }],
-				['RootType', rootTypeCode2, { someDocument: 'fake2' }],
+				['MainType', { code: mainCode1, someDocument: 'fake1' }],
+				['MainType', { code: mainCode2, someDocument: 'fake2' }],
 			),
 		);
 
@@ -41,9 +41,9 @@ describe('merge', () => {
 			stubDbUnavailable(sandbox);
 			await testMergeRequest(
 				{
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				},
 				500,
 			);
@@ -55,15 +55,15 @@ describe('merge', () => {
 			stubS3Unavailable(sandbox);
 			await testMergeRequest(
 				{
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				},
 				500,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -72,16 +72,16 @@ describe('merge', () => {
 		it('errors if no type supplied', async () => {
 			await testMergeRequest(
 				{
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				},
 				400,
 				/No type/,
 			);
 
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -90,15 +90,15 @@ describe('merge', () => {
 		it('errors if no source code supplied', async () => {
 			await testMergeRequest(
 				{
-					type: 'RootType',
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					destinationCode: mainCode2,
 				},
 				400,
 				/No sourceCode/,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -106,15 +106,15 @@ describe('merge', () => {
 		it('errors if no destination code supplied', async () => {
 			await testMergeRequest(
 				{
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
+					type: 'MainType',
+					sourceCode: mainCode1,
 				},
 				400,
 				/No destinationCode/,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -123,15 +123,15 @@ describe('merge', () => {
 			await testMergeRequest(
 				{
 					type: 'NotTeam',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				},
 				400,
 				/Invalid type/,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -140,16 +140,16 @@ describe('merge', () => {
 		it('errors if source code does not exist', async () => {
 			await testMergeRequest(
 				{
-					type: 'RootType',
+					type: 'MainType',
 					sourceCode: 'not-exist',
-					destinationCode: rootTypeCode2,
+					destinationCode: mainCode2,
 				},
 				404,
 				/record missing/,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -157,16 +157,16 @@ describe('merge', () => {
 		it('errors if destination code does not exist', async () => {
 			await testMergeRequest(
 				{
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
+					type: 'MainType',
+					sourceCode: mainCode1,
 					destinationCode: 'not-exist',
 				},
 				404,
 				/record missing/,
 			);
 			await Promise.all([
-				verifyExists('RootType', rootTypeCode1),
-				verifyExists('RootType', rootTypeCode2),
+				verifyExists('MainType', mainCode1),
+				verifyExists('MainType', mainCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -176,54 +176,50 @@ describe('merge', () => {
 		describe('properties', () => {
 			it('merges unconnected nodes', async () => {
 				await sandbox.createNodes(
-					['RootType', rootTypeCode1],
-					['RootType', rootTypeCode2],
+					['MainType', mainCode1],
+					['MainType', mainCode2],
 				);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
 				await Promise.all([
-					verifyNotExists('RootType', rootTypeCode1),
-					verifyExists('RootType', rootTypeCode2),
+					verifyNotExists('MainType', mainCode1),
+					verifyExists('MainType', mainCode2),
 				]);
-				sandbox.expectKinesisEvents([
-					'DELETE',
-					rootTypeCode1,
-					'RootType',
-				]);
+				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('merges ordinary properties', async () => {
 				sandbox.setS3Responses({ merge: {} });
 				await sandbox.createNodes(
 					[
-						'RootType',
+						'MainType',
 						{
-							code: rootTypeCode1,
+							code: mainCode1,
 							someString: 'Fake String',
 							anotherString: 'Another Fake String',
 						},
 					],
 					[
-						'RootType',
+						'MainType',
 						{
-							code: rootTypeCode2,
+							code: mainCode2,
 							anotherString: 'A Third Fake String',
 						},
 					],
 				);
 				await testMergeRequest(
 					{
-						type: 'RootType',
-						sourceCode: rootTypeCode1,
-						destinationCode: rootTypeCode2,
+						type: 'MainType',
+						sourceCode: mainCode1,
+						destinationCode: mainCode2,
 					},
 					200,
 					sandbox.withUpdateMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 						someString: 'Fake String',
 						anotherString: 'A Third Fake String',
 					}),
@@ -234,151 +230,140 @@ describe('merge', () => {
 			it('merges document properties', async () => {
 				await sandbox.createNodes(
 					[
-						'RootType',
+						'MainType',
 
 						{
-							code: rootTypeCode1,
+							code: mainCode1,
 							someDocument: 'Fake Document',
 							anotherDocument: 'Another Fake Document',
 						},
 					],
 					[
-						'RootType',
+						'MainType',
 						{
-							code: rootTypeCode2,
+							code: mainCode2,
 							anotherDocument: 'A Third Fake Document',
 						},
 					],
 				);
 				await testMergeRequest(
 					{
-						type: 'RootType',
-						sourceCode: rootTypeCode1,
-						destinationCode: rootTypeCode2,
+						type: 'MainType',
+						sourceCode: mainCode1,
+						destinationCode: mainCode2,
 					},
 					200,
 					sandbox.withUpdateMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 						someDocument: 'Fake Document',
 						anotherDocument: 'A Third Fake Document',
 					}),
 				);
 				sandbox.expectS3Actions({
 					action: 'merge',
-					nodeType: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					nodeType: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
 			});
 
 			it("doesn't error when unrecognised properties exist", async () => {
 				await sandbox.createNodes(
-					[
-						'RootType',
-						{ code: rootTypeCode1, notInSchema: 'someVal' },
-					],
-					['RootType', rootTypeCode2],
+					['MainType', { code: mainCode1, notInSchema: 'someVal' }],
+					['MainType', mainCode2],
 				);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
 				await Promise.all([
-					verifyNotExists('RootType', rootTypeCode1),
-					verifyExists('RootType', rootTypeCode2),
+					verifyNotExists('MainType', mainCode1),
+					verifyExists('MainType', mainCode2),
 				]);
 
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withUpdateMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 						notInSchema: 'someVal',
 					}),
 				);
-				sandbox.expectKinesisEvents([
-					'DELETE',
-					rootTypeCode1,
-					'RootType',
-				]);
+				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('not modify existing properties of destination node', async () => {
 				await sandbox.createNodes(
-					['RootType', { code: rootTypeCode1, someString: 'potato' }],
-					['RootType', { code: rootTypeCode2, someString: 'tomato' }],
+					['MainType', { code: mainCode1, someString: 'potato' }],
+					['MainType', { code: mainCode2, someString: 'tomato' }],
 				);
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 						someString: 'tomato',
 					}),
 				);
 
-				sandbox.expectKinesisEvents([
-					'DELETE',
-					rootTypeCode1,
-					'RootType',
-				]);
+				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('add new properties to destination node', async () => {
 				await sandbox.createNodes(
-					['RootType', { code: rootTypeCode1, someString: 'potato' }],
-					['RootType', { code: rootTypeCode2 }],
+					['MainType', { code: mainCode1, someString: 'potato' }],
+					['MainType', { code: mainCode2 }],
 				);
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 						someString: 'potato',
 					}),
 				);
 
 				sandbox.expectKinesisEvents(
-					['DELETE', rootTypeCode1, 'RootType'],
-					['UPDATE', rootTypeCode2, 'RootType', ['someString']],
+					['DELETE', mainCode1, 'MainType'],
+					['UPDATE', mainCode2, 'MainType', ['someString']],
 				);
 			});
 		});
 
 		describe('relationships', () => {
 			it('move outgoing relationships', async () => {
-				const [rootType1, , childType] = await sandbox.createNodes(
-					['RootType', rootTypeCode1],
-					['RootType', rootTypeCode2],
-					['ChildType', childTypeCode],
+				const [main1, , child] = await sandbox.createNodes(
+					['MainType', mainCode1],
+					['MainType', mainCode2],
+					['ChildType', childCode],
 				);
 
-				await sandbox.connectNodes(rootType1, 'HAS_CHILD', childType);
+				await sandbox.connectNodes(main1, 'HAS_CHILD', child);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
-				await verifyNotExists('RootType', rootTypeCode1);
+				await verifyNotExists('MainType', mainCode1);
 
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 					}),
 					[
 						{
@@ -388,43 +373,39 @@ describe('merge', () => {
 						},
 						{
 							type: 'ChildType',
-							props: sandbox.withMeta({ code: childTypeCode }),
+							props: sandbox.withMeta({ code: childCode }),
 						},
 					],
 				);
 
 				sandbox.expectKinesisEvents(
-					['DELETE', rootTypeCode1, 'RootType'],
-					['UPDATE', rootTypeCode2, 'RootType', ['children']],
-					['UPDATE', childTypeCode, 'ChildType', ['isChildOf']],
+					['DELETE', mainCode1, 'MainType'],
+					['UPDATE', mainCode2, 'MainType', ['children']],
+					['UPDATE', childCode, 'ChildType', ['isChildOf']],
 				);
 			});
 
 			it('move incoming relationships', async () => {
-				const [rootType1, , parentType] = await sandbox.createNodes(
-					['RootType', rootTypeCode1],
-					['RootType', rootTypeCode2],
-					['ParentType', parentTypeCode],
+				const [main1, , parent] = await sandbox.createNodes(
+					['MainType', mainCode1],
+					['MainType', mainCode2],
+					['ParentType', parentCode],
 				);
 
-				await sandbox.connectNodes(
-					parentType,
-					'HAS_ROOT_CHILD',
-					rootType1,
-				);
+				await sandbox.connectNodes(parent, 'HAS_ROOT_CHILD', main1);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
-				await verifyNotExists('RootType', rootTypeCode1);
+				await verifyNotExists('MainType', mainCode1);
 
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 					}),
 					[
 						{
@@ -434,46 +415,42 @@ describe('merge', () => {
 						},
 						{
 							type: 'ParentType',
-							props: sandbox.withMeta({ code: parentTypeCode }),
+							props: sandbox.withMeta({ code: parentCode }),
 						},
 					],
 				);
 
 				sandbox.expectKinesisEvents(
-					['DELETE', rootTypeCode1, 'RootType'],
-					['UPDATE', rootTypeCode2, 'RootType', ['parents']],
-					['UPDATE', parentTypeCode, 'ParentType', ['isParentOf']],
+					['DELETE', mainCode1, 'MainType'],
+					['UPDATE', mainCode2, 'MainType', ['parents']],
+					['UPDATE', parentCode, 'ParentType', ['isParentOf']],
 				);
 			});
 
 			it('merges identical relationships', async () => {
-				const [
-					rootType1,
-					rootType2,
-					childType,
-				] = await sandbox.createNodes(
-					['RootType', rootTypeCode1],
-					['RootType', rootTypeCode2],
-					['ChildType', childTypeCode],
+				const [main1, main2, child] = await sandbox.createNodes(
+					['MainType', mainCode1],
+					['MainType', mainCode2],
+					['ChildType', childCode],
 				);
 
 				await sandbox.connectNodes(
-					[rootType1, 'HAS_CHILD', childType],
-					[rootType2, 'HAS_CHILD', childType],
+					[main1, 'HAS_CHILD', child],
+					[main2, 'HAS_CHILD', child],
 				);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
-				await verifyNotExists('RootType', rootTypeCode1);
+				await verifyNotExists('MainType', mainCode1);
 
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 					}),
 					[
 						{
@@ -483,78 +460,70 @@ describe('merge', () => {
 						},
 						{
 							type: 'ChildType',
-							props: sandbox.withMeta({ code: childTypeCode }),
+							props: sandbox.withMeta({ code: childCode }),
 						},
 					],
 				);
-				sandbox.expectKinesisEvents([
-					'DELETE',
-					rootTypeCode1,
-					'RootType',
-				]);
+				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('discard any newly reflexive relationships', async () => {
-				const [rootType1, rootType2] = await sandbox.createNodes(
-					['RootType', rootTypeCode1],
-					['RootType', rootTypeCode2],
+				const [main1, main2] = await sandbox.createNodes(
+					['MainType', mainCode1],
+					['MainType', mainCode2],
 				);
 
-				await sandbox.connectNodes(
-					rootType1,
-					'HAS_YOUNGER_SIBLING',
-					rootType2,
-				);
+				await sandbox.connectNodes(main1, 'HAS_YOUNGER_SIBLING', main2);
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: rootTypeCode1,
-					destinationCode: rootTypeCode2,
+					type: 'MainType',
+					sourceCode: mainCode1,
+					destinationCode: mainCode2,
 				});
-				await verifyNotExists('RootType', rootTypeCode1);
+				await verifyNotExists('MainType', mainCode1);
 
 				await testNode(
-					'RootType',
-					rootTypeCode2,
+					'MainType',
+					mainCode2,
 					sandbox.withMeta({
-						code: rootTypeCode2,
+						code: mainCode2,
 					}),
 				);
 				sandbox.expectKinesisEvents(
-					['DELETE', rootTypeCode1, 'RootType'],
-					['UPDATE', rootTypeCode2, 'RootType', ['olderSiblings']],
+					['DELETE', mainCode1, 'MainType'],
+					['UPDATE', mainCode2, 'MainType', ['olderSiblings']],
 				);
 			});
 
 			it('does not overwrite __-to-one relationships', async () => {
 				const [
-					RootType1,
-					RootType2,
-					childType1,
-					childType2,
+					Main1,
+					Main2,
+					child1,
+					child2,
 				] = await sandbox.createNodes(
-					['RootType', `${namespace}-root-1`],
-					['RootType', `${namespace}-root-2`],
-					['ChildType', `${namespace}-child-type-1`],
-					['ChildType', `${namespace}-child-type-2`],
+					['MainType', `${namespace}-main1`],
+					['MainType', `${namespace}-main2`],
+					['ChildType', `${namespace}-child1`],
+					['ChildType', `${namespace}-child2`],
 				);
 
 				await sandbox.connectNodes(
-					[RootType1, 'HAS_FAVOURITE_CHILD', childType1],
-					[RootType2, 'HAS_FAVOURITE_CHILD', childType2],
+					[Main1, 'HAS_FAVOURITE_CHILD', child1],
+					[Main2, 'HAS_FAVOURITE_CHILD', child2],
 				);
 
 				await testMergeRequest({
-					type: 'RootType',
-					sourceCode: `${namespace}-root-1`,
-					destinationCode: `${namespace}-root-2`,
+					type: 'MainType',
+					sourceCode: `${namespace}-main1`,
+					destinationCode: `${namespace}-main2`,
 				});
-				await verifyNotExists('RootType', rootTypeCode1);
+				await verifyNotExists('MainType', mainCode1);
 
 				await testNode(
-					'RootType',
-					`${namespace}-root-2`,
+					'MainType',
+					`${namespace}-main2`,
 					sandbox.withMeta({
-						code: `${namespace}-root-2`,
+						code: `${namespace}-main2`,
 					}),
 					[
 						{
@@ -565,16 +534,16 @@ describe('merge', () => {
 						{
 							type: 'ChildType',
 							props: sandbox.withMeta({
-								code: `${namespace}-child-type-2`,
+								code: `${namespace}-child2`,
 							}),
 						},
 					],
 				);
 				sandbox.expectKinesisEvents(
-					['DELETE', `${namespace}-root-1`, 'RootType'],
+					['DELETE', `${namespace}-main1`, 'MainType'],
 					[
 						'UPDATE',
-						`${namespace}-child-type-1`,
+						`${namespace}-child1`,
 						'ChildType',
 						['isFavouriteChildOf'],
 					],

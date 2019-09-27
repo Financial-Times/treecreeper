@@ -10,7 +10,7 @@ describe('v2 - node GET', () => {
 	const sandbox = {};
 
 	const namespace = 'v2-node-get';
-	const rootTypeCode = `${namespace}-root-type`;
+	const mainCode = `${namespace}-main`;
 	setupMocks(sandbox, { namespace });
 
 	const testGetRequest = (url, ...expectations) =>
@@ -22,16 +22,16 @@ describe('v2 - node GET', () => {
 
 	it('gets node without relationships', async () => {
 		sandbox.setS3Responses({ get: { someDocument: 'Fake Document' } });
-		await sandbox.createNode('RootType', {
-			code: rootTypeCode,
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 			someString: 'name1',
 			someDocument: 'Fake Document',
 		});
 		await testGetRequest(
-			`/v2/node/RootType/${rootTypeCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			200,
 			sandbox.withMeta({
-				code: rootTypeCode,
+				code: mainCode,
 				someString: 'name1',
 				someDocument: 'Fake Document',
 			}),
@@ -39,28 +39,28 @@ describe('v2 - node GET', () => {
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		sandbox.expectS3Actions({
 			action: 'get',
-			nodeType: 'RootType',
-			code: rootTypeCode,
+			nodeType: 'MainType',
+			code: mainCode,
 		});
 	});
 
 	it('gets node with relationships', async () => {
-		const [rootType, childType, parentType] = await sandbox.createNodes(
-			['RootType', rootTypeCode],
+		const [main, child, parent] = await sandbox.createNodes(
+			['MainType', mainCode],
 			['ChildType', `${namespace}-child`],
 			['ParentType', `${namespace}-parent`],
 		);
 		await sandbox.connectNodes(
 			// tests incoming and outgoing relationships
-			[rootType, 'HAS_CHILD', childType],
-			[parentType, 'HAS_ROOT_CHILD', rootType],
+			[main, 'HAS_CHILD', child],
+			[parent, 'HAS_ROOT_CHILD', main],
 		);
 
 		return testGetRequest(
-			`/v2/node/RootType/${rootTypeCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			200,
 			sandbox.withMeta({
-				code: rootTypeCode,
+				code: mainCode,
 				parents: [`${namespace}-parent`],
 				children: [`${namespace}-child`],
 			}),
@@ -68,16 +68,16 @@ describe('v2 - node GET', () => {
 	});
 
 	it('responds with 404 if no node', async () => {
-		return testGetRequest(`/v2/node/RootType/${rootTypeCode}`, 404);
+		return testGetRequest(`/v2/node/MainType/${mainCode}`, 404);
 	});
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return testGetRequest(`/v2/node/RootType/${rootTypeCode}`, 500);
+		return testGetRequest(`/v2/node/MainType/${mainCode}`, 500);
 	});
 
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
-		return testGetRequest(`/v2/node/RootType/${rootTypeCode}`, 500);
+		return testGetRequest(`/v2/node/MainType/${mainCode}`, 500);
 	});
 });

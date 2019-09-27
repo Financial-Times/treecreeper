@@ -2,7 +2,7 @@ test:
   label: Test
   description: Test types
   types:
-    - RootType
+    - MainType
     - ParentType
     - ChildType
 business:
