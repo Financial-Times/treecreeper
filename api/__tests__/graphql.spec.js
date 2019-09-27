@@ -48,6 +48,7 @@ describe('graphql', () => {
 	});
 
 	it('Return a single system with Document property', async () => {
+		sandbox.setS3Responses({ get: { troubleshooting: 'Fake Document' } });
 		await sandbox.createNode('System', {
 			code: systemCode,
 			troubleshooting: 'Fake Document',

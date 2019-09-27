@@ -29,9 +29,10 @@ const stubS3Get = responses => {
 				event: data.event,
 			});
 			return Promise.resolve(
-				responses.get || {
-					troubleshooting: 'Fake Document',
-				},
+				responses.get ||
+					{
+						// troubleshooting: 'Fake Document',
+					},
 			);
 		},
 	);
