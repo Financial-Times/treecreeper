@@ -10,30 +10,27 @@ const {
 describe('v2 - node DELETE', () => {
 	const sandbox = {};
 	const namespace = 'v2-node-delete';
-	const teamCode = `${namespace}-team`;
+	const rootCode = `${namespace}-root`;
 
 	setupMocks(sandbox, { namespace });
 
 	const testDeleteRequest = (...expectations) =>
 		sandbox
 			.request(app)
-			.delete(`/v2/node/Team/${teamCode}`)
+			.delete(`/v2/node/RootType/${rootCode}`)
 			.namespacedAuth()
 			.expect(...expectations);
 
 	it('deletes a detached node and deletes from s3', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
-		});
+		await sandbox.createNode('RootType', rootCode);
 		await testDeleteRequest(204);
 
-		await verifyNotExists('Team', teamCode);
-		sandbox.expectKinesisEvents(['DELETE', teamCode, 'Team']);
+		await verifyNotExists('RootType', rootCode);
+		sandbox.expectKinesisEvents(['DELETE', rootCode, 'RootType']);
 		sandbox.expectS3Actions({
 			action: 'delete',
-			nodeType: 'Team',
-			code: teamCode,
+			nodeType: 'RootType',
+			code: rootCode,
 		});
 		sandbox.expectNoS3Actions('upload', 'patch');
 	});
@@ -46,20 +43,20 @@ describe('v2 - node DELETE', () => {
 	});
 
 	it('error informatively when attempting to delete connected node', async () => {
-		const [team, person] = await sandbox.createNodes(
-			['Team', `${teamCode}`],
-			['Person', `${namespace}-person`],
+		const [rootType, childType] = await sandbox.createNodes(
+			['RootType', `${rootCode}`],
+			['ChildType', `${namespace}-child`],
 		);
-		await sandbox.connectNodes([team, 'HAS_TECH_LEAD', person]);
+		await sandbox.connectNodes([rootType, 'HAS_CHILD', childType]);
 
 		await testDeleteRequest(
 			409,
 			new RegExp(
-				`Cannot delete - Team ${teamCode} has relationships. Remove all techLeads relationships before attempting to delete this record.`,
+				`Cannot delete - RootType ${rootCode} has relationships. Remove all children relationships before attempting to delete this record.`,
 			),
 		);
 
-		await verifyExists('Team', teamCode);
+		await verifyExists('RootType', rootCode);
 		sandbox.expectNoKinesisEvents();
 		// bailOnAttachedNode throws error before s3 delete
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -75,10 +72,7 @@ describe('v2 - node DELETE', () => {
 
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
-		});
+		await sandbox.createNode('RootType', rootCode);
 		await testDeleteRequest(500);
 		sandbox.expectNoKinesisEvents();
 		// S3DocumentsHelper throws on instantiation
