@@ -31,6 +31,17 @@ const maybePluralType = def => (def.hasMany ? `[${def.type}]` : def.type);
 const maybePaginate = def =>
 	def.isRelationship && def.hasMany ? '(first: Int, offset: Int)' : '';
 
+const snakeToCamel = str => {
+	const camel = str
+		.split('_')
+		.map(
+			word =>
+				word.charAt(0).toUpperCase() + word.substring(1).toLowerCase(),
+		)
+		.join('');
+	return camel;
+};
+
 const cypherResolver = def => {
 	if (!def.isRelationship) {
 		return '';
@@ -59,17 +70,45 @@ const maybeDeprecate = ({ deprecationReason }) => {
 const defineProperties = properties => {
 	return properties
 		.map(
-			([name, def]) =>
-				stripEmptyFirstLine`
+			([name, def]) => {
+
+				return 	stripEmptyFirstLine`
+				"""
+				${def.description}
+				"""
+				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
+						def,
+					)} ${maybeDeprecate(def)}`
+			})
+		.join('');
+};
+
+const definePropertiesForRelationshipSchema = (properties, firstNode) => {
+	const retVal = properties
+	.map(
+		([name, def]) => {
+			const mapVal = stripEmptyFirstLine`
 			"""
 			${def.description}
 			"""
-			${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
-					def,
-				)} ${maybeDeprecate(def)}`,
-		)
-		.join('');
+			${name}${maybePaginate(def)}: ${def.isRelationship ? relationshipPluralType(def, firstNode) : maybePluralType(def)} ${maybeDeprecate(def)}`
+			return mapVal
+		}
+
+	)
+	.join('');
+	return retVal
 };
+
+const relationshipPluralType = (def, firstNode) => {
+	const from = def.direction === 'incoming' ? def.type : firstNode;
+	const to = def.direction === 'incoming' ? firstNode : def.type;
+	const fullNameCaps = `${from.toUpperCase()}_${
+		def.relationship
+	}_${to.toUpperCase()}`;
+	return `[${snakeToCamel(fullNameCaps)}]`
+}
+
 
 const PAGINATE = indentMultiline(
 	defineProperties(
@@ -108,13 +147,48 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 	): ${type}`;
 };
 
-const defineType = config => `
-"""
-${config.description}
-"""
-type ${config.name} {
-	${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
-}`;
+const defineType = config => {
+	return `
+	"""
+	${config.description}
+	"""
+	type ${config.name} {
+		${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
+	}`;
+}
+
+const defineTypeWithRelationshipTypes = config => {
+	// const properties = Object.entries(config.properties).filter(([name, def]) => !def.isRelationship)
+	console.log('defineTypeWithRelationshipTypes ', config.name)
+	const relationshipTypes = defineRelationshipTypes(config)
+	const properties = definePropertiesForRelationshipSchema(Object.entries(config.properties), config.name);
+	const retVal = `
+	"""
+	${config.description}
+	"""
+	type ${config.name} {
+		${indentMultiline(properties, 2, true)}
+	}`
+	return retVal;
+}
+
+const defineRelationshipTypes = config => {
+	const relationships = Object.entries(config.properties).filter(([name, def]) => def.isRelationship);
+	const relationshipTypes = relationships.map(defineRelationshipType(config.name))
+	return relationshipTypes
+}
+
+const defineRelationshipType = (firstNode) => ([name, def]) => {
+	const from = def.direction === 'incoming' ? def.type : firstNode;
+	const to = def.direction === 'incoming' ? firstNode : def.type;
+	const fullNameCaps = `${from.toUpperCase()}_${
+		def.relationship
+	}_${to.toUpperCase()}`;
+	return `\n\ttype ${snakeToCamel(fullNameCaps)} @relation(name: ${fullNameCaps}) {
+		from: ${from}
+		to: ${to}
+	}`;
+}
 
 const defineQueries = config => [
 	defineQuery({
@@ -154,8 +228,16 @@ const defineEnum = ([name, { description, options }]) => {
 		}`;
 };
 
+function flatten(arr) {
+	return arr.reduce(function(flat, toFlatten) {
+		return flat.concat(
+			Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten,
+		);
+	}, []);
+}
+
 module.exports = {
-	accessor() {
+	accessor(representRelationshipsAsNodes = true) {
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			relationshipStructure: 'graphql',
@@ -166,17 +248,33 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
+		// const typeNamesAndDescriptions = typesFromSchema.map(defineType);
+		const mapTypes = representRelationshipsAsNodes
+			? defineTypeWithRelationshipTypes
+			: defineType;
 
-		const typeNamesAndDescriptions = typesFromSchema.map(defineType);
+		console.log('TYPESFROMSCHEMA		', typesFromSchema)
+		const typeNamesAndDescriptions = flatten(typesFromSchema.map(mapTypes));
+
+
+		const uniqueTypeNamesAndDescriptions = [
+			...new Set(typeNamesAndDescriptions),
+		];
+
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
 
+		console.log('done')
+
+		console.log('uniqueTypeNamesAndDescriptions ', uniqueTypeNamesAndDescriptions)
+
+
 		return [].concat(
-			customDateTimeTypes + typeNamesAndDescriptions,
-			'type Query {\n',
-			...typesFromSchema.map(defineQueries),
-			'}',
+			customDateTimeTypes + uniqueTypeNamesAndDescriptions,
+			// 'type Query {\n',
+			// ...typesFromSchema.map(defineQueries),
+			// '}',
 			enums,
 		);
 	},
