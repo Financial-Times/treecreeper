@@ -10,12 +10,12 @@ references:
     environment:
       NEO4J_VERSION: "3.5.0"
 
-  workspace_root: &workspace_root
+  workspace_RootType: &workspace_RootType
     ~/
 
   attach_workspace: &attach_workspace
     attach_workspace:
-      at: *workspace_root
+      at: *workspace_RootType
 
   restore_node_modules: &restore_node_modules
     restore_cache:
@@ -49,7 +49,7 @@ jobs:
       - *cache_node_modules
 
       - persist_to_workspace:
-          root: *workspace_root
+          RootType: *workspace_RootType
           paths:
             - biz-ops-api
 

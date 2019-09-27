@@ -1,0 +1,62 @@
+name: RootType
+description: Description of RootType.
+moreInformation: |
+    More information for RootType
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  someDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  anotherDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  someString:
+    type: Word
+    description: Word description.
+    label: Word label
+  anotherString:
+    type: Word
+    description: Word description.
+    label: Word label
+  children:
+    relationship: HAS_CHILD
+    type: ChildType
+    description: Children description.
+    label: Children label
+    direction: outgoing
+    hasMany: true
+  parents:
+    relationship: HAS_ROOT_CHILD
+    type: ParentType
+    description: Parents description.
+    label: Parents label
+    direction: incoming
+    hasMany: true
+  favouriteChild:
+    relationship: HAS_FAVOURITE_CHILD
+    type: ChildType
+    description: Favourite child description.
+    label: Favourite label
+    direction: outgoing
+  youngerSiblings:
+    relationship: HAS_YOUNGER_SIBLING
+    type: RootType
+    description: Parents description.
+    label: Parents label
+    direction: outgoing
+    hasMany: true
+  olderSiblings:
+    relationship: HAS_YOUNGER_SIBLING
+    type: RootType
+    description: Parents description.
+    label: Parents label
+    direction: incoming
+    hasMany: true

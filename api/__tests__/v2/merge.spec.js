@@ -12,12 +12,10 @@ describe('merge', () => {
 	const sandbox = {};
 	const namespace = 'v2-merge';
 
-	const teamCode1 = `${namespace}-team-1`;
-	const teamCode2 = `${namespace}-team-2`;
-	const personCode = `${namespace}-person`;
-	const groupCode = `${namespace}-group`;
-	const systemCode1 = `${namespace}-system-1`;
-	const systemCode2 = `${namespace}-system-2`;
+	const rootTypeCode1 = `${namespace}-root-1`;
+	const rootTypeCode2 = `${namespace}-root-2`;
+	const childTypeCode = `${namespace}-child-type`;
+	const parentTypeCode = `${namespace}-parent-type`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -33,24 +31,19 @@ describe('merge', () => {
 
 	describe('error handling', () => {
 		beforeEach(() =>
-			sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]),
+			sandbox.createNodes(
+				['RootType', rootTypeCode1, { someDocument: 'fake1' }],
+				['RootType', rootTypeCode2, { someDocument: 'fake2' }],
+			),
 		);
 
 		it('responds with 500 if neo4j query fails', async () => {
-			await sandbox.createNodes(
-				['System', systemCode1, { troubleshooting: 'Fake Document' }],
-				[
-					'System',
-					systemCode2,
-					{ architectureDiagram: 'Another Fake Document' },
-				],
-			);
 			stubDbUnavailable(sandbox);
 			await testMergeRequest(
 				{
-					type: 'System',
-					sourceCode: systemCode1,
-					destinationCode: systemCode2,
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
 				},
 				500,
 			);
@@ -60,22 +53,18 @@ describe('merge', () => {
 
 		it('responds with 500 if s3 query fails', async () => {
 			stubS3Unavailable(sandbox);
-			await sandbox.createNodes(
-				['System', systemCode1, { troubleshooting: 'Fake Document' }],
-				[
-					'System',
-					systemCode2,
-					{ architectureDiagram: 'Another Fake Document' },
-				],
-			);
 			await testMergeRequest(
 				{
-					type: 'System',
-					sourceCode: systemCode1,
-					destinationCode: systemCode2,
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
 				},
 				500,
 			);
+			await Promise.all([
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
+			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
@@ -83,16 +72,16 @@ describe('merge', () => {
 		it('errors if no type supplied', async () => {
 			await testMergeRequest(
 				{
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
 				},
 				400,
 				/No type/,
 			);
 
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -101,15 +90,15 @@ describe('merge', () => {
 		it('errors if no source code supplied', async () => {
 			await testMergeRequest(
 				{
-					type: 'Team',
-					destinationCode: teamCode2,
+					type: 'RootType',
+					destinationCode: rootTypeCode2,
 				},
 				400,
 				/No sourceCode/,
 			);
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -117,15 +106,15 @@ describe('merge', () => {
 		it('errors if no destination code supplied', async () => {
 			await testMergeRequest(
 				{
-					type: 'Team',
-					sourceCode: teamCode1,
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
 				},
 				400,
 				/No destinationCode/,
 			);
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -134,15 +123,15 @@ describe('merge', () => {
 			await testMergeRequest(
 				{
 					type: 'NotTeam',
-					sourceCode: teamCode1,
-					destinationCode: teamCode2,
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
 				},
 				400,
 				/Invalid type/,
 			);
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -151,16 +140,16 @@ describe('merge', () => {
 		it('errors if source code does not exist', async () => {
 			await testMergeRequest(
 				{
-					type: 'Team',
-					sourceCode: 'not-team1',
-					destinationCode: teamCode2,
+					type: 'RootType',
+					sourceCode: 'not-exist',
+					destinationCode: rootTypeCode2,
 				},
 				404,
 				/record missing/,
 			);
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
@@ -168,352 +157,429 @@ describe('merge', () => {
 		it('errors if destination code does not exist', async () => {
 			await testMergeRequest(
 				{
-					type: 'Team',
-					sourceCode: teamCode1,
-					destinationCode: 'not-team2',
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: 'not-exist',
 				},
 				404,
 				/record missing/,
 			);
 			await Promise.all([
-				verifyExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
+				verifyExists('RootType', rootTypeCode1),
+				verifyExists('RootType', rootTypeCode2),
 			]);
 			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
 			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 	});
 	describe('successful application', () => {
-		it('merges unconnected nodes', async () => {
-			await sandbox.createNodes(['Team', teamCode1], ['Team', teamCode2]);
+		describe('properties', () => {
+			it('merges unconnected nodes', async () => {
+				await sandbox.createNodes(
+					['RootType', rootTypeCode1],
+					['RootType', rootTypeCode2],
+				);
 
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await Promise.all([
+					verifyNotExists('RootType', rootTypeCode1),
+					verifyExists('RootType', rootTypeCode2),
+				]);
+				sandbox.expectKinesisEvents([
+					'DELETE',
+					rootTypeCode1,
+					'RootType',
+				]);
 			});
-			await Promise.all([
-				verifyNotExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
-			]);
-			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
+
+			it('merges ordinary properties', async () => {
+				sandbox.setS3Responses({ merge: {} });
+				await sandbox.createNodes(
+					[
+						'RootType',
+						{
+							code: rootTypeCode1,
+							someString: 'Fake String',
+							anotherString: 'Another Fake String',
+						},
+					],
+					[
+						'RootType',
+						{
+							code: rootTypeCode2,
+							anotherString: 'A Third Fake String',
+						},
+					],
+				);
+				await testMergeRequest(
+					{
+						type: 'RootType',
+						sourceCode: rootTypeCode1,
+						destinationCode: rootTypeCode2,
+					},
+					200,
+					sandbox.withUpdateMeta({
+						code: rootTypeCode2,
+						someString: 'Fake String',
+						anotherString: 'A Third Fake String',
+					}),
+				);
+				sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
+			});
+
+			it('merges document properties', async () => {
+				await sandbox.createNodes(
+					[
+						'RootType',
+
+						{
+							code: rootTypeCode1,
+							someDocument: 'Fake Document',
+							anotherDocument: 'Another Fake Document',
+						},
+					],
+					[
+						'RootType',
+						{
+							code: rootTypeCode2,
+							anotherDocument: 'A Third Fake Document',
+						},
+					],
+				);
+				await testMergeRequest(
+					{
+						type: 'RootType',
+						sourceCode: rootTypeCode1,
+						destinationCode: rootTypeCode2,
+					},
+					200,
+					sandbox.withUpdateMeta({
+						code: rootTypeCode2,
+						someDocument: 'Fake Document',
+						anotherDocument: 'A Third Fake Document',
+					}),
+				);
+				sandbox.expectS3Actions({
+					action: 'merge',
+					nodeType: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+			});
+
+			it("doesn't error when unrecognised properties exist", async () => {
+				await sandbox.createNodes(
+					[
+						'RootType',
+						{ code: rootTypeCode1, notInSchema: 'someVal' },
+					],
+					['RootType', rootTypeCode2],
+				);
+
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await Promise.all([
+					verifyNotExists('RootType', rootTypeCode1),
+					verifyExists('RootType', rootTypeCode2),
+				]);
+
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withUpdateMeta({
+						code: rootTypeCode2,
+						notInSchema: 'someVal',
+					}),
+				);
+				sandbox.expectKinesisEvents([
+					'DELETE',
+					rootTypeCode1,
+					'RootType',
+				]);
+			});
+
+			it('not modify existing properties of destination node', async () => {
+				await sandbox.createNodes(
+					['RootType', { code: rootTypeCode1, someString: 'potato' }],
+					['RootType', { code: rootTypeCode2, someString: 'tomato' }],
+				);
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+						someString: 'tomato',
+					}),
+				);
+
+				sandbox.expectKinesisEvents([
+					'DELETE',
+					rootTypeCode1,
+					'RootType',
+				]);
+			});
+
+			it('add new properties to destination node', async () => {
+				await sandbox.createNodes(
+					['RootType', { code: rootTypeCode1, someString: 'potato' }],
+					['RootType', { code: rootTypeCode2 }],
+				);
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+						someString: 'potato',
+					}),
+				);
+
+				sandbox.expectKinesisEvents(
+					['DELETE', rootTypeCode1, 'RootType'],
+					['UPDATE', rootTypeCode2, 'RootType', ['someString']],
+				);
+			});
 		});
 
-		it('merges unconnected nodes with document properties in s3, updating only keys that do not already exist on the destinationNode', async () => {
-			await sandbox.createNodes(
-				[
-					'System',
-					systemCode1,
-					{
-						troubleshooting: 'Fake Document',
-						architectureDiagram: 'Another Fake Document',
-					},
-				],
-				[
-					'System',
-					systemCode2,
-					{ architectureDiagram: 'A Third Fake Document' },
-				],
-			);
-			await testMergeRequest(
-				{
-					type: 'System',
-					sourceCode: systemCode1,
-					destinationCode: systemCode2,
-				},
-				200,
-				sandbox.withUpdateMeta({
-					code: systemCode2,
-					troubleshooting: 'Fake Document',
-					architectureDiagram: 'A Third Fake Document',
-				}),
-			);
-			sandbox.expectS3Actions({
-				action: 'merge',
-				nodeType: 'System',
-				sourceCode: systemCode1,
-				destinationCode: systemCode2,
+		describe('relationships', () => {
+			it('move outgoing relationships', async () => {
+				const [rootType1, , childType] = await sandbox.createNodes(
+					['RootType', rootTypeCode1],
+					['RootType', rootTypeCode2],
+					['ChildType', childTypeCode],
+				);
+
+				await sandbox.connectNodes(rootType1, 'HAS_CHILD', childType);
+
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await verifyNotExists('RootType', rootTypeCode1);
+
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+					}),
+					[
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: sandbox.withMeta({}),
+						},
+						{
+							type: 'ChildType',
+							props: sandbox.withMeta({ code: childTypeCode }),
+						},
+					],
+				);
+
+				sandbox.expectKinesisEvents(
+					['DELETE', rootTypeCode1, 'RootType'],
+					['UPDATE', rootTypeCode2, 'RootType', ['children']],
+					['UPDATE', childTypeCode, 'ChildType', ['isChildOf']],
+				);
 			});
-		});
 
-		it("doesn't error when unrecognised properties exist", async () => {
-			await sandbox.createNodes(
-				['Team', teamCode1, { someProp: 'someVal' }],
-				['Team', teamCode2],
-			);
+			it('move incoming relationships', async () => {
+				const [rootType1, , parentType] = await sandbox.createNodes(
+					['RootType', rootTypeCode1],
+					['RootType', rootTypeCode2],
+					['ParentType', parentTypeCode],
+				);
 
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
+				await sandbox.connectNodes(
+					parentType,
+					'HAS_ROOT_CHILD',
+					rootType1,
+				);
+
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await verifyNotExists('RootType', rootTypeCode1);
+
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+					}),
+					[
+						{
+							type: 'HAS_ROOT_CHILD',
+							direction: 'incoming',
+							props: sandbox.withMeta({}),
+						},
+						{
+							type: 'ParentType',
+							props: sandbox.withMeta({ code: parentTypeCode }),
+						},
+					],
+				);
+
+				sandbox.expectKinesisEvents(
+					['DELETE', rootTypeCode1, 'RootType'],
+					['UPDATE', rootTypeCode2, 'RootType', ['parents']],
+					['UPDATE', parentTypeCode, 'ParentType', ['isParentOf']],
+				);
 			});
-			await Promise.all([
-				verifyNotExists('Team', teamCode1),
-				verifyExists('Team', teamCode2),
-			]);
 
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withUpdateMeta({
-					code: teamCode2,
-				}),
-			);
-			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
-		});
+			it('merges identical relationships', async () => {
+				const [
+					rootType1,
+					rootType2,
+					childType,
+				] = await sandbox.createNodes(
+					['RootType', rootTypeCode1],
+					['RootType', rootTypeCode2],
+					['ChildType', childTypeCode],
+				);
 
-		it('move outgoing relationships', async () => {
-			const [team1, , person] = await sandbox.createNodes(
-				['Team', teamCode1],
-				['Team', teamCode2],
-				['Person', personCode],
-			);
+				await sandbox.connectNodes(
+					[rootType1, 'HAS_CHILD', childType],
+					[rootType2, 'HAS_CHILD', childType],
+				);
 
-			await sandbox.connectNodes(team1, 'HAS_TECH_LEAD', person);
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await verifyNotExists('RootType', rootTypeCode1);
 
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+					}),
+					[
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: sandbox.withMeta({}),
+						},
+						{
+							type: 'ChildType',
+							props: sandbox.withMeta({ code: childTypeCode }),
+						},
+					],
+				);
+				sandbox.expectKinesisEvents([
+					'DELETE',
+					rootTypeCode1,
+					'RootType',
+				]);
 			});
-			await verifyNotExists('Team', teamCode1);
 
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-				}),
-				[
-					{
-						type: 'HAS_TECH_LEAD',
-						direction: 'outgoing',
-						props: sandbox.withMeta({}),
-					},
-					{
-						type: 'Person',
-						props: sandbox.withMeta({ code: personCode }),
-					},
-				],
-			);
+			it('discard any newly reflexive relationships', async () => {
+				const [rootType1, rootType2] = await sandbox.createNodes(
+					['RootType', rootTypeCode1],
+					['RootType', rootTypeCode2],
+				);
 
-			sandbox.expectKinesisEvents(
-				['DELETE', teamCode1, 'Team'],
-				['UPDATE', teamCode2, 'Team', ['techLeads']],
-				['UPDATE', personCode, 'Person', ['techLeadFor']],
-			);
-		});
+				await sandbox.connectNodes(
+					rootType1,
+					'HAS_YOUNGER_SIBLING',
+					rootType2,
+				);
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: rootTypeCode1,
+					destinationCode: rootTypeCode2,
+				});
+				await verifyNotExists('RootType', rootTypeCode1);
 
-		it('move incoming relationships', async () => {
-			const [team1, , group] = await sandbox.createNodes(
-				['Team', teamCode1],
-				['Team', teamCode2],
-				['Group', groupCode],
-			);
-
-			await sandbox.connectNodes(group, 'HAS_TEAM', team1);
-
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
+				await testNode(
+					'RootType',
+					rootTypeCode2,
+					sandbox.withMeta({
+						code: rootTypeCode2,
+					}),
+				);
+				sandbox.expectKinesisEvents(
+					['DELETE', rootTypeCode1, 'RootType'],
+					['UPDATE', rootTypeCode2, 'RootType', ['olderSiblings']],
+				);
 			});
-			await verifyNotExists('Team', teamCode1);
 
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-				}),
-				[
-					{
-						type: 'HAS_TEAM',
-						direction: 'incoming',
-						props: sandbox.withMeta({}),
-					},
-					{
-						type: 'Group',
-						props: sandbox.withMeta({ code: groupCode }),
-					},
-				],
-			);
+			it('does not overwrite __-to-one relationships', async () => {
+				const [
+					RootType1,
+					RootType2,
+					childType1,
+					childType2,
+				] = await sandbox.createNodes(
+					['RootType', `${namespace}-root-1`],
+					['RootType', `${namespace}-root-2`],
+					['ChildType', `${namespace}-child-type-1`],
+					['ChildType', `${namespace}-child-type-2`],
+				);
 
-			sandbox.expectKinesisEvents(
-				['DELETE', teamCode1, 'Team'],
-				['UPDATE', teamCode2, 'Team', ['group', 'parentGroup']],
-				['UPDATE', groupCode, 'Group', ['topLevelTeams', 'allTeams']],
-			);
-		});
+				await sandbox.connectNodes(
+					[RootType1, 'HAS_FAVOURITE_CHILD', childType1],
+					[RootType2, 'HAS_FAVOURITE_CHILD', childType2],
+				);
 
-		it('merges identical relationships', async () => {
-			const [team1, team2, person] = await sandbox.createNodes(
-				['Team', teamCode1],
-				['Team', teamCode2],
-				['Person', personCode],
-			);
+				await testMergeRequest({
+					type: 'RootType',
+					sourceCode: `${namespace}-root-1`,
+					destinationCode: `${namespace}-root-2`,
+				});
+				await verifyNotExists('RootType', rootTypeCode1);
 
-			await sandbox.connectNodes(
-				[team1, 'HAS_TECH_LEAD', person],
-				[team2, 'HAS_TECH_LEAD', person],
-			);
-
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
+				await testNode(
+					'RootType',
+					`${namespace}-root-2`,
+					sandbox.withMeta({
+						code: `${namespace}-root-2`,
+					}),
+					[
+						{
+							type: 'HAS_FAVOURITE_CHILD',
+							direction: 'outgoing',
+							props: sandbox.withMeta({}),
+						},
+						{
+							type: 'ChildType',
+							props: sandbox.withMeta({
+								code: `${namespace}-child-type-2`,
+							}),
+						},
+					],
+				);
+				sandbox.expectKinesisEvents(
+					['DELETE', `${namespace}-root-1`, 'RootType'],
+					[
+						'UPDATE',
+						`${namespace}-child-type-1`,
+						'ChildType',
+						['isFavouriteChildOf'],
+					],
+				);
 			});
-			await verifyNotExists('Team', teamCode1);
-
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-				}),
-				[
-					{
-						type: 'HAS_TECH_LEAD',
-						direction: 'outgoing',
-						props: sandbox.withMeta({}),
-					},
-					{
-						type: 'Person',
-						props: sandbox.withMeta({ code: personCode }),
-					},
-				],
-			);
-			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
-		});
-
-		it('discard any newly reflexive relationships', async () => {
-			const [team1, team2] = await sandbox.createNodes(
-				['Team', teamCode1],
-				['Team', teamCode2],
-			);
-
-			await sandbox.connectNodes(team1, 'HAS_TEAM', team2);
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
-			});
-			await verifyNotExists('Team', teamCode1);
-
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-				}),
-			);
-			sandbox.expectKinesisEvents(
-				['DELETE', teamCode1, 'Team'],
-				['UPDATE', teamCode2, 'Team', ['parentTeam']],
-			);
-		});
-
-		it('not modify existing properties of destination node', async () => {
-			await sandbox.createNodes(
-				['Team', { code: teamCode1, name: 'potato' }],
-				['Team', { code: teamCode2, name: 'tomato' }],
-			);
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
-			});
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-					name: 'tomato',
-				}),
-			);
-
-			sandbox.expectKinesisEvents(['DELETE', teamCode1, 'Team']);
-		});
-
-		it('add new properties to destination node', async () => {
-			await sandbox.createNodes(
-				['Team', { code: teamCode1, name: 'potato' }],
-				['Team', { code: teamCode2 }],
-			);
-			await testMergeRequest({
-				type: 'Team',
-				sourceCode: teamCode1,
-				destinationCode: teamCode2,
-			});
-			await testNode(
-				'Team',
-				teamCode2,
-				sandbox.withMeta({
-					code: teamCode2,
-					name: 'potato',
-				}),
-			);
-
-			sandbox.expectKinesisEvents(
-				['DELETE', teamCode1, 'Team'],
-				['UPDATE', teamCode2, 'Team', ['name']],
-			);
-		});
-
-		it('does not overwrite __-to-one relationships', async () => {
-			const [
-				system1,
-				system2,
-				person1,
-				person2,
-			] = await sandbox.createNodes(
-				['System', `${namespace}-system-1`],
-				['System', `${namespace}-system-2`],
-				['Person', `${namespace}-person-1`],
-				['Person', `${namespace}-person-2`],
-			);
-
-			await sandbox.connectNodes(
-				[system1, 'HAS_TECHNICAL_OWNER', person1],
-				[system2, 'HAS_TECHNICAL_OWNER', person2],
-			);
-
-			await testMergeRequest({
-				type: 'System',
-				sourceCode: `${namespace}-system-1`,
-				destinationCode: `${namespace}-system-2`,
-			});
-			await verifyNotExists('Team', teamCode1);
-
-			await testNode(
-				'System',
-				`${namespace}-system-2`,
-				sandbox.withMeta({
-					code: `${namespace}-system-2`,
-				}),
-				[
-					{
-						type: 'HAS_TECHNICAL_OWNER',
-						direction: 'outgoing',
-						props: sandbox.withMeta({}),
-					},
-					{
-						type: 'Person',
-						props: sandbox.withMeta({
-							code: `${namespace}-person-2`,
-						}),
-					},
-				],
-			);
-			sandbox.expectKinesisEvents(
-				['DELETE', `${namespace}-system-1`, 'System'],
-				[
-					'UPDATE',
-					`${namespace}-person-1`,
-					'Person',
-					['technicalOwnerFor'],
-				],
-			);
 		});
 	});
 });

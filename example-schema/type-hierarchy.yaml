@@ -1,3 +1,10 @@
+test:
+  label: Test
+  description: Test types
+  types:
+    - RootType
+    - ParentType
+    - ChildType
 business:
   label: Business
   description: Relating to how the FT operates and makes and spends its money

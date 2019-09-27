@@ -22,21 +22,23 @@ const stubKinesis = () => {
 	return EventLogWriter.prototype.sendEvent;
 };
 
-const stubS3Get = () => {
+const stubS3Get = responses => {
 	jest.spyOn(S3DocumentsHelper.prototype, 'getFileFromS3').mockImplementation(
 		data => {
 			logger.debug('S3DocumentsHelper stub getFileFromS3 called', {
 				event: data.event,
 			});
-			return Promise.resolve({
-				troubleshooting: 'Fake Document',
-			});
+			return Promise.resolve(
+				responses.get || {
+					troubleshooting: 'Fake Document',
+				},
+			);
 		},
 	);
 	return S3DocumentsHelper.prototype.getFileFromS3;
 };
 
-const stubS3Delete = () => {
+const stubS3Delete = responses => {
 	jest.spyOn(
 		S3DocumentsHelper.prototype,
 		'deleteFileFromS3',
@@ -44,41 +46,43 @@ const stubS3Delete = () => {
 		logger.debug('S3DocumentsHelper stub deleteFileFromS3 called', {
 			event: data.event,
 		});
-		return Promise.resolve('FakeDeleteMarker');
+		return Promise.resolve(responses.delete || 'FakeDeleteMarker');
 	});
 	return S3DocumentsHelper.prototype.deleteFileFromS3;
 };
 
-const stubS3Patch = () => {
+const stubS3Patch = responses => {
 	jest.spyOn(S3DocumentsHelper.prototype, 'patchS3file').mockImplementation(
 		data => {
 			logger.debug('S3DocumentsHelper stub patchS3file called', {
 				event: data.event,
 			});
-			return Promise.resolve({
-				versionId: 'FakePatchVersionId',
-				newBodyDocs: {
-					troubleshooting: 'Another Fake Document',
+			return Promise.resolve(
+				responses.patch || {
+					versionId: 'FakePatchVersionId',
+					newBodyDocs: {
+						troubleshooting: 'Another Fake Document',
+					},
 				},
-			});
+			);
 		},
 	);
 	return S3DocumentsHelper.prototype.patchS3file;
 };
 
-const stubS3Upload = () => {
+const stubS3Upload = responses => {
 	jest.spyOn(S3DocumentsHelper.prototype, 'uploadToS3').mockImplementation(
 		data => {
 			logger.debug('S3DocumentsHelper stub uploadToS3 called', {
 				event: data.event,
 			});
-			return Promise.resolve('FakeVersionId');
+			return Promise.resolve(responses.upload || 'FakeVersionId');
 		},
 	);
 	return S3DocumentsHelper.prototype.uploadToS3;
 };
 
-const stubS3Merge = () => {
+const stubS3Merge = responses => {
 	jest.spyOn(
 		S3DocumentsHelper.prototype,
 		'mergeFilesInS3',
@@ -89,9 +93,9 @@ const stubS3Merge = () => {
 		return Promise.resolve({
 			deleteVersionId: 'FakeDeleteVersionId',
 			writeVersionId: 'FakeWriteVersionId',
-			updatedBody: {
-				troubleshooting: 'Fake Document',
-				architectureDiagram: 'A Third Fake Document',
+			updatedBody: responses.merge || {
+				someDocument: 'Fake Document',
+				anotherDocument: 'A Third Fake Document',
 			},
 		});
 	});
@@ -109,7 +113,6 @@ const setupMocks = (
 	let clock;
 	const now = '2019-01-09T09:08:22.908Z';
 	const then = '2015-11-15T08:12:27.908Z';
-
 	if (withDb) {
 		// clean up after potentially failed test runs
 		beforeAll(() => dropDb(namespace));
@@ -121,14 +124,18 @@ const setupMocks = (
 		// app.listen does in server/create-app.js
 		await schemaReady;
 		sandbox.sinon = sinon.createSandbox();
+		const s3Responses = {};
 		jest.spyOn(salesForceSync, 'setSalesforceIdForSystem');
 		sandbox.request = request;
 		sandbox.stubSendEvent = stubKinesis();
-		sandbox.stubS3Get = stubS3Get();
-		sandbox.stubPatchS3file = stubS3Patch();
-		sandbox.stubDeleteFileFromS3 = stubS3Delete();
-		sandbox.stubS3Upload = stubS3Upload();
-		sandbox.stubS3Merge = stubS3Merge();
+		sandbox.stubS3Get = stubS3Get(s3Responses);
+		sandbox.stubPatchS3file = stubS3Patch(s3Responses);
+		sandbox.stubDeleteFileFromS3 = stubS3Delete(s3Responses);
+		sandbox.stubS3Upload = stubS3Upload(s3Responses);
+		sandbox.stubS3Merge = stubS3Merge(s3Responses);
+
+		sandbox.setS3Responses = overrides =>
+			Object.assign(s3Responses, overrides);
 		clock = lolex.install({ now: new Date(now).getTime() });
 		if (withDb) {
 			testDataCreators(namespace, sandbox, now, then);
