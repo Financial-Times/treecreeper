@@ -44,7 +44,7 @@ describe('v2 - node firewall', () => {
 		it('PATCH no api_key returns 401', async () => {
 			await sandbox
 				.request(app)
-				.patch('/v2/node/Team/a-team')
+				.patch('/v2/node/MainType/a-team')
 				.send({ foo: 'bar' })
 				.set('client-id', 'test-client-id')
 				.expect(401);
@@ -72,7 +72,7 @@ describe('v2 - node firewall', () => {
 			it('POST no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
-					.post('/v2/node/Team/new-team')
+					.post('/v2/node/MainType/new-team')
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
@@ -82,7 +82,7 @@ describe('v2 - node firewall', () => {
 			it('PATCH no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
-					.patch('/v2/node/Team/a-team')
+					.patch('/v2/node/MainType/a-team')
 					.send({ foo: 'bar' })
 					.set('API_KEY', API_KEY)
 					.expect(400);
@@ -279,12 +279,12 @@ describe('v2 - node firewall', () => {
 			it('should error when node code is suspicious', async () => {
 				await sandbox
 					.request(app)
-					[method](`/v2/node/Team/${INJECTION_ATTACK_STRING}`)
+					[method](`/v2/node/MainType/${INJECTION_ATTACK_STRING}`)
 					.namespacedAuth()
 					.expect(
 						400,
 						new RegExp(
-							`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`Team\``,
+							`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`MainType\``,
 						),
 					);
 			});

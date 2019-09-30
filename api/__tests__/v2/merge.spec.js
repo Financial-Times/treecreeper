@@ -122,7 +122,7 @@ describe('merge', () => {
 		it('errors if type invalid', async () => {
 			await testMergeRequest(
 				{
-					type: 'NotTeam',
+					type: 'InvalidType',
 					sourceCode: mainCode1,
 					destinationCode: mainCode2,
 				},
