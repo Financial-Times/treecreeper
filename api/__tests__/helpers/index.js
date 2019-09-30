@@ -62,7 +62,7 @@ const stubS3Patch = responses => {
 				responses.patch || {
 					versionId: 'FakePatchVersionId',
 					newBodyDocs: {
-						troubleshooting: 'Another Fake Document',
+						someDocument: 'Another Fake Document',
 					},
 				},
 			);

@@ -20,6 +20,7 @@ properties:
   isFavouriteChildOf:
     relationship: HAS_FAVOURITE_CHILD
     type: MainType
+    hasMany: true
     description: Is favourite child of description.
     label: Is favourite child of label
     direction: incoming

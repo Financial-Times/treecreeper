@@ -22,6 +22,10 @@ properties:
     type: Word
     description: Word description.
     label: Word label
+  someBoolean:
+    type: Boolean
+    description: Boolean description.
+    label: Boolean label
   anotherString:
     type: Word
     description: Word description.
@@ -49,6 +53,7 @@ properties:
     type: ChildType
     description: Favourite child description.
     label: Favourite label
+    hasMany: false
     direction: outgoing
   youngerSiblings:
     relationship: HAS_YOUNGER_SIBLING
