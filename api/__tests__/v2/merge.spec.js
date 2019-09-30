@@ -392,7 +392,7 @@ describe('merge', () => {
 					['ParentType', parentCode],
 				);
 
-				await sandbox.connectNodes(parent, 'HAS_ROOT_CHILD', main1);
+				await sandbox.connectNodes(parent, 'IS_PARENT_OF', main1);
 
 				await testMergeRequest({
 					type: 'MainType',
@@ -409,7 +409,7 @@ describe('merge', () => {
 					}),
 					[
 						{
-							type: 'HAS_ROOT_CHILD',
+							type: 'IS_PARENT_OF',
 							direction: 'incoming',
 							props: sandbox.withMeta({}),
 						},

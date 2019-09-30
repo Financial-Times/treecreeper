@@ -26,6 +26,10 @@ properties:
     type: Word
     description: Word description.
     label: Word label
+  someDate:
+    type: Date
+    description: Date description.
+    label: Date label
   children:
     relationship: HAS_CHILD
     type: ChildType
@@ -34,7 +38,7 @@ properties:
     direction: outgoing
     hasMany: true
   parents:
-    relationship: HAS_ROOT_CHILD
+    relationship: IS_PARENT_OF
     type: ParentType
     description: Parents description.
     label: Parents label

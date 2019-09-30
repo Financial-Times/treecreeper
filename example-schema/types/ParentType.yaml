@@ -11,7 +11,7 @@ properties:
     label: Code label
     pattern: CODE
   isParentOf:
-    relationship: HAS_ROOT_CHILD
+    relationship: IS_PARENT_OF
     type: MainType
     description: Is parent of description.
     label: Is parent of label

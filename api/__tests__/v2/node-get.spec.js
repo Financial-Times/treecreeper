@@ -53,7 +53,7 @@ describe('v2 - node GET', () => {
 		await sandbox.connectNodes(
 			// tests incoming and outgoing relationships
 			[main, 'HAS_CHILD', child],
-			[parent, 'HAS_ROOT_CHILD', main],
+			[parent, 'IS_PARENT_OF', main],
 		);
 
 		return testGetRequest(
