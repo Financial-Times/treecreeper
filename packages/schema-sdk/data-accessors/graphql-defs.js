@@ -84,20 +84,19 @@ const defineProperties = properties => {
 };
 
 const definePropertiesForRelationshipSchema = (properties, firstNode) => {
-	const retVal = properties
-	.map(
-		([name, def]) => {
-			const mapVal = stripEmptyFirstLine`
-			"""
-			${def.description}
-			"""
-			${name}${maybePaginate(def)}: ${def.isRelationship ? relationshipPluralType(def, firstNode) : maybePluralType(def)} ${maybeDeprecate(def)}`
-			return mapVal
-		}
+	return properties
+		.map(
+			([name, def]) => {
+				const mapVal = stripEmptyFirstLine`
+				"""
+				${def.description}
+				"""
+				${name}${maybePaginate(def)}: ${def.isRelationship ? relationshipPluralType(def, firstNode) : maybePluralType(def)} ${maybeDeprecate(def)}`
+				return mapVal
+			}
 
-	)
-	.join('');
-	return retVal
+		)
+		.join('');
 };
 
 const relationshipPluralType = (def, firstNode) => {
@@ -162,14 +161,16 @@ const defineTypeWithRelationshipTypes = config => {
 	console.log('defineTypeWithRelationshipTypes ', config.name)
 	const relationshipTypes = defineRelationshipTypes(config)
 	const properties = definePropertiesForRelationshipSchema(Object.entries(config.properties), config.name);
-	const retVal = `
-	"""
-	${config.description}
-	"""
-	type ${config.name} {
-		${indentMultiline(properties, 2, true)}
-	}`
-	return retVal;
+	return [
+		`
+		"""
+		${config.description}
+		"""
+		type ${config.name} {
+			${indentMultiline(properties, 2, true)}
+		}`,
+		...relationshipTypes
+	];
 }
 
 const defineRelationshipTypes = config => {
@@ -272,9 +273,9 @@ module.exports = {
 
 		return [].concat(
 			customDateTimeTypes + uniqueTypeNamesAndDescriptions,
-			// 'type Query {\n',
-			// ...typesFromSchema.map(defineQueries),
-			// '}',
+			'type Query {\n',
+			...typesFromSchema.map(defineQueries),
+			'}',
 			enums,
 		);
 	},
