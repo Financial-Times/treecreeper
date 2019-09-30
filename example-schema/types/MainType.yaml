@@ -26,6 +26,10 @@ properties:
     type: Boolean
     description: Boolean description.
     label: Boolean label
+  someEnum:
+    type: SystemLifecycle
+    description: Enum description.
+    label: Enum label
   anotherString:
     type: Word
     description: Word description.
