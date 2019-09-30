@@ -99,7 +99,7 @@ describe('generic app settings', () => {
 		delete process.env.DISABLE_READS;
 	});
 
-	it('POST graphql with default query', async () => {
+	it.skip('POST graphql with default query', async () => {
 		await request(app)
 			.post('/graphql')
 			.send({ query: DEFAULT_QUERY })
