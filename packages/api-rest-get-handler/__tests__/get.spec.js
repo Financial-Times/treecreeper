@@ -15,7 +15,10 @@ describe('v2 - node GET', () => {
 			code: mainCode,
 			someString: 'name1',
 		});
-		const { body, status } = await getHandler()({type: 'MainType', code: mainCode});
+		const { body, status } = await getHandler()({
+			type: 'MainType',
+			code: mainCode,
+		});
 
 		expect(status).toBe(200);
 		expect(body).toEqual(
@@ -38,7 +41,10 @@ describe('v2 - node GET', () => {
 			[parent, 'IS_PARENT_OF', main],
 		);
 
-		const { body, status } = await getHandler()({type: 'MainType', code: mainCode});
+		const { body, status } = await getHandler()({
+			type: 'MainType',
+			code: mainCode,
+		});
 		expect(status).toBe(200);
 		expect(body).toEqual(
 			sandbox.addMeta({
@@ -57,10 +63,10 @@ describe('v2 - node GET', () => {
 		const { body, status } = await getHandler({
 			documentStore: {
 				get: jest.fn(() => ({
-					someDocument: 'document'
+					someDocument: 'document',
 				})),
 			},
-		})({type: 'MainType', code: mainCode});
+		})({ type: 'MainType', code: mainCode });
 
 		expect(status).toBe(200);
 		expect(body).toEqual(

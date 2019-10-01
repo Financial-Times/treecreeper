@@ -13,7 +13,7 @@ const getNodeWithRelationships = (nodeType, code) => {
 	return executeQuery(
 		`MATCH (node:${nodeType} {code: $code})
 			${nodeWithRelsCypher()}`,
-		{ code }
+		{ code },
 	);
 };
 

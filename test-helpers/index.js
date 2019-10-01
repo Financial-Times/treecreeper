@@ -1,6 +1,6 @@
 const logger = require('@financial-times/n-logger').default;
-const dbConnection = require('./db-connection');
 const lolex = require('lolex');
+const dbConnection = require('./db-connection');
 const { schemaReady } = require('../api/server/lib/init-schema');
 
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
@@ -13,7 +13,6 @@ const setupMocks = (sandbox, { namespace } = {}) => {
 	beforeAll(() => dropDb(namespace));
 
 	beforeEach(async () => {
-
 		// have to await in here as supertest doesn't wait for the callback
 		// in app listen to be called, so doesn't await schemaReady where
 		// app.listen does in server/create-app.js

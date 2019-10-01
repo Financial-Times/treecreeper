@@ -2,7 +2,7 @@ const neo4j = require('neo4j-driver').v1;
 const metrics = require('next-metrics');
 const { logger } = require('../lib/request-context');
 
-const { TIMEOUT } = {TIMEOUT: 15000};
+const { TIMEOUT } = { TIMEOUT: 15000 };
 
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL,
