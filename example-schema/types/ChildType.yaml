@@ -1,0 +1,26 @@
+name: ChildType
+description: Description of ChildType.
+moreInformation: |
+    More information for ChildType
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    pattern: CODE
+    label: Code label
+  isChildOf:
+    relationship: HAS_CHILD
+    type: MainType
+    description: Is child of description.
+    label: Is child of label
+    direction: incoming
+    hasMany: true
+  isFavouriteChildOf:
+    relationship: HAS_FAVOURITE_CHILD
+    type: MainType
+    hasMany: true
+    description: Is favourite child of description.
+    label: Is favourite child of label
+    direction: incoming

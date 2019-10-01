@@ -15,11 +15,10 @@ describe('v2 - node PATCH', () => {
 	const sandbox = {};
 	const namespace = 'v2-node-patch';
 
-	const teamCode = `${namespace}-team`;
-	const repoCode = `github:${namespace}`;
-	const personCode = `${namespace}-person`;
-	const groupCode = `${namespace}-group`;
-	const systemCode = `${namespace}-system`;
+	const mainCode = `${namespace}-main`;
+	const restrictedCode = `${namespace}-restricted`;
+	const childCode = `${namespace}-child`;
+	const parentCode = `${namespace}-parent`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -37,178 +36,187 @@ describe('v2 - node PATCH', () => {
 	};
 
 	it('update node in neo4j with non-document properties only', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
 		});
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				name: 'name2',
+				someString: 'name2',
 			},
 			200,
 			sandbox.withUpdateMeta({
-				name: 'name2',
-				code: teamCode,
+				someString: 'name2',
+				code: mainCode,
 			}),
 		);
 
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				name: 'name2',
-				code: teamCode,
+				someString: 'name2',
+				code: mainCode,
 			}),
 		);
 
-		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			mainCode,
+			'MainType',
+			['someString'],
+		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('update node in s3 with document properties only', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 		});
 		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				troubleshooting: 'Another Fake Document',
+				someDocument: 'Another Fake Document',
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: systemCode,
-				troubleshooting: 'Another Fake Document',
+				code: mainCode,
+				someDocument: 'Another Fake Document',
 			}),
 		);
 
 		await testNode(
-			'System',
-			systemCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				code: systemCode,
+				code: mainCode,
 			}),
 		);
 		sandbox.expectKinesisEvents([
 			'UPDATE',
-			systemCode,
-			'System',
-			['troubleshooting'],
+			mainCode,
+			'MainType',
+			['someDocument'],
 		]);
 		sandbox.expectS3Actions({
 			action: 'patch',
-			nodeType: 'System',
-			code: systemCode,
+			nodeType: 'MainType',
+			code: mainCode,
 			body: {
-				troubleshooting: 'Another Fake Document',
+				someDocument: 'Another Fake Document',
 			},
 		});
 		sandbox.expectNoS3Actions('upload', 'delete');
 	});
 
 	it('update node in neo4j and s3 with document and non-document properties', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 		});
 		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				name: 'name1',
-				troubleshooting: 'Another Fake Document',
+				someString: 'name1',
+				someDocument: 'Another Fake Document',
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: systemCode,
-				name: 'name1',
-				troubleshooting: 'Another Fake Document',
+				code: mainCode,
+				someString: 'name1',
+				someDocument: 'Another Fake Document',
 			}),
 		);
 
 		await testNode(
-			'System',
-			systemCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				name: 'name1',
-				code: systemCode,
+				someString: 'name1',
+				code: mainCode,
 			}),
 		);
 
 		sandbox.expectKinesisEvents([
 			'UPDATE',
-			systemCode,
-			'System',
-			['name', 'troubleshooting'],
+			mainCode,
+			'MainType',
+			['someString', 'someDocument'],
 		]);
 		sandbox.expectS3Actions({
 			action: 'patch',
-			nodeType: 'System',
-			code: systemCode,
+			nodeType: 'MainType',
+			code: mainCode,
 			body: {
-				troubleshooting: 'Another Fake Document',
+				someDocument: 'Another Fake Document',
 			},
 		});
 		sandbox.expectNoS3Actions('upload', 'delete');
 	});
 
 	it('Not create property when passed empty string', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
 		});
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				description: '',
+				anotherString: '',
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: teamCode,
-				name: 'name1',
+				code: mainCode,
+				someString: 'name1',
 			}),
 		);
 
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				name: 'name1',
-				code: teamCode,
+				someString: 'name1',
+				code: mainCode,
 			}),
 		);
 		sandbox.expectNoKinesisEvents();
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
+	it.skip('Not set Document property when empty string provided', async () => {
+		// TODO need to write a test here
+	});
+
 	describe('temporal properties', () => {
 		it('Set Date property when no previous value', async () => {
 			const isoDateString = '2019-01-09';
 			const date = new Date(isoDateString);
-			await sandbox.createNode('System', {
-				code: systemCode,
+			await sandbox.createNode('MainType', {
+				code: mainCode,
 			});
 			await testPatchRequest(
-				`/v2/node/System/${systemCode}`,
-				{ lastServiceReviewDate: date.toISOString() },
+				`/v2/node/MainType/${mainCode}`,
+				{ someDate: date.toISOString() },
 				200,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 
 			await testNode(
-				'System',
-				systemCode,
+				'MainType',
+				mainCode,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 			sandbox.expectKinesisEvents([
 				'UPDATE',
-				systemCode,
-				'System',
-				['lastServiceReviewDate'],
+				mainCode,
+				'MainType',
+				['someDate'],
 			]);
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
@@ -216,36 +224,36 @@ describe('v2 - node PATCH', () => {
 		it('Overwrite existing Date property', async () => {
 			const isoDateString = '2019-01-09';
 			const date = new Date(isoDateString);
-			await sandbox.createNode('System', {
-				code: systemCode,
-				lastServiceReviewDate: neo4jTemporalTypes.Date.fromStandardDate(
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+				someDate: neo4jTemporalTypes.Date.fromStandardDate(
 					new Date('2018-01-09'),
 				),
 			});
 
 			await testPatchRequest(
-				`/v2/node/System/${systemCode}`,
-				{ lastServiceReviewDate: date.toISOString() },
+				`/v2/node/MainType/${mainCode}`,
+				{ someDate: date.toISOString() },
 				200,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 
 			await testNode(
-				'System',
-				systemCode,
+				'MainType',
+				mainCode,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 			sandbox.expectKinesisEvents([
 				'UPDATE',
-				systemCode,
-				'System',
-				['lastServiceReviewDate'],
+				mainCode,
+				'MainType',
+				['someDate'],
 			]);
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
@@ -253,141 +261,156 @@ describe('v2 - node PATCH', () => {
 		it("Not overwrite when 'same' Date sent", async () => {
 			const isoDateString = '2019-01-09';
 			const date = new Date(isoDateString);
-			await sandbox.createNode('System', {
-				code: systemCode,
-				lastServiceReviewDate: neo4jTemporalTypes.Date.fromStandardDate(
-					date,
-				),
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+				someDate: neo4jTemporalTypes.Date.fromStandardDate(date),
 			});
 
 			await testPatchRequest(
-				`/v2/node/System/${systemCode}`,
-				{ lastServiceReviewDate: '2019-01-09' },
+				`/v2/node/MainType/${mainCode}`,
+				{ someDate: '2019-01-09' },
 				200,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 
 			await testNode(
-				'System',
-				systemCode,
+				'MainType',
+				mainCode,
 				sandbox.withUpdateMeta({
-					code: systemCode,
-					lastServiceReviewDate: isoDateString,
+					code: mainCode,
+					someDate: isoDateString,
 				}),
 			);
 			sandbox.expectNoKinesisEvents();
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
+
+		it.skip('Set DateTime property when no previous value', async () => {});
+
+		it.skip('Overwrite existing DateTime property', async () => {});
+
+		it.skip("Not overwrite when 'same' DateTime sent", async () => {});
+
+		it.skip('Set Time property when no previous value', async () => {});
+
+		it.skip('Overwrite existing Time property', async () => {});
+
+		it.skip("Not overwrite when 'same' Time sent", async () => {});
 	});
 
 	it('Remove property when empty string sent in payload', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
-			description: 'description',
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
+			anotherString: 'anotherString',
 		});
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				description: '',
+				anotherString: '',
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: teamCode,
-				name: 'name1',
+				code: mainCode,
+				someString: 'name1',
 			}),
 		);
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				name: 'name1',
-				code: teamCode,
+				someString: 'name1',
+				code: mainCode,
 			}),
 		);
 		sandbox.expectKinesisEvents([
 			'UPDATE',
-			teamCode,
-			'Team',
-			['description'],
+			mainCode,
+			'MainType',
+			['anotherString'],
 		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not remove property when falsy value sent in payload', async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			isActive: true,
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someBoolean: true,
 		});
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				isActive: false,
+				someBoolean: false,
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: teamCode,
-				isActive: false,
+				code: mainCode,
+				someBoolean: false,
 			}),
 		);
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				isActive: false,
-				code: teamCode,
+				someBoolean: false,
+				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['isActive']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			mainCode,
+			'MainType',
+			['someBoolean'],
+		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Create when patching non-existent node', async () => {
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				name: 'name1',
+				someString: 'name1',
 			},
 			201,
 			sandbox.withCreateMeta({
-				name: 'name1',
-				code: teamCode,
+				someString: 'name1',
+				code: mainCode,
 			}),
 		);
 
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withCreateMeta({
-				name: 'name1',
-				code: teamCode,
+				someString: 'name1',
+				code: mainCode,
 			}),
 		);
 		sandbox.expectKinesisEvents([
 			'CREATE',
-			teamCode,
-			'Team',
-			['name', 'code'],
+			mainCode,
+			'MainType',
+			['someString', 'code'],
 		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
 		await testPatchRequest(
-			`/v2/node/Repository/${repoCode}`,
+			`/v2/node/RestrictedType/${restrictedCode}`,
 			{
-				name: 'name1',
+				someString: 'name1',
 			},
 			400,
 			new RegExp(
-				`Repositories can only be created by biz-ops-github-importer`,
+				`RestrictedTypes can only be created by restricted-type-creator`,
 			),
 		);
 
-		await verifyNotExists('Repository', repoCode);
+		await verifyNotExists('RestrictedType', restrictedCode);
 		sandbox.expectNoKinesisEvents();
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
@@ -395,50 +418,50 @@ describe('v2 - node PATCH', () => {
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
 		const result = Object.assign(
 			sandbox.withCreateMeta({
-				name: 'name1',
-				code: repoCode,
+				someString: 'name1',
+				code: restrictedCode,
 			}),
 			{
-				_createdByClient: 'biz-ops-github-importer',
-				_updatedByClient: 'biz-ops-github-importer',
+				_createdByClient: 'restricted-type-creator',
+				_updatedByClient: 'restricted-type-creator',
 			},
 		);
 		await sandbox
 			.request(app)
-			.patch(`/v2/node/Repository/${repoCode}`)
+			.patch(`/v2/node/RestrictedType/${restrictedCode}`)
 			.set('API_KEY', process.env.API_KEY)
 			.set('client-user-id', `${namespace}-user`)
 			.set('x-request-id', `${namespace}-request`)
-			.set('client-id', 'biz-ops-github-importer')
+			.set('client-id', 'restricted-type-creator')
 			.send({
-				name: 'name1',
+				someString: 'name1',
 			})
 			.expect(201, result);
 
-		await testNode('Repository', repoCode, result);
+		await testNode('RestrictedType', restrictedCode, result);
 		sandbox.expectKinesisEvents([
 			'CREATE',
-			repoCode,
-			'Repository',
-			['name', 'code'],
-			'biz-ops-github-importer',
+			restrictedCode,
+			'RestrictedType',
+			['someString', 'code'],
+			'restricted-type-creator',
 		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when conflicting code values', async () => {
 		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
 				code: 'wrong-code',
-				troubleshooting: 'Fake Document',
+				someDocument: 'Fake Document',
 			},
 			400,
 			new RegExp(
-				`Conflicting code property \`wrong-code\` in payload for System ${systemCode}`,
+				`Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			),
 		);
-		await verifyNotExists('System', systemCode);
+		await verifyNotExists('MainType', mainCode);
 		sandbox.expectNoKinesisEvents();
 		// validatePayload throws before S3 actions
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -446,14 +469,14 @@ describe('v2 - node PATCH', () => {
 
 	it('error when unrecognised attribute', async () => {
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				foo: 'unrecognised',
+				notInSchema: 'unrecognised',
 			},
 			400,
-			/Invalid property `foo` on type `Team`/,
+			/Invalid property `notInSchema` on type `MainType`/,
 		);
-		await verifyNotExists('Team', teamCode);
+		await verifyNotExists('MainType', mainCode);
 		sandbox.expectNoKinesisEvents();
 		// getType from biz-ops-schema throws before s3 actions
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -462,9 +485,9 @@ describe('v2 - node PATCH', () => {
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
 		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				troubleshooting: 'Fake Document',
+				someDocument: 'Fake Document',
 			},
 			500,
 		);
@@ -476,9 +499,9 @@ describe('v2 - node PATCH', () => {
 	it('responds with 500 if s3 query fails', async () => {
 		stubS3Unavailable(sandbox);
 		await testPatchRequest(
-			`/v2/node/System/${systemCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				troubleshooting: 'Fake Document',
+				someDocument: 'Fake Document',
 			},
 			500,
 		);
@@ -488,80 +511,85 @@ describe('v2 - node PATCH', () => {
 	});
 
 	it("deletes attributes which are provided as 'null'", async () => {
-		await sandbox.createNode('Team', {
-			code: teamCode,
-			name: 'name1',
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
 		});
 		await testPatchRequest(
-			`/v2/node/Team/${teamCode}`,
+			`/v2/node/MainType/${mainCode}`,
 			{
-				name: null,
+				someString: null,
 			},
 			200,
 			sandbox.withUpdateMeta({
-				code: teamCode,
+				code: mainCode,
 			}),
 		);
 
 		await testNode(
-			'Team',
-			teamCode,
+			'MainType',
+			mainCode,
 			sandbox.withUpdateMeta({
-				code: teamCode,
+				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
+		sandbox.expectKinesisEvents([
+			'UPDATE',
+			mainCode,
+			'MainType',
+			['someString'],
+		]);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
-		await sandbox.createNode('Team', {
-			code: `${namespace}-team`,
-			name: 'name1',
+		await sandbox.createNode('MainType', {
+			code: `${namespace}-main`,
+			someString: 'name1',
 		});
 		const expectedMeta = sandbox.withUpdateMeta({
-			name: 'name2',
-			code: teamCode,
+			someString: 'name2',
+			code: mainCode,
 		});
 		delete expectedMeta._updatedByClient;
 		return sandbox
 			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
+			.patch(`/v2/node/MainType/${mainCode}`)
 			.set('API_KEY', API_KEY)
 			.set('client-user-id', `${namespace}-user`)
 			.set('x-request-id', `${namespace}-request`)
-			.send({ name: 'name2' })
+			.send({ someString: 'name2' })
 			.expect(200, expectedMeta);
 	});
 
 	it('no client-user-id header deletes the _updatedByUser metaProperty from the database', async () => {
-		await sandbox.createNode('Team', {
-			code: `${namespace}-team`,
-			name: 'name1',
+		await sandbox.createNode('MainType', {
+			code: `${namespace}-main`,
+			someString: 'name1',
 		});
 		const expectedMeta = sandbox.withUpdateMeta({
-			name: 'name2',
-			code: teamCode,
+			someString: 'name2',
+			code: mainCode,
 		});
 		delete expectedMeta._updatedByUser;
 		return sandbox
 			.request(app)
-			.patch(`/v2/node/Team/${teamCode}`)
+			.patch(`/v2/node/MainType/${mainCode}`)
 			.set('API_KEY', API_KEY)
 			.set('client-id', `${namespace}-client`)
 			.set('x-request-id', `${namespace}-request`)
-			.send({ name: 'name2' })
+			.send({ someString: 'name2' })
 			.expect(200, expectedMeta);
 	});
 
 	describe('relationship patching', () => {
 		describe('deleting', () => {
 			it('errors if no relationshipAction query string when deleting relationship set', async () => {
-				await sandbox.createNode('Team', teamCode);
+				await sandbox.createNode('MainType', mainCode);
 				await testPatchRequest(
-					`/v2/node/Team/${teamCode}`,
+					`/v2/node/MainType/${mainCode}`,
 					{
-						techLeads: null,
+						children: null,
 					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
@@ -571,11 +599,11 @@ describe('v2 - node PATCH', () => {
 			});
 
 			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
-				await sandbox.createNode('Team', teamCode);
+				await sandbox.createNode('MainType', mainCode);
 				await testPatchRequest(
-					`/v2/node/Team/${teamCode}`,
+					`/v2/node/MainType/${mainCode}`,
 					{
-						'!techLeads': [personCode],
+						'!children': [childCode],
 					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
@@ -588,45 +616,45 @@ describe('v2 - node PATCH', () => {
 					describe('individual relationship delete', () => {
 						it('can delete a specific relationship', async () => {
 							const [
-								team,
-								person1,
-								person2,
+								main,
+								child1,
+								child2,
 							] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', `${personCode}-1`],
-								['Person', `${personCode}-2`],
+								['MainType', mainCode],
+								['ChildType', `${childCode}-1`],
+								['ChildType', `${childCode}-2`],
 							);
 							await sandbox.connectNodes(
-								[team, 'HAS_TECH_LEAD', person1],
-								[team, 'HAS_TECH_LEAD', person2],
+								[main, 'HAS_CHILD', child1],
+								[main, 'HAS_CHILD', child2],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [`${personCode}-1`] },
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
+								{ '!children': [`${childCode}-1`] },
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [`${personCode}-2`],
+									code: mainCode,
+									children: [`${childCode}-2`],
 								}),
 							);
 						});
 
 						it("can attempt to delete a specific relationship of type that doesn't exist", async () => {
-							await sandbox.createNode('Team', teamCode);
+							await sandbox.createNode('MainType', mainCode);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [personCode] },
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
+								{ '!children': [childCode] },
 								200,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 							sandbox.expectNoKinesisEvents();
@@ -638,41 +666,41 @@ describe('v2 - node PATCH', () => {
 						});
 
 						it("can attempt to delete a specific relationship that doesn't exist", async () => {
-							const [team, person1] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', `${personCode}-1`],
+							const [main, child1] = await sandbox.createNodes(
+								['MainType', mainCode],
+								['ChildType', `${childCode}-1`],
 							);
 							await sandbox.connectNodes([
-								team,
-								'HAS_TECH_LEAD',
-								person1,
+								main,
+								'HAS_CHILD',
+								child1,
 							]);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ '!techLeads': [`${personCode}-2`] },
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
+								{ '!children': [`${childCode}-2`] },
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [`${personCode}-1`],
+									code: mainCode,
+									children: [`${childCode}-1`],
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: `${personCode}-1`,
+											code: `${childCode}-1`,
 										}),
 									},
 								],
@@ -687,68 +715,68 @@ describe('v2 - node PATCH', () => {
 
 						it('can delete multiple specific relationships of the same kind', async () => {
 							const [
-								team,
-								person1,
-								person2,
-								person3,
+								main,
+								child1,
+								child2,
+								child3,
 							] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', `${personCode}-1`],
-								['Person', `${personCode}-2`],
-								['Person', `${personCode}-3`],
+								['MainType', mainCode],
+								['ChildType', `${childCode}-1`],
+								['ChildType', `${childCode}-2`],
+								['ChildType', `${childCode}-3`],
 							);
 							await sandbox.connectNodes(
-								[team, 'HAS_TECH_LEAD', person1],
-								[team, 'HAS_TECH_LEAD', person2],
-								[team, 'HAS_TECH_LEAD', person3],
+								[main, 'HAS_CHILD', child1],
+								[main, 'HAS_CHILD', child2],
+								[main, 'HAS_CHILD', child3],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 								{
-									'!techLeads': [
-										`${personCode}-1`,
-										`${personCode}-3`,
+									'!children': [
+										`${childCode}-1`,
+										`${childCode}-3`,
 									],
 								},
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [`${personCode}-2`],
+									code: mainCode,
+									children: [`${childCode}-2`],
 								}),
 							);
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: `${personCode}-2`,
+											code: `${childCode}-2`,
 										}),
 									},
 								],
 							);
 							sandbox.expectKinesisEvents(
-								['UPDATE', teamCode, 'Team', ['techLeads']],
+								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'UPDATE',
-									`${personCode}-1`,
-									'Person',
-									['techLeadFor'],
+									`${childCode}-1`,
+									'ChildType',
+									['isChildOf'],
 								],
 								[
 									'UPDATE',
-									`${personCode}-3`,
-									'Person',
-									['techLeadFor'],
+									`${childCode}-3`,
+									'ChildType',
+									['isChildOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -760,55 +788,55 @@ describe('v2 - node PATCH', () => {
 
 						it('can delete multiple specific relationships of different kinds', async () => {
 							const [
-								team,
-								person,
-								group,
+								main,
+								child,
+								parent,
 							] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', personCode],
-								['Group', groupCode],
+								['MainType', mainCode],
+								['ChildType', childCode],
+								['ParentType', parentCode],
 							);
 							await sandbox.connectNodes(
-								[team, 'HAS_TECH_LEAD', person],
-								[group, 'HAS_TEAM', team],
+								[main, 'HAS_CHILD', child],
+								[parent, 'IS_PARENT_OF', main],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 								{
-									'!techLeads': [personCode],
-									'!parentGroup': groupCode,
+									'!children': [childCode],
+									'!parents': parentCode,
 								},
 								200,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									teamCode,
-									'Team',
-									['techLeads', 'parentGroup', 'group'],
+									mainCode,
+									'MainType',
+									['children', 'parents'],
 								],
 								[
 									'UPDATE',
-									personCode,
-									'Person',
-									['techLeadFor'],
+									childCode,
+									'ChildType',
+									['isChildOf'],
 								],
 								[
 									'UPDATE',
-									groupCode,
-									'Group',
-									['allTeams', 'topLevelTeams'],
+									parentCode,
+									'ParentType',
+									['isParentOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -819,44 +847,44 @@ describe('v2 - node PATCH', () => {
 						});
 						it('leaves relationships in the opposite direction unaffected', async () => {
 							const [
-								team1,
-								team2,
-								team3,
+								main1,
+								main2,
+								main3,
 							] = await sandbox.createNodes(
-								['Team', `${teamCode}-1`],
-								['Team', `${teamCode}-2`],
-								['Team', `${teamCode}-3`],
+								['MainType', `${mainCode}-1`],
+								['MainType', `${mainCode}-2`],
+								['MainType', `${mainCode}-3`],
 							);
 							await sandbox.connectNodes(
-								[team1, 'HAS_TEAM', team2],
-								[team2, 'HAS_TEAM', team3],
+								[main1, 'HAS_YOUNGER_SIBLING', main2],
+								[main2, 'HAS_YOUNGER_SIBLING', main3],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
-								{ '!subTeams': [`${teamCode}-3`] },
+								`/v2/node/MainType/${mainCode}-2?relationshipAction=${action}`,
+								{ '!youngerSiblings': [`${mainCode}-3`] },
 								200,
 								sandbox.withMeta({
-									code: `${teamCode}-2`,
-									parentTeam: `${teamCode}-1`,
+									code: `${mainCode}-2`,
+									olderSiblings: [`${mainCode}-1`],
 								}),
 							);
 
 							await testNode(
-								'Team',
-								`${teamCode}-2`,
+								'MainType',
+								`${mainCode}-2`,
 								sandbox.withMeta({
-									code: `${teamCode}-2`,
+									code: `${mainCode}-2`,
 								}),
 								[
 									{
-										type: 'HAS_TEAM',
+										type: 'HAS_YOUNGER_SIBLING',
 										direction: 'incoming',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Team',
+										type: 'MainType',
 										props: sandbox.withMeta({
-											code: `${teamCode}-1`,
+											code: `${mainCode}-1`,
 										}),
 									},
 								],
@@ -864,15 +892,15 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									`${teamCode}-3`,
-									'Team',
-									['parentTeam'],
+									`${mainCode}-3`,
+									'MainType',
+									['olderSiblings'],
 								],
 								[
 									'UPDATE',
-									`${teamCode}-2`,
-									'Team',
-									['subTeams'],
+									`${mainCode}-2`,
+									'MainType',
+									['youngerSiblings'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -882,62 +910,62 @@ describe('v2 - node PATCH', () => {
 							);
 						});
 						it('can add and remove relationships of the same type at the same time', async () => {
-							const [team, person1] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', `${personCode}-1`],
-								['Person', `${personCode}-2`],
+							const [main, child1] = await sandbox.createNodes(
+								['MainType', mainCode],
+								['ChildType', `${childCode}-1`],
+								['ChildType', `${childCode}-2`],
 							);
 							await sandbox.connectNodes([
-								team,
-								'HAS_TECH_LEAD',
-								person1,
+								main,
+								'HAS_CHILD',
+								child1,
 							]);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 								{
-									'!techLeads': [`${personCode}-1`],
-									techLeads: [`${personCode}-2`],
+									'!children': [`${childCode}-1`],
+									children: [`${childCode}-2`],
 								},
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [`${personCode}-2`],
+									code: mainCode,
+									children: [`${childCode}-2`],
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withCreateMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: `${personCode}-2`,
+											code: `${childCode}-2`,
 										}),
 									},
 								],
 							);
 							sandbox.expectKinesisEvents(
-								['UPDATE', teamCode, 'Team', ['techLeads']],
+								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'UPDATE',
-									`${personCode}-1`,
-									'Person',
-									['techLeadFor'],
+									`${childCode}-1`,
+									'ChildType',
+									['isChildOf'],
 								],
 								[
 									'UPDATE',
-									`${personCode}-2`,
-									'Person',
-									['techLeadFor'],
+									`${childCode}-2`,
+									'ChildType',
+									['isChildOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -948,24 +976,24 @@ describe('v2 - node PATCH', () => {
 						});
 						it('errors if deleting and adding the same relationship to the same record', async () => {
 							await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', personCode],
+								['MainType', mainCode],
+								['ChildType', childCode],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 								{
-									techLeads: [personCode],
-									'!techLeads': [personCode],
+									children: [childCode],
+									'!children': [childCode],
 								},
 								400,
 								/Trying to add and remove a relationship to a record at the same time/,
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 							sandbox.expectNoKinesisEvents();
@@ -979,21 +1007,21 @@ describe('v2 - node PATCH', () => {
 
 					describe('bulk relationship delete', () => {
 						it('can delete empty relationship set', async () => {
-							await sandbox.createNode('Team', teamCode);
+							await sandbox.createNode('MainType', mainCode);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ techLeads: null },
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
+								{ children: null },
 								200,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 							sandbox.expectNoKinesisEvents();
@@ -1006,54 +1034,54 @@ describe('v2 - node PATCH', () => {
 
 						it('can delete entire relationship sets', async () => {
 							const [
-								team,
-								person,
-								group,
+								main,
+								child,
+								parent,
 							] = await sandbox.createNodes(
-								['Team', teamCode],
-								['Person', personCode],
-								['Group', groupCode],
+								['MainType', mainCode],
+								['ChildType', childCode],
+								['ParentType', parentCode],
 							);
 							await sandbox.connectNodes(
 								// tests incoming and outgoing relationships
-								[group, 'HAS_TEAM', team],
-								[team, 'HAS_TECH_LEAD', person],
+								[parent, 'IS_PARENT_OF', main],
+								[main, 'HAS_CHILD', child],
 							);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
-								{ techLeads: null, parentGroup: null },
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
+								{ children: null, parents: null },
 								200,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 							);
 
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									teamCode,
-									'Team',
-									['techLeads', 'parentGroup', 'group'],
+									mainCode,
+									'MainType',
+									['children', 'parents'],
 								],
 								[
 									'UPDATE',
-									personCode,
-									'Person',
-									['techLeadFor'],
+									childCode,
+									'ChildType',
+									['isChildOf'],
 								],
 								[
 									'UPDATE',
-									groupCode,
-									'Group',
-									['allTeams', 'topLevelTeams'],
+									parentCode,
+									'ParentType',
+									['isParentOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1065,52 +1093,52 @@ describe('v2 - node PATCH', () => {
 
 						it('leaves other similar relationships on destination node untouched when deleting', async () => {
 							const [
-								team1,
-								team2,
-								person,
+								main1,
+								main2,
+								child,
 							] = await sandbox.createNodes(
-								['Team', `${teamCode}-1`],
-								['Team', `${teamCode}-2`],
-								['Person', personCode],
+								['MainType', `${mainCode}-1`],
+								['MainType', `${mainCode}-2`],
+								['ChildType', childCode],
 							);
 							await sandbox.connectNodes([
-								team1,
-								'HAS_TECH_LEAD',
-								person,
+								main1,
+								'HAS_CHILD',
+								child,
 							]);
 							await sandbox.connectNodes([
-								team2,
-								'HAS_TECH_LEAD',
-								person,
+								main2,
+								'HAS_CHILD',
+								child,
 							]);
 
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}-2?relationshipAction=${action}`,
 								{
-									techLeads: null,
+									children: null,
 								},
 								200,
 								sandbox.withMeta({
-									code: `${teamCode}-2`,
+									code: `${mainCode}-2`,
 								}),
 							);
 
 							await testNode(
-								'Team',
-								`${teamCode}-1`,
+								'MainType',
+								`${mainCode}-1`,
 								sandbox.withMeta({
-									code: `${teamCode}-1`,
+									code: `${mainCode}-1`,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: personCode,
+											code: childCode,
 										}),
 									},
 								],
@@ -1119,15 +1147,15 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									`${teamCode}-2`,
-									'Team',
-									['techLeads'],
+									`${mainCode}-2`,
+									'MainType',
+									['children'],
 								],
 								[
 									'UPDATE',
-									personCode,
-									'Person',
-									['techLeadFor'],
+									childCode,
+									'ChildType',
+									['isChildOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1139,74 +1167,74 @@ describe('v2 - node PATCH', () => {
 
 						it('leaves relationships in other direction and of other types untouched when deleting', async () => {
 							const [
-								team1,
-								team2,
-								team3,
-								person,
+								main1,
+								main2,
+								main3,
+								child,
 							] = await sandbox.createNodes(
-								['Team', `${teamCode}-1`],
-								['Team', `${teamCode}-2`],
-								['Team', `${teamCode}-3`],
-								['Person', personCode],
+								['MainType', `${mainCode}-1`],
+								['MainType', `${mainCode}-2`],
+								['MainType', `${mainCode}-3`],
+								['ChildType', childCode],
 							);
 							await sandbox.connectNodes([
-								team1,
-								'HAS_TEAM',
-								team2,
+								main1,
+								'HAS_YOUNGER_SIBLING',
+								main2,
 							]);
 							await sandbox.connectNodes([
-								team2,
-								'HAS_TEAM',
-								team3,
+								main2,
+								'HAS_YOUNGER_SIBLING',
+								main3,
 							]);
 							await sandbox.connectNodes([
-								team2,
-								'HAS_TECH_LEAD',
-								person,
+								main2,
+								'HAS_CHILD',
+								child,
 							]);
 
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}-2?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}-2?relationshipAction=${action}`,
 								{
-									subTeams: null,
+									youngerSiblings: null,
 								},
 								200,
 								sandbox.withMeta({
-									code: `${teamCode}-2`,
-									parentTeam: `${teamCode}-1`,
-									techLeads: [personCode],
+									code: `${mainCode}-2`,
+									olderSiblings: [`${mainCode}-1`],
+									children: [childCode],
 								}),
 							);
 
 							await testNode(
-								'Team',
-								`${teamCode}-2`,
+								'MainType',
+								`${mainCode}-2`,
 								sandbox.withMeta({
-									code: `${teamCode}-2`,
+									code: `${mainCode}-2`,
 								}),
 								[
 									{
-										type: 'HAS_TEAM',
+										type: 'HAS_YOUNGER_SIBLING',
 										direction: 'incoming',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Team',
+										type: 'MainType',
 										props: sandbox.withMeta({
-											code: `${teamCode}-1`,
+											code: `${mainCode}-1`,
 										}),
 									},
 								],
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: personCode,
+											code: childCode,
 										}),
 									},
 								],
@@ -1215,15 +1243,15 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									`${teamCode}-2`,
-									'Team',
-									['subTeams'],
+									`${mainCode}-2`,
+									'MainType',
+									['youngerSiblings'],
 								],
 								[
 									'UPDATE',
-									`${teamCode}-3`,
-									'Team',
-									['parentTeam'],
+									`${mainCode}-3`,
+									'MainType',
+									['olderSiblings'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1238,20 +1266,20 @@ describe('v2 - node PATCH', () => {
 		});
 		describe('creating', () => {
 			it('errors if updating relationships without relationshipAction query string', async () => {
-				await sandbox.createNode('Team', teamCode);
+				await sandbox.createNode('MainType', mainCode);
 				await testPatchRequest(
-					`/v2/node/Team/${teamCode}`,
+					`/v2/node/MainType/${mainCode}`,
 					{
-						techLeads: [personCode],
+						children: [childCode],
 					},
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
 
 				await testNode(
-					'Team',
-					teamCode,
-					sandbox.withMeta({ code: teamCode }),
+					'MainType',
+					mainCode,
+					sandbox.withMeta({ code: mainCode }),
 				);
 				sandbox.expectNoKinesisEvents();
 				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1261,37 +1289,37 @@ describe('v2 - node PATCH', () => {
 				['merge', 'replace'].forEach(action => {
 					it('accept a string', async () => {
 						await sandbox.createNodes(
-							['Team', teamCode],
-							['Group', groupCode],
+							['MainType', mainCode],
+							['ChildType', childCode],
 						);
 						await testPatchRequest(
-							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 							{
-								parentGroup: groupCode,
+								favouriteChild: childCode,
 							},
 							200,
 							sandbox.withMeta({
-								code: teamCode,
-								parentGroup: groupCode,
+								code: mainCode,
+								favouriteChild: childCode,
 							}),
 						);
 
 						await testNode(
-							'Team',
-							teamCode,
+							'MainType',
+							mainCode,
 							sandbox.withMeta({
-								code: teamCode,
+								code: mainCode,
 							}),
 							[
 								{
-									type: 'HAS_TEAM',
-									direction: 'incoming',
+									type: 'HAS_FAVOURITE_CHILD',
+									direction: 'outgoing',
 									props: sandbox.withCreateMeta({}),
 								},
 								{
-									type: 'Group',
+									type: 'ChildType',
 									props: sandbox.withMeta({
-										code: groupCode,
+										code: childCode,
 									}),
 								},
 							],
@@ -1300,52 +1328,52 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
-								teamCode,
-								'Team',
-								['parentGroup', 'group'],
+								mainCode,
+								'MainType',
+								['favouriteChild'],
 							],
 							[
 								'UPDATE',
-								groupCode,
-								'Group',
-								['allTeams', 'topLevelTeams'],
+								childCode,
+								'ChildType',
+								['isFavouriteChildOf'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('accept an array of length one', async () => {
 						await sandbox.createNodes(
-							['Team', teamCode],
-							['Group', groupCode],
+							['MainType', mainCode],
+							['ChildType', childCode],
 						);
 						await testPatchRequest(
-							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [groupCode],
+								favouriteChild: [childCode],
 							},
 							200,
 							sandbox.withMeta({
-								code: teamCode,
-								parentGroup: groupCode,
+								code: mainCode,
+								favouriteChild: childCode,
 							}),
 						);
 
 						await testNode(
-							'Team',
-							teamCode,
+							'MainType',
+							mainCode,
 							sandbox.withMeta({
-								code: teamCode,
+								code: mainCode,
 							}),
 							[
 								{
-									type: 'HAS_TEAM',
-									direction: 'incoming',
+									type: 'HAS_FAVOURITE_CHILD',
+									direction: 'outgoing',
 									props: sandbox.withCreateMeta({}),
 								},
 								{
-									type: 'Group',
+									type: 'ChildType',
 									props: sandbox.withMeta({
-										code: groupCode,
+										code: childCode,
 									}),
 								},
 							],
@@ -1354,42 +1382,42 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
-								teamCode,
-								'Team',
-								['parentGroup', 'group'],
+								mainCode,
+								'MainType',
+								['favouriteChild'],
 							],
 							[
 								'UPDATE',
-								groupCode,
-								'Group',
-								['allTeams', 'topLevelTeams'],
+								childCode,
+								'ChildType',
+								['isFavouriteChildOf'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('error if trying to write multiple relationships', async () => {
 						await sandbox.createNodes(
-							['Team', teamCode],
-							['Group', `${groupCode}-1`],
-							['Group', `${groupCode}-2`],
+							['MainType', mainCode],
+							['ChildType', `${childCode}-1`],
+							['ChildType', `${childCode}-2`],
 						);
 						await testPatchRequest(
-							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [
-									`${groupCode}-1`,
-									`${groupCode}-2`,
+								favouriteChild: [
+									`${childCode}-1`,
+									`${childCode}-2`,
 								],
 							},
 							400,
-							/Can only have one parentGroup/,
+							/Can only have one favouriteChild/,
 						);
 
 						await testNode(
-							'Team',
-							teamCode,
+							'MainType',
+							mainCode,
 							sandbox.withMeta({
-								code: teamCode,
+								code: mainCode,
 							}),
 						);
 
@@ -1398,41 +1426,45 @@ describe('v2 - node PATCH', () => {
 					});
 
 					it('replace existing relationship', async () => {
-						const [team, group1] = await sandbox.createNodes(
-							['Team', teamCode],
-							['Group', `${groupCode}-1`],
-							['Group', `${groupCode}-2`],
+						const [main, child1] = await sandbox.createNodes(
+							['MainType', mainCode],
+							['ChildType', `${childCode}-1`],
+							['ChildType', `${childCode}-2`],
 						);
 
-						await sandbox.connectNodes(group1, 'HAS_TEAM', team);
+						await sandbox.connectNodes(
+							main,
+							'HAS_FAVOURITE_CHILD',
+							child1,
+						);
 						await testPatchRequest(
-							`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+							`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 							{
-								parentGroup: [`${groupCode}-2`],
+								favouriteChild: [`${childCode}-2`],
 							},
 							200,
 							sandbox.withMeta({
-								code: teamCode,
-								parentGroup: `${groupCode}-2`,
+								code: mainCode,
+								favouriteChild: `${childCode}-2`,
 							}),
 						);
 
 						await testNode(
-							'Team',
-							teamCode,
+							'MainType',
+							mainCode,
 							sandbox.withMeta({
-								code: teamCode,
+								code: mainCode,
 							}),
 							[
 								{
-									type: 'HAS_TEAM',
-									direction: 'incoming',
+									type: 'HAS_FAVOURITE_CHILD',
+									direction: 'outgoing',
 									props: sandbox.withCreateMeta({}),
 								},
 								{
-									type: 'Group',
+									type: 'ChildType',
 									props: sandbox.withMeta({
-										code: `${groupCode}-2`,
+										code: `${childCode}-2`,
 									}),
 								},
 							],
@@ -1441,21 +1473,21 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
-								teamCode,
-								'Team',
-								['parentGroup', 'group'],
+								mainCode,
+								'MainType',
+								['favouriteChild'],
 							],
 							[
 								'UPDATE',
-								`${groupCode}-1`,
-								'Group',
-								['allTeams', 'topLevelTeams'],
+								`${childCode}-1`,
+								'ChildType',
+								['isFavouriteChildOf'],
 							],
 							[
 								'UPDATE',
-								`${groupCode}-2`,
-								'Group',
-								['allTeams', 'topLevelTeams'],
+								`${childCode}-2`,
+								'ChildType',
+								['isFavouriteChildOf'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1470,109 +1502,105 @@ describe('v2 - node PATCH', () => {
 			describe('merge', () => {
 				it('can merge with empty relationship set if relationshipAction=merge', async () => {
 					await sandbox.createNodes(
-						['Team', teamCode],
-						['Person', personCode],
+						['MainType', mainCode],
+						['ChildType', childCode],
 					);
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
+						`/v2/node/MainType/${mainCode}?relationshipAction=merge`,
 						{
-							techLeads: [personCode],
+							children: [childCode],
 						},
 						200,
 						sandbox.withMeta({
-							code: teamCode,
-							techLeads: [personCode],
+							code: mainCode,
+							children: [childCode],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						teamCode,
+						'MainType',
+						mainCode,
 						sandbox.withMeta({
-							code: teamCode,
+							code: mainCode,
 						}),
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Person',
-								props: sandbox.withMeta({ code: personCode }),
+								type: 'ChildType',
+								props: sandbox.withMeta({ code: childCode }),
 							},
 						],
 					);
 					sandbox.expectKinesisEvents(
-						['UPDATE', teamCode, 'Team', ['techLeads']],
-						['UPDATE', personCode, 'Person', ['techLeadFor']],
+						['UPDATE', mainCode, 'MainType', ['children']],
+						['UPDATE', childCode, 'ChildType', ['isChildOf']],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
-					const [team, person1] = await sandbox.createNodes(
-						['Team', teamCode],
-						['Person', `${personCode}-1`],
-						['Person', `${personCode}-2`],
+					const [main, child1] = await sandbox.createNodes(
+						['MainType', mainCode],
+						['ChildType', `${childCode}-1`],
+						['ChildType', `${childCode}-2`],
 					);
-					await sandbox.connectNodes(
-						team,
-						['HAS_TECH_LEAD'],
-						person1,
-					);
+					await sandbox.connectNodes(main, ['HAS_CHILD'], child1);
 
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}?relationshipAction=merge`,
+						`/v2/node/MainType/${mainCode}?relationshipAction=merge`,
 						{
-							techLeads: [`${personCode}-2`],
+							children: [`${childCode}-2`],
 						},
 						200,
 						sandbox.withMeta({
-							code: teamCode,
-							techLeads: [`${personCode}-2`, `${personCode}-1`],
+							code: mainCode,
+							children: [`${childCode}-2`, `${childCode}-1`],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						teamCode,
+						'MainType',
+						mainCode,
 						sandbox.withMeta({
-							code: teamCode,
+							code: mainCode,
 						}),
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withMeta({}),
 							},
 							{
-								type: 'Person',
+								type: 'ChildType',
 								props: sandbox.withMeta({
-									code: `${personCode}-1`,
+									code: `${childCode}-1`,
 								}),
 							},
 						],
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Person',
+								type: 'ChildType',
 								props: sandbox.withMeta({
-									code: `${personCode}-2`,
+									code: `${childCode}-2`,
 								}),
 							},
 						],
 					);
 					sandbox.expectKinesisEvents(
-						['UPDATE', teamCode, 'Team', ['techLeads']],
+						['UPDATE', mainCode, 'MainType', ['children']],
 						[
 							'UPDATE',
-							`${personCode}-2`,
-							'Person',
-							['techLeadFor'],
+							`${childCode}-2`,
+							'ChildType',
+							['isChildOf'],
 						],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1582,241 +1610,255 @@ describe('v2 - node PATCH', () => {
 			describe('replace', () => {
 				it('can replace an empty relationship set if relationshipAction=replace', async () => {
 					await sandbox.createNodes(
-						['Team', teamCode],
-						['Person', personCode],
+						['MainType', mainCode],
+						['ChildType', childCode],
 					);
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
+						`/v2/node/MainType/${mainCode}?relationshipAction=replace`,
 						{
-							techLeads: [personCode],
+							children: [childCode],
 						},
 						200,
 						sandbox.withMeta({
-							code: teamCode,
-							techLeads: [personCode],
+							code: mainCode,
+							children: [childCode],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						teamCode,
+						'MainType',
+						mainCode,
 						sandbox.withMeta({
-							code: teamCode,
+							code: mainCode,
 						}),
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Person',
-								props: sandbox.withMeta({ code: personCode }),
+								type: 'ChildType',
+								props: sandbox.withMeta({ code: childCode }),
 							},
 						],
 					);
 
 					sandbox.expectKinesisEvents(
-						['UPDATE', teamCode, 'Team', ['techLeads']],
-						['UPDATE', personCode, 'Person', ['techLeadFor']],
+						['UPDATE', mainCode, 'MainType', ['children']],
+						['UPDATE', childCode, 'ChildType', ['isChildOf']],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('can replace relationships if relationshipAction=replace', async () => {
-					const [team, person1] = await sandbox.createNodes(
-						['Team', teamCode],
-						['Person', `${personCode}-1`],
-						['Person', `${personCode}-2`],
+					const [main, child1] = await sandbox.createNodes(
+						['MainType', mainCode],
+						['ChildType', `${childCode}-1`],
+						['ChildType', `${childCode}-2`],
 					);
-					await sandbox.connectNodes(
-						team,
-						['HAS_TECH_LEAD'],
-						person1,
-					);
+					await sandbox.connectNodes(main, ['HAS_CHILD'], child1);
 
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}?relationshipAction=replace`,
+						`/v2/node/MainType/${mainCode}?relationshipAction=replace`,
 						{
-							techLeads: [`${personCode}-2`],
+							children: [`${childCode}-2`],
 						},
 						200,
 						sandbox.withMeta({
-							code: teamCode,
-							techLeads: [`${personCode}-2`],
+							code: mainCode,
+							children: [`${childCode}-2`],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						teamCode,
+						'MainType',
+						mainCode,
 						sandbox.withMeta({
-							code: teamCode,
+							code: mainCode,
 						}),
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Person',
+								type: 'ChildType',
 								props: sandbox.withMeta({
-									code: `${personCode}-2`,
+									code: `${childCode}-2`,
 								}),
 							},
 						],
 					);
 					sandbox.expectKinesisEvents(
-						['UPDATE', teamCode, 'Team', ['techLeads']],
+						['UPDATE', mainCode, 'MainType', ['children']],
 						[
 							'UPDATE',
-							`${personCode}-1`,
-							'Person',
-							['techLeadFor'],
+							`${childCode}-1`,
+							'ChildType',
+							['isChildOf'],
 						],
 						[
 							'UPDATE',
-							`${personCode}-2`,
-							'Person',
-							['techLeadFor'],
+							`${childCode}-2`,
+							'ChildType',
+							['isChildOf'],
 						],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('leaves relationships in other direction and of other types untouched when replacing', async () => {
-					const [team1, team2, , person] = await sandbox.createNodes(
-						['Team', `${teamCode}-1`],
-						['Team', `${teamCode}-2`],
-						['Team', `${teamCode}-3`],
-						['Person', personCode],
+					const [main1, main2, , child] = await sandbox.createNodes(
+						['MainType', `${mainCode}-1`],
+						['MainType', `${mainCode}-2`],
+						['MainType', `${mainCode}-3`],
+						['ChildType', childCode],
 					);
-					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
 					await sandbox.connectNodes([
-						team2,
-						'HAS_TECH_LEAD',
-						person,
+						main1,
+						'HAS_YOUNGER_SIBLING',
+						main2,
 					]);
+					await sandbox.connectNodes([main2, 'HAS_CHILD', child]);
 
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
+						`/v2/node/MainType/${mainCode}-2?relationshipAction=replace`,
 						{
-							subTeams: [`${teamCode}-3`],
+							youngerSiblings: [`${mainCode}-3`],
 						},
 						200,
 						sandbox.withMeta({
-							code: `${teamCode}-2`,
-							subTeams: [`${teamCode}-3`],
-							parentTeam: `${teamCode}-1`,
-							techLeads: [personCode],
+							code: `${mainCode}-2`,
+							youngerSiblings: [`${mainCode}-3`],
+							olderSiblings: [`${mainCode}-1`],
+							children: [childCode],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						`${teamCode}-2`,
+						'MainType',
+						`${mainCode}-2`,
 						sandbox.withMeta({
-							code: `${teamCode}-2`,
+							code: `${mainCode}-2`,
 						}),
 						[
 							{
-								type: 'HAS_TEAM',
+								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'incoming',
 								props: sandbox.withMeta({}),
 							},
 							{
-								type: 'Team',
+								type: 'MainType',
 								props: sandbox.withMeta({
-									code: `${teamCode}-1`,
+									code: `${mainCode}-1`,
 								}),
 							},
 						],
 						[
 							{
-								type: 'HAS_TEAM',
+								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Team',
+								type: 'MainType',
 								props: sandbox.withMeta({
-									code: `${teamCode}-3`,
+									code: `${mainCode}-3`,
 								}),
 							},
 						],
 						[
 							{
-								type: 'HAS_TECH_LEAD',
+								type: 'HAS_CHILD',
 								direction: 'outgoing',
 								props: sandbox.withMeta({}),
 							},
 							{
-								type: 'Person',
-								props: sandbox.withMeta({ code: personCode }),
+								type: 'ChildType',
+								props: sandbox.withMeta({ code: childCode }),
 							},
 						],
 					);
 
 					sandbox.expectKinesisEvents(
-						['UPDATE', `${teamCode}-2`, 'Team', ['subTeams']],
-						['UPDATE', `${teamCode}-3`, 'Team', ['parentTeam']],
+						[
+							'UPDATE',
+							`${mainCode}-2`,
+							'MainType',
+							['youngerSiblings'],
+						],
+						[
+							'UPDATE',
+							`${mainCode}-3`,
+							'MainType',
+							['olderSiblings'],
+						],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('replaces relationships in multiple directions', async () => {
-					const [team1, team2, team3] = await sandbox.createNodes(
-						['Team', `${teamCode}-1`],
-						['Team', `${teamCode}-2`],
-						['Team', `${teamCode}-3`],
+					const [main1, main2, main3] = await sandbox.createNodes(
+						['MainType', `${mainCode}-1`],
+						['MainType', `${mainCode}-2`],
+						['MainType', `${mainCode}-3`],
 					);
-					await sandbox.connectNodes([team1, 'HAS_TEAM', team2]);
-					await sandbox.connectNodes([team2, 'HAS_TEAM', team3]);
+					await sandbox.connectNodes([
+						main1,
+						'HAS_YOUNGER_SIBLING',
+						main2,
+					]);
+					await sandbox.connectNodes([
+						main2,
+						'HAS_YOUNGER_SIBLING',
+						main3,
+					]);
 
 					await testPatchRequest(
-						`/v2/node/Team/${teamCode}-2?relationshipAction=replace`,
+						`/v2/node/MainType/${mainCode}-2?relationshipAction=replace`,
 						{
-							subTeams: [`${teamCode}-1`],
-							parentTeam: `${teamCode}-3`,
+							youngerSiblings: [`${mainCode}-1`],
+							olderSiblings: [`${mainCode}-3`],
 						},
 						200,
 						sandbox.withMeta({
-							code: `${teamCode}-2`,
-							subTeams: [`${teamCode}-1`],
-							parentTeam: `${teamCode}-3`,
+							code: `${mainCode}-2`,
+							youngerSiblings: [`${mainCode}-1`],
+							olderSiblings: [`${mainCode}-3`],
 						}),
 					);
 
 					await testNode(
-						'Team',
-						`${teamCode}-2`,
+						'MainType',
+						`${mainCode}-2`,
 						sandbox.withMeta({
-							code: `${teamCode}-2`,
+							code: `${mainCode}-2`,
 						}),
 						[
 							{
-								type: 'HAS_TEAM',
+								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'incoming',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Team',
+								type: 'MainType',
 								props: sandbox.withMeta({
-									code: `${teamCode}-3`,
+									code: `${mainCode}-3`,
 								}),
 							},
 						],
 						[
 							{
-								type: 'HAS_TEAM',
+								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'outgoing',
 								props: sandbox.withCreateMeta({}),
 							},
 							{
-								type: 'Team',
+								type: 'MainType',
 								props: sandbox.withMeta({
-									code: `${teamCode}-1`,
+									code: `${mainCode}-1`,
 								}),
 							},
 						],
@@ -1824,21 +1866,21 @@ describe('v2 - node PATCH', () => {
 					sandbox.expectKinesisEvents(
 						[
 							'UPDATE',
-							`${teamCode}-1`,
-							'Team',
-							['subTeams', 'parentTeam'],
+							`${mainCode}-1`,
+							'MainType',
+							['olderSiblings', 'youngerSiblings'],
 						],
 						[
 							'UPDATE',
-							`${teamCode}-2`,
-							'Team',
-							['subTeams', 'parentTeam'],
+							`${mainCode}-2`,
+							'MainType',
+							['olderSiblings', 'youngerSiblings'],
 						],
 						[
 							'UPDATE',
-							`${teamCode}-3`,
-							'Team',
-							['subTeams', 'parentTeam'],
+							`${mainCode}-3`,
+							'MainType',
+							['olderSiblings', 'youngerSiblings'],
 						],
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1850,9 +1892,9 @@ describe('v2 - node PATCH', () => {
 					describe(`with ${action}`, () => {
 						it(`error when relationship to non-existent node`, async () => {
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}`,
 								{
-									techLeads: [personCode],
+									children: [childCode],
 								},
 								400,
 								/Missing related node/,
@@ -1866,46 +1908,46 @@ describe('v2 - node PATCH', () => {
 						});
 
 						it('create node related to non-existent nodes when using upsert=true', async () => {
-							await sandbox.createNode('Team', teamCode);
+							await sandbox.createNode('MainType', mainCode);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}&upsert=true`,
 								{
-									techLeads: [personCode],
+									children: [childCode],
 								},
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [personCode],
+									code: mainCode,
+									children: [childCode],
 								}),
 							);
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withCreateMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withCreateMeta({
-											code: personCode,
+											code: childCode,
 										}),
 									},
 								],
 							);
 
 							sandbox.expectKinesisEvents(
-								['UPDATE', teamCode, 'Team', ['techLeads']],
+								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'CREATE',
-									personCode,
-									'Person',
-									['code', 'techLeadFor'],
+									childCode,
+									'ChildType',
+									['code', 'isChildOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1916,47 +1958,47 @@ describe('v2 - node PATCH', () => {
 						});
 
 						it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
-							await sandbox.createNode('Team', teamCode);
-							await sandbox.createNode('Person', personCode);
+							await sandbox.createNode('MainType', mainCode);
+							await sandbox.createNode('ChildType', childCode);
 							await testPatchRequest(
-								`/v2/node/Team/${teamCode}?relationshipAction=${action}&upsert=true`,
+								`/v2/node/MainType/${mainCode}?relationshipAction=${action}&upsert=true`,
 								{
-									techLeads: [personCode],
+									children: [childCode],
 								},
 								200,
 								sandbox.withMeta({
-									code: teamCode,
-									techLeads: [personCode],
+									code: mainCode,
+									children: [childCode],
 								}),
 							);
 							await testNode(
-								'Team',
-								teamCode,
+								'MainType',
+								mainCode,
 								sandbox.withMeta({
-									code: teamCode,
+									code: mainCode,
 								}),
 								[
 									{
-										type: 'HAS_TECH_LEAD',
+										type: 'HAS_CHILD',
 										direction: 'outgoing',
 										props: sandbox.withCreateMeta({}),
 									},
 									{
-										type: 'Person',
+										type: 'ChildType',
 										props: sandbox.withMeta({
-											code: personCode,
+											code: childCode,
 										}),
 									},
 								],
 							);
 
 							sandbox.expectKinesisEvents(
-								['UPDATE', teamCode, 'Team', ['techLeads']],
+								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'UPDATE',
-									personCode,
-									'Person',
-									['techLeadFor'],
+									childCode,
+									'ChildType',
+									['isChildOf'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1973,15 +2015,15 @@ describe('v2 - node PATCH', () => {
 
 	describe('diffing before writes', () => {
 		it("doesn't write if no real property changes detected", async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
-				name: 'name-1',
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+				someString: 'name-1',
 			});
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=replace`,
 				{
-					name: 'name-1',
+					someString: 'name-1',
 				},
 				200,
 			);
@@ -1994,15 +2036,15 @@ describe('v2 - node PATCH', () => {
 		});
 
 		it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
-			const [team, person] = await sandbox.createNodes(
-				['Team', teamCode],
-				['Person', personCode],
+			const [main, child] = await sandbox.createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
 			);
-			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
+			await sandbox.connectNodes(main, 'HAS_CHILD', child);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
-				{ techLeads: [personCode] },
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=replace`,
+				{ children: [childCode] },
 				200,
 			);
 
@@ -2014,15 +2056,15 @@ describe('v2 - node PATCH', () => {
 		});
 
 		it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
-			const [team, person] = await sandbox.createNodes(
-				['Team', teamCode],
-				['Person', personCode],
+			const [main, child] = await sandbox.createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
 			);
-			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
+			await sandbox.connectNodes(main, 'HAS_CHILD', child);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ techLeads: [personCode] },
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
+				{ children: [childCode] },
 				200,
 			);
 
@@ -2034,12 +2076,12 @@ describe('v2 - node PATCH', () => {
 		});
 
 		it("doesn't write if no real lockField changes detected", async () => {
-			await sandbox.createNode('Team', {
-				code: teamCode,
+			await sandbox.createNode('MainType', {
+				code: mainCode,
 			});
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=replace`,
 				{},
 				200,
 			);
@@ -2052,36 +2094,41 @@ describe('v2 - node PATCH', () => {
 		});
 
 		it('writes if property but no relationship changes detected', async () => {
-			const [team, person] = await sandbox.createNodes(
-				['Team', teamCode],
-				['Person', personCode],
+			const [main, child] = await sandbox.createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
 			);
-			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
+			await sandbox.connectNodes(main, 'HAS_CHILD', child);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: 'new-name', techLeads: [personCode] },
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
+				{ someString: 'new-name', children: [childCode] },
 				200,
 			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
+			sandbox.expectKinesisEvents([
+				'UPDATE',
+				mainCode,
+				'MainType',
+				['someString'],
+			]);
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
-			const [team, person] = await sandbox.createNodes(
-				['Team', { code: teamCode, name: 'name' }],
-				['Person', `${personCode}-1`],
-				['Person', `${personCode}-2`],
+			const [main, child] = await sandbox.createNodes(
+				['MainType', { code: mainCode, someString: 'someString' }],
+				['ChildType', `${childCode}-1`],
+				['ChildType', `${childCode}-2`],
 			);
-			await sandbox.connectNodes(team, 'HAS_TECH_LEAD', person);
+			await sandbox.connectNodes(main, 'HAS_CHILD', child);
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: 'name', techLeads: [`${personCode}-2`] },
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
+				{ someString: 'someString', children: [`${childCode}-2`] },
 				200,
 			);
 
@@ -2089,44 +2136,52 @@ describe('v2 - node PATCH', () => {
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
 			sandbox.expectKinesisEvents(
-				['UPDATE', teamCode, 'Team', ['techLeads']],
-				['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
+				['UPDATE', mainCode, 'MainType', ['children']],
+				['UPDATE', `${childCode}-2`, 'ChildType', ['isChildOf']],
 			);
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('detects deleted property as a change', async () => {
-			await sandbox.createNode('Team', { code: teamCode, name: 'name' });
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+				someString: 'someString',
+			});
 			const dbQuerySpy = spyDbQuery(sandbox);
 			await testPatchRequest(
-				`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
-				{ name: null },
+				`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
+				{ someString: null },
 				200,
 			);
 
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectKinesisEvents(['UPDATE', teamCode, 'Team', ['name']]);
+			sandbox.expectKinesisEvents([
+				'UPDATE',
+				mainCode,
+				'MainType',
+				['someString'],
+			]);
 			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		describe('patching with fewer relationships', () => {
 			it('treats fewer relationships as a delete when replacing relationships', async () => {
-				const [team, person1, person2] = await sandbox.createNodes(
-					['Team', teamCode],
-					['Person', `${personCode}-1`],
-					['Person', `${personCode}-2`],
+				const [main, child1, child2] = await sandbox.createNodes(
+					['MainType', mainCode],
+					['ChildType', `${childCode}-1`],
+					['ChildType', `${childCode}-2`],
 				);
 				await sandbox.connectNodes(
-					[team, 'HAS_TECH_LEAD', person1],
-					[team, 'HAS_TECH_LEAD', person2],
+					[main, 'HAS_CHILD', child1],
+					[main, 'HAS_CHILD', child2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
 				await testPatchRequest(
-					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=replace`,
+					`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=replace`,
 					{
-						techLeads: [`${personCode}-1`],
+						children: [`${childCode}-1`],
 					},
 					200,
 				);
@@ -2137,27 +2192,27 @@ describe('v2 - node PATCH', () => {
 					),
 				).toBe(true);
 				sandbox.expectKinesisEvents(
-					['UPDATE', teamCode, 'Team', ['techLeads']],
-					['UPDATE', `${personCode}-2`, 'Person', ['techLeadFor']],
+					['UPDATE', mainCode, 'MainType', ['children']],
+					['UPDATE', `${childCode}-2`, 'ChildType', ['isChildOf']],
 				);
 				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 
 			it('treats fewer relationships as no change when merging relationships', async () => {
-				const [team, person1, person2] = await sandbox.createNodes(
-					['Team', teamCode],
-					['Person', `${personCode}-1`],
-					['Person', `${personCode}-2`],
+				const [main, child1, child2] = await sandbox.createNodes(
+					['MainType', mainCode],
+					['ChildType', `${childCode}-1`],
+					['ChildType', `${childCode}-2`],
 				);
 				await sandbox.connectNodes(
-					[team, 'HAS_TECH_LEAD', person1],
-					[team, 'HAS_TECH_LEAD', person2],
+					[main, 'HAS_CHILD', child1],
+					[main, 'HAS_CHILD', child2],
 				);
 				const dbQuerySpy = spyDbQuery(sandbox);
 				await testPatchRequest(
-					`/v2/node/Team/${teamCode}?upsert=true&relationshipAction=merge`,
+					`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
 					{
-						techLeads: [`${personCode}-1`],
+						children: [`${childCode}-1`],
 					},
 					200,
 				);

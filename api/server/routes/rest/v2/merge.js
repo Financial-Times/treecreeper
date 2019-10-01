@@ -75,15 +75,19 @@ module.exports = async input => {
 
 	const sourceRecord = sourceNode.toApiV2(nodeType, true);
 	const destinationRecord = destinationNode.toApiV2(nodeType, true);
-
 	const writeProperties = diffProperties({
 		nodeType,
 		newContent: sourceRecord,
 		initialContent: destinationRecord,
 	});
-
+	const { properties } = getType(nodeType);
 	Object.keys(sourceRecord).forEach(name => {
 		if (name in destinationRecord) {
+			delete writeProperties[name];
+		}
+		// covers the case where properties exist on the node but not the schema
+		// and avoids an update event being sent
+		if (!(name in properties)) {
 			delete writeProperties[name];
 		}
 	});
@@ -93,7 +97,6 @@ module.exports = async input => {
 		newContent: destinationRecord,
 		action: 'merge',
 	});
-	const { properties } = getType(nodeType);
 
 	const possibleReflections = Object.entries(properties)
 		.filter(([, { type: otherType }]) => nodeType === otherType)

@@ -1,6 +1,7 @@
-class BizOpsError {
+/* eslint-disable no-useless-constructor */
+class BizOpsError extends Error {
 	constructor(message) {
-		this.message = message;
+		super(message);
 	}
 }
 
