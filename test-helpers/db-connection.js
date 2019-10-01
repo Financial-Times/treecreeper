@@ -16,8 +16,8 @@ const spyDbQuery = ({ sinon }) => {
 	return () => spy;
 };
 
-const stubDbUnavailable = ({ sinon }) =>
-	sinon.stub(driver, 'session').returns({
+const stubDbUnavailable = () =>
+	jest.spyOn(driver, 'session').mockReturnValue({
 		run: () => {
 			throw new Error('oh no');
 		},
