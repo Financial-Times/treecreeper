@@ -1,6 +1,5 @@
-const { getNodeWithRelationships } = require('../api-core');
 const httpErrors = require('http-errors');
-
+const { getNodeWithRelationships } = require('../api-core');
 
 const getHandler = ({
 	logger,

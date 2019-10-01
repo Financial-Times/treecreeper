@@ -1,6 +1,8 @@
 const { getHandler } = require('..');
 
-const { setupMocks, stubDbUnavailable } = require('../../../test-helpers');
+const { setupMocks } = require('../../../test-helpers');
+const {dbUnavailable,
+	asyncErrorFunction,} = require('../../../test-helpers/error-stubs');
 
 describe('v2 - node GET', () => {
 	const sandbox = {};
@@ -78,32 +80,37 @@ describe('v2 - node GET', () => {
 	});
 
 	it('throws 404 error if no node', async () => {
-		await expect(getHandler()({
-			type: 'MainType',
-			code: mainCode,
-		})).rejects.toThrow({status: 404, message: 'MainType v2-node-get-main does not exist'})
+		await expect(
+			getHandler()({
+				type: 'MainType',
+				code: mainCode,
+			}),
+		).rejects.toThrow({
+			status: 404,
+			message: 'MainType v2-node-get-main does not exist',
+		});
 	});
 
 	it('throws if neo4j query fails', async () => {
-		stubDbUnavailable(sandbox);
-		await expect(getHandler()({
-			type: 'MainType',
-			code: mainCode,
-		})).rejects.toThrow('oh no')
+		dbUnavailable();
+		await expect(
+			getHandler()({
+				type: 'MainType',
+				code: mainCode,
+			}),
+		).rejects.toThrow('oh no');
 	});
 
 	it('throws if s3 query fails', async () => {
-		const handler = getHandler({
+		await expect(
+			getHandler({
 			documentStore: {
-				get: jest.fn(async () => {
-					throw new Error('oh no');
-				}),
+				get: asyncErrorFunction
 			},
-		})
-
-		await expect(handler({
-			type: 'MainType',
-			code: mainCode,
-		})).rejects.toThrow('oh no')
+		})({
+				type: 'MainType',
+				code: mainCode,
+			}),
+		).rejects.toThrow('oh no');
 	});
 });
