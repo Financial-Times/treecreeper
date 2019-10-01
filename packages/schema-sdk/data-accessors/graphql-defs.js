@@ -156,27 +156,22 @@ const defineType = config => {
 	}`;
 }
 
-const defineTypeWithRelationshipTypes = config => {
+const defineTypeWithRelationshipSchema = config => {
 	// const properties = Object.entries(config.properties).filter(([name, def]) => !def.isRelationship)
-	console.log('defineTypeWithRelationshipTypes ', config.name)
-	const relationshipTypes = defineRelationshipTypes(config)
 	const properties = definePropertiesForRelationshipSchema(Object.entries(config.properties), config.name);
-	return [
-		`
+	return `
 		"""
 		${config.description}
 		"""
 		type ${config.name} {
 			${indentMultiline(properties, 2, true)}
-		}`,
-		...relationshipTypes
-	];
+		}`;
 }
 
 const defineRelationshipTypes = config => {
 	const relationships = Object.entries(config.properties).filter(([name, def]) => def.isRelationship);
 	const relationshipTypes = relationships.map(defineRelationshipType(config.name))
-	return relationshipTypes
+	return [...relationshipTypes]
 }
 
 const defineRelationshipType = (firstNode) => ([name, def]) => {
@@ -251,15 +246,15 @@ module.exports = {
 	`;
 		// const typeNamesAndDescriptions = typesFromSchema.map(defineType);
 		const mapTypes = representRelationshipsAsNodes
-			? defineTypeWithRelationshipTypes
+			? defineTypeWithRelationshipSchema
 			: defineType;
 
-		console.log('TYPESFROMSCHEMA		', typesFromSchema)
-		const typeNamesAndDescriptions = flatten(typesFromSchema.map(mapTypes));
+		const typeNamesAndDescriptions = typesFromSchema.map(mapTypes);
 
+		const relationshipTypes = flatten(typesFromSchema.map(defineRelationshipTypes));
 
-		const uniqueTypeNamesAndDescriptions = [
-			...new Set(typeNamesAndDescriptions),
+		const uniqueRelationshipTypes = [
+			...new Set(relationshipTypes),
 		];
 
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
@@ -268,11 +263,11 @@ module.exports = {
 
 		console.log('done')
 
-		console.log('uniqueTypeNamesAndDescriptions ', uniqueTypeNamesAndDescriptions)
 
 
 		return [].concat(
-			customDateTimeTypes + uniqueTypeNamesAndDescriptions,
+			customDateTimeTypes + typeNamesAndDescriptions,
+			...uniqueRelationshipTypes,
 			'type Query {\n',
 			...typesFromSchema.map(defineQueries),
 			'}',
