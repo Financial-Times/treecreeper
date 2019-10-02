@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
-const { validators, BizOpsError } = require('../../../packages/schema-sdk');
 const { stripIndents } = require('common-tags');
+const { validators, BizOpsError } = require('../../../packages/schema-sdk');
 
 const sdkValidators = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
@@ -38,8 +38,6 @@ const validateBody = ({ type, code, body: newContent }) => {
 		module.exports.validateProperty(type, realPropName, value);
 	});
 };
-
-
 
 const CLIENT_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
 const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d-.']*[a-z\d]$/;

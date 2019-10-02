@@ -9,7 +9,7 @@ const nodeWithRelsCypher = ({
 	OPTIONAL MATCH (${nodeName})-[relationship]-(related)
 	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest AS relatedRequestId`;
 
-const getNodeWithRelationships = (nodeType, code) => {
+const getNeo4jRecord = (nodeType, code) => {
 	return executeQuery(
 		`MATCH (node:${nodeType} {code: $code})
 			${nodeWithRelsCypher()}`,
@@ -19,5 +19,5 @@ const getNodeWithRelationships = (nodeType, code) => {
 
 module.exports = {
 	nodeWithRelsCypher,
-	getNodeWithRelationships,
+	getNeo4jRecord,
 };
