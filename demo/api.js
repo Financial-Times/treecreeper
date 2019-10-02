@@ -16,8 +16,6 @@ initConstraints();
 const app = express();
 
 app.use(contextMiddleware);
-app.use(requestId);
-
 app.use('/rest', getRestApi({ app }));
 
 const PORT = process.env.PORT || 8888;
