@@ -1,5 +1,6 @@
 const httpErrors = require('http-errors');
 const { getNodeWithRelationships } = require('../api-core');
+const { validateInput } = require('../api-core/lib/validation');
 
 const getHandler = ({
 	logger,
@@ -8,7 +9,9 @@ const getHandler = ({
 	lockFieldsUsingMetadata, // string
 	updateStream, // kinesis
 } = {}) => {
-	return async ({ metaData, body, type, code }) => {
+	return async input => {
+		validateInput(input);
+		const { type, code } = input;
 		const [neo4jResult, documentStoreResult] = await Promise.all([
 			getNodeWithRelationships(type, code),
 			documentStore ? documentStore.get(type, code) : null,

@@ -1,13 +1,15 @@
 const { getHandler } = require('..');
 
 const { setupMocks } = require('../../../test-helpers');
-const {dbUnavailable,
-	asyncErrorFunction,} = require('../../../test-helpers/error-stubs');
+const {
+	dbUnavailable,
+	asyncErrorFunction,
+} = require('../../../test-helpers/error-stubs');
 
-describe('v2 - node GET', () => {
+describe('rest GET', () => {
 	const sandbox = {};
 
-	const namespace = 'v2-node-get';
+	const namespace = 'get';
 	const mainCode = `${namespace}-main`;
 
 	setupMocks(sandbox, { namespace });
@@ -87,7 +89,7 @@ describe('v2 - node GET', () => {
 			}),
 		).rejects.toThrow({
 			status: 404,
-			message: 'MainType v2-node-get-main does not exist',
+			message: `MainType ${mainCode} does not exist`,
 		});
 	});
 
@@ -104,13 +106,113 @@ describe('v2 - node GET', () => {
 	it('throws if s3 query fails', async () => {
 		await expect(
 			getHandler({
-			documentStore: {
-				get: asyncErrorFunction
-			},
-		})({
+				documentStore: {
+					get: asyncErrorFunction,
+				},
+			})({
 				type: 'MainType',
 				code: mainCode,
 			}),
 		).rejects.toThrow('oh no');
+	});
+
+	describe('security', () => {
+		// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
+		const INJECTION_ATTACK_STRING =
+			'"1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r"';
+		const vectors = {
+			type: obj => {
+				obj.type = INJECTION_ATTACK_STRING;
+			},
+			code: obj => {
+				obj.code = INJECTION_ATTACK_STRING;
+			},
+			clientId: obj => {
+				obj.metadata = { clientId: INJECTION_ATTACK_STRING };
+			},
+			clientUserId: obj => {
+				obj.metadata = { clientUserId: INJECTION_ATTACK_STRING };
+			},
+			requestId: obj => {
+				obj.metadata = { requestId: INJECTION_ATTACK_STRING };
+			},
+		};
+
+		Object.entries(vectors).forEach(([name, modifier]) => {
+			it(`should error when ${name} is suspicious`, async () => {
+				const input = {
+					type: 'MainType',
+					code: mainCode,
+				};
+				modifier(input);
+				await expect(getHandler()(input)).rejects.toThrow(
+					expect.objectContaining({ status: 400 }),
+				);
+			});
+		});
+
+		// it('should error when node code is suspicious', async () => {
+		// 	await expect(
+		// 		getHandler()({
+		// 			type: 'MainType',
+		// 			code: INJECTION_ATTACK_STRING,
+		// 		}),
+		// 	).rejects.toThrow(
+		// 		new RegExp(
+		// 			`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`MainType\``,
+		// 		),
+		// 	);
+		// });
+
+		// it('should error when client id is suspicious', async () => {
+		// 	await expect(
+		// 		getHandler()({
+		// 			type: 'MainType',
+		// 			code: INJECTION_ATTACK_STRING,
+		// 			metadata: {
+		// 				clientId
+		// 			}
+		// 		}),
+		// 	).rejects.toThrow(
+		// 		new RegExp(
+		// 			`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`MainType\``,
+		// 		),
+		// 	);
+
+		// 	await request(app)
+		// 		.get(restUrl)
+		// 		.set('client-id', `${INJECTION_ATTACK_STRING}`)
+		// 		.expect(
+		// 			400,
+		// 			new RegExp(
+		// 				`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+		// 			),
+		// 		);
+		// });
+
+		// it('should error when client user id is suspicious', async () => {
+		// 	await request(app)
+		// 		.get(restUrl)
+		// 		.set('client-user-id', `${INJECTION_ATTACK_STRING}`)
+		// 		.expect(
+		// 			400,
+		// 			new RegExp(
+		// 				`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+		// 			),
+		// 		);
+		// });
+
+		// it('should error when request id is suspicious', async () => {
+		// 	await request(app)
+		// 		.get(restUrl)
+		// 		.set('client-id', 'valid-id')
+		// 		.set('x-request-id', `${INJECTION_ATTACK_STRING}`)
+		// 		.expect(
+		// 			400,
+		// 			new RegExp(
+		// 				`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+		// 			),
+		// 		);
+		// });
 	});
 });

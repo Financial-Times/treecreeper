@@ -54,6 +54,9 @@ test-api:
 run:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
+demo-api:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
+
 run-db:
 	docker-compose up
 
