@@ -1,8 +1,8 @@
 const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('./request-context');
-const { diffProperties } = require('./diff-helpers');
+const { logger } = require('../api-core/lib/request-context');
+const { diffProperties } = require('../api-core/lib/diff-helpers');
 
 const s3BucketInstance = new AWS.S3({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -126,12 +126,12 @@ class S3DocumentsHelper {
 				delete writeProperties[name];
 			}
 		});
-		const mergeResults = [this.deleteFileFromS3(nodeType, sourceCode)];
+		const mergeResults = [this.delete(nodeType, sourceCode)];
 		let noPropertiesToWrite;
 		if (!_isEmpty(writeProperties)) {
 			Object.assign(destinationNodeBody, writeProperties);
 			mergeResults.push(
-				this.writeFileToS3(
+				this.post(
 					nodeType,
 					destinationCode,
 					destinationNodeBody,
@@ -148,11 +148,11 @@ class S3DocumentsHelper {
 			throw new Error('MERGE FAILED: Write and delete failed in S3');
 		}
 		if (!deleteVersionId) {
-			this.deleteFileFromS3(nodeType, destinationCode, writeVersionId);
+			this.delete(nodeType, destinationCode, writeVersionId);
 			throw new Error('MERGE FAILED: Delete failed in S3');
 		}
 		if (!writeVersionId && !noPropertiesToWrite) {
-			this.deleteFileFromS3(nodeType, sourceCode, deleteVersionId);
+			this.delete(nodeType, sourceCode, deleteVersionId);
 			throw new Error('MERGE FAILED: Write failed in S3');
 		}
 		return {
