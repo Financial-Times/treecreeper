@@ -1,7 +1,7 @@
 const { stripIndents } = require('common-tags');
 const { executeQuery } = require('./neo4j-model');
 
-const nodeWithRelsCypher = ({
+const getNeo4jRecordCypherQuery = ({
 	nodeName = 'node',
 	includeWithStatement = true,
 } = {}) => stripIndents`
@@ -12,12 +12,12 @@ const nodeWithRelsCypher = ({
 const getNeo4jRecord = (nodeType, code) => {
 	return executeQuery(
 		`MATCH (node:${nodeType} {code: $code})
-			${nodeWithRelsCypher()}`,
+			${getNeo4jRecordCypherQuery()}`,
 		{ code },
 	);
 };
 
 module.exports = {
-	nodeWithRelsCypher,
+	getNeo4jRecordCypherQuery,
 	getNeo4jRecord,
 };
