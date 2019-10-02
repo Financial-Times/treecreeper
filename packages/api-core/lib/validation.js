@@ -1,7 +1,8 @@
 const httpErrors = require('http-errors');
 const { validators, BizOpsError } = require('../../../packages/schema-sdk');
+const { stripIndents } = require('common-tags');
 
-const validation = Object.entries(validators).reduce(
+const sdkValidators = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
 		methods[key] = (...args) => {
 			try {
@@ -23,7 +24,7 @@ const validateParams = ({ type, code }) => {
 	module.exports.validateCode(type, code);
 };
 
-const validatePayload = ({ type, code, body: newContent }) => {
+const validateBody = ({ type, code, body: newContent }) => {
 	if (newContent.code && newContent.code !== code) {
 		throw httpErrors(
 			400,
@@ -38,7 +39,7 @@ const validatePayload = ({ type, code, body: newContent }) => {
 	});
 };
 
-const { stripIndents } = require('common-tags');
+
 
 const CLIENT_ID_RX = /^[a-z\d][a-z\d-.]*[a-z\d]$/;
 const CLIENT_USER_ID_RX = /^[a-z\d][a-z\d-.']*[a-z\d]$/;
@@ -82,14 +83,15 @@ const validateMetadata = ({
 const validateInput = input => {
 	validateParams(input);
 	if (input.body) {
-		validatePayload(input);
+		validateBody(input);
 	}
 	validateMetadata(input);
+	return input;
 };
 
 module.exports = Object.assign(
 	{
 		validateInput,
 	},
-	validation,
+	sdkValidators,
 );

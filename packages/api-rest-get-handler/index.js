@@ -10,19 +10,20 @@ const getHandler = ({
 	updateStream, // kinesis
 } = {}) => {
 	return async input => {
-		validateInput(input);
-		const { type, code } = input;
+		;
+
+		const { type, code } = validateInput(input);
+
 		const [neo4jResult, documentStoreResult] = await Promise.all([
 			getNodeWithRelationships(type, code),
 			documentStore ? documentStore.get(type, code) : null,
 		]);
+
 		const parsedNeo4jResult = neo4jResult.toJson(type);
 
 		if (!parsedNeo4jResult) {
 			throw httpErrors(404, `${type} ${code} does not exist`);
 		}
-		// need to reimplement 404
-		// preflightChecks.bailOnMissingNode({ result, nodeType, code, status: 404 });
 		return {
 			status: 200,
 			body: Object.assign(parsedNeo4jResult, documentStoreResult),
