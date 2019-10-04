@@ -180,7 +180,7 @@ const defineRelationshipType = (firstNode) => ([name, def]) => {
 	const fullNameCaps = `${from.toUpperCase()}_${
 		def.relationship
 	}_${to.toUpperCase()}`;
-	return `\n\ttype ${snakeToCamel(fullNameCaps)} @relation(name: ${fullNameCaps}) {
+	return `\n\ttype ${snakeToCamel(fullNameCaps)} @relation(name: ${def.relationship}) {
 		from: ${from}
 		to: ${to}
 	}`;
