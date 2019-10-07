@@ -39,7 +39,6 @@ const unimplemented = (endpointName, method, alternativeMethod) => req => {
 };
 
 const controller = (method, handler) => (req, res, next) => {
-	console.log(method, handler);
 	requestLog('rest', method, req);
 	handler(
 		Object.assign(
@@ -69,7 +68,7 @@ const controller = (method, handler) => (req, res, next) => {
 const { getHandler } = require('../../packages/api-rest-get-handler');
 // const {postHandler} = require('../../packages/api-rest-post-handler');
 // const {patchHandler} = require('../../packages/api-rest-patch-handler');
-// const {deleteHandler} = require('../../packages/api-rest-delete-handler');
+const { deleteHandler } = require('../../packages/api-rest-delete-handler');
 // const {mergeHandler} = require('../../packages/api-rest-merge-handler');
 
 const getRestApi = ({
@@ -85,11 +84,11 @@ const getRestApi = ({
 
 	router
 		.route('/:type/:code')
-		.get(controller('GET', getHandler({ documentStore })));
-	// 	.post(controller('POST', postHandler({documentStore})))
-	// 	.put(unimplemented('PUT', 'PATCH'))
-	// 	.patch(controller('PATCH', patchHandler({documentStore})))
-	// 	.delete(controller('DELETE', deleteHandler({documentStore})));
+		.get(controller('GET', getHandler({ documentStore })))
+		// 	.post(controller('POST', postHandler({documentStore})))
+		// 	.put(unimplemented('PUT', 'PATCH'))
+		// 	.patch(controller('PATCH', patchHandler({documentStore})))
+		.delete(controller('DELETE', deleteHandler({ documentStore })));
 
 	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore})));
 

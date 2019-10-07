@@ -10,11 +10,12 @@ const getHandler = ({ documentStore } = {}) => async input => {
 		documentStore ? documentStore.get(type, code) : null,
 	]);
 
-	const parsedNeo4jResult = neo4jResult.toJson(type);
-
-	if (!parsedNeo4jResult) {
+	if (!neo4jResult.hasRecords()) {
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
+
+	const parsedNeo4jResult = neo4jResult.toJson(type);
+
 	return {
 		status: 200,
 		body: Object.assign(parsedNeo4jResult, documentStoreResult),
