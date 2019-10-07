@@ -1,7 +1,7 @@
 const { getHandler } = require('..');
 
 const { setupMocks } = require('../../../test-helpers');
-const {securityTests} = require('../../../test-helpers/security');
+const { securityTests } = require('../../../test-helpers/security');
 const {
 	dbUnavailable,
 	asyncErrorFunction,
@@ -13,13 +13,13 @@ describe('rest GET', () => {
 	const namespace = 'get';
 	const mainCode = `${namespace}-main`;
 	const input = {
-			type: 'MainType',
-			code: mainCode,
-		}
+		type: 'MainType',
+		code: mainCode,
+	};
 
 	setupMocks(sandbox, { namespace });
 
-	securityTests(getHandler(), mainCode)
+	securityTests(getHandler(), mainCode);
 
 	it('gets record without relationships', async () => {
 		await sandbox.createNode('MainType', {
@@ -83,9 +83,7 @@ describe('rest GET', () => {
 	});
 
 	it('throws 404 error if no record', async () => {
-		await expect(
-			getHandler()(input),
-		).rejects.toThrow({
+		await expect(getHandler()(input)).rejects.toThrow({
 			status: 404,
 			message: `MainType ${mainCode} does not exist`,
 		});
@@ -93,9 +91,7 @@ describe('rest GET', () => {
 
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
-		await expect(
-			getHandler()(input),
-		).rejects.toThrow('oh no');
+		await expect(getHandler()(input)).rejects.toThrow('oh no');
 	});
 
 	it('throws if s3 query fails', async () => {

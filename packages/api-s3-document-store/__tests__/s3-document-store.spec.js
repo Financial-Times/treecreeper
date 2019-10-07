@@ -1,5 +1,6 @@
-const S3DocumentsHelper = require('../');
+const S3DocumentsHelper = require('..');
 const schema = require('../../../packages/schema-sdk');
+
 schema.init();
 
 describe('S3 Documents Helper', () => {
@@ -75,11 +76,7 @@ describe('S3 Documents Helper', () => {
 		} = exampleRequest();
 		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		s3DocumentsHelper.post(
-			requestNodeType,
-			requestCode,
-			requestBody,
-		);
+		s3DocumentsHelper.post(requestNodeType, requestCode, requestBody);
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: bucket,

@@ -131,11 +131,7 @@ class S3DocumentsHelper {
 		if (!_isEmpty(writeProperties)) {
 			Object.assign(destinationNodeBody, writeProperties);
 			mergeResults.push(
-				this.post(
-					nodeType,
-					destinationCode,
-					destinationNodeBody,
-				),
+				this.post(nodeType, destinationCode, destinationNodeBody),
 			);
 		} else {
 			// If there are no properties to write to s3, no need to write

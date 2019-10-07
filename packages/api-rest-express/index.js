@@ -39,6 +39,7 @@ const unimplemented = (endpointName, method, alternativeMethod) => req => {
 };
 
 const controller = (method, handler) => (req, res, next) => {
+	console.log(method, handler);
 	requestLog('rest', method, req);
 	handler(
 		Object.assign(
@@ -65,7 +66,6 @@ const controller = (method, handler) => (req, res, next) => {
 		)
 		.catch(next);
 };
-
 const { getHandler } = require('../../packages/api-rest-get-handler');
 // const {postHandler} = require('../../packages/api-rest-post-handler');
 // const {patchHandler} = require('../../packages/api-rest-patch-handler');

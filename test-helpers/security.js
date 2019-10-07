@@ -36,5 +36,4 @@ const securityTests = (handler, namespacedCode, testBody = false) =>
 		});
 	});
 
-
-module.exports = {securityTests}
+module.exports = { securityTests };
