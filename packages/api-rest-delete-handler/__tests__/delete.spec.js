@@ -17,13 +17,13 @@ describe('rest DELETE', () => {
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
+	const createMainNode = (props = {}) =>
+		createNode('MainType', Object.assign({ code: mainCode }, props));
+
 	securityTests(deleteHandler(), mainCode);
 
 	it('deletes record without relationships', async () => {
-		await createNode('MainType', {
-			code: mainCode,
-			someString: 'name1',
-		});
+		await createMainNode();
 		const { status } = await deleteHandler()(input);
 
 		expect(status).toBe(204);
@@ -51,9 +51,7 @@ describe('rest DELETE', () => {
 
 	it('deletes record with Documents', async () => {
 		const deleteMock = jest.fn(async () => 'delete-marker');
-		await createNode('MainType', {
-			code: mainCode,
-		});
+		await createMainNode();
 
 		const { status } = await deleteHandler({
 			documentStore: {
@@ -80,9 +78,7 @@ describe('rest DELETE', () => {
 	});
 
 	it('throws if s3 query fails', async () => {
-		await createNode('MainType', {
-			code: mainCode,
-		});
+		await createMainNode();
 		await expect(
 			deleteHandler({
 				documentStore: {
@@ -95,9 +91,7 @@ describe('rest DELETE', () => {
 
 	it('undoes any s3 actions if neo4j query fails', async () => {
 		const deleteMock = jest.fn(async () => 'delete-marker');
-		await createNode('MainType', {
-			code: mainCode,
-		});
+		await createMainNode();
 		dbUnavailable({ skip: 1 });
 		await expect(
 			deleteHandler({

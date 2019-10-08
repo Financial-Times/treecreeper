@@ -26,29 +26,16 @@ const deleteHandler = ({
 		);
 	}
 
-	const query = stripIndents`
-	MATCH (node:${type} {code: $code})
-	DELETE node
-	`;
-	// Prefer simplicity/readability over optimisation here -
-	// S3 and neo4j deletes are in series instead of parallel
-	// so we don't have to bother thinking about rolling back actions for
-	// all the different possible combinations of successes/failures
-	// in different orders. S3 requests are more reliable than neo4j
-	// requests so try s3 first, and roll back S3 if neo4j delete fails.
+	const query = `MATCH (node:${type} {code: $code}) DELETE node`;
+
+	// Writes are in series, not parallel, to simplify rollback on error
 	const deleteMarker = await documentStore.delete(type, code);
 	try {
 		const res = await executeQuery(query, { code });
-		logger.info(
-			{ event: 'DELETE_NEO4J_SUCCESS' },
-			res,
-			'DELETE: Neo4j Delete successful',
-		);
-	} catch (err) {
-		logger.info(
-			{ event: 'DELETE_NEO4J_FAILURE' },
-			err,
-			'DELETE: Neo4j Delete unsuccessful, attempting to rollback S3 delete',
+	} catch (error) {
+		logger.error(
+			{ event: 'NEO4J_DELETE_FAILURE', error },
+			'Neo4j Delete unsuccessful. Rolling back S3 delete',
 		);
 		documentStore.delete(type, code, deleteMarker);
 		throw new Error(err);

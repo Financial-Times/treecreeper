@@ -45,6 +45,5 @@ const stubDbTransaction = ({ sinon }, properties = {}) => {
 
 module.exports = {
 	spyDbQuery,
-	stubDbUnavailable,
 	stubDbTransaction,
 };

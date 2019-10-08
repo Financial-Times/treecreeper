@@ -18,11 +18,13 @@ describe('rest GET', () => {
 		namespace,
 	);
 
+	const createMainNode = (props = {}) =>
+		createNode('MainType', Object.assign({ code: mainCode }, props));
+
 	securityTests(getHandler(), mainCode);
 
 	it('gets record without relationships', async () => {
-		await createNode('MainType', {
-			code: mainCode,
+		await createMainNode({
 			someString: 'name1',
 		});
 		const { body, status } = await getHandler()(input);
@@ -32,10 +34,7 @@ describe('rest GET', () => {
 	});
 
 	it('retrieves metadata', async () => {
-		await createNode('MainType', {
-			code: mainCode,
-			someString: 'name1',
-		});
+		await createMainNode();
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
@@ -64,9 +63,7 @@ describe('rest GET', () => {
 	});
 
 	it('gets record with Documents', async () => {
-		await createNode('MainType', {
-			code: mainCode,
-		});
+		await createMainNode();
 
 		const { body, status } = await getHandler({
 			documentStore: {
