@@ -1,8 +1,9 @@
-const logger = require('@financial-times/n-logger').default;
-const lolex = require('lolex');
+/* global jest beforeAll beforeEach afterEach */
+const lolex = require('lolex'); // eslint-disable-line import/no-extraneous-dependencies
 const dbConnection = require('./db-connection');
 const { schemaReady } = require('../api/server/lib/init-schema');
 
+const { neo4jTest } = require('./neo4j-test');
 const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
 
 const setupMocks = (sandbox, { namespace } = {}) => {
@@ -30,6 +31,7 @@ const setupMocks = (sandbox, { namespace } = {}) => {
 module.exports = Object.assign(
 	{
 		setupMocks,
+		neo4jTest,
 	},
 	dbConnection,
 	testDataCheckers,

@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const httpErrors = require('http-errors');
+// const httpErrors = require('http-errors');
 
 const clientId = require('../../packages/api-core/lib/middleware/client-id');
 const requestId = require('../../packages/api-core/lib/middleware/request-id');
@@ -30,13 +30,13 @@ const requestLog = (endpointName, method, req) => {
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
-const unimplemented = (endpointName, method, alternativeMethod) => req => {
-	requestLog(endpointName, method, req);
-	throw httpErrors(
-		405,
-		`${method} is unimplemented. Use ${alternativeMethod}`,
-	);
-};
+// const unimplemented = (endpointName, method, alternativeMethod) => req => {
+// 	requestLog(endpointName, method, req);
+// 	throw httpErrors(
+// 		405,
+// 		`${method} is unimplemented. Use ${alternativeMethod}`,
+// 	);
+// };
 
 const controller = (method, handler) => (req, res, next) => {
 	requestLog('rest', method, req);

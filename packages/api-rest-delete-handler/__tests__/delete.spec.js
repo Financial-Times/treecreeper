@@ -1,10 +1,6 @@
 const { deleteHandler } = require('..');
 
-const {
-	setupMocks,
-	verifyNotExists,
-	verifyExists,
-} = require('../../../test-helpers');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 const {
 	dbUnavailable,
@@ -33,7 +29,7 @@ describe('rest DELETE', () => {
 		const { status } = await deleteHandler()(input);
 
 		expect(status).toBe(204);
-		await verifyNotExists('MainType', mainCode);
+		await neo4jTest('MainType', mainCode).notExists();
 	});
 
 	it('errors when deleting record with relationships', async () => {
@@ -48,10 +44,11 @@ describe('rest DELETE', () => {
 			[parent, 'IS_PARENT_OF', main],
 		);
 
-		expect(deleteHandler()(input)).rejects.toThrow({
+		await expect(deleteHandler()(input)).rejects.toThrow({
 			status: 400,
 			message: `Cannot delete - MainType ${mainCode} has relationships.`,
 		});
+		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('deletes record with Documents', async () => {
@@ -67,7 +64,7 @@ describe('rest DELETE', () => {
 		})(input);
 
 		expect(status).toBe(204);
-		await verifyNotExists('MainType', mainCode);
+		await neo4jTest('MainType', mainCode).notExists();
 		expect(deleteMock).toHaveBeenCalledWith('MainType', mainCode);
 	});
 
@@ -81,6 +78,7 @@ describe('rest DELETE', () => {
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
 		await expect(deleteHandler()(input)).rejects.toThrow('oh no');
+		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('throws if s3 query fails', async () => {
@@ -94,6 +92,7 @@ describe('rest DELETE', () => {
 				},
 			})(input),
 		).rejects.toThrow('oh no');
+		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('undoes any s3 actions if neo4j query fails', async () => {
@@ -114,5 +113,6 @@ describe('rest DELETE', () => {
 			mainCode,
 			'delete-marker',
 		);
+		await neo4jTest('MainType', mainCode).exists();
 	});
 });

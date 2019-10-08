@@ -1,5 +1,4 @@
 const { getHandler } = require('..');
-
 const { setupMocks } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 const {
@@ -29,12 +28,18 @@ describe('rest GET', () => {
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				someString: 'name1',
-			}),
-		);
+		expect(body).toMatchObject({ code: mainCode, someString: 'name1' });
+	});
+
+	it('retrieves metadata', async () => {
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
+		});
+		const { body, status } = await getHandler()(input);
+
+		expect(status).toBe(200);
+		expect(body).toMatchObject(sandbox.meta.default);
 	});
 
 	it('gets record with relationships', async () => {
@@ -51,13 +56,11 @@ describe('rest GET', () => {
 
 		const { body, status } = await getHandler()(input);
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				parents: [`${namespace}-parent`],
-				children: [`${namespace}-child`],
-			}),
-		);
+		expect(body).toMatchObject({
+			code: mainCode,
+			parents: [`${namespace}-parent`],
+			children: [`${namespace}-child`],
+		});
 	});
 
 	it('gets record with Documents', async () => {
@@ -74,12 +77,10 @@ describe('rest GET', () => {
 		})(input);
 
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				someDocument: 'document',
-			}),
-		);
+		expect(body).toMatchObject({
+			code: mainCode,
+			someDocument: 'document',
+		});
 	});
 
 	it('throws 404 error if no record', async () => {

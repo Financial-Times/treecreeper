@@ -1,11 +1,6 @@
 const { postHandler } = require('..');
 
-const {
-	setupMocks,
-	verifyNotExists,
-	verifyExists,
-	testNode,
-} = require('../../../test-helpers');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 const {
 	dbUnavailable,
@@ -16,9 +11,9 @@ describe('rest POST', () => {
 	const sandbox = {};
 	const namespace = 'api-rest-post-handler';
 	const mainCode = `${namespace}-main`;
-	const childCode = `${namespace}-child`;
-	const parentCode = `${namespace}-parent`;
-	const restrictedCode = `${namespace}-restricted`;
+	// const childCode = `${namespace}-child`;
+	// const parentCode = `${namespace}-parent`;
+	// const restrictedCode = `${namespace}-restricted`;
 
 	setupMocks(sandbox, { namespace });
 
@@ -32,38 +27,45 @@ describe('rest POST', () => {
 
 	const getS3PostMock = body =>
 		jest.fn(async () => ({
-			versionId,
+			versionId: 'fake-id',
 			newBodyDocs: body,
 		}));
 
-	describe('writing properties', () => {
+	describe('writing disconnected records', () => {
 		it('creates record with properties', async () => {
 			const { status, body } = postHandler()(
 				getInput({ someString: 'some string' }),
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'some string',
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
 					code: mainCode,
 					someString: 'some string',
-				}),
-			);
-
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-					someString: 'some string',
-				}),
-			);
+				})
+				.noRels();
 		});
+
+		it('sets metadata', async () => {
+			const { status, body } = postHandler()(getInput());
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject(sandbox.meta.create);
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match(sandbox.meta.create);
+		});
+
 		it('creates record with Documents', async () => {
-			const postMock = getS3PostMock({ someDocument: 'some document' });
+			const s3PostMock = getS3PostMock({ someDocument: 'some document' });
 			const { status, body } = await postHandler({
 				documentStore: {
-					post: postMock,
+					post: s3PostMock,
 				},
 			})(
 				getInput({
@@ -73,24 +75,20 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'some string',
+				someDocument: 'some document',
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
 					code: mainCode,
 					someString: 'some string',
-					someDocument: 'some document',
-				}),
-			);
+				});
 
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-					someString: 'some string',
-				}),
-			);
-
-			expect(postMock).toHaveBeenCalledWith({
+			expect(s3PostMock).toHaveBeenCalledWith({
 				someDocument: 'some document',
 			});
 		});
@@ -100,25 +98,21 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
-					code: mainCode,
-				}),
-			);
+			expect(body).toMatchObject({
+				code: mainCode,
+			});
 
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-				}),
-			);
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.notMatch({
+					someString: expect.any(),
+				});
 		});
 		it("doesn't set a Document property when empty string provided", async () => {
-			const postMock = getS3PostMock({ someDocument: '' });
+			const s3PostMock = getS3PostMock({ someDocument: '' });
 			const { status, body } = await postHandler({
 				documentStore: {
-					post: postMock,
+					post: s3PostMock,
 				},
 			})(
 				getInput({
@@ -127,22 +121,14 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
-					code: mainCode,
-				}),
-			);
+			expect(body).toMatchObject({
+				code: mainCode,
+			});
+			await neo4jTest('MainType', mainCode).exists();
 
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-				}),
-			);
-
-			expect(postMock).not.toHaveBeenCalled();
+			expect(s3PostMock).not.toHaveBeenCalled();
 		});
+
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
 			const { status, body } = postHandler()(
@@ -150,22 +136,18 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
+			expect(body).toMatchObject({
+				code: mainCode,
+				someDate: date,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
 					code: mainCode,
 					someDate: date,
-				}),
-			);
-
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-					someDate: date,
-				}),
-			);
+				});
 		});
+
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.000Z';
 			const { status, body } = postHandler()(
@@ -173,21 +155,16 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
+			expect(body).toMatchObject({
+				code: mainCode,
+				someDatetime: datetime,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
 					code: mainCode,
 					someDatetime: datetime,
-				}),
-			);
-
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					code: mainCode,
-					someDatetime: datetime,
-				}),
-			);
+				});
 		});
 
 		it('sets Time property', async () => {
@@ -197,35 +174,78 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toEqual(
-				sandbox.withCreateMeta({
+			expect(body).toMatchObject({
+				someTime: time,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					code: mainCode,
 					someTime: time,
-				}),
-			);
+				})
+				.noRels();
+		});
 
-			await testNode(
-				'MainType',
-				mainCode,
-				sandbox.withCreateMeta({
-					someTime: time,
-				}),
-			);
+		it('throws 409 error if record already exists', async () => {
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+			});
+			await expect(postHandler()(getInput())).rejects.toThrow({
+				status: 409,
+			});
+			await neo4jTest('MainType', mainCode).notExists();
+		});
+
+		it("doesn't write to s3 if record already exists", async () => {
+			await sandbox.createNode('MainType', {
+				code: mainCode,
+			});
+			const s3PostMock = getS3PostMock();
+			await expect(
+				postHandler({
+					documentStore: {
+						post: s3PostMock,
+					},
+				})(
+					getInput({
+						someDocument: 'some document',
+					}),
+				),
+			).rejects.toThrow({
+				status: 409,
+				message: `MainType ${mainCode} already exists`,
+			});
+
+			await neo4jTest('MainType', mainCode).notExists();
+			expect(s3PostMock).not.toHaveBeenCalled();
+		});
+		it('throws 400 if code in body conflicts with code in url', async () => {
+			await expect(
+				postHandler()(getInput({ code: 'wrong-code' })),
+			).rejects.toThrow({
+				status: 400,
+				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
+			});
+			await neo4jTest('MainType', mainCode).notExists();
+		});
+		it('throws 400 if attempting to write property not in schema', async () => {
+			await expect(
+				postHandler()(getInput({ notInSchema: 'a string' })),
+			).rejects.toThrow({
+				status: 400,
+				message: 'Invalid property `notInSchema` on type `MainType`',
+			});
+			await neo4jTest('MainType', mainCode).notExists();
 		});
 	});
 
 	describe('generic error states', () => {
-		it('throws 409 error if record already exists', async () => {});
-		it('throws 400 if code in body conflicts with code in url', async () => {});
-		it('throws 400 if attempting to write property not in schema', async () => {});
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
 			await expect(postHandler()(getInput)).rejects.toThrow('oh no');
 		});
 
 		it('throws if s3 query fails', async () => {
-			await sandbox.createNode('MainType', {
-				code: mainCode,
-			});
 			await expect(
 				postHandler({
 					documentStore: {
@@ -236,25 +256,23 @@ describe('rest POST', () => {
 		});
 
 		it('undoes any s3 actions if neo4j query fails', async () => {
-			const postMock = jest.fn(async () => 'post-marker');
-			await sandbox.createNode('MainType', {
-				code: mainCode,
-			});
-			dbUnavailable({ skip: 1 });
+			const s3PostMock = jest.fn(async () => 'post-marker');
+			dbUnavailable();
 			await expect(
 				postHandler({
 					documentStore: {
-						post: postMock,
+						post: s3PostMock,
 					},
 				})(getInput({ someDocument: 'some document' })),
 			).rejects.toThrow('oh no');
-			expect(postMock).toHaveBeenCalledWith(
+			expect(s3PostMock).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
 				'post-marker',
 			);
 		});
 	});
+
 	describe('restricted types', () => {
 		it('throws 400 when creating restricted record', async () => {});
 		it('creates restricted record when using correct client-id', async () => {});
@@ -265,7 +283,8 @@ describe('rest POST', () => {
 		it('throws 400 when creating record related to non-existent records', async () => {});
 		it('creates record related to non-existent records when using upsert=true', async () => {});
 	});
-	describe('field locking', () => {
+
+	describe.skip('field locking', () => {
 		it('creates a record with _lockedFields', async () => {});
 		it('creates a record with multiple fields, locking selective ones', async () => {});
 		it('creates a record and locks all fields that are written', async () => {});

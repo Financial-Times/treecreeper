@@ -10,10 +10,7 @@ const express = require('express');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
 const { getRestApi } = require('..');
-const {
-	deleteHandler,
-	mockHandler,
-} = require('../../../packages/api-rest-delete-handler');
+const { mockHandler } = require('../../../packages/api-rest-delete-handler');
 
 const app = express();
 

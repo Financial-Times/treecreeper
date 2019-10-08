@@ -1,4 +1,9 @@
-const securityTests = (handler, namespacedCode, testBody = false) =>
+/* global describe, expect, it */
+const securityTests = (
+	handler,
+	namespacedCode,
+	// testBody = false
+) =>
 	describe('security', () => {
 		// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 		const INJECTION_ATTACK_STRING =
