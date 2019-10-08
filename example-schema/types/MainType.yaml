@@ -38,6 +38,14 @@ properties:
     type: Date
     description: Date description.
     label: Date label
+  someTime:
+    type: Time
+    description: Time description.
+    label: Time label
+  someDatetime:
+    type: Datetime
+    description: Datetime description.
+    label: Datetime label
   children:
     relationship: HAS_CHILD
     type: ChildType
