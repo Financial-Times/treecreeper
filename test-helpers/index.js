@@ -4,7 +4,7 @@ const dbConnection = require('./db-connection');
 const { schemaReady } = require('../api/server/lib/init-schema');
 
 const { neo4jTest } = require('./neo4j-test');
-const { fixtureBuilder, dropFixtures } = require('./test-data');
+const { fixtureBuilder, dropFixtures } = require('./test-fixtures');
 
 const setupMocks = namespace => {
 	let clock;

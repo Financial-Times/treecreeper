@@ -17,14 +17,6 @@ const spyDbQuery = ({ sinon }) => {
 	return () => spy;
 };
 
-const stubDbUnavailable = () =>
-	jest.spyOn(driver, 'session').mockReturnValue({
-		run: () => {
-			throw new Error('oh no');
-		},
-		close: () => {},
-	});
-
 const stubDbTransaction = ({ sinon }, properties = {}) => {
 	const runStub = sinon.stub();
 	const dummyId = { equals: () => false };
