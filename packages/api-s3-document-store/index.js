@@ -42,7 +42,7 @@ class S3DocumentsHelper {
 			Body: JSON.stringify(body),
 		};
 		const versionId = await this._uploadToS3(params, 'POST');
-		return { versionId, newBodyDocs: body };
+		return { versionMarker: versionId, body };
 	}
 
 	async patch(nodeType, code, body) {
@@ -57,9 +57,9 @@ class S3DocumentsHelper {
 				Object.assign({ Body: JSON.stringify(newBodyDocs) }, params),
 				'PATCH',
 			);
-			return { versionId, newBodyDocs };
+			return { versionMarker: versionId, body: newBodyDocs };
 		}
-		return { newBodyDocs: existingBody };
+		return { body: existingBody };
 	}
 
 	async delete(nodeType, code, versionId) {
@@ -77,7 +77,7 @@ class S3DocumentsHelper {
 				res,
 				'DELETE: S3 Delete successful',
 			);
-			return res.VersionId;
+			return {versionMarker: res.VersionId};
 		} catch (err) {
 			logger.info(
 				{ event: `DELETE_S3_FAILURE` },
@@ -102,8 +102,7 @@ class S3DocumentsHelper {
 			if (err.code === 'NoSuchKey') return {};
 			throw new Error(err);
 		}
-		const nodeBody = JSON.parse(node.Body);
-		return nodeBody;
+		return {body: JSON.parse(node.Body)};
 	}
 
 	async merge(nodeType, sourceCode, destinationCode) {
@@ -152,9 +151,9 @@ class S3DocumentsHelper {
 			throw new Error('MERGE FAILED: Write failed in S3');
 		}
 		return {
-			deleteVersionId,
-			writeVersionId,
-			updatedBody: destinationNodeBody,
+			versionMarker: writeVersionId,
+			siblingVersionMarker: deleteVersionId,
+			body: destinationNodeBody,
 		};
 	}
 }

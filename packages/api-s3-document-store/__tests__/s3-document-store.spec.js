@@ -76,7 +76,11 @@ describe('S3 Documents Helper', () => {
 		} = exampleRequest();
 		const { stubUpload, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		s3DocumentsHelper.post(requestNodeType, requestCode, requestBody);
+		const result = await s3DocumentsHelper.post(requestNodeType, requestCode, requestBody);
+		expect(result).toEqual({
+			versionMarker: 'FakeUploadVersionId',
+			body: requestBody
+		})
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenLastCalledWith({
 			Bucket: bucket,
@@ -89,7 +93,10 @@ describe('S3 Documents Helper', () => {
 		const { requestNodeType, requestCode, bucket } = exampleRequest();
 		const { stubDelete, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		s3DocumentsHelper.delete(requestNodeType, requestCode);
+		const result = await s3DocumentsHelper.delete(requestNodeType, requestCode);
+		expect(result).toEqual({
+			versionMarker: 'FakeDeleteVersionId'
+		})
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenLastCalledWith({
 			Bucket: bucket,
@@ -99,9 +106,12 @@ describe('S3 Documents Helper', () => {
 
 	it('gets a file from S3', () => {
 		const { requestNodeType, requestCode, bucket } = exampleRequest();
-		const { stubGetObject, mockS3Bucket } = stubOutS3(false); // get stub value is irrelevant for this test
+		const { stubGetObject, mockS3Bucket } = stubOutS3({dummy: true}); // get stub value is irrelevant for this test
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		s3DocumentsHelper.get(requestNodeType, requestCode);
+		const result = await s3DocumentsHelper.get(requestNodeType, requestCode);
+		expect(result).toEqual({
+			body: {dummy: true}
+		})
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
 		expect(stubGetObject).toHaveBeenLastCalledWith({
 			Bucket: bucket,
@@ -117,7 +127,7 @@ describe('S3 Documents Helper', () => {
 			JSON.stringify(savedBody),
 		);
 		const s3DocumentsHelper = new S3DocumentsHelper(mockS3Bucket);
-		await s3DocumentsHelper.patch(
+		const result = await s3DocumentsHelper.patch(
 			requestNodeType,
 			requestCode,
 			requestBody,
@@ -195,6 +205,9 @@ describe('S3 Documents Helper', () => {
 			Body: JSON.stringify(requestBody),
 		});
 	});
+
+	describe('merge', () => {
+
 
 	it('merges a file to s3', async () => {
 		const { requestNodeType, requestCode, bucket } = exampleRequest();
@@ -373,4 +386,5 @@ describe('S3 Documents Helper', () => {
 			Key: `${requestNodeType}/${requestCode}`,
 		});
 	});
+	})
 });
