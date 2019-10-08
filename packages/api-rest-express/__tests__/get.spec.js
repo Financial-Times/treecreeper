@@ -18,7 +18,7 @@ app.use('/route', getRestApi());
 
 const namespace = 'express-get';
 const mainCode = `${namespace}-main`;
-const restUrl = `/route/MainType/${mainCode}`;
+const restUrl = `/route/MainType/${mainCode}?upsert=yes`;
 
 describe('api-rest-express - GET', () => {
 	const { createNode } = setupMocks(namespace);
@@ -79,7 +79,7 @@ describe('api-rest-express - GET', () => {
 					clientUserId: 'test-user-id',
 				},
 				body: {},
-				query: {},
+				query: {upsert: 'yes'},
 				type: 'MainType',
 				code: 'express-get-main',
 			});
