@@ -1,4 +1,3 @@
-/* global jest */
 const { driver } = require('../packages/api-core/lib/db-connection');
 
 const spyDbQuery = ({ sinon }) => {

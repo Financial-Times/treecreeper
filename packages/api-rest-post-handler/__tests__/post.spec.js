@@ -20,10 +20,11 @@ describe('rest POST', () => {
 
 	securityTests(postHandler(), mainCode);
 
-	const getInput = body => ({
+	const getInput = (body, query) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
+		query,
 	});
 
 	const getS3PostMock = body =>
@@ -274,13 +275,109 @@ describe('rest POST', () => {
 		});
 	});
 
-	describe.skip('creating relationships', () => {
-		it('creates record related to existing records', async () => {});
-		it('throws 400 when creating record related to non-existent records', async () => {});
-		it('creates record related to non-existent records when using upsert=true', async () => {});
+	describe('creating relationships', () => {
+		it('creates record related to existing records', async () => {
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+			const { status, body } = await postHandler()(
+				getInput({
+					children: [childCode],
+					parents: [parentCode],
+				}),
+			);
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				children: [childCode],
+				parents: [parentCode],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(2)
+				.hasRel([
+					{
+						type: 'HAS_CHILD',
+						direction: 'outgoing',
+						props: meta.create,
+					},
+					{
+						type: 'ChildType',
+						props: Object.assign({ code: childCode }, meta.default),
+					},
+				])
+				.hasRel([
+					{
+						type: 'IS_PARENT_OF',
+						direction: 'incoming',
+						props: meta.create,
+					},
+					{
+						type: 'ParentType',
+						props: Object.assign(
+							{ code: parentCode },
+							meta.default,
+						),
+					},
+				]);
+		});
+		it('throws 400 when creating record related to non-existent records', async () => {
+			await expect(
+				postHandler()(
+					getInput({
+						children: [childCode],
+						parents: [parentCode],
+					}),
+				),
+			).rejects.toThrow({ status: 400, message: /Missing related node/ });
+			await neo4jTest('MainType', mainCode).notExists();
+		});
+		it('creates record related to non-existent records when using upsert=true', async () => {
+			const { status, body } = await postHandler()(
+				getInput(
+					{
+						children: [childCode],
+						parents: [parentCode],
+					},
+					{ upsert: true },
+				),
+			);
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				children: [childCode],
+				parents: [parentCode],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(2)
+				.hasRel([
+					{
+						type: 'HAS_CHILD',
+						direction: 'outgoing',
+						props: meta.create,
+					},
+					{
+						type: 'ChildType',
+						props: Object.assign({ code: childCode }, meta.create),
+					},
+				])
+				.hasRel([
+					{
+						type: 'IS_PARENT_OF',
+						direction: 'incoming',
+						props: meta.create,
+					},
+					{
+						type: 'ParentType',
+						props: Object.assign({ code: parentCode }, meta.create),
+					},
+				]);
+		});
 	});
 
-	describe.skip('restricted types', () => {
+	describe('restricted types', () => {
 		it('throws 400 when creating restricted record', async () => {});
 		it('creates restricted record when using correct client-id', async () => {});
 	});
