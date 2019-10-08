@@ -10,9 +10,6 @@ const {
 describe('rest POST', () => {
 	const namespace = 'api-rest-post-handler';
 	const mainCode = `${namespace}-main`;
-	const childCode = `${namespace}-child`;
-	const parentCode = `${namespace}-parent`;
-	const restrictedCode = `${namespace}-restricted`;
 
 	const { createNodes, createNode, connectNodes, meta } = setupMocks(
 		namespace,
@@ -20,11 +17,12 @@ describe('rest POST', () => {
 
 	securityTests(postHandler(), mainCode);
 
-	const getInput = (body, query) => ({
+	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
 		query,
+		metadata,
 	});
 
 	const getS3PostMock = body =>
@@ -221,6 +219,7 @@ describe('rest POST', () => {
 			await neo4jTest('MainType', mainCode).notExists();
 			expect(s3PostMock).not.toHaveBeenCalled();
 		});
+
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await expect(
 				postHandler()(getInput({ code: 'wrong-code' })),
@@ -230,6 +229,7 @@ describe('rest POST', () => {
 			});
 			await neo4jTest('MainType', mainCode).notExists();
 		});
+
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
 				postHandler()(getInput({ notInSchema: 'a string' })),
@@ -276,6 +276,9 @@ describe('rest POST', () => {
 	});
 
 	describe('creating relationships', () => {
+		const childCode = `${namespace}-child`;
+		const parentCode = `${namespace}-parent`;
+
 		it('creates record related to existing records', async () => {
 			await createNodes(
 				['ChildType', childCode],
@@ -322,6 +325,7 @@ describe('rest POST', () => {
 					},
 				]);
 		});
+
 		it('throws 400 when creating record related to non-existent records', async () => {
 			await expect(
 				postHandler()(
@@ -333,6 +337,7 @@ describe('rest POST', () => {
 			).rejects.toThrow({ status: 400, message: /Missing related node/ });
 			await neo4jTest('MainType', mainCode).notExists();
 		});
+
 		it('creates record related to non-existent records when using upsert=true', async () => {
 			const { status, body } = await postHandler()(
 				getInput(
@@ -378,14 +383,128 @@ describe('rest POST', () => {
 	});
 
 	describe('restricted types', () => {
-		it('throws 400 when creating restricted record', async () => {});
-		it('creates restricted record when using correct client-id', async () => {});
+		const restrictedCode = `${namespace}-restricted`;
+
+		it('throws 400 when creating restricted record', async () => {
+			await expect(
+				postHandler()({
+					type: 'RestrictedType',
+					code: restrictedCode,
+				}),
+			).rejects.toThrow({
+				status: 400,
+				message: `RestrictedTypes can only be created by restricted-type-creator`,
+			});
+			await neo4jTest('RestrictedType', restrictedCode).notExists();
+		});
+
+		it('creates restricted record when using correct client-id', async () => {
+			const { status } = await postHandler()({
+				type: 'RestrictedType',
+				code: restrictedCode,
+				metadata: {
+					clientId: 'restricted-type-creator',
+				},
+			});
+
+			expect(status).ToBe(200);
+			await neo4jTest('RestrictedType', restrictedCode).exists();
+		});
 	});
 
-	describe.skip('field locking', () => {
-		it('creates a record with _lockedFields', async () => {});
-		it('creates a record with multiple fields, locking selective ones', async () => {});
-		it('creates a record and locks all fields that are written', async () => {});
-		it('throws 400 when clientId is not set', async () => {});
+	describe('field locking', () => {
+		const lockClient = `${namespace}-lock-client`;
+
+		it('creates a record with _lockedFields', async () => {
+			const { status, body } = await postHandler()(
+				getInput(
+					{ someString: 'some string' },
+					{ lockFields: 'someString' },
+					{
+						clientId: lockClient,
+					},
+				),
+			);
+
+			expect(status).ToBe(200);
+			expect(body).toMatchObject({
+				someString: 'some string',
+				_lockedFields: `{"someString":${lockClient}}`,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					someString: 'some string',
+					_lockedFields: `{"someString":${lockClient}}`,
+				});
+		});
+
+		it('creates a record with multiple fields, locking selective ones', async () => {
+			const { status, body } = await postHandler()(
+				getInput(
+					{
+						someString: 'some string',
+						anotherString: 'another string',
+					},
+					{ lockFields: 'someString' },
+					{
+						clientId: lockClient,
+					},
+				),
+			);
+
+			expect(status).ToBe(200);
+			expect(body).toMatchObject({
+				someString: 'some string',
+				anotherString: 'another string',
+				_lockedFields: `{"someString":${lockClient}}`,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					someString: 'some string',
+					anotherString: 'another string',
+					_lockedFields: `{"someString":${lockClient}}`,
+				});
+		});
+
+		it('creates a record and locks all fields that are written', async () => {
+			const { status, body } = await postHandler()(
+				getInput(
+					{ someString: 'some string' },
+					{ lockFields: 'all' },
+					{
+						clientId: lockClient,
+					},
+				),
+			);
+
+			expect(status).ToBe(200);
+			expect(body).toMatchObject({
+				someString: 'some string',
+				_lockedFields: `{"someString":${lockClient}}`,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					someString: 'some string',
+					_lockedFields: `{"someString":${lockClient}}`,
+				});
+		});
+
+		it('throws 400 when clientId is not set', async () => {
+			await expect(
+				postHandler()(
+					getInput(
+						{ someString: 'some string' },
+						{ lockFields: 'all' },
+					),
+				),
+			).rejects.toThrow({
+				status: 400,
+				message: /clientId needs to be set to a valid system code in order to lock fields/,
+			});
+			await neo4jTest('MainType', mainCode).notExists();
+		});
 	});
 });
