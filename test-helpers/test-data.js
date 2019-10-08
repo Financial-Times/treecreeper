@@ -39,75 +39,52 @@ RETURN n1, n2, rel`,
 		},
 	);
 
-const testDataCreators = (namespace, sandbox, now, then) => {
-	const formattedTimestamp = new Date(now).toISOString();
+const fixtureBuilder = (namespace, now, then) => {
+	const getMetaObject = (prefix, suffix = '', time) => ({
+		[`${prefix}ByRequest`]: `${namespace}${suffix}-request`,
+		[`${prefix}ByClient`]: `${namespace}${suffix}-client`,
+		[`${prefix}ByUser`]: `${namespace}${suffix}-user`,
+		[`${prefix}Timestamp`]: DateTime.fromStandardDate(
+			new Date(time),
+		).toString(),
+	});
 
-	const defaultCreateByMeta = {
-		_createdByRequest: `${namespace}-default-request`,
-		_createdByClient: `${namespace}-default-client`,
-		_createdByUser: `${namespace}-default-user`,
-		_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
-	};
-
-	sandbox.meta = {
+	const meta = {
 		default: Object.assign(
-			{
-				_updatedByRequest: `${namespace}-default-request`,
-				_updatedByClient: `${namespace}-default-client`,
-				_updatedByUser: `${namespace}-default-user`,
-				_updatedTimestamp: DateTime.fromStandardDate(
-					new Date(now),
-				).toString(),
-			},
-			defaultCreateByMeta,
+			getMetaObject('_updated', '-default', then),
+			getMetaObject('_created', '-default', then),
 		),
-		create: {
-			_createdByClient: `${namespace}-client`,
-			_createdByUser: `${namespace}-user`,
-			_createdByRequest: `${namespace}-request`,
-			_createdTimestamp: DateTime.fromStandardDate(
-				new Date(formattedTimestamp),
-			).toString(),
-			_updatedByClient: `${namespace}-client`,
-			_updatedByUser: `${namespace}-user`,
-			_updatedByRequest: `${namespace}-request`,
-			_updatedTimestamp: DateTime.fromStandardDate(
-				new Date(formattedTimestamp),
-			).toString(),
-		},
+		create: Object.assign(
+			getMetaObject('_updated', '', now),
+			getMetaObject('_created', '', now),
+		),
 		update: Object.assign(
-			{
-				_updatedByClient: `${namespace}-client`,
-				_updatedByUser: `${namespace}-user`,
-				_updatedByRequest: `${namespace}-request`,
-				_updatedTimestamp: DateTime.fromStandardDate(
-					new Date(formattedTimestamp),
-				).toString(),
-			},
-			defaultCreateByMeta,
+			getMetaObject('_updated', '', now),
+			getMetaObject('_created', '-default', then),
 		),
 	};
 
-	const createNode = getNodeCreator(namespace, sandbox.meta.default);
-	const connect = getConnector(namespace, sandbox.meta.default);
+	const createNode = getNodeCreator(namespace, meta.default);
+	const connect = getConnector(namespace, meta.default);
 
-	sandbox.connectNodes = (...input) => {
+	const connectNodes = (...input) => {
 		if (!Array.isArray(input[0])) {
 			input = [input];
 		}
 		return Promise.all(input.map(args => connect(...args)));
 	};
-	sandbox.createNode = createNode;
-	sandbox.createNodes = (...nodes) =>
+	const createNodes = (...nodes) =>
 		Promise.all(nodes.map(args => createNode(...args)));
+
+	return { createNodes, createNode, connectNodes, meta };
 };
 
-const dropDb = namespace =>
+const dropFixtures = namespace =>
 	executeQuery(
 		`MATCH (n) WHERE n.code CONTAINS "${namespace}" DETACH DELETE n`,
 	);
 
 module.exports = {
-	testDataCreators,
-	dropDb,
+	fixtureBuilder,
+	dropFixtures,
 };

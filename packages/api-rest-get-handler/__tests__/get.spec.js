@@ -7,8 +7,6 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest GET', () => {
-	const sandbox = {};
-
 	const namespace = 'api-rest-get-handler';
 	const mainCode = `${namespace}-main`;
 	const input = {
@@ -16,12 +14,14 @@ describe('rest GET', () => {
 		code: mainCode,
 	};
 
-	setupMocks(sandbox, { namespace });
+	const { createNodes, createNode, connectNodes, meta } = setupMocks(
+		namespace,
+	);
 
 	securityTests(getHandler(), mainCode);
 
 	it('gets record without relationships', async () => {
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
 		});
@@ -32,23 +32,23 @@ describe('rest GET', () => {
 	});
 
 	it('retrieves metadata', async () => {
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
 		});
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
-		expect(body).toMatchObject(sandbox.meta.default);
+		expect(body).toMatchObject(meta.default);
 	});
 
 	it('gets record with relationships', async () => {
-		const [main, child, parent] = await sandbox.createNodes(
+		const [main, child, parent] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', `${namespace}-child`],
 			['ParentType', `${namespace}-parent`],
 		);
-		await sandbox.connectNodes(
+		await connectNodes(
 			// tests incoming and outgoing relationships
 			[main, 'HAS_CHILD', child],
 			[parent, 'IS_PARENT_OF', main],
@@ -64,7 +64,7 @@ describe('rest GET', () => {
 	});
 
 	it('gets record with Documents', async () => {
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 		});
 

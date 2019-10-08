@@ -8,14 +8,15 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest POST', () => {
-	const sandbox = {};
 	const namespace = 'api-rest-post-handler';
 	const mainCode = `${namespace}-main`;
-	// const childCode = `${namespace}-child`;
-	// const parentCode = `${namespace}-parent`;
-	// const restrictedCode = `${namespace}-restricted`;
+	const childCode = `${namespace}-child`;
+	const parentCode = `${namespace}-parent`;
+	const restrictedCode = `${namespace}-restricted`;
 
-	setupMocks(sandbox, { namespace });
+	const { createNodes, createNode, connectNodes, meta } = setupMocks(
+		namespace,
+	);
 
 	securityTests(postHandler(), mainCode);
 
@@ -55,10 +56,10 @@ describe('rest POST', () => {
 			const { status, body } = postHandler()(getInput());
 
 			expect(status).toBe(200);
-			expect(body).toMatchObject(sandbox.meta.create);
+			expect(body).toMatchObject(meta.create);
 			await neo4jTest('MainType', mainCode)
 				.exists()
-				.match(sandbox.meta.create);
+				.match(meta.create);
 		});
 
 		it('creates record with Documents', async () => {
@@ -187,7 +188,7 @@ describe('rest POST', () => {
 		});
 
 		it('throws 409 error if record already exists', async () => {
-			await sandbox.createNode('MainType', {
+			await createNode('MainType', {
 				code: mainCode,
 			});
 			await expect(postHandler()(getInput())).rejects.toThrow({
@@ -197,7 +198,7 @@ describe('rest POST', () => {
 		});
 
 		it("doesn't write to s3 if record already exists", async () => {
-			await sandbox.createNode('MainType', {
+			await createNode('MainType', {
 				code: mainCode,
 			});
 			const s3PostMock = getS3PostMock();
@@ -273,15 +274,15 @@ describe('rest POST', () => {
 		});
 	});
 
-	describe('restricted types', () => {
-		it('throws 400 when creating restricted record', async () => {});
-		it('creates restricted record when using correct client-id', async () => {});
-	});
-
-	describe('creating relationships', () => {
+	describe.skip('creating relationships', () => {
 		it('creates record related to existing records', async () => {});
 		it('throws 400 when creating record related to non-existent records', async () => {});
 		it('creates record related to non-existent records when using upsert=true', async () => {});
+	});
+
+	describe.skip('restricted types', () => {
+		it('throws 400 when creating restricted record', async () => {});
+		it('creates restricted record when using correct client-id', async () => {});
 	});
 
 	describe.skip('field locking', () => {

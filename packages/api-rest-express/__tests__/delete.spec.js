@@ -21,8 +21,7 @@ const mainCode = `${namespace}-main`;
 const restUrl = `/route/MainType/${mainCode}`;
 
 describe('api-rest-express - delete', () => {
-	const sandbox = {};
-	setupMocks(sandbox, { namespace });
+	const { createNode } = setupMocks(namespace);
 	beforeEach(() => mockHandler.mockResolvedValue({ status: 204 }));
 	describe('client headers', () => {
 		it('delete no client-id or client-user-id returns 400', async () => {
@@ -32,7 +31,7 @@ describe('api-rest-express - delete', () => {
 		});
 
 		it('delete client-id but no client-user-id returns 204', async () => {
-			await sandbox.createNode('MainType', mainCode);
+			await createNode('MainType', mainCode);
 			return request(app)
 				.delete(restUrl)
 				.set('client-id', 'test-client-id')
@@ -40,7 +39,7 @@ describe('api-rest-express - delete', () => {
 		});
 
 		it('delete client-user-id but no client-id returns 204', async () => {
-			await sandbox.createNode('MainType', mainCode);
+			await createNode('MainType', mainCode);
 			return request(app)
 				.delete(restUrl)
 				.set('client-user-id', 'test-user-id')
@@ -48,7 +47,7 @@ describe('api-rest-express - delete', () => {
 		});
 
 		it('delete client-id and client-user-id returns 204', async () => {
-			await sandbox.createNode('MainType', mainCode);
+			await createNode('MainType', mainCode);
 			return request(app)
 				.delete(restUrl)
 				.set('client-id', 'test-client-id')

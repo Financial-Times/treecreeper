@@ -8,8 +8,6 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest DELETE', () => {
-	const sandbox = {};
-
 	const namespace = 'api-rest-delete-handler';
 	const mainCode = `${namespace}-main`;
 	const input = {
@@ -17,12 +15,12 @@ describe('rest DELETE', () => {
 		code: mainCode,
 	};
 
-	setupMocks(sandbox, { namespace });
+	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
 	securityTests(deleteHandler(), mainCode);
 
 	it('deletes record without relationships', async () => {
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
 		});
@@ -33,12 +31,12 @@ describe('rest DELETE', () => {
 	});
 
 	it('errors when deleting record with relationships', async () => {
-		const [main, child, parent] = await sandbox.createNodes(
+		const [main, child, parent] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', `${namespace}-child`],
 			['ParentType', `${namespace}-parent`],
 		);
-		await sandbox.connectNodes(
+		await connectNodes(
 			// tests incoming and outgoing relationships
 			[main, 'HAS_CHILD', child],
 			[parent, 'IS_PARENT_OF', main],
@@ -53,7 +51,7 @@ describe('rest DELETE', () => {
 
 	it('deletes record with Documents', async () => {
 		const deleteMock = jest.fn(async () => 'delete-marker');
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 		});
 
@@ -82,7 +80,7 @@ describe('rest DELETE', () => {
 	});
 
 	it('throws if s3 query fails', async () => {
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 		});
 		await expect(
@@ -97,7 +95,7 @@ describe('rest DELETE', () => {
 
 	it('undoes any s3 actions if neo4j query fails', async () => {
 		const deleteMock = jest.fn(async () => 'delete-marker');
-		await sandbox.createNode('MainType', {
+		await createNode('MainType', {
 			code: mainCode,
 		});
 		dbUnavailable({ skip: 1 });
