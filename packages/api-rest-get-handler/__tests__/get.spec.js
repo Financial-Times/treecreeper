@@ -10,7 +10,7 @@ const {
 describe('rest GET', () => {
 	const sandbox = {};
 
-	const namespace = 'get';
+	const namespace = 'api-rest-get-handler';
 	const mainCode = `${namespace}-main`;
 	const input = {
 		type: 'MainType',

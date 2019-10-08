@@ -14,7 +14,7 @@ const {
 describe('rest DELETE', () => {
 	const sandbox = {};
 
-	const namespace = 'delete';
+	const namespace = 'api-rest-delete-handler';
 	const mainCode = `${namespace}-main`;
 	const input = {
 		type: 'MainType',
