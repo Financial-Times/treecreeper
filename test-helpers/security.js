@@ -25,11 +25,11 @@ const securityTests = (
 			requestId: obj => {
 				obj.metadata = { requestId: INJECTION_ATTACK_STRING };
 			},
-			propertyValue: obj => {
-				obj.body = {
-					someString: INJECTION_ATTACK_STRING,
-				};
-			},
+			// propertyValue: obj => {
+			// 	obj.body = {
+			// 		someString: INJECTION_ATTACK_STRING,
+			// 	};
+			// },
 			propertyName: obj => {
 				obj.body = {
 					[INJECTION_ATTACK_STRING]: 'value',

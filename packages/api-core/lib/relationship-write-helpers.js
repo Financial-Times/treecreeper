@@ -1,3 +1,4 @@
+const httpErrors = require('http-errors')
 const { stripIndents } = require('common-tags');
 const { getType } = require('../../../packages/schema-sdk');
 const { metaPropertiesForCreate } = require('./metadata-helpers');
@@ -91,7 +92,26 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 	return { parameters, queryParts };
 };
 
+const MISSING_RELATED_NODE_REGEX = /Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./
+
+const handleUpsertError = err => {
+	if (MISSING_RELATED_NODE_REGEX.test(err.message)) {
+		throw httpErrors(
+			400,
+			stripIndents`Missing related node.
+			If you need to create multiple things which depend on each other,
+			use the \`upsert=true\` query string to create placeholder entries for
+			related things which can be populated with properties with subsequent
+			API calls.
+			DO NOT use \`upsert\` if you are attempting to create a relationship with
+			an item that already exists - there's probably a mistake somewhere in your
+			code`,
+		);
+	}
+};
+
 module.exports = {
 	prepareToWriteRelationships,
 	prepareRelationshipDeletion,
+	handleUpsertError
 };

@@ -13,11 +13,12 @@ const {
 } = require('../api-core/lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
+	handleUpsertError
 } = require('../api-core/lib/relationship-write-helpers');
 const { getNeo4jRecordCypherQuery } = require('../api-core/lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const { type, code, body, metadata, query = {} } = validateInput(input);
+	const { type, code, body, metadata = {}, query = {} } = validateInput(input);
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -67,15 +68,23 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		// Hella useful for logging, but too clever by half for use in
 		// application code? Makes code less pure and testable
 		// DAMN YOU COMMON SENSE! Why must you ruin all my fun!
-		Object.assign({ timestamp: new Date().toISOString() }, metadata),
+		{
+			timestamp: new Date().toISOString(),
+			requestId: metadata.requestId || null,
+			clientId: metadata.clientId || null,
+			clientUserId: metadata.clientUserId || null,
+		},
 		relationshipParameters,
 	);
 
 	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
-
-	const neo4jResult = await executeQuery(queryParts.join('\n'), parameters);
-
-	return { status: 200, body: neo4jResult.toJson(type) };
+	try {
+		const neo4jResult = await executeQuery(queryParts.join('\n'), parameters);
+		return { status: 200, body: neo4jResult.toJson(type) };
+	} catch (err) {
+		handleUpsertError(err)
+		throw err;
+	}
 };
 
 module.exports = { postHandler };
