@@ -79,7 +79,7 @@ describe('api-rest-express - GET', () => {
 					clientUserId: 'test-user-id',
 				},
 				body: {},
-				query: {upsert: 'yes'},
+				query: { upsert: 'yes' },
 				type: 'MainType',
 				code: 'express-get-main',
 			});

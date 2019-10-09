@@ -31,11 +31,13 @@ describe('rest POST', () => {
 			newBodyDocs: body,
 		}));
 
+	const basicHandler = (...args) => postHandler()(getInput(...args));
+
 	describe('writing disconnected records', () => {
 		it('creates record with properties', async () => {
-			const { status, body } = postHandler()(
-				getInput({ someString: 'some string' }),
-			);
+			const { status, body } = basicHandler({
+				someString: 'some string',
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -52,7 +54,7 @@ describe('rest POST', () => {
 		});
 
 		it('sets metadata', async () => {
-			const { status, body } = postHandler()(getInput());
+			const { status, body } = basicHandler();
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
@@ -93,9 +95,7 @@ describe('rest POST', () => {
 			});
 		});
 		it("doesn't set a property when empty string provided", async () => {
-			const { status, body } = postHandler()(
-				getInput({ someString: '' }),
-			);
+			const { status, body } = basicHandler({ someString: '' });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -131,9 +131,9 @@ describe('rest POST', () => {
 
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
-			const { status, body } = postHandler()(
-				getInput({ someDate: new Date(date).toISOString() }),
-			);
+			const { status, body } = basicHandler({
+				someDate: new Date(date).toISOString(),
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -150,9 +150,7 @@ describe('rest POST', () => {
 
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.000Z';
-			const { status, body } = postHandler()(
-				getInput({ someDatetime: datetime }),
-			);
+			const { status, body } = basicHandler({ someDatetime: datetime });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -169,9 +167,7 @@ describe('rest POST', () => {
 
 		it('sets Time property', async () => {
 			const time = '2019-01-09T00:00:00.000Z';
-			const { status, body } = postHandler()(
-				getInput({ someTime: time }),
-			);
+			const { status, body } = basicHandler({ someTime: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -190,7 +186,7 @@ describe('rest POST', () => {
 			await createNode('MainType', {
 				code: mainCode,
 			});
-			await expect(postHandler()(getInput())).rejects.toThrow({
+			await expect(basicHandler()).rejects.toThrow({
 				status: 409,
 			});
 			await neo4jTest('MainType', mainCode).notExists();
@@ -221,9 +217,7 @@ describe('rest POST', () => {
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
-			await expect(
-				postHandler()(getInput({ code: 'wrong-code' })),
-			).rejects.toThrow({
+			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
@@ -232,7 +226,7 @@ describe('rest POST', () => {
 
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
-				postHandler()(getInput({ notInSchema: 'a string' })),
+				basicHandler({ notInSchema: 'a string' }),
 			).rejects.toThrow({
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`',
@@ -244,7 +238,7 @@ describe('rest POST', () => {
 	describe('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
-			await expect(postHandler()(getInput)).rejects.toThrow('oh no');
+			await expect(basicHandler()).rejects.toThrow('oh no');
 		});
 
 		it('throws if s3 query fails', async () => {
@@ -284,12 +278,10 @@ describe('rest POST', () => {
 				['ChildType', childCode],
 				['ParentType', parentCode],
 			);
-			const { status, body } = await postHandler()(
-				getInput({
-					children: [childCode],
-					parents: [parentCode],
-				}),
-			);
+			const { status, body } = await basicHandler({
+				children: [childCode],
+				parents: [parentCode],
+			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				children: [childCode],
@@ -328,25 +320,21 @@ describe('rest POST', () => {
 
 		it('throws 400 when creating record related to non-existent records', async () => {
 			await expect(
-				postHandler()(
-					getInput({
-						children: [childCode],
-						parents: [parentCode],
-					}),
-				),
+				basicHandler({
+					children: [childCode],
+					parents: [parentCode],
+				}),
 			).rejects.toThrow({ status: 400, message: /Missing related node/ });
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 
 		it('creates record related to non-existent records when using upsert=true', async () => {
-			const { status, body } = await postHandler()(
-				getInput(
-					{
-						children: [childCode],
-						parents: [parentCode],
-					},
-					{ upsert: true },
-				),
+			const { status, body } = await basicHandler(
+				{
+					children: [childCode],
+					parents: [parentCode],
+				},
+				{ upsert: true },
 			);
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -416,14 +404,12 @@ describe('rest POST', () => {
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
-			const { status, body } = await postHandler()(
-				getInput(
-					{ someString: 'some string' },
-					{ lockFields: 'someString' },
-					{
-						clientId: lockClient,
-					},
-				),
+			const { status, body } = await basicHandler(
+				{ someString: 'some string' },
+				{ lockFields: 'someString' },
+				{
+					clientId: lockClient,
+				},
 			);
 
 			expect(status).ToBe(200);
@@ -440,17 +426,15 @@ describe('rest POST', () => {
 		});
 
 		it('creates a record with multiple fields, locking selective ones', async () => {
-			const { status, body } = await postHandler()(
-				getInput(
-					{
-						someString: 'some string',
-						anotherString: 'another string',
-					},
-					{ lockFields: 'someString' },
-					{
-						clientId: lockClient,
-					},
-				),
+			const { status, body } = await basicHandler(
+				{
+					someString: 'some string',
+					anotherString: 'another string',
+				},
+				{ lockFields: 'someString' },
+				{
+					clientId: lockClient,
+				},
 			);
 
 			expect(status).ToBe(200);
@@ -469,14 +453,12 @@ describe('rest POST', () => {
 		});
 
 		it('creates a record and locks all fields that are written', async () => {
-			const { status, body } = await postHandler()(
-				getInput(
-					{ someString: 'some string' },
-					{ lockFields: 'all' },
-					{
-						clientId: lockClient,
-					},
-				),
+			const { status, body } = await basicHandler(
+				{ someString: 'some string' },
+				{ lockFields: 'all' },
+				{
+					clientId: lockClient,
+				},
 			);
 
 			expect(status).ToBe(200);
@@ -494,11 +476,9 @@ describe('rest POST', () => {
 
 		it('throws 400 when clientId is not set', async () => {
 			await expect(
-				postHandler()(
-					getInput(
-						{ someString: 'some string' },
-						{ lockFields: 'all' },
-					),
+				basicHandler(
+					{ someString: 'some string' },
+					{ lockFields: 'all' },
 				),
 			).rejects.toThrow({
 				status: 400,
