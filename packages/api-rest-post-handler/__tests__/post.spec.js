@@ -11,7 +11,7 @@ describe('rest POST', () => {
 	const namespace = 'api-rest-post-handler';
 	const mainCode = `${namespace}-main`;
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
+	const { createNodes, createNode, meta, getMetaPayload } = setupMocks(
 		namespace,
 	);
 
@@ -34,8 +34,19 @@ describe('rest POST', () => {
 	const basicHandler = (...args) => postHandler()(getInput(...args));
 
 	describe('writing disconnected records', () => {
+		it('creates record with no body', async () => {
+			const { status, body } = await basicHandler();
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+		});
+
 		it('creates record with properties', async () => {
-			const { status, body } = basicHandler({
+			const { status, body } = await basicHandler({
 				someString: 'some string',
 			});
 
@@ -54,7 +65,7 @@ describe('rest POST', () => {
 		});
 
 		it('sets metadata', async () => {
-			const { status, body } = basicHandler();
+			const { status, body } = await basicHandler(undefined, undefined, getMetaPayload());
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
@@ -95,7 +106,7 @@ describe('rest POST', () => {
 			});
 		});
 		it("doesn't set a property when empty string provided", async () => {
-			const { status, body } = basicHandler({ someString: '' });
+			const { status, body } = await basicHandler({ someString: '' });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -131,7 +142,7 @@ describe('rest POST', () => {
 
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
-			const { status, body } = basicHandler({
+			const { status, body } = await basicHandler({
 				someDate: new Date(date).toISOString(),
 			});
 
@@ -150,7 +161,7 @@ describe('rest POST', () => {
 
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.000Z';
-			const { status, body } = basicHandler({ someDatetime: datetime });
+			const { status, body } = await basicHandler({ someDatetime: datetime });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -167,7 +178,7 @@ describe('rest POST', () => {
 
 		it('sets Time property', async () => {
 			const time = '2019-01-09T00:00:00.000Z';
-			const { status, body } = basicHandler({ someTime: time });
+			const { status, body } = await basicHandler({ someTime: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({

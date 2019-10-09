@@ -40,6 +40,12 @@ RETURN n1, n2, rel`,
 	);
 
 const fixtureBuilder = (namespace, now, then) => {
+	const getMetaPayload = () => ({
+		requestId: `${namespace}-request`,
+		clientId: `${namespace}-client`,
+		clientUserId: `${namespace}-user`,
+	});
+
 	const getMetaObject = (prefix, suffix = '', time) => ({
 		[`${prefix}ByRequest`]: `${namespace}${suffix}-request`,
 		[`${prefix}ByClient`]: `${namespace}${suffix}-client`,
@@ -76,7 +82,7 @@ const fixtureBuilder = (namespace, now, then) => {
 	const createNodes = (...nodes) =>
 		Promise.all(nodes.map(args => createNode(...args)));
 
-	return { createNodes, createNode, connectNodes, meta };
+	return { createNodes, createNode, connectNodes, meta, getMetaPayload };
 };
 
 const dropFixtures = namespace =>

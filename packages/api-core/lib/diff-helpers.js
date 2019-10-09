@@ -157,10 +157,18 @@ const getRemovedRelationships = ({
 		.reduce(entriesToObject, {});
 };
 
-const getAddedRelationships = ({ nodeType, initialContent, newContent }) => {
-	let newRelationships = Object.entries(newContent)
-		.filter(isWriteRelationship(nodeType))
+const getRelationships = ({ type, body = {} }, reduce = true) => {
+	const newRelationships = Object.entries(body)
+		.filter(isWriteRelationship(type))
 		.map(([propName, codes]) => [propName, toArray(codes)]);
+
+	return reduce
+		? newRelationships.reduce(entriesToObject, {})
+		: newRelationships;
+};
+
+const getAddedRelationships = ({ type, initialContent, newContent }) => {
+	let newRelationships = getRelationships({ type, body: newContent }, false);
 
 	if (initialContent) {
 		newRelationships = newRelationships
@@ -179,6 +187,7 @@ const containsRelationshipData = (nodeType, payload) => {
 };
 
 module.exports = {
+	getRelationships,
 	getAddedRelationships,
 	getRemovedRelationships,
 	diffProperties,
