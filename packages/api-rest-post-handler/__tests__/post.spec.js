@@ -41,8 +41,7 @@ describe('rest POST', () => {
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
+			await neo4jTest('MainType', mainCode).exists();
 		});
 
 		it('creates record with properties', async () => {
@@ -65,7 +64,11 @@ describe('rest POST', () => {
 		});
 
 		it('sets metadata', async () => {
-			const { status, body } = await basicHandler(undefined, undefined, getMetaPayload());
+			const { status, body } = await basicHandler(
+				undefined,
+				undefined,
+				getMetaPayload(),
+			);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
@@ -161,7 +164,9 @@ describe('rest POST', () => {
 
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.000Z';
-			const { status, body } = await basicHandler({ someDatetime: datetime });
+			const { status, body } = await basicHandler({
+				someDatetime: datetime,
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({

@@ -1,19 +1,4 @@
 const { stripIndents } = require('common-tags');
-const { getContext } = require('./request-context');
-
-const getDbWriteContext = () => {
-	// TODO need to add timestamp when request starts ad expose here too
-	// Default to null rather than undefined because it avoids a 'missing
-	// parameter' error and it unsets any previous values when updating.
-	const { requestId = null, clientId = null, clientUserId = null } = getContext();
-
-	return {
-		requestId,
-		clientId,
-		clientUserId,
-		timestamp: new Date().toISOString(),
-	};
-};
 
 const metaPropertiesForUpdate = recordName => stripIndents`
 	${recordName}._updatedByRequest = $requestId,
@@ -32,10 +17,9 @@ const metaPropertiesForCreate = recordName => stripIndents`
 	${recordName}._createdTimestamp = datetime($timestamp),
 	${metaPropertiesForUpdate(recordName)}
 `;
-	// ${recordName}._lockedFields = $lockedFields,
+// ${recordName}._lockedFields = $lockedFields,
 
 module.exports = {
-	getDbWriteContext,
 	metaPropertiesForUpdate,
 	metaPropertiesForCreate,
 };

@@ -94,7 +94,7 @@ const neo4jTest = (type, code) => {
 			});
 			return this;
 		},
-		then: (res) => res(Promise.all(tests)),
+		then: res => res(Promise.all(tests)),
 	};
 };
 

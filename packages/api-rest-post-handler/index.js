@@ -5,23 +5,16 @@ const { executeQuery } = require('../api-core/lib/neo4j-model');
 const { validateInput } = require('../api-core/lib/validation');
 const { getType } = require('../schema-sdk');
 
-const {
-	metaPropertiesForCreate,
-	getDbWriteContext,
-} = require('../api-core/lib/metadata-helpers');
+const { metaPropertiesForCreate } = require('../api-core/lib/metadata-helpers');
 
-const {
-	getRelationships,
-} = require('../api-core/lib/diff-helpers');
+const { getRelationships } = require('../api-core/lib/diff-helpers');
 const {
 	constructNeo4jProperties,
 } = require('../api-core/lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
 } = require('../api-core/lib/relationship-write-helpers');
-const {
-	getNeo4jRecordCypherQuery,
-} = require('../api-core/lib/read-helpers');
+const { getNeo4jRecordCypherQuery } = require('../api-core/lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const { type, code, body, metadata, query = {} } = validateInput(input);
@@ -74,7 +67,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		// Hella useful for logging, but too clever by half for use in
 		// application code? Makes code less pure and testable
 		// DAMN YOU COMMON SENSE! Why must you ruin all my fun!
-		Object.assign({}, getDbWriteContext(), metadata),
+		Object.assign({ timestamp: new Date().toISOString() }, metadata),
 		relationshipParameters,
 	);
 
