@@ -2,8 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 // const httpErrors = require('http-errors');
 
-const clientId = require('../../packages/api-core/lib/middleware/client-id');
-const requestId = require('../../packages/api-core/lib/middleware/request-id');
+const clientId = require('./middleware/client-id');
+const requestId = require('./middleware/request-id');
 const {
 	logger,
 	setContext,
@@ -15,9 +15,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-const {
-	errorToErrors,
-} = require('../../packages/api-core/lib/middleware/errors');
+const { errorToErrors } = require('./middleware/errors');
 
 const requestLog = (endpointName, method, req) => {
 	setContext({
@@ -86,13 +84,13 @@ const getRestApi = ({
 
 	router
 		.route('/:type/:code')
-		.get(controller('GET', getHandler({ documentStore })))
-		.post(controller('POST', postHandler({ documentStore })))
+		.get(controller('GET', getHandler({ documentStore, logger })))
+		.post(controller('POST', postHandler({ documentStore, logger })))
 		// 	.put(unimplemented('PUT', 'PATCH'))
-		// 	.patch(controller('PATCH', patchHandler({documentStore})))
-		.delete(controller('DELETE', deleteHandler({ documentStore })));
+		// 	.patch(controller('PATCH', patchHandler({documentStore, logger})))
+		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
 
-	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore})));
+	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
 
 	router.use(errorToErrors);
 

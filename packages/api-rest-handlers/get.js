@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
-const { getNeo4jRecord } = require('../api-core');
-const { validateInput } = require('../api-core/lib/validation');
+const { validateInput } = require('./lib/validation');
+const { getNeo4jRecord } = require('./lib/read-helpers');
 
 const getHandler = ({
 	documentStore = { get: () => null },

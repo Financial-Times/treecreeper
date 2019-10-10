@@ -1,12 +1,12 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { validateInput } = require('../api-core/lib/validation');
-const { getNeo4jRecord } = require('../api-core');
-const { executeQuery } = require('../api-core/lib/neo4j-model');
-const { logger } = require('../api-core/lib/request-context');
+const { validateInput } = require('./lib/validation');
+const { getNeo4jRecord } = require('./lib/read-helpers');
+const { executeQuery } = require('./lib/neo4j-model');
 
 const deleteHandler = ({
 	documentStore = { delete: () => null },
+	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
 	const neo4jResult = await getNeo4jRecord(type, code);

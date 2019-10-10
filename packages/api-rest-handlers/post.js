@@ -1,21 +1,23 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { getNeo4jRecord } = require('../api-core');
-const { executeQuery } = require('../api-core/lib/neo4j-model');
-const { validateInput } = require('../api-core/lib/validation');
+const { executeQuery } = require('./lib/neo4j-model');
+const { validateInput } = require('./lib/validation');
+const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
 
-const { metaPropertiesForCreate } = require('../api-core/lib/metadata-helpers');
+const {
+	metaPropertiesForCreate,
+	prepareMetadataForNeo4jQuery,
+} = require('./lib/metadata-helpers');
 
 const { getRelationships } = require('../api-core/lib/diff-helpers');
-const {
-	constructNeo4jProperties,
-} = require('../api-core/lib/neo4j-type-conversion');
+
+const { constructNeo4jProperties } = require('./lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
 	handleUpsertError,
-} = require('../api-core/lib/relationship-write-helpers');
-const { getNeo4jRecordCypherQuery } = require('../api-core/lib/read-helpers');
+} = require('./lib/relationship-write-helpers');
+const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
@@ -66,16 +68,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			code,
 			properties,
 		},
-		// TODO need to figure out the role of getContext() in general.
-		// Hella useful for logging, but too clever by half for use in
-		// application code? Makes code less pure and testable
-		// DAMN YOU COMMON SENSE! Why must you ruin all my fun!
-		{
-			timestamp: new Date().toISOString(),
-			requestId: metadata.requestId || null,
-			clientId: metadata.clientId || null,
-			clientUserId: metadata.clientUserId || null,
-		},
+		prepareMetadataForNeo4jQuery(metadata),
 		relationshipParameters,
 	);
 

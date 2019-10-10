@@ -1,3 +1,3 @@
-const {testSuite} = require('./test-suite');
+const { testSuite } = require('./test-suite');
 
-testSuite('delete', 204)
+testSuite('delete', 204);

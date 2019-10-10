@@ -1,4 +1,4 @@
-const { logger } = require('../request-context');
+const { logger } = require('../../api-core/lib/request-context');
 
 // eslint-disable-next-line no-unused-vars
 const errorToErrors = (err, req, res, next) => {

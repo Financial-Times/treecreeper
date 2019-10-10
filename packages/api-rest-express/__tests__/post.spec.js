@@ -1,3 +1,3 @@
-const {testSuite} = require('./test-suite');
+const { testSuite } = require('./test-suite');
 
-testSuite('post', 200)
+testSuite('post', 200);

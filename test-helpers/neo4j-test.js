@@ -1,8 +1,8 @@
 /* global expect */
 const {
 	convertNeo4jToJson,
-} = require('../packages/api-core/lib/neo4j-type-conversion');
-const { driver } = require('../packages/api-core/lib/db-connection');
+} = require('../packages/api-rest-handlers/lib/neo4j-type-conversion');
+const { driver } = require('./db-connection');
 
 const executeQuery = (query, parameters) =>
 	driver.session().run(query, parameters);
