@@ -1,4 +1,4 @@
-const { postHandler } = require('..');
+const { postHandler } = require('../post');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
@@ -202,11 +202,15 @@ describe('rest POST', () => {
 			await createNode('MainType', {
 				code: mainCode,
 			});
-			await expect(basicHandler({someString: 'some string'	})).rejects.toThrow({
+			await expect(
+				basicHandler({ someString: 'some string' }),
+			).rejects.toThrow({
 				status: 409,
-				message: `MainType ${mainCode} already exists`
+				message: `MainType ${mainCode} already exists`,
 			});
-			await neo4jTest('MainType', mainCode).notMatch({someString: 'some string'	});
+			await neo4jTest('MainType', mainCode).notMatch({
+				someString: 'some string',
+			});
 		});
 
 		it.skip("doesn't write to s3 if record already exists", async () => {
@@ -295,10 +299,14 @@ describe('rest POST', () => {
 				['ChildType', childCode],
 				['ParentType', parentCode],
 			);
-			const { status, body } = await basicHandler({
-				children: [childCode],
-				parents: [parentCode],
-			}, undefined, getMetaPayload());
+			const { status, body } = await basicHandler(
+				{
+					children: [childCode],
+					parents: [parentCode],
+				},
+				undefined,
+				getMetaPayload(),
+			);
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				children: [childCode],
@@ -353,7 +361,8 @@ describe('rest POST', () => {
 					parents: [parentCode],
 				},
 				{ upsert: true },
-			 getMetaPayload());
+				getMetaPayload(),
+			);
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				children: [childCode],

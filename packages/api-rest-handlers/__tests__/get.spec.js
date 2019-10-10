@@ -1,4 +1,4 @@
-const { getHandler } = require('..');
+const { getHandler } = require('../get');
 const { setupMocks } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 const {

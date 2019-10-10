@@ -65,10 +65,12 @@ const controller = (method, handler) => (req, res, next) => {
 		)
 		.catch(next);
 };
-const { getHandler } = require('../../packages/api-rest-get-handler');
-// const {postHandler} = require('../../packages/api-rest-post-handler');
-// const {patchHandler} = require('../../packages/api-rest-patch-handler');
-const { deleteHandler } = require('../../packages/api-rest-delete-handler');
+const {
+	getHandler,
+	deleteHandler,
+	postHandler,
+	patchHandler,
+} = require('../../packages/api-rest-handlers');
 // const {mergeHandler} = require('../../packages/api-rest-merge-handler');
 
 const getRestApi = ({
@@ -85,7 +87,7 @@ const getRestApi = ({
 	router
 		.route('/:type/:code')
 		.get(controller('GET', getHandler({ documentStore })))
-		// 	.post(controller('POST', postHandler({documentStore})))
+		.post(controller('POST', postHandler({ documentStore })))
 		// 	.put(unimplemented('PUT', 'PATCH'))
 		// 	.patch(controller('PATCH', patchHandler({documentStore})))
 		.delete(controller('DELETE', deleteHandler({ documentStore })));

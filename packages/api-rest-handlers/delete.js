@@ -31,14 +31,14 @@ const deleteHandler = ({
 	// Writes are in series, not parallel, to simplify rollback on error
 	const deleteMarker = await documentStore.delete(type, code);
 	try {
-		const res = await executeQuery(query, { code });
+		await executeQuery(query, { code });
 	} catch (error) {
 		logger.error(
 			{ event: 'NEO4J_DELETE_FAILURE', error },
 			'Neo4j Delete unsuccessful. Rolling back S3 delete',
 		);
-		documentStore.delete(type, code, deleteMarker);
-		throw new Error(err);
+		await documentStore.delete(type, code, deleteMarker);
+		throw error;
 	}
 
 	return { status: 204 };

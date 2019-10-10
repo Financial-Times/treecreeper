@@ -13,12 +13,14 @@ const {
 } = require('../api-core/lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
-	handleUpsertError
+	handleUpsertError,
 } = require('../api-core/lib/relationship-write-helpers');
 const { getNeo4jRecordCypherQuery } = require('../api-core/lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const { type, code, body, metadata = {}, query = {} } = validateInput(input);
+	const { type, code, body, metadata = {}, query = {} } = validateInput(
+		input,
+	);
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -79,10 +81,13 @@ const postHandler = ({ documentStore } = {}) => async input => {
 
 	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
 	try {
-		const neo4jResult = await executeQuery(queryParts.join('\n'), parameters);
+		const neo4jResult = await executeQuery(
+			queryParts.join('\n'),
+			parameters,
+		);
 		return { status: 200, body: neo4jResult.toJson(type) };
 	} catch (err) {
-		handleUpsertError(err)
+		handleUpsertError(err);
 		throw err;
 	}
 };

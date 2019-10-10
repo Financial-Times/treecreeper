@@ -1,4 +1,4 @@
-const httpErrors = require('http-errors')
+const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { getType } = require('../../../packages/schema-sdk');
 const { metaPropertiesForCreate } = require('./metadata-helpers');
@@ -92,7 +92,7 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 	return { parameters, queryParts };
 };
 
-const MISSING_RELATED_NODE_REGEX = /Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./
+const MISSING_RELATED_NODE_REGEX = /Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./;
 
 const handleUpsertError = err => {
 	if (MISSING_RELATED_NODE_REGEX.test(err.message)) {
@@ -113,5 +113,5 @@ const handleUpsertError = err => {
 module.exports = {
 	prepareToWriteRelationships,
 	prepareRelationshipDeletion,
-	handleUpsertError
+	handleUpsertError,
 };

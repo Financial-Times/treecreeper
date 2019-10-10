@@ -1,4 +1,4 @@
-const { deleteHandler } = require('..');
+const { deleteHandler } = require('../delete');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
@@ -74,7 +74,6 @@ describe('rest DELETE', () => {
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
 		await expect(deleteHandler()(input)).rejects.toThrow('oh no');
-		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('throws if s3 query fails', async () => {
@@ -105,6 +104,5 @@ describe('rest DELETE', () => {
 			mainCode,
 			'delete-marker',
 		);
-		await neo4jTest('MainType', mainCode).exists();
 	});
 });
