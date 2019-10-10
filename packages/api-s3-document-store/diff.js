@@ -9,8 +9,6 @@ const detectPropertyChanges = (nodeType, initialContent = {}) => {
 		return ([, val]) => !isNullValue(val);
 	}
 
-	const { properties } = getType(nodeType);
-
 	return ([propName, val]) => {
 		if (!(propName in initialContent)) {
 			return !isNullValue(val);

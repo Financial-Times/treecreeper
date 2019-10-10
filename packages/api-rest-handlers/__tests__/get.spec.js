@@ -7,7 +7,7 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest GET', () => {
-	const namespace = 'api-rest-get-handler';
+	const namespace = 'api-rest-handlers-get';
 	const mainCode = `${namespace}-main`;
 	const input = {
 		type: 'MainType',

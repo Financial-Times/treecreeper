@@ -1,4 +1,4 @@
-const { postHandler } = require('../post');
+const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
@@ -7,15 +7,15 @@ const {
 	asyncErrorFunction,
 } = require('../../../test-helpers/error-stubs');
 
-describe('rest POST', () => {
-	const namespace = 'api-rest-handlers-post';
+describe('rest PATCH create', () => {
+	const namespace = 'api-rest-handlers-patch-create';
 	const mainCode = `${namespace}-main`;
 
 	const { createNodes, createNode, meta, getMetaPayload } = setupMocks(
 		namespace,
 	);
 
-	securityTests(postHandler(), mainCode);
+	securityTests(patchHandler(), mainCode);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
@@ -31,13 +31,13 @@ describe('rest POST', () => {
 			newBodyDocs: body,
 		}));
 
-	const basicHandler = (...args) => postHandler()(getInput(...args));
+	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	describe('writing disconnected records', () => {
 		it('creates record with no body', async () => {
 			const { status, body } = await basicHandler();
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
@@ -49,7 +49,7 @@ describe('rest POST', () => {
 				someString: 'some string',
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 				someString: 'some string',
@@ -70,7 +70,7 @@ describe('rest POST', () => {
 				getMetaPayload(),
 			);
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject(meta.create);
 			await neo4jTest('MainType', mainCode)
 				.exists()
@@ -79,7 +79,7 @@ describe('rest POST', () => {
 
 		it.skip('creates record with Documents', async () => {
 			const s3PostMock = getS3PostMock({ someDocument: 'some document' });
-			const { status, body } = await postHandler({
+			const { status, body } = await patchHandler({
 				documentStore: {
 					post: s3PostMock,
 				},
@@ -90,7 +90,7 @@ describe('rest POST', () => {
 				}),
 			);
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 				someString: 'some string',
@@ -111,7 +111,7 @@ describe('rest POST', () => {
 		it("doesn't set a property when empty string provided", async () => {
 			const { status, body } = await basicHandler({ someString: '' });
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
@@ -124,7 +124,7 @@ describe('rest POST', () => {
 		});
 		it.skip("doesn't set a Document property when empty string provided", async () => {
 			const s3PostMock = getS3PostMock({ someDocument: '' });
-			const { status, body } = await postHandler({
+			const { status, body } = await patchHandler({
 				documentStore: {
 					post: s3PostMock,
 				},
@@ -134,7 +134,7 @@ describe('rest POST', () => {
 				}),
 			);
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
@@ -149,7 +149,7 @@ describe('rest POST', () => {
 				someDate: new Date(date).toISOString(),
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 				someDate: date,
@@ -168,7 +168,7 @@ describe('rest POST', () => {
 				someDatetime: datetime,
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				code: mainCode,
 				someDatetime: datetime,
@@ -185,7 +185,7 @@ describe('rest POST', () => {
 			const time = '2019-01-09T00:00:00.000Z';
 			const { status, body } = await basicHandler({ someTime: time });
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				someTime: time,
 			});
@@ -198,28 +198,13 @@ describe('rest POST', () => {
 				.noRels();
 		});
 
-		it('throws 409 error if record already exists', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-			});
-			await expect(
-				basicHandler({ someString: 'some string' }),
-			).rejects.toThrow({
-				status: 409,
-				message: `MainType ${mainCode} already exists`,
-			});
-			await neo4jTest('MainType', mainCode).notMatch({
-				someString: 'some string',
-			});
-		});
-
 		it.skip("doesn't write to s3 if record already exists", async () => {
 			await createNode('MainType', {
 				code: mainCode,
 			});
 			const s3PostMock = getS3PostMock();
 			await expect(
-				postHandler({
+				patchHandler({
 					documentStore: {
 						post: s3PostMock,
 					},
@@ -264,7 +249,7 @@ describe('rest POST', () => {
 
 		it.skip('throws if s3 query fails', async () => {
 			await expect(
-				postHandler({
+				patchHandler({
 					documentStore: {
 						post: asyncErrorFunction,
 					},
@@ -276,7 +261,7 @@ describe('rest POST', () => {
 			const s3PostMock = jest.fn(async () => 'post-marker');
 			dbUnavailable();
 			await expect(
-				postHandler({
+				patchHandler({
 					documentStore: {
 						post: s3PostMock,
 					},
@@ -290,119 +275,12 @@ describe('rest POST', () => {
 		});
 	});
 
-	describe('creating relationships', () => {
-		const childCode = `${namespace}-child`;
-		const parentCode = `${namespace}-parent`;
-
-		it('creates record related to existing records', async () => {
-			await createNodes(
-				['ChildType', childCode],
-				['ParentType', parentCode],
-			);
-			const { status, body } = await basicHandler(
-				{
-					children: [childCode],
-					parents: [parentCode],
-				},
-				undefined,
-				getMetaPayload(),
-			);
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				children: [childCode],
-				parents: [parentCode],
-			});
-
-			await neo4jTest('MainType', mainCode)
-				.match(meta.create)
-				.hasRels(2)
-				.hasRel([
-					{
-						type: 'HAS_CHILD',
-						direction: 'outgoing',
-						props: meta.create,
-					},
-					{
-						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
-					},
-				])
-				.hasRel([
-					{
-						type: 'IS_PARENT_OF',
-						direction: 'incoming',
-						props: meta.create,
-					},
-					{
-						type: 'ParentType',
-						props: Object.assign(
-							{ code: parentCode },
-							meta.default,
-						),
-					},
-				]);
-		});
-
-		it('throws 400 when creating record related to non-existent records', async () => {
-			await expect(
-				basicHandler({
-					children: [childCode],
-					parents: [parentCode],
-				}),
-			).rejects.toThrow(/Missing related node/);
-			// { status: 400, message: expect.toMatch(
-			await neo4jTest('MainType', mainCode).notExists();
-		});
-
-		it('creates record related to non-existent records when using upsert=true', async () => {
-			const { status, body } = await basicHandler(
-				{
-					children: [childCode],
-					parents: [parentCode],
-				},
-				{ upsert: true },
-				getMetaPayload(),
-			);
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				children: [childCode],
-				parents: [parentCode],
-			});
-
-			await neo4jTest('MainType', mainCode)
-				.match(meta.create)
-				.hasRels(2)
-				.hasRel([
-					{
-						type: 'HAS_CHILD',
-						direction: 'outgoing',
-						props: meta.create,
-					},
-					{
-						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.create),
-					},
-				])
-				.hasRel([
-					{
-						type: 'IS_PARENT_OF',
-						direction: 'incoming',
-						props: meta.create,
-					},
-					{
-						type: 'ParentType',
-						props: Object.assign({ code: parentCode }, meta.create),
-					},
-				]);
-		});
-	});
-
 	describe('restricted types', () => {
 		const restrictedCode = `${namespace}-restricted`;
 
 		it('throws 400 when creating restricted record', async () => {
 			await expect(
-				postHandler()({
+				patchHandler()({
 					type: 'RestrictedType',
 					code: restrictedCode,
 				}),
@@ -414,7 +292,7 @@ describe('rest POST', () => {
 		});
 
 		it('creates restricted record when using correct client-id', async () => {
-			const { status } = await postHandler()({
+			const { status } = await patchHandler()({
 				type: 'RestrictedType',
 				code: restrictedCode,
 				metadata: {
@@ -422,96 +300,8 @@ describe('rest POST', () => {
 				},
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			await neo4jTest('RestrictedType', restrictedCode).exists();
-		});
-	});
-
-	describe.skip('field locking', () => {
-		const lockClient = `${namespace}-lock-client`;
-
-		it('creates a record with _lockedFields', async () => {
-			const { status, body } = await basicHandler(
-				{ someString: 'some string' },
-				{ lockFields: 'someString' },
-				{
-					clientId: lockClient,
-				},
-			);
-
-			expect(status).ToBe(200);
-			expect(body).toMatchObject({
-				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
-			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
-				});
-		});
-
-		it('creates a record with multiple fields, locking selective ones', async () => {
-			const { status, body } = await basicHandler(
-				{
-					someString: 'some string',
-					anotherString: 'another string',
-				},
-				{ lockFields: 'someString' },
-				{
-					clientId: lockClient,
-				},
-			);
-
-			expect(status).ToBe(200);
-			expect(body).toMatchObject({
-				someString: 'some string',
-				anotherString: 'another string',
-				_lockedFields: `{"someString":${lockClient}}`,
-			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					someString: 'some string',
-					anotherString: 'another string',
-					_lockedFields: `{"someString":${lockClient}}`,
-				});
-		});
-
-		it('creates a record and locks all fields that are written', async () => {
-			const { status, body } = await basicHandler(
-				{ someString: 'some string' },
-				{ lockFields: 'all' },
-				{
-					clientId: lockClient,
-				},
-			);
-
-			expect(status).ToBe(200);
-			expect(body).toMatchObject({
-				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
-			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
-				});
-		});
-
-		it('throws 400 when clientId is not set', async () => {
-			await expect(
-				basicHandler(
-					{ someString: 'some string' },
-					{ lockFields: 'all' },
-				),
-			).rejects.toThrow({
-				status: 400,
-				message: /clientId needs to be set to a valid system code in order to lock fields/,
-			});
-			await neo4jTest('MainType', mainCode).notExists();
 		});
 	});
 });

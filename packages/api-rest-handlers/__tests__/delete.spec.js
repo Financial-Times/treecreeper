@@ -8,7 +8,7 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest DELETE', () => {
-	const namespace = 'api-rest-delete-handler';
+	const namespace = 'api-rest-handlers-delete';
 	const mainCode = `${namespace}-main`;
 	const input = {
 		type: 'MainType',
