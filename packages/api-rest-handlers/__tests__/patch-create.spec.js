@@ -123,14 +123,14 @@ describe('rest PATCH create', () => {
 				});
 		});
 		it.skip("doesn't set a Document property when empty string provided", async () => {
-			const s3PostMock = getS3PostMock({ someDocument: '' });
+			const s3PostMock = getS3PostMock({});
 			const { status, body } = await patchHandler({
 				documentStore: {
 					post: s3PostMock,
 				},
 			})(
 				getInput({
-					someDocument: 'some document',
+					someDocument: '',
 				}),
 			);
 
@@ -259,7 +259,7 @@ describe('rest PATCH create', () => {
 
 		it.skip('undoes any s3 actions if neo4j query fails', async () => {
 			const s3PostMock = jest.fn(async () => 'post-marker');
-			dbUnavailable();
+			dbUnavailable({ skip: 1 });
 			await expect(
 				patchHandler({
 					documentStore: {

@@ -27,9 +27,13 @@ properties:
     description: Boolean description.
     label: Boolean label
   someEnum:
-    type: SystemLifecycle
+    type: AnEnum
     description: Enum description.
     label: Enum label
+  someInteger:
+    type: Integer
+    description: Integer description.
+    label: Integer label
   anotherString:
     type: Word
     description: Word description.

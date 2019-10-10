@@ -1,4 +1,3 @@
-
 // field locking
 describe('lockedFields', () => {});
 it('throws an error when trying to write a field that is locked by another clientId', async () => {});

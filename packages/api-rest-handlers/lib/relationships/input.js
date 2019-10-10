@@ -11,22 +11,22 @@ const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const unNegatePropertyName = propName => propName.replace(/^!/, '');
 
-const identifyRelationships = nodeType => {
-	const { properties } = getType(nodeType);
+const identifyRelationships = type => {
+	const { properties } = getType(type);
 	return propName =>
 		properties[propName] && properties[propName].isRelationship;
 };
 
-const isWriteRelationship = nodeType => {
-	const isRelationship = identifyRelationships(nodeType);
+const isWriteRelationship = type => {
+	const isRelationship = identifyRelationships(type);
 	return ([propName, codes]) =>
 		propName.charAt(0) !== '!' &&
 		isRelationship(propName) &&
 		codes !== null;
 };
 
-const isDeleteRelationship = nodeType => {
-	const isRelationship = identifyRelationships(nodeType);
+const isDeleteRelationship = type => {
+	const isRelationship = identifyRelationships(type);
 	return ([propName, codes]) =>
 		(propName.charAt(0) === '!' &&
 			isRelationship(unNegatePropertyName(propName))) ||
@@ -67,7 +67,7 @@ const findActualAdditions = initialContent => ([relType, newCodes]) => [
 ];
 
 const getRemovedRelationships = ({
-	nodeType,
+	type,
 	initialContent,
 	newContent,
 	action,
@@ -76,18 +76,18 @@ const getRemovedRelationships = ({
 		return {};
 	}
 
-	const schema = getType(nodeType);
+	const schema = getType(type);
 
 	// deletes because of a replace action or because the relationship
 	// is a __-to-one
 	const implicitDeletes = Object.entries(newContent)
-		.filter(isWriteRelationship(nodeType))
+		.filter(isWriteRelationship(type))
 		.map(findImplicitDeletions(initialContent, schema, action))
 		.filter(it => !!it);
 
 	// deletes explictly expressed using the payload null and ! conventions
 	const explictDeletes = Object.entries(newContent)
-		.filter(isDeleteRelationship(nodeType))
+		.filter(isDeleteRelationship(type))
 		.map(findActualDeletions(initialContent));
 
 	return implicitDeletes
@@ -118,9 +118,9 @@ const getAddedRelationships = ({ type, initialContent, newContent }) => {
 	return newRelationships.reduce(entriesToObject, {});
 };
 
-const containsRelationshipData = (nodeType, payload) => {
-	const isRelationship = identifyRelationships(nodeType);
-	return Object.entries(getType(nodeType).properties)
+const containsRelationshipData = (type, payload) => {
+	const isRelationship = identifyRelationships(type);
+	return Object.entries(getType(type).properties)
 		.filter(([propName]) => isRelationship(propName))
 		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };

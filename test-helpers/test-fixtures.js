@@ -87,7 +87,7 @@ const fixtureBuilder = (namespace, now, then) => {
 
 const dropFixtures = namespace =>
 	executeQuery(
-		`MATCH (n) WHERE n.code CONTAINS "${namespace}" DETACH DELETE n`,
+		`MATCH (n) WHERE n.code STARTS WITH "${namespace}" DETACH DELETE n`,
 	);
 
 module.exports = {

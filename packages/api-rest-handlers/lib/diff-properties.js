@@ -17,18 +17,18 @@ const datesAreEqual = (date1, date2, neo4jConstructor) =>
 	normalizeDateString(date1, neo4jConstructor) ===
 	normalizeDateString(date2, neo4jConstructor);
 
-const isProperty = nodeType => {
-	const { properties } = getType(nodeType);
+const isProperty = type => {
+	const { properties } = getType(type);
 	return ([propName]) =>
 		properties[propName] && !properties[propName].isRelationship;
 };
 
-const detectPropertyChanges = (nodeType, initialContent = {}) => {
+const detectPropertyChanges = (type, initialContent = {}) => {
 	if (!Object.keys(initialContent).length) {
 		return ([, val]) => !isNullValue(val);
 	}
 
-	const { properties } = getType(nodeType);
+	const { properties } = getType(type);
 
 	return ([propName, val]) => {
 		const { type } = properties[propName] || {};
@@ -53,10 +53,10 @@ const detectPropertyChanges = (nodeType, initialContent = {}) => {
 	};
 };
 
-const diffProperties = ({ nodeType, newContent = {}, initialContent = {} }) =>
+const diffProperties = ({ type, newContent = {}, initialContent = {} }) =>
 	Object.entries(newContent)
-		.filter(isProperty(nodeType))
-		.filter(detectPropertyChanges(nodeType, initialContent))
+		.filter(isProperty(type))
+		.filter(detectPropertyChanges(type, initialContent))
 		.reduce(entriesToObject, {});
 
 module.exports = {

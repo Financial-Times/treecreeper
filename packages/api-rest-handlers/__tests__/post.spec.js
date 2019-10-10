@@ -53,12 +53,16 @@ describe('rest POST', () => {
 			expect(body).toMatchObject({
 				code: mainCode,
 				someString: 'some string',
+				someBoolean: true,
+				someEnum: 'First',
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
 					someString: 'some string',
+					someBoolean: true,
+					someEnum: 'First',
 				})
 				.noRels();
 		});
@@ -123,14 +127,14 @@ describe('rest POST', () => {
 				});
 		});
 		it.skip("doesn't set a Document property when empty string provided", async () => {
-			const s3PostMock = getS3PostMock({ someDocument: '' });
+			const s3PostMock = getS3PostMock({});
 			const { status, body } = await postHandler({
 				documentStore: {
 					post: s3PostMock,
 				},
 			})(
 				getInput({
-					someDocument: 'some document',
+					someDocument: '',
 				}),
 			);
 
@@ -274,7 +278,7 @@ describe('rest POST', () => {
 
 		it.skip('undoes any s3 actions if neo4j query fails', async () => {
 			const s3PostMock = jest.fn(async () => 'post-marker');
-			dbUnavailable();
+			dbUnavailable({ skip: 1 });
 			await expect(
 				postHandler({
 					documentStore: {

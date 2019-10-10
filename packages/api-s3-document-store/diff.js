@@ -1,5 +1,3 @@
-const { getType } = require('../../packages/schema-sdk');
-
 const isNullValue = val => val === null || val === '';
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
