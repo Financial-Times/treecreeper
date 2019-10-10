@@ -10,13 +10,13 @@ const {
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
 
-const { getRelationships } = require('../api-core/lib/diff-helpers');
+const { getRelationships } = require('./lib/relationships/input');
 
 const { constructNeo4jProperties } = require('./lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
 	handleUpsertError,
-} = require('./lib/relationship-write-helpers');
+} = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {

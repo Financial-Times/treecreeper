@@ -1,7 +1,7 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { getType } = require('../../../packages/schema-sdk');
-const { metaPropertiesForCreate } = require('./metadata-helpers');
+const { getType } = require('../../../../packages/schema-sdk');
+const { metaPropertiesForCreate } = require('../metadata-helpers');
 
 const relationshipFragment = (type, direction) => {
 	const left = direction === 'incoming' ? '<' : '';

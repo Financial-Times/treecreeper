@@ -1,4 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
+
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL,
 	neo4j.auth.basic(
@@ -53,5 +54,5 @@ const stubDbTransaction = ({ sinon }, properties = {}) => {
 module.exports = {
 	spyDbQuery,
 	stubDbTransaction,
-	driver
+	driver,
 };
