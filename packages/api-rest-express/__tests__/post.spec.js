@@ -1,3 +1,3 @@
 const { testSuite } = require('./test-suite');
 
-testSuite('delete', 204);
+testSuite('post', 200);

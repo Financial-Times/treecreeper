@@ -1,9 +1,4 @@
-const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const { getType } = require('../../../packages/schema-sdk');
-
-const isNullValue = val => val === null || val === '';
-
-const isTemporalTypeName = type => ['Date', 'DateTime', 'Time'].includes(type);
+const { getType } = require('../../../../packages/schema-sdk');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -16,83 +11,27 @@ const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const unNegatePropertyName = propName => propName.replace(/^!/, '');
 
-const maybeToObject = func => (input, asObject = true) =>
-	asObject ? func(input).reduce(entriesToObject, {}) : func(input);
-
-// We go to extra lengths here using constructors because the string representations
-// in the payload and retrieved from db may have different precision, but effectively
-// be the same value e.g. 12:00:00 compared to 12:00:00.000 should return false
-const normalizeDateString = (date, neo4jConstructor) =>
-	neo4jConstructor.fromStandardDate(new Date(date)).toString();
-
-const datesAreEqual = (date1, date2, neo4jConstructor) =>
-	normalizeDateString(date1, neo4jConstructor) ===
-	normalizeDateString(date2, neo4jConstructor);
-
-const identifyRelationships = nodeType => {
-	const { properties } = getType(nodeType);
+const identifyRelationships = type => {
+	const { properties } = getType(type);
 	return propName =>
 		properties[propName] && properties[propName].isRelationship;
 };
 
-const isProperty = nodeType => {
-	const isRelationship = identifyRelationships(nodeType);
-	return ([propName]) => !isRelationship(unNegatePropertyName(propName));
-};
-
-const isWriteRelationship = nodeType => {
-	const isRelationship = identifyRelationships(nodeType);
+const isWriteRelationship = type => {
+	const isRelationship = identifyRelationships(type);
 	return ([propName, codes]) =>
 		propName.charAt(0) !== '!' &&
 		isRelationship(propName) &&
 		codes !== null;
 };
 
-const isDeleteRelationship = nodeType => {
-	const isRelationship = identifyRelationships(nodeType);
+const isDeleteRelationship = type => {
+	const isRelationship = identifyRelationships(type);
 	return ([propName, codes]) =>
 		(propName.charAt(0) === '!' &&
 			isRelationship(unNegatePropertyName(propName))) ||
 		(isRelationship(propName) && codes === null);
 };
-
-const detectPropertyChanges = (nodeType, initialContent = {}) => {
-	if (!Object.keys(initialContent).length) {
-		return ([, val]) => !isNullValue(val);
-	}
-
-	const { properties } = getType(nodeType);
-
-	return ([propName, val]) => {
-		const { type } = properties[propName] || {};
-
-		if (!(propName in initialContent)) {
-			return !isNullValue(val);
-		}
-
-		if (isNullValue(val)) {
-			return true;
-		}
-
-		if (isTemporalTypeName(type)) {
-			return !datesAreEqual(
-				val,
-				initialContent[propName],
-				neo4jTemporalTypes[type],
-			);
-		}
-
-		return val !== initialContent[propName];
-	};
-};
-
-const diffProperties = maybeToObject(
-	({ nodeType, newContent = {}, initialContent = {} }) => {
-		return Object.entries(newContent)
-			.filter(isProperty(nodeType))
-			.filter(detectPropertyChanges(nodeType, initialContent));
-	},
-);
 
 const findActualDeletions = initialContent => ([propName, codesToDelete]) => {
 	const realPropName = unNegatePropertyName(propName);
@@ -128,7 +67,7 @@ const findActualAdditions = initialContent => ([relType, newCodes]) => [
 ];
 
 const getRemovedRelationships = ({
-	nodeType,
+	type,
 	initialContent,
 	newContent,
 	action,
@@ -137,18 +76,18 @@ const getRemovedRelationships = ({
 		return {};
 	}
 
-	const schema = getType(nodeType);
+	const schema = getType(type);
 
 	// deletes because of a replace action or because the relationship
 	// is a __-to-one
 	const implicitDeletes = Object.entries(newContent)
-		.filter(isWriteRelationship(nodeType))
+		.filter(isWriteRelationship(type))
 		.map(findImplicitDeletions(initialContent, schema, action))
 		.filter(it => !!it);
 
 	// deletes explictly expressed using the payload null and ! conventions
 	const explictDeletes = Object.entries(newContent)
-		.filter(isDeleteRelationship(nodeType))
+		.filter(isDeleteRelationship(type))
 		.map(findActualDeletions(initialContent));
 
 	return implicitDeletes
@@ -157,10 +96,18 @@ const getRemovedRelationships = ({
 		.reduce(entriesToObject, {});
 };
 
-const getAddedRelationships = ({ nodeType, initialContent, newContent }) => {
-	let newRelationships = Object.entries(newContent)
-		.filter(isWriteRelationship(nodeType))
+const getRelationships = ({ type, body = {} }, reduce = true) => {
+	const newRelationships = Object.entries(body)
+		.filter(isWriteRelationship(type))
 		.map(([propName, codes]) => [propName, toArray(codes)]);
+
+	return reduce
+		? newRelationships.reduce(entriesToObject, {})
+		: newRelationships;
+};
+
+const getAddedRelationships = ({ type, initialContent, newContent }) => {
+	let newRelationships = getRelationships({ type, body: newContent }, false);
 
 	if (initialContent) {
 		newRelationships = newRelationships
@@ -171,16 +118,16 @@ const getAddedRelationships = ({ nodeType, initialContent, newContent }) => {
 	return newRelationships.reduce(entriesToObject, {});
 };
 
-const containsRelationshipData = (nodeType, payload) => {
-	const isRelationship = identifyRelationships(nodeType);
-	return Object.entries(getType(nodeType).properties)
+const containsRelationshipData = (type, payload) => {
+	const isRelationship = identifyRelationships(type);
+	return Object.entries(getType(type).properties)
 		.filter(([propName]) => isRelationship(propName))
 		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };
 
 module.exports = {
+	getRelationships,
 	getAddedRelationships,
 	getRemovedRelationships,
-	diffProperties,
 	containsRelationshipData,
 };

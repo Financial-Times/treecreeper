@@ -1,16 +1,17 @@
-const logger = require('@financial-times/n-logger').default;
-const lolex = require('lolex');
+/* global jest beforeAll beforeEach afterEach */
+const lolex = require('lolex'); // eslint-disable-line import/no-extraneous-dependencies
 const dbConnection = require('./db-connection');
 const { schemaReady } = require('../api/server/lib/init-schema');
 
-const { testDataCreators, dropDb, testDataCheckers } = require('./test-data');
+const { neo4jTest } = require('./neo4j-test');
+const { fixtureBuilder, dropFixtures } = require('./test-fixtures');
 
-const setupMocks = (sandbox, { namespace } = {}) => {
+const setupMocks = namespace => {
 	let clock;
 	const now = '2019-01-09T09:08:22.908Z';
 	const then = '2015-11-15T08:12:27.908Z';
 	// clean up after potentially failed test runs
-	beforeAll(() => dropDb(namespace));
+	beforeAll(() => dropFixtures(namespace));
 
 	beforeEach(async () => {
 		// have to await in here as supertest doesn't wait for the callback
@@ -18,19 +19,19 @@ const setupMocks = (sandbox, { namespace } = {}) => {
 		// app.listen does in server/create-app.js
 		await schemaReady;
 		clock = lolex.install({ now: new Date(now).getTime() });
-		testDataCreators(namespace, sandbox, now, then);
 	});
 	afterEach(async () => {
 		jest.restoreAllMocks();
 		clock = clock.uninstall();
-		await dropDb(namespace);
+		await dropFixtures(namespace);
 	});
+	return fixtureBuilder(namespace, now, then);
 };
 
 module.exports = Object.assign(
 	{
 		setupMocks,
+		neo4jTest,
 	},
 	dbConnection,
-	testDataCheckers,
 );

@@ -1,6 +1,6 @@
 const { getType } = require('../../../packages/schema-sdk');
 const { convertNeo4jToJson } = require('./neo4j-type-conversion');
-const { executeQuery } = require('./db-connection');
+const { executeQuery } = require('../../api-core/lib/db-connection');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

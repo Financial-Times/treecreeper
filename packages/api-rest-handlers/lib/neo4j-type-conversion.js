@@ -5,7 +5,6 @@ const {
 } = require('neo4j-driver/lib/v1/temporal-types');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 const { getType } = require('../../../packages/schema-sdk');
-// const { diffProperties } = require('./diff-helpers');
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
@@ -39,21 +38,16 @@ const convertNullValues = ([propName, val]) => [
 	isNullValue(val) ? null : val,
 ];
 
-// const constructNeo4jProperties = ({
-// 	nodeType,
-// 	newContent = {},
-// 	code,
-// 	initialContent,
-// }) => {
-// 	newContent.code = code || newContent.code;
+const constructNeo4jProperties = ({ type, body = {}, code }) => {
+	body.code = code || body.code;
 
-// 	return diffProperties({ nodeType, newContent, initialContent }, false)
-// 		.map(convertTemporalTypes(nodeType))
-// 		.map(convertNullValues)
-// 		.reduce(entriesToObject, {});
-// };
+	return Object.entries(body)
+		.map(convertTemporalTypes(type))
+		.map(convertNullValues)
+		.reduce(entriesToObject, {});
+};
 
 module.exports = {
 	convertNeo4jToJson,
-	// constructNeo4jProperties,
+	constructNeo4jProperties,
 };

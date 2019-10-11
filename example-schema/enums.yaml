@@ -1,19 +1,7 @@
-SystemLifecycle:
+AnEnum:
   description: |
-    The lifecycle stage of a system.
-    Note that 'Deprecated' should be used for systems that are currently
-    not actively used, but may not be fully decommissioned yet
+    An example enum
   options:
-    Preproduction: |
-      Not yet ready for use. May be unstable, subject to unannounced changes,
-      or not yet fully built.
-    Production: |
-      Ready for use by its intended users, and supported appropriately.
-    Deprecated: |
-      In the process of being replaced or retired. May still be functional,
-      but should not be added as a new dependency to systems.
-    Discontinued: |
-      No longer functional. Attempts to interact with the system will be unsuccessful.
-    Decommissioned: |
-      For a self hosted/installed system, all its parts have been removed from all the environments it ran in.
-      For SaaS, we no longer pay for or have the ability to use the system.
+    First: First description.
+    Second: Second description.
+    Third: Third description.

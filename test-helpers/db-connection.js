@@ -1,4 +1,13 @@
-const { driver } = require('../packages/api-core/lib/db-connection');
+const neo4j = require('neo4j-driver').v1;
+
+const driver = neo4j.driver(
+	process.env.NEO4J_BOLT_URL,
+	neo4j.auth.basic(
+		process.env.NEO4J_BOLT_USER,
+		process.env.NEO4J_BOLT_PASSWORD,
+	),
+	{ disableLosslessIntegers: true },
+);
 
 const spyDbQuery = ({ sinon }) => {
 	const originalSession = driver.session.bind(driver);
@@ -15,14 +24,6 @@ const spyDbQuery = ({ sinon }) => {
 	});
 	return () => spy;
 };
-
-const stubDbUnavailable = () =>
-	jest.spyOn(driver, 'session').mockReturnValue({
-		run: () => {
-			throw new Error('oh no');
-		},
-		close: () => {},
-	});
 
 const stubDbTransaction = ({ sinon }, properties = {}) => {
 	const runStub = sinon.stub();
@@ -52,6 +53,6 @@ const stubDbTransaction = ({ sinon }, properties = {}) => {
 
 module.exports = {
 	spyDbQuery,
-	stubDbUnavailable,
 	stubDbTransaction,
+	driver,
 };

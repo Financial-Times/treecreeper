@@ -1,4 +1,9 @@
-const securityTests = (handler, namespacedCode, testBody = false) =>
+/* global describe, expect, it */
+const securityTests = (
+	handler,
+	namespacedCode,
+	// testBody = false
+) =>
 	describe('security', () => {
 		// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 		const INJECTION_ATTACK_STRING =
@@ -19,6 +24,21 @@ const securityTests = (handler, namespacedCode, testBody = false) =>
 			},
 			requestId: obj => {
 				obj.metadata = { requestId: INJECTION_ATTACK_STRING };
+			},
+			// propertyValue: obj => {
+			// 	obj.body = {
+			// 		someString: INJECTION_ATTACK_STRING,
+			// 	};
+			// },
+			propertyName: obj => {
+				obj.body = {
+					[INJECTION_ATTACK_STRING]: 'value',
+				};
+			},
+			relatedCode: obj => {
+				obj.body = {
+					children: [INJECTION_ATTACK_STRING],
+				};
 			},
 		};
 

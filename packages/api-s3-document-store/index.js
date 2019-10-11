@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const { diff } = require('deep-diff');
 const _isEmpty = require('lodash.isempty');
 const { logger } = require('../api-core/lib/request-context');
-const { diffProperties } = require('../api-core/lib/diff-helpers');
+const { diffProperties } = require('./diff');
 
 const s3BucketInstance = new AWS.S3({
 	accessKeyId: process.env.AWS_ACCESS_KEY,

@@ -1,9 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const httpErrors = require('http-errors');
+// const httpErrors = require('http-errors');
 
-const clientId = require('../../packages/api-core/lib/middleware/client-id');
-const requestId = require('../../packages/api-core/lib/middleware/request-id');
+const clientId = require('./middleware/client-id');
+const requestId = require('./middleware/request-id');
 const {
 	logger,
 	setContext,
@@ -15,9 +15,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-const {
-	errorToErrors,
-} = require('../../packages/api-core/lib/middleware/errors');
+const { errorToErrors } = require('./middleware/errors');
 
 const requestLog = (endpointName, method, req) => {
 	setContext({
@@ -30,13 +28,13 @@ const requestLog = (endpointName, method, req) => {
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
-const unimplemented = (endpointName, method, alternativeMethod) => req => {
-	requestLog(endpointName, method, req);
-	throw httpErrors(
-		405,
-		`${method} is unimplemented. Use ${alternativeMethod}`,
-	);
-};
+// const unimplemented = (endpointName, method, alternativeMethod) => req => {
+// 	requestLog(endpointName, method, req);
+// 	throw httpErrors(
+// 		405,
+// 		`${method} is unimplemented. Use ${alternativeMethod}`,
+// 	);
+// };
 
 const controller = (method, handler) => (req, res, next) => {
 	requestLog('rest', method, req);
@@ -65,10 +63,12 @@ const controller = (method, handler) => (req, res, next) => {
 		)
 		.catch(next);
 };
-const { getHandler } = require('../../packages/api-rest-get-handler');
-// const {postHandler} = require('../../packages/api-rest-post-handler');
-// const {patchHandler} = require('../../packages/api-rest-patch-handler');
-const { deleteHandler } = require('../../packages/api-rest-delete-handler');
+const {
+	getHandler,
+	deleteHandler,
+	postHandler,
+	patchHandler,
+} = require('../../packages/api-rest-handlers');
 // const {mergeHandler} = require('../../packages/api-rest-merge-handler');
 
 const getRestApi = ({
@@ -84,13 +84,13 @@ const getRestApi = ({
 
 	router
 		.route('/:type/:code')
-		.get(controller('GET', getHandler({ documentStore })))
-		// 	.post(controller('POST', postHandler({documentStore})))
+		.get(controller('GET', getHandler({ documentStore, logger })))
+		.post(controller('POST', postHandler({ documentStore, logger })))
 		// 	.put(unimplemented('PUT', 'PATCH'))
-		// 	.patch(controller('PATCH', patchHandler({documentStore})))
-		.delete(controller('DELETE', deleteHandler({ documentStore })));
+		// 	.patch(controller('PATCH', patchHandler({documentStore, logger})))
+		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
 
-	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore})));
+	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
 
 	router.use(errorToErrors);
 

@@ -1,5 +1,4 @@
-const { getHandler } = require('..');
-
+const { getHandler } = require('../get');
 const { setupMocks } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 const {
@@ -8,42 +7,47 @@ const {
 } = require('../../../test-helpers/error-stubs');
 
 describe('rest GET', () => {
-	const sandbox = {};
-
-	const namespace = 'api-rest-get-handler';
+	const namespace = 'api-rest-handlers-get';
 	const mainCode = `${namespace}-main`;
 	const input = {
 		type: 'MainType',
 		code: mainCode,
 	};
 
-	setupMocks(sandbox, { namespace });
+	const { createNodes, createNode, connectNodes, meta } = setupMocks(
+		namespace,
+	);
+
+	const createMainNode = (props = {}) =>
+		createNode('MainType', Object.assign({ code: mainCode }, props));
 
 	securityTests(getHandler(), mainCode);
 
 	it('gets record without relationships', async () => {
-		await sandbox.createNode('MainType', {
-			code: mainCode,
+		await createMainNode({
 			someString: 'name1',
 		});
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				someString: 'name1',
-			}),
-		);
+		expect(body).toMatchObject({ code: mainCode, someString: 'name1' });
+	});
+
+	it('retrieves metadata', async () => {
+		await createMainNode();
+		const { body, status } = await getHandler()(input);
+
+		expect(status).toBe(200);
+		expect(body).toMatchObject(meta.default);
 	});
 
 	it('gets record with relationships', async () => {
-		const [main, child, parent] = await sandbox.createNodes(
+		const [main, child, parent] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', `${namespace}-child`],
 			['ParentType', `${namespace}-parent`],
 		);
-		await sandbox.connectNodes(
+		await connectNodes(
 			// tests incoming and outgoing relationships
 			[main, 'HAS_CHILD', child],
 			[parent, 'IS_PARENT_OF', main],
@@ -51,19 +55,15 @@ describe('rest GET', () => {
 
 		const { body, status } = await getHandler()(input);
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				parents: [`${namespace}-parent`],
-				children: [`${namespace}-child`],
-			}),
-		);
+		expect(body).toMatchObject({
+			code: mainCode,
+			parents: [`${namespace}-parent`],
+			children: [`${namespace}-child`],
+		});
 	});
 
 	it('gets record with Documents', async () => {
-		await sandbox.createNode('MainType', {
-			code: mainCode,
-		});
+		await createMainNode();
 
 		const { body, status } = await getHandler({
 			documentStore: {
@@ -74,12 +74,10 @@ describe('rest GET', () => {
 		})(input);
 
 		expect(status).toBe(200);
-		expect(body).toEqual(
-			sandbox.addMeta({
-				code: mainCode,
-				someDocument: 'document',
-			}),
-		);
+		expect(body).toMatchObject({
+			code: mainCode,
+			someDocument: 'document',
+		});
 	});
 
 	it('throws 404 error if no record', async () => {
