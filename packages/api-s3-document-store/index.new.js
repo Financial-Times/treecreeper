@@ -5,6 +5,8 @@ const { s3Patch } = require('./patch');
 const { s3Delete } = require('./delete');
 const { s3Merge } = require('./merge');
 
+const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
+
 const docstore = (
 	s3Instance = defaultS3Instance,
 	bucketName = getBucketName(),
@@ -52,4 +54,11 @@ const docstore = (
 	};
 };
 
-module.exports = docstore;
+// Factory method which user intend to use thier S3 bucket
+const createStore = (s3BucketName = TREECREEPER_DOCSTORE_S3_BUCKET) =>
+	docstore(defaultS3Instance, s3BucketName);
+
+module.exports = {
+	docstore,
+	createStore,
+};
