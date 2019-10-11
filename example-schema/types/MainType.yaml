@@ -27,9 +27,13 @@ properties:
     description: Boolean description.
     label: Boolean label
   someEnum:
-    type: SystemLifecycle
+    type: AnEnum
     description: Enum description.
     label: Enum label
+  someInteger:
+    type: Integer
+    description: Integer description.
+    label: Integer label
   anotherString:
     type: Word
     description: Word description.
@@ -38,6 +42,14 @@ properties:
     type: Date
     description: Date description.
     label: Date label
+  someTime:
+    type: Time
+    description: Time description.
+    label: Time label
+  someDatetime:
+    type: Datetime
+    description: Datetime description.
+    label: Datetime label
   children:
     relationship: HAS_CHILD
     type: ChildType
