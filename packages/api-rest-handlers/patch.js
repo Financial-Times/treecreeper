@@ -67,9 +67,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		const preflightRequest = await getNeo4jRecord(type, code);
 
 		if (!preflightRequest.hasRecords()) {
-			return Object.assign(await post(
-					input
-			),{status: 201});
+			return Object.assign(await post(input), { status: 201 });
 		}
 		const initialContent = preflightRequest.toJson(type);
 
@@ -150,7 +148,7 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 		try {
-			console.log(queryParts.join('\n'))
+			console.log(queryParts.join('\n'));
 			const neo4jResult = await executeQuery(
 				queryParts.join('\n'),
 				parameters,

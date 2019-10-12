@@ -20,13 +20,9 @@ const {
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const {
-		type,
-		code,
-		body,
-		metadata = {},
-		query = {},
-	} = validateInput(input);
+	const { type, code, body, metadata = {}, query = {} } = validateInput(
+		input,
+	);
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
