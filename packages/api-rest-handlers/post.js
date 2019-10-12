@@ -26,8 +26,6 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		body,
 		metadata = {},
 		query = {},
-		skipPreflight = false,
-		responseStatus = 200,
 	} = validateInput(input);
 
 	const { createPermissions, pluralName } = getType(type);
@@ -38,16 +36,6 @@ const postHandler = ({ documentStore } = {}) => async input => {
 				', ',
 			)}`,
 		);
-	}
-
-	// when PATCH calls POST handler after first detecting there
-	// is no existing record
-	if (!skipPreflight) {
-		const preflightRequest = await getNeo4jRecord(type, code);
-
-		if (preflightRequest.hasRecords()) {
-			throw httpErrors(409, `${type} ${code} already exists`);
-		}
 	}
 
 	const queryParts = [
@@ -88,8 +76,11 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			queryParts.join('\n'),
 			parameters,
 		);
-		return { status: responseStatus, body: neo4jResult.toJson(type) };
+		return { status: 200, body: neo4jResult.toJson(type) };
 	} catch (err) {
+		if (/already exists with label/.test(err.message)) {
+			throw httpErrors(409, `${type} ${code} already exists`);
+		}
 		handleUpsertError(err);
 		throw err;
 	}

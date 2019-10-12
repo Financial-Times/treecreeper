@@ -46,7 +46,8 @@ describe('rest POST', () => {
 
 		it('creates record with properties', async () => {
 			const { status, body } = await basicHandler({
-				someString: 'some string',
+				someString: 'some string',someBoolean: true,
+				someEnum: 'First',
 			});
 
 			expect(status).toBe(200);

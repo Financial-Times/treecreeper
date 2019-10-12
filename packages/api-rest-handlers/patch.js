@@ -67,12 +67,9 @@ const patchHandler = ({ documentStore } = {}) => {
 		const preflightRequest = await getNeo4jRecord(type, code);
 
 		if (!preflightRequest.hasRecords()) {
-			return post(
-				Object.assign(
-					{ skipPreflight: true, responseStatus: 201 },
-					input,
-				),
-			);
+			return Object.assign(await post(
+					input
+			),{status: 201});
 		}
 		const initialContent = preflightRequest.toJson(type);
 
