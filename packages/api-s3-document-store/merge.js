@@ -32,30 +32,26 @@ const s3Merge = async ({
 		}
 	});
 
-	const mergeResultPromises = [
-		s3Delete({
-			s3Instance,
-			bucketName,
-			nodeType,
-			code: sourceCode,
-		}),
-	];
 	const noPropertiesToWrite = _isEmpty(writeProperties);
-	if (!noPropertiesToWrite) {
-		mergeResultPromises.push(
-			s3Post({
-				s3Instance,
-				bucketName,
-				nodeType,
-				code: destinationCode,
-				body: Object.assign(destinationNodeBody, writeProperties),
-			}),
-		);
-	}
 
-	const [deletedObject, postedObject] = await Promise.all(
-		mergeResultPromises,
-	);
+	const [deletedObject, postedObject] = await Promise.all([
+		s3Delete({ s3Instance, bucketName, nodeType, code: sourceCode }),
+		!noPropertiesToWrite
+			? s3Post({
+					s3Instance,
+					bucketName,
+					nodeType,
+					code: destinationCode,
+					// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
+					body: Object.assign(
+						{},
+						destinationNodeBody,
+						writeProperties,
+					),
+			  })
+			: {},
+	]);
+
 	const { versionMarker: deletedVersionId } = deletedObject;
 	const { versionMarker: postedVersionId } = postedObject || {}; // probably undefined when writeProperties are empty
 	if (!deletedVersionId && !postedVersionId) {
@@ -84,7 +80,8 @@ const s3Merge = async ({
 	return {
 		versionMarker: postedVersionId,
 		siblingVersionMarker: deletedVersionId,
-		body: destinationNodeBody,
+		// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
+		body: Object.assign({}, destinationNodeBody, sourceNodeBody),
 	};
 };
 
