@@ -1,7 +1,111 @@
-const S3DocumentsHelper = require('..');
-const schema = require('../../../packages/schema-sdk');
+jest.mock('aws-sdk');
+const { S3 } = require('aws-sdk');
 
-schema.init();
+const { createS3Instance } = require('../s3');
+const { docstore } = require('..');
+const {
+	s3DeleteObjectResponseFixture,
+} = require('../__fixtures__/s3-object-fixture');
+
+const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
+
+const mockS3DeleteObject = (systemCode, versionMarker) => {
+	let promiseResult;
+
+	if (systemCode === 'docstore-delete-test') {
+		promiseResult = jest
+			.fn()
+			.mockResolvedValue(s3DeleteObjectResponseFixture(versionMarker));
+	} else {
+		promiseResult = jest
+			.fn()
+			.mockRejectedValue(new Error('something went wrong'));
+	}
+
+	const stubDeleteObject = jest.fn().mockReturnValue({
+		promise: promiseResult,
+	});
+
+	S3.mockImplementation(() => ({
+		deleteObject: stubDeleteObject,
+	}));
+	return {
+		s3Instance: createS3Instance({
+			accessKeyId: 'testAccessKeyId',
+			secretAccessKey: 'testSecretAccessKey',
+		}),
+		stubDeleteObject,
+	};
+};
+
+describe('S3 document helper delete', () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	test('returns exact versionMarker', async () => {
+		const givenSystemCode = 'docstore-delete-test';
+		const givenNodeType = 'System';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubDeleteObject, s3Instance } = mockS3DeleteObject(
+			givenSystemCode,
+			givenVersionMarker,
+		);
+		const store = docstore(s3Instance);
+
+		const result = await store.delete(
+			givenNodeType,
+			givenSystemCode,
+			givenVersionMarker,
+		);
+
+		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
+		expect(stubDeleteObject).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${givenNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
+		expect(result).toMatchObject({
+			versionMarker: givenVersionMarker,
+		});
+	});
+
+	test('returns null versionMarker when delete fails', async () => {
+		const givenSystemCode = 'docstore-delete-unexpected';
+		const givenNodeType = 'System';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubDeleteObject, s3Instance } = mockS3DeleteObject(
+			givenSystemCode,
+			givenVersionMarker,
+		);
+		const store = docstore(s3Instance);
+
+		const result = await store.delete(
+			givenNodeType,
+			givenSystemCode,
+			givenVersionMarker,
+		);
+
+		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
+		expect(stubDeleteObject).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${givenNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
+		expect(result).toMatchObject({
+			versionMarker: null,
+		});
+	});
+});
+
+/*
+const S3DocumentsHelper = require('..');
+
 
 describe('S3 Documents Helper', () => {
 	const stubOutS3 = (resolved, value, secondResolved, secondValue) => {
@@ -374,3 +478,4 @@ describe('S3 Documents Helper', () => {
 		});
 	});
 });
+*/

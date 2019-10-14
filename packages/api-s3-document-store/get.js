@@ -1,4 +1,4 @@
-const get = async ({ s3Instance, bucketName, nodeType, code }) => {
+const s3Get = async ({ s3Instance, bucketName, nodeType, code }) => {
 	const params = {
 		Bucket: bucketName,
 		Key: `${nodeType}/${code}`,
@@ -18,5 +18,5 @@ const get = async ({ s3Instance, bucketName, nodeType, code }) => {
 };
 
 module.exports = {
-	get,
+	s3Get,
 };

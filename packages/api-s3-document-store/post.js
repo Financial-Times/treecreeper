@@ -1,6 +1,6 @@
 const { upload } = require('./upload');
 
-const post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
+const s3Post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 	const params = {
 		Bucket: bucketName,
 		Key: `${nodeType}/${code}`,
@@ -19,5 +19,5 @@ const post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 };
 
 module.exports = {
-	post,
+	s3Post,
 };

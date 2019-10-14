@@ -11,9 +11,12 @@ const s3Merge = async ({
 	sourceCode,
 	destinationCode,
 }) => {
-	const [sourceNodeBody, destinationNodeBody] = await Promise.all([
-		s3Get({ s3Instance, bucketName, nodeType, sourceCode }),
-		s3Get({ s3Instance, bucketName, nodeType, destinationCode }),
+	const [
+		{ body: sourceNodeBody },
+		{ body: destinationNodeBody },
+	] = await Promise.all([
+		s3Get({ s3Instance, bucketName, nodeType, code: sourceCode }),
+		s3Get({ s3Instance, bucketName, nodeType, code: destinationCode }),
 	]);
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
@@ -21,11 +24,7 @@ const s3Merge = async ({
 		return {};
 	}
 
-	const writeProperties = diffProperties({
-		nodeType,
-		newContent: sourceNodeBody,
-		initialContent: destinationNodeBody,
-	});
+	const writeProperties = diffProperties(sourceNodeBody, destinationNodeBody);
 
 	Object.keys(sourceNodeBody).forEach(name => {
 		if (name in destinationNodeBody) {
@@ -58,7 +57,7 @@ const s3Merge = async ({
 		mergeResultPromises,
 	);
 	const { versionMarker: deletedVersionId } = deletedObject;
-	const { versionMarker: postedVersionId } = postedObject;
+	const { versionMarker: postedVersionId } = postedObject || {}; // probably undefined when writeProperties are empty
 	if (!deletedVersionId && !postedVersionId) {
 		throw new Error('MERGE FAILED: Write and delete failed in S3');
 	}

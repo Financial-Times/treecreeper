@@ -1,13 +1,13 @@
 const { diff } = require('deep-diff');
 const { upload } = require('./upload');
-const { get } = require('./get');
+const { s3Get } = require('./get');
 
-const patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
+const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 	const params = {
 		Bucket: bucketName,
 		Key: `${nodeType}/${code}`,
 	};
-	const existingBody = await get({
+	const { body: existingBody } = await s3Get({
 		s3Instance,
 		bucketName,
 		nodeType,
@@ -37,5 +37,5 @@ const patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 };
 
 module.exports = {
-	patch,
+	s3Patch,
 };

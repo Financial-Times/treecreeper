@@ -10,7 +10,7 @@ const upload = async ({ s3Instance, params, requestType }) => {
 			response,
 			`${requestType}: S3 Upload successful`,
 		);
-		return response.versionId;
+		return response.VersionId;
 	} catch (err) {
 		logger.info(
 			{

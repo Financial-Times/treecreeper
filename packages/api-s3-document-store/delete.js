@@ -12,7 +12,7 @@ const s3Delete = async ({
 		Key: `${nodeType}/${code}`,
 	};
 	if (versionMarker) {
-		params.versionId = versionMarker;
+		params.VersionId = versionMarker;
 	}
 
 	try {
