@@ -2,10 +2,7 @@ const { postHandler } = require('../post');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
-const {
-	dbUnavailable,
-	asyncErrorFunction,
-} = require('../../../test-helpers/error-stubs');
+const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest POST', () => {
 	const namespace = 'api-rest-handlers-post';
@@ -83,37 +80,6 @@ describe('rest POST', () => {
 				.match(meta.create);
 		});
 
-		it.skip('creates record with Documents', async () => {
-			const s3PostMock = getS3PostMock({ someDocument: 'some document' });
-			const { status, body } = await postHandler({
-				documentStore: {
-					post: s3PostMock,
-				},
-			})(
-				getInput({
-					someString: 'some string',
-					someDocument: 'some document',
-				}),
-			);
-
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				code: mainCode,
-				someString: 'some string',
-				someDocument: 'some document',
-			});
-
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					code: mainCode,
-					someString: 'some string',
-				});
-
-			expect(s3PostMock).toHaveBeenCalledWith({
-				someDocument: 'some document',
-			});
-		});
 		it("doesn't set a property when empty string provided", async () => {
 			const { status, body } = await basicHandler({ someString: '' });
 
@@ -127,26 +93,6 @@ describe('rest POST', () => {
 				.notMatch({
 					someString: expect.any(String),
 				});
-		});
-		it.skip("doesn't set a Document property when empty string provided", async () => {
-			const s3PostMock = getS3PostMock({});
-			const { status, body } = await postHandler({
-				documentStore: {
-					post: s3PostMock,
-				},
-			})(
-				getInput({
-					someDocument: '',
-				}),
-			);
-
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				code: mainCode,
-			});
-			await neo4jTest('MainType', mainCode).exists();
-
-			expect(s3PostMock).not.toHaveBeenCalled();
 		});
 
 		it('sets Date property', async () => {
@@ -219,30 +165,6 @@ describe('rest POST', () => {
 			});
 		});
 
-		it.skip("doesn't write to s3 if record already exists", async () => {
-			await createNode('MainType', {
-				code: mainCode,
-			});
-			const s3PostMock = getS3PostMock();
-			await expect(
-				postHandler({
-					documentStore: {
-						post: s3PostMock,
-					},
-				})(
-					getInput({
-						someDocument: 'some document',
-					}),
-				),
-			).rejects.toThrow({
-				status: 409,
-				message: `MainType ${mainCode} already exists`,
-			});
-
-			await neo4jTest('MainType', mainCode).notExists();
-			expect(s3PostMock).not.toHaveBeenCalled();
-		});
-
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
 				status: 400,
@@ -266,33 +188,6 @@ describe('rest POST', () => {
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
 			await expect(basicHandler()).rejects.toThrow('oh no');
-		});
-
-		it.skip('throws if s3 query fails', async () => {
-			await expect(
-				postHandler({
-					documentStore: {
-						post: asyncErrorFunction,
-					},
-				})(getInput({ someDocument: 'some document' })),
-			).rejects.toThrow('oh no');
-		});
-
-		it.skip('undoes any s3 actions if neo4j query fails', async () => {
-			const s3PostMock = jest.fn(async () => 'post-marker');
-			dbUnavailable({ skip: 1 });
-			await expect(
-				postHandler({
-					documentStore: {
-						post: s3PostMock,
-					},
-				})(getInput({ someDocument: 'some document' })),
-			).rejects.toThrow('oh no');
-			expect(s3PostMock).toHaveBeenCalledWith(
-				'MainType',
-				mainCode,
-				'post-marker',
-			);
 		});
 	});
 

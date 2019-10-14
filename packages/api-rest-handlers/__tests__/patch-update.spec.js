@@ -12,9 +12,7 @@ describe('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
 	const mainCode = `${namespace}-main`;
 
-	const { createNodes, createNode, meta, getMetaPayload } = setupMocks(
-		namespace,
-	);
+	const { createNode, meta, getMetaPayload } = setupMocks(namespace);
 
 	securityTests(patchHandler(), mainCode);
 

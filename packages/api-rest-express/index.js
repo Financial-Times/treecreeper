@@ -87,7 +87,7 @@ const getRestApi = ({
 		.get(controller('GET', getHandler({ documentStore, logger })))
 		.post(controller('POST', postHandler({ documentStore, logger })))
 		// 	.put(unimplemented('PUT', 'PATCH'))
-		// 	.patch(controller('PATCH', patchHandler({documentStore, logger})))
+		.patch(controller('PATCH', patchHandler({ documentStore, logger })))
 		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
 
 	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
