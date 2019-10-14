@@ -22,12 +22,6 @@ describe('rest POST', () => {
 		metadata,
 	});
 
-	const getS3PostMock = body =>
-		jest.fn(async () => ({
-			versionId: 'fake-id',
-			newBodyDocs: body,
-		}));
-
 	const basicHandler = (...args) => postHandler()(getInput(...args));
 
 	describe('writing disconnected records', () => {

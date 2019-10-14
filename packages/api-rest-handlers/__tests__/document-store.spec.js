@@ -13,6 +13,12 @@ describe('rest document store integration', () => {
 		code: mainCode,
 	};
 
+	const getInput = body => ({
+		type: 'MainType',
+		code: mainCode,
+		body,
+	});
+
 	const { createNode } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
@@ -100,21 +106,13 @@ describe('rest document store integration', () => {
 		// ['PATCH', patchHandler, 201]
 	].forEach(([method, handler, goodStatus]) => {
 		describe(`${method} create`, () => {
-			const getInput = (body, query, metadata) => ({
-				type: 'MainType',
-				code: mainCode,
-				body,
-				query,
-				metadata,
-			});
-
 			const getS3PostMock = body =>
 				jest.fn(async () => ({
 					versionId: 'fake-id',
 					newBodyDocs: body,
 				}));
 
-			it.skip('creates record with Documents', async () => {
+			it('creates record with Documents', async () => {
 				const s3PostMock = getS3PostMock({
 					someDocument: 'some document',
 				});
@@ -148,7 +146,7 @@ describe('rest document store integration', () => {
 				});
 			});
 
-			it.skip("doesn't set a Document property when empty string provided", async () => {
+			it("doesn't set a Document property when empty string provided", async () => {
 				const s3PostMock = getS3PostMock({});
 				const { status, body } = await handler({
 					documentStore: {
@@ -169,7 +167,7 @@ describe('rest document store integration', () => {
 				expect(s3PostMock).not.toHaveBeenCalled();
 			});
 
-			it.skip("doesn't write to s3 if record already exists", async () => {
+			it("doesn't write to s3 if record already exists", async () => {
 				await createNode('MainType', {
 					code: mainCode,
 				});
@@ -193,7 +191,7 @@ describe('rest document store integration', () => {
 				expect(s3PostMock).not.toHaveBeenCalled();
 			});
 
-			it.skip('throws if s3 query fails', async () => {
+			it('throws if s3 query fails', async () => {
 				await expect(
 					handler({
 						documentStore: {
@@ -203,7 +201,7 @@ describe('rest document store integration', () => {
 				).rejects.toThrow('oh no');
 			});
 
-			it.skip('undoes any s3 actions if neo4j query fails', async () => {
+			it('undoes any s3 actions if neo4j query fails', async () => {
 				const s3PostMock = jest.fn(async () => 'post-marker');
 				dbUnavailable({ skip: 1 });
 				await expect(
@@ -219,6 +217,103 @@ describe('rest document store integration', () => {
 					'post-marker',
 				);
 			});
+		});
+	});
+
+	describe('PATCH update', () => {
+		const getS3PatchMock = body =>
+			jest.fn(async () => ({
+				versionId: 'fake-id',
+				newBodyDocs: body,
+			}));
+
+		it('updates record with Documents', async () => {
+			await createMainNode();
+			const s3PatchMock = getS3PatchMock({
+				someDocument: 'some document',
+			});
+			const { status, body } = await patchHandler({
+				documentStore: {
+					patch: s3PatchMock,
+				},
+			})(
+				getInput({
+					someString: 'some string',
+					someDocument: 'some document',
+				}),
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'some string',
+				someDocument: 'some document',
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					code: mainCode,
+					someString: 'some string',
+				});
+
+			expect(s3PatchMock).toHaveBeenCalledWith({
+				someDocument: 'some document',
+			});
+		});
+		it('unsets a Document property when empty string provided', async () => {
+			await createMainNode();
+			const s3PatchMock = getS3PatchMock({
+				anotherDocument: 'another document',
+			});
+			const { status, body } = await patchHandler({
+				documentStore: {
+					patch: s3PatchMock,
+				},
+			})(
+				getInput({
+					someDocument: '',
+					anotherDocument: 'another document',
+				}),
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+			});
+			await neo4jTest('MainType', mainCode).exists();
+
+			expect(s3PatchMock).toHaveBeenCalledWith({
+				anotherDocument: 'another document',
+			});
+		});
+		it('throws if s3 query fails', async () => {
+			await createMainNode();
+			await expect(
+				patchHandler({
+					documentStore: {
+						patch: asyncErrorFunction,
+					},
+				})(getInput({ someDocument: 'some document' })),
+			).rejects.toThrow('oh no');
+		});
+
+		it('undoes any s3 actions if neo4j query fails', async () => {
+			const s3PatchMock = jest.fn(async () => 'patch-marker');
+			await createMainNode();
+			dbUnavailable({ skip: 1 });
+			await expect(
+				patchHandler({
+					documentStore: {
+						patch: s3PatchMock,
+					},
+				})(getInput({ someDocument: 'some document' })),
+			).rejects.toThrow('oh no');
+			expect(s3PatchMock).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+				'patch-marker',
+			);
 		});
 	});
 });
