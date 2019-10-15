@@ -54,8 +54,9 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = () => {
-	const post = postHandler();
+// TODO: Need implementation for post to S3 using documentStore
+const patchHandler = ({ documentStore = {} }) => {
+	const post = postHandler({ documentStore });
 
 	return async input => {
 		const { type, code, body, metadata = {}, query = {} } = validateInput(

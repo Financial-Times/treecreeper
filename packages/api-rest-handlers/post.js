@@ -19,7 +19,8 @@ const {
 } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
-const postHandler = () => async input => {
+// TODO: Need implementation for post to S3 using documentStore
+const postHandler = ({ documentStore = {} }) => async input => {
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
 	);

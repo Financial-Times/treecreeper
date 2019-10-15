@@ -1,6 +1,6 @@
 const { diffProperties } = require('../diff');
 
-describe('diffProperties test (internal function', () => {
+describe('diffProperties test (internal function)', () => {
 	test('returns exact added entries', () => {
 		const initialContent = {
 			propertyOne: 'prop-1',

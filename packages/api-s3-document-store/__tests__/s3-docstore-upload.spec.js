@@ -5,6 +5,7 @@ const { createS3Instance } = require('../s3');
 const { upload } = require('../upload');
 const {
 	s3UploadResponseFixture,
+	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
@@ -34,6 +35,7 @@ const mockS3Upload = (nodeType, systemCode, versionMarker) => {
 		upload: stubUpload,
 	}));
 	return {
+		// We need to create S3 instance here in order to use mocked instance
 		s3Instance: createS3Instance({
 			accessKeyId: 'testAccessKeyId',
 			secretAccessKey: 'testSecretAccessKey',
@@ -50,40 +52,33 @@ describe('S3 document helper upload (internal function)', () => {
 		jest.restoreAllMocks();
 	});
 
-	const expectedData = {
-		firstLineTroubleshooting: 'firstLineTroubleshooting',
-		moreInformation: 'moreInformation',
-		monitoring: 'monitoring',
-		architectureDiagram: 'architectureDiagram',
-	};
+	const consistentNodeType = 'System';
 
 	test('returns uploaded new version marker', async () => {
 		const givenSystemCode = 'docstore-upload-test';
-		const givenNodeType = 'System';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
 		const { stubUpload, s3Instance } = mockS3Upload(
-			givenNodeType,
+			consistentNodeType,
 			givenSystemCode,
 			givenVersionMarker,
 		);
+		const expectedData = createExampleBodyData();
+
+		const callParams = {
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			Body: JSON.stringify(expectedData),
+		};
 
 		const versionMarker = await upload({
 			s3Instance,
-			params: {
-				Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
-				Key: `${givenNodeType}/${givenSystemCode}`,
-				Body: JSON.stringify(expectedData),
-			},
+			params: callParams,
 			requestType: 'POST',
 		});
 
 		expect(stubUpload).toHaveBeenCalled();
-		expect(stubUpload).toHaveBeenCalledWith({
-			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
-			Key: `${givenNodeType}/${givenSystemCode}`,
-			Body: JSON.stringify(expectedData),
-		});
+		expect(stubUpload).toHaveBeenCalledWith(callParams);
 		expect(versionMarker).toBe(givenVersionMarker);
 	});
 
@@ -93,10 +88,11 @@ describe('S3 document helper upload (internal function)', () => {
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
 		const { stubUpload, s3Instance } = mockS3Upload(
-			givenNodeType,
+			consistentNodeType,
 			givenSystemCode,
 			givenVersionMarker,
 		);
+		const expectedData = createExampleBodyData();
 
 		const callParams = {
 			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,

@@ -26,8 +26,16 @@ const s3UploadResponseFixture = (bucket, key, versionMarker) => ({
 	Bucket: bucket,
 });
 
+const createExampleBodyData = () => ({
+	firstLineTroubleshooting: 'firstLineTroubleshooting',
+	moreInformation: 'moreInformation',
+	monitoring: 'monitoring',
+	architectureDiagram: 'architectureDiagram',
+});
+
 module.exports = {
 	s3GetObjectResponseFixture,
 	s3DeleteObjectResponseFixture,
 	s3UploadResponseFixture,
+	createExampleBodyData,
 };

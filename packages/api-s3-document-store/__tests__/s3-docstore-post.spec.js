@@ -3,6 +3,7 @@ jest.mock('../upload');
 const { createS3Instance } = require('../s3');
 const { docstore } = require('..');
 const uploadModule = require('../upload');
+const { createExampleBodyData } = require('../__fixtures__/s3-object-fixture');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -13,10 +14,6 @@ const mockS3Post = versionMarker => {
 		.mockResolvedValue(versionMarker);
 
 	return {
-		s3Instance: createS3Instance({
-			accessKeyId: 'testAccessKeyId',
-			secretAccessKey: 'testSecretAccessKey',
-		}),
 		stubUpload,
 	};
 };
@@ -29,40 +26,42 @@ describe('S3 document helper post', () => {
 		jest.restoreAllMocks();
 	});
 
-	const expectedData = {
-		firstLineTroubleshooting: 'firstLineTroubleshooting',
-		moreInformation: 'moreInformation',
-		monitoring: 'monitoring',
-		architectureDiagram: 'architectureDiagram',
-	};
+	const consistentNodeType = 'System';
+
+	const s3Instance = createS3Instance({
+		accessKeyId: 'testAccessKeyId',
+		secretAccessKey: 'testSecretAccessKey',
+	});
 
 	test('returns exact uploaded body and versionMarker', async () => {
 		const givenSystemCode = 'docstore-post-test';
-		const givenNodeType = 'System';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, s3Instance } = mockS3Post(givenVersionMarker);
+		const { stubUpload } = mockS3Post(givenVersionMarker);
 		const store = docstore(s3Instance);
+		const exampleData = createExampleBodyData();
 
 		const result = await store.post(
-			givenNodeType,
+			consistentNodeType,
 			givenSystemCode,
-			expectedData,
+			exampleData,
 		);
+
+		const callParams = {
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			Body: JSON.stringify(exampleData),
+		};
 
 		expect(stubUpload).toHaveBeenCalledTimes(1);
 		expect(stubUpload).toHaveBeenCalledWith({
 			s3Instance,
-			params: {
-				Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
-				Key: `${givenNodeType}/${givenSystemCode}`,
-				Body: JSON.stringify(expectedData),
-			},
+			params: callParams,
 			requestType: 'POST',
 		});
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
-			body: expectedData,
+			body: exampleData,
 		});
 	});
 });
