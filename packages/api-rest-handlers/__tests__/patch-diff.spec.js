@@ -1,11 +1,8 @@
-const {driver} = require('../../api-core/lib/db-connection')
+const { driver } = require('../../api-core/lib/db-connection');
 const { patchHandler } = require('../patch');
-
 
 const { setupMocks } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
-
-const { spyDbQuery } = require('../../../test-helpers/db-connection');
 
 const spyDbQuery = () => {
 	const originalSession = driver.session.bind(driver);
@@ -138,11 +135,6 @@ describe('rest PATCH relationship diff', () => {
 			someString: 'someString',
 		});
 		const dbQuerySpy = spyDbQuery();
-		await testPatchRequest(
-			`/v2/node/MainType/${mainCode}?upsert=true&relationshipAction=merge`,
-			{ someString: null },
-			200,
-		);
 		const { status } = await basicHandler({ someString: null });
 		expect(status).toBe(200);
 		expect(dbQuerySpy).toHaveBeenCalledWith(
