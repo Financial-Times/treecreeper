@@ -77,20 +77,6 @@ describe('rest GET', () => {
 		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
 	});
 
-	it('gets record with Documents', async () => {
-		await createMainNode();
-
-		const { body, status } = await getHandler({ documentStore })(input);
-
-		expect(status).toBe(200);
-		expect(body).toMatchObject({
-			code: mainCode,
-			body: { some: 'field' },
-		});
-		expect(documentStoreSpy).toHaveBeenCalled();
-		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
-	});
-
 	it('throws 404 error if no record', async () => {
 		await expect(getHandler({ documentStore })(input)).rejects.toThrow({
 			status: 404,
@@ -100,16 +86,6 @@ describe('rest GET', () => {
 
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
-		await expect(getHandler({ documentStore })(input)).rejects.toThrow(
-			'oh no',
-		);
-	});
-
-	it('throws if s3 query fails', async () => {
-		documentStoreSpy = jest
-			.spyOn(documentStore, 'get')
-			.mockRejectedValue(new Error('oh no'));
-
 		await expect(getHandler({ documentStore })(input)).rejects.toThrow(
 			'oh no',
 		);

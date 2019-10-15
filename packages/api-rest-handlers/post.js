@@ -2,7 +2,7 @@ const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
-const { getNeo4jRecord } = require('./lib/read-helpers');
+// const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
 
 const {
@@ -19,16 +19,10 @@ const {
 } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
-const postHandler = ({ documentStore } = {}) => async input => {
-	const {
-		type,
-		code,
-		body,
-		metadata = {},
-		query = {},
-		skipPreflight = false,
-		responseStatus = 200,
-	} = validateInput(input);
+const postHandler = () => async input => {
+	const { type, code, body, metadata = {}, query = {} } = validateInput(
+		input,
+	);
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -38,16 +32,6 @@ const postHandler = ({ documentStore } = {}) => async input => {
 				', ',
 			)}`,
 		);
-	}
-
-	// when PATCH calls POST handler after first detecting there
-	// is no existing record
-	if (!skipPreflight) {
-		const preflightRequest = await getNeo4jRecord(type, code);
-
-		if (preflightRequest.hasRecords()) {
-			throw httpErrors(409, `${type} ${code} already exists`);
-		}
 	}
 
 	const queryParts = [
@@ -88,8 +72,11 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			queryParts.join('\n'),
 			parameters,
 		);
-		return { status: responseStatus, body: neo4jResult.toJson(type) };
+		return { status: 200, body: neo4jResult.toJson(type) };
 	} catch (err) {
+		if (/already exists with label/.test(err.message)) {
+			throw httpErrors(409, `${type} ${code} already exists`);
+		}
 		handleUpsertError(err);
 		throw err;
 	}

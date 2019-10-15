@@ -64,17 +64,6 @@ describe('rest DELETE', () => {
 		await neo4jTest('MainType', mainCode).exists();
 	});
 
-	it('deletes record with Documents', async () => {
-		await createMainNode();
-
-		const { status } = await deleteHandler({ documentStore })(input);
-
-		expect(status).toBe(204);
-		await neo4jTest('MainType', mainCode).notExists();
-		expect(documentStoreSpy).toHaveBeenCalled();
-		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
-	});
-
 	it('throws 404 error if no record', async () => {
 		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow({
 			status: 404,
@@ -85,44 +74,9 @@ describe('rest DELETE', () => {
 
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
-		await expect(deleteHandler()(input)).rejects.toThrow('oh no');
+		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow(
+			'oh no',
+		);
 		expect(documentStoreSpy).not.toHaveBeenCalled();
-	});
-
-	it('throws if s3 query fails', async () => {
-		documentStoreSpy = jest
-			.spyOn(documentStore, 'delete')
-			.mockRejectedValue(new Error('oh no'));
-
-		await createMainNode();
-		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow(
-			'oh no',
-		);
-		await neo4jTest('MainType', mainCode).exists();
-		expect(documentStoreSpy).toHaveBeenCalled();
-		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
-	});
-
-	it('undoes any s3 actions if neo4j query fails', async () => {
-		await createMainNode();
-		dbUnavailable({ skip: 1 });
-		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow(
-			'oh no',
-		);
-		// documentStore.delete should be called with 2 times.
-		expect(documentStoreSpy).toHaveBeenCalledTimes(2);
-		// first time is main delete, returns versionMarker
-		expect(documentStoreSpy).toHaveBeenNthCalledWith(
-			1,
-			'MainType',
-			mainCode,
-		);
-		// Second time is revert action, call with versionMarker
-		expect(documentStoreSpy).toHaveBeenNthCalledWith(
-			2,
-			'MainType',
-			mainCode,
-			'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar',
-		);
 	});
 });

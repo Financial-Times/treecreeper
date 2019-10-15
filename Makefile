@@ -58,6 +58,10 @@ test-pkg-rest-handlers:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
 
+test-api-docs:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch; \
+
+
 run:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 

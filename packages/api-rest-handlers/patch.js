@@ -54,8 +54,8 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = ({ documentStore } = {}) => {
-	const post = postHandler(({ documentStore } = {}));
+const patchHandler = () => {
+	const post = postHandler();
 
 	return async input => {
 		const { type, code, body, metadata = {}, query = {} } = validateInput(
@@ -67,12 +67,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		const preflightRequest = await getNeo4jRecord(type, code);
 
 		if (!preflightRequest.hasRecords()) {
-			return post(
-				Object.assign(
-					{ skipPreflight: true, responseStatus: 201 },
-					input,
-				),
-			);
+			return Object.assign(await post(input), { status: 201 });
 		}
 		const initialContent = preflightRequest.toJson(type);
 
@@ -153,7 +148,6 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 		try {
-			console.log(queryParts.join('\n'))
 			const neo4jResult = await executeQuery(
 				queryParts.join('\n'),
 				parameters,
