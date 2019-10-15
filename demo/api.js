@@ -8,7 +8,7 @@ const {
 	middleware: contextMiddleware,
 } = require('../packages/api-core/lib/request-context');
 
-const requestId = require('../packages/api-core/lib/middleware/request-id');
+const requestId = require('../packages/api-rest-express/middleware/request-id');
 
 schema.init();
 initConstraints();
