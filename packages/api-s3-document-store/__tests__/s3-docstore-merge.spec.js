@@ -33,9 +33,6 @@ const mockS3Merge = (
 			if (code.indexOf('post-unexpected') !== -1) {
 				throw new Error('unexpected error');
 			}
-			// need waiting for resolve in order to test parallel asynchronous processing properly
-			// await wait(200);
-
 			return {
 				versionMarker: toVersionMarker,
 				body,
@@ -63,9 +60,6 @@ const mockS3Merge = (
 	const stubDelete = jest
 		.spyOn(deleteModule, 's3Delete')
 		.mockImplementation(async ({ code }) => {
-			// need waiting for resolve in order to test parallel asynchronous processing properly
-			// await wait(100);
-
 			switch (code) {
 				case fromSystemCode:
 					if (fromSystemCode.indexOf('delete-unexpected') !== -1) {
