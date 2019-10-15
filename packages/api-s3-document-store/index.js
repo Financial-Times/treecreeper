@@ -54,7 +54,7 @@ const docstore = (
 	};
 };
 
-// Factory method which user intend to use thier S3 bucket
+// Factory method which user intend to use their S3 bucket
 const createStore = (s3BucketName = TREECREEPER_DOCSTORE_S3_BUCKET) =>
 	docstore(defaultS3Instance, s3BucketName);
 

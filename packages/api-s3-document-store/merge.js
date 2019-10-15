@@ -53,7 +53,8 @@ const s3Merge = async ({
 	]);
 
 	const { versionMarker: deletedVersionId } = deletedObject;
-	const { versionMarker: postedVersionId } = postedObject || {}; // probably undefined when writeProperties are empty
+	const { versionMarker: postedVersionId } = postedObject;
+
 	if (!deletedVersionId && !postedVersionId) {
 		throw new Error('MERGE FAILED: Write and delete failed in S3');
 	}

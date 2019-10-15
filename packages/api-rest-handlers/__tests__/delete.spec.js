@@ -2,10 +2,8 @@ const { deleteHandler } = require('../delete');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
-const {
-	dbUnavailable,
-	asyncErrorFunction,
-} = require('../../../test-helpers/error-stubs');
+const { dbUnavailable } = require('../../../test-helpers/error-stubs');
+const { docstore } = require('../../api-s3-document-store');
 
 describe('rest DELETE', () => {
 	const namespace = 'api-rest-handlers-delete';
@@ -22,11 +20,26 @@ describe('rest DELETE', () => {
 
 	securityTests(deleteHandler(), mainCode);
 
+	const documentStore = docstore();
+	let documentStoreSpy;
+	beforeEach(() => {
+		documentStoreSpy = jest
+			.spyOn(documentStore, 'delete')
+			.mockResolvedValue({
+				versionMarker: 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar',
+			});
+	});
+	afterEach(() => {
+		jest.resetAllMocks();
+	});
+
 	it('deletes record without relationships', async () => {
 		await createMainNode();
-		const { status } = await deleteHandler()(input);
+		const { status } = await deleteHandler({ documentStore })(input);
 
 		expect(status).toBe(204);
+		expect(documentStoreSpy).toHaveBeenCalled();
+		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
 		await neo4jTest('MainType', mainCode).notExists();
 	});
 
@@ -42,67 +55,74 @@ describe('rest DELETE', () => {
 			[parent, 'IS_PARENT_OF', main],
 		);
 
-		await expect(deleteHandler()(input)).rejects.toThrow({
+		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow({
 			status: 400,
 			message: `Cannot delete - MainType ${mainCode} has relationships.`,
 		});
+		// documentStore.delete won't be called because neo4j raise error
+		expect(documentStoreSpy).not.toHaveBeenCalled();
 		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('deletes record with Documents', async () => {
-		const deleteMock = jest.fn(async () => 'delete-marker');
 		await createMainNode();
 
-		const { status } = await deleteHandler({
-			documentStore: {
-				delete: deleteMock,
-			},
-		})(input);
+		const { status } = await deleteHandler({ documentStore })(input);
 
 		expect(status).toBe(204);
 		await neo4jTest('MainType', mainCode).notExists();
-		expect(deleteMock).toHaveBeenCalledWith('MainType', mainCode);
+		expect(documentStoreSpy).toHaveBeenCalled();
+		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
 	});
 
 	it('throws 404 error if no record', async () => {
-		await expect(deleteHandler()(input)).rejects.toThrow({
+		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow({
 			status: 404,
 			message: `MainType ${mainCode} does not exist`,
 		});
+		expect(documentStoreSpy).not.toHaveBeenCalled();
 	});
 
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
 		await expect(deleteHandler()(input)).rejects.toThrow('oh no');
+		expect(documentStoreSpy).not.toHaveBeenCalled();
 	});
 
 	it('throws if s3 query fails', async () => {
+		documentStoreSpy = jest
+			.spyOn(documentStore, 'delete')
+			.mockRejectedValue(new Error('oh no'));
+
 		await createMainNode();
-		await expect(
-			deleteHandler({
-				documentStore: {
-					delete: asyncErrorFunction,
-				},
-			})(input),
-		).rejects.toThrow('oh no');
+		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow(
+			'oh no',
+		);
 		await neo4jTest('MainType', mainCode).exists();
+		expect(documentStoreSpy).toHaveBeenCalled();
+		expect(documentStoreSpy).toHaveBeenCalledWith('MainType', mainCode);
 	});
 
 	it('undoes any s3 actions if neo4j query fails', async () => {
-		const deleteMock = jest.fn(async () => 'delete-marker');
 		await createMainNode();
 		dbUnavailable({ skip: 1 });
-		await expect(
-			deleteHandler({
-				documentStore: {
-					delete: deleteMock,
-				},
-			})(input),
-		).rejects.toThrow('oh no');
-		expect(deleteMock).toHaveBeenCalledWith(
+		await expect(deleteHandler({ documentStore })(input)).rejects.toThrow(
+			'oh no',
+		);
+		// documentStore.delete should be called with 2 times.
+		expect(documentStoreSpy).toHaveBeenCalledTimes(2);
+		// first time is main delete, returns versionMarker
+		expect(documentStoreSpy).toHaveBeenNthCalledWith(
+			1,
 			'MainType',
 			mainCode,
-			'delete-marker',
+		);
+		// Second time is revert action, call with versionMarker
+		expect(documentStoreSpy).toHaveBeenNthCalledWith(
+			2,
+			'MainType',
+			mainCode,
+			'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar',
 		);
 	});
 });

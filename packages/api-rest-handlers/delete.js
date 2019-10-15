@@ -1,5 +1,4 @@
 const httpErrors = require('http-errors');
-const { stripIndents } = require('common-tags');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 const { executeQuery } = require('./lib/neo4j-model');
@@ -29,7 +28,10 @@ const deleteHandler = ({
 	const query = `MATCH (node:${type} {code: $code}) DELETE node`;
 
 	// Writes are in series, not parallel, to simplify rollback on error
-	const deleteMarker = await documentStore.delete(type, code);
+	const { versionMarker: deleteMarker } = await documentStore.delete(
+		type,
+		code,
+	);
 	try {
 		await executeQuery(query, { code });
 	} catch (error) {
