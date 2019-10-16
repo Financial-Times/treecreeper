@@ -101,140 +101,153 @@ describe('rest document store integration', () => {
 		});
 	});
 
-	[
-		['POST', postHandler, 200],
-		// ['PATCH', patchHandler, 201]
-	].forEach(([method, handler, goodStatus]) => {
-		describe(`${method} create`, () => {
-			const versionId = 'post-marker';
-			const getS3PostMock = body =>
-				jest.fn(async () => ({
-					versionId,
-					newBodyDocs: body,
-				}));
+	[['POST', postHandler, 200], ['PATCH', patchHandler, 201]].forEach(
+		([method, handler, goodStatus]) => {
+			describe(`${method} create`, () => {
+				const versionId = 'post-marker';
+				const getS3PostMock = body =>
+					jest.fn(async () => ({
+						versionId,
+						newBodyDocs: body,
+					}));
 
-			it('creates record with Documents', async () => {
-				const s3PostMock = getS3PostMock({
-					someDocument: 'some document from s3',
-				});
-				const { status, body } = await handler({
-					documentStore: {
-						post: s3PostMock,
-					},
-				})(
-					getInput({
-						someString: 'some string',
-						someDocument: 'some document',
-					}),
-				);
-
-				expect(status).toBe(goodStatus);
-				expect(body).toMatchObject({
-					code: mainCode,
-					someString: 'some string',
-					someDocument: 'some document from s3',
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.exists()
-					.match({
-						code: mainCode,
-						someString: 'some string',
+				it('creates record with Documents', async () => {
+					const s3PostMock = getS3PostMock({
+						someDocument: 'some document from s3',
 					});
-
-				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
-					someDocument: 'some document',
-				});
-			});
-
-			it("doesn't set a Document property when empty string provided", async () => {
-				const s3PostMock = getS3PostMock({});
-				const { status, body } = await handler({
-					documentStore: {
-						post: s3PostMock,
-					},
-				})(
-					getInput({
-						someDocument: '',
-					}),
-				);
-
-				expect(status).toBe(goodStatus);
-				expect(body).toMatchObject({
-					code: mainCode,
-				});
-				await neo4jTest('MainType', mainCode).exists();
-
-				expect(s3PostMock).not.toHaveBeenCalled();
-			});
-
-			it('undoes any s3 actions if record already exists', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-				});
-				await neo4jTest('MainType', mainCode).exists();
-				const s3PostMock = getS3PostMock({});
-				const s3DeleteMock = jest.fn();
-
-				await expect(
-					handler({
+					const { status, body } = await handler({
 						documentStore: {
 							post: s3PostMock,
-							delete: s3DeleteMock,
 						},
 					})(
 						getInput({
+							someString: 'some string',
 							someDocument: 'some document',
 						}),
-					),
-				).rejects.toThrow({
-					status: 409,
-					message: `MainType ${mainCode} already exists`,
-				});
-				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
-					someDocument: 'some document',
-				});
-				expect(s3DeleteMock).toHaveBeenCalledWith(
-					'MainType',
-					mainCode,
-					versionId,
-				);
-			});
+					);
 
-			it('throws if s3 query fails', async () => {
-				await expect(
-					handler({
-						documentStore: {
-							post: asyncErrorFunction,
+					expect(status).toBe(goodStatus);
+					expect(body).toMatchObject({
+						code: mainCode,
+						someString: 'some string',
+						someDocument: 'some document from s3',
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.exists()
+						.match({
+							code: mainCode,
+							someString: 'some string',
+						});
+
+					expect(s3PostMock).toHaveBeenCalledWith(
+						'MainType',
+						mainCode,
+						{
+							someDocument: 'some document',
 						},
-					})(getInput({ someDocument: 'some document' })),
-				).rejects.toThrow('oh no');
-			});
+					);
+				});
 
-			it('undoes any s3 actions if neo4j query fails', async () => {
-				const s3PostMock = getS3PostMock({});
-				const s3DeleteMock = jest.fn();
-				dbUnavailable({ skip: 0 });
-
-				await expect(
-					handler({
+				it("doesn't set a Document property when empty string provided", async () => {
+					const s3PostMock = getS3PostMock({});
+					const { status, body } = await handler({
 						documentStore: {
 							post: s3PostMock,
-							delete: s3DeleteMock,
 						},
-					})(getInput({ someDocument: 'some document' })),
-				).rejects.toThrow('oh no');
-				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
-					someDocument: 'some document',
+					})(
+						getInput({
+							someDocument: '',
+						}),
+					);
+
+					expect(status).toBe(goodStatus);
+					expect(body).toMatchObject({
+						code: mainCode,
+					});
+					await neo4jTest('MainType', mainCode).exists();
+
+					expect(s3PostMock).not.toHaveBeenCalled();
 				});
-				expect(s3DeleteMock).toHaveBeenCalledWith(
-					'MainType',
-					mainCode,
-					versionId,
-				);
+
+				if (method === 'POST') {
+					it('undoes any s3 actions if record already exists', async () => {
+						await createNode('MainType', {
+							code: mainCode,
+						});
+						await neo4jTest('MainType', mainCode).exists();
+						const s3PostMock = getS3PostMock({});
+						const s3DeleteMock = jest.fn();
+
+						await expect(
+							handler({
+								documentStore: {
+									post: s3PostMock,
+									delete: s3DeleteMock,
+								},
+							})(
+								getInput({
+									someDocument: 'some document',
+								}),
+							),
+						).rejects.toThrow({
+							status: 409,
+							message: `MainType ${mainCode} already exists`,
+						});
+						expect(s3PostMock).toHaveBeenCalledWith(
+							'MainType',
+							mainCode,
+							{
+								someDocument: 'some document',
+							},
+						);
+						expect(s3DeleteMock).toHaveBeenCalledWith(
+							'MainType',
+							mainCode,
+							versionId,
+						);
+					});
+				}
+
+				it('throws if s3 query fails', async () => {
+					await expect(
+						handler({
+							documentStore: {
+								post: asyncErrorFunction,
+							},
+						})(getInput({ someDocument: 'some document' })),
+					).rejects.toThrow('oh no');
+				});
+
+				it('undoes any s3 actions if neo4j query fails', async () => {
+					const s3PostMock = getS3PostMock({});
+					const s3DeleteMock = jest.fn();
+					dbUnavailable({ skip: method === 'PATCH' ? 1 : 0 });
+
+					await expect(
+						handler({
+							documentStore: {
+								post: s3PostMock,
+								delete: s3DeleteMock,
+							},
+						})(getInput({ someDocument: 'some document' })),
+					).rejects.toThrow('oh no');
+					expect(s3PostMock).toHaveBeenCalledWith(
+						'MainType',
+						mainCode,
+						{
+							someDocument: 'some document',
+						},
+					);
+					expect(s3DeleteMock).toHaveBeenCalledWith(
+						'MainType',
+						mainCode,
+						versionId,
+					);
+				});
 			});
-		});
-	});
+		},
+	);
 
 	describe('PATCH update', () => {
 		const versionId = 'patch-marker';

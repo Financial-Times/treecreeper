@@ -60,11 +60,21 @@ const patchHandler = ({ documentStore } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
-		let versionId;
-		let newBodyDocs;
 		const { type, code, body, metadata = {}, query = {} } = validateInput(
 			input,
 		);
+
+		validateRelationshipInputs(input);
+
+		const preflightRequest = await getNeo4jRecord(type, code);
+		if (!preflightRequest.hasRecords()) {
+			return Object.assign(await post(input), { status: 201 });
+		}
+
+		const initialContent = preflightRequest.toJson(type);
+
+		let versionId;
+		let newBodyDocs;
 		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
 
 		if (!_isEmpty(bodyDocuments)) {
@@ -79,15 +89,6 @@ const patchHandler = ({ documentStore } = {}) => {
 			// 	'No changed Document properties - skipping update',
 			// );
 		}
-
-		validateRelationshipInputs(input);
-
-		const preflightRequest = await getNeo4jRecord(type, code);
-
-		if (!preflightRequest.hasRecords()) {
-			return Object.assign(await post(input), { status: 201 });
-		}
-		const initialContent = preflightRequest.toJson(type);
 
 		const properties = constructNeo4jProperties({
 			type,
