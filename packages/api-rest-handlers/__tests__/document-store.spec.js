@@ -107,17 +107,15 @@ describe('rest document store integration', () => {
 	].forEach(([method, handler, goodStatus]) => {
 		describe(`${method} create`, () => {
 			const versionId = 'post-marker';
-			const getS3PostMock = () =>
+			const getS3PostMock = body =>
 				jest.fn(async () => ({
 					versionId,
-					newBodyDocs: {
-						someDocument: 'new document from s3',
-					},
+					newBodyDocs: body,
 				}));
 
 			it('creates record with Documents', async () => {
 				const s3PostMock = getS3PostMock({
-					someDocument: 'some document',
+					someDocument: 'some document from s3',
 				});
 				const { status, body } = await handler({
 					documentStore: {
@@ -134,7 +132,7 @@ describe('rest document store integration', () => {
 				expect(body).toMatchObject({
 					code: mainCode,
 					someString: 'some string',
-					someDocument: 'new document from s3',
+					someDocument: 'some document from s3',
 				});
 
 				await neo4jTest('MainType', mainCode)
@@ -175,7 +173,7 @@ describe('rest document store integration', () => {
 					code: mainCode,
 				});
 				await neo4jTest('MainType', mainCode).exists();
-				const s3PostMock = getS3PostMock();
+				const s3PostMock = getS3PostMock({});
 				const s3DeleteMock = jest.fn();
 
 				await expect(
@@ -214,7 +212,7 @@ describe('rest document store integration', () => {
 			});
 
 			it('undoes any s3 actions if neo4j query fails', async () => {
-				const s3PostMock = getS3PostMock();
+				const s3PostMock = getS3PostMock({});
 				const s3DeleteMock = jest.fn();
 				dbUnavailable({ skip: 0 });
 
@@ -239,16 +237,17 @@ describe('rest document store integration', () => {
 	});
 
 	describe('PATCH update', () => {
+		const versionId = 'patch-marker';
 		const getS3PatchMock = body =>
 			jest.fn(async () => ({
-				versionId: 'fake-id',
+				versionId,
 				newBodyDocs: body,
 			}));
 
 		it('updates record with Documents', async () => {
 			await createMainNode();
 			const s3PatchMock = getS3PatchMock({
-				someDocument: 'some document',
+				someDocument: 'some document from s3',
 			});
 			const { status, body } = await patchHandler({
 				documentStore: {
@@ -265,7 +264,7 @@ describe('rest document store integration', () => {
 			expect(body).toMatchObject({
 				code: mainCode,
 				someString: 'some string',
-				someDocument: 'some document',
+				someDocument: 'some document from s3',
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -275,14 +274,15 @@ describe('rest document store integration', () => {
 					someString: 'some string',
 				});
 
-			expect(s3PatchMock).toHaveBeenCalledWith({
+			expect(s3PatchMock).toHaveBeenCalledWith('MainType', mainCode, {
 				someDocument: 'some document',
 			});
 		});
+
 		it('unsets a Document property when empty string provided', async () => {
 			await createMainNode();
 			const s3PatchMock = getS3PatchMock({
-				anotherDocument: 'another document',
+				anotherDocument: 'another document from s3',
 			});
 			const { status, body } = await patchHandler({
 				documentStore: {
@@ -298,13 +298,16 @@ describe('rest document store integration', () => {
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
+				anotherDocument: 'another document from s3',
 			});
+
 			await neo4jTest('MainType', mainCode).exists();
 
-			expect(s3PatchMock).toHaveBeenCalledWith({
+			expect(s3PatchMock).toHaveBeenCalledWith('MainType', mainCode, {
 				anotherDocument: 'another document',
 			});
 		});
+
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
 			await expect(
@@ -317,20 +320,28 @@ describe('rest document store integration', () => {
 		});
 
 		it('undoes any s3 actions if neo4j query fails', async () => {
-			const s3PatchMock = jest.fn(async () => 'patch-marker');
+			const s3PatchMock = getS3PatchMock({
+				someDocument: 'some document from s3',
+			});
+			const s3DeleteMock = jest.fn();
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
+
 			await expect(
 				patchHandler({
 					documentStore: {
 						patch: s3PatchMock,
+						delete: s3DeleteMock,
 					},
 				})(getInput({ someDocument: 'some document' })),
 			).rejects.toThrow('oh no');
-			expect(s3PatchMock).toHaveBeenCalledWith(
+			expect(s3PatchMock).toHaveBeenCalledWith('MainType', mainCode, {
+				someDocument: 'some document',
+			});
+			expect(s3DeleteMock).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
-				'patch-marker',
+				versionId,
 			);
 		});
 	});

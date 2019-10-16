@@ -1,5 +1,6 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
@@ -21,6 +22,7 @@ const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
+const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -55,12 +57,28 @@ const validateRelationshipInputs = ({
 };
 
 const patchHandler = ({ documentStore } = {}) => {
-	const post = postHandler(({ documentStore } = {}));
+	const post = postHandler({ documentStore });
 
 	return async input => {
+		let versionId;
+		let newBodyDocs;
 		const { type, code, body, metadata = {}, query = {} } = validateInput(
 			input,
 		);
+		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+
+		if (!_isEmpty(bodyDocuments)) {
+			({ versionId, newBodyDocs } = await documentStore.patch(
+				type,
+				code,
+				bodyDocuments,
+			));
+		} else {
+			// logger.info(
+			// 	{ event: 'SKIP_S3_UPDATE' },
+			// 	'No changed Document properties - skipping update',
+			// );
+		}
 
 		validateRelationshipInputs(input);
 
@@ -76,7 +94,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			code,
 			body: diffProperties({
 				type,
-				newContent: body,
+				newContent: bodyNoDocs,
 				initialContent,
 			}),
 		});
@@ -84,14 +102,14 @@ const patchHandler = ({ documentStore } = {}) => {
 		const removedRelationships = getRemovedRelationships({
 			type,
 			initialContent,
-			newContent: body,
+			newContent: bodyNoDocs,
 			action: query.relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			type,
 			initialContent,
-			newContent: body,
+			newContent: bodyNoDocs,
 		});
 
 		const willModifyNode = !!Object.keys(properties).length;
@@ -153,8 +171,21 @@ const patchHandler = ({ documentStore } = {}) => {
 				queryParts.join('\n'),
 				parameters,
 			);
-			return { status: 200, body: neo4jResult.toJson(type) };
+			const responseData = Object.assign(
+				neo4jResult.toJson(type),
+				newBodyDocs,
+			);
+
+			return { status: 200, body: responseData };
 		} catch (err) {
+			if (!_isEmpty(bodyDocuments) && versionId) {
+				// logger.info(
+				// 	{ event: `${method}_NEO4J_FAILURE` },
+				// 	err,
+				// 	`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+				// );
+				documentStore.delete(type, code, versionId);
+			}
 			handleUpsertError(err);
 			throw err;
 		}

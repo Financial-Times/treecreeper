@@ -5,38 +5,18 @@ const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 // const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
-
 const {
 	metaPropertiesForCreate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
-
 const { getRelationships } = require('./lib/relationships/input');
-
 const { constructNeo4jProperties } = require('./lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
 	handleUpsertError,
 } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
-
-const separateDocsFromBody = (nodeType, body) => {
-	const { properties } = getType(nodeType);
-	const bodyDocuments = {};
-	const bodyNoDocs = {};
-
-	Object.entries(body).forEach(([key, value]) => {
-		if (!_isEmpty(value)) {
-			if (properties[key].type === 'Document') {
-				bodyDocuments[key] = body[key];
-			} else {
-				bodyNoDocs[key] = body[key];
-			}
-		}
-	});
-
-	return { bodyDocuments, bodyNoDocs };
-};
+const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	let versionId;
@@ -108,9 +88,12 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			parameters,
 		);
 
-		const result = Object.assign({}, neo4jResult.toJson(type), newBodyDocs);
+		const responseData = Object.assign(
+			neo4jResult.toJson(type),
+			newBodyDocs,
+		);
 
-		return { status: 200, body: result };
+		return { status: 200, body: responseData };
 	} catch (err) {
 		if (!_isEmpty(bodyDocuments) && versionId) {
 			// logger.info(
