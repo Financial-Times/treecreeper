@@ -81,7 +81,7 @@ describe.skip('schema polling updates', () => {
 
 		it('updates validation rules', async () => {
 			return request(app, { useCached: false })
-				.post(`/v2/node/System/system-code-${Date.now()}`)
+				.post(`/v2/node/MainType/MainType-code-${Date.now()}`)
 				.send({ name: 'hello' })
 				.namespacedAuth()
 				.expect(400);

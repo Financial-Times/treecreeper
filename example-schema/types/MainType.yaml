@@ -1,0 +1,87 @@
+name: MainType
+description: Description of MainType.
+moreInformation: |
+    More information for MainType
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  someDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  anotherDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  someString:
+    type: Word
+    description: Word description.
+    label: Word label
+  someBoolean:
+    type: Boolean
+    description: Boolean description.
+    label: Boolean label
+  someEnum:
+    type: AnEnum
+    description: Enum description.
+    label: Enum label
+  someInteger:
+    type: Integer
+    description: Integer description.
+    label: Integer label
+  anotherString:
+    type: Word
+    description: Word description.
+    label: Word label
+  someDate:
+    type: Date
+    description: Date description.
+    label: Date label
+  someTime:
+    type: Time
+    description: Time description.
+    label: Time label
+  someDatetime:
+    type: Datetime
+    description: Datetime description.
+    label: Datetime label
+  children:
+    relationship: HAS_CHILD
+    type: ChildType
+    description: Children description.
+    label: Children label
+    direction: outgoing
+    hasMany: true
+  parents:
+    relationship: IS_PARENT_OF
+    type: ParentType
+    description: Parents description.
+    label: Parents label
+    direction: incoming
+    hasMany: true
+  favouriteChild:
+    relationship: HAS_FAVOURITE_CHILD
+    type: ChildType
+    description: Favourite child description.
+    label: Favourite label
+    hasMany: false
+    direction: outgoing
+  youngerSiblings:
+    relationship: HAS_YOUNGER_SIBLING
+    type: MainType
+    description: Parents description.
+    label: Parents label
+    direction: outgoing
+    hasMany: true
+  olderSiblings:
+    relationship: HAS_YOUNGER_SIBLING
+    type: MainType
+    description: Parents description.
+    label: Parents label
+    direction: incoming
+    hasMany: true

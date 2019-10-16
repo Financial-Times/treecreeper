@@ -13,23 +13,23 @@ describe('graphql', () => {
 	const namespace = 'graphql';
 	setupMocks(sandbox, { namespace });
 
-	const systemCode = `${namespace}-system`;
+	const mainCode = `${namespace}-main`;
 
-	it('Return a single system', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
-			name: 'name1',
-			lifecycleStage: 'Production',
+	it('Return a single record', async () => {
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
+			someEnum: 'Production',
 		});
 		return sandbox
 			.request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					System(code: "${systemCode}") {
+					MainType(code: "${mainCode}") {
 						code
-						name
-						lifecycleStage
+						someString
+						someEnum
 					}}`,
 			})
 			.namespacedAuth()
@@ -37,29 +37,29 @@ describe('graphql', () => {
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
-							lifecycleStage: 'Production',
-							name: 'name1',
+						MainType: {
+							code: mainCode,
+							someEnum: 'Production',
+							someString: 'name1',
 						},
 					},
 				});
 			});
 	});
 
-	it('Return a single system with Document property', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
-			troubleshooting: 'Fake Document',
+	it('Return a single record with Document property', async () => {
+		sandbox.setS3Responses({ get: { someDocument: 'Fake Document' } });
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 		});
 		return sandbox
 			.request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					System(code: "${systemCode}") {
+					MainType(code: "${mainCode}") {
 						code
-						troubleshooting
+						someDocument
 					}}`,
 			})
 			.namespacedAuth()
@@ -67,51 +67,51 @@ describe('graphql', () => {
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
-							troubleshooting: 'Fake Document',
+						MainType: {
+							code: mainCode,
+							someDocument: 'Fake Document',
 						},
 					},
 				});
 			});
 	});
 
-	it('Return a single system via GET request', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
-			name: 'name1',
-			lifecycleStage: 'Production',
+	it('Return a single record via GET request', async () => {
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
+			someEnum: 'Production',
 		});
 		return sandbox
 			.request(app)
 			.get(
-				`/graphql?query={System(code: "${systemCode}") {code name lifecycleStage}}`,
+				`/graphql?query={MainType(code: "${mainCode}") {code someString someEnum}}`,
 			)
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
-							lifecycleStage: 'Production',
-							name: 'name1',
+						MainType: {
+							code: mainCode,
+							someEnum: 'Production',
+							someString: 'name1',
 						},
 					},
 				});
 			});
 	});
 
-	it('Return metadata for system', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
+	it('Return metadata for record', async () => {
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 		});
 		return sandbox
 			.request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					System(code: "${systemCode}") {
+					MainType(code: "${mainCode}") {
 						code
 						_createdTimestamp {formatted}
 						_updatedTimestamp {formatted}
@@ -126,8 +126,8 @@ describe('graphql', () => {
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
+						MainType: {
+							code: mainCode,
 							_createdByClient: 'graphql-init-client',
 							_createdByUser: 'graphql-init-user',
 							_createdTimestamp: {
@@ -144,15 +144,15 @@ describe('graphql', () => {
 			});
 	});
 
-	it('Return metadata for system via GET request', async () => {
-		await sandbox.createNode('System', {
-			code: systemCode,
+	it('Return metadata for record via GET request', async () => {
+		await sandbox.createNode('MainType', {
+			code: mainCode,
 		});
 		return sandbox
 			.request(app)
 			.get(
 				`/graphql?query={
-					System(code: "${systemCode}") {
+					MainType(code: "${mainCode}") {
 						code
 						_createdTimestamp {formatted}
 						_updatedTimestamp {formatted}
@@ -167,8 +167,8 @@ describe('graphql', () => {
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
+						MainType: {
+							code: mainCode,
 							_createdByClient: 'graphql-init-client',
 							_createdByUser: 'graphql-init-user',
 							_createdTimestamp: {
@@ -186,26 +186,26 @@ describe('graphql', () => {
 	});
 
 	it('Returns related entities', async () => {
-		const teamCode = `${namespace}-team`;
-		const [system, team] = await sandbox.createNodes(
+		const childCode = `${namespace}-child`;
+		const [main, child] = await sandbox.createNodes(
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode,
+					code: mainCode,
 				},
 			],
-			['Team', { code: teamCode }],
+			['ChildType', { code: childCode }],
 		);
 
-		await sandbox.connectNodes(system, 'DELIVERED_BY', team);
+		await sandbox.connectNodes(main, 'HAS_CHILD', child);
 		return sandbox
 			.request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					System(code: "${systemCode}") {
+					MainType(code: "${mainCode}") {
 						code
-						deliveredBy {code}
+						children {code}
 					}}`,
 			})
 			.namespacedAuth()
@@ -213,9 +213,9 @@ describe('graphql', () => {
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
-							deliveredBy: { code: teamCode },
+						MainType: {
+							code: mainCode,
+							children: [{ code: childCode }],
 						},
 					},
 				});
@@ -223,31 +223,31 @@ describe('graphql', () => {
 	});
 
 	it('Returns related entities via GET request', async () => {
-		const teamCode = `${namespace}-team`;
-		const [system, team] = await sandbox.createNodes(
+		const childCode = `${namespace}-child`;
+		const [main, child] = await sandbox.createNodes(
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode,
+					code: mainCode,
 				},
 			],
-			['Team', { code: teamCode }],
+			['ChildType', { code: childCode }],
 		);
 
-		await sandbox.connectNodes(system, 'DELIVERED_BY', team);
+		await sandbox.connectNodes(main, 'HAS_CHILD', child);
 		return sandbox
 			.request(app)
 			.get(
-				`/graphql?query={System(code: "${systemCode}") {code deliveredBy {code}}}`,
+				`/graphql?query={MainType(code: "${mainCode}") {code children {code}}}`,
 			)
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
 				expect(body).toEqual({
 					data: {
-						System: {
-							code: systemCode,
-							deliveredBy: { code: teamCode },
+						MainType: {
+							code: mainCode,
+							children: [{ code: childCode }],
 						},
 					},
 				});
@@ -257,15 +257,15 @@ describe('graphql', () => {
 	it('Returns a list of systems', async () => {
 		await sandbox.createNodes(
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode + 1,
+					code: mainCode + 1,
 				},
 			],
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode + 2,
+					code: mainCode + 2,
 				},
 			],
 		);
@@ -274,7 +274,7 @@ describe('graphql', () => {
 			.post('/graphql')
 			.send({
 				query: `{
-					Systems {
+					MainTypes {
 						code
 					}}`,
 			})
@@ -282,11 +282,11 @@ describe('graphql', () => {
 			.expect(200)
 			.then(({ body }) => {
 				[1, 2].forEach(num => {
-					const result = body.data.Systems.find(
-						s => s.code === systemCode + num,
+					const result = body.data.MainTypes.find(
+						s => s.code === mainCode + num,
 					);
 					expect(result).not.toBeUndefined();
-					expect(result).toEqual({ code: systemCode + num });
+					expect(result).toEqual({ code: mainCode + num });
 				});
 			});
 	});
@@ -294,30 +294,30 @@ describe('graphql', () => {
 	it('Returns a list of systems via GET request', async () => {
 		await sandbox.createNodes(
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode + 1,
+					code: mainCode + 1,
 				},
 			],
 			[
-				'System',
+				'MainType',
 				{
-					code: systemCode + 2,
+					code: mainCode + 2,
 				},
 			],
 		);
 		return sandbox
 			.request(app)
-			.get(`/graphql?query={Systems {code}}`)
+			.get(`/graphql?query={MainTypes {code}}`)
 			.namespacedAuth()
 			.expect(200)
 			.then(({ body }) => {
 				[1, 2].forEach(num => {
-					const result = body.data.Systems.find(
-						s => s.code === systemCode + num,
+					const result = body.data.MainTypes.find(
+						s => s.code === mainCode + num,
 					);
 					expect(result).not.toBeUndefined();
-					expect(result).toEqual({ code: systemCode + num });
+					expect(result).toEqual({ code: mainCode + num });
 				});
 			});
 	});
@@ -334,7 +334,7 @@ describe('graphql', () => {
 
 		const dummyQuery = {
 			query: `{
-				Systems {
+				MainTypes {
 					code
 				}
 			}`,
@@ -394,14 +394,14 @@ describe('graphql', () => {
 
 		it('should allow access to GET /graphql with an API key header and client id', () => {
 			return request(app)
-				.get('/graphql?query={Systems{code}}')
+				.get('/graphql?query={MainTypes{code}}')
 				.namespacedAuth()
 				.expect(200);
 		});
 
 		it('should not access to GET /graphql if there is no valid s3o auth or API key header', () => {
 			return request(app)
-				.get('/graphql?query={Systems{code}}')
+				.get('/graphql?query={MainTypes{code}}')
 				.expect(403);
 		});
 	});

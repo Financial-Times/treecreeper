@@ -1,34 +1,8 @@
-business:
-  label: Business
-  description: Relating to how the FT operates and makes and spends its money
+test:
+  label: Test
+  description: Test types
   types:
-    - BusinessCapability
-    - CostCentre
-    - Product
-technology:
-  label: Technology
-  description: Relating to the technology and infrastructure the FT uses
-  types:
-    - System
-    - Package
-    - Repository
-    - Healthcheck
-organisation:
-  label: Organisation
-  description: Operational units of the FT e.g. teams, people
-  types:
-    - Group
-    - Team
-    - Person
-governance:
-  label: Governance
-  description: Elements of the FT that are in Biz Ops primarily for governance reasons
-  types:
-    - AuditableData
-    - AuditableDataType
-    - Cookie
-    - CookieInstance
-    - Tag
-    - TagInstance
-
-
+    - MainType
+    - ParentType
+    - ChildType
+    - RestrictedType

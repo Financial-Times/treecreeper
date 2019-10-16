@@ -180,5 +180,4 @@ module.exports = {
 			enums,
 		);
 	},
-	cacheKeyGenerator: () => 'graphql',
 };

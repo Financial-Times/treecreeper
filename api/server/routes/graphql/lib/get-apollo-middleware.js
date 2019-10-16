@@ -49,7 +49,7 @@ const getApolloMiddleware = () => {
 	const trace = new Tracer();
 	const apollo = new ApolloServer({
 		subscriptions: false,
-		tracing: true,
+		// tracing: true,
 		schema: getAugmentedSchema(),
 		context: ({ req: { headers } }) => {
 			const s3DocsDataLoader = new DataLoader(async keys => {
