@@ -2,6 +2,9 @@ const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { getTypes, getGraphqlDefs } = require('@financial-times/biz-ops-schema');
 const { parse } = require('graphql');
+const { applyMiddleware } = require('graphql-middleware');
+
+const { middleware: requestTracer } = require('./request-tracer');
 
 const getDocs = async (obj, args, context, info) => {
 	const code = obj.code || args.code;
@@ -55,7 +58,7 @@ directive @deprecated(
 		resolvers: getResolvers(),
 		config: { query: true, mutation: false, debug: true },
 	});
-	return schema;
+	return applyMiddleware(schema, requestTracer);
 };
 
 module.exports = { createSchema };

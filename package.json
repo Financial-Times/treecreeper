@@ -53,6 +53,7 @@
 		"express": "^4.16.3",
 		"express-async-errors": "^3.0.0",
 		"graphql": "^14.0.0",
+		"graphql-middleware": "^4.0.1",
 		"graphql-server-express": "^1.4.0",
 		"http-errors": "^1.6.3",
 		"jsforce": "^1.9.1",

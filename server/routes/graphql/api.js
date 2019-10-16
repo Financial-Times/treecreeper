@@ -12,6 +12,7 @@ const { TIMEOUT } = require('../../constants');
 const { createSchema } = require('./lib/graphql-schema');
 const { driver } = require('../../lib/db-connection');
 const S3DocumentsHelper = require('../rest/lib/s3-documents-helper');
+const { Tracer } = require('./lib/request-tracer');
 
 const s3 = new S3DocumentsHelper();
 
@@ -27,7 +28,7 @@ const constructAPI = () => {
 					keys.map(key => s3.getFileFromS3(...key.split('/'))),
 				),
 			);
-
+			const trace = new Tracer();
 			return {
 				schema: newSchema,
 				rootValue: {},
@@ -35,9 +36,15 @@ const constructAPI = () => {
 					driver,
 					headers,
 					s3DocsDataLoader,
+					trace,
+				},
+				formatResponse(response) {
+					trace.log();
+					return response;
 				},
 				formatError(error) {
 					const isS3oError = /Forbidden/i.test(error.message);
+					trace.error();
 					logger.error('GraphQL Error', {
 						event: 'GRAPHQL_ERROR',
 						error,
