@@ -18,7 +18,7 @@ const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	let versionId;
+	let versionMarker;
 	let newBodyDocs;
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
@@ -27,7 +27,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
 
 	if (!_isEmpty(bodyDocuments)) {
-		({ versionId, newBodyDocs } = await documentStore.post(
+		({ versionMarker, body: newBodyDocs } = await documentStore.post(
 			type,
 			code,
 			bodyDocuments,
@@ -94,13 +94,13 @@ const postHandler = ({ documentStore } = {}) => async input => {
 
 		return { status: 200, body: responseData };
 	} catch (err) {
-		if (!_isEmpty(bodyDocuments) && versionId) {
+		if (!_isEmpty(bodyDocuments) && versionMarker) {
 			// logger.info(
 			// 	{ event: `${method}_NEO4J_FAILURE` },
 			// 	err,
 			// 	`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
 			// );
-			documentStore.delete(type, code, versionId);
+			documentStore.delete(type, code, versionMarker);
 		}
 
 		if (/already exists with label/.test(err.message)) {

@@ -104,11 +104,11 @@ describe('rest document store integration', () => {
 	[['POST', postHandler, 200], ['PATCH', patchHandler, 201]].forEach(
 		([method, handler, goodStatus]) => {
 			describe(`${method} create`, () => {
-				const versionId = 'post-marker';
+				const versionMarker = 'post-marker';
 				const getS3PostMock = body =>
 					jest.fn(async () => ({
-						versionId,
-						newBodyDocs: body,
+						versionMarker,
+						body,
 					}));
 
 				it('creates record with Documents', async () => {
@@ -204,7 +204,7 @@ describe('rest document store integration', () => {
 						expect(s3DeleteMock).toHaveBeenCalledWith(
 							'MainType',
 							mainCode,
-							versionId,
+							versionMarker,
 						);
 					});
 				}
@@ -242,7 +242,7 @@ describe('rest document store integration', () => {
 					expect(s3DeleteMock).toHaveBeenCalledWith(
 						'MainType',
 						mainCode,
-						versionId,
+						versionMarker,
 					);
 				});
 			});
@@ -250,11 +250,11 @@ describe('rest document store integration', () => {
 	);
 
 	describe('PATCH update', () => {
-		const versionId = 'patch-marker';
+		const versionMarker = 'patch-marker';
 		const getS3PatchMock = body =>
 			jest.fn(async () => ({
-				versionId,
-				newBodyDocs: body,
+				versionMarker,
+				body,
 			}));
 
 		it('updates record with Documents', async () => {
@@ -354,7 +354,7 @@ describe('rest document store integration', () => {
 			expect(s3DeleteMock).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
-				versionId,
+				versionMarker,
 			);
 		});
 	});

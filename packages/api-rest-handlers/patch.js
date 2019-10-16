@@ -73,12 +73,12 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		const initialContent = preflightRequest.toJson(type);
 
-		let versionId;
+		let versionMarker;
 		let newBodyDocs;
 		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
 
 		if (!_isEmpty(bodyDocuments)) {
-			({ versionId, newBodyDocs } = await documentStore.patch(
+			({ versionMarker, body: newBodyDocs } = await documentStore.patch(
 				type,
 				code,
 				bodyDocuments,
@@ -179,13 +179,13 @@ const patchHandler = ({ documentStore } = {}) => {
 
 			return { status: 200, body: responseData };
 		} catch (err) {
-			if (!_isEmpty(bodyDocuments) && versionId) {
+			if (!_isEmpty(bodyDocuments) && versionMarker) {
 				// logger.info(
 				// 	{ event: `${method}_NEO4J_FAILURE` },
 				// 	err,
 				// 	`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
 				// );
-				documentStore.delete(type, code, versionId);
+				documentStore.delete(type, code, versionMarker);
 			}
 			handleUpsertError(err);
 			throw err;
