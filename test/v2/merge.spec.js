@@ -342,7 +342,12 @@ describe('merge', () => {
 			sandbox.expectKinesisEvents(
 				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['group', 'parentGroup']],
-				['UPDATE', groupCode, 'Group', ['topLevelTeams', 'allTeams']],
+				[
+					'UPDATE',
+					groupCode,
+					'Group',
+					['topLevelTeams', 'teams', 'allTeams'],
+				],
 			);
 		});
 

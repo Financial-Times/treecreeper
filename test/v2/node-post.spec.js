@@ -379,6 +379,7 @@ describe('v2 - node POST', () => {
 				code: teamCode,
 				techLeads: [personCode],
 				parentGroup: groupCode,
+				group: groupCode,
 			}),
 		);
 
@@ -420,7 +421,12 @@ describe('v2 - node POST', () => {
 				['code', 'techLeads', 'parentGroup', 'group'],
 			],
 			['UPDATE', personCode, 'Person', ['techLeadFor']],
-			['UPDATE', groupCode, 'Group', ['allTeams', 'topLevelTeams']],
+			[
+				'UPDATE',
+				groupCode,
+				'Group',
+				['teams', 'allTeams', 'topLevelTeams'],
+			],
 		);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
@@ -452,6 +458,7 @@ describe('v2 - node POST', () => {
 				code: teamCode,
 				techLeads: [personCode],
 				parentGroup: groupCode,
+				group: groupCode,
 			}),
 		);
 
@@ -497,7 +504,7 @@ describe('v2 - node POST', () => {
 				'CREATE',
 				groupCode,
 				'Group',
-				['code', 'allTeams', 'topLevelTeams'],
+				['code', 'teams', 'allTeams', 'topLevelTeams'],
 			],
 		);
 		sandbox.expectNoS3Actions('upload', 'delete', 'patch');

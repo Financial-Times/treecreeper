@@ -808,7 +808,7 @@ describe('v2 - node PATCH', () => {
 									'UPDATE',
 									groupCode,
 									'Group',
-									['allTeams', 'topLevelTeams'],
+									['teams', 'allTeams', 'topLevelTeams'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1053,7 +1053,7 @@ describe('v2 - node PATCH', () => {
 									'UPDATE',
 									groupCode,
 									'Group',
-									['allTeams', 'topLevelTeams'],
+									['teams', 'allTeams', 'topLevelTeams'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -1273,6 +1273,7 @@ describe('v2 - node PATCH', () => {
 							sandbox.withMeta({
 								code: teamCode,
 								parentGroup: groupCode,
+								group: groupCode,
 							}),
 						);
 
@@ -1308,7 +1309,7 @@ describe('v2 - node PATCH', () => {
 								'UPDATE',
 								groupCode,
 								'Group',
-								['allTeams', 'topLevelTeams'],
+								['teams', 'allTeams', 'topLevelTeams'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1327,6 +1328,7 @@ describe('v2 - node PATCH', () => {
 							sandbox.withMeta({
 								code: teamCode,
 								parentGroup: groupCode,
+								group: groupCode,
 							}),
 						);
 
@@ -1362,7 +1364,7 @@ describe('v2 - node PATCH', () => {
 								'UPDATE',
 								groupCode,
 								'Group',
-								['allTeams', 'topLevelTeams'],
+								['teams', 'allTeams', 'topLevelTeams'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
@@ -1414,6 +1416,7 @@ describe('v2 - node PATCH', () => {
 							sandbox.withMeta({
 								code: teamCode,
 								parentGroup: `${groupCode}-2`,
+								group: `${groupCode}-2`,
 							}),
 						);
 
@@ -1449,13 +1452,13 @@ describe('v2 - node PATCH', () => {
 								'UPDATE',
 								`${groupCode}-1`,
 								'Group',
-								['allTeams', 'topLevelTeams'],
+								['teams', 'allTeams', 'topLevelTeams'],
 							],
 							[
 								'UPDATE',
 								`${groupCode}-2`,
 								'Group',
-								['allTeams', 'topLevelTeams'],
+								['teams', 'allTeams', 'topLevelTeams'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
