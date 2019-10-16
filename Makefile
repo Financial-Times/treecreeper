@@ -99,3 +99,6 @@ load-test-cleanUp:
 s3-publish:
 	@node schema/scripts/deploy
 
+dummy-data:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema node dummy-data
+

@@ -21,18 +21,22 @@ class Tracer {
 
 	_log(logType) {
 		Object.entries(this.map).map(([type, fields]) => {
-			console.log(type);
-			// const { properties } = getType(type);
-			// 	fields = [...fields];
-			// 	logger[logType]({
-			// 		event: 'GRAPHQL_TRACE',
-			// 		success: logType !== 'error',
-			// 		type,
-			// 		fields,
-			// 		deprecatedFields: fields.filter(
-			// 			name => !!properties[name].deprecationReason,
-			// 		),
-			// 	});
+			const { properties } = getType(type);
+				fields = [...fields];
+				logger[logType]({
+					event: 'GRAPHQL_TRACE',
+					success: logType !== 'error',
+					type,
+					fields
+				});
+
+				fields.filter(
+					name => !!properties[name].deprecationReason,
+				).map(field => logger.warn({
+					event: 'GRAPHQL_DEPRECATION_TRACE',
+					type,
+					field
+				}))
 		});
 	}
 
@@ -49,17 +53,10 @@ const getApolloMiddleware = () => {
 	const trace = new Tracer();
 	const apollo = new ApolloServer({
 		subscriptions: false,
-		// tracing: true,
 		schema: getAugmentedSchema(),
 		context: ({ req: { headers } }) => {
-			const s3DocsDataLoader = new DataLoader(async keys => {
-				const [type, code] = keys[0].split('/');
-				const record = await s3.getFileFromS3(type, code);
-				return [record];
-			});
 			return {
 				driver,
-				s3DocsDataLoader,
 				headers,
 				trace,
 			};
@@ -68,20 +65,20 @@ const getApolloMiddleware = () => {
 			trace.log();
 			return response;
 		},
-		// formatError(error) {
-		// 	const isS3oError = /Forbidden/i.test(error.message);
-		// 	trace.error();
-		// 	logger.error('GraphQL Error', {
-		// 		event: 'GRAPHQL_ERROR',
-		// 		error,
-		// 	});
-		// 	const displayedError = isS3oError
-		// 		? new Error(
-		// 				'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
-		// 		  )
-		// 		: error;
-		// 	return formatError(displayedError);
-		// },
+		formatError(error) {
+			const isS3oError = /Forbidden/i.test(error.message);
+			trace.error();
+			logger.error('GraphQL Error', {
+				event: 'GRAPHQL_ERROR',
+				error,
+			});
+			const displayedError = isS3oError
+				? new Error(
+						'FT s3o session has expired. Please reauthenticate via s3o - i.e. refresh the page if using the graphiql explorer',
+				  )
+				: error;
+			return formatError(displayedError);
+		},
 	});
 
 	return apollo.getMiddleware({ path: '/' });

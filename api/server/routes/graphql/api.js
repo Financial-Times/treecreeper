@@ -33,6 +33,7 @@ const updateAPI = () => {
 				});
 		}
 	} catch (error) {
+		console.log(error)
 		schemaVersionIsConsistent = false;
 		logger.error(
 			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },

@@ -31,7 +31,7 @@ properties:
     description: Enum description.
     label: Enum label
   someInteger:
-    type: Integer
+    type: Int
     description: Integer description.
     label: Integer label
   anotherString:
@@ -47,7 +47,7 @@ properties:
     description: Time description.
     label: Time label
   someDatetime:
-    type: Datetime
+    type: DateTime
     description: Datetime description.
     label: Datetime label
   children:

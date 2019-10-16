@@ -9,41 +9,11 @@ const {
 
 let defs;
 
-const propertyUsageMiddleware = async (resolve, root, args, context, info) => {
+const propertyUsageMiddleware = async (resolve, parent, args, context, info) => {
 	if (info.parentType.name !== 'Query') {
-		console.log(info.parentType.name, info.fieldName);
 		context.trace.collect(info.parentType.name, info.fieldName);
 	}
-};
-
-const getDocs = async (obj, args, context, info) => {
-	const code = obj.code || args.code;
-	if (!code) {
-		throw new Error(
-			'must include code in body of query that requests large docs',
-		);
-	}
-	const key = `${info.parentType.name}/${code}`;
-	const record = await context.s3DocsDataLoader.load(key);
-	return record[info.fieldName];
-};
-
-const getResolvers = () => {
-	const types = getTypes();
-	const typeResolvers = {};
-	types.forEach(type => {
-		const nodeProperties = type.properties;
-		const documentResolvers = {};
-		Object.keys(nodeProperties).forEach(prop => {
-			if (nodeProperties[prop].type === 'Document') {
-				documentResolvers[prop] = getDocs;
-			}
-		});
-		if (Object.keys(documentResolvers).length) {
-			typeResolvers[type.name] = documentResolvers;
-		}
-	});
-	return typeResolvers;
+	return resolve(parent, args, context, info);
 };
 
 const getAugmentedSchema = () => {
@@ -66,97 +36,11 @@ directive @deprecated(
 				});
 			},
 		},
-		resolvers: getResolvers(),
 		config: { query: true, mutation: false, debug: true },
 	});
-
 	return applyMiddleware(schema, propertyUsageMiddleware);
 };
 
 module.exports = {
 	getAugmentedSchema,
 };
-
-// setTimeout(() => {
-// 	defs = [
-// 		`
-// scalar DateTime
-// scalar Date
-// scalar Time
-// """
-// Some business function carried out at FT e.g. ability to publish the news, ability to pay staff...
-
-// """
-// type BusinessCapability {
-
-//   """
-//   The unique identification code for the capability. When creating a new capability,
-//   choose a lower case, hyphenated string similar to the name people call the capability.
-
-//   """
-//   code: String
-//   """
-//   The name generally used to refer to the capability.
-
-//   """
-//   namette: String
-
-// },
-
-// type Query {
-
-// 	"""
-// 	Some business function carried out at FT e.g. ability to publish the news, ability to pay staff...
-
-// 	"""
-// 	BusinessCapability(
-
-//     """
-//     The unique identification code for the capability. When creating a new capability,
-//     choose a lower case, hyphenated string similar to the name people call the capability.
-
-//     """
-//     code: String
-//     """
-//     The name generally used to refer to the capability.
-
-//     """
-//     namette: String
-// 	): BusinessCapability
-
-// 	"""
-// 	Some business function carried out at FT e.g. ability to publish the news, ability to pay staff...
-
-// 	"""
-// 	BusinessCapabilities(
-
-//     """
-//     The pagination offset to use
-//     """
-//     offset: Int = 0
-//     """
-//     The number of records to return after the pagination offset. This uses the default neo4j ordering
-//     """
-//     first: Int = 20000
-
-//     """
-//     The unique identification code for the capability. When creating a new capability,
-//     choose a lower case, hyphenated string similar to the name people call the capability.
-
-//     """
-//     code: String
-//     """
-//     The name generally used to refer to the capability.
-
-//     """
-//     namette: String
-
-// 	): [BusinessCapability]
-
-// }
-
-// 	`,
-// 	];
-// 	console.log('emiting');
-// 	schemaEmitter.emit('schemaUpdate', getAugmentedSchema());
-// }, 5000);
