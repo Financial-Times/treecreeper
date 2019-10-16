@@ -3,7 +3,6 @@ const { stripIndents } = require('common-tags');
 const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
-// const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
 const {
 	metaPropertiesForCreate,
