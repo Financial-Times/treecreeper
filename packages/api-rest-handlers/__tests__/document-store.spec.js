@@ -106,12 +106,12 @@ describe('rest document store integration', () => {
 		// ['PATCH', patchHandler, 201]
 	].forEach(([method, handler, goodStatus]) => {
 		describe(`${method} create`, () => {
-			const versionId = 'fake-id-from-s3';
+			const versionId = 'post-marker';
 			const getS3PostMock = () =>
 				jest.fn(async () => ({
 					versionId,
 					newBodyDocs: {
-						someDocument: 'some document from s3 mock',
+						someDocument: 'new document from s3',
 					},
 				}));
 
@@ -134,7 +134,7 @@ describe('rest document store integration', () => {
 				expect(body).toMatchObject({
 					code: mainCode,
 					someString: 'some string',
-					someDocument: 'some document from s3 mock',
+					someDocument: 'new document from s3',
 				});
 
 				await neo4jTest('MainType', mainCode)
@@ -170,13 +170,14 @@ describe('rest document store integration', () => {
 				expect(s3PostMock).not.toHaveBeenCalled();
 			});
 
-			it('delete the Document from s3 if record already exists', async () => {
+			it('undoes any s3 actions if record already exists', async () => {
 				await createNode('MainType', {
 					code: mainCode,
 				});
 				await neo4jTest('MainType', mainCode).exists();
 				const s3PostMock = getS3PostMock();
 				const s3DeleteMock = jest.fn();
+
 				await expect(
 					handler({
 						documentStore: {
@@ -192,7 +193,9 @@ describe('rest document store integration', () => {
 					status: 409,
 					message: `MainType ${mainCode} already exists`,
 				});
-				expect(s3PostMock).toHaveBeenCalled();
+				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
+					someDocument: 'some document',
+				});
 				expect(s3DeleteMock).toHaveBeenCalledWith(
 					'MainType',
 					mainCode,
@@ -211,19 +214,25 @@ describe('rest document store integration', () => {
 			});
 
 			it('undoes any s3 actions if neo4j query fails', async () => {
-				const s3PostMock = jest.fn(async () => 'post-marker');
-				dbUnavailable({ skip: 1 });
+				const s3PostMock = getS3PostMock();
+				const s3DeleteMock = jest.fn();
+				dbUnavailable({ skip: 0 });
+
 				await expect(
 					handler({
 						documentStore: {
 							post: s3PostMock,
+							delete: s3DeleteMock,
 						},
 					})(getInput({ someDocument: 'some document' })),
 				).rejects.toThrow('oh no');
-				expect(s3PostMock).toHaveBeenCalledWith(
+				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
+					someDocument: 'some document',
+				});
+				expect(s3DeleteMock).toHaveBeenCalledWith(
 					'MainType',
 					mainCode,
-					'post-marker',
+					versionId,
 				);
 			});
 		});
