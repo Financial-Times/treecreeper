@@ -106,10 +106,12 @@ describe('rest document store integration', () => {
 		// ['PATCH', patchHandler, 201]
 	].forEach(([method, handler, goodStatus]) => {
 		describe(`${method} create`, () => {
-			const getS3PostMock = body =>
+			const getS3PostMock = () =>
 				jest.fn(async () => ({
 					versionId: 'fake-id',
-					newBodyDocs: body,
+					newBodyDocs: {
+						someDocument: 'some document from s3 mock',
+					},
 				}));
 
 			it('creates record with Documents', async () => {
@@ -131,7 +133,7 @@ describe('rest document store integration', () => {
 				expect(body).toMatchObject({
 					code: mainCode,
 					someString: 'some string',
-					someDocument: 'some document',
+					someDocument: 'some document from s3 mock',
 				});
 
 				await neo4jTest('MainType', mainCode)
@@ -141,7 +143,7 @@ describe('rest document store integration', () => {
 						someString: 'some string',
 					});
 
-				expect(s3PostMock).toHaveBeenCalledWith({
+				expect(s3PostMock).toHaveBeenCalledWith('MainType', mainCode, {
 					someDocument: 'some document',
 				});
 			});

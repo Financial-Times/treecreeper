@@ -1,8 +1,9 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
-const { getNeo4jRecord } = require('./lib/read-helpers');
+// const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
 
 const {
@@ -19,10 +20,42 @@ const {
 } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 
+const separateDocsFromBody = (nodeType, body) => {
+	const { properties } = getType(nodeType);
+	const bodyDocuments = {};
+	const bodyNoDocs = {};
+
+	Object.entries(body).forEach(([key, value]) => {
+		if (!_isEmpty(value)) {
+			if (properties[key].type === 'Document') {
+				bodyDocuments[key] = body[key];
+			} else {
+				bodyNoDocs[key] = body[key];
+			}
+		}
+	});
+
+	return { bodyDocuments, bodyNoDocs };
+};
+
 const postHandler = ({ documentStore } = {}) => async input => {
+	// let versionId;
+	let newBodyDocs;
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
 	);
+
+	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+
+	if (!_isEmpty(bodyDocuments)) {
+		// ({ versionId, newBodyDocs } = await documentStore.post(
+		({ newBodyDocs } = await documentStore.post(type, code, bodyDocuments));
+	} else {
+		// logger.info(
+		// 	{ event: 'SKIP_S3_UPDATE' },
+		// 	'No changed Document properties - skipping update',
+		// );
+	}
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -43,13 +76,12 @@ const postHandler = ({ documentStore } = {}) => async input => {
 
 	const properties = constructNeo4jProperties({
 		type,
-		body,
+		body: bodyNoDocs,
 		code,
 	});
-
 	const relationshipsToCreate = getRelationships({
 		type,
-		body,
+		body: bodyNoDocs,
 	});
 
 	const {
@@ -72,7 +104,10 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			queryParts.join('\n'),
 			parameters,
 		);
-		return { status: 200, body: neo4jResult.toJson(type) };
+
+		const result = Object.assign({}, neo4jResult.toJson(type), newBodyDocs);
+
+		return { status: 200, body: result };
 	} catch (err) {
 		if (/already exists with label/.test(err.message)) {
 			throw httpErrors(409, `${type} ${code} already exists`);
