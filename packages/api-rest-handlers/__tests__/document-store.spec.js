@@ -106,9 +106,10 @@ describe('rest document store integration', () => {
 		// ['PATCH', patchHandler, 201]
 	].forEach(([method, handler, goodStatus]) => {
 		describe(`${method} create`, () => {
+			const versionId = 'fake-id-from-s3';
 			const getS3PostMock = () =>
 				jest.fn(async () => ({
-					versionId: 'fake-id',
+					versionId,
 					newBodyDocs: {
 						someDocument: 'some document from s3 mock',
 					},
@@ -169,15 +170,18 @@ describe('rest document store integration', () => {
 				expect(s3PostMock).not.toHaveBeenCalled();
 			});
 
-			it("doesn't write to s3 if record already exists", async () => {
+			it('delete the Document from s3 if record already exists', async () => {
 				await createNode('MainType', {
 					code: mainCode,
 				});
+				await neo4jTest('MainType', mainCode).exists();
 				const s3PostMock = getS3PostMock();
+				const s3DeleteMock = jest.fn();
 				await expect(
 					handler({
 						documentStore: {
 							post: s3PostMock,
+							delete: s3DeleteMock,
 						},
 					})(
 						getInput({
@@ -188,9 +192,12 @@ describe('rest document store integration', () => {
 					status: 409,
 					message: `MainType ${mainCode} already exists`,
 				});
-
-				await neo4jTest('MainType', mainCode).notExists();
-				expect(s3PostMock).not.toHaveBeenCalled();
+				expect(s3PostMock).toHaveBeenCalled();
+				expect(s3DeleteMock).toHaveBeenCalledWith(
+					'MainType',
+					mainCode,
+					versionId,
+				);
 			});
 
 			it('throws if s3 query fails', async () => {

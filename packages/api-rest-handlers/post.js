@@ -39,7 +39,7 @@ const separateDocsFromBody = (nodeType, body) => {
 };
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	// let versionId;
+	let versionId;
 	let newBodyDocs;
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
@@ -48,8 +48,11 @@ const postHandler = ({ documentStore } = {}) => async input => {
 	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
 
 	if (!_isEmpty(bodyDocuments)) {
-		// ({ versionId, newBodyDocs } = await documentStore.post(
-		({ newBodyDocs } = await documentStore.post(type, code, bodyDocuments));
+		({ versionId, newBodyDocs } = await documentStore.post(
+			type,
+			code,
+			bodyDocuments,
+		));
 	} else {
 		// logger.info(
 		// 	{ event: 'SKIP_S3_UPDATE' },
@@ -109,6 +112,15 @@ const postHandler = ({ documentStore } = {}) => async input => {
 
 		return { status: 200, body: result };
 	} catch (err) {
+		if (!_isEmpty(bodyDocuments) && versionId) {
+			// logger.info(
+			// 	{ event: `${method}_NEO4J_FAILURE` },
+			// 	err,
+			// 	`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
+			// );
+			documentStore.delete(type, code, versionId);
+		}
+
 		if (/already exists with label/.test(err.message)) {
 			throw httpErrors(409, `${type} ${code} already exists`);
 		}
