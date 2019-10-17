@@ -54,8 +54,9 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = ({ documentStore } = {}) => {
-	const post = postHandler(({ documentStore } = {}));
+// TODO: Need implementation for post to S3 using documentStore
+const patchHandler = ({ documentStore = {} }) => {
+	const post = postHandler({ documentStore });
 
 	return async input => {
 		const { type, code, body, metadata = {}, query = {} } = validateInput(
@@ -148,7 +149,6 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 		try {
-			console.log(queryParts.join('\n'));
 			const neo4jResult = await executeQuery(
 				queryParts.join('\n'),
 				parameters,
