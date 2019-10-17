@@ -1,6 +1,7 @@
 const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 describe('rest PATCH field-locking', () => {
 	const namespace = 'api-rest-handlers-patch-field-locking';
@@ -9,9 +10,7 @@ describe('rest PATCH field-locking', () => {
 	const clientId = `${namespace}-client`;
 	const otherClientId = `${namespace}-other-client`;
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
-		namespace,
-	);
+	const { createNode } = setupMocks(namespace);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
@@ -303,7 +302,7 @@ describe('rest PATCH field-locking', () => {
 					),
 				});
 
-				const dbQuerySpy = spyDbQuery(sandbox);
+				const dbQuerySpy = spyDbQuery();
 
 				const { status, body } = await lockHandler(null, {
 					lockFields: 'anotherString,someString',
@@ -361,7 +360,7 @@ describe('rest PATCH field-locking', () => {
 				});
 
 				await expect(
-					lockHandler({ 'someString': 'new some string' }),
+					lockHandler({ someString: 'new some string' }),
 				).rejects.toThrow({
 					status: 400,
 					message: "blah blah can't remember",
@@ -413,15 +412,107 @@ describe('rest PATCH field-locking', () => {
 			});
 		});
 	});
-	describe('unlocking', () => {
-		it('unlocks fields when request is given', async () => {});
-		it('unlocks fields when request is given by a different clientId that locked it', async () => {});
-		it('unlocks `all` fields', async () => {});
-		it('unlocks the locked field when value sent make no changes', async () => {});
-		it('unlocks a locked field and writes new value in same request', async () => {});
-		it('unlocks a locked field and writes new locked value in same request', async () => {});
-		it('unlocks `all` fields when not sending any content', async () => {});
-		it('unlocks specific locked fields when not sending any content', async () => {});
-	});
 
+	describe('unlocking fields', () => {
+		it('unlocks specific fields', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				_lockedFields: lockedSomeString,
+			});
+			const { status, body } = await lockHandler(null, {
+				unlockFields: 'someString',
+			});
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				_lockedFields: expect.any(String),
+			});
+
+			await neo4jTest('MainType', mainCode).notMatch({
+				_lockedFields: expect.any(String),
+			});
+		});
+
+		it('unlocks fields when request is given by a different clientId', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				_lockedFields: otherLockedSomeString,
+			});
+			const { status, body } = await lockHandler(null, {
+				unlockFields: 'someString',
+			});
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				_lockedFields: expect.any(String),
+			});
+
+			await neo4jTest('MainType', mainCode).notMatch({
+				_lockedFields: expect.any(String),
+			});
+		});
+
+		it('unlocks `all` fields', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				_lockedFields: lock(clientId, 'someString', 'anotherString'),
+			});
+			const { status, body } = await lockHandler(null, {
+				unlockFields: 'all',
+			});
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				_lockedFields: expect.any(String),
+			});
+
+			await neo4jTest('MainType', mainCode).notMatch({
+				_lockedFields: expect.any(String),
+			});
+		});
+
+		it('unlocks a locked field and writes new value in same request', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				someString: 'some string',
+				_lockedFields: lockedSomeString,
+			});
+			const { status, body } = await lockHandler(
+				{
+					someString: 'new some string',
+				},
+				{ unlockFields: 'someString' },
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				someString: 'new some string',
+			});
+			expect(body).not.toMatchObject({
+				_lockedFields: expect.any(String),
+			});
+		});
+
+		it('unlocks the locked field when value sent makes no changes', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				someString: 'some string',
+				_lockedFields: lockedSomeString,
+			});
+			const { status, body } = await lockHandler(
+				{
+					someString: 'some string',
+				},
+				{ unlockFields: 'someString' },
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				someString: 'some string',
+			});
+			expect(body).not.toMatchObject({
+				_lockedFields: expect.any(String),
+			});
+		});
+	});
 });
