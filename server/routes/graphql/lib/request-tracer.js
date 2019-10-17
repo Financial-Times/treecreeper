@@ -51,7 +51,7 @@ class Tracer {
 	}
 }
 
-const middleware = async (resolve, parent, args, context, info) => {
+const middleware = (resolve, parent, args, context, info) => {
 	if (info.parentType.name !== 'Query') {
 		context.trace.collect(info.parentType.name, info.fieldName);
 	}
