@@ -1,4 +1,6 @@
 const { logger } = require('../api-core/lib/request-context');
+const { s3Get } = require('./get');
+const { undoDelete } = require('./undo');
 
 const s3Delete = async ({
 	s3Instance,
@@ -15,6 +17,15 @@ const s3Delete = async ({
 		params.VersionId = versionMarker;
 	}
 
+	// we need to store body before delete in order to undo it
+	const { body } = await s3Get({
+		s3Instance,
+		bucketName,
+		nodeType,
+		code,
+		versionMarker,
+	});
+
 	try {
 		const response = await s3Instance.deleteObject(params).promise();
 		logger.info(
@@ -26,6 +37,13 @@ const s3Delete = async ({
 		);
 		return {
 			versionMarker: response.VersionId,
+			undo: undoDelete({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				body,
+			}),
 		};
 	} catch (err) {
 		logger.info(

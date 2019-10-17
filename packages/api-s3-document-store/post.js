@@ -1,4 +1,5 @@
 const { upload } = require('./upload');
+const { undoCreate } = require('./undo');
 
 const s3Post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 	const params = {
@@ -12,9 +13,17 @@ const s3Post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 		params,
 		requestType: 'POST',
 	});
+
 	return {
 		versionMarker: versionId,
 		body,
+		undo: undoCreate({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code,
+			versionMarker: versionId,
+		}),
 	};
 };
 

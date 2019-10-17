@@ -1,11 +1,16 @@
+jest.mock('aws-sdk');
 jest.mock('../upload');
 jest.mock('../get');
 
+const { S3 } = require('aws-sdk');
 const { createS3Instance } = require('../s3');
 const { docstore } = require('..');
 const uploadModule = require('../upload');
 const getModule = require('../get');
-const { createExampleBodyData } = require('../__fixtures__/s3-object-fixture');
+const {
+	s3DeleteObjectResponseFixture,
+	createExampleBodyData,
+} = require('../__fixtures__/s3-object-fixture');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -18,10 +23,25 @@ const mockS3Patch = versionMarker => {
 	const stubGetObject = createStub(getModule, 's3Get', {
 		body: createExampleBodyData(),
 	});
+	const stubDeleteOnUndo = jest.fn().mockReturnValue({
+		promise: jest
+			.fn()
+			.mockResolvedValue(s3DeleteObjectResponseFixture(versionMarker)),
+	});
+
+	S3.mockImplementation(() => ({
+		deleteObject: stubDeleteOnUndo,
+	}));
 
 	return {
+		// We need to create S3 instance here in order to use mocked instance
+		s3Instance: createS3Instance({
+			accessKeyId: 'testAccessKeyId',
+			secretAccessKey: 'testSecretAccessKey',
+		}),
 		stubUpload,
 		stubGetObject,
+		stubDeleteOnUndo,
 	};
 };
 
@@ -35,12 +55,7 @@ describe('S3 document helper patch', () => {
 
 	const consistentNodeType = 'System';
 
-	const s3Instance = createS3Instance({
-		accessKeyId: 'testAccessKeyId',
-		secretAccessKey: 'testSecretAccessKey',
-	});
-
-	const matcher = systemCode => ({
+	const matcher = (s3Instance, systemCode) => ({
 		s3Instance,
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 		nodeType: consistentNodeType,
@@ -51,7 +66,9 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, stubGetObject } = mockS3Patch(givenVersionMarker);
+		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
+			givenVersionMarker,
+		);
 		const store = docstore(s3Instance);
 		const expectedData = createExampleBodyData();
 
@@ -64,17 +81,26 @@ describe('S3 document helper patch', () => {
 		expect(result).toMatchObject({
 			body: expectedData,
 		});
+		// result SHOULD NOT have versionMarker and undo property
 		expect(result).not.toHaveProperty('versionMarker');
+		expect(result).not.toHaveProperty('undo');
 		expect(stubUpload).not.toHaveBeenCalled();
 		expect(stubGetObject).toHaveBeenCalled();
-		expect(stubGetObject).toHaveBeenCalledWith(matcher(givenSystemCode));
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
 	});
 
-	test('returns patched body with new versionMakrer', async () => {
+	test('returns patched body with new versionMakrer and undo function', async () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, stubGetObject } = mockS3Patch(givenVersionMarker);
+		const {
+			stubUpload,
+			stubGetObject,
+			stubDeleteOnUndo,
+			s3Instance,
+		} = mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 		const expectedData = createExampleBodyData();
 
@@ -97,6 +123,7 @@ describe('S3 document helper patch', () => {
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
 			body: expectedBody,
+			undo: expect.any(Function),
 		});
 		expect(stubUpload).toHaveBeenCalled();
 		expect(stubUpload).toHaveBeenCalledWith({
@@ -105,6 +132,18 @@ describe('S3 document helper patch', () => {
 			requestType: 'PATCH',
 		});
 		expect(stubGetObject).toHaveBeenCalled();
-		expect(stubGetObject).toHaveBeenCalledWith(matcher(givenSystemCode));
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
+
+		const undoResult = await result.undo();
+		expect(undoResult).toMatchObject({
+			versionMarker: givenVersionMarker,
+		});
+		expect(stubDeleteOnUndo).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
 	});
 });

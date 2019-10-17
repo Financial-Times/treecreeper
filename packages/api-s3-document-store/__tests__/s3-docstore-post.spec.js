@@ -1,9 +1,14 @@
+jest.mock('aws-sdk');
 jest.mock('../upload');
 
+const { S3 } = require('aws-sdk');
 const { createS3Instance } = require('../s3');
 const { docstore } = require('..');
 const uploadModule = require('../upload');
-const { createExampleBodyData } = require('../__fixtures__/s3-object-fixture');
+const {
+	s3DeleteObjectResponseFixture,
+	createExampleBodyData,
+} = require('../__fixtures__/s3-object-fixture');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -13,8 +18,24 @@ const mockS3Post = versionMarker => {
 		.spyOn(uploadModule, 'upload')
 		.mockResolvedValue(versionMarker);
 
+	const stubDeleteOnUndo = jest.fn().mockReturnValue({
+		promise: jest
+			.fn()
+			.mockResolvedValue(s3DeleteObjectResponseFixture(versionMarker)),
+	});
+
+	S3.mockImplementation(() => ({
+		deleteObject: stubDeleteOnUndo,
+	}));
+
 	return {
+		// We need to create S3 instance here in order to use mocked instance
+		s3Instance: createS3Instance({
+			accessKeyId: 'testAccessKeyId',
+			secretAccessKey: 'testSecretAccessKey',
+		}),
 		stubUpload,
+		stubDeleteOnUndo,
 	};
 };
 
@@ -28,16 +49,13 @@ describe('S3 document helper post', () => {
 
 	const consistentNodeType = 'System';
 
-	const s3Instance = createS3Instance({
-		accessKeyId: 'testAccessKeyId',
-		secretAccessKey: 'testSecretAccessKey',
-	});
-
-	test('returns exact uploaded body and versionMarker', async () => {
+	test('returns exact uploaded body, versionMarker and undo function which can call it', async () => {
 		const givenSystemCode = 'docstore-post-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload } = mockS3Post(givenVersionMarker);
+		const { stubUpload, stubDeleteOnUndo, s3Instance } = mockS3Post(
+			givenVersionMarker,
+		);
 		const store = docstore(s3Instance);
 		const exampleData = createExampleBodyData();
 
@@ -62,6 +80,16 @@ describe('S3 document helper post', () => {
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
 			body: exampleData,
+			undo: expect.any(Function),
+		});
+		const undoResult = await result.undo();
+		expect(undoResult).toMatchObject({
+			versionMarker: 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar',
+		});
+		expect(stubDeleteOnUndo).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
 		});
 	});
 });
