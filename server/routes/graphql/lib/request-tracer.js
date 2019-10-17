@@ -12,26 +12,34 @@ class Tracer {
 	}
 
 	_log(logType) {
-		Object.entries(this.map).map(([type, fields]) => {
-			const { properties } = getType(type);
-			fields = [...fields];
-			logger[logType]({
-				event: 'GRAPHQL_TRACE',
-				success: logType !== 'error',
-				type,
-				fields,
-			});
+		try {
+			Object.entries(this.map).map(([type, fields]) => {
+				const { properties } = getType(type);
+				fields = [...fields];
+				logger[logType]({
+					event: 'GRAPHQL_TRACE',
+					success: logType !== 'error',
+					type,
+					fields,
+				});
 
-			fields
-				.filter(name => !!properties[name].deprecationReason)
-				.map(field =>
-					logger.warn({
-						event: 'GRAPHQL_DEPRECATION_TRACE',
-						type,
-						field,
-					}),
-				);
-		});
+				fields
+					.filter(
+						name =>
+							properties[name] &&
+							properties[name].deprecationReason,
+					)
+					.map(field =>
+						logger.warn({
+							event: 'GRAPHQL_DEPRECATION_TRACE',
+							type,
+							field,
+						}),
+					);
+			});
+		} catch (error) {
+			logger.error({ event: 'GRAPHQL_TRACE_ERROR', error });
+		}
 	}
 
 	log() {
