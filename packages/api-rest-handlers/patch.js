@@ -83,11 +83,6 @@ const patchHandler = ({ documentStore } = {}) => {
 				code,
 				bodyDocuments,
 			));
-		} else {
-			// logger.info(
-			// 	{ event: 'SKIP_S3_UPDATE' },
-			// 	'No changed Document properties - skipping update',
-			// );
 		}
 
 		const properties = constructNeo4jProperties({
@@ -180,11 +175,6 @@ const patchHandler = ({ documentStore } = {}) => {
 			return { status: 200, body: responseData };
 		} catch (err) {
 			if (!_isEmpty(bodyDocuments) && versionMarker) {
-				// logger.info(
-				// 	{ event: `${method}_NEO4J_FAILURE` },
-				// 	err,
-				// 	`${method}: neo4j write unsuccessful, attempting to rollback S3 write`,
-				// );
 				documentStore.delete(type, code, versionMarker);
 			}
 			handleUpsertError(err);
