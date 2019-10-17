@@ -60,7 +60,7 @@ describe('rest PATCH relationship create', () => {
 
 				await neo4jTest('MainType', mainCode)
 					.hasRels(1)
-					.hasRel([
+					.hasRel(
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
@@ -75,7 +75,7 @@ describe('rest PATCH relationship create', () => {
 								meta.default,
 							),
 						},
-					]);
+					);
 			});
 			it('accept an array of length one', async () => {
 				await createNodes(
@@ -93,7 +93,7 @@ describe('rest PATCH relationship create', () => {
 
 				await neo4jTest('MainType', mainCode)
 					.hasRels(1)
-					.hasRel([
+					.hasRel(
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
@@ -108,7 +108,7 @@ describe('rest PATCH relationship create', () => {
 								meta.default,
 							),
 						},
-					]);
+					);
 			});
 			it('error if trying to write multiple relationships', async () => {
 				await createNodes(
@@ -148,7 +148,7 @@ describe('rest PATCH relationship create', () => {
 
 				await neo4jTest('MainType', mainCode)
 					.hasRels(1)
-					.hasRel([
+					.hasRel(
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
@@ -163,7 +163,7 @@ describe('rest PATCH relationship create', () => {
 								meta.default,
 							),
 						},
-					]);
+					);
 			});
 		});
 	});
@@ -184,7 +184,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(1)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -194,7 +194,7 @@ describe('rest PATCH relationship create', () => {
 						type: 'ChildType',
 						props: Object.assign({ code: childCode }, meta.default),
 					},
-				]);
+				);
 		});
 		it('can merge with relationships if relationshipAction=merge', async () => {
 			const [main, child1] = await createNodes(
@@ -215,7 +215,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(2)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -228,8 +228,8 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				])
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -242,7 +242,7 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				]);
+				);
 		});
 	});
 	describe('replace', () => {
@@ -262,7 +262,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(1)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -275,7 +275,7 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				]);
+				);
 		});
 
 		it('can replace relationships if relationshipAction=replace', async () => {
@@ -297,7 +297,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(1)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -310,7 +310,7 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				]);
+				);
 		});
 
 		it('leaves relationships in other direction and of other types untouched when replacing', async () => {
@@ -336,7 +336,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(3)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'incoming',
@@ -351,9 +351,8 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				])
-
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'outgoing',
@@ -368,8 +367,8 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				])
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -379,7 +378,7 @@ describe('rest PATCH relationship create', () => {
 						type: 'ChildType',
 						props: Object.assign({ code: childCode }, meta.default),
 					},
-				]);
+				);
 		});
 
 		it('replaces relationships in multiple directions', async () => {
@@ -404,7 +403,7 @@ describe('rest PATCH relationship create', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.hasRels(2)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'incoming',
@@ -419,8 +418,8 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				])
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'outgoing',
@@ -435,7 +434,7 @@ describe('rest PATCH relationship create', () => {
 							meta.default,
 						),
 					},
-				]);
+				);
 		});
 	});
 
@@ -476,7 +475,7 @@ describe('rest PATCH relationship create', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -491,7 +490,7 @@ describe('rest PATCH relationship create', () => {
 									meta.create,
 								),
 							},
-						]);
+						);
 				});
 
 				it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
@@ -510,7 +509,7 @@ describe('rest PATCH relationship create', () => {
 					});
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -525,7 +524,7 @@ describe('rest PATCH relationship create', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 			});
 		});

@@ -36,25 +36,25 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch -o; \
 		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 test-pkg:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch -o ; \
 
 test-schema:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch -o; \
 
 test-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch -o; \
 
 test-pkg-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api.*/.*__tests__.*spec.js" --testEnvironment=node --watch -o; \
 
 
 test-api-docs:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch -o; \
 
 
 run:

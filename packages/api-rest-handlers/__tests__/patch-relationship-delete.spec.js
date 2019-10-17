@@ -87,7 +87,7 @@ describe('rest PATCH relationship delete', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -100,7 +100,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 
 				it("can attempt to delete a specific relationship of a kind that doesn't exist", async () => {
@@ -132,7 +132,7 @@ describe('rest PATCH relationship delete', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -145,7 +145,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 
 				it('can delete multiple specific relationships of the same kind', async () => {
@@ -169,7 +169,7 @@ describe('rest PATCH relationship delete', () => {
 					});
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -182,7 +182,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 
 				it('can delete multiple specific relationships of different kinds', async () => {
@@ -226,7 +226,7 @@ describe('rest PATCH relationship delete', () => {
 					});
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'outgoing',
@@ -239,7 +239,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 
 				it('can add and remove relationships of the same type at the same time', async () => {
@@ -260,7 +260,7 @@ describe('rest PATCH relationship delete', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -273,7 +273,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 				it('errors if deleting and adding the same relationship to the same record', async () => {
 					await createNodes(
@@ -351,7 +351,7 @@ describe('rest PATCH relationship delete', () => {
 
 					await neo4jTest('MainType', mainCode2)
 						.hasRels(1)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -364,7 +364,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 
 				it('leaves relationships in other direction and of other types untouched when deleting', async () => {
@@ -392,7 +392,7 @@ describe('rest PATCH relationship delete', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.hasRels(2)
-						.hasRel([
+						.hasRel(
 							{
 								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'incoming',
@@ -402,8 +402,8 @@ describe('rest PATCH relationship delete', () => {
 								type: 'MainType',
 								props: meta.default,
 							},
-						])
-						.hasRel([
+						)
+						.hasRel(
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
@@ -416,7 +416,7 @@ describe('rest PATCH relationship delete', () => {
 									meta.default,
 								),
 							},
-						]);
+						);
 				});
 			});
 		}),
