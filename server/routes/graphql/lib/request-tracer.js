@@ -31,7 +31,7 @@ class Tracer {
 					)
 					.map(field =>
 						logger.warn({
-							event: 'GRAPHQL_DEPRECATION_TRACE',
+							event: 'GRAPHQL_TRACE_DEPRECATION',
 							type,
 							field,
 						}),
