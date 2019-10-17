@@ -211,7 +211,7 @@ describe('rest POST', () => {
 			await neo4jTest('MainType', mainCode)
 				.match(meta.create)
 				.hasRels(2)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -221,8 +221,8 @@ describe('rest POST', () => {
 						type: 'ChildType',
 						props: Object.assign({ code: childCode }, meta.default),
 					},
-				])
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'IS_PARENT_OF',
 						direction: 'incoming',
@@ -235,7 +235,7 @@ describe('rest POST', () => {
 							meta.default,
 						),
 					},
-				]);
+				);
 		});
 
 		it('throws 400 when creating record related to non-existent records', async () => {
@@ -267,7 +267,7 @@ describe('rest POST', () => {
 			await neo4jTest('MainType', mainCode)
 				.match(meta.create)
 				.hasRels(2)
-				.hasRel([
+				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
@@ -277,8 +277,8 @@ describe('rest POST', () => {
 						type: 'ChildType',
 						props: Object.assign({ code: childCode }, meta.create),
 					},
-				])
-				.hasRel([
+				)
+				.hasRel(
 					{
 						type: 'IS_PARENT_OF',
 						direction: 'incoming',
@@ -288,7 +288,7 @@ describe('rest POST', () => {
 						type: 'ParentType',
 						props: Object.assign({ code: parentCode }, meta.create),
 					},
-				]);
+				);
 		});
 	});
 

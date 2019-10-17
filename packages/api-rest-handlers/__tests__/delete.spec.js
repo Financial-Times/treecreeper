@@ -22,6 +22,7 @@ describe('rest DELETE', () => {
 	it('deletes record without relationships', async () => {
 		await createMainNode();
 		const { status } = await deleteHandler()(input);
+
 		expect(status).toBe(204);
 		await neo4jTest('MainType', mainCode).notExists();
 	});

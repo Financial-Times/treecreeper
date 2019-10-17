@@ -2,7 +2,7 @@ const isNullValue = val => val === null || val === '';
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
-const detectPropertyChanges = (nodeType, initialContent = {}) => {
+const detectPropertyChanges = (initialContent = {}) => {
 	if (!Object.keys(initialContent).length) {
 		return ([, val]) => !isNullValue(val);
 	}
@@ -20,9 +20,9 @@ const detectPropertyChanges = (nodeType, initialContent = {}) => {
 	};
 };
 
-const diffProperties = ({ nodeType, newContent = {}, initialContent = {} }) =>
+const diffProperties = (newContent = {}, initialContent = {}) =>
 	Object.entries(newContent)
-		.filter(detectPropertyChanges(nodeType, initialContent))
+		.filter(detectPropertyChanges(initialContent))
 		.reduce(entriesToObject, {});
 
 module.exports = {

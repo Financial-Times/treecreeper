@@ -56,7 +56,7 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = ({ documentStore } = {}) => {
+const patchHandler = ({ documentStore = {} }) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
@@ -162,7 +162,6 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 		try {
-			console.log(queryParts.join('\n'));
 			const neo4jResult = await executeQuery(
 				queryParts.join('\n'),
 				parameters,
