@@ -54,10 +54,10 @@ const neo4jTest = (type, code) => {
 			test(records => expect(records.length).toBe(n));
 			return this;
 		},
-		hasRel([
+		hasRel(
 			{ type: relType, props: relationshipProps, direction },
 			{ type: relatedType, props: relatedNodeProps },
-		]) {
+		) {
 			test(records => {
 				const record = records.find(testRecord => {
 					const relatedNode = testRecord.get('relatedNode');
