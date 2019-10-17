@@ -83,7 +83,10 @@ describe('rest document store integration', () => {
 		});
 
 		it('undoes any s3 actions if neo4j query fails', async () => {
-			const deleteMock = jest.fn(async () => 'delete-marker');
+			const versionMarker = 'delete-marker';
+			const deleteMock = jest.fn(async () => ({
+				versionMarker,
+			}));
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
 			await expect(
@@ -96,7 +99,7 @@ describe('rest document store integration', () => {
 			expect(deleteMock).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
-				'delete-marker',
+				versionMarker,
 			);
 		});
 	});
