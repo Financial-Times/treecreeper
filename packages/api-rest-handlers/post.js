@@ -17,8 +17,10 @@ const {
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
-const postHandler = ({ documentStore = {} }) => async input => {
-  let versionMarker;
+const postHandler = ({
+	documentStore = { post: () => ({}), delete: () => null },
+} = {}) => async input => {
+	let versionMarker;
 	let newBodyDocs;
 
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
