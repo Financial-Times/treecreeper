@@ -23,6 +23,31 @@ const isProperty = type => {
 		properties[propName] && !properties[propName].isRelationship;
 };
 
+const getPropertyChangeDetector = (properties, initialContent) => ([
+	propName,
+	val,
+]) => {
+	const { type } = properties[propName] || {};
+
+	if (!(propName in initialContent)) {
+		return !isNullValue(val);
+	}
+
+	if (isNullValue(val)) {
+		return true;
+	}
+
+	if (isTemporalTypeName(type)) {
+		return !datesAreEqual(
+			val,
+			initialContent[propName],
+			neo4jTemporalTypes[type],
+		);
+	}
+
+	return val !== initialContent[propName];
+};
+
 const detectPropertyChanges = (type, initialContent = {}) => {
 	if (!Object.keys(initialContent).length) {
 		return ([, val]) => !isNullValue(val);
@@ -30,27 +55,7 @@ const detectPropertyChanges = (type, initialContent = {}) => {
 
 	const { properties } = getType(type);
 
-	return ([propName, val]) => {
-		const { type } = properties[propName] || {};
-
-		if (!(propName in initialContent)) {
-			return !isNullValue(val);
-		}
-
-		if (isNullValue(val)) {
-			return true;
-		}
-
-		if (isTemporalTypeName(type)) {
-			return !datesAreEqual(
-				val,
-				initialContent[propName],
-				neo4jTemporalTypes[type],
-			);
-		}
-
-		return val !== initialContent[propName];
-	};
+	return getPropertyChangeDetector(properties, initialContent);
 };
 
 const diffProperties = ({ type, newContent = {}, initialContent = {} }) =>

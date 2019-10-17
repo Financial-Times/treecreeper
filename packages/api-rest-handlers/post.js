@@ -2,7 +2,6 @@ const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
-const { getNeo4jRecord } = require('./lib/read-helpers');
 const { getType } = require('../schema-sdk');
 
 const {

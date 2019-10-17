@@ -41,7 +41,7 @@ test:
 	fi
 
 test-pkg:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch ; \
 
 test-schema:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
