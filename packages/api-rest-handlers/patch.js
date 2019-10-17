@@ -1,5 +1,6 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
@@ -21,6 +22,7 @@ const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
+const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -54,8 +56,9 @@ const validateRelationshipInputs = ({
 	}
 };
 
-// TODO: Need implementation for post to S3 using documentStore
-const patchHandler = ({ documentStore = {} }) => {
+const patchHandler = ({
+	documentStore = { patch: () => ({}), delete: () => null },
+} = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
@@ -66,18 +69,30 @@ const patchHandler = ({ documentStore = {} }) => {
 		validateRelationshipInputs(input);
 
 		const preflightRequest = await getNeo4jRecord(type, code);
-
 		if (!preflightRequest.hasRecords()) {
 			return Object.assign(await post(input), { status: 201 });
 		}
+
 		const initialContent = preflightRequest.toJson(type);
+
+		let versionMarker;
+		let newBodyDocs;
+		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+
+		if (!_isEmpty(bodyDocuments)) {
+			({ versionMarker, body: newBodyDocs } = await documentStore.patch(
+				type,
+				code,
+				bodyDocuments,
+			));
+		}
 
 		const properties = constructNeo4jProperties({
 			type,
 			code,
 			body: diffProperties({
 				type,
-				newContent: body,
+				newContent: bodyNoDocs,
 				initialContent,
 			}),
 		});
@@ -85,14 +100,14 @@ const patchHandler = ({ documentStore = {} }) => {
 		const removedRelationships = getRemovedRelationships({
 			type,
 			initialContent,
-			newContent: body,
+			newContent: bodyNoDocs,
 			action: query.relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			type,
 			initialContent,
-			newContent: body,
+			newContent: bodyNoDocs,
 		});
 
 		const willModifyNode = !!Object.keys(properties).length;
@@ -153,8 +168,16 @@ const patchHandler = ({ documentStore = {} }) => {
 				queryParts.join('\n'),
 				parameters,
 			);
-			return { status: 200, body: neo4jResult.toJson(type) };
+			const responseData = Object.assign(
+				neo4jResult.toJson(type),
+				newBodyDocs,
+			);
+
+			return { status: 200, body: responseData };
 		} catch (err) {
+			if (!_isEmpty(bodyDocuments) && versionMarker) {
+				documentStore.delete(type, code, versionMarker);
+			}
 			handleUpsertError(err);
 			throw err;
 		}
