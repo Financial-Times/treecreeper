@@ -1,7 +1,7 @@
 const { diff } = require('deep-diff');
 const { logger } = require('../api-core/lib/request-context');
 const { upload } = require('./upload');
-const { undoCreate } = require('./undo');
+const { undo } = require('./undo');
 const { s3Get } = require('./get');
 
 const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
@@ -40,7 +40,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 	return {
 		versionMarker: versionId,
 		body: newBodyDocument,
-		undo: undoCreate({
+		undo: undo({
 			s3Instance,
 			bucketName,
 			nodeType,

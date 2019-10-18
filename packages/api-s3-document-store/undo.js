@@ -1,16 +1,36 @@
 const { logger } = require('../api-core/lib/request-context');
 
-const undo = async (s3Instance, undoType, params) => {
+const undo = ({
+	s3Instance,
+	bucketName,
+	nodeType,
+	code,
+	versionMarker,
+	undoType = 'POST',
+}) => async () => {
+	if (!versionMarker) {
+		logger.info(
+			{
+				event: `${undoType}_UNDO_NOACTION`,
+			},
+			'UNDO no action becauce versionMarker is not provided',
+		);
+		return {};
+	}
+
+	const params = {
+		Bucket: bucketName,
+		Key: `${nodeType}/${code}`,
+		VersionId: versionMarker,
+	};
+
 	logger.info({
 		event: `${undoType}_UNDO_S3_VERSION`,
 		params,
 	});
 
 	try {
-		const response =
-			undoType === 'DELETE'
-				? await s3Instance.upload(params).promise()
-				: await s3Instance.deleteObject(params).promise();
+		const response = await s3Instance.deleteObject(params).promise();
 		logger.info(
 			{
 				event: `${undoType}_UNDO_S3_SUCCESS`,
@@ -23,7 +43,7 @@ const undo = async (s3Instance, undoType, params) => {
 		};
 	} catch (err) {
 		const message = `UNDO_${undoType}: Undo fail`;
-		logger.info(
+		logger.error(
 			{
 				event: `${undoType}_UNDO_S3_FAILURE`,
 			},
@@ -34,34 +54,30 @@ const undo = async (s3Instance, undoType, params) => {
 	}
 };
 
-const undoCreate = ({
-	s3Instance,
-	bucketName,
-	nodeType,
-	code,
-	versionMarker,
-	undoType = 'POST',
-}) => async () =>
-	undo(s3Instance, undoType, {
-		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
-		VersionId: versionMarker,
-	});
-
-const undoDelete = ({
-	s3Instance,
-	bucketName,
-	nodeType,
-	code,
-	body,
-}) => async () =>
-	undo(s3Instance, 'DELETE', {
-		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
-		Body: JSON.stringify(body),
-	});
+// const undoCreate = ({
+// 	s3Instance,
+// 	bucketName,
+// 	nodeType,
+// 	code,
+// 	versionMarker,
+// 	undoType = 'POST',
+// }) => async () =>
+// 	undo(s3Instance, undoType, {
+// 	});
+//
+// const undoDelete = ({
+// 	s3Instance,
+// 	bucketName,
+// 	nodeType,
+// 	code,
+// 	body,
+// }) => async () =>
+// 	undo(s3Instance, 'DELETE', {
+// 		Bucket: bucketName,
+// 		Key: `${nodeType}/${code}`,
+// 		Body: JSON.stringify(body),
+// 	});
 
 module.exports = {
-	undoCreate,
-	undoDelete,
+	undo,
 };

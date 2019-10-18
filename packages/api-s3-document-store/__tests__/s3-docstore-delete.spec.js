@@ -1,13 +1,10 @@
 jest.mock('aws-sdk');
-jest.mock('../get');
 const { S3 } = require('aws-sdk');
 
 const { createS3Instance } = require('../s3');
 const { docstore } = require('..');
-const getModule = require('../get');
 const {
 	s3DeleteObjectResponseFixture,
-	s3UploadResponseFixture,
 } = require('../__fixtures__/s3-object-fixture');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
@@ -28,20 +25,8 @@ const mockS3DeleteObject = (systemCode, versionMarker) => {
 	const stubDeleteObject = jest.fn().mockReturnValue({
 		promise: promiseResult,
 	});
-	const stubUpload = jest.fn().mockReturnValue({
-		promise: jest
-			.fn()
-			.mockResolvedValue(
-				s3UploadResponseFixture(
-					TREECREEPER_DOCSTORE_S3_BUCKET,
-					`${consistentNodeType}/${systemCode}`,
-					versionMarker,
-				),
-			),
-	});
 	S3.mockImplementation(() => ({
 		deleteObject: stubDeleteObject,
-		upload: stubUpload,
 	}));
 
 	return {
@@ -50,9 +35,7 @@ const mockS3DeleteObject = (systemCode, versionMarker) => {
 			accessKeyId: 'testAccessKeyId',
 			secretAccessKey: 'testSecretAccessKey',
 		}),
-		stubS3Get: jest.spyOn(getModule, 's3Get').mockResolvedValue({}),
 		stubDeleteObject,
-		stubUpload,
 	};
 };
 
@@ -74,12 +57,10 @@ describe('S3 document helper delete', () => {
 		const givenSystemCode = 'docstore-delete-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const {
-			stubDeleteObject,
-			stubS3Get,
-			stubUpload,
-			s3Instance,
-		} = mockS3DeleteObject(givenSystemCode, givenVersionMarker);
+		const { stubDeleteObject, s3Instance } = mockS3DeleteObject(
+			givenSystemCode,
+			givenVersionMarker,
+		);
 		const store = docstore(s3Instance);
 
 		const result = await store.delete(
@@ -97,13 +78,12 @@ describe('S3 document helper delete', () => {
 		expect(stubDeleteObject).toHaveBeenCalledWith(
 			matcher(givenSystemCode, givenVersionMarker),
 		);
-		expect(stubS3Get).toHaveBeenCalled();
 
 		const undoResult = await result.undo();
 		expect(undoResult).toMatchObject({
 			versionMarker: givenVersionMarker,
 		});
-		expect(stubUpload).toHaveBeenCalled();
+		expect(stubDeleteObject).toHaveBeenCalledTimes(2);
 	});
 
 	test('returns null versionMarker when delete fails', async () => {
