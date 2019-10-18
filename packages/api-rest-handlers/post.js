@@ -18,24 +18,13 @@ const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const postHandler = ({
-	documentStore = { post: () => ({}), delete: () => null },
+	documentStore = { post: () => ({}) },
 } = {}) => async input => {
-	let versionMarker;
-	let newBodyDocs;
-
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
 	);
 
 	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
-
-	if (!_isEmpty(bodyDocuments)) {
-		({ versionMarker, body: newBodyDocs } = await documentStore.post(
-			type,
-			code,
-			bodyDocuments,
-		));
-	}
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -79,6 +68,11 @@ const postHandler = ({
 	);
 
 	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
+
+	const { body: newBodyDocs = {}, undo } = !_isEmpty(bodyDocuments)
+		? await documentStore.post(type, code, bodyDocuments)
+		: {};
+
 	try {
 		const neo4jResult = await executeQuery(
 			queryParts.join('\n'),
@@ -92,8 +86,8 @@ const postHandler = ({
 
 		return { status: 200, body: responseData };
 	} catch (err) {
-		if (!_isEmpty(bodyDocuments) && versionMarker) {
-			documentStore.delete(type, code, versionMarker);
+		if (undo) {
+			await undo();
 		}
 
 		if (/already exists with label/.test(err.message)) {
