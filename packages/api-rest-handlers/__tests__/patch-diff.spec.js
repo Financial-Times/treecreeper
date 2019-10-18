@@ -1,25 +1,9 @@
-const { driver } = require('../../api-core/lib/db-connection');
 const { patchHandler } = require('../patch');
 
 const { setupMocks } = require('../../../test-helpers');
 const { securityTests } = require('../../../test-helpers/security');
 
-const spyDbQuery = () => {
-	const originalSession = driver.session.bind(driver);
-	let spy;
-	jest.spyOn(driver, 'session').mockImplementation(() => {
-		const session = originalSession();
-		jest.spyOn(session, 'run');
-		if (!spy) {
-			jest.spyOn(session, 'run');
-			spy = session.run;
-		} else {
-			session.run = spy;
-		}
-		return session;
-	});
-	return spy;
-};
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 describe('rest PATCH relationship diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';

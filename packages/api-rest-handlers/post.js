@@ -1,28 +1,41 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getType } = require('../schema-sdk');
-
 const {
 	metaPropertiesForCreate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
-
 const { getRelationships } = require('./lib/relationships/input');
-
 const { constructNeo4jProperties } = require('./lib/neo4j-type-conversion');
 const {
 	prepareToWriteRelationships,
 	handleUpsertError,
 } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
+const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
-// TODO: Need implementation for post to S3 using documentStore
-const postHandler = ({ documentStore = {} }) => async input => {
+const postHandler = ({
+	documentStore = { post: () => ({}), delete: () => null },
+} = {}) => async input => {
+	let versionMarker;
+	let newBodyDocs;
+
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
 	);
+
+	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+
+	if (!_isEmpty(bodyDocuments)) {
+		({ versionMarker, body: newBodyDocs } = await documentStore.post(
+			type,
+			code,
+			bodyDocuments,
+		));
+	}
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -43,13 +56,12 @@ const postHandler = ({ documentStore = {} }) => async input => {
 
 	const properties = constructNeo4jProperties({
 		type,
-		body,
+		body: bodyNoDocs,
 		code,
 	});
-
 	const relationshipsToCreate = getRelationships({
 		type,
-		body,
+		body: bodyNoDocs,
 	});
 
 	const {
@@ -72,8 +84,18 @@ const postHandler = ({ documentStore = {} }) => async input => {
 			queryParts.join('\n'),
 			parameters,
 		);
-		return { status: 200, body: neo4jResult.toJson(type) };
+
+		const responseData = Object.assign(
+			neo4jResult.toJson(type),
+			newBodyDocs,
+		);
+
+		return { status: 200, body: responseData };
 	} catch (err) {
+		if (!_isEmpty(bodyDocuments) && versionMarker) {
+			documentStore.delete(type, code, versionMarker);
+		}
+
 		if (/already exists with label/.test(err.message)) {
 			throw httpErrors(409, `${type} ${code} already exists`);
 		}
