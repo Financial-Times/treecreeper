@@ -1,7 +1,6 @@
 const { postHandler } = require('../post');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { securityTests } = require('../../../test-helpers/security');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest POST', () => {
@@ -11,8 +10,6 @@ describe('rest POST', () => {
 	const { createNodes, createNode, meta, getMetaPayload } = setupMocks(
 		namespace,
 	);
-
-	securityTests(postHandler(), mainCode);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',

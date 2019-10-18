@@ -1,6 +1,5 @@
 const { getHandler } = require('../get');
 const { setupMocks } = require('../../../test-helpers');
-const { securityTests } = require('../../../test-helpers/security');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest GET', () => {
@@ -17,8 +16,6 @@ describe('rest GET', () => {
 
 	const createMainNode = (props = {}) =>
 		createNode('MainType', Object.assign({ code: mainCode }, props));
-
-	securityTests(getHandler(), mainCode);
 
 	it('gets record without relationships', async () => {
 		await createMainNode({

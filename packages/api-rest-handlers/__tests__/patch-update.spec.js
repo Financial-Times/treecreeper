@@ -2,7 +2,6 @@ const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { securityTests } = require('../../../test-helpers/security');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest PATCH update', () => {
@@ -10,8 +9,6 @@ describe('rest PATCH update', () => {
 	const mainCode = `${namespace}-main`;
 
 	const { createNode, meta, getMetaPayload } = setupMocks(namespace);
-
-	securityTests(patchHandler(), mainCode);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
