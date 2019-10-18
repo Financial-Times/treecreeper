@@ -1,7 +1,6 @@
 const { deleteHandler } = require('../delete');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { securityTests } = require('../../../test-helpers/security');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest DELETE', () => {
@@ -16,8 +15,6 @@ describe('rest DELETE', () => {
 
 	const createMainNode = (props = {}) =>
 		createNode('MainType', Object.assign({ code: mainCode }, props));
-
-	securityTests(deleteHandler(), mainCode);
 
 	it('deletes record without relationships', async () => {
 		await createMainNode();
