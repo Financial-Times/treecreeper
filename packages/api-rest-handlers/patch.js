@@ -152,7 +152,7 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 
-		const { body: newBodyDocs = {}, undo } = !_isEmpty(bodyDocuments)
+		const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(bodyDocuments)
 			? await documentStore.patch(type, code, bodyDocuments)
 			: {};
 
