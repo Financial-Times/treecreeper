@@ -341,4 +341,57 @@ describe('rest document store integration', () => {
 			expect(mockUndo).toHaveBeenCalled();
 		});
 	});
+
+	describe.skip('absorb', () => {
+		it('responds with 500 if s3 query fails', async () => {
+			// stubS3Unavailable(sandbox);
+			// await testMergeRequest(
+			// 	{
+			// 		type: 'MainType',
+			// 		sourceCode: mainCode1,
+			// 		destinationCode: mainCode2,
+			// 	},
+			// 	500,
+			// );
+			// await Promise.all([
+			// 	verifyExists('MainType', mainCode1),
+			// 	verifyExists('MainType', mainCode2),
+			// ]);
+			// expect(stubSendEvent).not.toHaveBeenCalled();
+			// expectNoS3Actions('upload', 'patch', 'delete', 'merge');
+		});
+
+		it('merges document properties', async () => {
+			// await createNodes(
+			// 	[
+			// 		'MainType',
+			// 		{
+			// 			code: mainCode,
+			// 			someString: 'Fake Document',
+			// 			anotherDocument: 'Another Fake Document',
+			// 		},
+			// 	],
+			// 	[
+			// 		'MainType',
+			// 		{
+			// 			code: mainCode2,
+			// 			anotherDocument: 'A Third Fake Document',
+			// 		},
+			// 	],
+			// );
+			// await testMergeRequest(
+			// 	{
+			// 		type: 'MainType',
+			// 		sourceCode: mainCode,
+			// 		destinationCode: mainCode2,
+			// 	},
+			// 	200,
+			// 	withUpdateMeta({
+			// 		code: mainCode2,
+			// 		someString: 'Fake Document',
+			// 		anotherDocument: 'A Third Fake Document',
+			// 	}),
+			// );
+		});
+	});
 });
