@@ -2,7 +2,7 @@ jest.mock('aws-sdk');
 const { S3 } = require('aws-sdk');
 
 const { createS3Instance } = require('../s3');
-const { docstore } = require('..');
+const { undo } = require('../undo');
 const {
 	s3DeleteObjectResponseFixture,
 } = require('../__fixtures__/s3-object-fixture');
@@ -10,36 +10,46 @@ const {
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 const consistentNodeType = 'System';
 
-const mockS3DeleteObject = (systemCode, versionMarker) => {
-	let promiseResult = jest.fn();
-	if (systemCode === 'docstore-delete-test') {
-		promiseResult = promiseResult.mockResolvedValue(
+const mockUndo = (systemCode, versionMarker) => {
+	let deletePromise = jest.fn();
+
+	if (systemCode === 'docstore-undo-test') {
+		deletePromise = deletePromise.mockResolvedValue(
 			s3DeleteObjectResponseFixture(versionMarker),
 		);
 	} else {
-		promiseResult = promiseResult.mockRejectedValue(
-			new Error('something went wrong'),
+		deletePromise = deletePromise.mockRejectedValue(
+			new Error('something went wrong on delete'),
 		);
 	}
 
 	const stubDeleteObject = jest.fn().mockReturnValue({
-		promise: promiseResult,
+		promise: deletePromise,
 	});
+
 	S3.mockImplementation(() => ({
 		deleteObject: stubDeleteObject,
 	}));
 
-	return {
+	const undoParams = {
 		// We need to create S3 instance here in order to use mocked instance
 		s3Instance: createS3Instance({
 			accessKeyId: 'testAccessKeyId',
 			secretAccessKey: 'testSecretAccessKey',
 		}),
+		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
+		nodeType: consistentNodeType,
+		code: systemCode,
+		versionMarker,
+	};
+
+	return {
 		stubDeleteObject,
+		undoFunction: undo(undoParams),
 	};
 };
 
-describe('S3 document helper delete', () => {
+describe('S3 document helper undo (internal function)', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 	});
@@ -53,60 +63,37 @@ describe('S3 document helper delete', () => {
 		VersionId: versionMarker,
 	});
 
-	test('returns exact versionMarker and can undo it', async () => {
-		const givenSystemCode = 'docstore-delete-test';
+	test('when success, returns versionMarker', async () => {
+		const givenSystemCode = 'docstore-undo-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubDeleteObject, s3Instance } = mockS3DeleteObject(
+		const { stubDeleteObject, undoFunction } = mockUndo(
 			givenSystemCode,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
 
-		const result = await store.delete(
-			consistentNodeType,
-			givenSystemCode,
-			givenVersionMarker,
-		);
+		const result = await undoFunction();
 
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
-			undo: expect.any(Function),
 		});
 
 		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
 		expect(stubDeleteObject).toHaveBeenCalledWith(
 			matcher(givenSystemCode, givenVersionMarker),
 		);
-
-		const undoResult = await result.undo();
-		expect(undoResult).toMatchObject({
-			versionMarker: givenVersionMarker,
-		});
-		expect(stubDeleteObject).toHaveBeenCalledTimes(2);
 	});
 
-	test('returns null versionMarker when delete fails', async () => {
-		const givenSystemCode = 'docstore-delete-unexpected';
+	test('throws Error when undo fails', async () => {
+		const givenSystemCode = 'docstore-undo-unexpected';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubDeleteObject, s3Instance } = mockS3DeleteObject(
-			givenSystemCode,
-			givenVersionMarker,
-		);
-		const store = docstore(s3Instance);
-
-		const result = await store.delete(
-			consistentNodeType,
+		const { stubDeleteObject, undoFunction } = mockUndo(
 			givenSystemCode,
 			givenVersionMarker,
 		);
 
-		expect(result).toMatchObject({
-			versionMarker: null,
-		});
-		// On fails, result SHOULD NOT have undo function
-		expect(result).not.toHaveProperty('undo');
+		await expect(undoFunction()).rejects.toThrow(Error);
 
 		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
 		expect(stubDeleteObject).toHaveBeenCalledWith(

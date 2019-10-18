@@ -1,4 +1,5 @@
 const { logger } = require('../api-core/lib/request-context');
+const { undo } = require('./undo');
 
 const s3Delete = async ({
 	s3Instance,
@@ -26,6 +27,14 @@ const s3Delete = async ({
 		);
 		return {
 			versionMarker: response.VersionId,
+			undo: undo({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				versionMarker: response.VersionId,
+				undoType: 'DELETE',
+			}),
 		};
 	} catch (err) {
 		logger.info(
