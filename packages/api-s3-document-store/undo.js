@@ -54,30 +54,6 @@ const undo = ({
 	}
 };
 
-// const undoCreate = ({
-// 	s3Instance,
-// 	bucketName,
-// 	nodeType,
-// 	code,
-// 	versionMarker,
-// 	undoType = 'POST',
-// }) => async () =>
-// 	undo(s3Instance, undoType, {
-// 	});
-//
-// const undoDelete = ({
-// 	s3Instance,
-// 	bucketName,
-// 	nodeType,
-// 	code,
-// 	body,
-// }) => async () =>
-// 	undo(s3Instance, 'DELETE', {
-// 		Bucket: bucketName,
-// 		Key: `${nodeType}/${code}`,
-// 		Body: JSON.stringify(body),
-// 	});
-
 module.exports = {
 	undo,
 };
