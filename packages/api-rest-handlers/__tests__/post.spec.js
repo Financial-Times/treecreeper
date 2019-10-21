@@ -14,6 +14,10 @@ describe('rest POST', () => {
 
 	securityTests(postHandler(), mainCode);
 
+	const documentStore = {
+		post: jest.fn(async (type, code, body) => ({ body })),
+	};
+
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
 		code: mainCode,
@@ -22,7 +26,8 @@ describe('rest POST', () => {
 		metadata,
 	});
 
-	const basicHandler = (...args) => postHandler()(getInput(...args));
+	const basicHandler = (...args) =>
+		postHandler({ documentStore })(getInput(...args));
 
 	describe('writing disconnected records', () => {
 		it('creates record with no body', async () => {

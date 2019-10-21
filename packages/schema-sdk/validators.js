@@ -126,5 +126,7 @@ module.exports = ({ getEnums, getType }) => {
 		validateProperty: propertyValidator,
 		validatePropertyName,
 		validateCode: (type, code) => propertyValidator(type, 'code', code),
+		validateOtherCode: (type, otherCode) =>
+			propertyValidator(type, 'otherCode', otherCode),
 	};
 };
