@@ -1,7 +1,6 @@
 const { absorbHandler } = require('../absorb');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { securityTests } = require('../../../test-helpers/security');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest POST (absorb)', () => {
@@ -56,8 +55,6 @@ describe('rest POST (absorb)', () => {
 		];
 		return createNodes(...nodes);
 	};
-
-	securityTests(absorbHandler(), mainCode);
 
 	describe('error handling', () => {
 		it('responds with 500 if neo4j query fails', async () => {
