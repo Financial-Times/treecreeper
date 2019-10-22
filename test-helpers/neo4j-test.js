@@ -46,12 +46,24 @@ const neo4jTest = (type, code) => {
 			return this;
 		},
 		noRels() {
-			test(records => expect(records.length).toBe(1));
+			test(records =>
+				expect(
+					records
+						.map(record => record.get('rel'))
+						.filter(rel => !!rel).length,
+				).toBe(0),
+			);
 			return this;
 		},
 
 		hasRels(n) {
-			test(records => expect(records.length).toBe(n));
+			test(records =>
+				expect(
+					records
+						.map(record => record.get('rel'))
+						.filter(rel => !!rel).length,
+				).toBe(n),
+			);
 			return this;
 		},
 		hasRel(

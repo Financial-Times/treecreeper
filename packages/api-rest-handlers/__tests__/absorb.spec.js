@@ -29,7 +29,7 @@ describe('rest POST (absorb)', () => {
 		override || {
 			type: 'MainType',
 			code: mainCode,
-			otherCode: absorbedCode,
+			codeToAbsorb: absorbedCode,
 		};
 
 	const createNodePair = (mainBody, absorbedBody) => {
@@ -66,7 +66,7 @@ describe('rest POST (absorb)', () => {
 		it('errors if no code to absorb supplied', async () => {
 			await createNodePair();
 			await expect(
-				absorbHandler()(
+				absorb(
 					getInput({
 						type: 'MainType',
 						code: mainCode,
@@ -74,22 +74,21 @@ describe('rest POST (absorb)', () => {
 				),
 			).rejects.toThrow({
 				status: 400,
-				message: 'Expected parameter(s): code',
+				message: 'Expected parameter(s): codeToAbsorb',
 			});
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
-				someString: 'fake1',
 			});
 		});
 
-		it('errors if destination code does not exist', async () => {
+		it('errors if main code does not exist', async () => {
 			await createNode('MainType', {
 				code: absorbedCode,
 				someString: 'fake1',
 			});
 			await expect(absorbHandler()(getInput())).rejects.toThrow({
 				status: 404,
-				message: `MainType record missing for \`${mainCode}\``,
+				message: `MainType record missing for \`code\``,
 			});
 			await neo4jTest('MainType', absorbedCode).match({
 				code: absorbedCode,
@@ -104,7 +103,7 @@ describe('rest POST (absorb)', () => {
 			});
 			await expect(absorbHandler()(getInput())).rejects.toThrow({
 				status: 404,
-				message: `MainType record missing for \`${absorbedCode}\``,
+				message: `MainType record missing for \`codeToAbsorb\``,
 			});
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
@@ -127,8 +126,8 @@ describe('rest POST (absorb)', () => {
 
 			it('not modify existing properties of destination node', async () => {
 				await createNodePair(
-					{ someString: 'potato' }, // source
-					{ someString: 'tomato' }, // destination
+					{ someString: 'potato' },
+					{ someString: 'tomato' },
 				);
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
@@ -269,16 +268,17 @@ describe('rest POST (absorb)', () => {
 					{ code: absorbedCode },
 				);
 				const [main, absorbed] = nodes;
-				// (mainCode:youngerSiblings)->(absorbed:olderSiblings)
 				await connectNodes(main, 'HAS_YOUNGER_SIBLING', absorbed);
-				// (mainCode:youngerSiblings)->(mainCode:youngerSiblings)
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					youngerSiblings: [mainCode],
+				expect(body).not.toMatchObject({
+					youngerSiblings: expect.any(Array),
+				});
+				expect(body).not.toMatchObject({
+					olderSiblings: expect.any(Array),
 				});
 
-				await neo4jTest('MainType', mainCode).hasRels(1);
+				await neo4jTest('MainType', mainCode).hasRels(0);
 				await neo4jTest('MainType', absorbedCode).notExists();
 			});
 
