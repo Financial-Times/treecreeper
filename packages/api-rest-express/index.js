@@ -8,7 +8,7 @@ const {
 	logger,
 	setContext,
 	middleware: contextMiddleware,
-} = require('../../packages/api-core/lib/request-context');
+} = require('./lib/request-context');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),

@@ -1,4 +1,4 @@
-const { logger } = require('../api-core/lib/request-context');
+const { logger } = require('../api-rest-express/lib/request-context');
 
 const upload = async ({ s3Instance, params, requestType }) => {
 	try {
