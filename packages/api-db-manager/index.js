@@ -6,8 +6,10 @@ const dbConnection = require('./db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
-const initConstraints = async () => {
-	await schema.ready();
+const initConstraints = async ({ awaitSchema = false } = {}) => {
+	if (awaitSchema) {
+		await schema.ready();
+	}
 	const executeQuery = dbConnection.executeQueryWithSharedSession();
 
 	try {

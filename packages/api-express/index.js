@@ -34,12 +34,7 @@ const getApp = async ({
 	router.use(requestId);
 	router.use(clientId);
 	router.use(bodyParsers);
-
-	if (restMiddlewares) {
 	router.use(restPath, restMiddlewares, getRestApi({}));
-	} else {
-	router.use(restPath, getRestApi({}));
-	}
 	router.use(errorToErrors);
 	app.use('/', router);
 	await schema.ready();
