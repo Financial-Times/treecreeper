@@ -118,7 +118,7 @@ const getAddedRelationships = ({ type, initialContent, newContent }) => {
 	return newRelationships.reduce(entriesToObject, {});
 };
 
-const containsRelationshipData = (type, payload) => {
+const containsRelationshipData = (type, payload = {}) => {
 	const isRelationship = identifyRelationships(type);
 	return Object.entries(getType(type).properties)
 		.filter(([propName]) => isRelationship(propName))
