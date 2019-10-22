@@ -93,7 +93,7 @@ const getRestApi = ({
 
 	router.post(
 		'/:type/:code/absorb/:otherCode',
-		controller('POST', absorbHandler({ documentStore, logger })),
+		controller('ABSORB', absorbHandler({ documentStore, logger })),
 	);
 
 	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
