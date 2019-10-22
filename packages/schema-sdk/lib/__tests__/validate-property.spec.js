@@ -1,4 +1,4 @@
-const { SDK } = require('../sdk');
+const { SDK } = require('../../sdk');
 const primitiveTypesMap = require('../primitive-types-map');
 
 const getValidator = (type, enums = {}) => {

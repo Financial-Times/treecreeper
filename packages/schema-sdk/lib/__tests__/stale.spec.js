@@ -1,14 +1,14 @@
 const fetch = require('node-fetch');
 
-jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
+jest.mock('../../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { SchemaUpdater } = require('..');
+const { SchemaUpdater } = require('../updater');
 
 // TODO move into schema-utils
-const { RawDataWrapper } = require('../../schema-sdk/raw-data-wrapper');
-const { Cache } = require('../../schema-utils');
+const { RawDataWrapper } = require('../raw-data-wrapper');
+const { Cache } = require('../../../schema-utils');
 
 const create = options =>
 	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
