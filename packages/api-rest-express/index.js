@@ -92,7 +92,7 @@ const getRestApi = ({
 		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
 
 	router.post(
-		'/:type/:code/absorb/:otherCode',
+		'/:type/:code/absorb/:codeToAbsorb',
 		controller('ABSORB', absorbHandler({ documentStore, logger })),
 	);
 
