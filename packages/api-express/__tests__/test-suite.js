@@ -5,7 +5,7 @@ const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
 
 const testSuite = (method, goodStatus) => {
-	describe(`api-rest-express - ${method}`, () => {
+	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
 		let app;
 		beforeAll(() => {
@@ -33,7 +33,7 @@ const testSuite = (method, goodStatus) => {
 							: defaultHandler,
 				};
 			});
-			const { getRestApi } = require('..');
+			const { getRestApi } = require('../lib/rest');
 			app = express();
 
 			app.use('/route', getRestApi());
@@ -41,7 +41,7 @@ const testSuite = (method, goodStatus) => {
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));
 
-		const namespace = `api-rest-express-${method}`;
+		const namespace = `api-express-${method}`;
 		const mainCode = `${namespace}-main`;
 		const restUrl = `/route/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
