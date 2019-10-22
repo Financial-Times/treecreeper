@@ -13,7 +13,6 @@ module.exports = (req, res, next) => {
 	res.locals.clientUserId = req.get('client-user-id');
 
 	setContext('clientId', res.locals.clientId);
-
 	setContext('clientUserId', res.locals.clientUserId);
 	next();
 };

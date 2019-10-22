@@ -1,6 +1,5 @@
 const defaultHandler = () => () => null;
 const httpErrors = require('http-errors');
-const express = require('express');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
 
@@ -33,17 +32,15 @@ const testSuite = (method, goodStatus) => {
 							: defaultHandler,
 				};
 			});
-			const { getRestApi } = require('../lib/rest');
-			app = express();
-
-			app.use('/route', getRestApi());
+			const { getApp } = require('..');
+			app = getApp();
 		});
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));
 
 		const namespace = `api-express-${method}`;
 		const mainCode = `${namespace}-main`;
-		const restUrl = `/route/MainType/${mainCode}?upsert=yes`;
+		const restUrl = `/rest/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
 
