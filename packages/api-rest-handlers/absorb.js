@@ -156,7 +156,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	const {
 		body: updatedBody = {},
 		undo: undoS3Merge = async () => ({}),
-	} = await documentStore.merge(nodeType, absorbedCode, code);
+	} = await documentStore.absorb(nodeType, absorbedCode, code);
 
 	let result;
 	try {

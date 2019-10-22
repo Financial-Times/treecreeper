@@ -19,7 +19,7 @@ const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 const consistentNodeType = 'System';
 
 const createSourceBodyData = () => ({
-	extraField: 'willBeMerged',
+	extraField: 'willBeAbsorbed',
 });
 
 const createDestinationBodyData = () => createExampleBodyData();
@@ -39,7 +39,7 @@ const createStub = (module, method, valueMap) => {
 	});
 };
 
-const mockS3Merge = (
+const mockS3Absorb = (
 	{ fromSystemCode, fromNodeBody, fromVersionMarker },
 	{ toSystemCode, toNodeBody, toVersionMarker },
 ) => {
@@ -136,7 +136,7 @@ const mockS3Merge = (
 	};
 };
 
-describe('S3 document helper merge', () => {
+describe('S3 document helper absorb', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 	});
@@ -158,11 +158,11 @@ describe('S3 document helper merge', () => {
 		...(versionMarker ? { VersionId: versionMarker } : {}),
 	});
 
-	test('returns with merged object, posted version, deleted version and undo function', async () => {
-		const fromSystemCode = 'docstore-merge-src';
+	test('returns with absorbed object, posted version, deleted version and undo function', async () => {
+		const fromSystemCode = 'docstore-absorb-src';
 		const fromNodeBody = createSourceBodyData();
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest';
+		const toSystemCode = 'docstore-absorb-dest';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
@@ -172,14 +172,14 @@ describe('S3 document helper merge', () => {
 			stubDelete,
 			stubDeleteOnUndo,
 			s3Instance,
-		} = mockS3Merge(
+		} = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 
-		const result = await store.merge(
+		const result = await store.absorb(
 			consistentNodeType,
 			fromSystemCode,
 			toSystemCode,
@@ -230,21 +230,21 @@ describe('S3 document helper merge', () => {
 	});
 
 	test('returns empty object when source node body is empty', async () => {
-		const fromSystemCode = 'docstore-merge-src';
+		const fromSystemCode = 'docstore-absorb-src';
 		const fromNodeBody = {};
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest';
+		const toSystemCode = 'docstore-absorb-dest';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Merge(
+		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 
-		const result = await store.merge(
+		const result = await store.absorb(
 			consistentNodeType,
 			fromSystemCode,
 			toSystemCode,
@@ -265,21 +265,21 @@ describe('S3 document helper merge', () => {
 	});
 
 	test('throws error when delete and post fail', async () => {
-		const fromSystemCode = 'docstore-merge-src-s3Delete-unexpected';
+		const fromSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
 		const fromNodeBody = createSourceBodyData();
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest-s3Post-unexpected';
+		const toSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Merge(
+		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.merge(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
@@ -307,10 +307,10 @@ describe('S3 document helper merge', () => {
 	});
 
 	test('throws error when post destination body fail', async () => {
-		const fromSystemCode = 'docstore-merge-src';
+		const fromSystemCode = 'docstore-absorb-src';
 		const fromNodeBody = createSourceBodyData();
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest-s3Post-unexpected';
+		const toSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
@@ -320,14 +320,14 @@ describe('S3 document helper merge', () => {
 			stubDelete,
 			stubDeleteOnUndo,
 			s3Instance,
-		} = mockS3Merge(
+		} = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.merge(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
@@ -359,10 +359,10 @@ describe('S3 document helper merge', () => {
 	});
 
 	test('throws error when delete source body fail', async () => {
-		const fromSystemCode = 'docstore-merge-src-s3Delete-unexpected';
+		const fromSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
 		const fromNodeBody = createSourceBodyData();
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest';
+		const toSystemCode = 'docstore-absorb-dest';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
@@ -372,14 +372,14 @@ describe('S3 document helper merge', () => {
 			stubDelete,
 			stubDeleteOnUndo,
 			s3Instance,
-		} = mockS3Merge(
+		} = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.merge(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
@@ -411,10 +411,10 @@ describe('S3 document helper merge', () => {
 	});
 
 	test('only deletes source version when objects are same between source and destination', async () => {
-		const fromSystemCode = 'docstore-merge-src';
+		const fromSystemCode = 'docstore-absorb-src';
 		const fromNodeBody = createDestinationBodyData();
 		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-merge-dest';
+		const toSystemCode = 'docstore-absorb-dest';
 		const toNodeBody = createDestinationBodyData();
 		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
@@ -424,13 +424,13 @@ describe('S3 document helper merge', () => {
 			stubDelete,
 			stubDeleteOnUndo,
 			s3Instance,
-		} = mockS3Merge(
+		} = mockS3Absorb(
 			{ fromSystemCode, fromNodeBody, fromVersionMarker },
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
-		const result = await store.merge(
+		const result = await store.absorb(
 			consistentNodeType,
 			fromSystemCode,
 			toSystemCode,
