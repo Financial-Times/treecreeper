@@ -11,9 +11,11 @@ const throwInvalidValueError = (
 	typeName,
 	propertyName,
 	propertyValue,
+	aliasPropertyName,
 ) => reason => {
+	const propName = aliasPropertyName || propertyName;
 	throw new BizOpsError(
-		`Invalid value \`${propertyValue}\` for property \`${propertyName}\` on type \`${typeName}\`.
+		`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`.
 				${reason}`,
 	);
 };
@@ -23,6 +25,7 @@ const validateProperty = ({ getType, getEnums }) => {
 		typeName,
 		propertyName,
 		propertyValue,
+		aliasPropertyName,
 	) => {
 		const propertyDefinition = getType(typeName).properties[propertyName];
 
@@ -51,6 +54,7 @@ const validateProperty = ({ getType, getEnums }) => {
 			typeName,
 			propertyName,
 			propertyValue,
+			aliasPropertyName,
 		);
 		if (isRelationship) {
 			if (isRecursive) {
@@ -125,6 +129,7 @@ module.exports = ({ getEnums, getType }) => {
 		validateTypeName: validateTypeName(getType),
 		validateProperty: propertyValidator,
 		validatePropertyName,
-		validateCode: (type, code) => propertyValidator(type, 'code', code),
+		validateCode: (type, code, aliasName = 'code') =>
+			propertyValidator(type, 'code', code, aliasName),
 	};
 };

@@ -63,6 +63,19 @@ describe('rest POST (absorb)', () => {
 			await expect(absorb(getInput())).rejects.toThrow(Error);
 		});
 
+		it('errors if unexpected code to abosorb supplied', async () => {
+			await createNodePair();
+			await expect(
+				absorb(
+					getInput({
+						type: 'MainType',
+						code: mainCode,
+						codeToAbsorb: `${absorbedCode}@@@@@`,
+					}),
+				),
+			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
+		});
+
 		it('errors if no code to absorb supplied', async () => {
 			await createNodePair();
 			await expect(

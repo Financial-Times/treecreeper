@@ -10,13 +10,6 @@ properties:
     description: Code description.
     label: Code label
     pattern: CODE
-  otherCode:
-    type: Code
-    unique: true
-    canIdentify: true
-    description: Other code description.
-    label: Other code label
-    pattern: CODE
   someDocument:
     type: Document
     description: Document description.
