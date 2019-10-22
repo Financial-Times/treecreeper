@@ -1,4 +1,4 @@
-const { Cache } = require('../../packages/schema-utils/cache');
+const { Cache } = require('./lib/cache');
 const { RawDataWrapper } = require('./lib/raw-data-wrapper');
 const getValidators = require('./lib/validators');
 const BizOpsError = require('./lib/biz-ops-error');

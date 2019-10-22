@@ -9,7 +9,7 @@ jest.mock('../../../../package.json', () => ({ version: '8.9.10' }), {
 const { SchemaUpdater } = require('../updater');
 // TODO move into schema-utils
 const { RawDataWrapper } = require('../raw-data-wrapper');
-const { Cache } = require('../../../schema-utils');
+const { Cache } = require('../cache');
 
 const create = options =>
 	new SchemaUpdater(options, new RawDataWrapper(), new Cache());

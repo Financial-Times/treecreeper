@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const { Readable } = require('stream');
-const { getSchemaFilename } = require('../schema-utils');
+const { getSchemaFilename } = require('../schema-file-name');
 
 const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
