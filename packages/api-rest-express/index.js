@@ -68,6 +68,7 @@ const {
 	deleteHandler,
 	postHandler,
 	patchHandler,
+	absorbHandler,
 } = require('../../packages/api-rest-handlers');
 // const {mergeHandler} = require('../../packages/api-rest-merge-handler');
 
@@ -89,6 +90,11 @@ const getRestApi = ({
 		// 	.put(unimplemented('PUT', 'PATCH'))
 		.patch(controller('PATCH', patchHandler({ documentStore, logger })))
 		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
+
+	router.post(
+		'/:type/:code/absorb/:codeToAbsorb',
+		controller('ABSORB', absorbHandler({ documentStore, logger })),
+	);
 
 	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
 

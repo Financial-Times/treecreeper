@@ -3,7 +3,7 @@ const { absorbHandler } = require('../absorb');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
-describe('rest DELETE', () => {
+describe('rest POST (absorb)', () => {
 	const namespace = 'api-rest-handlers-absorb';
 	const mainCode = `${namespace}-main`;
 	const absorbedCode = `${namespace}-absorbed`;
@@ -14,21 +14,33 @@ describe('rest DELETE', () => {
 		namespace,
 	);
 
-	const absorb = absorbHandler()({
-		type: 'MainType',
-		code: mainCode,
-		body: { code: absorbedCode },
+	const documentStore = {};
+
+	beforeEach(() => {
+		documentStore.merge = jest.fn(async () => ({}));
 	});
 
-	const createNodePair = (mainBody = {}, absorbedBody = {}) =>
-		createNodes(
+	afterEach(() => {
+		jest.resetAllMocks();
+	});
+
+	const absorb = absorbHandler({ documentStore });
+	const getInput = override =>
+		override || {
+			type: 'MainType',
+			code: mainCode,
+			codeToAbsorb: absorbedCode,
+		};
+
+	const createNodePair = (mainBody, absorbedBody) => {
+		const nodes = [
 			[
 				'MainType',
 				Object.assign(
 					{
 						code: mainCode,
 					},
-					mainBody,
+					mainBody || {},
 				),
 			],
 			[
@@ -37,38 +49,59 @@ describe('rest DELETE', () => {
 					{
 						code: absorbedCode,
 					},
-					absorbedBody,
+					absorbedBody || {},
 				),
 			],
-		);
+		];
+		return createNodes(...nodes);
+	};
 
 	describe('error handling', () => {
 		it('responds with 500 if neo4j query fails', async () => {
-			await createNodePair(
-				{ someString: 'fake1' },
-				{ someString: 'fake2' },
-			);
+			await createNodePair();
 			dbUnavailable();
-			await expect(absorb());
+			await expect(absorb(getInput())).rejects.toThrow(Error);
+		});
+
+		it('errors if unexpected code to abosorb supplied', async () => {
+			await createNodePair();
+			await expect(
+				absorb(
+					getInput({
+						type: 'MainType',
+						code: mainCode,
+						codeToAbsorb: `${absorbedCode}@@@@@`,
+					}),
+				),
+			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
 		});
 
 		it('errors if no code to absorb supplied', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				someString: 'fake1',
-			});
+			await createNodePair();
 			await expect(
-				absorbHandler()({
-					type: 'MainType',
-					code: mainCode,
-					body: {},
-				}),
-			).rejects.toThrow({
-				status: 400,
-				message: 'oh no',
-			});
+				absorb(
+					getInput({
+						type: 'MainType',
+						code: mainCode,
+					}),
+				),
+			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
+			});
+		});
+
+		it('errors if main code does not exist', async () => {
+			await createNode('MainType', {
+				code: absorbedCode,
+				someString: 'fake1',
+			});
+			await expect(absorbHandler()(getInput())).rejects.toThrow({
+				status: 404,
+				message: `MainType record missing for \`code\``,
+			});
+			await neo4jTest('MainType', absorbedCode).match({
+				code: absorbedCode,
 				someString: 'fake1',
 			});
 		});
@@ -76,50 +109,25 @@ describe('rest DELETE', () => {
 		it('errors if code to absorb does not exist', async () => {
 			await createNode('MainType', {
 				code: mainCode,
-				someString: 'fake1',
+				someString: 'fake2',
 			});
-			await expect(
-				absorbHandler()({
-					type: 'MainType',
-					code: mainCode,
-					body: { code: absorbedCode },
-				}),
-			).rejects.toThrow({
+			await expect(absorbHandler()(getInput())).rejects.toThrow({
 				status: 404,
-				message: 'oh no',
+				message: `MainType record missing for \`codeToAbsorb\``,
 			});
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
-				someString: 'fake1',
-			});
-		});
-		it('errors if destination code does not exist', async () => {
-			await createNode('MainType', {
-				code: absorbedCode,
-				someString: 'fake2',
-			});
-			await expect(
-				absorbHandler()({
-					type: 'MainType',
-					code: mainCode,
-					body: { code: absorbedCode },
-				}),
-			).rejects.toThrow({
-				status: 404,
-				message: 'oh no',
-			});
-			await neo4jTest('MainType', absorbedCode).match({
-				code: absorbedCode,
 				someString: 'fake2',
 			});
 		});
 	});
+
 	describe('successful application', () => {
 		describe('properties', () => {
 			it('merges unconnected nodes', async () => {
 				await createNodePair();
 
-				const { status } = await absorb();
+				const { status } = await absorb(getInput());
 				expect(status).toBe(200);
 
 				await neo4jTest('MainType', mainCode).exists();
@@ -131,7 +139,7 @@ describe('rest DELETE', () => {
 					{ someString: 'potato' },
 					{ someString: 'tomato' },
 				);
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					someString: 'potato',
@@ -143,7 +151,7 @@ describe('rest DELETE', () => {
 
 			it('add new properties to destination node', async () => {
 				await createNodePair(undefined, { someString: 'potato' });
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					someString: 'potato',
@@ -155,7 +163,7 @@ describe('rest DELETE', () => {
 
 			it("doesn't error when unrecognised properties exist", async () => {
 				await createNodePair(undefined, { notInSchema: 'someVal' });
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).not.toMatchObject({
 					notInSchema: expect.any(String),
@@ -174,7 +182,7 @@ describe('rest DELETE', () => {
 				const child = await createNode('ChildType', childCode);
 				await connectNodes(absorbed, 'HAS_CHILD', child);
 
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					children: [childCode],
@@ -204,7 +212,7 @@ describe('rest DELETE', () => {
 				const parent = await createNode('ParentType', parentCode);
 				await connectNodes(parent, 'IS_PARENT_OF', absorbed);
 
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					parents: [parentCode],
@@ -238,7 +246,7 @@ describe('rest DELETE', () => {
 					[absorbed, 'HAS_CHILD', child],
 				);
 
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					children: [childCode],
@@ -265,12 +273,13 @@ describe('rest DELETE', () => {
 			});
 
 			it('discard any newly reflexive relationships', async () => {
-				const [main, absorbed] = await createNodePair(
-					mainCode,
-					absorbedCode,
+				const nodes = await createNodePair(
+					{ code: mainCode },
+					{ code: absorbedCode },
 				);
+				const [main, absorbed] = nodes;
 				await connectNodes(main, 'HAS_YOUNGER_SIBLING', absorbed);
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).not.toMatchObject({
 					youngerSiblings: expect.any(Array),
@@ -280,7 +289,6 @@ describe('rest DELETE', () => {
 				});
 
 				await neo4jTest('MainType', mainCode).hasRels(0);
-
 				await neo4jTest('MainType', absorbedCode).notExists();
 			});
 
@@ -297,7 +305,7 @@ describe('rest DELETE', () => {
 					[absorbed, 'HAS_FAVOURITE_CHILD', child2],
 				);
 
-				const { status, body } = await absorb();
+				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					favouriteChild: `${namespace}-child1`,
