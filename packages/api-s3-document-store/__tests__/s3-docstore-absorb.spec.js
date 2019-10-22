@@ -64,7 +64,7 @@ const mockS3Absorb = (
 	});
 
 	// s3Merge depends on s3Get, s3Delete and s3Post module so we create stub for them
-	// When 'post-unexpected' word is included on provided system code (e,g `docstore-merge-test-post-unexpected`), then we'll throw error
+	// When 'post-unexpected' word is included on provided system code (e,g `docstore-absorb-test-post-unexpected`), then we'll throw error
 	const stubPost = jest
 		.spyOn(postModule, 's3Post')
 		.mockImplementation(async ({ code, body }) => {
@@ -219,7 +219,7 @@ describe('S3 document helper absorb', () => {
 			versionMarker: result.versionMarker,
 			siblingVersionMarker: result.siblingVersionMarker,
 		});
-		// undo merge
+		// undo absorb
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(2);
 		[
 			s3CallMatcher(toSystemCode, result.versionMarker),
