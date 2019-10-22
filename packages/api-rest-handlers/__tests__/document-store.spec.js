@@ -248,6 +248,31 @@ describe('rest document store integration', () => {
 						versionMarker,
 					);
 				});
+
+				it('returns document from neo4j when documentStore is not passed in', async () => {
+					const { status, body } = await handler({})(
+						getInput({
+							someString: 'some string',
+							someDocument: 'some document',
+						}),
+					);
+
+					expect(status).toBe(goodStatus);
+
+					expect(body).toMatchObject({
+						code: mainCode,
+						someString: 'some string',
+						someDocument: 'some document',
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.exists()
+						.match({
+							code: mainCode,
+							someString: 'some string',
+							someDocument: 'some document',
+						});
+				});
 			});
 		},
 	);
@@ -359,6 +384,32 @@ describe('rest document store integration', () => {
 				mainCode,
 				versionMarker,
 			);
+		});
+
+		it('returns document from neo4j when documentStore is not passed in', async () => {
+			await createMainNode();
+			const { status, body } = await patchHandler({})(
+				getInput({
+					someString: 'some string',
+					someDocument: 'some document',
+				}),
+			);
+
+			expect(status).toBe(200);
+
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'some string',
+				someDocument: 'some document',
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					code: mainCode,
+					someString: 'some string',
+					someDocument: 'some document',
+				});
 		});
 	});
 
