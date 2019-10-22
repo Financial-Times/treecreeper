@@ -18,9 +18,11 @@ const getHandler = ({
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
 
+	const { body: documentStoreBody } = documentStoreResult;
+
 	return {
 		status: 200,
-		body: Object.assign(neo4jResult.toJson(type), documentStoreResult),
+		body: Object.assign(neo4jResult.toJson(type), documentStoreBody),
 	};
 };
 
