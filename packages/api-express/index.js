@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const { getRestApi } = require('./lib/get-rest-api');
 const clientId = require('./middleware/client-id');
 const requestId = require('./middleware/request-id');
+const { errorToErrors } = require('./middleware/errors');
 const { middleware: contextMiddleware } = require('./lib/request-context');
 
 const bodyParsers = [
@@ -27,6 +28,8 @@ const getApp = ({
 	} else {
 		app.use(restPath, getRestApi({ app }));
 	}
+
+	app.use(errorToErrors);
 	return app;
 };
 

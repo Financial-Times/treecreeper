@@ -31,7 +31,6 @@ const requestLog = (endpointName, method, req) => {
 
 const controller = (method, handler) => (req, res, next) => {
 	requestLog('rest', method, req);
-	console.log('asldkhsal duaskl j');
 	handler(
 		Object.assign(
 			{
