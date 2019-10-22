@@ -4,7 +4,7 @@ const { patchHandler } = require('../patch');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
-describe('rest PATCH update', () => {
+describe.skip('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
 	const mainCode = `${namespace}-main`;
 

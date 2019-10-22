@@ -2,7 +2,7 @@ const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 
-describe('rest PATCH relationship delete', () => {
+describe.skip('rest PATCH relationship delete', () => {
 	const namespace = 'api-rest-handlers-patch-relationship-delete';
 	const mainCode = `${namespace}-main`;
 	const mainCode2 = `${mainCode}2`;

@@ -27,6 +27,10 @@ const testSuite = (method, goodStatus) => {
 						method === 'patch'
 							? jest.fn().mockReturnValue(mockHandler)
 							: defaultHandler,
+					absorbHandler:
+						method === 'absorb'
+							? jest.fn().mockReturnValue(mockHandler)
+							: defaultHandler,
 				};
 			});
 			const { getRestApi } = require('..');
