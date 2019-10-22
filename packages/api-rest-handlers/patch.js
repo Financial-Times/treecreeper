@@ -56,9 +56,7 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = ({
-	documentStore = { patch: () => ({}), delete: () => null },
-} = {}) => {
+const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
@@ -75,17 +73,7 @@ const patchHandler = ({
 
 		const initialContent = preflightRequest.toJson(type);
 
-		let versionMarker;
-		let newBodyDocs;
 		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
-
-		if (!_isEmpty(bodyDocuments)) {
-			({ versionMarker, body: newBodyDocs } = await documentStore.patch(
-				type,
-				code,
-				bodyDocuments,
-			));
-		}
 
 		const properties = constructNeo4jProperties({
 			type,
@@ -163,6 +151,11 @@ const patchHandler = ({
 		}
 
 		queryParts.push(getNeo4jRecordCypherQuery());
+
+		const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(bodyDocuments)
+			? await documentStore.patch(type, code, bodyDocuments)
+			: {};
+
 		try {
 			const neo4jResult = await executeQuery(
 				queryParts.join('\n'),
@@ -175,8 +168,8 @@ const patchHandler = ({
 
 			return { status: 200, body: responseData };
 		} catch (err) {
-			if (!_isEmpty(bodyDocuments) && versionMarker) {
-				documentStore.delete(type, code, versionMarker);
+			if (undo) {
+				await undo();
 			}
 			handleUpsertError(err);
 			throw err;

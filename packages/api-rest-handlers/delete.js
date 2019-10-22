@@ -28,10 +28,12 @@ const deleteHandler = ({
 	const query = `MATCH (node:${type} {code: $code}) DELETE node`;
 
 	// Writes are in series, not parallel, to simplify rollback on error
-	const { versionMarker: deleteMarker } = await documentStore.delete(
-		type,
-		code,
-	);
+	const { versionMarker, undo } = await documentStore.delete(type, code);
+	// documentStore.delete never throws error,  but retuns { versionMarker: null } instead
+	if (versionMarker === null) {
+		throw new Error('S3 query failed');
+	}
+
 	try {
 		await executeQuery(query, { code });
 	} catch (error) {
@@ -39,7 +41,9 @@ const deleteHandler = ({
 			{ event: 'NEO4J_DELETE_FAILURE', error },
 			'Neo4j Delete unsuccessful. Rolling back S3 delete',
 		);
-		await documentStore.delete(type, code, deleteMarker);
+		if (undo) {
+			await undo();
+		}
 		throw error;
 	}
 
