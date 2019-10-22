@@ -55,13 +55,6 @@ class SDK {
 		return this.updater.ready();
 	}
 
-	// TODO ditch this in favour of using OnChange everywhere
-	on(event, handler) {
-		if (event === 'change') {
-			return this.onChange(handler, event);
-		}
-	}
-
 	onChange(handler, event) {
 		// handle the case where things are listening for an asynchronous
 		// load event, but it has already happened
