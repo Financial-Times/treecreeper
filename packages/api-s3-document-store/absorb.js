@@ -5,7 +5,7 @@ const { s3Delete } = require('./delete');
 const { s3Post } = require('./post');
 const { diffProperties } = require('./diff');
 
-const s3Merge = async ({
+const s3Absorb = async ({
 	s3Instance,
 	bucketName,
 	nodeType,
@@ -24,9 +24,9 @@ const s3Merge = async ({
 	if (_isEmpty(sourceNodeBody)) {
 		logger.info(
 			{
-				event: 'MERGE_S3_NOACTION',
+				event: 'ABSORB_S3_NOACTION',
 			},
-			'Merge: Source object is empty',
+			'Absorb: Source object is empty',
 		);
 		return {};
 	}
@@ -77,7 +77,7 @@ const s3Merge = async ({
 	const undoAndRaiseEror = async message => {
 		logger.error(
 			{
-				event: 'MERGE_S3_FAILURE',
+				event: 'ABSORB_S3_FAILURE',
 				deletedVersionId,
 				postedVersionId,
 			},
@@ -89,17 +89,17 @@ const s3Merge = async ({
 
 	// Both of delete source version and post destination version fails
 	if (!deletedVersionId && !postedVersionId) {
-		await undoAndRaiseEror('MERGE FAILED: Write and delete failed in S3');
+		await undoAndRaiseEror('ABSORB FAILED: Write and delete failed in S3');
 	}
 
 	// post destination version success, but delete source version fails
 	if (!deletedVersionId) {
-		await undoAndRaiseEror('MERGE FAILED: Delete failed in S3');
+		await undoAndRaiseEror('ABSORB FAILED: Delete failed in S3');
 	}
 
 	// delete source version success, but post destination version fails and should write new body
 	if (!postedVersionId && !noPropertiesToWrite) {
-		await undoAndRaiseEror('MERGE FAILED: Write failed in S3');
+		await undoAndRaiseEror('ABSORB FAILED: Write failed in S3');
 	}
 
 	return {
@@ -108,7 +108,7 @@ const s3Merge = async ({
 		// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
 		body: Object.assign({}, destinationNodeBody, sourceNodeBody),
 
-		// On undo merge, we have to delete both of posted destination version and deleted source version
+		// On undo absorb, we have to delete both of posted destination version and deleted source version
 		undo: async () => {
 			const [
 				// delete destination post version
@@ -126,5 +126,5 @@ const s3Merge = async ({
 };
 
 module.exports = {
-	s3Merge,
+	s3Absorb,
 };
