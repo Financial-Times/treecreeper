@@ -19,12 +19,9 @@ const sdkValidators = Object.entries(validators).reduce(
 	{},
 );
 
-const validateParams = ({ type, code, codeToAbsorb }) => {
+const validateParams = ({ type, code }) => {
 	module.exports.validateTypeName(type);
 	module.exports.validateCode(type, code);
-	if (codeToAbsorb) {
-		module.exports.validateCode(type, codeToAbsorb, 'codeToAbsorb');
-	}
 };
 
 const validateBody = ({ type, code, body: newContent }) => {

@@ -85,10 +85,7 @@ describe('rest POST (absorb)', () => {
 						code: mainCode,
 					}),
 				),
-			).rejects.toThrow({
-				status: 400,
-				message: 'Expected parameter(s): codeToAbsorb',
-			});
+			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
 			});

@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { validateInput } = require('./lib/validation');
+const { validateInput, validateCode } = require('./lib/validation');
 const { logger } = require('../api-core/lib/request-context');
 const { executeQuery } = require('./lib/neo4j-model');
 const { diffProperties } = require('./lib/diff-properties');
@@ -39,6 +39,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	const { type: nodeType, code, codeToAbsorb: absorbedCode } = validateInput(
 		input,
 	);
+	validateCode(nodeType, absorbedCode, 'codeToAbsorb');
 
 	// Fetch the nodes to be updated
 	const [mainNode, absorbedNode] = await Promise.all([
