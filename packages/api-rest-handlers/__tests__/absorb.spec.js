@@ -58,19 +58,13 @@ describe('rest POST (absorb)', () => {
 
 	describe('error handling', () => {
 		it('responds with 500 if neo4j query fails', async () => {
-			await createNodePair(
-				{ someString: 'fake1' },
-				{ someString: 'fake2' },
-			);
+			await createNodePair();
 			dbUnavailable();
 			await expect(absorb(getInput())).rejects.toThrow(Error);
 		});
 
 		it('errors if no code to absorb supplied', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				someString: 'fake1',
-			});
+			await createNodePair();
 			await expect(
 				absorbHandler()(
 					getInput({
@@ -90,23 +84,8 @@ describe('rest POST (absorb)', () => {
 
 		it('errors if destination code does not exist', async () => {
 			await createNode('MainType', {
-				code: mainCode,
-				someString: 'fake1',
-			});
-			await expect(absorbHandler()(getInput())).rejects.toThrow({
-				status: 404,
-				message: `MainType record missing for \`${absorbedCode}\``,
-			});
-			await neo4jTest('MainType', mainCode).match({
-				code: mainCode,
-				someString: 'fake1',
-			});
-		});
-
-		it('errors if code to absorb does not exist', async () => {
-			await createNode('MainType', {
 				code: absorbedCode,
-				someString: 'fake2',
+				someString: 'fake1',
 			});
 			await expect(absorbHandler()(getInput())).rejects.toThrow({
 				status: 404,
@@ -114,6 +93,21 @@ describe('rest POST (absorb)', () => {
 			});
 			await neo4jTest('MainType', absorbedCode).match({
 				code: absorbedCode,
+				someString: 'fake1',
+			});
+		});
+
+		it('errors if code to absorb does not exist', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+				someString: 'fake2',
+			});
+			await expect(absorbHandler()(getInput())).rejects.toThrow({
+				status: 404,
+				message: `MainType record missing for \`${absorbedCode}\``,
+			});
+			await neo4jTest('MainType', mainCode).match({
+				code: mainCode,
 				someString: 'fake2',
 			});
 		});
