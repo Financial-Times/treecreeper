@@ -33,28 +33,39 @@ const mergeRelationships = async (nodeType, absorbedCode, code) => {
 	return executeQuery(query.join('\n'), { absorbedCode, code }, true);
 };
 
-// e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
-// Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
-const absorbHandler = ({ documentStore } = {}) => async input => {
-	const { type: nodeType, code, codeToAbsorb: absorbedCode } = validateInput(
-		input,
+const removeRelationships = async (
+	nodeType,
+	absorbedCode,
+	removedRelationships,
+) => {
+	const queryParts = [`MATCH (node:${nodeType} { code: $code })`];
+	const {
+		parameters,
+		queryParts: deleteRelationshipQueries,
+	} = prepareRelationshipDeletion(nodeType, removedRelationships);
+
+	const queries = [
+		...queryParts,
+		...deleteRelationshipQueries,
+		'RETURN node',
+	];
+	await executeQuery(
+		queries.join('\n'),
+		Object.assign({}, parameters, { code: absorbedCode }),
 	);
-	validateCode(nodeType, absorbedCode, 'codeToAbsorb');
+};
 
-	// Fetch the nodes to be updated
-	const [mainNode, absorbedNode] = await Promise.all([
-		fetchNode(nodeType, code),
-		fetchNode(nodeType, absorbedCode, 'codeToAbsorb'),
-	]);
-	const mainRecord = mainNode.toJson(nodeType, true);
-	const absorbedRecord = absorbedNode.toJson(nodeType, true);
-
+const getWriteProperties = ({
+	nodeType,
+	properties,
+	absorbedRecord,
+	mainRecord,
+}) => {
 	const writeProperties = diffProperties({
 		type: nodeType,
 		newContent: absorbedRecord,
 		initialContent: mainRecord,
 	});
-	const { properties } = getType(nodeType);
 	Object.keys(absorbedRecord).forEach(name => {
 		if (name in mainRecord) {
 			delete writeProperties[name];
@@ -65,7 +76,16 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 			delete writeProperties[name];
 		}
 	});
+	return writeProperties;
+};
 
+const collectRemovedRelationships = ({
+	nodeType,
+	code,
+	properties,
+	absorbedRecord,
+	mainRecord,
+}) => {
 	const removedRelationships = getRemovedRelationships({
 		type: nodeType,
 		initialContent: absorbedRecord,
@@ -91,23 +111,46 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		}
 	});
 
-	// Check and delete relationships if needed
-	if (Object.keys(removedRelationships).length > 0) {
-		const queryParts = [`MATCH (node:${nodeType} { code: $code })`];
-		const {
-			parameters,
-			queryParts: deleteRelationshipQueries,
-		} = prepareRelationshipDeletion(nodeType, removedRelationships);
+	return removedRelationships;
+};
 
-		const queries = [
-			...queryParts,
-			...deleteRelationshipQueries,
-			'RETURN node',
-		];
-		await executeQuery(
-			queries.join('\n'),
-			Object.assign({}, parameters, { code: absorbedCode }),
-		);
+// e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
+// Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
+const absorbHandler = ({ documentStore } = {}) => async input => {
+	const { type: nodeType, code, codeToAbsorb: absorbedCode } = validateInput(
+		input,
+	);
+	validateCode(nodeType, absorbedCode, 'codeToAbsorb');
+
+	// Fetch nodes to be updated
+	const [mainNode, absorbedNode] = await Promise.all([
+		fetchNode(nodeType, code),
+		fetchNode(nodeType, absorbedCode, 'codeToAbsorb'),
+	]);
+	const mainRecord = mainNode.toJson(nodeType, true);
+	const absorbedRecord = absorbedNode.toJson(nodeType, true);
+	const { properties } = getType(nodeType);
+
+	// This object will be used for logging
+	// eslint-disable-next-line no-unused-vars
+	const writeProperties = getWriteProperties({
+		nodeType,
+		properties,
+		absorbedRecord,
+		mainRecord,
+	});
+
+	const removedRelationships = collectRemovedRelationships({
+		nodeType,
+		code,
+		properties,
+		absorbedRecord,
+		mainRecord,
+	});
+
+	// Remove relationships for absorbed code if exists
+	if (Object.keys(removedRelationships).length > 0) {
+		await removeRelationships(nodeType, absorbedCode, removedRelationships);
 	}
 
 	const {
@@ -117,7 +160,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	let result;
 	try {
-		// Merge relationships in Neo4j
+		// Merge Neo4j relationships
 		result = await mergeRelationships(nodeType, absorbedCode, code);
 	} catch (err) {
 		logger.info(
