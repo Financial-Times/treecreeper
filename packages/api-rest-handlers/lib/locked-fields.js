@@ -77,7 +77,7 @@ const validatePropertiesAgainstLocked = (clientId, body, newLockedFields) => {
 
 	if (clashes.length) {
 		throw new Error(
-			`The following fields cannot be locked because they are locked by another client: ${clashes.join(
+			`The following fields cannot be written because they are locked by another client: ${clashes.join(
 				', ',
 			)}`,
 		);
