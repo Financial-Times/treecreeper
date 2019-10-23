@@ -33,7 +33,7 @@ const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
 	return removedFields;
 };
 
-const setLockFields = (clientId, lockFieldList, existingLockedFields) => {
+const setLockedFields = (clientId, lockFieldList, existingLockedFields) => {
 	const conflictFields = normalizeFieldParam(lockFieldList).reduce(
 		(conflicts, fieldName) => {
 			const lockedByExistingClientId = existingLockedFields[fieldName];
@@ -114,7 +114,7 @@ const mergeLockedFields = ({
 				  )
 				: {};
 	}
-	const newLockedFields = setLockFields(
+	const newLockedFields = setLockedFields(
 		clientId,
 		lockFieldList,
 		existingLockedFields,
@@ -130,5 +130,5 @@ const mergeLockedFields = ({
 module.exports = {
 	mergeLockedFields,
 	normalizeFieldParam,
-	setLockFields,
+	setLockedFields,
 };
