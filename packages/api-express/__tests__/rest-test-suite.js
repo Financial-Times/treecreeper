@@ -1,14 +1,13 @@
 const defaultHandler = () => () => null;
 const httpErrors = require('http-errors');
-const express = require('express');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
 
 const testSuite = (method, goodStatus) => {
-	describe(`api-rest-express - ${method}`, () => {
+	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
 		let app;
-		beforeAll(() => {
+		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
 				return {
 					deleteHandler:
@@ -27,19 +26,22 @@ const testSuite = (method, goodStatus) => {
 						method === 'patch'
 							? jest.fn().mockReturnValue(mockHandler)
 							: defaultHandler,
+					absorbHandler:
+						method === 'absorb'
+							? jest.fn().mockReturnValue(mockHandler)
+							: defaultHandler,
 				};
 			});
-			const { getRestApi } = require('..');
-			app = express();
+			const { getApp } = require('..');
 
-			app.use('/route', getRestApi());
+			app = await getApp();
 		});
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));
 
-		const namespace = `api-rest-express-${method}`;
+		const namespace = `api-express-${method}`;
 		const mainCode = `${namespace}-main`;
-		const restUrl = `/route/MainType/${mainCode}?upsert=yes`;
+		const restUrl = `/rest/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
 

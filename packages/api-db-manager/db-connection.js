@@ -1,6 +1,6 @@
 const neo4j = require('neo4j-driver').v1;
 const metrics = require('next-metrics');
-const { logger } = require('../lib/request-context');
+const { logger } = require('../api-express/lib/request-context');
 
 const { TIMEOUT } = { TIMEOUT: 15000 };
 

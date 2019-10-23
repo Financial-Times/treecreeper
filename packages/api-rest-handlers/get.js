@@ -3,7 +3,7 @@ const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 
 const getHandler = ({
-	documentStore = { get: () => null },
+	documentStore = { get: () => ({}) },
 } = {}) => async input => {
 	validateInput(input);
 

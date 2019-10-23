@@ -1,5 +1,5 @@
 /* global  jest */
-const { driver } = require('../packages/api-core/lib/db-connection');
+const { driver } = require('../packages/api-db-manager');
 
 const asyncErrorFunction = async () => {
 	throw new Error('oh no');

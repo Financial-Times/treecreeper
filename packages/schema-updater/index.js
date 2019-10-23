@@ -45,6 +45,10 @@ class SchemaUpdater {
 		if (schemaData) {
 			this.isStatic = true;
 			this.rawData.set(schemaData);
+			this.eventEmitter.emit('change', {
+				oldVersion: undefined,
+				newVersion: this.version,
+			})
 			return;
 		}
 
@@ -129,12 +133,7 @@ class SchemaUpdater {
 
 	ready() {
 		if (this.isStatic) {
-			return Promise.resolve().then(() =>
-				this.eventEmitter.emit('change', {
-					oldVersion: undefined,
-					newVersion: this.version,
-				}),
-			);
+			return Promise.resolve()
 		}
 		return this.updateMode === 'poll'
 			? this.startPolling()

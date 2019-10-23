@@ -1,5 +1,5 @@
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-const { driver } = require('../packages/api-core/lib/db-connection');
+const { driver } = require('./db-connection');
 
 const executeQuery = (query, parameters) =>
 	driver.session().run(query, parameters);

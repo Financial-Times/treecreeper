@@ -87,12 +87,21 @@ const buildNeo4jPatchQuery = ({
 		...createRelationshipQueries,
 		getNeo4jRecordCypherQuery(),
 	].join('\n');
+
+	properties = {
+		...properties,
+		_lockedFields: Object.keys(lockedFields).length
+			? JSON.stringify(lockedFields)
+			: null,
+	};
 	const parameters = {
-		...{ code, properties, _lockedFields: lockedFields },
+		...{ code, properties },
 		...prepareMetadataForNeo4jQuery(metadata),
 		...deleteRelationshipParams,
 		...createRelationshipParams,
 	};
+
+	// TODO: Best point of logging neo4j query if we need
 
 	return {
 		neo4jQuery,
@@ -100,14 +109,18 @@ const buildNeo4jPatchQuery = ({
 	};
 };
 
-const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
+const patchHandler = ({
+	documentStore = {
+		patch: () => ({}),
+		post: () => ({}),
+	},
+} = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
 		const {
 			type,
 			code,
-			clientId,
 			body,
 			metadata = {},
 			query: {
@@ -117,6 +130,8 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 				unlockFields,
 			} = {},
 		} = validateInput(input);
+
+		const { clientId } = metadata;
 
 		if (containsRelationshipData(type, body)) {
 			validateRelationshipAction(relationshipAction);
@@ -180,7 +195,7 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			return { status: 200, body: initialContent };
 		}
 
-		const { neo4jQuery, parameters } = buildNeo4jPatchQuery(
+		const { neo4jQuery, parameters } = buildNeo4jPatchQuery({
 			type,
 			code,
 			metadata,
@@ -190,11 +205,11 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			removedRelationships,
 			addedRelationships,
 			willModifyLockedFields,
-		);
+		});
 
 		const {
 			body: newBodyDocuments = {},
-			undo: undoDocstorePatch,
+			undo: undoDocstoreWrite,
 		} = !_isEmpty(bodyDocuments)
 			? await documentStore.patch(type, code, bodyDocuments)
 			: {};
@@ -209,8 +224,8 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 				},
 			};
 		} catch (err) {
-			if (undoDocstorePatch) {
-				await undoDocstorePatch();
+			if (undoDocstoreWrite) {
+				await undoDocstoreWrite();
 			}
 			handleUpsertError(err);
 			throw err;

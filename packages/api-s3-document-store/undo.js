@@ -1,4 +1,4 @@
-const { logger } = require('../api-core/lib/request-context');
+const { logger } = require('../api-express/lib/request-context');
 
 const undo = ({
 	s3Instance,
