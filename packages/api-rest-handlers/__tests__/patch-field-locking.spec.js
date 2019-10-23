@@ -366,7 +366,7 @@ describe('rest PATCH field-locking', () => {
 					lockHandler({ someString: 'new some string' }),
 				).rejects.toThrow({
 					status: 400,
-					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
+					message: `The following fields cannot be written because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 
 				await neo4jTest('MainType', mainCode).match({
