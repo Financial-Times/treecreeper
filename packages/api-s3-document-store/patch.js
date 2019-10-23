@@ -31,6 +31,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 		Bucket: bucketName,
 		Key: `${nodeType}/${code}`,
 		Body: JSON.stringify(newBodyDocument),
+		ContentType: 'application/json',
 	};
 	const versionId = await upload({
 		s3Instance,
