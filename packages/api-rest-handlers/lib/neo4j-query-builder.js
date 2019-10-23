@@ -73,7 +73,7 @@ const queryBuilder = (method, input, body) => {
 				  })
 				: body,
 		});
-		parameters = { ...parameters, properties };
+		updateParameter({ properties });
 		context.willModifyNode = !!Object.keys(properties).length;
 		return builder;
 	};
