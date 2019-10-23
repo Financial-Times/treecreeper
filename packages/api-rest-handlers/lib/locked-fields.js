@@ -1,5 +1,5 @@
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('../../api-core/lib/request-context');
+const { logger } = require('../../api-express/lib/request-context');
 
 const normalizeFieldParam = fieldParam => {
 	if (!fieldParam) {
@@ -18,10 +18,8 @@ const getLockFieldList = (body, lockFields) => {
 };
 
 const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
-	const fields = unlockFields.split(',').map(field => field.trim());
-
 	const removedFields = Object.entries(existingLockedFields)
-		.filter(([fieldName]) => !fields.includes(fieldName))
+		.filter(([fieldName]) => !unlockFields.includes(fieldName))
 		.reduce((newFields, [fieldName, value]) => {
 			newFields[fieldName] = value;
 			return newFields;
@@ -29,28 +27,35 @@ const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
 
 	logger.info({
 		event: 'REMOVE_LOCKED_FIELDS',
-		fields,
+		unlockFields,
 		clientId,
 	});
 	return removedFields;
 };
 
 const setLockFields = (clientId, lockFieldList, existingLockedFields) => {
-	const conflictFields = lockFieldList.reduce((conflicts, fieldName) => {
-		const lockedByExistingClientId = existingLockedFields[fieldName];
-		if (lockedByExistingClientId && lockedByExistingClientId !== clientId) {
-			conflicts.push(
-				`${fieldName} is locked by ${lockedByExistingClientId}`,
-			);
-		}
-		existingLockedFields[fieldName] = clientId;
-		return conflicts;
-	}, []);
+	const conflictFields = normalizeFieldParam(lockFieldList).reduce(
+		(conflicts, fieldName) => {
+			const lockedByExistingClientId = existingLockedFields[fieldName];
+			if (
+				lockedByExistingClientId &&
+				lockedByExistingClientId !== clientId
+			) {
+				conflicts.push(
+					`${fieldName} is locked by ${lockedByExistingClientId}`,
+				);
+			}
+			existingLockedFields[fieldName] = clientId;
+			return conflicts;
+		},
+		[],
+	);
 
 	if (conflictFields.length) {
 		throw new Error(
-			`The following fields cannot be locked because they are locked by another client:
-				${conflictFields.join(', ')}`,
+			`The following fields cannot be locked because they are locked by another client: ${conflictFields.join(
+				', ',
+			)}`,
 		);
 	}
 	logger.info({
@@ -72,14 +77,15 @@ const validatePropertiesAgainstLocked = (clientId, body, newLockedFields) => {
 
 	if (clashes.length) {
 		throw new Error(
-			`The following fields cannot be written because they are locked by another client:
-				${clashes.join(', ')}`,
+			`The following fields cannot be locked because they are locked by another client: ${clashes.join(
+				', ',
+			)}`,
 		);
 	}
 };
 
 const mergeLockedFields = ({
-	body,
+	body = {},
 	clientId,
 	lockFields,
 	unlockFields,
@@ -89,15 +95,17 @@ const mergeLockedFields = ({
 	lockFields = normalizeFieldParam(lockFields);
 	unlockFields = normalizeFieldParam(unlockFields);
 
-	let newLockedFields = { ...existingLockedFields };
+	let lockFieldList = [];
 	if (lockFields.length > 0) {
 		if (!clientId) {
 			throw new Error(
 				'clientId needs to be set to a valid system code in order to lock fields',
 			);
 		}
-		const lockFieldList = getLockFieldList(body, lockFields);
-		const removedLockFields =
+		lockFieldList = getLockFieldList(body, lockFields);
+	}
+	if (unlockFields.length > 0) {
+		existingLockedFields =
 			!_isEmpty(existingLockedFields) && unlockFields !== 'all'
 				? removeLockedFields(
 						clientId,
@@ -105,20 +113,18 @@ const mergeLockedFields = ({
 						existingLockedFields,
 				  )
 				: {};
-		newLockedFields = setLockFields(
-			clientId,
-			lockFieldList,
-			removedLockFields,
-		);
 	}
+	const newLockedFields = setLockFields(
+		clientId,
+		lockFieldList,
+		existingLockedFields,
+	);
 
 	if (needValidate) {
-		validatePropertiesAgainstLocked(body, clientId, newLockedFields);
+		validatePropertiesAgainstLocked(clientId, body, newLockedFields);
 	}
 
-	return Object.keys(newLockedFields).length
-		? JSON.stringify(newLockedFields)
-		: null;
+	return newLockedFields;
 };
 
 module.exports = {
