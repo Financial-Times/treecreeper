@@ -29,7 +29,7 @@ const {
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { mergeLockedFields } = require('./lib/locked-fields');
 
-const determineChangeFlags = (
+const isNeo4jUpdateNeeded = (
 	properties,
 	removedRelationships,
 	addedRelationships,
@@ -41,16 +41,62 @@ const determineChangeFlags = (
 	const willModifyRelationships =
 		willDeleteRelationships || willCreateRelationships;
 
+	return !!(
+		willModifyNode ||
+		willModifyRelationships ||
+		willModifyLockedFields
+	);
+};
+
+const buildNeo4jPatchQuery = ({
+	type,
+	code,
+	metadata,
+	properties,
+	lockedFields,
+	upsert,
+	removedRelationships,
+	addedRelationships,
+}) => {
+	const baseQuery = stripIndents`MERGE (node:${type} { code: $code })
+		SET ${metaPropertiesForUpdate('node')}
+		SET node += $properties
+		`;
+
+	let deleteRelationshipParams = {};
+	let deleteRelationshipQueries = [];
+	if (Object.keys(removedRelationships).length) {
+		({
+			parameters: deleteRelationshipParams,
+			queryParts: deleteRelationshipQueries,
+		} = prepareRelationshipDeletion(type, removedRelationships));
+	}
+
+	let createRelationshipParams = {};
+	let createRelationshipQueries = [];
+	if (Object.keys(addedRelationships).length) {
+		({
+			relationshipParameters: createRelationshipParams,
+			relationshipQueries: createRelationshipQueries,
+		} = prepareToWriteRelationships(type, addedRelationships, upsert));
+	}
+
+	const neo4jQuery = [
+		baseQuery,
+		...deleteRelationshipQueries,
+		...createRelationshipQueries,
+		getNeo4jRecordCypherQuery(),
+	].join('\n');
+	const parameters = {
+		...{ code, properties, _lockedFields: lockedFields },
+		...prepareMetadataForNeo4jQuery(metadata),
+		...deleteRelationshipParams,
+		...createRelationshipParams,
+	};
+
 	return {
-		willModifyNode,
-		willDeleteRelationships,
-		willCreateRelationships,
-		willModifyLockedFields,
-		willUpdateNeo4j: !!(
-			willModifyNode ||
-			willModifyRelationships ||
-			willModifyLockedFields
-		),
+		neo4jQuery,
+		parameters,
 	};
 };
 
@@ -64,14 +110,13 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			clientId,
 			body,
 			metadata = {},
-			query = {},
+			query: {
+				relationshipAction,
+				upsert,
+				lockFields,
+				unlockFields,
+			} = {},
 		} = validateInput(input);
-		const {
-			relationshipAction,
-			// upsert,
-			lockFields,
-			unlockFields,
-		} = query;
 
 		if (containsRelationshipData(type, body)) {
 			validateRelationshipAction(relationshipAction);
@@ -111,7 +156,7 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			type,
 			initialContent,
 			newContent: bodyNoDocs,
-			action: query.relationshipAction,
+			action: relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
@@ -124,56 +169,28 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			(unlockFields || lockFields) &&
 			lockedFields !== initialContent._lockedFields;
 
-		const {
-			willDeleteRelationships,
-			willCreateRelationships,
-			willUpdateNeo4j,
-		} = determineChangeFlags(
+		if (
+			!isNeo4jUpdateNeeded(
+				properties,
+				addedRelationships,
+				removedRelationships,
+				willModifyLockedFields,
+			)
+		) {
+			return { status: 200, body: initialContent };
+		}
+
+		const { neo4jQuery, parameters } = buildNeo4jPatchQuery(
+			type,
+			code,
+			metadata,
 			properties,
+			lockedFields,
+			upsert,
 			removedRelationships,
 			addedRelationships,
 			willModifyLockedFields,
 		);
-
-		if (!willUpdateNeo4j) {
-			return { status: 200, body: initialContent };
-		}
-
-		const queryParts = [
-			stripIndents`MERGE (node:${type} { code: $code })
-					SET ${metaPropertiesForUpdate('node')}
-					SET node += $properties
-				`,
-		];
-
-		const parameters = {
-			...{ code, properties },
-			...prepareMetadataForNeo4jQuery(metadata),
-		};
-
-		if (willDeleteRelationships) {
-			const {
-				parameters: delParams,
-				queryParts: relDeleteQueries,
-			} = prepareRelationshipDeletion(type, removedRelationships);
-
-			queryParts.push(...relDeleteQueries);
-			Object.assign(parameters, delParams);
-		}
-		if (willCreateRelationships) {
-			const {
-				relationshipParameters,
-				relationshipQueries,
-			} = prepareToWriteRelationships(
-				type,
-				addedRelationships,
-				query.upsert,
-			);
-			Object.assign(parameters, relationshipParameters);
-			queryParts.push(...relationshipQueries);
-		}
-
-		queryParts.push(getNeo4jRecordCypherQuery());
 
 		const {
 			body: newBodyDocuments = {},
@@ -183,11 +200,7 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 			: {};
 
 		try {
-			// TODO: consider lock fields corresponds to writeNode in write-helper.js
-			const neo4jResult = await executeQuery(
-				queryParts.join('\n'),
-				parameters,
-			);
+			const neo4jResult = await executeQuery(neo4jQuery, parameters);
 			return {
 				status: 200,
 				body: {
