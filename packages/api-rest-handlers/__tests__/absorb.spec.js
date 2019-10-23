@@ -17,7 +17,7 @@ describe('rest POST (absorb)', () => {
 	const documentStore = {};
 
 	beforeEach(() => {
-		documentStore.merge = jest.fn(async () => ({}));
+		documentStore.absorb = jest.fn(async () => ({}));
 	});
 
 	afterEach(() => {
