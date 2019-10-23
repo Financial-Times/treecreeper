@@ -1,20 +1,22 @@
 const _isEmpty = require('lodash.isempty');
 const { logger } = require('../../api-express/lib/request-context');
 
-const normalizeFieldParam = fieldParam => {
+const normalizeFields = (fieldParam, body = {}) => {
 	if (!fieldParam) {
 		return [];
 	}
-	if (Array.isArray(fieldParam) || fieldParam === 'all') {
+	if (Array.isArray(fieldParam)) {
 		return fieldParam;
+	}
+	if (fieldParam === 'all') {
+		// TODO: exclude falsy field
+		return Object.keys(body);
 	}
 	return fieldParam.split(',').map(field => field.trim());
 };
 
-const getLockFieldList = (body, lockFields) => {
-	const fields = lockFields === 'all' ? Object.keys(body) : lockFields;
-
-	return fields.filter(name => name !== 'code');
+const getLockFieldList = lockFields => {
+	return lockFields.filter(name => name !== 'code');
 };
 
 const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
@@ -34,7 +36,7 @@ const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
 };
 
 const setLockedFields = (clientId, lockFieldList, existingLockedFields) => {
-	const conflictFields = normalizeFieldParam(lockFieldList).reduce(
+	const conflictFields = normalizeFields(lockFieldList).reduce(
 		(conflicts, fieldName) => {
 			const lockedByExistingClientId = existingLockedFields[fieldName];
 			if (
@@ -92,8 +94,9 @@ const mergeLockedFields = ({
 	existingLockedFields = {},
 	needValidate = false,
 }) => {
-	lockFields = normalizeFieldParam(lockFields);
-	unlockFields = normalizeFieldParam(unlockFields);
+	const isUnlockAll = unlockFields === 'all';
+	lockFields = normalizeFields(lockFields, body);
+	unlockFields = normalizeFields(unlockFields);
 
 	let lockFieldList = [];
 	if (lockFields.length > 0) {
@@ -102,17 +105,14 @@ const mergeLockedFields = ({
 				'clientId needs to be set to a valid system code in order to lock fields',
 			);
 		}
-		lockFieldList = getLockFieldList(body, lockFields);
+		lockFieldList = getLockFieldList(lockFields);
 	}
-	if (unlockFields.length > 0) {
-		existingLockedFields =
-			!_isEmpty(existingLockedFields) && unlockFields !== 'all'
-				? removeLockedFields(
-						clientId,
-						unlockFields,
-						existingLockedFields,
-				  )
-				: {};
+	if (isUnlockAll) {
+		existingLockedFields = {};
+	} else {
+		existingLockedFields = !_isEmpty(existingLockedFields)
+			? removeLockedFields(clientId, unlockFields, existingLockedFields)
+			: {};
 	}
 	const newLockedFields = setLockedFields(
 		clientId,
@@ -129,6 +129,6 @@ const mergeLockedFields = ({
 
 module.exports = {
 	mergeLockedFields,
-	normalizeFieldParam,
+	normalizeFields,
 	setLockedFields,
 };
