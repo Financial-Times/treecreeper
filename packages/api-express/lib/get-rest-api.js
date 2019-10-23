@@ -1,21 +1,14 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-// const httpErrors = require('http-errors');
-
-const clientId = require('./middleware/client-id');
-const requestId = require('./middleware/request-id');
+const { logger, setContext } = require('./request-context');
 const {
-	logger,
-	setContext,
-	middleware: contextMiddleware,
-} = require('../../packages/api-core/lib/request-context');
+	getHandler,
+	deleteHandler,
+	postHandler,
+	patchHandler,
+	absorbHandler,
+} = require('../../../packages/api-rest-handlers');
 
-const bodyParsers = [
-	bodyParser.json({ limit: '8mb' }),
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-];
-
-const { errorToErrors } = require('./middleware/errors');
+const { errorToErrors } = require('../middleware/errors');
 
 const requestLog = (endpointName, method, req) => {
 	setContext({
@@ -63,14 +56,6 @@ const controller = (method, handler) => (req, res, next) => {
 		)
 		.catch(next);
 };
-const {
-	getHandler,
-	deleteHandler,
-	postHandler,
-	patchHandler,
-	absorbHandler,
-} = require('../../packages/api-rest-handlers');
-// const {mergeHandler} = require('../../packages/api-rest-merge-handler');
 
 const getRestApi = ({
 	documentStore, // : s3Adaptor,
@@ -78,11 +63,6 @@ const getRestApi = ({
 	// updateStream, // : kinesisAdaptor
 } = {}) => {
 	const router = new express.Router();
-	router.use(contextMiddleware);
-	router.use(requestId);
-	router.use(clientId);
-	router.use(bodyParsers);
-
 	router
 		.route('/:type/:code')
 		.get(controller('GET', getHandler({ documentStore, logger })))
@@ -95,8 +75,6 @@ const getRestApi = ({
 		'/:type/:code/absorb/:codeToAbsorb',
 		controller('ABSORB', absorbHandler({ documentStore, logger })),
 	);
-
-	// router.post('/:type/:code/absorb', controller('POST', mergeHandler({documentStore, logger})));
 
 	router.use(errorToErrors);
 

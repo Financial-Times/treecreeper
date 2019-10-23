@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { setContext } = require('../../api-core/lib/request-context');
+const { setContext } = require('../lib/request-context');
 
 module.exports = (req, res, next) => {
 	if (!req.get('client-id') && !req.get('client-user-id')) {
@@ -13,7 +13,6 @@ module.exports = (req, res, next) => {
 	res.locals.clientUserId = req.get('client-user-id');
 
 	setContext('clientId', res.locals.clientId);
-
 	setContext('clientUserId', res.locals.clientUserId);
 	next();
 };

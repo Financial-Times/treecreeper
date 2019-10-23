@@ -1,5 +1,5 @@
 /* global jest */
-const { driver } = require('../packages/api-core/lib/db-connection');
+const { driver } = require('../packages/api-db-manager');
 
 const spyDbQuery = () => {
 	const originalSession = driver.session.bind(driver);

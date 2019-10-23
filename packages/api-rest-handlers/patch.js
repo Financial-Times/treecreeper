@@ -152,7 +152,9 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 
 		queryParts.push(getNeo4jRecordCypherQuery());
 
-		const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(bodyDocuments)
+		const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
+			bodyDocuments,
+		)
 			? await documentStore.patch(type, code, bodyDocuments)
 			: {};
 
@@ -168,8 +170,8 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 
 			return { status: 200, body: responseData };
 		} catch (err) {
-			if (undo) {
-				await undo();
+			if (undoDocstoreWrite) {
+				await undoDocstoreWrite();
 			}
 			handleUpsertError(err);
 			throw err;

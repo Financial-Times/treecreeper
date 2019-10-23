@@ -2,15 +2,13 @@
 
 const logger = require('@financial-times/n-logger').default;
 const schema = require('../../packages/schema-sdk');
-const {
-	executeQueryWithSharedSession,
-} = require('../../packages/api-core/lib/db-connection');
+const dbConnection = require('./db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
 const initConstraints = async () => {
 	await schema.ready();
-	const executeQuery = executeQueryWithSharedSession();
+	const executeQuery = dbConnection.executeQueryWithSharedSession();
 
 	try {
 		const setupConstraintIfPossible = constraintQuery =>
@@ -69,10 +67,13 @@ const initConstraints = async () => {
 	}
 };
 
-module.exports = {
-	initConstraints,
-	listenForChanges: () => schema.on('change', initConstraints),
-};
+module.exports = Object.assign(
+	{
+		initConstraints,
+		listenForChanges: () => schema.onChange(initConstraints),
+	},
+	dbConnection,
+);
 
 if (process.argv[1] === __filename) {
 	initConstraints()

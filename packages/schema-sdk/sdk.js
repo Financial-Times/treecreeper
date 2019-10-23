@@ -63,7 +63,7 @@ class SDK {
 	}
 
 	onChange(handler, event) {
-		// handle the cas ewhere thinsg are listening for an asynchronous
+		// handle the case where things are listening for an asynchronous
 		// load event, but it has already happened
 		if (this.rawData.isHydrated) {
 			handler(event);

@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
 const { validateInput, validateCode } = require('./lib/validation');
-const { logger } = require('../api-core/lib/request-context');
+const { logger } = require('../api-express/lib/request-context');
 const { executeQuery } = require('./lib/neo4j-model');
 const { diffProperties } = require('./lib/diff-properties');
 const { getType } = require('../schema-sdk');

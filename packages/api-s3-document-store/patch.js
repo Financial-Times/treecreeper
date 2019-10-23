@@ -1,5 +1,5 @@
 const { diff } = require('deep-diff');
-const { logger } = require('../api-core/lib/request-context');
+const { logger } = require('../api-express/lib/request-context');
 const { upload } = require('./upload');
 const { undo } = require('./undo');
 const { s3Get } = require('./get');

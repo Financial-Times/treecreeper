@@ -2,7 +2,7 @@ const schema = require('../../../packages/schema-sdk');
 
 schema.init();
 const { initConstraints } = require('..');
-const { driver } = require('../../../packages/api-core/lib/db-connection');
+const { driver } = require('../db-connection');
 
 const mockConstraints = (stub, constraints, writeResponse) => {
 	stub.mockImplementation(query => {
