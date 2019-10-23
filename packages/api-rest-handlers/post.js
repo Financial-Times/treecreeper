@@ -69,7 +69,9 @@ const postHandler = ({
 
 	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
 
-	const { body: newBodyDocs = {}, undo } = !_isEmpty(bodyDocuments)
+	const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
+		bodyDocuments,
+	)
 		? await documentStore.post(type, code, bodyDocuments)
 		: {};
 
@@ -86,8 +88,8 @@ const postHandler = ({
 
 		return { status: 200, body: responseData };
 	} catch (err) {
-		if (undo) {
-			await undo();
+		if (undoDocstoreWrite) {
+			await undoDocstoreWrite();
 		}
 
 		if (/already exists with label/.test(err.message)) {

@@ -7,7 +7,7 @@ const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
 		let app;
-		beforeAll(() => {
+		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
 				return {
 					deleteHandler:
@@ -33,7 +33,8 @@ const testSuite = (method, goodStatus) => {
 				};
 			});
 			const { getApp } = require('..');
-			app = getApp();
+
+			app = await getApp();
 		});
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));

@@ -170,8 +170,8 @@ const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
 
 			return { status: 200, body: responseData };
 		} catch (err) {
-			if (undo) {
-				await undo();
+			if (undoDocstoreWrite) {
+				await undoDocstoreWrite();
 			}
 			handleUpsertError(err);
 			throw err;
