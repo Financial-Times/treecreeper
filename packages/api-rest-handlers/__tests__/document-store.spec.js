@@ -235,6 +235,38 @@ describe('rest document store integration', () => {
 					);
 					expect(mockUndo).toHaveBeenCalled();
 				});
+
+				it('returns document from neo4j when documentStore is not passed in', async () => {
+					const mockPost = createResolvedDocstoreMock('post', {
+						versionMarker,
+						body: {
+							someDocument: 'some document from s3',
+						},
+					});
+
+					const { status, body } = await handler({})(
+						getInput({
+							someString: 'some string',
+							someDocument: 'some document',
+						}),
+					);
+
+					expect(status).toBe(goodStatus);
+					expect(body).toMatchObject({
+						code: mainCode,
+						someString: 'some string',
+						someDocument: 'some document',
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.exists()
+						.match({
+							code: mainCode,
+							someString: 'some string',
+						});
+
+					expect(mockPost).not.toHaveBeenCalled();
+				});
 			});
 		},
 	);
@@ -339,6 +371,38 @@ describe('rest document store integration', () => {
 				someDocument: 'some document',
 			});
 			expect(mockUndo).toHaveBeenCalled();
+		});
+
+		it('returns document from neo4j when documentStore is not passed in', async () => {
+			await createMainNode();
+			const mockPatch = createResolvedDocstoreMock('patch', {
+				versionMarker,
+				body: {
+					someDocument: 'some document from s3',
+				},
+			});
+			const { status, body } = await patchHandler({})(
+				getInput({
+					someString: 'some string',
+					someDocument: 'some document',
+				}),
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'some string',
+				someDocument: 'some document',
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					code: mainCode,
+					someString: 'some string',
+				});
+
+			expect(mockPatch).not.toHaveBeenCalled();
 		});
 	});
 
