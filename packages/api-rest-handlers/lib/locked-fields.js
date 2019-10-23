@@ -130,8 +130,5 @@ const mergeLockedFields = ({
 module.exports = {
 	mergeLockedFields,
 	normalizeFieldParam,
-	getLockFieldList,
-	removeLockedFields,
 	setLockFields,
-	validatePropertiesAgainstLocked,
 };

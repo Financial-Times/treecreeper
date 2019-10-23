@@ -1,4 +1,3 @@
-// const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const _isEmpty = require('lodash.isempty');
 const { executeQuery } = require('./lib/neo4j-model');
