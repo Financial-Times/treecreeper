@@ -1,6 +1,7 @@
 const express = require('express');
 const { logger, setContext } = require('./request-context');
 const {
+	headHandler,
 	getHandler,
 	deleteHandler,
 	postHandler,
@@ -49,10 +50,8 @@ const controller = (method, handler) => (req, res, next) => {
 			req.params,
 		),
 	)
-		.then(result =>
-			result.status
-				? res.status(result.status).json(result.body)
-				: res.json(result),
+		.then(({ status, body }) =>
+			body ? res.status(status).json(body) : res.status(status).end(),
 		)
 		.catch(next);
 };
@@ -65,6 +64,7 @@ const getRestApi = ({
 	const router = new express.Router();
 	router
 		.route('/:type/:code')
+		.head(controller('HEAD', headHandler({ logger })))
 		.get(controller('GET', getHandler({ documentStore, logger })))
 		.post(controller('POST', postHandler({ documentStore, logger })))
 		// 	.put(unimplemented('PUT', 'PATCH'))
