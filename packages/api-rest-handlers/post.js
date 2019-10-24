@@ -18,13 +18,21 @@ const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 
 const postHandler = ({
-	documentStore = { post: () => ({}) },
+	documentStore = { post: () => ({}), isDummy: true },
 } = {}) => async input => {
 	const { type, code, body, metadata = {}, query = {} } = validateInput(
 		input,
 	);
 
-	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+	let {
+		bodyDocuments: bodyForS3,
+		bodyNoDocs: bodyForNeo4j,
+	} = separateDocsFromBody(type, body);
+
+	if (documentStore.isDummy) {
+		bodyForS3 = {};
+		bodyForNeo4j = body;
+	}
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
@@ -45,12 +53,12 @@ const postHandler = ({
 
 	const properties = constructNeo4jProperties({
 		type,
-		body: bodyNoDocs,
+		body: bodyForNeo4j,
 		code,
 	});
 	const relationshipsToCreate = getRelationships({
 		type,
-		body: bodyNoDocs,
+		body: bodyForNeo4j,
 	});
 
 	const {
@@ -70,9 +78,9 @@ const postHandler = ({
 	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
 
 	const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
-		bodyDocuments,
+		bodyForS3,
 	)
-		? await documentStore.post(type, code, bodyDocuments)
+		? await documentStore.post(type, code, bodyForS3)
 		: {};
 
 	try {
