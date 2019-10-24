@@ -58,14 +58,19 @@ const controller = (endpointName, method, controllerImplementation) => (
 			req.params,
 		),
 	)
-		.then(result =>
-			result.status
+		.then(result => {
+			console.log(result);
+			if (method === 'HEAD') {
+				return res.status(result.status).end();
+			}
+			return result.status
 				? res.status(result.status).json(result.data)
-				: res.json(result),
-		)
+				: res.json(result);
+		})
 		.catch(next);
 };
 
+const headHandler = require('./node/head');
 const getHandler = require('./node/get');
 const postHandler = require('./node/post');
 const patchHandler = require('./node/patch');
@@ -83,6 +88,7 @@ module.exports = router => {
 
 	router
 		.route('/node/:nodeType/:code')
+		.head(controller('node', 'HEAD', headHandler))
 		.get(controller('node', 'GET', getHandler))
 		.post(controller('node', 'POST', postHandler))
 		.put(unimplemented('PUT', 'PATCH'))

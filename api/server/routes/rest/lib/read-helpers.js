@@ -18,7 +18,17 @@ const getNodeWithRelationships = (nodeType, code) => {
 	);
 };
 
+const getNode = (nodeType, code) => {
+	return executeQuery(
+		`MATCH (node:${nodeType} {code: $code})
+		RETURN node`,
+		{ code },
+		true,
+	);
+};
+
 module.exports = {
 	nodeWithRelsCypher,
 	getNodeWithRelationships,
+	getNode,
 };
