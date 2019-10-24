@@ -22,7 +22,6 @@ const getNeo4jNode = (type, code) => {
 		`MATCH (node:${type} {code: $code})
 		RETURN node`,
 		{ code },
-		true,
 	);
 };
 
