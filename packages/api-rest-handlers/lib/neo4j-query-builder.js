@@ -123,8 +123,7 @@ const queryBuilder = (method, input, body) => {
 			queryParts.push(...addRelationshipQueries);
 			updateParameter(addRelationshipParams);
 		}
-		context.willCreateRelationships = !!Object.keys(addedRelationships)
-			.length;
+		context.willAddRelationships = !!Object.keys(addedRelationships).length;
 		return builder;
 	};
 
@@ -174,11 +173,11 @@ const queryBuilder = (method, input, body) => {
 		const {
 			willModifyNode,
 			willDeleteRelationships,
-			willCreateRelationships,
+			willAddRelationships,
 			willModifyLockedFields,
 		} = context;
 		const willModifyRelationships =
-			willDeleteRelationships || willCreateRelationships;
+			willDeleteRelationships || willAddRelationships;
 
 		return !!(
 			willModifyNode ||
