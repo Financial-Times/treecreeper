@@ -5,7 +5,7 @@ const { getAugmentedSchema } = require('./get-augmented-schema');
 const { logger } = require('../../../lib/request-context');
 const { driver } = require('../../../lib/db-connection');
 const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
-// const { Tracer } = require('./request-tracer');
+const { Tracer } = require('./request-tracer');
 
 const s3 = new S3DocumentsHelper();
 
@@ -24,16 +24,16 @@ const getApolloMiddleware = () => {
 				driver,
 				s3DocsDataLoader,
 				headers,
-				// trace: new Tracer(),
+				trace: new Tracer(),
 			};
 		},
-		// formatResponse(response, { context }) {
-		// 	context.trace.log();
-		// 	return response;
-		// },
+		formatResponse(response, { context }) {
+			context.trace.log();
+			return response;
+		},
 		formatError(error, { context }) {
 			const isS3oError = /Forbidden/i.test(error.message);
-			// context.trace.error();
+			context.trace.error();
 			logger.error('GraphQL Error', {
 				event: 'GRAPHQL_ERROR',
 				error,

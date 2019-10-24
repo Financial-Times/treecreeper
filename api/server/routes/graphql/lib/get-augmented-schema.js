@@ -61,8 +61,8 @@ directive @deprecated(
 		resolvers: getResolvers(),
 		config: { query: true, mutation: false, debug: true },
 	});
-	return schema;
-	// return applyMiddleware(schema, requestTracer);
+
+	return applyMiddleware(schema, requestTracer);
 };
 
 module.exports = {

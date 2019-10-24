@@ -15,7 +15,7 @@ describe('graphql', () => {
 
 	const mainCode = `${namespace}-main`;
 
-	it.only('Return a single record', async () => {
+	it('Return a single record', async () => {
 		await sandbox.createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
