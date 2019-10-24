@@ -8,7 +8,7 @@ const {
 	findPropertyNames,
 	findInversePropertyNames,
 	invertDirection,
-	addRecursiveProperties, // remove
+	addRecursiveProperties,
 } = require('./schema-helpers');
 
 const kinesisClient = new Kinesis(
