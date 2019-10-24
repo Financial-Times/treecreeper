@@ -55,15 +55,18 @@ const patchHandler = ({
 				.removeRelationships(initialContent)
 				.addRelationships(initialContent);
 
-			if (!builder.isNeo4jUpdateNeeded()) {
-				return { status: 200, body: initialContent };
+			let neo4jResultBody;
+			if (builder.isNeo4jUpdateNeeded()) {
+				const neo4jResult = await builder.execute();
+				neo4jResultBody = neo4jResult.toJson(type);
+			} else {
+				neo4jResultBody = initialContent;
 			}
 
-			const neo4jResult = await builder.execute();
 			return {
 				status: 200,
 				body: {
-					...neo4jResult.toJson(type),
+					...neo4jResultBody,
 					...newBodyDocuments,
 				},
 			};

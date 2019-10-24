@@ -304,6 +304,24 @@ describe('rest document store integration', () => {
 			});
 		});
 
+		it("returns patched document store result even if neo4j won't update", async () => {
+			await createMainNode();
+			const documentBody = { someDocument: 'some document' };
+			const mockPost = createResolvedDocstoreMock('patch', {
+				body: documentBody,
+			});
+			const result = await patchHandler({ documentStore })(
+				getInput(documentBody),
+			);
+			expect(result).toMatchObject({
+				status: 200,
+				body: documentBody,
+			});
+			expect(mockPost).toHaveBeenCalledWith('MainType', mainCode, {
+				someDocument: 'some document',
+			});
+		});
+
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
 			const mockPatch = createRejectedDocstoreMock(
@@ -332,7 +350,10 @@ describe('rest document store integration', () => {
 
 			await expect(
 				patchHandler({ documentStore })(
-					getInput({ someDocument: 'some document' }),
+					getInput({
+						someDocument: 'some document',
+						someString: 'some string',
+					}),
 				),
 			).rejects.toThrow('oh no');
 			expect(mockPatch).toHaveBeenCalledWith('MainType', mainCode, {

@@ -8,7 +8,7 @@ const {
 	findPropertyNames,
 	findInversePropertyNames,
 	invertDirection,
-	addRecursiveProperties,
+	addRecursiveProperties, // remove
 } = require('./schema-helpers');
 
 const kinesisClient = new Kinesis(
@@ -109,6 +109,7 @@ const logNodeChanges = ({
 					: 'UPDATE',
 			code: node.properties.code,
 			type: nodeType,
+			// dont need recursive
 			updatedProperties: addRecursiveProperties(
 				updatedProperties,
 				nodeType,
