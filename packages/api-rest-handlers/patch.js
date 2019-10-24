@@ -41,16 +41,6 @@ const patchHandler = ({
 
 		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
 
-		const builder = queryBuilder('MERGE', input, bodyNoDocs)
-			.constructProperties(initialContent)
-			.mergeLockFields(initialContent)
-			.removeRelationships(initialContent)
-			.addRelationships(initialContent);
-
-		if (!builder.isNeo4jUpdateNeeded()) {
-			return { status: 200, body: initialContent };
-		}
-
 		const {
 			body: newBodyDocuments = {},
 			undo: undoDocstoreWrite,
@@ -59,6 +49,16 @@ const patchHandler = ({
 			: {};
 
 		try {
+			const builder = queryBuilder('MERGE', input, bodyNoDocs)
+				.constructProperties(initialContent)
+				.mergeLockFields(initialContent)
+				.removeRelationships(initialContent)
+				.addRelationships(initialContent);
+
+			if (!builder.isNeo4jUpdateNeeded()) {
+				return { status: 200, body: initialContent };
+			}
+
 			const neo4jResult = await builder.execute();
 			return {
 				status: 200,
