@@ -59,7 +59,6 @@ const controller = (endpointName, method, controllerImplementation) => (
 		),
 	)
 		.then(result => {
-			console.log(result);
 			if (method === 'HEAD') {
 				return res.status(result.status).end();
 			}
