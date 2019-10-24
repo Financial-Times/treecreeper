@@ -109,7 +109,6 @@ const logNodeChanges = ({
 					: 'UPDATE',
 			code: node.properties.code,
 			type: nodeType,
-			// dont need recursive
 			updatedProperties: addRecursiveProperties(
 				updatedProperties,
 				nodeType,
