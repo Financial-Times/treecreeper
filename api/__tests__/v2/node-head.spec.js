@@ -5,7 +5,8 @@ const { setupMocks, stubDbUnavailable } = require('../helpers');
 describe('v2 - node HEAD', () => {
 	const sandbox = {};
 
-	const namespace = 'v2-node-get';
+	const namespace = 'v2-node-head';
+	const mainCode = `${namespace}-main`;
 	setupMocks(sandbox, { namespace });
 
 	const testHeadRequest = (url, ...expectations) =>
@@ -16,35 +17,35 @@ describe('v2 - node HEAD', () => {
 			.expect(...expectations);
 
 	it('gets node without relationships', async () => {
-		await sandbox.createNode('System', {
-			code: `${namespace}-system`,
-			name: 'name1',
-			troubleshooting: 'Fake Document',
+		await sandbox.createNode('MainType', {
+			code: mainCode,
+			someString: 'name1',
+			someDocument: 'Fake Document',
 		});
-		await testHeadRequest(`/v2/node/System/${namespace}-system`, 200);
+		await testHeadRequest(`/v2/node/MainType/${mainCode}`, 200);
 	});
 
 	it('gets node with relationships', async () => {
-		const [system, person, product] = await sandbox.createNodes(
-			['System', `${namespace}-system`],
-			['Person', `${namespace}-person`],
-			['Product', `${namespace}-product`],
+		const [main, child, parent] = await sandbox.createNodes(
+			['MainType', mainCode],
+			['ChildType', `${namespace}-child`],
+			['ParentType', `${namespace}-parent`],
 		);
 		await sandbox.connectNodes(
 			// tests incoming and outgoing relationships
-			[system, 'HAS_TECHNICAL_OWNER', person],
-			[product, 'DEPENDS_ON', system],
+			[main, 'HAS_CHILD', child],
+			[parent, 'IS_PARENT_OF', main],
 		);
 
-		await testHeadRequest(`/v2/node/System/${namespace}-system`, 200);
+		return testHeadRequest(`/v2/node/MainType/${mainCode}`, 200);
 	});
 
 	it('responds with 404 if no node', async () => {
-		return testHeadRequest(`/v2/node/Team/${namespace}-team`, 404);
+		return testHeadRequest(`/v2/node/MainType/${mainCode}`, 404);
 	});
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);
-		return testHeadRequest(`/v2/node/Team/${namespace}-team`, 500);
+		return testHeadRequest(`/v2/node/MainType/${mainCode}`, 500);
 	});
 });
