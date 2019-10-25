@@ -57,11 +57,11 @@ const controller = (method, handler) => (req, res, next) => {
 };
 
 const getRestApi = (config = {}) => {
-// {
-// 	documentStore, // : s3Adaptor,
-// 	// lockFieldsUsingMetadata, //: clientId,
-// 	// updateStream, // : kinesisAdaptor
-// } = {}) => {
+	// {
+	// 	documentStore, // : s3Adaptor,
+	// 	// lockFieldsUsingMetadata, //: clientId,
+	// 	// updateStream, // : kinesisAdaptor
+	// } = {}) => {
 	const router = new express.Router();
 	router
 		.route('/:type/:code')

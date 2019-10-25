@@ -1,6 +1,6 @@
-const { patchHandler } = require('./packages/api-rest-handlers');
+const { patchHandler } = require('../packages/api-rest-handlers');
 
-const { schemaReady } = require('./api/server/lib/init-schema');
+const { schemaReady } = require('../api/server/lib/init-schema');
 
 schemaReady.then(async () => {
 	await patchHandler()({

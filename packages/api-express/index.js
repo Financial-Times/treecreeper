@@ -29,8 +29,7 @@ const getApp = async (options = {}) => {
 		graphqlMiddlewares = [],
 		restPath = '/rest',
 		restMiddlewares = [],
-		documentStore,
-	} = options
+	} = options;
 	updateConstraintsOnSchemaChange();
 	schema.init();
 

@@ -7,7 +7,7 @@ const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
 		const mockHandlerFactory = jest.fn();
-		const config = {fake: 'config'};
+		const config = { fake: 'config' };
 		let app;
 		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
@@ -53,8 +53,9 @@ const testSuite = (method, goodStatus) => {
 
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
 		it('passes config to the handler factory', () => {
-			expect(mockHandlerFactory).toHaveBeenCalledWith(config)
-		})
+			expect(mockHandlerFactory).toHaveBeenCalledWith(config);
+		});
+
 		describe('client headers', () => {
 			it(`no client-id or client-user-id returns 400`, async () => {
 				return request(app)
