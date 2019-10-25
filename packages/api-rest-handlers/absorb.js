@@ -154,7 +154,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	}
 
 	let updatedBody;
-	let undoS3Merge;
+	let undoS3Absorb;
 
 	if (documentStore) {
 		const { body, undo } = await documentStore.absorb(
@@ -163,7 +163,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 			code,
 		);
 		updatedBody = body || {};
-		undoS3Merge = undo;
+		undoS3Absorb = undo;
 	}
 
 	let result;
@@ -176,9 +176,8 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 			err,
 			`Neo4j merge unsuccessful, attempting to rollback S3`,
 		);
-		if (undoS3Merge) {
-			// Undo S3 actions
-			undoS3Merge();
+		if (undoS3Absorb) {
+			undoS3Absorb();
 		}
 	}
 
