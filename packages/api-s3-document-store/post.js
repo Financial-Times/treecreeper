@@ -6,6 +6,7 @@ const s3Post = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 		Bucket: bucketName,
 		Key: `${nodeType}/${code}`,
 		Body: JSON.stringify(body),
+		ContentType: 'application/json',
 	};
 
 	const versionId = await upload({

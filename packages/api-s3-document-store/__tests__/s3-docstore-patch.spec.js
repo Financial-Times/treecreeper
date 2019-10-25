@@ -118,6 +118,7 @@ describe('S3 document helper patch', () => {
 			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
 			Key: `${consistentNodeType}/${givenSystemCode}`,
 			Body: JSON.stringify(expectedBody),
+			ContentType: 'application/json',
 		};
 
 		expect(result).toMatchObject({
