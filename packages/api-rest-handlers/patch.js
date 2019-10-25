@@ -22,9 +22,9 @@ const patchHandler = ({ documentStore } = {}) => {
 			query: { relationshipAction } = {},
 		} = validateInput(input);
 
-		if (containsRelationshipData(type, body)) {
+		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
-			validateRelationshipInput(body);
+			validateRelationshipInput(originalBody);
 		}
 
 		const preflightRequest = await getNeo4jRecord(type, code);
