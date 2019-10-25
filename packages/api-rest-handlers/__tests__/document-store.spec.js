@@ -102,6 +102,15 @@ describe('rest document store integration', () => {
 			);
 		});
 
+		it('deletes record when documentStore is not passed in', async () => {
+			await createMainNode(documentInput);
+
+			const { status } = await deleteHandler({})(input);
+
+			expect(status).toBe(204);
+			await neo4jTest('MainType', mainCode).notExists();
+		});
+
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
 			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
