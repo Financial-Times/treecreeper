@@ -2,9 +2,7 @@ const httpErrors = require('http-errors');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 
-const getHandler = ({
-	documentStore = { get: () => ({}) },
-} = {}) => async input => {
+const getHandler = ({ documentStore } = {}) => async input => {
 	validateInput(input);
 
 	const { type, code } = input;

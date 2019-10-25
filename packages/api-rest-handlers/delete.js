@@ -4,7 +4,7 @@ const { getNeo4jRecord } = require('./lib/read-helpers');
 const { executeQuery } = require('./lib/neo4j-model');
 
 const deleteHandler = ({
-	documentStore = { delete: () => ({}) },
+	documentStore,
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);

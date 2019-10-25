@@ -56,7 +56,7 @@ const validateRelationshipInputs = ({
 	}
 };
 
-const patchHandler = ({ documentStore = { patch: () => ({}) } } = {}) => {
+const patchHandler = ({ documentStore } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
