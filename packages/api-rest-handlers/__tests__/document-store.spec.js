@@ -74,7 +74,7 @@ describe('rest document store integration', () => {
 				body: documentFromS3,
 			});
 
-			const { body, status } = await getHandler({ documentStore })(input);
+			const { body, status } = await getHandler({})(input);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(
