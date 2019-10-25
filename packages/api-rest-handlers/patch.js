@@ -60,9 +60,13 @@ const patchHandler = ({ documentStore } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
-		const { type, code, body, metadata = {}, query = {} } = validateInput(
-			input,
-		);
+		const {
+			type,
+			code,
+			body: originalBody,
+			metadata = {},
+			query = {},
+		} = validateInput(input);
 
 		validateRelationshipInputs(input);
 
@@ -73,27 +77,16 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		const initialContent = preflightRequest.toJson(type);
 
-		let bodyForS3;
-		let bodyForNeo4j;
-
-		if (documentStore) {
-			const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(
-				type,
-				body,
-			);
-			bodyForS3 = bodyDocuments;
-			bodyForNeo4j = bodyNoDocs;
-		} else {
-			bodyForS3 = {};
-			bodyForNeo4j = body;
-		}
+		const { documents = {}, body } = documentStore
+			? separateDocsFromBody(type, originalBody)
+			: { body: originalBody };
 
 		const properties = constructNeo4jProperties({
 			type,
 			code,
 			body: diffProperties({
 				type,
-				newContent: bodyForNeo4j,
+				newContent: body,
 				initialContent,
 			}),
 		});
@@ -101,14 +94,14 @@ const patchHandler = ({ documentStore } = {}) => {
 		const removedRelationships = getRemovedRelationships({
 			type,
 			initialContent,
-			newContent: bodyForNeo4j,
+			newContent: body,
 			action: query.relationshipAction,
 		});
 
 		const addedRelationships = getAddedRelationships({
 			type,
 			initialContent,
-			newContent: bodyForNeo4j,
+			newContent: body,
 		});
 
 		const willModifyNode = !!Object.keys(properties).length;
@@ -166,9 +159,9 @@ const patchHandler = ({ documentStore } = {}) => {
 		queryParts.push(getNeo4jRecordCypherQuery());
 
 		const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
-			bodyForS3,
+			documents,
 		)
-			? await documentStore.patch(type, code, bodyForS3)
+			? await documentStore.patch(type, code, documents)
 			: {};
 
 		try {
