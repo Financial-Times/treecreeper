@@ -18,7 +18,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
 
-	const { body: documentStoreBody } = documentStoreResult || {};
+	const { body: documentStoreBody = {} } = documentStoreResult || {};
 
 	return {
 		status: 200,
