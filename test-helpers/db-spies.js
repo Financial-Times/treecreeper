@@ -15,7 +15,9 @@ const spyDbQuery = () => {
 		}
 		return session;
 	});
-	return spy;
+	// We have to wrap function in order to trap `spy` variable in this scope
+	// and return lazy affected spy variable properly
+	return () => spy;
 };
 
 module.exports = { spyDbQuery };

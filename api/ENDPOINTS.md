@@ -92,8 +92,18 @@ All errors are returned as json of the following structure:
 
 Errors are returned in an array to avoid breaking API changes in future, but at present all endpoints only return an errors array of length one.
 
+### HEAD
+
+To be used for verifying the existence of a record
+
+| initial state | status | response type |
+| ------------- | ------ | ------------- |
+| absent        | 404    | none          |
+| existing      | 200    | none          |
+
 ### GET
 
+**DEPRECATED** Prefer to use the graphql endpoint
 _Note, it is not possible to omit `nodeType` and/or `code` to retrieve a list of nodes. `/api/graphql` is intended to be the primary read interface for anything other than single records._
 
 | initial state | status | response type |

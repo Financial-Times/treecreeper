@@ -10,14 +10,19 @@ const testSuite = (method, goodStatus) => {
 		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
 				return {
-					deleteHandler:
-						method === 'delete'
+					headHandler:
+						method === 'head'
 							? jest.fn().mockReturnValue(mockHandler)
 							: defaultHandler,
 					getHandler:
 						method === 'get'
 							? jest.fn().mockReturnValue(mockHandler)
 							: defaultHandler,
+					deleteHandler:
+						method === 'delete'
+							? jest.fn().mockReturnValue(mockHandler)
+							: defaultHandler,
+
 					postHandler:
 						method === 'post'
 							? jest.fn().mockReturnValue(mockHandler)
@@ -121,6 +126,10 @@ const testSuite = (method, goodStatus) => {
 					.set('request-id', 'test-request-id')
 					.expect(goodStatus);
 			});
+
+			const expectError = (status, message) =>
+				method === 'head' ? [status] : [status, message];
+
 			it('must respond with expected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(httpErrors(404, 'hahaha'));
 				await request(app)
@@ -128,7 +137,11 @@ const testSuite = (method, goodStatus) => {
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
-					.expect(404, { errors: [{ message: 'hahaha' }] });
+					.expect(
+						...expectError(404, {
+							errors: [{ message: 'hahaha' }],
+						}),
+					);
 			});
 			it('must respond with unexpected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(new Error('hahaha'));
@@ -137,9 +150,11 @@ const testSuite = (method, goodStatus) => {
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
-					.expect(500, {
-						errors: [{ message: 'Error: hahaha' }],
-					});
+					.expect(
+						...expectError(500, {
+							errors: [{ message: 'Error: hahaha' }],
+						}),
+					);
 			});
 		});
 	});

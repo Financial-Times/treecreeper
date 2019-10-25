@@ -255,7 +255,7 @@ describe('rest PATCH field-locking', () => {
 				await createNode('MainType', {
 					code: mainCode,
 				});
-				const { status, body } = await lockHandler(null, {
+				const { status, body } = await lockHandler(undefined, {
 					lockFields: 'someString',
 				});
 
@@ -302,9 +302,9 @@ describe('rest PATCH field-locking', () => {
 					),
 				});
 
-				const dbQuerySpy = spyDbQuery();
+				const getDbSpy = spyDbQuery();
 
-				const { status, body } = await lockHandler(null, {
+				const { status, body } = await lockHandler(undefined, {
 					lockFields: 'anotherString,someString',
 				});
 
@@ -325,7 +325,7 @@ describe('rest PATCH field-locking', () => {
 						'anotherString',
 					),
 				});
-				expect(dbQuerySpy).not.toHaveBeenCalledWith(
+				expect(getDbSpy()).not.toHaveBeenCalledWith(
 					expect.stringMatching(/MERGE|CREATE/),
 				);
 			});
@@ -340,7 +340,10 @@ describe('rest PATCH field-locking', () => {
 							{
 								children: [childCode],
 							},
-							{ lockFields: 'someString' },
+							{
+								lockFields: 'someString',
+								relationshipAction: 'merge',
+							},
 						),
 					),
 				).rejects.toThrow({
@@ -363,10 +366,10 @@ describe('rest PATCH field-locking', () => {
 					lockHandler({ someString: 'new some string' }),
 				).rejects.toThrow({
 					status: 400,
-					message: "blah blah can't remember",
+					message: `The following fields cannot be written because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 
-				await await neo4jTest('MainType', mainCode).match({
+				await neo4jTest('MainType', mainCode).match({
 					_lockedFields: otherLockedSomeString,
 				});
 			});
@@ -377,13 +380,13 @@ describe('rest PATCH field-locking', () => {
 				});
 
 				await expect(
-					lockHandler(null, { lockFields: 'someString' }),
+					lockHandler(undefined, { lockFields: 'someString' }),
 				).rejects.toThrow({
 					status: 400,
-					message: "blah blah can't remember",
+					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 
-				await await neo4jTest('MainType', mainCode).match({
+				await neo4jTest('MainType', mainCode).match({
 					_lockedFields: otherLockedSomeString,
 				});
 			});
@@ -419,7 +422,7 @@ describe('rest PATCH field-locking', () => {
 				code: mainCode,
 				_lockedFields: lockedSomeString,
 			});
-			const { status, body } = await lockHandler(null, {
+			const { status, body } = await lockHandler(undefined, {
 				unlockFields: 'someString',
 			});
 
@@ -438,7 +441,7 @@ describe('rest PATCH field-locking', () => {
 				code: mainCode,
 				_lockedFields: otherLockedSomeString,
 			});
-			const { status, body } = await lockHandler(null, {
+			const { status, body } = await lockHandler(undefined, {
 				unlockFields: 'someString',
 			});
 
@@ -457,7 +460,7 @@ describe('rest PATCH field-locking', () => {
 				code: mainCode,
 				_lockedFields: lock(clientId, 'someString', 'anotherString'),
 			});
-			const { status, body } = await lockHandler(null, {
+			const { status, body } = await lockHandler(undefined, {
 				unlockFields: 'all',
 			});
 
