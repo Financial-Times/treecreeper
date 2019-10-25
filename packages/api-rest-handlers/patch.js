@@ -18,13 +18,13 @@ const patchHandler = ({ documentStore } = {}) => {
 		const {
 			type,
 			code,
-			body,
+			body: originalBody,
 			query: { relationshipAction } = {},
 		} = validateInput(input);
 
-		if (containsRelationshipData(type, body)) {
+		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
-			validateRelationshipInput(body);
+			validateRelationshipInput(originalBody);
 		}
 
 		const preflightRequest = await getNeo4jRecord(type, code);
@@ -34,17 +34,19 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		const initialContent = preflightRequest.toJson(type);
 
-		const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+		const { documents = {}, body } = documentStore
+			? separateDocsFromBody(type, originalBody)
+			: { body: originalBody };
 
 		const {
 			body: newBodyDocuments = {},
 			undo: undoDocstoreWrite,
-		} = !_isEmpty(bodyDocuments)
-			? await documentStore.patch(type, code, bodyDocuments)
+		} = !_isEmpty(documents)
+			? await documentStore.patch(type, code, documents)
 			: {};
 
 		try {
-			const builder = queryBuilder('MERGE', input, bodyNoDocs)
+			const builder = queryBuilder('MERGE', input, body)
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)
