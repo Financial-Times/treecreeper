@@ -48,7 +48,7 @@ class SchemaUpdater {
 			this.eventEmitter.emit('change', {
 				oldVersion: undefined,
 				newVersion: this.version,
-			})
+			});
 			return;
 		}
 
@@ -133,7 +133,7 @@ class SchemaUpdater {
 
 	ready() {
 		if (this.isStatic) {
-			return Promise.resolve()
+			return Promise.resolve();
 		}
 		return this.updateMode === 'poll'
 			? this.startPolling()

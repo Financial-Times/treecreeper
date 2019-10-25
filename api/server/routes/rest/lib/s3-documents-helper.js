@@ -40,6 +40,7 @@ class S3DocumentsHelper {
 			Bucket: this.s3BucketName,
 			Key: `${nodeType}/${code}`,
 			Body: JSON.stringify(body),
+			ContentType: 'application/json',
 		};
 		const versionId = await this.uploadToS3(params, 'POST');
 		return { versionId, newBodyDocs: body };
