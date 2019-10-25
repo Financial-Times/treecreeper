@@ -23,6 +23,13 @@ describe('v2 - node firewall', () => {
 		});
 	});
 	describe('api key auth', () => {
+		it('HEAD no api_key returns 401', async () => {
+			return sandbox
+				.request(app)
+				.head(restUrl)
+				.set('client-id', 'test-client-id')
+				.expect(401);
+		});
 		it('GET no api_key returns 401', async () => {
 			return sandbox
 				.request(app)
@@ -61,6 +68,14 @@ describe('v2 - node firewall', () => {
 		});
 
 		describe('client headers', () => {
+			it('HEAD no client-id or client-user-id returns 400', async () => {
+				return sandbox
+					.request(app)
+					.head(restUrl)
+					.set('API_KEY', API_KEY)
+					.expect(400);
+			});
+
 			it('GET no client-id or client-user-id returns 400', async () => {
 				return sandbox
 					.request(app)
@@ -98,6 +113,18 @@ describe('v2 - node firewall', () => {
 				await verifyNotExists('MainType', mainCode);
 			});
 
+			it('HEAD client-id but no client-user-id returns 200', async () => {
+				await sandbox.createNode('MainType', {
+					code: mainCode,
+					someString: 'name1',
+				});
+				return sandbox
+					.request(app)
+					.head(restUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.expect(200);
+			});
 			it('GET client-id but no client-user-id returns 200', async () => {
 				await sandbox.createNode('MainType', {
 					code: mainCode,
@@ -147,6 +174,19 @@ describe('v2 - node firewall', () => {
 					.expect(204);
 			});
 
+			it('HEAD client-user-id but no client-id returns 200', async () => {
+				await sandbox.createNode('MainType', {
+					code: mainCode,
+					someString: 'name1',
+				});
+				return sandbox
+					.request(app)
+					.head(restUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-user-id', 'test-user-id')
+					.expect(200);
+			});
+
 			it('GET client-user-id but no client-id returns 200', async () => {
 				await sandbox.createNode('MainType', {
 					code: mainCode,
@@ -194,6 +234,20 @@ describe('v2 - node firewall', () => {
 					.set('API_KEY', API_KEY)
 					.set('client-user-id', 'test-user-id')
 					.expect(204);
+			});
+
+			it('HEAD client-id and client-user-id returns 200', async () => {
+				await sandbox.createNode('MainType', {
+					code: mainCode,
+					someString: 'name1',
+				});
+				return sandbox
+					.request(app)
+					.head(restUrl)
+					.set('API_KEY', API_KEY)
+					.set('client-id', 'test-client-id')
+					.set('client-user-id', 'test-user-id')
+					.expect(200);
 			});
 
 			it('GET client-id and client-user-id returns 200', async () => {
@@ -255,8 +309,13 @@ describe('v2 - node firewall', () => {
 		['post', true],
 		['patch', true],
 		['get', false],
+		['head', false],
 		['delete', false],
 	].forEach(([method, checkBody]) => {
+		// this is to deal with that head requyests send no error body
+		const expectError = (status, message) =>
+			method === 'head' ? [status] : [status, message];
+
 		describe(`security checks - ${method}`, () => {
 			// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 			const INJECTION_ATTACK_STRING =
@@ -269,9 +328,11 @@ describe('v2 - node firewall', () => {
 					[method](`/v2/node/${INJECTION_ATTACK_STRING}/${mainCode}`)
 					.namespacedAuth()
 					.expect(
-						400,
-						new RegExp(
-							`Invalid type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						...expectError(
+							400,
+							new RegExp(
+								`Invalid type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+							),
 						),
 					);
 			});
@@ -282,9 +343,11 @@ describe('v2 - node firewall', () => {
 					[method](`/v2/node/MainType/${INJECTION_ATTACK_STRING}`)
 					.namespacedAuth()
 					.expect(
-						400,
-						new RegExp(
-							`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`MainType\``,
+						...expectError(
+							400,
+							new RegExp(
+								`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`MainType\``,
+							),
 						),
 					);
 			});
@@ -296,9 +359,11 @@ describe('v2 - node firewall', () => {
 					.set('API_KEY', API_KEY)
 					.set('client-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
-						400,
-						new RegExp(
-							`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						...expectError(
+							400,
+							new RegExp(
+								`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+							),
 						),
 					);
 			});
@@ -310,9 +375,11 @@ describe('v2 - node firewall', () => {
 					.set('API_KEY', API_KEY)
 					.set('client-user-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
-						400,
-						new RegExp(
-							`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						...expectError(
+							400,
+							new RegExp(
+								`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+							),
 						),
 					);
 			});
@@ -325,9 +392,11 @@ describe('v2 - node firewall', () => {
 					.set('client-id', 'valid-id')
 					.set('x-request-id', `${INJECTION_ATTACK_STRING}`)
 					.expect(
-						400,
-						new RegExp(
-							`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+						...expectError(
+							400,
+							new RegExp(
+								`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
+							),
 						),
 					);
 			});

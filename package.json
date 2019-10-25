@@ -19,6 +19,7 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "graphql": "^14.4.2",
+    "graphql-middleware": "^4.0.1",
     "graphql-playground-middleware-express": "^1.7.12",
     "http-errors": "^1.7.3",
     "js-yaml": "^3.13.1",

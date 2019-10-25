@@ -1,37 +1,21 @@
 const httpErrors = require('http-errors');
-const { stripIndents } = require('common-tags');
 const _isEmpty = require('lodash.isempty');
-const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getType } = require('../schema-sdk');
-const {
-	metaPropertiesForCreate,
-	prepareMetadataForNeo4jQuery,
-} = require('./lib/metadata-helpers');
-const { getRelationships } = require('./lib/relationships/input');
-const { constructNeo4jProperties } = require('./lib/neo4j-type-conversion');
-const {
-	prepareToWriteRelationships,
-	handleUpsertError,
-} = require('./lib/relationships/write');
-const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
+const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
+const { queryBuilder } = require('./lib/neo4j-query-builder');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const {
-		type,
-		code,
-		body: originalBody,
-		metadata = {},
-		query = {},
-	} = validateInput(input);
+	const { type, code, body: originalBody, metadata = {} } = validateInput(input);
+	const { clientId } = metadata;
 
 	const { documents = {}, body } = documentStore
 		? separateDocsFromBody(type, originalBody)
 		: { body: originalBody };
 
 	const { createPermissions, pluralName } = getType(type);
-	if (createPermissions && !createPermissions.includes(metadata.clientId)) {
+	if (createPermissions && !createPermissions.includes(clientId)) {
 		throw httpErrors(
 			400,
 			`${pluralName} can only be created by ${createPermissions.join(
@@ -40,39 +24,6 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		);
 	}
 
-	const queryParts = [
-		stripIndents`
-			CREATE (node:${type} $properties)
-				SET ${metaPropertiesForCreate('node')}
-			WITH node`,
-	];
-
-	const properties = constructNeo4jProperties({
-		type,
-		body,
-		code,
-	});
-	const relationshipsToCreate = getRelationships({
-		type,
-		body,
-	});
-
-	const {
-		relationshipParameters,
-		relationshipQueries,
-	} = prepareToWriteRelationships(type, relationshipsToCreate, query.upsert);
-
-	const parameters = Object.assign(
-		{
-			code,
-			properties,
-		},
-		prepareMetadataForNeo4jQuery(metadata),
-		relationshipParameters,
-	);
-
-	queryParts.push(...relationshipQueries, getNeo4jRecordCypherQuery());
-
 	const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
 		documents,
 	)
@@ -80,10 +31,11 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		: {};
 
 	try {
-		const neo4jResult = await executeQuery(
-			queryParts.join('\n'),
-			parameters,
-		);
+		const neo4jResult = await queryBuilder('CREATE', input, body)
+			.constructProperties()
+			.createRelationships()
+			.setLockFields(documents)
+			.execute();
 
 		const responseData = Object.assign(
 			neo4jResult.toJson(type),
