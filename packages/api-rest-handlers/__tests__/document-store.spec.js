@@ -44,7 +44,7 @@ describe('rest document store integration', () => {
 	describe('GET', () => {
 		it('gets record with Documents', async () => {
 			await createMainNode();
-			const mockGet = createResolvedDocstoreMock('get', {
+			const mockDocstoreGet = createResolvedDocstoreMock('get', {
 				body: documentFromS3,
 			});
 
@@ -54,18 +54,18 @@ describe('rest document store integration', () => {
 			expect(body).toMatchObject(
 				Object.assign({ code: mainCode }, documentFromS3),
 			);
-			expect(mockGet).toHaveBeenCalledWith('MainType', mainCode);
+			expect(mockDocstoreGet).toHaveBeenCalledWith('MainType', mainCode);
 		});
 
 		it('throws if s3 query fails', async () => {
-			const mockGet = createRejectedDocstoreMock(
+			const mockDocstoreGet = createRejectedDocstoreMock(
 				'get',
 				new Error('oh no'),
 			);
 			await expect(getHandler({ documentStore })(input)).rejects.toThrow(
 				'oh no',
 			);
-			expect(mockGet).toHaveBeenCalledWith('MainType', mainCode);
+			expect(mockDocstoreGet).toHaveBeenCalledWith('MainType', mainCode);
 		});
 	});
 
@@ -73,7 +73,7 @@ describe('rest document store integration', () => {
 		it('deletes record with Documents', async () => {
 			await createMainNode();
 			const versionMarker = 'delete-marker';
-			const mockDelete = createResolvedDocstoreMock('delete', {
+			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
 				versionMarker,
 			});
 
@@ -81,19 +81,25 @@ describe('rest document store integration', () => {
 
 			expect(status).toBe(204);
 			await neo4jTest('MainType', mainCode).notExists();
-			expect(mockDelete).toHaveBeenCalledWith('MainType', mainCode);
+			expect(mockDocstoreDelete).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+			);
 		});
 
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
-			const mockDelete = createResolvedDocstoreMock('delete', {
+			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
 				versionMarker: null,
 			});
 			await expect(
 				deleteHandler({ documentStore })(input),
 			).rejects.toThrow(Error);
 			await neo4jTest('MainType', mainCode).exists();
-			expect(mockDelete).toHaveBeenCalledWith('MainType', mainCode);
+			expect(mockDocstoreDelete).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+			);
 		});
 
 		it('undoes any s3 actions if neo4j query fails', async () => {
@@ -101,7 +107,7 @@ describe('rest document store integration', () => {
 			await createMainNode();
 
 			const mockUndo = jest.fn(async () => ({}));
-			const mockDelete = createResolvedDocstoreMock('delete', {
+			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
 				versionMarker,
 				undo: mockUndo,
 			});
@@ -109,7 +115,10 @@ describe('rest document store integration', () => {
 			await expect(
 				deleteHandler({ documentStore })(input),
 			).rejects.toThrow('oh no');
-			expect(mockDelete).toHaveBeenCalledWith('MainType', mainCode);
+			expect(mockDocstoreDelete).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+			);
 			expect(mockUndo).toHaveBeenCalled();
 		});
 	});
@@ -120,10 +129,13 @@ describe('rest document store integration', () => {
 				const versionMarker = 'post-marker';
 
 				it('creates record with Documents', async () => {
-					const mockPost = createResolvedDocstoreMock('post', {
-						versionMarker,
-						body: documentFromS3,
-					});
+					const mockDocstorePost = createResolvedDocstoreMock(
+						'post',
+						{
+							versionMarker,
+							body: documentFromS3,
+						},
+					);
 
 					const { status, body } = await handler({ documentStore })(
 						getInput(Object.assign({}, stringInput, documentInput)),
@@ -142,7 +154,7 @@ describe('rest document store integration', () => {
 						.exists()
 						.match(Object.assign({ code: mainCode }, stringInput));
 
-					expect(mockPost).toHaveBeenCalledWith(
+					expect(mockDocstorePost).toHaveBeenCalledWith(
 						'MainType',
 						mainCode,
 						documentInput,
@@ -150,7 +162,10 @@ describe('rest document store integration', () => {
 				});
 
 				it("doesn't set a Document property when empty string provided", async () => {
-					const mockPost = createResolvedDocstoreMock('post', {});
+					const mockDocstorePost = createResolvedDocstoreMock(
+						'post',
+						{},
+					);
 					const { status, body } = await handler({ documentStore })(
 						getInput({ someDocument: '' }),
 					);
@@ -161,7 +176,7 @@ describe('rest document store integration', () => {
 					});
 					await neo4jTest('MainType', mainCode).exists();
 
-					expect(mockPost).not.toHaveBeenCalled();
+					expect(mockDocstorePost).not.toHaveBeenCalled();
 				});
 
 				if (method === 'POST') {
@@ -171,9 +186,12 @@ describe('rest document store integration', () => {
 						});
 						await neo4jTest('MainType', mainCode).exists();
 						const mockUndo = jest.fn(async () => ({}));
-						const mockPost = createResolvedDocstoreMock('post', {
-							undo: mockUndo,
-						});
+						const mockDocstorePost = createResolvedDocstoreMock(
+							'post',
+							{
+								undo: mockUndo,
+							},
+						);
 
 						await expect(
 							handler({ documentStore })(getInput(documentInput)),
@@ -181,7 +199,7 @@ describe('rest document store integration', () => {
 							status: 409,
 							message: `MainType ${mainCode} already exists`,
 						});
-						expect(mockPost).toHaveBeenCalledWith(
+						expect(mockDocstorePost).toHaveBeenCalledWith(
 							'MainType',
 							mainCode,
 							documentInput,
@@ -191,28 +209,31 @@ describe('rest document store integration', () => {
 				}
 
 				it('throws if s3 query fails', async () => {
-					const mockPost = createRejectedDocstoreMock(
+					const mockDocstorePost = createRejectedDocstoreMock(
 						'post',
 						new Error('oh no'),
 					);
 					await expect(
 						handler({ documentStore })(getInput(documentInput)),
 					).rejects.toThrow('oh no');
-					expect(mockPost).toHaveBeenCalled();
+					expect(mockDocstorePost).toHaveBeenCalled();
 				});
 
 				it('undoes any s3 actions if neo4j query fails', async () => {
 					const mockUndo = jest.fn(async () => ({}));
-					const mockPost = createResolvedDocstoreMock('post', {
-						versionMarker,
-						undo: mockUndo,
-					});
+					const mockDocstorePost = createResolvedDocstoreMock(
+						'post',
+						{
+							versionMarker,
+							undo: mockUndo,
+						},
+					);
 					dbUnavailable({ skip: method === 'PATCH' ? 1 : 0 });
 
 					await expect(
 						handler({ documentStore })(getInput(documentInput)),
 					).rejects.toThrow('oh no');
-					expect(mockPost).toHaveBeenCalledWith(
+					expect(mockDocstorePost).toHaveBeenCalledWith(
 						'MainType',
 						mainCode,
 						documentInput,
@@ -221,10 +242,13 @@ describe('rest document store integration', () => {
 				});
 
 				it('returns document from neo4j when documentStore is not passed in', async () => {
-					const mockPost = createResolvedDocstoreMock('post', {
-						versionMarker,
-						body: documentFromS3,
-					});
+					const mockDocstorePost = createResolvedDocstoreMock(
+						'post',
+						{
+							versionMarker,
+							body: documentFromS3,
+						},
+					);
 
 					const { status, body } = await handler({})(
 						getInput(Object.assign({}, stringInput, documentInput)),
@@ -243,7 +267,7 @@ describe('rest document store integration', () => {
 						.exists()
 						.match(Object.assign({ code: mainCode }, stringInput));
 
-					expect(mockPost).not.toHaveBeenCalled();
+					expect(mockDocstorePost).not.toHaveBeenCalled();
 				});
 			});
 		},
@@ -254,7 +278,7 @@ describe('rest document store integration', () => {
 
 		it('updates record with Documents', async () => {
 			await createMainNode();
-			const mockPatch = createResolvedDocstoreMock('patch', {
+			const mockDocstorePatch = createResolvedDocstoreMock('patch', {
 				versionMarker,
 				body: documentFromS3,
 			});
@@ -271,7 +295,7 @@ describe('rest document store integration', () => {
 				.exists()
 				.match(Object.assign({ code: mainCode }, stringInput));
 
-			expect(mockPatch).toHaveBeenCalledWith(
+			expect(mockDocstorePatch).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
 				documentInput,
@@ -283,7 +307,7 @@ describe('rest document store integration', () => {
 			const anotherDocFromS3 = {
 				anotherDocument: 'another document from s3',
 			};
-			const mockPatch = createResolvedDocstoreMock('patch', {
+			const mockDocstorePatch = createResolvedDocstoreMock('patch', {
 				versionMarker,
 				body: anotherDocFromS3,
 			});
@@ -301,26 +325,30 @@ describe('rest document store integration', () => {
 
 			await neo4jTest('MainType', mainCode).exists();
 
-			expect(mockPatch).toHaveBeenCalledWith('MainType', mainCode, {
-				anotherDocument: 'another document',
-			});
+			expect(mockDocstorePatch).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+				{
+					anotherDocument: 'another document',
+				},
+			);
 		});
 
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
-			const mockPatch = createRejectedDocstoreMock(
+			const mockDocstorePatch = createRejectedDocstoreMock(
 				'patch',
 				new Error('oh no'),
 			);
 			await expect(
 				patchHandler({ documentStore })(getInput(documentInput)),
 			).rejects.toThrow('oh no');
-			expect(mockPatch).toHaveBeenCalled();
+			expect(mockDocstorePatch).toHaveBeenCalled();
 		});
 
 		it('undoes any s3 actions if neo4j query fails', async () => {
 			const mockUndo = jest.fn(async () => ({}));
-			const mockPatch = createResolvedDocstoreMock('patch', {
+			const mockDocstorePatch = createResolvedDocstoreMock('patch', {
 				versionMarker,
 				undo: mockUndo,
 				body: documentFromS3,
@@ -331,7 +359,7 @@ describe('rest document store integration', () => {
 			await expect(
 				patchHandler({ documentStore })(getInput(documentInput)),
 			).rejects.toThrow('oh no');
-			expect(mockPatch).toHaveBeenCalledWith(
+			expect(mockDocstorePatch).toHaveBeenCalledWith(
 				'MainType',
 				mainCode,
 				documentInput,
@@ -341,7 +369,7 @@ describe('rest document store integration', () => {
 
 		it('returns document from neo4j when documentStore is not passed in', async () => {
 			await createMainNode();
-			const mockPatch = createResolvedDocstoreMock('patch', {
+			const mockDocstorePatch = createResolvedDocstoreMock('patch', {
 				versionMarker,
 				body: documentFromS3,
 			});
@@ -358,7 +386,7 @@ describe('rest document store integration', () => {
 				.exists()
 				.match(Object.assign({ code: mainCode }, stringInput));
 
-			expect(mockPatch).not.toHaveBeenCalled();
+			expect(mockDocstorePatch).not.toHaveBeenCalled();
 		});
 	});
 
