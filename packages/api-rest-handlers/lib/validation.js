@@ -87,9 +87,37 @@ const validateInput = input => {
 	return input;
 };
 
+const validateRelationshipAction = relationshipAction => {
+	if (!['merge', 'replace'].includes(relationshipAction)) {
+		throw httpErrors(
+			400,
+			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
+		);
+	}
+};
+
+const toArray = val => (Array.isArray(val) ? val : [val]);
+
+const validateRelationshipInput = body => {
+	Object.entries(body)
+		.filter(([propName]) => propName.startsWith('!'))
+		.forEach(([propName, deletedCodes]) => {
+			const addedCodes = toArray(body[propName.substr(1)]);
+			deletedCodes = toArray(deletedCodes);
+			if (deletedCodes.some(code => addedCodes.includes(code))) {
+				throw httpErrors(
+					400,
+					'Trying to add and remove a relationship to a record at the same time',
+				);
+			}
+		});
+};
+
 module.exports = Object.assign(
 	{
 		validateInput,
+		validateRelationshipAction,
+		validateRelationshipInput,
 	},
 	sdkValidators,
 );
