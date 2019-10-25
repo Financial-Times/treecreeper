@@ -20,16 +20,17 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-const getApp = async ({
-	app = express(),
-	treecreeperPath = '/',
-	graphqlPath = '/graphql',
-	graphqlMethods = ['post'],
-	graphqlMiddlewares = [],
-	restPath = '/rest',
-	restMiddlewares = [],
-	documentStore,
-} = {}) => {
+const getApp = async (options = {}) => {
+	const {
+		app = express(),
+		treecreeperPath = '/',
+		graphqlPath = '/graphql',
+		graphqlMethods = ['post'],
+		graphqlMiddlewares = [],
+		restPath = '/rest',
+		restMiddlewares = [],
+		documentStore,
+	} = options
 	updateConstraintsOnSchemaChange();
 	schema.init();
 
@@ -38,14 +39,15 @@ const getApp = async ({
 	router.use(requestId);
 	router.use(clientId);
 	router.use(bodyParsers);
-	router.use(restPath, restMiddlewares, getRestApi({ documentStore }));
+	router.use(restPath, restMiddlewares, getRestApi(options));
 	router.use(errorToErrors);
 
 	const {
 		isSchemaUpdating,
 		graphqlHandler,
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
-	} = getGraphqlApi({ documentStore });
+	} = getGraphqlApi(options);
+
 	updateGraphqlApiOnSchemaChange();
 
 	graphqlMethods.forEach(method =>

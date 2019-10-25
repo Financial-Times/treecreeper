@@ -56,24 +56,25 @@ const controller = (method, handler) => (req, res, next) => {
 		.catch(next);
 };
 
-const getRestApi = ({
-	documentStore, // : s3Adaptor,
-	// lockFieldsUsingMetadata, //: clientId,
-	// updateStream, // : kinesisAdaptor
-} = {}) => {
+const getRestApi = (config = {}) => {
+// {
+// 	documentStore, // : s3Adaptor,
+// 	// lockFieldsUsingMetadata, //: clientId,
+// 	// updateStream, // : kinesisAdaptor
+// } = {}) => {
 	const router = new express.Router();
 	router
 		.route('/:type/:code')
-		.head(controller('HEAD', headHandler({ logger })))
-		.get(controller('GET', getHandler({ documentStore, logger })))
-		.post(controller('POST', postHandler({ documentStore, logger })))
+		.head(controller('HEAD', headHandler(config)))
+		.get(controller('GET', getHandler(config)))
+		.post(controller('POST', postHandler(config)))
 		// 	.put(unimplemented('PUT', 'PATCH'))
-		.patch(controller('PATCH', patchHandler({ documentStore, logger })))
-		.delete(controller('DELETE', deleteHandler({ documentStore, logger })));
+		.patch(controller('PATCH', patchHandler(config)))
+		.delete(controller('DELETE', deleteHandler(config)));
 
 	router.post(
 		'/:type/:code/absorb/:codeToAbsorb',
-		controller('ABSORB', absorbHandler({ documentStore, logger })),
+		controller('ABSORB', absorbHandler(config)),
 	);
 
 	router.use(errorToErrors);
