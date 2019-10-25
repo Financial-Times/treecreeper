@@ -241,10 +241,7 @@ describe('rest document store integration', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.exists()
-						.match({
-							code: mainCode,
-							someString: 'some string',
-						});
+						.match(Object.assing({ code: mainCode }, stringInput));
 
 					expect(mockPost).not.toHaveBeenCalled();
 				});
@@ -272,10 +269,7 @@ describe('rest document store integration', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.exists()
-				.match({
-					code: mainCode,
-					someString: 'some string',
-				});
+				.match(Object.assign({ code: mainCode }, stringInput));
 
 			expect(mockPatch).toHaveBeenCalledWith(
 				'MainType',
