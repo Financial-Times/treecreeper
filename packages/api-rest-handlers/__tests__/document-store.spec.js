@@ -241,7 +241,7 @@ describe('rest document store integration', () => {
 
 					await neo4jTest('MainType', mainCode)
 						.exists()
-						.match(Object.assing({ code: mainCode }, stringInput));
+						.match(Object.assign({ code: mainCode }, stringInput));
 
 					expect(mockPost).not.toHaveBeenCalled();
 				});
