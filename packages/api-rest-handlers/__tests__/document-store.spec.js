@@ -67,6 +67,21 @@ describe('rest document store integration', () => {
 			);
 			expect(mockDocstoreGet).toHaveBeenCalledWith('MainType', mainCode);
 		});
+
+		it('returns document from neo4j when documentStore is not passed in', async () => {
+			await createMainNode(documentInput);
+			const mockDocstoreGet = createResolvedDocstoreMock('get', {
+				body: documentFromS3,
+			});
+
+			const { body, status } = await getHandler({ documentStore })(input);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject(
+				Object.assign({ code: mainCode }, documentInput),
+			);
+			expect(mockDocstoreGet).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('DELETE', () => {
