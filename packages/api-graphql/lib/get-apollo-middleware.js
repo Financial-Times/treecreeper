@@ -2,30 +2,31 @@ const { ApolloServer } = require('apollo-server-express');
 const DataLoader = require('dataloader');
 const { formatError } = require('graphql');
 const { getAugmentedSchema } = require('./get-augmented-schema');
-const { logger } = require('../../../lib/request-context');
-const { driver } = require('../../../lib/db-connection');
-const S3DocumentsHelper = require('../../rest/lib/s3-documents-helper');
+const { logger } = require('../../../packages/api-express/lib/request-context');
+const { driver } = require('../../../packages/api-db-manager');
 const { Tracer } = require('./request-tracer');
 
-const s3 = new S3DocumentsHelper();
 
-const getApolloMiddleware = () => {
+const getApolloMiddleware = ({ documentStore }) => {
 	const apollo = new ApolloServer({
 		subscriptions: false,
 		schema: getAugmentedSchema(),
 		context: ({ req: { headers } }) => {
-			const s3DocsDataLoader = new DataLoader(keys =>
-				Promise.all(
-					keys.map(key => s3.getFileFromS3(...key.split('/'))),
-				),
-			);
-
-			return {
+			const context = {
 				driver,
-				s3DocsDataLoader,
 				headers,
 				trace: new Tracer(),
 			};
+
+			if (documentStore) {
+				context.documentStoreDataLoader = new DataLoader(keys =>
+					Promise.all(
+						keys.map(key => s3.getFileFromS3(...key.split('/'))),
+					),
+				);
+			}
+
+			return context;
 		},
 		formatResponse(response, { context }) {
 			context.trace.log();

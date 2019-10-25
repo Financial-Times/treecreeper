@@ -3,8 +3,9 @@ require('express-async-errors');
 const bodyParser = require('body-parser');
 const schema = require('../../packages/schema-sdk');
 const {
-	listenForChanges: updateConstraintsOnSchemaChange,
+	listenForSchemaChanges: updateConstraintsOnSchemaChange,
 } = require('../../packages/api-db-manager');
+const { getGraphqlApi } = require('../../packages/api-graphql');
 const { getRestApi } = require('./lib/get-rest-api');
 const clientId = require('./middleware/client-id');
 const requestId = require('./middleware/request-id');
@@ -21,10 +22,13 @@ const bodyParsers = [
 
 const getApp = async ({
 	app = express(),
+	treecreeperPath = '/',
 	graphqlPath = '/graphql',
+	graphqlMethods = ['post'],
 	graphqlMiddlewares = [],
 	restPath = '/rest',
 	restMiddlewares = [],
+	documentStore,
 } = {}) => {
 	updateConstraintsOnSchemaChange();
 	schema.init();
@@ -34,11 +38,24 @@ const getApp = async ({
 	router.use(requestId);
 	router.use(clientId);
 	router.use(bodyParsers);
-	router.use(restPath, restMiddlewares, getRestApi({}));
+	router.use(restPath, restMiddlewares, getRestApi({ documentStore }));
 	router.use(errorToErrors);
-	app.use('/', router);
+
+	const {
+		isSchemaUpdating,
+		graphqlHandler,
+		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
+	} = getGraphqlApi({ documentStore });
+	updateGraphqlApiOnSchemaChange();
+
+	graphqlMethods.forEach(method =>
+		router[method](graphqlPath, graphqlMiddlewares, graphqlHandler),
+	);
+
+	app.use(treecreeperPath, router);
 	await schema.ready();
 	app.logger = logger;
+	app.isSchemaUpdating = isSchemaUpdating;
 	return app;
 };
 

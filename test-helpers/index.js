@@ -10,14 +10,14 @@ const setupMocks = namespace => {
 	let clock;
 	const now = '2019-01-09T09:08:22.908Z';
 	const then = '2015-11-15T08:12:27.908Z';
-	// clean up after potentially failed test runs
-	beforeAll(() => dropFixtures(namespace));
+
+	beforeAll(async () => {
+		// clean up after potentially failed test runs
+		await dropFixtures(namespace)
+		await schemaReady;
+	});
 
 	beforeEach(async () => {
-		// have to await in here as supertest doesn't wait for the callback
-		// in app listen to be called, so doesn't await schemaReady where
-		// app.listen does in server/create-app.js
-		await schemaReady;
 		clock = lolex.install({ now: new Date(now).getTime() });
 	});
 	afterEach(async () => {
