@@ -4,7 +4,7 @@ const { setupMocks } = require('../../../test-helpers');
 
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
-describe.skip('rest PATCH relationship diff', () => {
+describe.skip('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
@@ -30,11 +30,11 @@ describe.skip('rest PATCH relationship diff', () => {
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler({
-			someString: 'name-1',
+			someString: 'some string',
 		});
 		expect(status).toBe(200);
-		expect(dbQuerySpy).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 		);
 	});
 
@@ -50,8 +50,8 @@ describe.skip('rest PATCH relationship diff', () => {
 			{ relationshipAction: 'replace' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 		);
 	});
 
@@ -68,8 +68,8 @@ describe.skip('rest PATCH relationship diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 		);
 	});
 
@@ -87,8 +87,9 @@ describe.skip('rest PATCH relationship diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy).toHaveBeenCalledWith(
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object)
 		);
 	});
 
@@ -105,8 +106,8 @@ describe.skip('rest PATCH relationship diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 		);
 	});
 
@@ -118,8 +119,8 @@ describe.skip('rest PATCH relationship diff', () => {
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler({ someString: null });
 		expect(status).toBe(200);
-		expect(dbQuerySpy).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 		);
 	});
 
@@ -140,8 +141,8 @@ describe.skip('rest PATCH relationship diff', () => {
 				{ relationshipAction: 'replace' },
 			);
 			expect(status).toBe(200);
-			expect(dbQuerySpy).toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),
+			expect(dbQuerySpy()).toHaveBeenCalledWith(
+				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 			);
 		});
 
@@ -161,8 +162,8 @@ describe.skip('rest PATCH relationship diff', () => {
 				{ relationshipAction: 'merge' },
 			);
 			expect(status).toBe(200);
-			expect(dbQuerySpy).not.toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),
+			expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
 			);
 		});
 	});

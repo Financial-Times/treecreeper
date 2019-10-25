@@ -76,7 +76,7 @@ describe.skip('rest PATCH update', () => {
 					await createMainNode();
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISatchring(),
+						someDate: new Date(date).toISOstring(),
 					});
 
 					expect(status).toBe(200);
@@ -99,7 +99,7 @@ describe.skip('rest PATCH update', () => {
 					});
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISatchring(),
+						someDate: new Date(date).toISOstring(),
 					});
 
 					expect(status).toBe(200);
@@ -251,10 +251,10 @@ describe.skip('rest PATCH update', () => {
 				clientUserId: 'still-here',
 			});
 			expect(body).toMatchObject({
-				clientUserId: 'still-here',
+				_updatedByUser: 'still-here',
 			});
 			expect(body).not.toMatchObject({
-				clientId: expect.any(String),
+				_updatedByClient: expect.any(String),
 			});
 		});
 		it('no clientUserId, deletes the _updatedByUser property', async () => {
@@ -263,10 +263,10 @@ describe.skip('rest PATCH update', () => {
 				clientId: 'still-here',
 			});
 			expect(body).toMatchObject({
-				clientId: 'still-here',
+				_updatedByClient: 'still-here',
 			});
 			expect(body).not.toMatchObject({
-				clientUserId: expect.any(String),
+				_updatedByUser: expect.any(String),
 			});
 		});
 		it('throws 400 if code in body conflicts with code in url', async () => {
