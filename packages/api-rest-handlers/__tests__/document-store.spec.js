@@ -465,5 +465,9 @@ describe('rest document store integration', () => {
 			// 	}),
 			// );
 		});
+
+		it('merges neo4j document properties when documentStore is not passed in', async () => {
+			// need a test
+		});
 	});
 });
