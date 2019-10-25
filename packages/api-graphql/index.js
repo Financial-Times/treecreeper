@@ -3,18 +3,18 @@ const { onChange } = require('../../packages/schema-sdk');
 const { sendSchemaToS3 } = require('../../packages/schema-publisher');
 const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
 
-const getGraphqlApi = options => {
+const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
 	let schemaDidUpdate = false;
 	let graphqlHandler;
 
 	const updateAPI = () => {
 		try {
-			graphqlHandler = getApolloMiddleware(options);
+			graphqlHandler = getApolloMiddleware({ documentStore });
 
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
-			if (process.env.NODE_ENV === 'production') {
+			if (republishSchema) {
 				sendSchemaToS3('api')
 					.then(() => {
 						logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
@@ -34,6 +34,7 @@ const getGraphqlApi = options => {
 			);
 		}
 	};
+
 	return {
 		graphqlHandler: (...args) => graphqlHandler(...args),
 		isSchemaUpdating: () => schemaDidUpdate,

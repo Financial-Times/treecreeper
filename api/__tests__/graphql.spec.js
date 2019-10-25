@@ -19,7 +19,7 @@ describe('graphql', () => {
 		await sandbox.createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
-			someEnum: 'Production',
+			someEnum: 'First',
 		});
 		return sandbox
 			.request(app)
@@ -39,7 +39,7 @@ describe('graphql', () => {
 					data: {
 						MainType: {
 							code: mainCode,
-							someEnum: 'Production',
+							someEnum: 'First',
 							someString: 'name1',
 						},
 					},
@@ -80,7 +80,7 @@ describe('graphql', () => {
 		await sandbox.createNode('MainType', {
 			code: mainCode,
 			someString: 'name1',
-			someEnum: 'Production',
+			someEnum: 'First',
 		});
 		return sandbox
 			.request(app)
@@ -94,7 +94,7 @@ describe('graphql', () => {
 					data: {
 						MainType: {
 							code: mainCode,
-							someEnum: 'Production',
+							someEnum: 'First',
 							someString: 'name1',
 						},
 					},

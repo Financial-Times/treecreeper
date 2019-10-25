@@ -5,15 +5,17 @@ const { parse } = require('graphql');
 const { getGraphqlDefs, getTypes } = require('../../../packages/schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
-const resolveDocumentProperty = async (obj, args, context, info) => {
-	const code = obj.code || args.code;
+const resolveDocumentProperty = async ({ code }, args, context, info) => {
+	console.log(code);
 	if (!code) {
 		throw new Error(
-			'must include code in body of query that requests large docs',
+			'Must include code in body of query that requests any Document properties',
 		);
 	}
 	const key = `${info.parentType.name}/${code}`;
+	console.log({ key });
 	const record = await context.documentStoreDataLoader.load(key);
+	console.log({ record });
 	return record[info.fieldName];
 };
 
@@ -55,7 +57,7 @@ directive @deprecated(
 				});
 			},
 		},
-		resolvers: documentStore ? {} : getDocumentResolvers(),
+		resolvers: documentStore ? getDocumentResolvers() : {},
 		config: { query: true, mutation: false, debug: true },
 	});
 

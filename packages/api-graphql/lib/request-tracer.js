@@ -13,7 +13,7 @@ class Tracer {
 
 	_log(logType) {
 		try {
-			Object.entries(this.map).map(([type, fields]) => {
+			Object.entries(this.map).forEach(([type, fields]) => {
 				const { properties } = getType(type);
 				fields = [...fields];
 				logger[logType]({

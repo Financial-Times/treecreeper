@@ -13,7 +13,7 @@ const setupMocks = namespace => {
 
 	beforeAll(async () => {
 		// clean up after potentially failed test runs
-		await dropFixtures(namespace)
+		await dropFixtures(namespace);
 		await schemaReady;
 	});
 
