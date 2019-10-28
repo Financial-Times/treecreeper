@@ -312,93 +312,76 @@ describe('v2 - node generic', () => {
 		['head', false],
 		['delete', false],
 	].forEach(([method, checkBody]) => {
-		// this is to deal with that head requyests send no error body
-		const expectError = (status, message) =>
-			method === 'head' ? [status] : [status, message];
+		const expectError = (req, status, message) =>
+			method === 'head'
+				? req.expect(status).expect('Debug-Error', message)
+				: req.expect(status, message);
 
 		describe(`security checks - ${method}`, () => {
 			// Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 			const INJECTION_ATTACK_STRING =
 				'"1 WITH count(1) AS dummy MATCH (u:User) OPTIONAL MATCH (u)-[r]-() DELETE u, r"';
-			const ESCAPED_INJECTION_ATTACK_STRING =
-				'\\\\"1 WITH count\\(1\\) AS dummy MATCH \\(u:User\\) OPTIONAL MATCH \\(u\\)-\\[r\\]-\\(\\) DELETE u, r\\\\"';
 			it('should error when node type is suspicious', async () => {
-				await sandbox
+				const req = sandbox
 					.request(app)
 					[method](`/v2/node/${INJECTION_ATTACK_STRING}/${teamCode}`)
-					.namespacedAuth()
-					.expect(
-						...expectError(
-							400,
-							new RegExp(
-								`Invalid type \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
-							),
-						),
-					);
+					.namespacedAuth();
+
+				await expectError(req, 400, new RegExp(`Invalid type \`.*\``));
 			});
 
 			it('should error when node code is suspicious', async () => {
-				await sandbox
+				const req = sandbox
 					.request(app)
 					[method](`/v2/node/Team/${INJECTION_ATTACK_STRING}`)
-					.namespacedAuth()
-					.expect(
-						...expectError(
-							400,
-							new RegExp(
-								`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`Team\``,
-							),
-						),
-					);
+					.namespacedAuth();
+				await expectError(
+					req,
+					400,
+					new RegExp(
+						`Invalid value \`.*\` for property \`code\` on type \`Team\``,
+					),
+				);
 			});
 
 			it('should error when client id is suspicious', async () => {
-				await sandbox
+				const req = sandbox
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-id', `${INJECTION_ATTACK_STRING}`)
-					.expect(
-						...expectError(
-							400,
-							new RegExp(
-								`Invalid client id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
-							),
-						),
-					);
+					.set('client-id', `${INJECTION_ATTACK_STRING}`);
+				await expectError(
+					req,
+					400,
+					new RegExp(`Invalid client id \`.*\``),
+				);
 			});
 
 			it('should error when client user id is suspicious', async () => {
-				await sandbox
+				const req = sandbox
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
-					.set('client-user-id', `${INJECTION_ATTACK_STRING}`)
-					.expect(
-						...expectError(
-							400,
-							new RegExp(
-								`Invalid client user id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
-							),
-						),
-					);
+					.set('client-user-id', `${INJECTION_ATTACK_STRING}`);
+				await expectError(
+					req,
+					400,
+					new RegExp(`Invalid client user id \`.*\``),
+				);
 			});
 
 			it('should error when request id is suspicious', async () => {
-				await sandbox
+				const req = sandbox
 					.request(app)
 					[method](teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-id', 'valid-id')
-					.set('x-request-id', `${INJECTION_ATTACK_STRING}`)
-					.expect(
-						...expectError(
-							400,
-							new RegExp(
-								`Invalid request id \`${ESCAPED_INJECTION_ATTACK_STRING}\``,
-							),
-						),
-					);
+					.set('x-request-id', `${INJECTION_ATTACK_STRING}`);
+				await expectError(
+					req,
+					400,
+					new RegExp(`Invalid request id \`.*\``),
+				);
 			});
 
 			if (checkBody) {
@@ -439,7 +422,7 @@ describe('v2 - node generic', () => {
 							.expect(
 								400,
 								new RegExp(
-									`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`System\``,
+									`Invalid value \`.*\` for property \`code\` on type \`System\``,
 								),
 							);
 					});

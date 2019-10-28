@@ -94,7 +94,7 @@ Errors are returned in an array to avoid breaking API changes in future, but at 
 
 ### HEAD
 
-To be used for verifying the existence of a record
+To be used for verifying the existence of a record. Note that any errors are returned in a `Debug-Error` header
 
 | initial state | status | response type |
 | ------------- | ------ | ------------- |
