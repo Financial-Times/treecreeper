@@ -41,8 +41,8 @@ const queryBuilder = (method, input, body) => {
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
 
-	// context is used for keep boolean flags to update record
-	const context = {};
+	// context is used for stacking data to update record
+	const context = { upsert };
 
 	const queryParts = [getBaseQuery(type, method)];
 	let parameters = {
@@ -86,6 +86,7 @@ const queryBuilder = (method, input, body) => {
 		} = prepareToWriteRelationships(type, relationships, upsert);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
+		context.addedRelationships = relationships;
 		return builder;
 	};
 
@@ -106,6 +107,8 @@ const queryBuilder = (method, input, body) => {
 		}
 		context.willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
+		context.removedRelationships = removeRelationships;
+
 		return builder;
 	};
 
@@ -124,6 +127,7 @@ const queryBuilder = (method, input, body) => {
 			updateParameter(addRelationshipParams);
 		}
 		context.willAddRelationships = !!Object.keys(addedRelationships).length;
+		context.addedRelationships = addedRelationships;
 		return builder;
 	};
 
@@ -166,7 +170,10 @@ const queryBuilder = (method, input, body) => {
 	const execute = async () => {
 		queryParts.push(getNeo4jRecordCypherQuery());
 		const neo4jQuery = queryParts.join('\n');
-		return executeQuery(neo4jQuery, parameters);
+		return {
+			neo4jResult: await executeQuery(neo4jQuery, parameters),
+			queryContext: context,
+		};
 	};
 
 	const isNeo4jUpdateNeeded = () => {

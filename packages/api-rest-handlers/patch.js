@@ -10,6 +10,7 @@ const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { logChanges } = require('../api-publish');
 
 const patchHandler = ({
 	documentStore = {
@@ -59,7 +60,14 @@ const patchHandler = ({
 				return { status: 200, body: initialContent };
 			}
 
-			const neo4jResult = await builder.execute();
+			const { neo4jResult, queryContext } = await builder.execute();
+			const relationships = {
+				added: queryContext.addRelationships,
+				removed: queryContext.removedRelationships,
+			};
+			const relatedAction = queryContext.upsert ? 'CREATE' : 'UPDATE';
+			logChanges('UPDATE', neo4jResult, { relationships, relatedAction });
+
 			return {
 				status: 200,
 				body: {
