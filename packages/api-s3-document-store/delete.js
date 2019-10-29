@@ -44,7 +44,7 @@ const s3Delete = async ({
 			err,
 			'DELETE: S3 Delete failed',
 		);
-		throw new Error(err);
+		throw err;
 	}
 };
 
