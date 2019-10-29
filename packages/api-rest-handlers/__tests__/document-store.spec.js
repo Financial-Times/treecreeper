@@ -260,14 +260,6 @@ describe('rest document store integration', () => {
 				});
 
 				it('returns document from neo4j when documentStore is not passed in', async () => {
-					const mockDocstorePost = createResolvedDocstoreMock(
-						'post',
-						{
-							versionMarker,
-							body: documentFromS3,
-						},
-					);
-
 					const { status, body } = await handler({})(
 						getInput({ someString, someDocument }),
 					);
@@ -282,8 +274,6 @@ describe('rest document store integration', () => {
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({ code: mainCode, someString });
-
-					expect(mockDocstorePost).not.toHaveBeenCalled();
 				});
 			});
 		},
