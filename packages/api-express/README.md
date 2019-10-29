@@ -26,8 +26,8 @@ It returns an object with the following structure
 
 ```js
 app.treecreeper = {
-	logger, // the logger passed into the app, or a reference to trteecreeper's internal logger, which decoprates each log with useful application/request metadata
-	isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines it data types up to date
+	logger, // a reference to treecreeper's internal logger, which decorates each log with useful application/request metadata
+	isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines its data types up to date
 };
 ```
 

@@ -2,7 +2,7 @@
 
 Treecreeper&tm; functions for handling CRUD actions via a RESTful interface.
 
-The functions do not implement any handling of requests and responses, but work on a more event driven model - receiving and returning objects - for ease of reuse in various environments. Therefore the RESTful url scheme is implied rather than implemented.
+The functions do not implement any handling of requests and responses, but work on a more event driven model - receiving and returning objects - for ease of reuse in various environments. Therefore the RESTful url scheme is implied rather than implemented. This design is both to improve testability and to make it possible, in future, to deploy treecreeper to event driven architectures such as AWS Lambda.
 
 It exports the following functions
 
@@ -17,7 +17,7 @@ It exports the following functions
 }
 ```
 
-All of these functions are factories that return the actual handlers. Each of them accepts the following options
+All of these functions are factories that return the actual handlers. Each of the factories accepts the following options
 
 ```
 {
@@ -47,7 +47,7 @@ With the exception of `absorbHandler` they all return handlers which accept the 
 }
 ```
 
-`absorbHandler`'s input is the same, but accepts an additional property `absorbedCode`.
+`absorbHandler`'s input is the same, but accepts an additional property `absorbedCode`. `body` is only used by patch and post.
 
 The input can be generated from a http request (or equivalent object) by setting the url parameters as top level properties, and setting the request body and query string as nested objects within the input. Metadata is an object containing contextual information about the request.
 
