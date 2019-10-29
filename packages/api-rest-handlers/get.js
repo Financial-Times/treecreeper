@@ -12,17 +12,17 @@ const getHandler = ({ documentStore } = {}) => async input => {
 		tasks.push(documentStore.get(type, code));
 	}
 
-	const [neo4jResult, documentStoreResult] = await Promise.all(tasks);
+	const [neo4jResult, docstoreResult] = await Promise.all(tasks);
 
 	if (!neo4jResult.hasRecords()) {
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
 
-	const { body: documentStoreBody = {} } = documentStoreResult || {};
+	const { body: docstoreBody = {} } = docstoreResult || {};
 
 	return {
 		status: 200,
-		body: Object.assign(neo4jResult.toJson(type), documentStoreBody),
+		body: Object.assign(neo4jResult.toJson(type), docstoreBody),
 	};
 };
 
