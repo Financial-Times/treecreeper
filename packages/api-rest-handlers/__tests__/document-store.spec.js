@@ -65,15 +65,10 @@ describe('rest document store integration', () => {
 
 		it('returns document from neo4j when documentStore is not passed in', async () => {
 			await createMainNode({ someDocument });
-			const mockDocstoreGet = createResolvedDocstoreMock('get', {
-				body: documentFromS3,
-			});
-
 			const { body, status } = await getHandler({})(input);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({ code: mainCode, someDocument });
-			expect(mockDocstoreGet).not.toHaveBeenCalled();
 		});
 	});
 
@@ -375,10 +370,6 @@ describe('rest document store integration', () => {
 
 		it('returns document from neo4j when documentStore is not passed in', async () => {
 			await createMainNode();
-			const mockDocstorePatch = createResolvedDocstoreMock('patch', {
-				versionMarker,
-				body: documentFromS3,
-			});
 			const { status, body } = await patchHandler({})(
 				getInput({ someString, someDocument }),
 			);
@@ -393,8 +384,6 @@ describe('rest document store integration', () => {
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({ code: mainCode, someString });
-
-			expect(mockDocstorePatch).not.toHaveBeenCalled();
 		});
 	});
 
