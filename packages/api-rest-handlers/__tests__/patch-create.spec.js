@@ -118,9 +118,8 @@ describe('rest PATCH create', () => {
 		});
 
 		it('sets Time property', async () => {
-			const time = '12:34:56Z';
-			const datetime = `2019-01-09T${time}`;
-			const { status, body } = await basicHandler({ someTime: datetime });
+			const time = '2019-01-09T00:00:00.001Z';
+			const { status, body } = await basicHandler({ someTime: time });
 
 			expect(status).toBe(201);
 			expect(body).toMatchObject({
