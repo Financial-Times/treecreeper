@@ -24,22 +24,19 @@ const createKinesisClient = logger => {
 };
 
 const createStubKinesisClient = logger => ({
-	putRecord: () => {
-		logger.info({
-			event: 'PREVENT_LOGGING_TO_KINESIS',
-			message: `Skipped kinesis as not in production`,
-		});
-		return {
-			promise: () => Promise.resolve(),
-		};
-	},
+	putRecord: () => ({
+		promise: async () => {
+			logger.info(`Skipped kinesis as not in production`);
+		},
+	}),
 });
 
 const KinesisAdaptor = (streamName, { logger = console } = {}) => {
 	// eslint-disable-next-line no-unused-vars
 	const client = isDevelopment()
-		? createStubKinesisClient()
+		? createStubKinesisClient(logger)
 		: createKinesisClient(logger);
+
 	return {
 		getName: () => 'Kinesis',
 		publish: async payload => {
