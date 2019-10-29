@@ -34,7 +34,8 @@ describe.skip('rest PATCH diff', () => {
 		});
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
@@ -51,7 +52,8 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
@@ -69,7 +71,8 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
@@ -89,7 +92,7 @@ describe.skip('rest PATCH diff', () => {
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
-			expect.any(Object)
+			expect.any(Object),
 		);
 	});
 
@@ -107,7 +110,8 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
@@ -120,7 +124,8 @@ describe.skip('rest PATCH diff', () => {
 		const { status } = await basicHandler({ someString: null });
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
@@ -142,7 +147,8 @@ describe.skip('rest PATCH diff', () => {
 			);
 			expect(status).toBe(200);
 			expect(dbQuerySpy()).toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+				expect.stringMatching(/MERGE|CREATE/),
+				expect.any(Object),
 			);
 		});
 
@@ -163,7 +169,8 @@ describe.skip('rest PATCH diff', () => {
 			);
 			expect(status).toBe(200);
 			expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+				expect.stringMatching(/MERGE|CREATE/),
+				expect.any(Object),
 			);
 		});
 	});
