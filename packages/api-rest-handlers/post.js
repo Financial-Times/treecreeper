@@ -7,7 +7,9 @@ const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const { type, code, body: originalBody, metadata = {} } = validateInput(input);
+	const { type, code, body: originalBody, metadata = {} } = validateInput(
+		input,
+	);
 	const { clientId } = metadata;
 
 	const { documents = {}, body } = documentStore

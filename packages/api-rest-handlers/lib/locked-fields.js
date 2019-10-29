@@ -107,18 +107,18 @@ const mergeLockedFields = ({
 		}
 		lockFieldList = getLockFieldList(lockFields);
 	}
-	let willLockFields;
+	let unchangedLockFields;
 	if (isUnlockAll) {
-		willLockFields = {};
+		unchangedLockFields = {};
 	} else {
-		willLockFields = !_isEmpty(existingLockedFields)
+		unchangedLockFields = !_isEmpty(existingLockedFields)
 			? removeLockedFields(clientId, unlockFields, existingLockedFields)
 			: {};
 	}
 	const newLockedFields = setLockedFields(
 		clientId,
 		lockFieldList,
-		willLockFields,
+		unchangedLockFields,
 	);
 
 	if (needValidate) {

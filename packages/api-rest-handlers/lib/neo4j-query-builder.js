@@ -50,7 +50,7 @@ const getBaseQuery = (type, method) => {
 	}
 };
 
-const queryBuilder = (method, input, body) => {
+const queryBuilder = (method, input, body = {}) => {
 	const { type, code, metadata = {}, query = {} } = input;
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
@@ -154,9 +154,10 @@ const queryBuilder = (method, input, body) => {
 				? JSON.stringify(lockedFields)
 				: null,
 		});
-		context.willModifyLockedFields =
-			(unlockFields || lockFields || false) &&
-			!isObjectEqual(lockedFields, existingLockedFields);
+		context.willModifyLockedFields = !!(
+			(unlockFields || lockFields) &&
+			!isObjectEqual(lockedFields, existingLockedFields)
+		);
 		return builder;
 	};
 
