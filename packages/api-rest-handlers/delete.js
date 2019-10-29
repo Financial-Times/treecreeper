@@ -2,6 +2,7 @@ const httpErrors = require('http-errors');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 const { executeQuery } = require('./lib/neo4j-model');
+const { logChanges } = require('../api-publish');
 
 const deleteHandler = ({
 	documentStore = { delete: () => ({}) },
@@ -39,6 +40,7 @@ const deleteHandler = ({
 
 	try {
 		await executeQuery(query, { code });
+		logChanges('DELETE', neo4jResult);
 	} catch (error) {
 		logger.error(
 			{ event: 'NEO4J_DELETE_FAILURE', error },

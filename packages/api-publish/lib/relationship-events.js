@@ -33,8 +33,9 @@ const makeAddedRelationshipEvents = (
 		return [];
 	}
 	const createdNodes = neo4jRecords
-		.map(record => record.get('node'))
-		.filter(node => node && node.relatedCode() !== mainCode)
+		.filter(
+			record => record.get('node') && record.relatedCode() !== mainCode,
+		)
 		.map(node => ({
 			relatedCode: node.relatedCode(),
 			relatedType: node.relatedType(),

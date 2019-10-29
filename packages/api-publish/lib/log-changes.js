@@ -22,7 +22,6 @@ const makeEvents = (action, relatedAction, neo4jEntity, relationships) => {
 		added: addedRelationships = {},
 		removed: removedRelationships = {},
 	} = relationships;
-
 	events.push({
 		action,
 		code,
@@ -91,7 +90,7 @@ const logChanges = (
 
 	const events = makeEvents(action, relatedAction, entity, relationships);
 	const publisher = createPublisher(adaptor);
-	uniquifyEvents(events).forEach(event => publisher.publish(adaptor, event));
+	uniquifyEvents(events).forEach(event => publisher.publish(event));
 };
 
 module.exports = {
