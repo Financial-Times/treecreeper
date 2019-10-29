@@ -4,7 +4,7 @@ const { setupMocks } = require('../../../test-helpers');
 
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
-describe.skip('rest PATCH diff', () => {
+describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
@@ -34,11 +34,12 @@ describe.skip('rest PATCH diff', () => {
 		});
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
-	it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
+	it.skip("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
@@ -51,11 +52,12 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
-	it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
+	it.skip("doesn't write if no real relationship changes detected in MERGE mode", async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
@@ -69,13 +71,14 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
 	it.skip("doesn't write if no real lockField changes detected", async () => {});
 
-	it('writes if property but no relationship changes detected', async () => {
+	it.skip('writes if property but no relationship changes detected', async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
@@ -89,11 +92,11 @@ describe.skip('rest PATCH diff', () => {
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
-			expect.any(Object)
+			expect.any(Object),
 		);
 	});
 
-	it('writes if relationship but no property changes detected', async () => {
+	it.skip('writes if relationship but no property changes detected', async () => {
 		const [main, child] = await createNodes(
 			['MainType', { code: mainCode, someString: 'someString' }],
 			['ChildType', `${childCode}-1`],
@@ -107,11 +110,12 @@ describe.skip('rest PATCH diff', () => {
 		);
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
-	it('detects deleted property as a change', async () => {
+	it.skip('detects deleted property as a change', async () => {
 		await createNode('MainType', {
 			code: mainCode,
 			someString: 'someString',
@@ -120,11 +124,12 @@ describe.skip('rest PATCH diff', () => {
 		const { status } = await basicHandler({ someString: null });
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
 		);
 	});
 
-	describe('patching with fewer relationships', () => {
+	describe.skip('patching with fewer relationships', () => {
 		it('treats fewer relationships as a delete when replacing relationships', async () => {
 			const [main, child1, child2] = await createNodes(
 				['MainType', mainCode],
@@ -142,7 +147,8 @@ describe.skip('rest PATCH diff', () => {
 			);
 			expect(status).toBe(200);
 			expect(dbQuerySpy()).toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+				expect.stringMatching(/MERGE|CREATE/),
+				expect.any(Object),
 			);
 		});
 
@@ -163,7 +169,8 @@ describe.skip('rest PATCH diff', () => {
 			);
 			expect(status).toBe(200);
 			expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-				expect.stringMatching(/MERGE|CREATE/),expect.any(Object)
+				expect.stringMatching(/MERGE|CREATE/),
+				expect.any(Object),
 			);
 		});
 	});

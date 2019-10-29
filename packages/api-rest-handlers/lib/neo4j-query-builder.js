@@ -74,7 +74,8 @@ const queryBuilder = (method, input, body) => {
 				: body,
 		});
 		updateParameter({ properties });
-		context.willModifyNode = !!Object.keys(properties).length;
+		context.willModifyNode =
+			properties.body && !!Object.keys(properties.body).length;
 		return builder;
 	};
 
