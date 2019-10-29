@@ -5,7 +5,7 @@ This returns a treecreeper&tm; api to sit in front of a neo4j database instance 
 -   a graphql api
 -   RESTful CRUD endpoints
 
-It exports the following `{getApp}`. `getApp` accepts the following configuration object (defaults are as specified below):
+It exports `{ getApp }`. `getApp` accepts the following configuration object (defaults are as specified below):
 
 ```js
 getApp({
@@ -17,11 +17,12 @@ getApp({
 	restPath = '/rest', // the path, relative to treecreeperPath, where the REST api is served
 	restMiddlewares = [], // array of middlewares to call before the relevant REST handler executes
 	documentStore, // an [optional] reference to a documentStore object, used to store large properties outside the neo4j instance
-	logger; // an [optional] logger that implements debug, info, warning and error methods
+	republishSchema, // a boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi
+	logger // an [optional] logger that implements debug, info, warning and error methods
 })
 ```
 
-It returns either express application provided, or the new one it creates. Attached to this app is a `treecreeper` object with the following properties:
+It returns an object with the following structure
 
 ```js
 app.treecreeper = {
