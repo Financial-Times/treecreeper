@@ -19,7 +19,7 @@ const separateDocsFromBody = (nodeType, body = {}) => {
 		}
 	});
 
-	return { bodyDocuments, bodyNoDocs };
+	return { documents: bodyDocuments, body: bodyNoDocs };
 };
 
 module.exports = {

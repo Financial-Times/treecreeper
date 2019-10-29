@@ -6,13 +6,13 @@ const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 
-const postHandler = ({
-	documentStore = { post: () => ({}) },
-} = {}) => async input => {
-	const { type, code, body, metadata = {} } = validateInput(input);
+const postHandler = ({ documentStore } = {}) => async input => {
+	const { type, code, body: originalBody, metadata = {} } = validateInput(input);
 	const { clientId } = metadata;
 
-	const { bodyDocuments, bodyNoDocs } = separateDocsFromBody(type, body);
+	const { documents = {}, body } = documentStore
+		? separateDocsFromBody(type, originalBody)
+		: { body: originalBody };
 
 	const { createPermissions, pluralName } = getType(type);
 	if (createPermissions && !createPermissions.includes(clientId)) {
@@ -25,16 +25,16 @@ const postHandler = ({
 	}
 
 	const { body: newBodyDocs = {}, undo: undoDocstoreWrite } = !_isEmpty(
-		bodyDocuments,
+		documents,
 	)
-		? await documentStore.post(type, code, bodyDocuments)
+		? await documentStore.post(type, code, documents)
 		: {};
 
 	try {
-		const neo4jResult = await queryBuilder('CREATE', input, bodyNoDocs)
+		const neo4jResult = await queryBuilder('CREATE', input, body)
 			.constructProperties()
 			.createRelationships()
-			.setLockFields(bodyDocuments)
+			.setLockFields(documents)
 			.execute();
 
 		const responseData = Object.assign(
