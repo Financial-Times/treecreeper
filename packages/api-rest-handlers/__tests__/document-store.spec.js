@@ -99,6 +99,22 @@ describe('rest document store integration', () => {
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 
+		it('throws if s3 query fails', async () => {
+			await createMainNode();
+			const mockDocstoreDelete = createRejectedDocstoreMock(
+				'delete',
+				new Error('oh no'),
+			);
+			await expect(
+				deleteHandler({ documentStore })(input),
+			).rejects.toThrow('oh no');
+			await neo4jTest('MainType', mainCode).exists();
+			expect(mockDocstoreDelete).toHaveBeenCalledWith(
+				'MainType',
+				mainCode,
+			);
+		});
+
 		it('undoes any s3 actions if neo4j query fails', async () => {
 			const versionMarker = 'delete-marker';
 			await createMainNode();
