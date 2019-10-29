@@ -1,17 +1,26 @@
-# biz-ops-schema
+# @treecreeper/schema-sdk
 
-Schema for biz-ops data store and api. It provides two things:
-
--   yaml files which define which types, properties and relationships are allowed. These are intended to be edited by anybody who wants to add to the things the api models
--   a nodejs library for accessing subsets this information
+In many ways, this is the beating heart of Treecreeper&TM;. It consumes the schema files that define what sort of records can be stored in the neo4j instance, and what relationships can exist between them. These schema files may exist locally or be hosted somewhere remote. Once these files are consumed, schema-sdk then takes care of:
+- Updating the schema held locally when the remote copy changes, and making sure the change to the schema is propagated everywhere within the application
+Generating the GraphQl SDL schema that underlies the graphql API
+- Providing methods that allow validation of input data against the schema
+- Providing utility methods that allow various aspects of the schema to be interrogated and used for e.g. constructing a UI for the data
 
 ## Installation and usage
 
-`npm install @financial-times/biz-ops-schema`
+`npm install @treecreeper/schema-sdk`
 
-In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment.
+The package exports a singleton instance, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application. It should be initialised _once and once only per application_. It also exports a reference to the underlying `SDK` class, but this is only exposed for use by other packages' integration tests.
 
-The component should be initialised _once and once only per application_. The component is a singleton, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application, and will already be hydrated with schema data.
+### Initialisation
+The package exports an `init(options)` function, that takes the following options
+```
+
+
+```
+
+It also exports a `ready()` method, that returns a `Promise` that resolves once the schem-sdk has loaded the schema files, and an `onChange()` method, that can be used to attach handlers that need to respond when the schema changes.
+
 
 ### Persistent nodejs process (e.g. heroku)
 

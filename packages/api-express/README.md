@@ -4,6 +4,7 @@ Treecreeper&tm; api to sit in front of a neo4j database instance. It provides
 
 -   a graphql api
 -   RESTful CRUD endpoints
+-   Takes care of initialising a schema-sdk and api-db-manager, so that data structures automatically update
 
 It exports `{ getApp }`. `getApp` accepts the following configuration object (defaults are as specified below):
 
