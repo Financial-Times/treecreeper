@@ -31,9 +31,9 @@ properties:
     description: Enum description.
     label: Enum label
   someInteger:
-    type: Integer
-    description: Integer description.
-    label: Integer label
+    type: Int
+    description: Int description.
+    label: Int label
   anotherString:
     type: Word
     description: Word description.
@@ -47,9 +47,9 @@ properties:
     description: Time description.
     label: Time label
   someDatetime:
-    type: Datetime
-    description: Datetime description.
-    label: Datetime label
+    type: DateTime
+    description: DateTime description.
+    label: DateTime label
   children:
     relationship: HAS_CHILD
     type: ChildType

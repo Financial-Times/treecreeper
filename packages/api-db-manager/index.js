@@ -70,7 +70,7 @@ const initConstraints = async () => {
 module.exports = Object.assign(
 	{
 		initConstraints,
-		listenForChanges: () => schema.onChange(initConstraints),
+		listenForSchemaChanges: () => schema.onChange(initConstraints),
 	},
 	dbConnection,
 );

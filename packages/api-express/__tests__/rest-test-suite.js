@@ -6,40 +6,41 @@ const { setupMocks } = require('../../../test-helpers');
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
+		const mockHandlerFactory = jest.fn();
+		const config = { fake: 'config' };
 		let app;
 		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
 				return {
 					headHandler:
 						method === 'head'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					getHandler:
 						method === 'get'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					deleteHandler:
 						method === 'delete'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
-
 					postHandler:
 						method === 'post'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					patchHandler:
 						method === 'patch'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					absorbHandler:
 						method === 'absorb'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 				};
 			});
 			const { getApp } = require('..');
 
-			app = await getApp();
+			app = await getApp(config);
 		});
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));
@@ -51,6 +52,10 @@ const testSuite = (method, goodStatus) => {
 		const { createNode } = setupMocks(namespace);
 
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
+		it('passes config to the handler factory', () => {
+			expect(mockHandlerFactory).toHaveBeenCalledWith(config);
+		});
+
 		describe('client headers', () => {
 			it(`no client-id or client-user-id returns 400`, async () => {
 				return request(app)

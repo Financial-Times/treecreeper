@@ -71,6 +71,9 @@ describe.skip('rest PATCH update', () => {
 				.match(meta.update);
 		});
 		describe('temporal properties', () => {
+			const neo4jTimePrecision = timestamp =>
+				timestamp.replace('Z', '000000Z');
+
 			describe('Date', () => {
 				it('sets Date when no previous value', async () => {
 					await createMainNode();
@@ -119,20 +122,20 @@ describe.skip('rest PATCH update', () => {
 			describe('Time', () => {
 				it('sets Time when no previous value', async () => {
 					await createMainNode();
-					const time = '2019-01-09T00:00:00.000Z';
+					const time = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						someTime: time,
+						someTime: neo4jTimePrecision(time),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
-							someTime: time,
+							someTime: neo4jTimePrecision(time),
 						})
 						.noRels();
 				});
@@ -142,20 +145,20 @@ describe.skip('rest PATCH update', () => {
 							new Date('2018-01-09'),
 						),
 					});
-					const time = '2019-01-09T00:00:00.000Z';
+					const time = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						someTime: time,
+						someTime: neo4jTimePrecision(time),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
-							someTime: time,
+							someTime: neo4jTimePrecision(time),
 						})
 						.noRels();
 				});
@@ -164,21 +167,19 @@ describe.skip('rest PATCH update', () => {
 			describe('Datetime', () => {
 				it('sets Datetime when no previous value', async () => {
 					await createMainNode();
-					const datetime = '2019-01-09T00:00:00.000Z';
+					const datetime = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someDatetime: datetime,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
-						someDatetime: datetime,
+						someDatetime: neo4jTimePrecision(datetime),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
-							someDatetime: datetime,
+							someDatetime: neo4jTimePrecision(datetime),
 						});
 				});
 				it('updates existing Datetime', async () => {
@@ -187,21 +188,19 @@ describe.skip('rest PATCH update', () => {
 							new Date('2018-01-09'),
 						),
 					});
-					const datetime = '2019-01-09T00:00:00.000Z';
+					const datetime = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someDatetime: datetime,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
-						someDatetime: datetime,
+						someDatetime: neo4jTimePrecision(datetime),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
-							someDatetime: datetime,
+							someDatetime: neo4jTimePrecision(datetime),
 						});
 				});
 				it.skip("doesn't update when effectively the same Datetime", async () => {});

@@ -104,39 +104,41 @@ describe('rest POST', () => {
 					someDate: date,
 				});
 		});
+		const neo4jTimePrecision = timestamp =>
+			timestamp.replace('Z', '000000Z');
 
 		it('sets Datetime property', async () => {
-			const datetime = '2019-01-09T00:00:00.000Z';
+			const datetime = '2019-01-09T00:00:00.001Z';
+
 			const { status, body } = await basicHandler({
 				someDatetime: datetime,
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				code: mainCode,
-				someDatetime: datetime,
+				someDatetime: neo4jTimePrecision(datetime),
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someDatetime: datetime,
+					someDatetime: neo4jTimePrecision(datetime),
 				});
 		});
 
-		it.skip('sets Time property', async () => {
-			const time = '2019-01-09T00:00:00.000Z';
+		it('sets Time property', async () => {
+			const time = '2019-01-09T00:00:00.001Z';
 			const { status, body } = await basicHandler({ someTime: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someTime: time,
+				someTime: neo4jTimePrecision(time).split('T')[1],
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someTime: time,
+					someTime: neo4jTimePrecision(time).split('T')[1],
 				})
 				.noRels();
 		});
