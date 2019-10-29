@@ -44,10 +44,8 @@ const s3Delete = async ({
 			err,
 			'DELETE: S3 Delete failed',
 		);
+		throw err;
 	}
-	return {
-		versionMarker: null,
-	};
 };
 
 module.exports = {

@@ -71,12 +71,15 @@ describe.skip('rest PATCH update', () => {
 				.match(meta.update);
 		});
 		describe('temporal properties', () => {
+			const neo4jTimePrecision = timestamp =>
+				timestamp.replace('Z', '000000Z');
+
 			describe('Date', () => {
 				it('sets Date when no previous value', async () => {
 					await createMainNode();
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISatchring(),
+						someDate: new Date(date).toISOstring(),
 					});
 
 					expect(status).toBe(200);
@@ -99,7 +102,7 @@ describe.skip('rest PATCH update', () => {
 					});
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISatchring(),
+						someDate: new Date(date).toISOstring(),
 					});
 
 					expect(status).toBe(200);
@@ -119,20 +122,20 @@ describe.skip('rest PATCH update', () => {
 			describe('Time', () => {
 				it('sets Time when no previous value', async () => {
 					await createMainNode();
-					const time = '2019-01-09T00:00:00.000Z';
+					const time = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						someTime: time,
+						someTime: neo4jTimePrecision(time),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
-							someTime: time,
+							someTime: neo4jTimePrecision(time),
 						})
 						.noRels();
 				});
@@ -142,20 +145,20 @@ describe.skip('rest PATCH update', () => {
 							new Date('2018-01-09'),
 						),
 					});
-					const time = '2019-01-09T00:00:00.000Z';
+					const time = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						someTime: time,
+						someTime: neo4jTimePrecision(time),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
-							someTime: time,
+							someTime: neo4jTimePrecision(time),
 						})
 						.noRels();
 				});
@@ -164,21 +167,19 @@ describe.skip('rest PATCH update', () => {
 			describe('Datetime', () => {
 				it('sets Datetime when no previous value', async () => {
 					await createMainNode();
-					const datetime = '2019-01-09T00:00:00.000Z';
+					const datetime = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someDatetime: datetime,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
-						someDatetime: datetime,
+						someDatetime: neo4jTimePrecision(datetime),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
-							someDatetime: datetime,
+							someDatetime: neo4jTimePrecision(datetime),
 						});
 				});
 				it('updates existing Datetime', async () => {
@@ -187,21 +188,19 @@ describe.skip('rest PATCH update', () => {
 							new Date('2018-01-09'),
 						),
 					});
-					const datetime = '2019-01-09T00:00:00.000Z';
+					const datetime = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await basicHandler({
 						someDatetime: datetime,
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
-						someDatetime: datetime,
+						someDatetime: neo4jTimePrecision(datetime),
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
-							someDatetime: datetime,
+							someDatetime: neo4jTimePrecision(datetime),
 						});
 				});
 				it.skip("doesn't update when effectively the same Datetime", async () => {});
@@ -251,10 +250,10 @@ describe.skip('rest PATCH update', () => {
 				clientUserId: 'still-here',
 			});
 			expect(body).toMatchObject({
-				clientUserId: 'still-here',
+				_updatedByUser: 'still-here',
 			});
 			expect(body).not.toMatchObject({
-				clientId: expect.any(String),
+				_updatedByClient: expect.any(String),
 			});
 		});
 		it('no clientUserId, deletes the _updatedByUser property', async () => {
@@ -263,10 +262,10 @@ describe.skip('rest PATCH update', () => {
 				clientId: 'still-here',
 			});
 			expect(body).toMatchObject({
-				clientId: 'still-here',
+				_updatedByClient: 'still-here',
 			});
 			expect(body).not.toMatchObject({
-				clientUserId: expect.any(String),
+				_updatedByUser: expect.any(String),
 			});
 		});
 		it('throws 400 if code in body conflicts with code in url', async () => {

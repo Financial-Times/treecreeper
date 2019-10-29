@@ -3,7 +3,7 @@ const { s3Get } = require('./get');
 const { s3Post } = require('./post');
 const { s3Patch } = require('./patch');
 const { s3Delete } = require('./delete');
-const { s3Merge } = require('./merge');
+const { s3Absorb } = require('./absorb');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -43,8 +43,8 @@ const docstore = (
 				code,
 				versionMarker,
 			}),
-		merge: async (nodeType, sourceCode, destinationCode) =>
-			s3Merge({
+		absorb: async (nodeType, sourceCode, destinationCode) =>
+			s3Absorb({
 				s3Instance,
 				bucketName,
 				nodeType,
