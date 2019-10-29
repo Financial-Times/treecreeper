@@ -6,13 +6,10 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	validateInput(input);
 
 	const { type, code } = input;
-	const tasks = [getNeo4jRecord(type, code)];
-
-	if (documentStore) {
-		tasks.push(documentStore.get(type, code));
-	}
-
-	const [neo4jResult, docstoreResult] = await Promise.all(tasks);
+	const [neo4jResult, docstoreResult] = await Promise.all([
+		getNeo4jRecord(type, code),
+		documentStore ? documentStore.get(type, code) : { body: {} },
+	]);
 
 	if (!neo4jResult.hasRecords()) {
 		throw httpErrors(404, `${type} ${code} does not exist`);
