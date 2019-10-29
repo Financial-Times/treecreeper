@@ -1,6 +1,6 @@
 # @treecreeper/api-graphql
 
-This returns a treecreeper&tm; graphql express middleware to sit in front of a neo4j database instance
+Treecreeper&tm; graphql express middleware to sit in front of a neo4j database instance
 
 It exports `{getGraphqlApi}`. `getGraphqlApi` accepts the following configuration object (defaults are as specified below):
 

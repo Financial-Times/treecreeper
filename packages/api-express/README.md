@@ -1,6 +1,6 @@
 # @treecreeper/api-rest-express
 
-This returns a treecreeper&tm; api to sit in front of a neo4j database instance i.e.
+Treecreeper&tm; api to sit in front of a neo4j database instance. It provides
 
 -   a graphql api
 -   RESTful CRUD endpoints
