@@ -107,8 +107,7 @@ const queryBuilder = (method, input, body) => {
 		}
 		context.willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
-		context.removedRelationships = removeRelationships;
-
+		context.removedRelationships = removedRelationships;
 		return builder;
 	};
 

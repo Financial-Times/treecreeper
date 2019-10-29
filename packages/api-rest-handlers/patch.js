@@ -62,11 +62,11 @@ const patchHandler = ({
 
 			const { neo4jResult, queryContext } = await builder.execute();
 			const relationships = {
-				added: queryContext.addRelationships,
+				added: queryContext.addedRelationships,
 				removed: queryContext.removedRelationships,
 			};
-			const relatedAction = queryContext.upsert ? 'CREATE' : 'UPDATE';
-			logChanges('UPDATE', neo4jResult, { relationships, relatedAction });
+			// const relatedAction = queryContext.upsert ? 'CREATE' : 'UPDATE';
+			logChanges('UPDATE', neo4jResult, { relationships });
 
 			return {
 				status: 200,

@@ -23,20 +23,28 @@ const createKinesisClient = logger => {
 	});
 };
 
+const createStubKinesisClient = logger => ({
+	putRecord: () => {
+		logger.info({
+			event: 'PREVENT_LOGGING_TO_KINESIS',
+			message: `Skipped kinesis as not in production`,
+		});
+		return {
+			promise: () => Promise.resolve(),
+		};
+	},
+});
+
 const KinesisAdaptor = (streamName, { logger = console } = {}) => {
 	// eslint-disable-next-line no-unused-vars
-	const client = createKinesisClient(logger);
+	const client = isDevelopment()
+		? createStubKinesisClient()
+		: createKinesisClient(logger);
 	return {
 		getName: () => 'Kinesis',
 		publish: async payload => {
-			if (isDevelopment()) {
-				logger.debug(
-					`Skipped kinesis ${payload.action} as not in production`,
-				);
-				return;
-			}
 			try {
-				const { DYNO } = process.env.DYNO;
+				const { DYNO } = process.env;
 				const options = {
 					Data: Buffer.from(JSON.stringify(payload), 'utf8'),
 					PartitionKey: `${DYNO}:${Date.now()}`,
