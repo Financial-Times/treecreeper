@@ -55,8 +55,10 @@ const getApp = async (options = {}) => {
 
 	app.use(treecreeperPath, router);
 	await schema.ready();
-	app.logger = logger;
-	app.isSchemaUpdating = isSchemaUpdating;
+	app.treecreeper = {
+		logger,
+		isSchemaUpdating,
+	};
 	return app;
 };
 
