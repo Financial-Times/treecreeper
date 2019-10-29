@@ -6,35 +6,41 @@ const { setupMocks } = require('../../../test-helpers');
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
+		const mockHandlerFactory = jest.fn();
+		const config = { fake: 'config' };
 		let app;
 		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {
 				return {
-					deleteHandler:
-						method === 'delete'
-							? jest.fn().mockReturnValue(mockHandler)
+					headHandler:
+						method === 'head'
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					getHandler:
 						method === 'get'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
+							: defaultHandler,
+					deleteHandler:
+						method === 'delete'
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					postHandler:
 						method === 'post'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					patchHandler:
 						method === 'patch'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 					absorbHandler:
 						method === 'absorb'
-							? jest.fn().mockReturnValue(mockHandler)
+							? mockHandlerFactory.mockReturnValue(mockHandler)
 							: defaultHandler,
 				};
 			});
 			const { getApp } = require('..');
 
-			app = await getApp();
+			app = await getApp(config);
 		});
 
 		afterAll(() => jest.dontMock('../../../packages/api-rest-handlers'));
@@ -46,6 +52,10 @@ const testSuite = (method, goodStatus) => {
 		const { createNode } = setupMocks(namespace);
 
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
+		it('passes config to the handler factory', () => {
+			expect(mockHandlerFactory).toHaveBeenCalledWith(config);
+		});
+
 		describe('client headers', () => {
 			it(`no client-id or client-user-id returns 400`, async () => {
 				return request(app)
@@ -121,6 +131,10 @@ const testSuite = (method, goodStatus) => {
 					.set('request-id', 'test-request-id')
 					.expect(goodStatus);
 			});
+
+			const expectError = (status, message) =>
+				method === 'head' ? [status] : [status, message];
+
 			it('must respond with expected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(httpErrors(404, 'hahaha'));
 				await request(app)
@@ -128,7 +142,11 @@ const testSuite = (method, goodStatus) => {
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
-					.expect(404, { errors: [{ message: 'hahaha' }] });
+					.expect(
+						...expectError(404, {
+							errors: [{ message: 'hahaha' }],
+						}),
+					);
 			});
 			it('must respond with unexpected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(new Error('hahaha'));
@@ -137,9 +155,11 @@ const testSuite = (method, goodStatus) => {
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
-					.expect(500, {
-						errors: [{ message: 'Error: hahaha' }],
-					});
+					.expect(
+						...expectError(500, {
+							errors: [{ message: 'Error: hahaha' }],
+						}),
+					);
 			});
 		});
 	});

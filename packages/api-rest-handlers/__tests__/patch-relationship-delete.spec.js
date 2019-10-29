@@ -383,7 +383,7 @@ describe.skip('rest PATCH relationship delete', () => {
 					});
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						olderSiblings: [`${mainCode}-1`],
+						olderSiblings: [mainCode2],
 						children: [childCode],
 					});
 					expect(body).not.toMatchObject({

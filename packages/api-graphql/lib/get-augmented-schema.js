@@ -2,33 +2,32 @@ const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { applyMiddleware } = require('graphql-middleware');
 const { parse } = require('graphql');
-const {
-	getGraphqlDefs,
-	getTypes,
-} = require('../../../../../packages/schema-sdk');
+const { getGraphqlDefs, getTypes } = require('../../../packages/schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
-const getDocs = async (obj, args, context, info) => {
-	const code = obj.code || args.code;
+const resolveDocumentProperty = async ({ code }, args, context, info) => {
+	console.log(code);
 	if (!code) {
 		throw new Error(
-			'must include code in body of query that requests large docs',
+			'Must include code in body of query that requests any Document properties',
 		);
 	}
 	const key = `${info.parentType.name}/${code}`;
-	const record = await context.s3DocsDataLoader.load(key);
+	console.log({ key });
+	const record = await context.documentStoreDataLoader.load(key);
+	console.log({ record });
 	return record[info.fieldName];
 };
 
-const getResolvers = () => {
-	const types = getTypes();
+const getDocumentResolvers = () => {
 	const typeResolvers = {};
+	const types = getTypes();
 	types.forEach(type => {
 		const nodeProperties = type.properties;
 		const documentResolvers = {};
 		Object.keys(nodeProperties).forEach(prop => {
 			if (nodeProperties[prop].type === 'Document') {
-				documentResolvers[prop] = getDocs;
+				documentResolvers[prop] = resolveDocumentProperty;
 			}
 		});
 		if (Object.keys(documentResolvers).length) {
@@ -38,7 +37,7 @@ const getResolvers = () => {
 	return typeResolvers;
 };
 
-const getAugmentedSchema = () => {
+const getAugmentedSchema = ({ documentStore }) => {
 	const typeDefs = getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
@@ -58,7 +57,7 @@ directive @deprecated(
 				});
 			},
 		},
-		resolvers: getResolvers(),
+		resolvers: documentStore ? getDocumentResolvers() : {},
 		config: { query: true, mutation: false, debug: true },
 	});
 

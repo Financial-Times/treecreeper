@@ -69,6 +69,7 @@ describe('S3 document helper post', () => {
 			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
 			Key: `${consistentNodeType}/${givenSystemCode}`,
 			Body: JSON.stringify(exampleData),
+			ContentType: 'application/json',
 		};
 
 		expect(stubUpload).toHaveBeenCalledTimes(1);

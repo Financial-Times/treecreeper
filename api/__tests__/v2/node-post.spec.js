@@ -45,6 +45,7 @@ describe('v2 - node POST', () => {
 					Body: JSON.stringify({ someDocument: 'Fake Document' }),
 					Bucket: 'biz-ops-documents.510688331160',
 					Key: `MainType/${mainCode}`,
+					ContentType: 'application/json',
 				},
 				requestType: 'POST',
 			},
@@ -131,6 +132,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `MainType/${mainCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -172,6 +174,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `MainType/${mainCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -237,6 +240,7 @@ describe('v2 - node POST', () => {
 				}),
 				Bucket: 'biz-ops-documents.510688331160',
 				Key: `RestrictedType/${restrictedCode}`,
+				ContentType: 'application/json',
 			},
 			requestType: 'POST',
 		});
@@ -327,6 +331,7 @@ describe('v2 - node POST', () => {
 					Body: JSON.stringify({ someDocument: 'Fake Document' }),
 					Bucket: 'biz-ops-documents.510688331160',
 					Key: `MainType/${mainCode}`,
+					ContentType: 'application/json',
 				},
 				requestType: 'POST',
 			},
