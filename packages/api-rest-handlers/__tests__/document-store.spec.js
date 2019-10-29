@@ -101,12 +101,13 @@ describe('rest document store integration', () => {
 
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
-			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
-				versionMarker: null,
-			});
+			const mockDocstoreDelete = createRejectedDocstoreMock(
+				'delete',
+				new Error('oh no'),
+			);
 			await expect(
 				deleteHandler({ documentStore })(input),
-			).rejects.toThrow(Error);
+			).rejects.toThrow('oh no');
 			await neo4jTest('MainType', mainCode).exists();
 			expect(mockDocstoreDelete).toHaveBeenCalledWith(
 				'MainType',

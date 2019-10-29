@@ -31,12 +31,8 @@ const deleteHandler = ({
 
 	if (documentStore) {
 		// Writes are in series, not parallel, to simplify rollback on error
-		const { versionMarker, undo } = await documentStore.delete(type, code);
+		const { undo } = await documentStore.delete(type, code);
 		undoDocstoreWrite = undo;
-		// documentStore.delete never throws error,  but retuns { versionMarker: null } instead
-		if (versionMarker === null) {
-			throw new Error('S3 query failed');
-		}
 	}
 
 	try {

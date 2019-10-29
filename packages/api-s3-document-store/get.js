@@ -45,7 +45,7 @@ const s3Get = async ({
 			err,
 			params.Key,
 		);
-		throw new Error(err);
+		throw err;
 	}
 };
 
