@@ -2,11 +2,6 @@ jest.mock('../../api-express/lib/request-context');
 
 const { logChanges } = require('..');
 const { setupMocks } = require('../../../test-helpers');
-const {
-	queryBuilder,
-} = require('../../api-rest-handlers/lib/neo4j-query-builder');
-const { executeQuery } = require('../../api-rest-handlers/lib/neo4j-model');
-const { getNeo4jRecord } = require('../../api-rest-handlers/lib/read-helpers');
 const requestContext = require('../../api-express/lib/request-context');
 
 describe('logChanges', () => {
@@ -16,24 +11,24 @@ describe('logChanges', () => {
 	const childCode = `${namespace}-child`;
 	const mainType = 'MainType';
 	const requestId = `${namespace}-default-request`;
+	const anotherRequestId = `${requestId}-another`;
 
 	beforeEach(() => {
-		jest.spyOn(requestContext, 'getContext').mockReturnValue({});
+		jest.spyOn(requestContext, 'getContext').mockReturnValue({
+			requestId,
+		});
 	});
 
 	afterEach(() => {
 		jest.resetAllMocks();
 	});
 
-	const { createNode, createNodes } = setupMocks(namespace);
+	setupMocks(namespace);
 
 	const createMockAdaptor = () => ({
 		getName: () => 'mock-adaptor',
 		publish: jest.fn(async payload => payload),
 	});
-
-	const createMainNode = (code, props = {}) =>
-		createNode(mainType, Object.assign({ code }, props));
 
 	const matcher = (action, type, code, props) => ({
 		action,
@@ -43,12 +38,43 @@ describe('logChanges', () => {
 		updatedProperties: expect.arrayContaining(props),
 	});
 
+	const mockNeo4jResult = (
+		type,
+		code,
+		relType,
+		relCode,
+		props = {},
+		reqId = requestId,
+	) => ({
+		records: [
+			{
+				get: item => {
+					switch (item) {
+						case 'node':
+							return {
+								labels: [type],
+								properties: { ...props, code },
+							};
+						case 'related._createdByRequest':
+							return reqId;
+						default:
+							throw new Error(`invalid item name of ${item}`);
+					}
+				},
+				relatedCode: () => relCode,
+				relatedType: () => relType,
+			},
+		],
+	});
+
 	describe('DELETE', () => {
 		it('DELETE event should be sent with deleted properties', async () => {
-			await createMainNode(mainCode);
-			const neo4jResult = await executeQuery(
-				`MATCH (node:${mainType} {code: $code}) RETURN node`,
-				{ code: mainCode },
+			const neo4jResult = mockNeo4jResult(
+				mainType,
+				mainCode,
+				'ChildType',
+				childCode,
+				{ someString: 'some string' },
 			);
 			const adaptor = createMockAdaptor();
 			await logChanges('DELETE', neo4jResult, { adaptor });
@@ -63,25 +89,19 @@ describe('logChanges', () => {
 	});
 
 	describe('CREATE', () => {
-		it('event should be sent with related event with CREATE', async () => {
-			jest.spyOn(requestContext, 'getContext').mockReturnValue({
-				requestId,
-			});
-
-			await createNodes(['ChildType', { code: childCode }]);
-			const builder = queryBuilder(
-				'CREATE',
-				{ type: mainType, code: mainCode, query: { upsert: true } },
-				{ children: [childCode] },
+		it('event should be sent with CREATE related event', async () => {
+			const neo4jResult = mockNeo4jResult(
+				mainType,
+				mainCode,
+				'ChildType',
+				childCode,
+				{ _createdByRequest: requestId, children: [childCode] },
 			);
-			builder.constructProperties();
-			builder.createRelationships();
-			const { neo4jResult, queryContext } = await builder.execute();
 			const adaptor = createMockAdaptor();
 			await logChanges('CREATE', neo4jResult, {
 				adaptor,
 				relationships: {
-					added: queryContext.addedRelationships,
+					added: { children: [childCode] },
 				},
 			});
 			expect(adaptor.publish).toHaveBeenCalledTimes(2);
@@ -94,24 +114,20 @@ describe('logChanges', () => {
 				matcher('CREATE', mainType, childCode, ['children']),
 			);
 		});
-		it('event should be sent with related event with UPDATE', async () => {
-			jest.spyOn(requestContext, 'getContext').mockReturnValue({
-				requestId: `${requestId}-another`,
-			});
-			await createNodes(['ChildType', { code: childCode }]);
-			const builder = queryBuilder(
-				'CREATE',
-				{ type: mainType, code: mainCode },
-				{ children: [childCode] },
+		it('event should be sent with UPDATE related event', async () => {
+			const neo4jResult = mockNeo4jResult(
+				mainType,
+				mainCode,
+				'ChildType',
+				childCode,
+				{ _createdByRequest: requestId, children: [childCode] },
+				anotherRequestId,
 			);
-			builder.constructProperties();
-			builder.createRelationships();
-			const { neo4jResult, queryContext } = await builder.execute();
 			const adaptor = createMockAdaptor();
 			await logChanges('CREATE', neo4jResult, {
 				adaptor,
 				relationships: {
-					added: queryContext.addedRelationships,
+					added: { children: [childCode] },
 				},
 			});
 			expect(adaptor.publish).toHaveBeenCalledTimes(2);
@@ -128,59 +144,58 @@ describe('logChanges', () => {
 
 	describe('UPDATE', () => {
 		it('should be sent with updated properties', async () => {
-			await createNodes(
-				[mainType, { code: mainCode, someString: 'main string' }],
-				[mainType, { code: otherCode, someString: 'other string' }],
+			const neo4jResult = mockNeo4jResult(
+				mainType,
+				mainCode,
+				'ChildType',
+				childCode,
+				{
+					someString: 'some string',
+					children: [childCode],
+					parents: [otherCode],
+				},
 			);
-			const builder = queryBuilder(
-				'MERGE',
-				{ type: mainType, code: mainCode, query: { upsert: true } },
-				{ someString: 'some string' },
-			);
-			const mainNode = await getNeo4jRecord(mainType, mainCode);
-			const initialContent = mainNode.toJson(mainType);
-			builder.constructProperties(initialContent);
-			builder.removeRelationships(initialContent);
-			builder.addRelationships(initialContent);
-			const { neo4jResult, queryContext } = await builder.execute();
 			const adaptor = createMockAdaptor();
 			await logChanges('UPDATE', neo4jResult, {
 				adaptor,
 				relationships: {
-					added: queryContext.addedRelationships,
-					removed: queryContext.removedRelationships,
+					added: { children: [childCode] },
+					removed: { parents: [otherCode] },
 				},
 			});
-			expect(adaptor.publish).toHaveBeenCalledTimes(1);
-			expect(adaptor.publish).toHaveBeenCalledWith(
+			expect(adaptor.publish).toHaveBeenCalledTimes(3);
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				1,
 				matcher('UPDATE', mainType, mainCode, ['someString']),
 			);
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				2,
+				matcher('CREATE', mainType, childCode, ['children']),
+			);
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				3,
+				matcher('UPDATE', 'ParentType', otherCode, []),
+			);
 		});
-		it('should be sent with related events', async () => {
-			await createNodes(
-				[mainType, { code: mainCode, someString: 'main string' }],
-				['ChildType', { code: childCode }],
+
+		it('should be sent with UPDATE related events', async () => {
+			const neo4jResult = mockNeo4jResult(
+				mainType,
+				mainCode,
+				'ChildType',
+				childCode,
+				{ someString: 'some string' },
+				anotherRequestId,
 			);
-			const builder = queryBuilder(
-				'MERGE',
-				{ type: mainType, code: mainCode, query: { upsert: true } },
-				{ someString: 'some string', favouriteChild: childCode },
-			);
-			const mainNode = await getNeo4jRecord(mainType, mainCode);
-			const initialContent = mainNode.toJson(mainType);
-			builder.constructProperties(initialContent);
-			builder.removeRelationships(initialContent);
-			builder.addRelationships(initialContent);
-			const { neo4jResult, queryContext } = await builder.execute();
 			const adaptor = createMockAdaptor();
 			await logChanges('UPDATE', neo4jResult, {
 				adaptor,
 				relationships: {
-					added: queryContext.addedRelationships,
-					removed: queryContext.removedRelationships,
+					added: { favouriteChild: [childCode] },
+					removed: { favouriteChild: [otherCode] },
 				},
 			});
-			expect(adaptor.publish).toHaveBeenCalledTimes(2);
+			expect(adaptor.publish).toHaveBeenCalledTimes(3);
 			expect(adaptor.publish).toHaveBeenNthCalledWith(
 				1,
 				matcher('UPDATE', mainType, mainCode, ['someString']),
@@ -188,6 +203,10 @@ describe('logChanges', () => {
 			expect(adaptor.publish).toHaveBeenNthCalledWith(
 				2,
 				matcher('UPDATE', mainType, childCode, ['favouriteChild']),
+			);
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				3,
+				matcher('UPDATE', 'ChildType', otherCode, []),
 			);
 		});
 	});

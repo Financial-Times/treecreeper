@@ -181,6 +181,7 @@ const queryBuilder = (method, input, body = {}) => {
 	const execute = async () => {
 		queryParts.push(getNeo4jRecordCypherQuery());
 		const neo4jQuery = queryParts.join('\n');
+		console.log(context.removedRelationships);
 		return {
 			neo4jResult: await executeQuery(neo4jQuery, parameters),
 			queryContext: context,

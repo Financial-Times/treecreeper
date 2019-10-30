@@ -43,6 +43,7 @@ describe('Rest logChanges module integration', () => {
 			const { status } = await deleteHandler()(input);
 
 			expect(status).toBe(204);
+			expect(logChangesMock).toHaveBeenCalledTimes(1);
 			expect(logChangesMock).toHaveBeenCalledWith(
 				'DELETE',
 				expect.any(Object),
@@ -62,6 +63,7 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
+			expect(logChangesMock).toHaveBeenCalledTimes(1);
 			expect(logChangesMock).toHaveBeenCalledWith(
 				'CREATE',
 				expect.any(Object),
@@ -85,6 +87,7 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(201);
+			expect(logChangesMock).toHaveBeenCalledTimes(1);
 			expect(logChangesMock).toHaveBeenCalledWith(
 				'CREATE',
 				expect.any(Object),
@@ -108,6 +111,7 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
+			expect(logChangesMock).toHaveBeenCalledTimes(1);
 			expect(logChangesMock).toHaveBeenCalledWith(
 				'UPDATE',
 				expect.any(Object),
@@ -144,6 +148,7 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
+			expect(logChangesMock).toHaveBeenCalledTimes(2);
 			expect(logChangesMock).toHaveBeenNthCalledWith(
 				1,
 				'UPDATE',

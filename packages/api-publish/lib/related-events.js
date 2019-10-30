@@ -73,29 +73,31 @@ const makeAddedRelationshipEvents = (
 		}, []);
 };
 
-const makeRemovedRelationshipEvents = (
-	nodeType,
-	properties,
-	removedRelationships,
-) =>
-	Object.entries(removedRelationships).reduce((events, [propName, codes]) => {
-		codes.forEach(removedCode => {
-			const { type, relationship, direction } = properties[propName];
-			events.push({
-				action: 'UPDATE',
-				code: removedCode,
-				type,
-				updatedRemovedProperties: findPropertyNames({
-					sourceType: nodeType,
-					destinationType: type,
-					relationship,
-					direction,
-					inverse: true,
-				}),
+const makeRemovedRelationshipEvents = (nodeType, removedRelationships) => {
+	const { properties } = schema.getType(nodeType);
+
+	return Object.entries(removedRelationships).reduce(
+		(events, [propName, codes]) => {
+			codes.forEach(removedCode => {
+				const { type, relationship, direction } = properties[propName];
+				events.push({
+					action: 'UPDATE',
+					code: removedCode,
+					type,
+					updatedProperties: findPropertyNames({
+						sourceType: nodeType,
+						destinationType: type,
+						relationship,
+						direction,
+						inverse: true,
+					}),
+				});
 			});
-		});
-		return events;
-	}, []);
+			return events;
+		},
+		[],
+	);
+};
 
 module.exports = {
 	makeAddedRelationshipEvents,

@@ -40,10 +40,12 @@ const KinesisAdaptor = (streamName, { logger = console } = {}) => {
 		getName: () => 'Kinesis',
 		publish: async payload => {
 			try {
-				const { DYNO } = process.env;
+				const {
+					TREECREEPER_KINESIS_DYNAMOMETER = 'kinesis_stream_dyno',
+				} = process.env;
 				const options = {
 					Data: Buffer.from(JSON.stringify(payload), 'utf8'),
-					PartitionKey: `${DYNO}:${Date.now()}`,
+					PartitionKey: `${TREECREEPER_KINESIS_DYNAMOMETER}:${Date.now()}`,
 					StreamName: streamName,
 				};
 				await client.putRecord(options).promise();

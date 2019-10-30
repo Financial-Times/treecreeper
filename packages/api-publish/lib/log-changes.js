@@ -38,7 +38,6 @@ const makeEvents = (action, neo4jEntity, relationships) => {
 
 	const removedRelationshipEvents = makeRemovedRelationshipEvents(
 		nodeType,
-		properties,
 		removedRelationships,
 	);
 	events.push(...removedRelationshipEvents);
