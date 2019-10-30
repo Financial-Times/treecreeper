@@ -1,13 +1,13 @@
-const { Cache } = require('../../packages/schema-utils/cache');
-const { RawDataWrapper } = require('./raw-data-wrapper');
-const getValidators = require('./validators');
-const BizOpsError = require('./biz-ops-error');
+const { Cache } = require('./lib/cache');
+const { RawDataWrapper } = require('./lib/raw-data-wrapper');
+const getValidators = require('./lib/validators');
+const BizOpsError = require('./lib/biz-ops-error');
 const type = require('./data-accessors/type');
 const graphqlDefs = require('./data-accessors/graphql-defs');
 const stringValidator = require('./data-accessors/string-validator');
 const enums = require('./data-accessors/enums');
 const types = require('./data-accessors/types');
-const { SchemaUpdater } = require('../schema-updater');
+const { SchemaUpdater } = require('./lib/updater');
 
 class SDK {
 	constructor(options = {}) {
@@ -53,13 +53,6 @@ class SDK {
 
 	async ready() {
 		return this.updater.ready();
-	}
-
-	// TODO ditch this in favour of using OnChange everywhere
-	on(event, handler) {
-		if (event === 'change') {
-			return this.onChange(handler, event);
-		}
 	}
 
 	onChange(handler, event) {

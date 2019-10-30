@@ -40,6 +40,7 @@
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
     "dotenv": "^8.0.0",
+    "express-urlrewrite": "^1.2.0",
     "fetch-mock": "^7.3.9",
     "jest": "^24.8.0",
     "jest-junit": "^7.0.0",

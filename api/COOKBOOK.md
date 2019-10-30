@@ -50,12 +50,8 @@ _Coming soon: ability to filter people by `isTechLead`_
 
 ```graphql
 {
-	Person(code: "geoffthorpe") {
-		isDeliveryLeadFor {
-			owns {
-				code
-			}
-		}
+	Systems(filter: {deliveredBy: {productOwners_some: {code: "geoffthorpe"}}}) {
+		code
 	}
 }
 ```

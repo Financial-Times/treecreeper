@@ -19,6 +19,20 @@ const { getNeo4jRecordCypherQuery } = require('./read-helpers');
 const { executeQuery } = require('./neo4j-model');
 const { diffProperties } = require('./diff-properties');
 
+const isObjectEqual = (base, compare) => {
+	const baseKeys = Object.keys(base);
+	const compareKeys = Object.keys(compare);
+	if (baseKeys.length !== compareKeys.length) {
+		return false;
+	}
+
+	const diff = baseKeys.filter(
+		key => !(key in compare) || base[key] !== compare[key],
+	);
+
+	return diff.length === 0;
+};
+
 const getBaseQuery = (type, method) => {
 	switch (method) {
 		case 'CREATE':
@@ -36,7 +50,7 @@ const getBaseQuery = (type, method) => {
 	}
 };
 
-const queryBuilder = (method, input, body) => {
+const queryBuilder = (method, input, body = {}) => {
 	const { type, code, metadata = {}, query = {} } = input;
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
@@ -62,19 +76,16 @@ const queryBuilder = (method, input, body) => {
 	};
 
 	const constructProperties = initialContent => {
+		const bodyDiff = initialContent
+			? diffProperties({ type, newContent: body, initialContent })
+			: body;
 		const properties = constructNeo4jProperties({
 			type,
 			code,
-			body: initialContent
-				? diffProperties({
-						type,
-						newContent: body,
-						initialContent,
-				  })
-				: body,
+			body: { ...bodyDiff },
 		});
 		updateParameter({ properties });
-		context.willModifyNode = !!Object.keys(properties).length;
+		context.willModifyNode = !!Object.keys(bodyDiff).length;
 		return builder;
 	};
 
@@ -128,13 +139,14 @@ const queryBuilder = (method, input, body) => {
 	};
 
 	const mergeLockFields = initialContent => {
+		const existingLockedFields =
+			JSON.parse(initialContent._lockedFields || null) || {};
 		const lockedFields = mergeLockedFields({
 			body,
 			clientId,
 			lockFields,
 			unlockFields,
-			existingLockedFields:
-				JSON.parse(initialContent._lockedFields || null) || {},
+			existingLockedFields,
 			needValidate: true,
 		});
 		updateProperties({
@@ -142,10 +154,10 @@ const queryBuilder = (method, input, body) => {
 				? JSON.stringify(lockedFields)
 				: null,
 		});
-
-		context.willModifyLockedFields =
+		context.willModifyLockedFields = !!(
 			(unlockFields || lockFields) &&
-			lockedFields !== initialContent._lockedFields;
+			!isObjectEqual(lockedFields, existingLockedFields)
+		);
 		return builder;
 	};
 
