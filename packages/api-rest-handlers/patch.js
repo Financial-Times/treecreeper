@@ -65,6 +65,7 @@ const patchHandler = ({
 				added: queryContext.addedRelationships,
 				removed: queryContext.removedRelationships,
 			};
+
 			// const relatedAction = queryContext.upsert ? 'CREATE' : 'UPDATE';
 			logChanges('UPDATE', neo4jResult, { relationships });
 

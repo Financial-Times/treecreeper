@@ -1,15 +1,14 @@
-const groupBy = require('lodash.groupby');
 const { logger } = require('../../api-express/lib/request-context');
 const { KinesisAdaptor } = require('../../api-publish-adaptors');
 const { createPublisher } = require('./publisher');
 const {
 	makeAddedRelationshipEvents,
 	makeRemovedRelationshipEvents,
-} = require('./relationship-events');
+} = require('./related-events');
 
 const { TREECREPER_EVENT_LOG_STREAM_NAME = 'test-stream-name' } = process.env;
 
-const makeEvents = (action, relatedAction, neo4jEntity, relationships) => {
+const makeEvents = (action, neo4jEntity, relationships) => {
 	const record = neo4jEntity.records[0];
 	const node = record.get('node');
 	const { properties, labels } = node;
@@ -47,32 +46,12 @@ const makeEvents = (action, relatedAction, neo4jEntity, relationships) => {
 	return events;
 };
 
-const uniquifyEvents = events => {
-	const groupedEvents = groupBy(
-		events,
-		({ action, code, type }) => `${action}:${code}:${type}`,
-	);
-	return Object.values(groupedEvents).map(groupedEvent => {
-		const updatedPropertiesList = groupedEvent.map(
-			event => event.updatedProperties,
-		);
-		const updatedProperties = [
-			...new Set([].concat(...updatedPropertiesList)),
-		].sort();
-		// Merge to first event object
-		return Object.assign(groupedEvent[0], {
-			updatedProperties,
-		});
-	});
-};
-
 const acceptableActions = ['CREATE', 'UPDATE', 'DELETE'];
 
 const logChanges = (
 	action,
 	entity,
 	{
-		relatedAction = 'UPDATE',
 		relationships = {},
 		adaptor = KinesisAdaptor(TREECREPER_EVENT_LOG_STREAM_NAME),
 	} = {},
@@ -88,9 +67,9 @@ const logChanges = (
 		throw new Error(message);
 	}
 
-	const events = makeEvents(action, relatedAction, entity, relationships);
+	const events = makeEvents(action, entity, relationships);
 	const publisher = createPublisher(adaptor);
-	uniquifyEvents(events).forEach(event => publisher.publish(event));
+	publisher.publish(...events);
 };
 
 module.exports = {

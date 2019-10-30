@@ -1,4 +1,5 @@
 const schema = require('../../schema-sdk');
+const { getContext } = require('../../api-express/lib/request-context');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
@@ -32,14 +33,19 @@ const makeAddedRelationshipEvents = (
 	if (!Object.keys(addedRelationships).length) {
 		return [];
 	}
+	const { requestId } = getContext();
 	const createdNodes = neo4jRecords
-		.filter(
-			record => record.get('node') && record.relatedCode() !== mainCode,
-		)
+		.filter(record => record.get('related._createdByRequest') === requestId)
 		.map(node => ({
 			relatedCode: node.relatedCode(),
 			relatedType: node.relatedType(),
 		}));
+
+	const isCreatedNode = (type, code) =>
+		createdNodes.some(
+			({ relatedCode, relatedType }) =>
+				type === relatedType && code === relatedCode,
+		);
 
 	const { properties } = schema.getType(nodeType);
 	return Object.entries(properties)
@@ -53,14 +59,11 @@ const makeAddedRelationshipEvents = (
 			});
 
 			addedRelationships[name].forEach(code => {
-				const isCreated = createdNodes.some(
-					({ relatedCode, relatedType }) =>
-						type === relatedType && code === relatedCode,
-				);
+				const isCreated = isCreatedNode(type, code);
 				events.push({
 					action: isCreated ? 'CREATE' : 'UPDATE',
 					code,
-					type,
+					type: nodeType,
 					updatedProperties: isCreated
 						? ['code'].concat(updatedProperties).sort()
 						: updatedProperties,
