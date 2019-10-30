@@ -137,17 +137,20 @@ const setupMocks = (
 		sandbox.expectKinesisEvents = (...events) => {
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(events.length);
 			events.forEach(
-				([action, code, type, updatedProperties, clientId]) => {
-					expect(sandbox.stubSendEvent).toHaveBeenCalledWith({
-						action,
-						type,
-						code,
-						requestId: `${namespace}-request`,
-						clientId: clientId || `${namespace}-client`,
-						clientUserId: `${namespace}-user`,
-						updatedProperties:
-							updatedProperties && updatedProperties.sort(),
-					});
+				([action, code, type, updatedProperties, clientId], call) => {
+					expect(sandbox.stubSendEvent).toHaveBeenNthCalledWith(
+						call + 1,
+						{
+							action,
+							type,
+							code,
+							requestId: `${namespace}-request`,
+							clientId: clientId || `${namespace}-client`,
+							clientUserId: `${namespace}-user`,
+							updatedProperties:
+								updatedProperties && updatedProperties.sort(),
+						},
+					);
 				},
 			);
 		};
@@ -246,12 +249,10 @@ const stubS3Unavailable = sandbox => {
 	});
 };
 
-module.exports = Object.assign(
-	{
-		stubKinesis,
-		setupMocks,
-		stubS3Unavailable,
-	},
-	dbConnection,
-	testDataCheckers,
-);
+module.exports = {
+	stubKinesis,
+	setupMocks,
+	stubS3Unavailable,
+	...dbConnection,
+	...testDataCheckers,
+};

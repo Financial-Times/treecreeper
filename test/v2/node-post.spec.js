@@ -208,10 +208,10 @@ describe('v2 - node POST', () => {
 				_updatedByClient: 'biz-ops-github-importer',
 			},
 		);
-		const completeResult = Object.assign(
-			{ troubleshooting: 'Fake Document' },
-			neo4jResult,
-		);
+		const completeResult = {
+			troubleshooting: 'Fake Document',
+			...neo4jResult,
+		};
 		await sandbox
 			.request(app)
 			.post(`/v2/node/System/${systemCode}`)

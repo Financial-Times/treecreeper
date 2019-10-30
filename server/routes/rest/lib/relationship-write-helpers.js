@@ -1,29 +1,46 @@
 const { stripIndents } = require('common-tags');
 const { getType } = require('@financial-times/biz-ops-schema');
 const { metaPropertiesForCreate } = require('./metadata-helpers');
+const { findInversePropertyNames } = require('../../../lib/schema-helpers');
 
-const relationshipFragment = (type, direction) => {
-	const left = direction === 'incoming' ? '<' : '';
-	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[relationship:${type}]-${right}`;
+const relationshipFragment = (
+	type,
+	direction,
+	{ label = 'relationship', reverse = false } = {},
+) => {
+	const [left, right] =
+		reverse === (direction === 'outgoing') ? ['<', ''] : ['', '>'];
+	return `${left}-[${label}:${type}]-${right}`;
 };
+
+const relationshipFragmentWithEndNodes = (
+	head,
+	{ relationship, direction },
+	tail,
+	options,
+) =>
+	`(${head})${relationshipFragment(
+		relationship,
+		direction,
+		options,
+	)}(${tail})`;
 
 const locateRelatedNodes = ({ type }, key, upsert) => {
 	if (upsert) {
-		return `
-UNWIND $${key} as nodeCodes
-MERGE (related:${type} {code: nodeCodes} )
-	ON CREATE SET ${metaPropertiesForCreate('related')}
-`;
+		return stripIndents`
+			UNWIND $${key} as nodeCodes
+			MERGE (related:${type} {code: nodeCodes} )
+				ON CREATE SET ${metaPropertiesForCreate('related')}
+		`;
 	}
 	// Uses OPTIONAL MATCH when trying to match a node as it returns [null]
 	// rather than [] if the node doesn't exist
 	// This means the next line tries to create a relationship pointing
 	// at null, so we get an informative error
-	return `
-OPTIONAL MATCH (related:${type})
-WHERE related.code IN $${key}
-`;
+	return stripIndents`
+		OPTIONAL MATCH (related:${type})
+		WHERE related.code IN $${key}
+	`;
 };
 
 const prepareToWriteRelationships = (
@@ -38,8 +55,8 @@ const prepareToWriteRelationships = (
 
 	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
 		const propDef = validProperties[propName];
-
-		const key = `${propDef.relationship}${propDef.direction}${propDef.type}`;
+		const { type: relatedType, direction, relationship } = propDef;
+		const key = `${relationship}${direction}${relatedType}`;
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
@@ -53,13 +70,41 @@ const prepareToWriteRelationships = (
 			WITH node
 			${locateRelatedNodes(propDef, key, upsert)}
 			WITH node, related
-			MERGE (node)${relationshipFragment(
-				propDef.relationship,
-				propDef.direction,
-			)}(related)
+			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
 		`,
 		);
+
+		if (propDef.hasMany) {
+			const { properties: relatedProperties } = getType(relatedType);
+			const inverseProperties = findInversePropertyNames(
+				nodeType,
+				propName,
+			);
+			if (
+				inverseProperties.some(
+					inverseProperty =>
+						relatedProperties[inverseProperty] &&
+						!relatedProperties[inverseProperty].hasMany,
+				)
+			) {
+				relationshipQueries.push(
+					stripIndents`
+				WITH node, related
+				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
+					'otherNode',
+					propDef,
+					'related',
+					{
+						label: 'conflictingRelationship',
+					},
+				)}
+				WHERE otherNode <> node
+				DELETE conflictingRelationship
+			`,
+				);
+			}
+		}
 	});
 
 	return { relationshipParameters, relationshipQueries };

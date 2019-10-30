@@ -35,7 +35,7 @@ const constructOutput = (nodeType, result, excludeMeta = false) => {
 	const schema = getType(nodeType);
 	const node = result.records[0].get('node');
 	// TODO deep clone
-	const response = convertNeo4jTypes(Object.assign({}, node.properties));
+	const response = convertNeo4jTypes({ ...node.properties });
 	if (excludeMeta) {
 		Object.keys(response).forEach(key => {
 			if (key.charAt(0) === '_') {

@@ -413,8 +413,8 @@ describe('merge', () => {
 				}),
 			);
 			sandbox.expectKinesisEvents(
-				['DELETE', teamCode1, 'Team'],
 				['UPDATE', teamCode2, 'Team', ['parentTeam']],
+				['DELETE', teamCode1, 'Team'],
 			);
 		});
 
@@ -511,13 +511,13 @@ describe('merge', () => {
 				],
 			);
 			sandbox.expectKinesisEvents(
-				['DELETE', `${namespace}-system-1`, 'System'],
 				[
 					'UPDATE',
 					`${namespace}-person-1`,
 					'Person',
 					['technicalOwnerFor'],
 				],
+				['DELETE', `${namespace}-system-1`, 'System'],
 			);
 		});
 	});

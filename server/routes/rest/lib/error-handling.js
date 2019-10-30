@@ -138,7 +138,7 @@ const handleSimultaneousWriteAndDelete = (content = {}) => {
 	Object.entries(content)
 		.filter(([propName]) => propName.startsWith('!'))
 		.forEach(([propName, deletedCodes]) => {
-			const addedCodes = toArray(content[propName.substr(1)]);
+			const addedCodes = toArray(content[propName.slice(1)]);
 			deletedCodes = toArray(deletedCodes);
 			if (deletedCodes.some(code => addedCodes.includes(code))) {
 				throw httpErrors(
