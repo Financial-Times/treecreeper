@@ -125,6 +125,10 @@ const queryBuilder = (method, input, body) => {
 	};
 
 	const mergeLockFields = initialContent => {
+		if (!context.willModifyNode) {
+			return builder;
+		}
+
 		const lockedFields = mergeLockedFields({
 			body,
 			clientId,
