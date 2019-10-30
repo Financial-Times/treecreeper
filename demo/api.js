@@ -1,5 +1,5 @@
 const express = require('express');
-const rewrite = require('express-urlrewrite');
+const rewrite = require('express-urlrewrite'); // eslint-disable-line  import/no-extraneous-dependencies
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
 const { getApp } = require('../packages/api-express');
@@ -16,17 +16,14 @@ app.use(
 	}),
 );
 
-app.use(
-	'/graphql-with-cookies',
-	(req, res, next) => {
-		req.headers['api_key'] = 'yabdadda';
-		next()
-	}
-);
+app.use('/graphql-with-cookies', (req, res, next) => {
+	req.headers.api_key = 'yabdadda';
+	next();
+});
 
-app.use(rewrite('/graphql-with-cookies', '/graphql'))
+app.use(rewrite('/graphql-with-cookies', '/graphql'));
 
-getApp({ app, graphqlMethods: ['post', 'get'] }).then(app => {
+getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
 	app.listen(PORT, () => {
 		console.log(`Listening on ${PORT}`);
 	});
