@@ -65,7 +65,7 @@ const queryBuilder = (method, input, body) => {
 		const updatebody = initialContent
 			? diffProperties({ type, newContent: body, initialContent })
 			: body;
-		context.willModifyNode = !!Object.keys(updatebody).length;
+		context.willModifyNode = updatebody && !!Object.keys(updatebody).length;
 		const properties = constructNeo4jProperties({
 			type,
 			code,
