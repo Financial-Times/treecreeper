@@ -32,7 +32,6 @@ const createStubKinesisClient = logger => ({
 });
 
 const KinesisAdaptor = (streamName, { logger = console } = {}) => {
-	// eslint-disable-next-line no-unused-vars
 	const client = isDevelopment()
 		? createStubKinesisClient(logger)
 		: createKinesisClient(logger);

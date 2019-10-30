@@ -131,9 +131,7 @@ describe('logChanges', () => {
 			await createNodes(
 				[mainType, { code: mainCode, someString: 'main string' }],
 				[mainType, { code: otherCode, someString: 'other string' }],
-				// ['ChildType', { code: childCode }],
 			);
-			// await connectNodes([main, 'HAS_CHILD', other]);
 			const builder = queryBuilder(
 				'MERGE',
 				{ type: mainType, code: mainCode, query: { upsert: true } },
