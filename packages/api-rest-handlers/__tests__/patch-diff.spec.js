@@ -39,7 +39,7 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-	it.skip("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
+	it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
@@ -57,7 +57,7 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-	it.skip("doesn't write if no real relationship changes detected in MERGE mode", async () => {
+	it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
@@ -78,7 +78,7 @@ describe('rest PATCH diff', () => {
 
 	it.skip("doesn't write if no real lockField changes detected", async () => {});
 
-	it.skip('writes if property but no relationship changes detected', async () => {
+	it('writes if property but no relationship changes detected', async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode],
