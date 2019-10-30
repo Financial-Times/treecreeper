@@ -7,17 +7,21 @@ Any module implementing the same interface can also be passed to other treecreep
 When an s3 document store is present, properties which have the type `Document` will be stored in s3, and will be retrieved from there by graphql resolvers
 
 ## Creating an instance
+
 This package exports two methods:
-- `createStore(s3BucketName)` - this will create an instance of the package, creating an s3 client which will authorise with whatever credentials are detected in the environment. Rather than passing in the `s3BucketName` parameter, the `TREECREEPER_DOCSTORE_S3_BUCKET` environment variable can be set instead
-- `docstore(s3Instance, bucketName)` - as above, but allows passing in a custom instance of the `AWS.S3` client
+
+-   `createStore(s3BucketName)` - this will create an instance of the package, creating an s3 client which will authorise with whatever credentials are detected in the environment. Rather than passing in the `s3BucketName` parameter, the `TREECREEPER_DOCSTORE_S3_BUCKET` environment variable can be set instead
+-   `docstore(s3Instance, bucketName)` - as above, but allows passing in a custom instance of the `AWS.S3` client
 
 ## API
+
 Every instance implements the following CRUD methods:
-- `get(nodeType, code)`
-- `post(nodeType, code, body)`
-- `patch(nodeType, code, body)`
-- `delete(nodeType, code)`
-- `absorb(nodeType, code, absorbedCode)`
+
+-   `get(nodeType, code)`
+-   `post(nodeType, code, body)`
+-   `patch(nodeType, code, body)`
+-   `delete(nodeType, code)`
+-   `absorb(nodeType, code, absorbedCode)`
 
 All are self explanatory (yes, yes, I know... will document in full later. For now just need basic README's in place) with the exception of `absorb`, which takes the record for `absorbedCode`, copies any properties it has that don't already exist on `code` over, and then deletes the record for `absorbedCode`
 
@@ -26,16 +30,19 @@ Each method returns an object containing a `body` property, which itself contain
 In addition, all write methods return another property, `undo`, which is a function that can be called to revert the last action.
 
 ## Example
+
 ```js
-const { createDocstore } = require('@treecreeper/api-s3-document-store')
-const { getApp } = require('@treecreeper/api-express')
+const { createDocstore } = require('@treecreeper/api-s3-document-store');
+const { getApp } = require('@treecreeper/api-express');
 const documentStore = createDocstore('big-musical-properties');
 
-const app = getApp({documentStore});
+const app = getApp({ documentStore });
 
-app.listen(80)
+app.listen(80);
 ```
+
 If `lyrics` is defined in the schema as a `Document`, the following request will save them to s3
+
 ```shell
 curl http://localhost:80/Song/stereo -X POST -d '{
         "name": "Stereo",
@@ -75,7 +82,7 @@ And you're my fact-checkin' cuz
 
 Well focus on the quasar in the mist
 The Kaiser has a cyst
-And I\'m a blank want list 
+And I\'m a blank want list
 The qualms you have and if they stick
 They will drown you in a crick
 In the neck of a woods

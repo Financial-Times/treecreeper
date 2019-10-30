@@ -14,7 +14,7 @@ class SchemaUpdater {
 	}
 
 	configure({
-		updateMode = 'dev', // also 'stale' or 'poll'
+		updateMode,
 		ttl = 60000,
 		logger = console,
 		version,

@@ -50,7 +50,9 @@ _Coming soon: ability to filter people by `isTechLead`_
 
 ```graphql
 {
-	Systems(filter: {deliveredBy: {productOwners_some: {code: "geoffthorpe"}}}) {
+	Systems(
+		filter: { deliveredBy: { productOwners_some: { code: "geoffthorpe" } } }
+	) {
 		code
 	}
 }

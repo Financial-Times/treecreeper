@@ -55,6 +55,10 @@ class SDK {
 		return this.updater.ready();
 	}
 
+	async refresh() {
+		return this.updater.refresh();
+	}
+
 	onChange(handler, event) {
 		// handle the case where things are listening for an asynchronous
 		// load event, but it has already happened
