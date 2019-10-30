@@ -32,7 +32,7 @@ const getNamespacedSupertest = (namespace, includeClientId = true) => (
 ) => {
 	const req = request(...requestArgs);
 
-	['post', 'patch', 'get', 'delete', 'put'].forEach(methodName => {
+	['post', 'patch', 'get', 'delete', 'put', 'head'].forEach(methodName => {
 		const method = req[methodName].bind(req);
 		req[methodName] = function(...methodArgs) {
 			const test = method(...methodArgs);

@@ -86,7 +86,7 @@ describe('S3 document helper delete', () => {
 		expect(stubDeleteObject).toHaveBeenCalledTimes(2);
 	});
 
-	test('returns null versionMarker when delete fails', async () => {
+	test('throws error when delete fails', async () => {
 		const givenSystemCode = 'docstore-delete-unexpected';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
@@ -96,17 +96,13 @@ describe('S3 document helper delete', () => {
 		);
 		const store = docstore(s3Instance);
 
-		const result = await store.delete(
-			consistentNodeType,
-			givenSystemCode,
-			givenVersionMarker,
-		);
-
-		expect(result).toMatchObject({
-			versionMarker: null,
-		});
-		// On fails, result SHOULD NOT have undo function
-		expect(result).not.toHaveProperty('undo');
+		await expect(
+			store.delete(
+				consistentNodeType,
+				givenSystemCode,
+				givenVersionMarker,
+			),
+		).rejects.toThrow(Error);
 
 		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
 		expect(stubDeleteObject).toHaveBeenCalledWith(

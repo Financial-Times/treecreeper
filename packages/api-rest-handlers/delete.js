@@ -5,7 +5,7 @@ const { executeQuery } = require('./lib/neo4j-model');
 const { logChanges } = require('../api-publish');
 
 const deleteHandler = ({
-	documentStore = { delete: () => ({}) },
+	documentStore,
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
@@ -28,14 +28,12 @@ const deleteHandler = ({
 
 	const query = `MATCH (node:${type} {code: $code}) DELETE node`;
 
-	// Writes are in series, not parallel, to simplify rollback on error
-	const {
-		versionMarker,
-		undo: undoDocstoreWrite,
-	} = await documentStore.delete(type, code);
-	// documentStore.delete never throws error,  but retuns { versionMarker: null } instead
-	if (versionMarker === null) {
-		throw new Error('S3 query failed');
+	let undoDocstoreWrite;
+
+	if (documentStore) {
+		// Writes are in series, not parallel, to simplify rollback on error
+		const { undo } = await documentStore.delete(type, code);
+		undoDocstoreWrite = undo;
 	}
 
 	try {

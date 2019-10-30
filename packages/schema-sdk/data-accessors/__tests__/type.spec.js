@@ -1,4 +1,4 @@
-const metaProperties = require('../../meta-properties');
+const metaProperties = require('../../lib/meta-properties');
 const { SDK } = require('../../sdk');
 
 const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) =>

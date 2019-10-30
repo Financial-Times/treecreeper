@@ -154,12 +154,18 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		await removeRelationships(nodeType, absorbedCode, removedRelationships);
 	}
 
-	const {
-		body: updatedBody = {},
-		undo: undoS3Merge = async () => ({}),
-	} = documentStore
-		? await documentStore.absorb(nodeType, absorbedCode, code)
-		: {};
+	let updatedDocstoreBody;
+	let undoDocstoreWrite;
+
+	if (documentStore) {
+		const { body, undo } = await documentStore.absorb(
+			nodeType,
+			absorbedCode,
+			code,
+		);
+		updatedDocstoreBody = body || {};
+		undoDocstoreWrite = undo;
+	}
 
 	let result;
 	try {
@@ -178,11 +184,16 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 			err,
 			`Neo4j merge unsuccessful, attempting to rollback S3`,
 		);
-		// Undo S3 actions
-		undoS3Merge();
+		if (undoDocstoreWrite) {
+			undoDocstoreWrite();
+		}
 	}
 
-	const body = Object.assign({}, result.toJson(nodeType), updatedBody);
+	const body = Object.assign(
+		{},
+		result.toJson(nodeType),
+		updatedDocstoreBody,
+	);
 	return {
 		status: 200,
 		body: Object.keys(body).reduce((filteredBody, key) => {

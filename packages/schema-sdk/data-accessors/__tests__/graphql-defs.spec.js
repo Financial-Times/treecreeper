@@ -1,6 +1,6 @@
-const primitiveTypesMap = require('../../primitive-types-map');
+const primitiveTypesMap = require('../../lib/primitive-types-map');
 const { SDK } = require('../../sdk');
-const { readYaml } = require('../../../../packages/schema-updater');
+const { readYaml } = require('../../lib/updater');
 
 const stringPatterns = readYaml.file(
 	process.env.TREECREEPER_SCHEMA_DIRECTORY,

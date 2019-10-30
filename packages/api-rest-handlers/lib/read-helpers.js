@@ -9,10 +9,18 @@ const getNeo4jRecordCypherQuery = ({
 	OPTIONAL MATCH (${nodeName})-[relationship]-(related)
 	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest`;
 
-const getNeo4jRecord = (nodeType, code) => {
+const getNeo4jRecord = (type, code) => {
 	return executeQuery(
-		`MATCH (node:${nodeType} {code: $code})
+		`MATCH (node:${type} {code: $code})
 			${getNeo4jRecordCypherQuery()}`,
+		{ code },
+	);
+};
+
+const getNeo4jNode = (type, code) => {
+	return executeQuery(
+		`MATCH (node:${type} {code: $code})
+		RETURN node`,
 		{ code },
 	);
 };
@@ -20,4 +28,5 @@ const getNeo4jRecord = (nodeType, code) => {
 module.exports = {
 	getNeo4jRecordCypherQuery,
 	getNeo4jRecord,
+	getNeo4jNode,
 };

@@ -1,4 +1,4 @@
-const { SDK } = require('../sdk');
+const { SDK } = require('../../sdk');
 
 describe('validatePropertyName', () => {
 	const {

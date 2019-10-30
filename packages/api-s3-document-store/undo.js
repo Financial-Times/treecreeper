@@ -50,7 +50,7 @@ const undo = ({
 			err,
 			message,
 		);
-		throw new Error(err);
+		throw err;
 	}
 };
 
