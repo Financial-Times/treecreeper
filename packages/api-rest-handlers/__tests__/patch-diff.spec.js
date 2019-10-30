@@ -96,7 +96,7 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-	it.skip('writes if relationship but no property changes detected', async () => {
+	it('writes if relationship but no property changes detected', async () => {
 		const [main, child] = await createNodes(
 			['MainType', { code: mainCode, someString: 'someString' }],
 			['ChildType', `${childCode}-1`],
@@ -115,7 +115,7 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-	it.skip('detects deleted property as a change', async () => {
+	it('detects deleted property as a change', async () => {
 		await createNode('MainType', {
 			code: mainCode,
 			someString: 'someString',
@@ -129,7 +129,7 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-	describe.skip('patching with fewer relationships', () => {
+	describe('patching with fewer relationships', () => {
 		it('treats fewer relationships as a delete when replacing relationships', async () => {
 			const [main, child1, child2] = await createNodes(
 				['MainType', mainCode],
