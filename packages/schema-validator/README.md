@@ -13,7 +13,6 @@ Tests to validate that a set of yaml files conforms to the treecreeper schema sp
 Has a peer dependency of `jest`
 
 // my-schema-tests.spec.js
-
 ```js
 require('../../packages/schema-validator');
 ```
