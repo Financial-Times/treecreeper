@@ -1,20 +1,21 @@
 const fetch = require('node-fetch');
 
-jest.mock('../../../package.json', () => ({ version: '8.9.10' }), {
+jest.useFakeTimers();
+
+jest.mock('../../../../package.json', () => ({ version: '8.9.10' }), {
 	virtual: true,
 });
 
-const { SchemaUpdater } = require('..');
-
+const { SchemaUpdater } = require('../updater');
 // TODO move into schema-utils
-const { RawDataWrapper } = require('../../schema-sdk/raw-data-wrapper');
-const { Cache } = require('../../schema-utils');
+const { RawDataWrapper } = require('../raw-data-wrapper');
+const { Cache } = require('../cache');
 
 const create = options =>
 	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
 
-const timer = delay => new Promise(res => setTimeout(res, delay));
 const nextTick = () => new Promise(res => process.nextTick(res));
+
 describe('refreshing schema when stale', () => {
 	const schemaDir = process.env.TREECREEPER_SCHEMA_DIRECTORY;
 	beforeAll(() => {
@@ -26,24 +27,24 @@ describe('refreshing schema when stale', () => {
 		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());
-	it('does not fetch on create', async () => {
+	it('does not fetch on init', async () => {
 		create({
 			ttl: 100,
 			schemaBaseUrl: 'https://base.url',
-			updateMode: 'stale',
+			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
-	it('fetches when ready method called', async () => {
+	it('fetches when startPolling method called', async () => {
 		const schema = create({
 			ttl: 100,
 			schemaBaseUrl: 'https://base.url',
-			updateMode: 'stale',
+			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
 		let isPending = true;
-		schema.ready().then(() => {
+		schema.startPolling().then(() => {
 			isPending = false;
 		});
 		expect(fetch.called()).toBe(true);
@@ -51,48 +52,22 @@ describe('refreshing schema when stale', () => {
 		await fetch.flush();
 		await nextTick();
 		expect(isPending).toEqual(false);
+		schema.stopPolling();
 	});
 
-	it('does not fetch if ready method called within TTL', async () => {
+	it('fetches again after TTL has expired', async () => {
 		const schema = create({
 			ttl: 100,
 			schemaBaseUrl: 'https://base.url',
-			updateMode: 'stale',
+			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/v8.json', { result: true });
-		schema.ready();
+		schema.startPolling();
 		await fetch.flush();
 		fetch.resetHistory();
-		await timer(50);
-		let isPending = true;
-		schema.ready().then(() => {
-			isPending = false;
-		});
-		expect(fetch.called()).toBe(false);
-		expect(isPending).toEqual(true);
-		await nextTick();
-		expect(isPending).toEqual(false);
-	});
-	it('fetches if ready method called after TTL has expired', async () => {
-		const schema = create({
-			ttl: 100,
-			schemaBaseUrl: 'https://base.url',
-			updateMode: 'stale',
-		});
-		fetch.mock('https://base.url/v8.json', { result: true });
-		schema.ready();
-		await fetch.flush();
-		fetch.resetHistory();
-		await timer(101);
-		let isPending = true;
-		schema.ready().then(() => {
-			isPending = false;
-		});
+		jest.advanceTimersByTime(101);
 		expect(fetch.called()).toBe(true);
-		expect(isPending).toEqual(true);
-		await fetch.flush();
-		await nextTick();
-		expect(isPending).toEqual(false);
+		schema.stopPolling();
 	});
 
 	describe('handle updates', () => {
@@ -100,23 +75,23 @@ describe('refreshing schema when stale', () => {
 			const schema = create({
 				ttl: 100,
 				schemaBaseUrl: 'https://base.url',
-				updateMode: 'stale',
+				updateMode: 'poll',
 			});
-
 			schema.version = 'v8.9.10';
 			const listener = jest.fn();
 			schema.on('change', listener);
 			fetch.mock('https://base.url/v8.json', { version: 'v8.9.10' });
-			schema.ready();
+			schema.startPolling();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
+			schema.stopPolling();
 		});
 
 		it('updates local data nad triggers event when version has changed', async () => {
 			const schema = create({
 				ttl: 100,
 				schemaBaseUrl: 'https://base.url',
-				updateMode: 'stale',
+				updateMode: 'poll',
 			});
 			const listener = jest.fn();
 			schema.on('change', listener);
@@ -131,12 +106,13 @@ describe('refreshing schema when stale', () => {
 				},
 			};
 			fetch.mock('https://base.url/v8.json', data);
-			schema.ready();
+			schema.startPolling();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalledWith({
 				newVersion: 'v8.9.10',
 				oldVersion: undefined,
 			});
+			schema.stopPolling();
 		});
 	});
 });

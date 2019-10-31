@@ -1,8 +1,8 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const readYaml = require('./read-yaml');
-const { getSchemaFilename } = require('../../packages/schema-utils');
-const { version: libVersion } = require('../../package.json');
+const { getSchemaFilename } = require('../../../packages/schema-file-name');
+const { version: libVersion } = require('../../../package.json');
 
 class SchemaUpdater {
 	constructor(options, rawData, cache) {
@@ -14,7 +14,7 @@ class SchemaUpdater {
 	}
 
 	configure({
-		updateMode = 'dev', // also 'stale' or 'poll'
+		updateMode,
 		ttl = 60000,
 		logger = console,
 		version,

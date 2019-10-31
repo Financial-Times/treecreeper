@@ -101,12 +101,13 @@ describe('rest document store integration', () => {
 
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
-			const mockDocstoreDelete = createResolvedDocstoreMock('delete', {
-				versionMarker: null,
-			});
+			const mockDocstoreDelete = createRejectedDocstoreMock(
+				'delete',
+				new Error('oh no'),
+			);
 			await expect(
 				deleteHandler({ documentStore })(input),
-			).rejects.toThrow(Error);
+			).rejects.toThrow('oh no');
 			await neo4jTest('MainType', mainCode).exists();
 			expect(mockDocstoreDelete).toHaveBeenCalledWith(
 				'MainType',
@@ -335,6 +336,24 @@ describe('rest document store integration', () => {
 			);
 		});
 
+		it("returns patched document store result even if neo4j won't update", async () => {
+			await createMainNode();
+			const documentBody = { someDocument: 'some document' };
+			const mockPost = createResolvedDocstoreMock('patch', {
+				body: documentBody,
+			});
+			const result = await patchHandler({ documentStore })(
+				getInput(documentBody),
+			);
+			expect(result).toMatchObject({
+				status: 200,
+				body: documentBody,
+			});
+			expect(mockPost).toHaveBeenCalledWith('MainType', mainCode, {
+				someDocument: 'some document',
+			});
+		});
+
 		it('throws if s3 query fails', async () => {
 			await createMainNode();
 			const mockDocstorePatch = createRejectedDocstoreMock(
@@ -358,7 +377,12 @@ describe('rest document store integration', () => {
 			dbUnavailable({ skip: 1 });
 
 			await expect(
-				patchHandler({ documentStore })(getInput({ someDocument })),
+				patchHandler({ documentStore })(
+					getInput({
+						someDocument: 'some document',
+						someString: 'some string',
+					}),
+				),
 			).rejects.toThrow('oh no');
 			expect(mockDocstorePatch).toHaveBeenCalledWith(
 				'MainType',
