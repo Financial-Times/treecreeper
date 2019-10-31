@@ -62,6 +62,7 @@ describe('rest PATCH create', () => {
 				.exists()
 				.match(meta.create);
 		});
+
 		it("doesn't set a property when empty string provided", async () => {
 			const { status, body } = await basicHandler({ someString: '' });
 
@@ -95,6 +96,7 @@ describe('rest PATCH create', () => {
 					someDate: date,
 				});
 		});
+
 		const neo4jTimePrecision = timestamp =>
 			timestamp.replace('Z', '000000Z');
 
@@ -118,18 +120,19 @@ describe('rest PATCH create', () => {
 		});
 
 		it('sets Time property', async () => {
-			const time = '2019-01-09T00:00:00.001Z';
+			const time = '12:34:56.789Z';
+
 			const { status, body } = await basicHandler({ someTime: time });
 
 			expect(status).toBe(201);
 			expect(body).toMatchObject({
-				someTime: neo4jTimePrecision(time).split('T')[1],
+				someTime: neo4jTimePrecision(time),
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someTime: neo4jTimePrecision(time).split('T')[1],
+					someTime: neo4jTimePrecision(time),
 				})
 				.noRels();
 		});

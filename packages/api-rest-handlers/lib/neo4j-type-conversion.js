@@ -25,6 +25,12 @@ const convertTemporalTypes = nodeType => {
 	return ([propName, val]) => {
 		const { type } = properties[propName];
 		if (isTemporalTypeName(type)) {
+			if (type === 'Time') {
+				// Need to pass a standard JavaScript Date to use fromStandardDate function
+				// It returns only Time object even if the val includes date.
+				// Any date is ok. It doesn't need to be 2000-01-01.
+				val = `2000-01-01T${val}`;
+			}
 			val = neo4jTemporalTypes[type].fromStandardDate(new Date(val));
 		}
 		return [propName, val];
