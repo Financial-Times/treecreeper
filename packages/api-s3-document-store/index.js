@@ -1,3 +1,4 @@
+const { logger: defaultLogger } = require('../api-express/lib/request-context');
 const { defaultS3Instance } = require('./s3');
 const { s3Get } = require('./get');
 const { s3Post } = require('./post');
@@ -7,10 +8,11 @@ const { s3Absorb } = require('./absorb');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
-const docstore = (
+const docstore = ({
 	s3Instance = defaultS3Instance,
 	bucketName = TREECREEPER_DOCSTORE_S3_BUCKET,
-) => {
+	logger = defaultLogger,
+} = {}) => {
 	return {
 		get: async (nodeType, code) =>
 			s3Get({
@@ -18,6 +20,7 @@ const docstore = (
 				bucketName,
 				nodeType,
 				code,
+				logger,
 			}),
 		post: async (nodeType, code, body) =>
 			s3Post({
@@ -26,6 +29,7 @@ const docstore = (
 				nodeType,
 				code,
 				body,
+				logger,
 			}),
 		patch: async (nodeType, code, body) =>
 			s3Patch({
@@ -34,6 +38,7 @@ const docstore = (
 				nodeType,
 				code,
 				body,
+				logger,
 			}),
 		delete: async (nodeType, code, versionMarker) =>
 			s3Delete({
@@ -42,6 +47,7 @@ const docstore = (
 				nodeType,
 				code,
 				versionMarker,
+				logger,
 			}),
 		absorb: async (nodeType, sourceCode, destinationCode) =>
 			s3Absorb({
@@ -50,13 +56,14 @@ const docstore = (
 				nodeType,
 				sourceCode,
 				destinationCode,
+				logger,
 			}),
 	};
 };
 
 // Factory method which user intend to use their S3 bucket
 const createStore = (s3BucketName = TREECREEPER_DOCSTORE_S3_BUCKET) =>
-	docstore(defaultS3Instance, s3BucketName);
+	docstore({ s3Instance: defaultS3Instance, bucketName: s3BucketName });
 
 module.exports = {
 	docstore,

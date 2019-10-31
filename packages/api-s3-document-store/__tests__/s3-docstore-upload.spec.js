@@ -7,6 +7,9 @@ const {
 	s3UploadResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const {
+	logger: defaultLogger,
+} = require('../../api-express/lib/request-context');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -75,6 +78,7 @@ describe('S3 document helper upload (internal function)', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'POST',
+			logger: defaultLogger,
 		});
 
 		expect(stubUpload).toHaveBeenCalled();
@@ -104,6 +108,7 @@ describe('S3 document helper upload (internal function)', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'POST',
+			logger: defaultLogger,
 		});
 
 		expect(stubUpload).toHaveBeenCalled();

@@ -1,15 +1,22 @@
 const { diff } = require('deep-diff');
-const { logger } = require('../api-express/lib/request-context');
 const { upload } = require('./upload');
 const { undo } = require('./undo');
 const { s3Get } = require('./get');
 
-const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
+const s3Patch = async ({
+	s3Instance,
+	bucketName,
+	nodeType,
+	code,
+	body,
+	logger,
+}) => {
 	const { body: existingBody } = await s3Get({
 		s3Instance,
 		bucketName,
 		nodeType,
 		code,
+		logger,
 	});
 
 	// If PATCHing body is completely same with existing body,
@@ -37,6 +44,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 		s3Instance,
 		params,
 		requestType: 'PATCH',
+		logger,
 	});
 	return {
 		versionMarker: versionId,
@@ -48,6 +56,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 			code,
 			versionMarker: versionId,
 			undoType: 'PATCH',
+			logger,
 		}),
 	};
 };

@@ -1,5 +1,4 @@
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('../api-express/lib/request-context');
 const { s3Get } = require('./get');
 const { s3Delete } = require('./delete');
 const { s3Post } = require('./post');
@@ -11,13 +10,20 @@ const s3Absorb = async ({
 	nodeType,
 	sourceCode,
 	destinationCode,
+	logger,
 }) => {
 	const [
 		{ body: sourceNodeBody },
 		{ body: destinationNodeBody },
 	] = await Promise.all([
-		s3Get({ s3Instance, bucketName, nodeType, code: sourceCode }),
-		s3Get({ s3Instance, bucketName, nodeType, code: destinationCode }),
+		s3Get({ s3Instance, bucketName, nodeType, code: sourceCode, logger }),
+		s3Get({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code: destinationCode,
+			logger,
+		}),
 	]);
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
@@ -54,6 +60,7 @@ const s3Absorb = async ({
 				code: destinationCode,
 				// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
 				body: Object.assign({}, destinationNodeBody, writeProperties),
+				logger,
 			});
 		} catch (err) {
 			return {};
@@ -70,7 +77,13 @@ const s3Absorb = async ({
 			undo: undoPost = async () => ({ versionMarker: null }),
 		},
 	] = await Promise.all([
-		s3Delete({ s3Instance, bucketName, nodeType, code: sourceCode }),
+		s3Delete({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code: sourceCode,
+			logger,
+		}),
 		postDestinationBody(),
 	]);
 

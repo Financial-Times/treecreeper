@@ -1,11 +1,10 @@
-const { logger } = require('../api-express/lib/request-context');
-
 const s3Get = async ({
 	s3Instance,
 	bucketName,
 	nodeType,
 	code,
 	versionMarker,
+	logger,
 }) => {
 	const params = {
 		Bucket: bucketName,

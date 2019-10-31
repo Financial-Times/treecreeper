@@ -6,6 +6,7 @@ const { undo } = require('../undo');
 const {
 	s3DeleteObjectResponseFixture,
 } = require('../__fixtures__/s3-object-fixture');
+const { logger } = require('../../api-express/lib/request-context');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 const consistentNodeType = 'System';
@@ -41,6 +42,7 @@ const mockUndo = (systemCode, versionMarker) => {
 		nodeType: consistentNodeType,
 		code: systemCode,
 		versionMarker,
+		logger,
 	};
 
 	return {

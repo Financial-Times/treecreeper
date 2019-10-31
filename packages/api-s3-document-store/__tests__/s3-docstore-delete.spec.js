@@ -61,7 +61,7 @@ describe('S3 document helper delete', () => {
 			givenSystemCode,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.delete(
 			consistentNodeType,
@@ -86,6 +86,30 @@ describe('S3 document helper delete', () => {
 		expect(stubDeleteObject).toHaveBeenCalledTimes(2);
 	});
 
+	test('use can choose logger', async () => {
+		const givenSystemCode = 'docstore-delete-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { s3Instance } = mockS3DeleteObject(
+			givenSystemCode,
+			givenVersionMarker,
+		);
+		const mockLogger = {
+			info: jest.fn(),
+			error: jest.fn(),
+		};
+		const store = docstore({ s3Instance, logger: mockLogger });
+
+		await expect(
+			store.delete(
+				consistentNodeType,
+				givenSystemCode,
+				givenVersionMarker,
+			),
+		).resolves.not.toThrow();
+		expect(mockLogger.info).toHaveBeenCalledTimes(1);
+	});
+
 	test('throws error when delete fails', async () => {
 		const givenSystemCode = 'docstore-delete-unexpected';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
@@ -94,7 +118,7 @@ describe('S3 document helper delete', () => {
 			givenSystemCode,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		await expect(
 			store.delete(

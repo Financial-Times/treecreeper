@@ -11,6 +11,9 @@ const {
 	s3DeleteObjectResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const {
+	logger: defaultLogger,
+} = require('../../api-express/lib/request-context');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -55,11 +58,12 @@ describe('S3 document helper patch', () => {
 
 	const consistentNodeType = 'System';
 
-	const matcher = (s3Instance, systemCode) => ({
+	const matcher = (s3Instance, systemCode, logger = defaultLogger) => ({
 		s3Instance,
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 		nodeType: consistentNodeType,
 		code: systemCode,
+		logger,
 	});
 
 	test('returns existing body object when patch object is completely same', async () => {
@@ -69,7 +73,7 @@ describe('S3 document helper patch', () => {
 		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const expectedData = createExampleBodyData();
 
 		const result = await store.patch(
@@ -91,6 +95,40 @@ describe('S3 document helper patch', () => {
 		);
 	});
 
+	test('use can choose logger', async () => {
+		const givenSystemCode = 'docstore-patch-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
+			givenVersionMarker,
+		);
+		const mockLogger = {
+			info: jest.fn(),
+			error: jest.fn(),
+		};
+		const store = docstore({ s3Instance, logger: mockLogger });
+		const expectedData = createExampleBodyData();
+
+		const result = await store.patch(
+			consistentNodeType,
+			givenSystemCode,
+			expectedData,
+		);
+
+		expect(result).toMatchObject({
+			body: expectedData,
+		});
+		// result SHOULD NOT have versionMarker and undo property
+		expect(result).not.toHaveProperty('versionMarker');
+		expect(result).not.toHaveProperty('undo');
+		expect(stubUpload).not.toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode, mockLogger),
+		);
+		expect(mockLogger.info).toHaveBeenCalledTimes(1);
+	});
+
 	test('returns patched body with new versionMakrer and undo function', async () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
@@ -101,7 +139,7 @@ describe('S3 document helper patch', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Patch(givenVersionMarker);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const expectedData = createExampleBodyData();
 
 		const patchBody = {
@@ -131,6 +169,7 @@ describe('S3 document helper patch', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'PATCH',
+			logger: defaultLogger,
 		});
 		expect(stubGetObject).toHaveBeenCalled();
 		expect(stubGetObject).toHaveBeenCalledWith(

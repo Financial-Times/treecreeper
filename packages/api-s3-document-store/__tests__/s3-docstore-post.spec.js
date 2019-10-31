@@ -9,6 +9,9 @@ const {
 	s3DeleteObjectResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const {
+	logger: defaultLogger,
+} = require('../../api-express/lib/request-context');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
@@ -56,7 +59,7 @@ describe('S3 document helper post', () => {
 		const { stubUpload, stubDeleteOnUndo, s3Instance } = mockS3Post(
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const exampleData = createExampleBodyData();
 
 		const result = await store.post(
@@ -77,6 +80,7 @@ describe('S3 document helper post', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'POST',
+			logger: defaultLogger,
 		});
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
@@ -92,5 +96,56 @@ describe('S3 document helper post', () => {
 			Key: `${consistentNodeType}/${givenSystemCode}`,
 			VersionId: givenVersionMarker,
 		});
+	});
+
+	test('user can choose logger', async () => {
+		const givenSystemCode = 'docstore-post-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubUpload, stubDeleteOnUndo, s3Instance } = mockS3Post(
+			givenVersionMarker,
+		);
+		const mockLogger = {
+			info: jest.fn(),
+			error: jest.fn(),
+		};
+		const store = docstore({ s3Instance, logger: mockLogger });
+		const exampleData = createExampleBodyData();
+
+		const result = await store.post(
+			consistentNodeType,
+			givenSystemCode,
+			exampleData,
+		);
+
+		const callParams = {
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			Body: JSON.stringify(exampleData),
+			ContentType: 'application/json',
+		};
+
+		expect(stubUpload).toHaveBeenCalledTimes(1);
+		expect(stubUpload).toHaveBeenCalledWith({
+			s3Instance,
+			params: callParams,
+			requestType: 'POST',
+			logger: mockLogger,
+		});
+		expect(result).toMatchObject({
+			versionMarker: givenVersionMarker,
+			body: exampleData,
+			undo: expect.any(Function),
+		});
+		const undoResult = await result.undo();
+		expect(undoResult).toMatchObject({
+			versionMarker: 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar',
+		});
+		expect(stubDeleteOnUndo).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
+		expect(mockLogger.info).toHaveBeenCalledTimes(2);
 	});
 });

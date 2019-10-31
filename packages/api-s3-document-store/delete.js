@@ -1,4 +1,3 @@
-const { logger } = require('../api-express/lib/request-context');
 const { undo } = require('./undo');
 
 const s3Delete = async ({
@@ -7,6 +6,7 @@ const s3Delete = async ({
 	nodeType,
 	code,
 	versionMarker,
+	logger,
 }) => {
 	const params = {
 		Bucket: bucketName,
@@ -34,10 +34,11 @@ const s3Delete = async ({
 				code,
 				versionMarker: response.VersionId,
 				undoType: 'DELETE',
+				logger,
 			}),
 		};
 	} catch (err) {
-		logger.info(
+		logger.error(
 			{
 				event: `DELETE_S3_FAILURE`,
 			},

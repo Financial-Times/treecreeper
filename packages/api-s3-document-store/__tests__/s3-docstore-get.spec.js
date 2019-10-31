@@ -69,7 +69,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.get(consistentNodeType, givenSystemCode);
 
@@ -78,6 +78,33 @@ describe('S3 document helper get', () => {
 		});
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
 		expect(stubGetObject).toHaveBeenCalledWith(matcher(givenSystemCode));
+	});
+
+	test('user can choose logger', async () => {
+		const givenSystemCode = 'docstore-get-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const expectedData = createExampleBodyData();
+
+		const mockLogger = {
+			info: jest.fn(),
+			error: jest.fn(),
+		};
+
+		const { stubGetObject, s3Instance } = mockS3GetObject(
+			givenSystemCode,
+			expectedData,
+			givenVersionMarker,
+		);
+		const store = docstore({ s3Instance, logger: mockLogger });
+
+		const result = await store.get(consistentNodeType, givenSystemCode);
+
+		expect(result).toMatchObject({
+			body: expectedData,
+		});
+		expect(stubGetObject).toHaveBeenCalledTimes(1);
+		expect(stubGetObject).toHaveBeenCalledWith(matcher(givenSystemCode));
+		expect(mockLogger.info).toHaveBeenCalledTimes(1);
 	});
 
 	test('returns empty object when S3 responds with NoSuchKey error', async () => {
@@ -90,7 +117,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const result = await store.get(consistentNodeType, givenSystemCode);
 
 		expect(Object.keys(result)).toHaveLength(0);
@@ -108,7 +135,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		await expect(
 			store.get(consistentNodeType, givenSystemCode),

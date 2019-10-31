@@ -1,5 +1,3 @@
-const { logger } = require('../api-express/lib/request-context');
-
 const undo = ({
 	s3Instance,
 	bucketName,
@@ -7,6 +5,7 @@ const undo = ({
 	code,
 	versionMarker,
 	undoType = 'POST',
+	logger,
 }) => async () => {
 	if (!versionMarker) {
 		logger.info(
