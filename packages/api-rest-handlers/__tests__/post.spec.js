@@ -127,18 +127,18 @@ describe('rest POST', () => {
 		});
 
 		it('sets Time property', async () => {
-			const time = '2019-01-09T00:00:00.001Z';
+			const time = '12:34:56.789Z';
 			const { status, body } = await basicHandler({ someTime: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someTime: neo4jTimePrecision(time).split('T')[1],
+				someTime: neo4jTimePrecision(time),
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someTime: neo4jTimePrecision(time).split('T')[1],
+					someTime: neo4jTimePrecision(time),
 				})
 				.noRels();
 		});

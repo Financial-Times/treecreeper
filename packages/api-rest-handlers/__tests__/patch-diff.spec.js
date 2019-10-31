@@ -4,7 +4,7 @@ const { setupMocks } = require('../../../test-helpers');
 
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
-describe.skip('rest PATCH diff', () => {
+describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
@@ -75,8 +75,6 @@ describe.skip('rest PATCH diff', () => {
 			expect.any(Object),
 		);
 	});
-
-	it.skip("doesn't write if no real lockField changes detected", async () => {});
 
 	it('writes if property but no relationship changes detected', async () => {
 		const [main, child] = await createNodes(

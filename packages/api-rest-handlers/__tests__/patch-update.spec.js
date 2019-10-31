@@ -3,6 +3,7 @@ const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 describe.skip('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
@@ -119,10 +120,11 @@ describe.skip('rest PATCH update', () => {
 				});
 				it.skip("doesn't update when effectively the same Date", async () => {});
 			});
+
 			describe('Time', () => {
 				it('sets Time when no previous value', async () => {
 					await createMainNode();
-					const time = '2019-01-09T00:00:00.001Z';
+					const time = '12:34:56.789Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
@@ -139,13 +141,14 @@ describe.skip('rest PATCH update', () => {
 						})
 						.noRels();
 				});
+
 				it('updates existing Time', async () => {
 					await createMainNode({
 						someTime: neo4jTemporalTypes.Time.fromStandardDate(
 							new Date('2018-01-09'),
 						),
 					});
-					const time = '2019-01-09T00:00:00.001Z';
+					const time = '12:34:56.789Z';
 					const { status, body } = await basicHandler({
 						someTime: time,
 					});
@@ -162,8 +165,27 @@ describe.skip('rest PATCH update', () => {
 						})
 						.noRels();
 				});
-				it.skip("doesn't update when effectively the same Time", async () => {});
+
+				it("doesn't update when effectively the same Time", async () => {
+					const time = '12:34:56.789Z';
+					await createMainNode({
+						someTime: neo4jTemporalTypes.Time.fromStandardDate(
+							new Date(`2018-01-09T${time}`),
+						),
+					});
+					const dbQuerySpy = spyDbQuery();
+					const { status } = await basicHandler({
+						someTime: time,
+					});
+
+					expect(status).toBe(200);
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
 			});
+
 			describe('Datetime', () => {
 				it('sets Datetime when no previous value', async () => {
 					await createMainNode();
@@ -288,6 +310,7 @@ describe.skip('rest PATCH update', () => {
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 	});
+
 	describe('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
 			await createMainNode();

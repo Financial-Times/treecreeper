@@ -85,7 +85,7 @@ const queryBuilder = (method, input, body = {}) => {
 			body: { ...bodyDiff },
 		});
 		updateParameter({ properties });
-		context.willModifyNode = !!Object.keys(bodyDiff).length;
+		context.willModifyNode = bodyDiff && !!Object.keys(bodyDiff).length;
 		return builder;
 	};
 
