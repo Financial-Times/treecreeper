@@ -8,7 +8,6 @@ describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
-	const clientId = `${namespace}-client`;
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
@@ -19,11 +18,6 @@ describe('rest PATCH diff', () => {
 		query,
 		metadata,
 	});
-
-	const lock = (client, ...fields) =>
-		JSON.stringify(
-			fields.reduce((obj, field) => ({ ...obj, [field]: client }), {}),
-		);
 
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
@@ -75,24 +69,6 @@ describe('rest PATCH diff', () => {
 			{ children: [childCode] },
 			{ relationshipAction: 'merge' },
 		);
-		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
-			expect.stringMatching(/MERGE|CREATE/),
-			expect.any(Object),
-		);
-	});
-
-	it("doesn't write if no real lockField changes detected", async () => {
-		await createMainNode({
-			someString: 'some string',
-			anotherString: 'another string',
-			_lockedFields: lock(clientId, 'someString', 'anotherString'),
-		});
-		const dbQuerySpy = spyDbQuery();
-		const { status } = await basicHandler({
-			anotherString: 'another string',
-			someString: 'some string',
-		});
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
