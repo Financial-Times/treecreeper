@@ -10,12 +10,19 @@ const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 // We go to extra lengths here using constructors because the string representations
 // in the payload and retrieved from db may have different precision, but effectively
 // be the same value e.g. 12:00:00 compared to 12:00:00.000 should return false
-const normalizeDateString = (date, neo4jConstructor) =>
-	neo4jConstructor.fromStandardDate(new Date(date)).toString();
+const normalizeDateString = (type, val, neo4jConstructor) => {
+	if (type === 'Time') {
+		// Need to pass a standard JavaScript Date to use fromStandardDate function
+		// It returns only Time object even if the val includes date.
+		// Any date is ok. It doesn't need to be 2000-01-01.
+		val = `2000-01-01T${val}`;
+	}
+	return neo4jConstructor.fromStandardDate(new Date(val)).toString();
+};
 
-const datesAreEqual = (date1, date2, neo4jConstructor) =>
-	normalizeDateString(date1, neo4jConstructor) ===
-	normalizeDateString(date2, neo4jConstructor);
+const datesAreEqual = (type, val1, val2, neo4jConstructor) =>
+	normalizeDateString(type, val1, neo4jConstructor) ===
+	normalizeDateString(type, val2, neo4jConstructor);
 
 const isProperty = type => {
 	const { properties } = getType(type);
@@ -39,6 +46,7 @@ const getPropertyChangeDetector = (properties, initialContent) => ([
 
 	if (isTemporalTypeName(type)) {
 		return !datesAreEqual(
+			type,
 			val,
 			initialContent[propName],
 			neo4jTemporalTypes[type],
