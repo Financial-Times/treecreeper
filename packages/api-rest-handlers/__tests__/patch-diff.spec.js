@@ -1,8 +1,8 @@
 const { patchHandler } = require('../patch');
 
 const { setupMocks } = require('../../../test-helpers');
+
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
-const { lock } = require('../../../test-helpers/lock');
 
 describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
@@ -19,6 +19,11 @@ describe('rest PATCH diff', () => {
 		query,
 		metadata,
 	});
+
+	const lock = (client, ...fields) =>
+		JSON.stringify(
+			fields.reduce((obj, field) => ({ ...obj, [field]: client }), {}),
+		);
 
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 

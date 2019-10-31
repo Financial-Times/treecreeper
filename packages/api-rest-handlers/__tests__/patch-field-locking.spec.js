@@ -2,7 +2,6 @@ const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
-const { lock } = require('../../../test-helpers/lock');
 
 describe('rest PATCH field-locking', () => {
 	const namespace = 'api-rest-handlers-patch-field-locking';
@@ -26,6 +25,11 @@ describe('rest PATCH field-locking', () => {
 
 	const createMainNode = (props = {}) =>
 		createNode('MainType', Object.assign({ code: mainCode }, props));
+
+	const lock = (client, ...fields) =>
+		JSON.stringify(
+			fields.reduce((obj, field) => ({ ...obj, [field]: client }), {}),
+		);
 
 	const lockedSomeString = lock(clientId, 'someString');
 	const otherLockedSomeString = lock(otherClientId, 'someString');
