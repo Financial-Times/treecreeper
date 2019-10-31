@@ -1,11 +1,9 @@
-const sinon = require('sinon');
 const app = require('../server/app.js');
 const { setupMocks } = require('./helpers');
 
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'graphql',
 );
-const security = require('../server/middleware/security');
 
 describe('graphql', () => {
 	const sandbox = {};
@@ -323,15 +321,6 @@ describe('graphql', () => {
 	});
 
 	describe('access control', () => {
-		let sinonSandbox;
-		beforeEach(async () => {
-			sinonSandbox = sinon.createSandbox();
-		});
-
-		afterEach(async () => {
-			sinonSandbox.restore();
-		});
-
 		const dummyQuery = {
 			query: `{
 				Systems {
@@ -342,67 +331,35 @@ describe('graphql', () => {
 			operationName: null,
 		};
 
-		const stubS3o = (req, res) => {
-			const cookie = req.get('Cookie');
-			const status =
-				/s3o_username=.+?;?/.test(cookie) &&
-				/s3o_password=.+?;?/.test(cookie)
-					? 200
-					: 400;
-			return res.sendStatus(status);
-		};
-
-		it('should allow access to GET /graphiql behind s3o', () => {
-			sinonSandbox.stub(security, 'requireS3o').callsFake(stubS3o);
-
-			return request(app, { useCached: false })
-				.get('/graphiql')
-				.set('Cookie', 's3o_username=test; s3o_password=test')
-				.expect(200);
-		});
-
-		it('should not allow access to GET /graphiql if s3o fails', () => {
-			return request(app)
-				.get('/graphiql')
-				.expect(302);
-		});
-
-		it('should allow access to POST /api/graphql behind s3o', () => {
-			sinonSandbox
-				.stub(security, 'requireApiKeyOrS3o')
-				.callsFake(stubS3o);
-			return request(app, { useCached: false })
-				.post('/graphql')
-				.send(dummyQuery)
-				.set('Cookie', 's3o_username=test; s3o_password=test')
-				.expect(200);
-		});
-
 		it('should allow access to POST /graphql with an API key header and client id', () => {
 			return request(app)
 				.post('/graphql')
+				.set('client-id', 'test')
 				.send(dummyQuery)
 				.namespacedAuth()
 				.expect(200);
 		});
 
-		it('should not access to POST /graphql if there is no valid s3o auth or API key header', () => {
+		it('should not access to POST /graphql if there is no valid API key header', () => {
 			return request(app)
 				.post('/graphql', dummyQuery)
-				.expect(403);
+				.set('client-id', 'test')
+				.expect(401);
 		});
 
 		it('should allow access to GET /graphql with an API key header and client id', () => {
 			return request(app)
 				.get('/graphql?query={Systems{code}}')
+				.set('client-id', 'test')
 				.namespacedAuth()
 				.expect(200);
 		});
 
-		it('should not access to GET /graphql if there is no valid s3o auth or API key header', () => {
+		it('should not access to GET /graphql if there is no valid API key header', () => {
 			return request(app)
 				.get('/graphql?query={Systems{code}}')
-				.expect(403);
+				.set('client-id', 'test')
+				.expect(401);
 		});
 	});
 });

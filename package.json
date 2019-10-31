@@ -41,7 +41,6 @@
 		"@financial-times/biz-ops-schema": "^3.24.0",
 		"@financial-times/n-cluster": "^1.0.0",
 		"@financial-times/n-logger": "^5.6.4",
-		"@financial-times/s3o-middleware": "^3.0.0",
 		"apollo-server-express": "^1.4.0",
 		"aws-sdk": "^2.441.0",
 		"babel-plugin-transform-runtime": "^6.23.0",

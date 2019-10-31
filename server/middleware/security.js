@@ -1,4 +1,3 @@
-const s3o = require('@financial-times/s3o-middleware');
 const { logger } = require('../lib/request-context');
 
 if (!process.env.API_KEY) {
@@ -33,15 +32,6 @@ const requireApiKey = (req, res, next) => {
 	return next();
 };
 
-const requireApiKeyOrS3o = (req, res, next) => {
-	if (!hasApiKey(req)) {
-		return s3o.authS3ONoRedirect(req, res, next);
-	}
-	return next();
-};
-
 module.exports = {
-	requireS3o: s3o,
 	requireApiKey,
-	requireApiKeyOrS3o,
 };
