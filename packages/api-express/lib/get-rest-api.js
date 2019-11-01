@@ -12,17 +12,16 @@ const { composeDocumentStore } = require('../../api-s3-document-store');
 
 const { errorToErrors } = require('../middleware/errors');
 
-// const requestLog = (logger, endpointName = 'rest') => (req, res, next) => {
-// 	logger.setContext({
-// 		endpointName,
-// 		method: req.method,
-// 		params: req.params,
-// 		query: req.query,
-// 		bodyKeys: Object.keys(req.body || {}),
-// 	});
-// 	logger.info(`[APP] ${endpointName} ${req.method}`);
-// 	next();
-// };
+const requestLog = (logger, method, req, endpointName = 'rest') => {
+	logger.setContext({
+		endpointName,
+		method,
+		params: req.params,
+		query: req.query,
+		bodyKeys: Object.keys(req.body || {}),
+	});
+	logger.info(`[APP] ${endpointName} ${method}`);
+};
 
 // const unimplemented = (endpointName, method, alternativeMethod) => req => {
 // 	requestLog(endpointName, method, req);
@@ -33,15 +32,7 @@ const { errorToErrors } = require('../middleware/errors');
 // };
 
 const controller = (method, handler, logger) => (req, res, next) => {
-	logger.setContext({
-		endpointName: 'rest',
-		method: req.method,
-		params: req.params,
-		query: req.query,
-		bodyKeys: Object.keys(req.body || {}),
-	});
-	logger.info(`[APP] 'rest' ${req.method}`);
-
+	requestLog(logger, method, req, 'rest');
 	handler(
 		Object.assign(
 			{
@@ -80,7 +71,6 @@ const getRestApi = (options = {}) => {
 		// and more composers
 	).toObject();
 
-	// router.use(requestLog(logger));
 	router
 		.route('/:type/:code')
 		.head(controller('HEAD', headHandler(composedModules), logger))

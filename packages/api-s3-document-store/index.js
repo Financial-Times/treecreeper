@@ -70,8 +70,15 @@ const composeDocumentStore = (composeOptions = {}) => {
 	if ('documentStore' in composeOptions) {
 		return composeOptions;
 	}
+	// Pick fields which documentStore wants to
+	const {
+		s3Instance = defaultS3Instance,
+		bucketName = TREECREEPER_DOCSTORE_S3_BUCKET,
+		logger,
+	} = composeOptions;
+
 	const documentStore = new DocumentStore(
-		composeOptions,
+		{ s3Instance, bucketName, logger },
 		composeS3Get,
 		composeS3Post,
 		composeS3Patch,
