@@ -50,7 +50,7 @@ const testSuite = (method, goodStatus) => {
 		const otherCode = `${namespace}-other`;
 		const restUrl =
 			method === 'absorb'
-				? `/rest/MainType/${mainCode}/absorb/${otherCode}?upsert=yes`
+				? `/rest/MainType/${mainCode}/absorb/${otherCode}`
 				: `/rest/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
