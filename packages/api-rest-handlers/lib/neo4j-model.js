@@ -10,11 +10,6 @@ const getDirection = (record, node) =>
 		? 'outgoing'
 		: 'incoming';
 
-const richRelationshipsInfo = record => ({
-	code: record.relatedCode(),
-	...record.properties,
-});
-
 const bizOpsRecord = record => {
 	const node = record.get('node');
 	const hasRelationship = record.has('relationship');
@@ -23,7 +18,7 @@ const bizOpsRecord = record => {
 	return {
 		get: (...args) => record.get(...args),
 		has: (...args) => record.has(...args),
-		properties: node.properties,
+		richRelationship: ifRelationship(() => record.get('relationship')),
 		relationship: ifRelationship(() => record.get('relationship').type),
 		inverseDirection: ifRelationship(() =>
 			invertDirection(getDirection(record, node)),
@@ -38,7 +33,7 @@ const constructOutput = ({
 	type: nodeType,
 	result,
 	excludeMeta = false,
-	richRelationshipsInfoFlag = false,
+	richRelationshipsFlag = false,
 }) => {
 	if (!result.hasRecords()) {
 		return;
@@ -73,8 +68,11 @@ const constructOutput = ({
 								propertyType === record.relatedType(),
 						)
 						.map(record =>
-							richRelationshipsInfoFlag
-								? richRelationshipsInfo(record)
+							richRelationshipsFlag
+								? {
+										...record.richRelationship().properties,
+										code: record.relatedCode(),
+								  }
 								: record.relatedCode(),
 						);
 
@@ -87,7 +85,7 @@ const constructOutput = ({
 	return response;
 };
 
-const addBizOpsEnhancements = (result, richRelationshipsInfoFlag) => {
+const addBizOpsEnhancements = result => {
 	result.hasRecords = () => result.records && result.records.length;
 
 	result.hasRelationships = () =>
@@ -95,12 +93,12 @@ const addBizOpsEnhancements = (result, richRelationshipsInfoFlag) => {
 		result.records[0].has('relatedCode') &&
 		result.records[0].get('relatedCode');
 
-	result.toJson = (type, excludeMeta) =>
+	result.toJson = (type, richRelationshipsFlag, excludeMeta) =>
 		constructOutput({
 			type,
 			result,
 			excludeMeta,
-			richRelationshipsInfoFlag,
+			richRelationshipsFlag,
 		});
 
 	result.getNode = () =>
@@ -114,12 +112,5 @@ const addBizOpsEnhancements = (result, richRelationshipsInfoFlag) => {
 	return result;
 };
 
-module.exports.executeQuery = async (
-	query,
-	params,
-	richRelationshipsInfoFlag,
-) =>
-	addBizOpsEnhancements(
-		await executeQuery(query, params),
-		richRelationshipsInfoFlag,
-	);
+module.exports.executeQuery = async (query, params) =>
+	addBizOpsEnhancements(await executeQuery(query, params));

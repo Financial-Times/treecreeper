@@ -6,10 +6,10 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	validateInput(input);
 
 	const { type, code, query } = input;
-	const richRelationshipsInfoFlag = query && query.richRelationships;
+	const richRelationshipsFlag = query && query.richRelationships;
 
 	const [neo4jResult, docstoreResult] = await Promise.all([
-		getNeo4jRecord(type, code, richRelationshipsInfoFlag),
+		getNeo4jRecord(type, code, richRelationshipsFlag),
 		documentStore ? documentStore.get(type, code) : { body: {} },
 	]);
 
@@ -21,7 +21,10 @@ const getHandler = ({ documentStore } = {}) => async input => {
 
 	return {
 		status: 200,
-		body: Object.assign(neo4jResult.toJson(type), docstoreBody),
+		body: Object.assign(
+			neo4jResult.toJson(type, richRelationshipsFlag),
+			docstoreBody,
+		),
 	};
 };
 
