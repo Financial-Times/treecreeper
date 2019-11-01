@@ -10,18 +10,12 @@ const { getRestApi } = require('./lib/get-rest-api');
 const clientId = require('./middleware/client-id');
 const requestId = require('./middleware/request-id');
 const { errorToErrors } = require('./middleware/errors');
-const { createLogger, loggerMiddleware, Logger } = require('../api-logger');
+const { createLogger, loggerMiddleware } = require('../api-express-logger');
 
 const bodyParsers = [
 	bodyParser.json({ limit: '8mb' }),
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
-
-const checkLogger = logger => {
-	if (!(logger instanceof Logger)) {
-		throw new TypeError('logger must extend Logger');
-	}
-};
 
 const getApp = async (options = {}) => {
 	const {
@@ -32,23 +26,23 @@ const getApp = async (options = {}) => {
 		graphqlMiddlewares = [],
 		restPath = '/rest',
 		restMiddlewares = [],
-		logger = createLogger(),
+		logger,
 	} = options;
 	updateConstraintsOnSchemaChange();
 	schema.init();
-	checkLogger(logger);
 
+	const appLogger = createLogger(logger);
 	const router = new express.Router();
-	router.use(loggerMiddleware(logger));
-	router.use(requestId(logger));
-	router.use(clientId(logger));
+	router.use(loggerMiddleware(appLogger));
+	router.use(requestId(appLogger));
+	router.use(clientId(appLogger));
 	router.use(bodyParsers);
 	router.use(
 		restPath,
-		restMiddlewares.map(middleware => middleware(logger)),
+		restMiddlewares.map(middleware => middleware(appLogger)),
 		getRestApi({ ...options }),
 	);
-	router.use(errorToErrors(logger));
+	router.use(errorToErrors(appLogger));
 
 	const {
 		isSchemaUpdating,
@@ -65,7 +59,7 @@ const getApp = async (options = {}) => {
 	app.use(treecreeperPath, router);
 	await schema.ready();
 	app.treecreeper = {
-		logger,
+		logger: appLogger,
 		isSchemaUpdating,
 	};
 	return app;

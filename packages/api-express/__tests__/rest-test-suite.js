@@ -2,7 +2,7 @@ const defaultHandler = () => () => null;
 const httpErrors = require('http-errors');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
-const { createLogger } = require('../../api-logger');
+const { createLogger } = require('../../api-express-logger');
 
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {

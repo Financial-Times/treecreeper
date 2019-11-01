@@ -15,13 +15,19 @@
 const asyncHooks = require('async_hooks');
 const nLogger = require('@financial-times/n-logger').default;
 
-class Logger {
+let isAsyncHookCreated = false;
+
+class LogContext {
 	constructor(initialContext = {}) {
 		this.contextStore = initialContext;
 		this.init();
 	}
 
 	init() {
+		// Guard for duplicate setup hooks
+		if (isAsyncHookCreated) {
+			return;
+		}
 		const asyncHook = asyncHooks.createHook({
 			init: (asyncId, type, triggerId) => {
 				if (triggerId in this.contextStore) {
@@ -33,6 +39,7 @@ class Logger {
 		});
 
 		asyncHook.enable();
+		isAsyncHookCreated = true;
 	}
 
 	setContext(key, val) {
@@ -64,16 +71,25 @@ class Logger {
 	}
 }
 
-const createLogger = () => {
-	const logger = new Logger();
-	return new Proxy(logger, {
+const hasMethod = (logger, method) =>
+	method in logger && typeof logger[method] === 'function';
+
+const createLogger = (userDefinedLogger = {}) => {
+	const logContext = new LogContext({ example: 'is' });
+	return new Proxy(logContext, {
 		get: (baseLogger, name) => {
 			// each logging method should get request context before logging
 			if (['info', 'warn', 'log', 'error', 'debug'].includes(name)) {
-				return new Proxy(nLogger[name], {
+				// If user defined logger has each logging method, call it with context
+				// Otherwise, proxy nLogger
+				const loggingFunction = hasMethod(userDefinedLogger, name)
+					? userDefinedLogger[name]
+					: nLogger[name];
+
+				return new Proxy(loggingFunction, {
 					apply: (func, thisArg, args) => {
 						// get the request context
-						const context = logger.getContext();
+						const context = logContext.getContext();
 						// find the first object in the args
 						const firstObjectIndex = args.findIndex(
 							arg => typeof arg === 'object',
@@ -90,7 +106,29 @@ const createLogger = () => {
 					},
 				});
 			}
-			return baseLogger[name];
+			// Paticular case, user choosed logger with pino, we should proxy `child()` with context
+			if (name === 'child' && hasMethod(userDefinedLogger, 'child')) {
+				const childLoggerFunction = userDefinedLogger.child;
+
+				return new Proxy(childLoggerFunction, {
+					apply: (func, thisArg, args) => {
+						// get the request context
+						const context = logContext.getContext();
+
+						// The pino's child binding should be passed only one object
+						// @see https://github.com/pinojs/pino/blob/master/docs/api.md#loggerchildbindings--logger
+						if (args.length === 0) {
+							// if no object is being logged, append the context object to the args
+							args.push(context);
+						} else {
+							// if bindings are supplied, merge with context
+							args[0] = Object.assign({}, context, args[0]);
+						}
+						return func.apply(thisArg, args);
+					},
+				});
+			}
+			return userDefinedLogger[name] || baseLogger[name];
 		},
 	});
 };
@@ -113,5 +151,4 @@ const loggerMiddleware = logger => (req, res, next) => {
 module.exports = {
 	createLogger,
 	loggerMiddleware,
-	Logger,
 };
