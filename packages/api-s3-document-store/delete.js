@@ -1,4 +1,3 @@
-const { logger } = require('../api-express/lib/request-context');
 const { undo } = require('./undo');
 
 const s3Delete = async ({
@@ -7,6 +6,7 @@ const s3Delete = async ({
 	nodeType,
 	code,
 	versionMarker,
+	logger,
 }) => {
 	const params = {
 		Bucket: bucketName,
@@ -48,6 +48,19 @@ const s3Delete = async ({
 	}
 };
 
+const composeS3Delete = ({ s3Instance, bucketName, logger }) => ({
+	delete: async (nodeType, code, versionMarker) =>
+		s3Delete({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code,
+			versionMarker,
+			logger,
+		}),
+});
+
 module.exports = {
 	s3Delete,
+	composeS3Delete,
 };

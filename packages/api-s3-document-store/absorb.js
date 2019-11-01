@@ -1,5 +1,4 @@
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('../api-express/lib/request-context');
 const { s3Get } = require('./get');
 const { s3Delete } = require('./delete');
 const { s3Post } = require('./post');
@@ -11,6 +10,7 @@ const s3Absorb = async ({
 	nodeType,
 	sourceCode,
 	destinationCode,
+	logger,
 }) => {
 	const [
 		{ body: sourceNodeBody },
@@ -54,6 +54,7 @@ const s3Absorb = async ({
 				code: destinationCode,
 				// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
 				body: Object.assign({}, destinationNodeBody, writeProperties),
+				logger,
 			});
 		} catch (err) {
 			return {};
@@ -70,7 +71,13 @@ const s3Absorb = async ({
 			undo: undoPost = async () => ({ versionMarker: null }),
 		},
 	] = await Promise.all([
-		s3Delete({ s3Instance, bucketName, nodeType, code: sourceCode }),
+		s3Delete({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code: sourceCode,
+			logger,
+		}),
 		postDestinationBody(),
 	]);
 
@@ -125,6 +132,19 @@ const s3Absorb = async ({
 	};
 };
 
+const composeS3Absorb = ({ s3Instance, bucketName, logger }) => ({
+	absorb: async (nodeType, sourceCode, destinationCode) =>
+		s3Absorb({
+			s3Instance,
+			bucketName,
+			nodeType,
+			sourceCode,
+			destinationCode,
+			logger,
+		}),
+});
+
 module.exports = {
 	s3Absorb,
+	composeS3Absorb,
 };

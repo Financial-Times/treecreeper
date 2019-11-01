@@ -1,6 +1,4 @@
-const { logger } = require('../api-express/lib/request-context');
-
-const upload = async ({ s3Instance, params, requestType }) => {
+const upload = async ({ s3Instance, params, requestType, logger }) => {
 	try {
 		const response = await s3Instance.upload(params).promise();
 		logger.info(

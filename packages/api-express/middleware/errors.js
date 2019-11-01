@@ -1,7 +1,5 @@
-const { logger } = require('../lib/request-context');
-
 // eslint-disable-next-line no-unused-vars
-const errorToErrors = (err, req, res, next) => {
+const errorToErrors = logger => (err, req, res, next) => {
 	if (process.env.DEBUG) {
 		console.log(err); // eslint-disable-line no-console
 	}

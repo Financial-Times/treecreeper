@@ -7,7 +7,10 @@ const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
 		const mockHandler = jest.fn();
 		const mockHandlerFactory = jest.fn();
-		const config = { fake: 'config' };
+		const config = {
+			fake: 'config',
+			documentStore: undefined,
+		};
 		let app;
 		beforeAll(async () => {
 			jest.doMock('../../../packages/api-rest-handlers', () => {

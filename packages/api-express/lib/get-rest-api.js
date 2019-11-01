@@ -1,5 +1,4 @@
 const express = require('express');
-const { logger, setContext } = require('./request-context');
 const {
 	headHandler,
 	getHandler,
@@ -8,18 +7,21 @@ const {
 	patchHandler,
 	absorbHandler,
 } = require('../../../packages/api-rest-handlers');
+const Composer = require('./composer');
+const { composeDocumentStore } = require('../../api-s3-document-store');
 
 const { errorToErrors } = require('../middleware/errors');
 
-const requestLog = (endpointName, method, req) => {
-	setContext({
+const requestLog = (logger, endpointName = 'rest') => (req, res, next) => {
+	logger.setContext({
 		endpointName,
-		method,
+		method: req.method,
 		params: req.params,
 		query: req.query,
 		bodyKeys: Object.keys(req.body || {}),
 	});
-	logger.info(`[APP] ${endpointName} ${method}`);
+	logger.info(`[APP] ${endpointName} ${req.method}`);
+	next();
 };
 
 // const unimplemented = (endpointName, method, alternativeMethod) => req => {
@@ -56,28 +58,36 @@ const controller = (method, handler) => (req, res, next) => {
 		.catch(next);
 };
 
-const getRestApi = (config = {}) => {
+const getRestApi = (options = {}) => {
 	// {
 	// 	documentStore, // : s3Adaptor,
 	// 	// lockFieldsUsingMetadata, //: clientId,
 	// 	// updateStream, // : kinesisAdaptor
 	// } = {}) => {
 	const router = new express.Router();
+	const { logger } = options;
+	const composedModules = new Composer(
+		options,
+		composeDocumentStore,
+		// and more composers
+	).toObject();
+
+	// router.use(requestLog(logger));
 	router
 		.route('/:type/:code')
-		.head(controller('HEAD', headHandler(config)))
-		.get(controller('GET', getHandler(config)))
-		.post(controller('POST', postHandler(config)))
+		.head(controller('HEAD', headHandler(composedModules)))
+		.get(controller('GET', getHandler(composedModules)))
+		.post(controller('POST', postHandler(composedModules)))
 		// 	.put(unimplemented('PUT', 'PATCH'))
-		.patch(controller('PATCH', patchHandler(config)))
-		.delete(controller('DELETE', deleteHandler(config)));
+		.patch(controller('PATCH', patchHandler(composedModules)))
+		.delete(controller('DELETE', deleteHandler(composedModules)));
 
 	router.post(
 		'/:type/:code/absorb/:codeToAbsorb',
-		controller('ABSORB', absorbHandler(config)),
+		controller('ABSORB', absorbHandler(composedModules)),
 	);
 
-	router.use(errorToErrors);
+	router.use(errorToErrors(logger));
 
 	return router;
 };

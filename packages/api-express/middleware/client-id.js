@@ -1,7 +1,6 @@
 const httpErrors = require('http-errors');
-const { setContext } = require('../lib/request-context');
 
-module.exports = (req, res, next) => {
+module.exports = logger => (req, res, next) => {
 	if (!req.get('client-id') && !req.get('client-user-id')) {
 		throw httpErrors(
 			400,
@@ -12,7 +11,7 @@ module.exports = (req, res, next) => {
 	res.locals.clientId = req.get('client-id');
 	res.locals.clientUserId = req.get('client-user-id');
 
-	setContext('clientId', res.locals.clientId);
-	setContext('clientUserId', res.locals.clientUserId);
+	logger.setContext('clientId', res.locals.clientId);
+	logger.setContext('clientUserId', res.locals.clientUserId);
 	next();
 };
