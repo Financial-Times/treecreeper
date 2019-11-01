@@ -1,4 +1,10 @@
-const { getHandler, deleteHandler, postHandler, patchHandler } = require('..');
+const {
+	getHandler,
+	deleteHandler,
+	postHandler,
+	patchHandler,
+	absorbHandler,
+} = require('..');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { docstore } = require('../../api-s3-document-store');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
@@ -6,6 +12,7 @@ const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 describe('rest document store integration', () => {
 	const namespace = 'api-rest-handlers-docstore';
 	const mainCode = `${namespace}-main`;
+	const otherCode = `${namespace}-other`;
 	const input = {
 		type: 'MainType',
 		code: mainCode,
@@ -18,7 +25,7 @@ describe('rest document store integration', () => {
 		return Object.assign({}, input, { body });
 	};
 
-	const { createNode } = setupMocks(namespace);
+	const { createNode, createNodes } = setupMocks(namespace);
 
 	const documentStore = docstore();
 	const documentFromS3 = { someDocument: 'some document from s3' };
@@ -411,60 +418,92 @@ describe('rest document store integration', () => {
 		});
 	});
 
-	describe.skip('absorb', () => {
+	describe('absorb', () => {
 		it('responds with 500 if s3 query fails', async () => {
-			// stubS3Unavailable(sandbox);
-			// await testMergeRequest(
-			// 	{
-			// 		type: 'MainType',
-			// 		sourceCode: mainCode1,
-			// 		destinationCode: mainCode2,
-			// 	},
-			// 	500,
-			// );
-			// await Promise.all([
-			// 	verifyExists('MainType', mainCode1),
-			// 	verifyExists('MainType', mainCode2),
-			// ]);
-			// expect(stubSendEvent).not.toHaveBeenCalled();
-			// expectNoS3Actions('upload', 'patch', 'delete', 'merge');
+			await createNodes(['MainType', mainCode], ['MainType', otherCode]);
+			const mockDocstoreAbsorb = createRejectedDocstoreMock(
+				'absorb',
+				new Error('oh no'),
+			);
+			await expect(
+				absorbHandler({ documentStore })(
+					Object.assign({}, input, { codeToAbsorb: otherCode }),
+				),
+			).rejects.toThrow('oh no');
+			expect(mockDocstoreAbsorb).toHaveBeenCalled();
+			await neo4jTest('MainType', otherCode).exists();
 		});
 
 		it('merges document properties', async () => {
-			// await createNodes(
-			// 	[
-			// 		'MainType',
-			// 		{
-			// 			code: mainCode,
-			// 			someString: 'Fake Document',
-			// 			anotherDocument: 'Another Fake Document',
-			// 		},
-			// 	],
-			// 	[
-			// 		'MainType',
-			// 		{
-			// 			code: mainCode2,
-			// 			anotherDocument: 'A Third Fake Document',
-			// 		},
-			// 	],
-			// );
-			// await testMergeRequest(
-			// 	{
-			// 		type: 'MainType',
-			// 		sourceCode: mainCode,
-			// 		destinationCode: mainCode2,
-			// 	},
-			// 	200,
-			// 	withUpdateMeta({
-			// 		code: mainCode2,
-			// 		someString: 'Fake Document',
-			// 		anotherDocument: 'A Third Fake Document',
-			// 	}),
-			// );
+			await createNodes(
+				[
+					'MainType',
+					{
+						code: mainCode,
+						someString: 'Fake Document',
+						anotherDocument: 'Another Fake Document',
+					},
+				],
+				[
+					'MainType',
+					{
+						code: otherCode,
+						anotherDocument: 'A Third Fake Document',
+					},
+				],
+			);
+			const mockDocstoreAbsorb = createResolvedDocstoreMock('absorb', {
+				body: {
+					anotherDocument: 'A Third Fake Document',
+				},
+			});
+
+			const { status, body } = await absorbHandler({ documentStore })(
+				Object.assign({}, input, { codeToAbsorb: otherCode }),
+			);
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'Fake Document',
+				anotherDocument: 'A Third Fake Document',
+			});
+			expect(mockDocstoreAbsorb).toHaveBeenCalledWith(
+				'MainType',
+				otherCode,
+				mainCode,
+			);
+			await neo4jTest('MainType', otherCode).notExists();
 		});
 
 		it('merges neo4j document properties when documentStore is not passed in', async () => {
-			// need a test
+			await createNodes(
+				[
+					'MainType',
+					{
+						code: mainCode,
+						someString: 'Fake Document',
+						anotherDocument: 'Another Fake Document',
+					},
+				],
+				[
+					'MainType',
+					{
+						code: otherCode,
+						anotherDocument: 'A Third Fake Document',
+					},
+				],
+			);
+
+			const { status, body } = await absorbHandler()(
+				Object.assign({}, input, { codeToAbsorb: otherCode }),
+			);
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'Fake Document',
+				anotherDocument: 'Another Fake Document',
+			});
+			await neo4jTest('MainType', otherCode).notExists();
 		});
 	});
 });

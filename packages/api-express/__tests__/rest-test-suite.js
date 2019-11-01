@@ -47,9 +47,15 @@ const testSuite = (method, goodStatus) => {
 
 		const namespace = `api-express-${method}`;
 		const mainCode = `${namespace}-main`;
-		const restUrl = `/rest/MainType/${mainCode}?upsert=yes`;
+		const otherCode = `${namespace}-other`;
+		const restUrl =
+			method === 'absorb'
+				? `/rest/MainType/${mainCode}/absorb/${otherCode}`
+				: `/rest/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
+		// overwrite method to post is method is absorb
+		const getRequestMethod = () => (method === 'absorb' ? 'post' : method);
 
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
 		it('passes config to the handler factory', () => {
@@ -59,14 +65,14 @@ const testSuite = (method, goodStatus) => {
 		describe('client headers', () => {
 			it(`no client-id or client-user-id returns 400`, async () => {
 				return request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.expect(400);
 			});
 
 			it(`client-id but no client-user-id returns ${goodStatus}`, async () => {
 				await createNode('MainType', mainCode);
 				return request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.expect(goodStatus);
 			});
@@ -74,7 +80,7 @@ const testSuite = (method, goodStatus) => {
 			it(`client-user-id but no client-id returns ${goodStatus}`, async () => {
 				await createNode('MainType', mainCode);
 				return request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-user-id', 'test-user-id')
 					.expect(goodStatus);
 			});
@@ -82,7 +88,7 @@ const testSuite = (method, goodStatus) => {
 			it(`client-id and client-user-id returns ${goodStatus}`, async () => {
 				await createNode('MainType', mainCode);
 				return request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.expect(goodStatus);
@@ -98,7 +104,7 @@ const testSuite = (method, goodStatus) => {
 					body: { prop: 'value' },
 				});
 				let req = request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('x-request-id', 'test-request-id');
@@ -108,7 +114,7 @@ const testSuite = (method, goodStatus) => {
 				}
 
 				await req.expect(goodStatus);
-				expect(mockHandler).toHaveBeenCalledWith({
+				const expectedHandlerArgs = {
 					metadata: {
 						requestId: 'test-request-id',
 						clientId: 'test-client-id',
@@ -118,14 +124,19 @@ const testSuite = (method, goodStatus) => {
 					query: { upsert: 'yes' },
 					type: 'MainType',
 					code: mainCode,
-				});
+				};
+				expect(mockHandler).toHaveBeenCalledWith(
+					method === 'absorb'
+						? { ...expectedHandlerArgs, codeToAbsorb: otherCode }
+						: expectedHandlerArgs,
+				);
 			});
 			it('must respond with whatever the handler returns', async () => {
 				mockHandler.mockResolvedValue({
 					status: goodStatus,
 				});
 				await request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
@@ -138,7 +149,7 @@ const testSuite = (method, goodStatus) => {
 			it('must respond with expected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(httpErrors(404, 'hahaha'));
 				await request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
@@ -151,7 +162,7 @@ const testSuite = (method, goodStatus) => {
 			it('must respond with unexpected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(new Error('hahaha'));
 				await request(app)
-					[method](restUrl)
+					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id')
