@@ -2,6 +2,7 @@ const defaultHandler = () => () => null;
 const httpErrors = require('http-errors');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
+const { createLogger } = require('../../api-logger');
 
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
@@ -10,6 +11,7 @@ const testSuite = (method, goodStatus) => {
 		const config = {
 			fake: 'config',
 			documentStore: undefined,
+			logger: createLogger(),
 		};
 		let app;
 		beforeAll(async () => {
@@ -62,7 +64,10 @@ const testSuite = (method, goodStatus) => {
 
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
 		it('passes config to the handler factory', () => {
-			expect(mockHandlerFactory).toHaveBeenCalledWith(config);
+			expect(mockHandlerFactory).toHaveBeenCalledWith({
+				logger: config.logger,
+				documentStore: undefined,
+			});
 		});
 
 		describe('client headers', () => {
@@ -124,7 +129,7 @@ const testSuite = (method, goodStatus) => {
 						clientUserId: 'test-user-id',
 					},
 					body: useBody ? { property: 'value' } : {},
-					query: { upsert: 'yes' },
+					query: method !== 'absorb' ? { upsert: 'yes' } : {},
 					type: 'MainType',
 					code: mainCode,
 				};
