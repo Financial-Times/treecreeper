@@ -106,6 +106,8 @@ To be used for verifying the existence of a record
 **DEPRECATED** Prefer to use the graphql endpoint
 _Note, it is not possible to omit `nodeType` and/or `code` to retrieve a list of nodes. `/api/graphql` is intended to be the primary read interface for anything other than single records._
 
+-   The query string `richRelationships=true` provides more information about the relationships than just their `code`
+
 | initial state | status | response type |
 | ------------- | ------ | ------------- |
 | absent        | 404    | none          |
