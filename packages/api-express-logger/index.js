@@ -75,7 +75,8 @@ const hasMethod = (logger, method) =>
 	method in logger && typeof logger[method] === 'function';
 
 const createLogger = (userDefinedLogger = {}) => {
-	const logContext = new LogContext({ example: 'is' });
+	const logContext = new LogContext();
+
 	return new Proxy(logContext, {
 		get: (baseLogger, name) => {
 			// each logging method should get request context before logging
