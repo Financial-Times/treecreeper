@@ -22,7 +22,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	return {
 		status: 200,
 		body: Object.assign(
-			neo4jResult.toJson(type, richRelationshipsFlag),
+			neo4jResult.toJson({ type, richRelationshipsFlag }),
 			docstoreBody,
 		),
 	};

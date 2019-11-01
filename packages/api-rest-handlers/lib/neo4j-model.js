@@ -93,7 +93,7 @@ const addBizOpsEnhancements = result => {
 		result.records[0].has('relatedCode') &&
 		result.records[0].get('relatedCode');
 
-	result.toJson = (type, richRelationshipsFlag, excludeMeta) =>
+	result.toJson = ({ type, richRelationshipsFlag, excludeMeta }) =>
 		constructOutput({
 			type,
 			result,
