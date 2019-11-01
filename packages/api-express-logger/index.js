@@ -119,11 +119,11 @@ const createLogger = (userDefinedLogger = {}) => {
 						// The pino's child binding should be passed only one object
 						// @see https://github.com/pinojs/pino/blob/master/docs/api.md#loggerchildbindings--logger
 						if (args.length === 0) {
-							// if no object is being logged, append the context object to the args
+							// if no binding is supplied, set the context object to the args
 							args.push(context);
 						} else {
 							// if bindings are supplied, merge with context
-							args[0] = Object.assign({}, context, args[0]);
+							args[0] = Object.assign({}, context, args[0] || {});
 						}
 						return func.apply(thisArg, args);
 					},
