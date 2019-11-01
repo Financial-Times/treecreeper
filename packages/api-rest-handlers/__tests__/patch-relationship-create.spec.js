@@ -165,6 +165,98 @@ describe.skip('rest PATCH relationship create', () => {
 						},
 					);
 			});
+
+			it('strictly enforces one-to-__', async () => {
+				const [main, child1] = await createNodes(
+					['MainType', mainCode],
+					['ChildType', `${childCode}-1`],
+					['ChildType', `${childCode}-2`],
+				);
+
+				await connectNodes(main, 'HAS_FAVOURITE_CHILD', child1);
+
+				const { status, body } = await handler({
+					isFavouriteChildOf: [mainCode],
+				});
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					isFavouriteChildOf: [mainCode],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_FAVOURITE_CHILD',
+							direction: 'outgoing',
+							props: meta.create,
+						},
+						{
+							type: 'ChildType',
+							props: Object.assign(
+								{
+									code: `${childCode}-2`,
+								},
+								meta.default,
+							),
+						},
+					);
+			});
+
+			it(`leaves __-to-__ unchanged`, async () => {
+				const [main, child1] = await createNodes(
+					['MainType', mainCode],
+					['ChildType', `${childCode}-1`],
+					['ChildType', `${childCode}-2`],
+				);
+
+				await connectNodes(main, 'HAS_CHILD', child1);
+
+				const { status, body } = await handler({
+					isChildOf: [mainCode],
+				});
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					isChildOf: [mainCode],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.hasRels(2)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: meta.create,
+						},
+						{
+							type: 'ChildType',
+							props: Object.assign(
+								{
+									code: `${childCode}-2`,
+								},
+								meta.default,
+							),
+						},
+					)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: meta.default,
+						},
+						{
+							type: 'ChildType',
+							props: Object.assign(
+								{
+									code: `${childCode}-1`,
+								},
+								meta.default,
+							),
+						},
+					);
+			});
 		});
 	});
 	describe('merge', () => {
