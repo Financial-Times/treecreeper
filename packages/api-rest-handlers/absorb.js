@@ -118,9 +118,12 @@ const collectRemovedRelationships = ({
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
 const absorbHandler = ({ documentStore } = {}) => async input => {
-	const { type: nodeType, code, codeToAbsorb: absorbedCode } = validateInput(
-		input,
-	);
+	const {
+		type: nodeType,
+		code,
+		codeToAbsorb: absorbedCode,
+		query: { richRelationships } = {},
+	} = validateInput(input);
 	validateCode(nodeType, absorbedCode, 'codeToAbsorb');
 
 	// Fetch nodes to be updated
@@ -194,7 +197,10 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	const body = Object.assign(
 		{},
-		result.toJson({ type: nodeType }),
+		result.toJson({
+			type: nodeType,
+			richRelationshipsFlag: richRelationships,
+		}),
 		updatedDocstoreBody,
 	);
 	return {
