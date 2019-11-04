@@ -121,7 +121,7 @@ const testSuite = (method, goodStatus) => {
 						clientUserId: 'test-user-id',
 					},
 					body: useBody ? { property: 'value' } : {},
-					query: { upsert: 'yes' },
+					query: method === 'absorb' ? {} : { upsert: 'yes' },
 					type: 'MainType',
 					code: mainCode,
 				};
