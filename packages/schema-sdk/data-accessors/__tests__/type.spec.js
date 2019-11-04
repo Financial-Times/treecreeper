@@ -367,7 +367,6 @@ describe('get-type', () => {
 					},
 				},
 			);
-			console.log(Object.keys(type.fieldsets));
 			expect(
 				type.fieldsets.minimumViableRecord.properties.secondaryProp,
 			).toBeDefined();

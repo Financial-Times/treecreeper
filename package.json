@@ -23,7 +23,7 @@
     "graphql-playground-middleware-express": "^1.7.12",
     "http-errors": "^1.7.3",
     "js-yaml": "^3.13.1",
-    "jsforce": "^1.9.2",
+    "jsforce": "^1.9.3",
     "lodash.groupby": "^4.6.0",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqby": "^4.7.0",
@@ -32,6 +32,7 @@
     "next-metrics": "^3.1.9",
     "node-fetch": "^2.6.0",
     "semver": "^6.3.0",
+    "snyk": "^1.242.0",
     "uuid": "^3.3.2",
     "valid-url": "^1.0.9"
   },
