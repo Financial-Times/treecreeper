@@ -50,7 +50,9 @@ const testSuite = (method, goodStatus) => {
 		const otherCode = `${namespace}-other`;
 		const restUrl =
 			method === 'absorb'
-				? `/rest/MainType/${mainCode}/absorb/${otherCode}`
+				? // although upsert doesn't apply to absorb, it is used to test for
+				  // passing query string to handlers
+				  `/rest/MainType/${mainCode}/absorb/${otherCode}?upsert=yes`
 				: `/rest/MainType/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
