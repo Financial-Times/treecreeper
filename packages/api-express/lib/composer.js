@@ -1,10 +1,10 @@
 class Composer {
 	constructor(composeOptions = {}, ...packages) {
 		this.logger = composeOptions.logger;
-		Object.assign(
-			this,
-			packages.reduce((f1, f2) => f1(f2(composeOptions))),
+		const composed = packages.reduce((left, right) => options =>
+			left(right(options)),
 		);
+		Object.assign(this, composed(composeOptions));
 	}
 
 	toObject() {

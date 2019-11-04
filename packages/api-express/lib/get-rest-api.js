@@ -9,6 +9,7 @@ const {
 } = require('../../../packages/api-rest-handlers');
 const Composer = require('./composer');
 const { composeDocumentStore } = require('../../api-s3-document-store');
+const { composeAdaptor } = require('../../api-publish-adaptors');
 
 const { errorToErrors } = require('../middleware/errors');
 

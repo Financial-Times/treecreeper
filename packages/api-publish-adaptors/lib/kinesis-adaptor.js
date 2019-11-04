@@ -31,34 +31,40 @@ const createStubKinesisClient = logger => ({
 	}),
 });
 
-const KinesisAdaptor = (streamName, { logger = console } = {}) => {
-	const client = isDevelopment()
-		? createStubKinesisClient(logger)
-		: createKinesisClient(logger);
+class KinesisAdaptor {
+	constructor({ streamName, logger } = {}) {
+		this.logger = logger;
+		this.streamName = streamName;
 
-	return {
-		getName: () => 'Kinesis',
-		publish: async payload => {
-			try {
-				const options = {
-					Data: Buffer.from(JSON.stringify(payload), 'utf8'),
-					PartitionKey: 'SinglePartitionOnlySupported',
-					StreamName: streamName,
-				};
-				await client.putRecord(options).promise();
-			} catch (error) {
-				logger.error(
-					{
-						event: 'KINESIS_PUT_RECORD_FAILURE',
-						error,
-						payload,
-					},
-					'Kinesis put record failed',
-				);
-			}
-		},
-	};
-};
+		this.client = isDevelopment()
+			? createStubKinesisClient(this.logger)
+			: createKinesisClient(this.logger);
+	}
+
+	async publish(payload) {
+		try {
+			const streamName =
+				this.kinesisStreamName ||
+				process.env.TREECREEPER_KINESIS_STREAM_NAME;
+
+			const options = {
+				Data: Buffer.from(JSON.stringify(payload), 'utf8'),
+				PartitionKey: 'SinglePartitionOnlySupported',
+				StreamName: streamName,
+			};
+			await this.client.putRecord(options).promise();
+		} catch (error) {
+			this.logger.error(
+				{
+					event: 'KINESIS_PUT_RECORD_FAILURE',
+					error,
+					payload,
+				},
+				'Kinesis put record failed',
+			);
+		}
+	}
+}
 
 module.exports = {
 	KinesisAdaptor,
