@@ -48,7 +48,8 @@ const s3Delete = async ({
 	}
 };
 
-const composeS3Delete = ({ s3Instance, bucketName, logger }) => ({
+const composeS3Delete = ({ s3Instance, bucketName, logger }) => options => ({
+	...options,
 	delete: async (nodeType, code, versionMarker) =>
 		s3Delete({
 			s3Instance,

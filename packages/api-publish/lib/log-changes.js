@@ -1,12 +1,9 @@
-const { logger } = require('../../api-express/lib/request-context');
-const { KinesisAdaptor } = require('../../api-publish-adaptors');
+const { ConsoleAdaptor } = require('../../api-publish-adaptors');
 const { createPublisher } = require('./publisher');
 const {
 	makeAddedRelationshipEvents,
 	makeRemovedRelationshipEvents,
 } = require('./related-events');
-
-const { TREECREPER_EVENT_LOG_STREAM_NAME = 'test-stream-name' } = process.env;
 
 const makeEvents = (action, neo4jEntity, relationships) => {
 	const record = neo4jEntity.records[0];
@@ -50,16 +47,13 @@ const acceptableActions = ['CREATE', 'UPDATE', 'DELETE'];
 const logChanges = (
 	action,
 	entity,
-	{
-		relationships = {},
-		adaptor = KinesisAdaptor(TREECREPER_EVENT_LOG_STREAM_NAME),
-	} = {},
+	{ relationships = {}, adaptor = new ConsoleAdaptor() } = {},
 ) => {
 	if (!acceptableActions.includes(action)) {
 		const message = `Invalid action: ${action}. action must be either of ${acceptableActions.join(
 			',',
 		)}`;
-		logger.error({
+		adaptor.error({
 			event: 'INVALID_LOG_CHANGE_ACTION',
 			message,
 		});

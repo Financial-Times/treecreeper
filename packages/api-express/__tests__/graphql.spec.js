@@ -15,13 +15,13 @@ describe('api-express graphql', () => {
 		expect(apiGraphql.getGraphqlApi).toHaveBeenCalledWith(config);
 	});
 
-	it('can support GET requests', async () => {
+	it.skip('can support GET requests', async () => {
 		await request(app)
 			.get('/graphql?query={MainType(code: "test") {code}}')
 			.set('client-id', 'test-client-id')
 			.expect(200);
 	});
-	it('supports POST requests', async () => {
+	it.skip('supports POST requests', async () => {
 		await request(app)
 			.post('/graphql')
 			.send({ query: '{MainType(code: "test") {code}}' })

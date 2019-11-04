@@ -65,6 +65,7 @@ const testSuite = (method, goodStatus) => {
 		beforeEach(() => mockHandler.mockResolvedValue({ status: goodStatus }));
 		it('passes config to the handler factory', () => {
 			expect(mockHandlerFactory).toHaveBeenCalledWith({
+				fake: 'config',
 				logger: config.logger,
 				documentStore: undefined,
 			});

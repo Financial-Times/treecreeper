@@ -1,4 +1,5 @@
 const { Kinesis } = require('aws-sdk');
+const Adaptor = require('./adaptor');
 
 const isDevelopment = () => process.env.NODE_ENV !== 'production';
 
@@ -31,9 +32,9 @@ const createStubKinesisClient = logger => ({
 	}),
 });
 
-class KinesisAdaptor {
+class KinesisAdaptor extends Adaptor {
 	constructor({ streamName, logger } = {}) {
-		this.logger = logger;
+		super(logger);
 		this.streamName = streamName;
 
 		this.client = isDevelopment()
@@ -43,14 +44,10 @@ class KinesisAdaptor {
 
 	async publish(payload) {
 		try {
-			const streamName =
-				this.kinesisStreamName ||
-				process.env.TREECREEPER_KINESIS_STREAM_NAME;
-
 			const options = {
 				Data: Buffer.from(JSON.stringify(payload), 'utf8'),
 				PartitionKey: 'SinglePartitionOnlySupported',
-				StreamName: streamName,
+				StreamName: this.streamName,
 			};
 			await this.client.putRecord(options).promise();
 		} catch (error) {
@@ -66,6 +63,4 @@ class KinesisAdaptor {
 	}
 }
 
-module.exports = {
-	KinesisAdaptor,
-};
+module.exports = KinesisAdaptor;

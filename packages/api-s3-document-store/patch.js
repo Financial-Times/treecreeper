@@ -60,7 +60,8 @@ const s3Patch = async ({
 	};
 };
 
-const composeS3Patch = ({ s3Instance, bucketName, logger }) => ({
+const composeS3Patch = ({ s3Instance, bucketName, logger }) => options => ({
+	...options,
 	patch: async (nodeType, code, body) =>
 		s3Patch({
 			s3Instance,

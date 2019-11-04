@@ -1,9 +1,8 @@
-const { logger } = require('../../packages/api-express/lib/request-context');
 const { onChange } = require('../../packages/schema-sdk');
 const { sendSchemaToS3 } = require('../../packages/schema-publisher');
 const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
 
-const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
+const getGraphqlApi = ({ documentStore, republishSchema, logger } = {}) => {
 	let schemaDidUpdate = false;
 	let graphqlHandler;
 

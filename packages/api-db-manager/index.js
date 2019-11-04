@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-const logger = require('@financial-times/n-logger').default;
+const defaultLogger = require('@financial-times/n-logger').default;
 const schema = require('../../packages/schema-sdk');
 const dbConnection = require('./db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
-const initConstraints = async () => {
+const initConstraints = async (options = {}) => {
+	const { logger = defaultLogger } = options;
 	await schema.ready();
 	const executeQuery = dbConnection.executeQueryWithSharedSession();
 
@@ -70,7 +71,8 @@ const initConstraints = async () => {
 module.exports = Object.assign(
 	{
 		initConstraints,
-		listenForSchemaChanges: () => schema.onChange(initConstraints),
+		listenForSchemaChanges: initOptions =>
+			schema.onChange(() => initConstraints(initOptions)),
 	},
 	dbConnection,
 );
@@ -78,11 +80,11 @@ module.exports = Object.assign(
 if (process.argv[1] === __filename) {
 	initConstraints()
 		.then(() => {
-			logger.info('Completed init');
+			defaultLogger.info('Completed init');
 			process.exit(0);
 		})
 		.catch(error => {
-			logger.error('Init failed, ', error);
+			defaultLogger.error('Init failed, ', error);
 			process.exit(1);
 		});
 }

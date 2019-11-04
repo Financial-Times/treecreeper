@@ -9,6 +9,7 @@ const {
 } = require('../../../packages/api-rest-handlers');
 const Composer = require('./composer');
 const { composeDocumentStore } = require('../../api-s3-document-store');
+const { composeDbConnection } = require('../../api-db-manager');
 const { composeAdaptor } = require('../../api-publish-adaptors');
 
 const { errorToErrors } = require('../middleware/errors');
@@ -69,7 +70,9 @@ const getRestApi = (options = {}) => {
 	const composedModules = new Composer(
 		options,
 		composeDocumentStore,
-		// and more composers
+		composeDbConnection,
+		composeAdaptor,
+		// ...and more composers
 	).toObject();
 
 	router

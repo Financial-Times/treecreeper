@@ -37,7 +37,8 @@ const s3Post = async ({
 	};
 };
 
-const composeS3Post = ({ s3Instance, bucketName, logger }) => ({
+const composeS3Post = ({ s3Instance, bucketName, logger }) => options => ({
+	...options,
 	post: async (nodeType, code, body) =>
 		s3Post({
 			s3Instance,

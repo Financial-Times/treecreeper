@@ -1,6 +1,6 @@
 const neo4j = require('neo4j-driver').v1;
 const metrics = require('next-metrics');
-const { logger } = require('../api-express/lib/request-context');
+const { logger: defaultLogger } = require('../api-express/lib/request-context');
 
 const { TIMEOUT } = { TIMEOUT: 15000 };
 
@@ -15,7 +15,24 @@ const driver = neo4j.driver(
 
 const originalSession = driver.session;
 
-driver.session = (...sessionArgs) => {
+const queryTimedout = timeout =>
+	new Promise((resolve, reject) => {
+		setTimeout(
+			() =>
+				reject(
+					// note that this will cause the finally block to run, which closes the session
+					new Error(
+						`Neo4j query took more than ${timeout /
+							1000} seconds: closing session`,
+					),
+				),
+			timeout,
+		);
+	});
+
+const createDriverSession = ({ logger = defaultLogger } = {}) => (
+	...sessionArgs
+) => {
 	const session = originalSession.apply(driver, sessionArgs);
 	const originalRun = session.run;
 
@@ -26,18 +43,7 @@ driver.session = (...sessionArgs) => {
 		try {
 			const result = await Promise.race([
 				originalRun.apply(session, runArgs),
-				new Promise((res, rej) => {
-					setTimeout(
-						() =>
-							// note that this will cause the finally block to run, which closes the session
-							rej(
-								new Error(
-									'Neo4j query took more than 15 seconds: closing session',
-								),
-							),
-						TIMEOUT,
-					);
-				}),
+				queryTimedout(TIMEOUT),
 			]);
 
 			isSuccessful = true;
@@ -60,6 +66,15 @@ driver.session = (...sessionArgs) => {
 	return session;
 };
 
+driver.session = createDriverSession();
+
+const composeDbConnection = (composeOptions = {}) => {
+	const { logger } = composeOptions;
+	// Overwrite driver.session with using provided logger
+	driver.session = createDriverSession({ logger });
+	return composeOptions;
+};
+
 module.exports = {
 	driver,
 	executeQuery: (query, parameters) =>
@@ -73,4 +88,5 @@ module.exports = {
 
 		return executeQuery;
 	},
+	composeDbConnection,
 };

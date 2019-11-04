@@ -74,10 +74,12 @@ class LogContext {
 const hasMethod = (logger, method) =>
 	method in logger && typeof logger[method] === 'function';
 
+let stackedLogger;
+
 const createLogger = (userDefinedLogger = {}) => {
 	const logContext = new LogContext();
 
-	return new Proxy(logContext, {
+	stackedLogger = new Proxy(logContext, {
 		get: (baseLogger, name) => {
 			// each logging method should get request context before logging
 			if (['info', 'warn', 'log', 'error', 'debug'].includes(name)) {
@@ -132,7 +134,11 @@ const createLogger = (userDefinedLogger = {}) => {
 			return userDefinedLogger[name] || baseLogger[name];
 		},
 	});
+
+	return stackedLogger;
 };
+
+const getLogger = () => stackedLogger || createLogger();
 
 const loggerMiddleware = logger => (req, res, next) => {
 	const eid = asyncHooks.executionAsyncId();
@@ -151,5 +157,6 @@ const loggerMiddleware = logger => (req, res, next) => {
 
 module.exports = {
 	createLogger,
+	getLogger,
 	loggerMiddleware,
 };

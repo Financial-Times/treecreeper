@@ -1,11 +1,7 @@
 const groupBy = require('lodash.groupby');
-const { logger } = require('../../api-express/lib/request-context');
+const Adaptor = require('../../api-publish-adaptors/lib/adaptor');
 
 const requiredPluckFieldNames = ['action', 'code', 'type', 'updatedProperties'];
-const requiredInterfaceMethods = ['publish', 'getName'];
-
-const isImplemented = (adaptor, method) =>
-	method in adaptor && typeof adaptor[method] === 'function';
 
 const uniquifyEvents = events => {
 	const groupedEvents = groupBy(
@@ -27,14 +23,10 @@ const uniquifyEvents = events => {
 };
 
 const publishEvent = async (adaptor, payload) => {
-	// adaptor can extend fields by implementing pluckFields() method
-	const pluckFields = isImplemented(adaptor, 'pluckFields')
-		? requiredPluckFieldNames.concat(adaptor.pluckFields())
-		: requiredPluckFieldNames;
-
+	const pluckFields = requiredPluckFieldNames.concat(adaptor.pluckFields());
 	const missingFields = pluckFields.filter(field => !(field in payload));
 	if (missingFields.length > 0) {
-		logger.warn(
+		adaptor.warn(
 			{
 				event: 'INVALID_PUBLISH_EVENT',
 				missingFields,
@@ -57,16 +49,10 @@ const publishEvent = async (adaptor, payload) => {
 };
 
 const createPublisher = adaptor => {
-	const notImplemented = requiredInterfaceMethods.filter(
-		method => !isImplemented(adaptor, method),
-	);
-	if (notImplemented.length > 0) {
-		throw new TypeError(
-			`Interface satisfaction error: adaptor must implement ${notImplemented.join(
-				',',
-			)} method.`,
-		);
+	if (!(adaptor instanceof Adaptor)) {
+		throw new TypeError('adaptor must be extended Adaptor class');
 	}
+
 	return {
 		publish: async (...events) => {
 			uniquifyEvents(events).forEach(payload =>

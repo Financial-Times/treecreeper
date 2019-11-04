@@ -132,7 +132,8 @@ const s3Absorb = async ({
 	};
 };
 
-const composeS3Absorb = ({ s3Instance, bucketName, logger }) => ({
+const composeS3Absorb = ({ s3Instance, bucketName, logger }) => options => ({
+	...options,
 	absorb: async (nodeType, sourceCode, destinationCode) =>
 		s3Absorb({
 			s3Instance,

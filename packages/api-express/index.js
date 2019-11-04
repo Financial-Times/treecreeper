@@ -28,10 +28,10 @@ const getApp = async (options = {}) => {
 		restMiddlewares = [],
 		logger,
 	} = options;
-	updateConstraintsOnSchemaChange();
+	const appLogger = createLogger(logger);
+	updateConstraintsOnSchemaChange({ logger: appLogger });
 	schema.init();
 
-	const appLogger = createLogger(logger);
 	const router = new express.Router();
 	router.use(loggerMiddleware(appLogger));
 	router.use(requestId(appLogger));
@@ -48,7 +48,7 @@ const getApp = async (options = {}) => {
 		isSchemaUpdating,
 		graphqlHandler,
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
-	} = getGraphqlApi(options);
+	} = getGraphqlApi({ ...options, logger: appLogger });
 
 	updateGraphqlApiOnSchemaChange();
 
