@@ -74,7 +74,7 @@ const neo4jTest = (type, code) => {
 				const record = records.find(testRecord => {
 					const relatedNode = testRecord.get('relatedNode');
 					const rel = testRecord.get('rel');
-					console.log(relatedNode.properties)
+					console.log(relatedNode.properties);
 					return (
 						rel.type === relType &&
 						relatedNode.labels[0] === relatedType &&

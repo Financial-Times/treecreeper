@@ -78,7 +78,7 @@ run-db:
 	docker-compose up
 
 init-db:
-	server/init-db.js
+	packages/api-db-manager/index.js
 
 # load-testing
 load-test-run:

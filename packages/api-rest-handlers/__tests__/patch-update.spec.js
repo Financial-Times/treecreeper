@@ -60,7 +60,7 @@ describe('rest PATCH update', () => {
 		it('updates metadata', async () => {
 			await createMainNode();
 			const { status, body } = await basicHandler(
-				{someString: 'updated string'},
+				{ someString: 'updated string' },
 				undefined,
 				getMetaPayload(),
 			);
@@ -108,7 +108,6 @@ describe('rest PATCH update', () => {
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
 						someDate: date,
 					});
 					await neo4jTest('MainType', mainCode)
@@ -119,7 +118,7 @@ describe('rest PATCH update', () => {
 						});
 				});
 				it("doesn't update when effectively the same Date", async () => {
-					const date = '2019-01-09';;
+					const date = '2019-01-09';
 					await createMainNode({
 						someDate: neo4jTemporalTypes.DateTime.fromStandardDate(
 							new Date(date),
@@ -129,7 +128,11 @@ describe('rest PATCH update', () => {
 					const { status, body } = await basicHandler({
 						someDate: new Date(date).toISOString(),
 					});
+
 					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						someDate: date,
+					});
 					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
 						expect.stringMatching(/MERGE|CREATE/),
 						expect.any(Object),
@@ -203,7 +206,6 @@ describe('rest PATCH update', () => {
 			});
 
 			describe('Datetime', () => {
-
 				it('sets Datetime when no previous value', async () => {
 					await createMainNode();
 					const datetime = '2019-01-09T00:00:00.001Z';
@@ -254,6 +256,9 @@ describe('rest PATCH update', () => {
 						someDatetime: datetime.replace('Z', '000Z'),
 					});
 					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						someDatetime: neo4jTimePrecision(datetime),
+					});
 					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
 						expect.stringMatching(/MERGE|CREATE/),
 						expect.any(Object),
@@ -301,35 +306,41 @@ describe('rest PATCH update', () => {
 		});
 		it('no clientId, deletes the _updatedByClient property', async () => {
 			await createMainNode();
-			const { body } = await basicHandler({someString: 'some string'}, undefined, {
-				clientUserId: 'still-here',
-			});
+			const { body } = await basicHandler(
+				{ someString: 'some string' },
+				undefined,
+				{
+					clientUserId: 'still-here',
+				},
+			);
 			expect(body).toMatchObject({
 				_updatedByUser: 'still-here',
 			});
 			expect(body).not.toMatchObject({
 				_updatedByClient: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode)
-				.notMatch({
-					_updatedByClient: expect.any(String)
-				});
+			await neo4jTest('MainType', mainCode).notMatch({
+				_updatedByClient: expect.any(String),
+			});
 		});
 		it('no clientUserId, deletes the _updatedByUser property', async () => {
 			await createMainNode();
-			const { body } = await basicHandler({someString: 'some string'}, undefined, {
-				clientId: 'still-here',
-			});
+			const { body } = await basicHandler(
+				{ someString: 'some string' },
+				undefined,
+				{
+					clientId: 'still-here',
+				},
+			);
 			expect(body).toMatchObject({
 				_updatedByClient: 'still-here',
 			});
 			expect(body).not.toMatchObject({
 				_updatedByUser: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode)
-				.notMatch({
-					_updatedByUser: expect.any(String)
-				});
+			await neo4jTest('MainType', mainCode).notMatch({
+				_updatedByUser: expect.any(String),
+			});
 		});
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await createMainNode();
@@ -347,7 +358,9 @@ describe('rest PATCH update', () => {
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});
-			await neo4jTest('MainType', mainCode).notMatch({ notInSchema: 'a string' });
+			await neo4jTest('MainType', mainCode).notMatch({
+				notInSchema: 'a string',
+			});
 		});
 	});
 
@@ -355,7 +368,9 @@ describe('rest PATCH update', () => {
 		it('throws if neo4j query fails', async () => {
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
-			await expect(basicHandler({ someString: 'a string' })).rejects.toThrow('oh no');
+			await expect(
+				basicHandler({ someString: 'a string' }),
+			).rejects.toThrow('oh no');
 		});
 	});
 });
