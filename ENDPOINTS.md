@@ -103,13 +103,7 @@ To be used for verifying the existence of a record. Note that any errors are ret
 
 ### GET
 
-**DEPRECATED** Prefer to use the graphql endpoint
-_Note, it is not possible to omit `nodeType` and/or `code` to retrieve a list of nodes. `/api/graphql` is intended to be the primary read interface for anything other than single records._
-
-| initial state | status | response type |
-| ------------- | ------ | ------------- |
-| absent        | 404    | none          |
-| existing      | 200    | json          |
+Not implemented. Use `HEAD` to check fo the existence of a record, or the `/graphql` endpoint to read data for on eor more records.
 
 ### POST
 
