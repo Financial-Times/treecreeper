@@ -50,7 +50,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		logChanges('CREATE', neo4jResult, { relationships });
 
 		const responseData = Object.assign(
-			neo4jResult.toJson(type),
+			neo4jResult.toJson({ type }),
 			newBodyDocs,
 		);
 

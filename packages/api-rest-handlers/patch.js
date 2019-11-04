@@ -33,7 +33,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
-		const initialContent = preflightRequest.toJson(type);
+		const initialContent = preflightRequest.toJson({ type });
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)
@@ -56,7 +56,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			let neo4jResultBody;
 			if (builder.isNeo4jUpdateNeeded()) {
 				const { neo4jResult, queryContext } = await builder.execute();
-				neo4jResultBody = neo4jResult.toJson(type);
+				neo4jResultBody = neo4jResult.toJson({ type });
 				const relationships = {
 					added: queryContext.addedRelationships,
 					removed: queryContext.removedRelationships,

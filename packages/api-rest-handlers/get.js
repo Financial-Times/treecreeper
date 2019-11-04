@@ -5,9 +5,11 @@ const { getNeo4jRecord } = require('./lib/read-helpers');
 const getHandler = ({ documentStore } = {}) => async input => {
 	validateInput(input);
 
-	const { type, code } = input;
+	const { type, code, query } = input;
+	const richRelationshipsFlag = query && query.richRelationships;
+
 	const [neo4jResult, docstoreResult] = await Promise.all([
-		getNeo4jRecord(type, code),
+		getNeo4jRecord(type, code, richRelationshipsFlag),
 		documentStore ? documentStore.get(type, code) : { body: {} },
 	]);
 
@@ -19,7 +21,10 @@ const getHandler = ({ documentStore } = {}) => async input => {
 
 	return {
 		status: 200,
-		body: Object.assign(neo4jResult.toJson(type), docstoreBody),
+		body: Object.assign(
+			neo4jResult.toJson({ type, richRelationshipsFlag }),
+			docstoreBody,
+		),
 	};
 };
 

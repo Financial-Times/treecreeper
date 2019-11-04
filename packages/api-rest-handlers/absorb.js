@@ -128,8 +128,11 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		fetchNode(nodeType, code),
 		fetchNode(nodeType, absorbedCode, 'codeToAbsorb'),
 	]);
-	const mainRecord = mainNode.toJson(nodeType, true);
-	const absorbedRecord = absorbedNode.toJson(nodeType, true);
+	const mainRecord = mainNode.toJson({ type: nodeType, excludeMeta: true });
+	const absorbedRecord = absorbedNode.toJson({
+		type: nodeType,
+		excludeMeta: true,
+	});
 	const { properties } = getType(nodeType);
 
 	// This object will be used for logging
@@ -191,7 +194,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	const body = Object.assign(
 		{},
-		result.toJson(nodeType),
+		result.toJson({ type: nodeType }),
 		updatedDocstoreBody,
 	);
 	return {
