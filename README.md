@@ -51,6 +51,13 @@ You will still require `X-API-KEY`(dev/test or production) and `client-id` heade
 
 Read about these requests in the [GraphQL docs](https://graphql.org/learn/serving-over-http/#http-methods-headers-and-body)
 
+#### Should you use GET or POST?
+
+GET requests are not cached yet, but eventually the aim is to cache in Fastly for short periods of time. So:
+
+-   Use GET if you want performance and resilience, and being up-to-the-millisecond acuurate is not important
+-   Use POST when recency of data is most important. In particular if reading data to analyse before PATCHing it with new data, _always_ use POST
+
 #### GET Example
 
 To read via a GET, you must specify your graphql query as query-parameter in the request. For example:
