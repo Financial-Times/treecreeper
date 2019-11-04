@@ -289,6 +289,32 @@ describe('rest POST', () => {
 					},
 				);
 		});
+
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const { status, body } = await basicHandler(
+				{
+					children: [childCode],
+					parents: [parentCode],
+				},
+				{ upsert: true, richRelationships: true },
+				getMetaPayload(),
+			);
+
+			expect(status).toBe(200);
+			[...body.children, ...body.parents].forEach(relationship =>
+				expect(relationship).toHaveProperty(
+					'code',
+					'_updatedByClient',
+					'_updatedByRequest',
+					'_updatedTimestamp',
+					'_updatedByUser',
+					'_createdByClient',
+					'_createdByRequest',
+					'_createdTimestamp',
+					'_createdByUser',
+				),
+			);
+		});
 	});
 
 	describe('restricted types', () => {
