@@ -46,7 +46,9 @@ describe('rest PATCH relationship create', () => {
 	});
 
 	describe('__-to-one relationships', () => {
-		['merge', 'replace'].forEach(action => {
+		['merge',
+		// 'replace'
+		].forEach(action => {
 			const handler = body =>
 				patchHandler()(getInput(body, { relationshipAction: action }));
 
@@ -169,7 +171,7 @@ describe('rest PATCH relationship create', () => {
 					);
 			});
 
-			it.skip('strictly enforces one-to-__', async () => {
+			it('strictly enforces one-to-__', async () => {
 				const [main, child1] = await createNodes(
 					['MainType', mainCode],
 					['ChildType', childCode1],
@@ -209,13 +211,13 @@ describe('rest PATCH relationship create', () => {
 								{
 									code: childCode2,
 								},
-								meta.default,
+								meta.update,
 							),
 						},
 					);
 			});
 
-			it.skip(`leaves __-to-__ unchanged`, async () => {
+			it(`leaves __-to-__ unchanged`, async () => {
 				const [main, child1] = await createNodes(
 					['MainType', mainCode],
 					['ChildType', childCode1],
@@ -255,7 +257,7 @@ describe('rest PATCH relationship create', () => {
 								{
 									code: childCode2,
 								},
-								meta.default,
+								meta.update,
 							),
 						},
 					)

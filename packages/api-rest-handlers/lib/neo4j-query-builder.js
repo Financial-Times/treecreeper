@@ -63,6 +63,7 @@ const queryBuilder = (method, input, body = {}) => {
 		code,
 		...prepareMetadataForNeo4jQuery(metadata),
 	};
+
 	const builder = {};
 
 	const updateParameter = updateObj => {

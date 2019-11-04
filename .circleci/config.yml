@@ -20,13 +20,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v5-dependency-npm-{{ checksum "package.json" }}-
-        - v5-dependency-npm-{{ checksum "package.json" }}
-        - v5-dependency-npm-
+        - v1-dependency-npm-{{ checksum "package.json" }}-
+        - v1-dependency-npm-{{ checksum "package.json" }}
+        - v1-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v5-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v1-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
@@ -102,9 +102,3 @@ workflows:
           context: rel-eng-creds
           requires:
             - install
-
-experimental:
-  notify:
-    branches:
-      only:
-        - master
