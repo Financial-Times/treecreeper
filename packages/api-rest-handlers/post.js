@@ -40,7 +40,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			.execute();
 
 		const responseData = Object.assign(
-			neo4jResult.toJson(type),
+			neo4jResult.toJson({ type }),
 			newBodyDocs,
 		);
 
