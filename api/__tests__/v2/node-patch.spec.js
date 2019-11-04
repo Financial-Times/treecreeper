@@ -1493,6 +1493,127 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 
+					it('strictly enforces one-to-__', async () => {
+						const [main, child1] = await sandbox.createNodes(
+							['MainType', mainCode],
+							['ChildType', `${childCode}-1`],
+							['ChildType', `${childCode}-2`],
+						);
+
+						await sandbox.connectNodes(
+							main,
+							'HAS_FAVOURITE_CHILD',
+							child1,
+						);
+
+						await testPatchRequest(
+							`/v2/node/ChildType/${childCode}-2?relationshipAction=${action}`,
+							{
+								isFavouriteChildOf: [mainCode],
+							},
+							200,
+							sandbox.withMeta({
+								code: `${childCode}-2`,
+								isFavouriteChildOf: [mainCode],
+							}),
+						);
+
+						await testNode(
+							'MainType',
+							mainCode,
+							sandbox.withMeta({
+								code: mainCode,
+							}),
+							[
+								{
+									type: 'HAS_FAVOURITE_CHILD',
+									direction: 'outgoing',
+									props: sandbox.withCreateMeta({}),
+								},
+								{
+									type: 'ChildType',
+									props: sandbox.withMeta({
+										code: `${childCode}-2`,
+									}),
+								},
+							],
+						);
+
+						sandbox.expectKinesisEvents(
+							[
+								'UPDATE',
+								mainCode,
+								'MainType',
+								['favouriteChild'],
+							],
+							[
+								'UPDATE',
+								`${childCode}-2`,
+								'ChildType',
+								['isFavouriteChildOf'],
+							],
+							// TODO: log deletion of the relationship with the first child
+						);
+						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+					});
+
+					it(`leaves __-to-__ unchanged`, async () => {
+						const [main, child1] = await sandbox.createNodes(
+							['MainType', mainCode],
+							['ChildType', `${childCode}-1`],
+							['ChildType', `${childCode}-2`],
+						);
+
+						await sandbox.connectNodes(main, 'HAS_CHILD', child1);
+
+						await testPatchRequest(
+							`/v2/node/ChildType/${childCode}-2?relationshipAction=${action}`,
+							{
+								isChildOf: [mainCode],
+							},
+							200,
+							sandbox.withMeta({
+								code: `${childCode}-2`,
+								isChildOf: [mainCode],
+							}),
+						);
+
+						await testNode(
+							'MainType',
+							mainCode,
+							sandbox.withMeta({
+								code: mainCode,
+							}),
+							...[1, 2].map(child => [
+								{
+									type: 'HAS_CHILD',
+									direction: 'outgoing',
+									props: sandbox[
+										child === 1
+											? 'withMeta'
+											: 'withCreateMeta'
+									]({}),
+								},
+								{
+									type: 'ChildType',
+									props: sandbox.withMeta({
+										code: `${childCode}-${child}`,
+									}),
+								},
+							]),
+						);
+
+						sandbox.expectKinesisEvents(
+							['UPDATE', mainCode, 'MainType', ['children']],
+							[
+								'UPDATE',
+								`${childCode}-2`,
+								'ChildType',
+								['parents'],
+							],
+						);
+						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+					});
 					it.skip('not replace existing relationship in opposite direction', async () => {
 						// schema doesn't support any one-to-one relationships in both directions, so not possible to test this yet,
 					});

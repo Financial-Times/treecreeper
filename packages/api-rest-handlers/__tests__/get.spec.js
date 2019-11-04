@@ -67,4 +67,39 @@ describe('rest GET', () => {
 		dbUnavailable();
 		await expect(getHandler()(input)).rejects.toThrow('oh no');
 	});
+
+	describe('rich relationship information', () => {
+		it('gets record with rich relationship information if richRelationships query is true', async () => {
+			const [main, childOne, childTwo, parent] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', `${namespace}-child-1`],
+				['ChildType', `${namespace}-child-2`],
+				['ParentType', `${namespace}-parent`],
+			);
+			await connectNodes(
+				[main, 'HAS_CHILD', childOne],
+				[main, 'HAS_CHILD', childTwo],
+				[parent, 'IS_PARENT_OF', main],
+			);
+
+			const { body, status } = await getHandler()(
+				Object.assign({ query: { richRelationships: true } }, input),
+			);
+
+			expect(status).toBe(200);
+			[...body.children, ...body.parents].forEach(relationship =>
+				expect(relationship).toHaveProperty(
+					'code',
+					'_updatedByClient',
+					'_updatedByRequest',
+					'_updatedTimestamp',
+					'_updatedByUser',
+					'_createdByClient',
+					'_createdByRequest',
+					'_createdTimestamp',
+					'_createdByUser',
+				),
+			);
+		});
+	});
 });

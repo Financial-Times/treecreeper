@@ -2,12 +2,29 @@ const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
 const { getType } = require('../../../../packages/schema-sdk');
 const { metaPropertiesForCreate } = require('../metadata-helpers');
+const { findInversePropertyNames } = require('./properties');
 
-const relationshipFragment = (type, direction) => {
-	const left = direction === 'incoming' ? '<' : '';
-	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[relationship:${type}]-${right}`;
+const relationshipFragment = (
+	type,
+	direction,
+	{ label = 'relationship', reverse = false } = {},
+) => {
+	const [left, right] =
+		reverse === (direction === 'outgoing') ? ['<', ''] : ['', '>'];
+	return `${left}-[${label}:${type}]-${right}`;
 };
+
+const relationshipFragmentWithEndNodes = (
+	head,
+	{ relationship, direction },
+	tail,
+	options,
+) =>
+	`(${head})${relationshipFragment(
+		relationship,
+		direction,
+		options,
+	)}(${tail})`;
 
 const locateRelatedNodes = ({ type }, key, upsert) => {
 	if (upsert) {
@@ -39,7 +56,8 @@ const prepareToWriteRelationships = (
 
 	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
 		const propDef = validProperties[propName];
-		const key = `${propDef.relationship}${propDef.direction}${propDef.type}`;
+		const { type: relatedType, direction, relationship } = propDef;
+		const key = `${relationship}${direction}${relatedType}`;
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
@@ -53,13 +71,41 @@ const prepareToWriteRelationships = (
 			WITH node
 			${locateRelatedNodes(propDef, key, upsert)}
 			WITH node, related
-			MERGE (node)${relationshipFragment(
-				propDef.relationship,
-				propDef.direction,
-			)}(related)
+			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
 		`,
 		);
+
+		if (propDef.hasMany) {
+			const { properties: relatedProperties } = getType(relatedType);
+			const inverseProperties = findInversePropertyNames(
+				nodeType,
+				propName,
+			);
+			if (
+				inverseProperties.some(
+					inverseProperty =>
+						relatedProperties[inverseProperty] &&
+						!relatedProperties[inverseProperty].hasMany,
+				)
+			) {
+				relationshipQueries.push(
+					stripIndents`
+				WITH node, related
+				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
+					'otherNode',
+					propDef,
+					'related',
+					{
+						label: 'conflictingRelationship',
+					},
+				)}
+				WHERE otherNode <> node
+				DELETE conflictingRelationship
+			`,
+				);
+			}
+		}
 	});
 
 	return { relationshipParameters, relationshipQueries };
