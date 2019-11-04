@@ -91,7 +91,6 @@ describe('rest PATCH update', () => {
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
 							someDate: date,
 						});
 				});
@@ -113,14 +112,13 @@ describe('rest PATCH update', () => {
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
 							someDate: date,
 						});
 				});
 				it("doesn't update when effectively the same Date", async () => {
 					const date = '2019-01-09';
 					await createMainNode({
-						someDate: neo4jTemporalTypes.DateTime.fromStandardDate(
+						someDate: neo4jTemporalTypes.Date.fromStandardDate(
 							new Date(date),
 						),
 					});
