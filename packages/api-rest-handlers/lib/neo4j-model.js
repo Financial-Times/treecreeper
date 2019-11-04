@@ -73,12 +73,14 @@ const constructOutput = (nodeType, result, excludeMeta = false) => {
 };
 
 const addBizOpsEnhancements = result => {
-	result.hasRecords = () => result.records && result.records.length;
+	result.hasRecords = () => !!(result.records && result.records.length);
 
 	result.hasRelationships = () =>
-		result.hasRecords() &&
-		result.records[0].has('relatedCode') &&
-		result.records[0].get('relatedCode');
+		!!(
+			result.hasRecords() &&
+			result.records[0].has('relatedCode') &&
+			result.records[0].get('relatedCode')
+		);
 
 	result.toJson = (type, excludeMeta) =>
 		constructOutput(type, result, excludeMeta);

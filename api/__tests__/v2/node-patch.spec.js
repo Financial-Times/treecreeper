@@ -1584,23 +1584,29 @@ describe('v2 - node PATCH', () => {
 							sandbox.withMeta({
 								code: mainCode,
 							}),
-							...[1, 2].map(child => [
-								{
+
+								[{
 									type: 'HAS_CHILD',
 									direction: 'outgoing',
-									props: sandbox[
-										child === 1
-											? 'withMeta'
-											: 'withCreateMeta'
-									]({}),
+									props: sandbox.withMeta({}),
 								},
 								{
 									type: 'ChildType',
 									props: sandbox.withMeta({
-										code: `${childCode}-${child}`,
+										code: `${childCode}-1`,
 									}),
+								}],[{
+									type: 'HAS_CHILD',
+									direction: 'outgoing',
+									props: sandbox.withCreateMeta({}),
 								},
-							]),
+								{
+									type: 'ChildType',
+									props: sandbox.withMeta({
+										code: `${childCode}-2`,
+									}),
+								}]
+
 						);
 
 						sandbox.expectKinesisEvents(
@@ -1609,7 +1615,7 @@ describe('v2 - node PATCH', () => {
 								'UPDATE',
 								`${childCode}-2`,
 								'ChildType',
-								['parents'],
+								['isChildOf'],
 							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');

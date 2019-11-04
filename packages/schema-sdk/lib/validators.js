@@ -1,4 +1,5 @@
 const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
+const { stripIndents } = require('common-tags');
 const primitiveTypesMap = require('./primitive-types-map');
 
 const toArray = value => (Array.isArray(value) ? value : [value]);
@@ -15,8 +16,7 @@ const throwInvalidValueError = (
 ) => reason => {
 	const propName = aliasPropertyName || propertyName;
 	throw new BizOpsError(
-		`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`.
-				${reason}`,
+		stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
 	);
 };
 

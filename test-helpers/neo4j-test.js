@@ -74,6 +74,21 @@ const neo4jTest = (type, code) => {
 				const record = records.find(testRecord => {
 					const relatedNode = testRecord.get('relatedNode');
 					const rel = testRecord.get('rel');
+					console.log(
+						{ relType, direction, relatedType },
+						{
+							typeMatch: rel.type === relType,
+							lableMatch: relatedNode.labels[0] === relatedType,
+							codeMatch:
+								relatedNode.properties.code ===
+								relatedNodeProps.code,
+							// need either both things indicate outgoing, or both incoming
+							// i.e. both true or both false
+							directionMatch:
+								(direction === 'outgoing') ===
+								(rel.end === relatedNode.identity),
+						},
+					);
 					return (
 						rel.type === relType &&
 						relatedNode.labels[0] === relatedType &&

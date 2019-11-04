@@ -15,7 +15,7 @@ const {
 	prepareRelationshipDeletion,
 } = require('./relationships/write');
 const { setLockedFields, mergeLockedFields } = require('./locked-fields');
-const { getNeo4jRecordCypherQuery } = require('./read-helpers');
+const { getNeo4jRecordCypherQuery, getNeo4jRecord } = require('./read-helpers');
 const { executeQuery } = require('./neo4j-model');
 const { diffProperties } = require('./diff-properties');
 
@@ -178,7 +178,17 @@ const queryBuilder = (method, input, body = {}) => {
 	const execute = async () => {
 		queryParts.push(getNeo4jRecordCypherQuery());
 		const neo4jQuery = queryParts.join('\n');
-		return executeQuery(neo4jQuery, parameters);
+
+		let neo4jResult = await executeQuery(neo4jQuery, parameters);
+		console.log(neo4jQuery, neo4jResult.hasRelationships());
+		// In _theory_ we could return the above all the time (it works most of the
+		// time) but behaviour when deleting relationships is weird, and difficult
+		// to obtain consistent results, so for safety we do a fresh get when
+		// deletes are involved.
+		if (context.willDeleteRelationships) {
+			neo4jResult = await getNeo4jRecord(type, code);
+		}
+		return neo4jResult;
 	};
 
 	const isNeo4jUpdateNeeded = () => {
