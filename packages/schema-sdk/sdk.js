@@ -52,6 +52,9 @@ class SDK {
 	}
 
 	async ready() {
+		if (!this.updater) {
+			this.init();
+		}
 		return this.updater.ready();
 	}
 
