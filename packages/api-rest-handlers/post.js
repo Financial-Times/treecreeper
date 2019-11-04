@@ -5,6 +5,7 @@ const { getType } = require('../schema-sdk');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { logChanges } = require('../api-publish');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const { type, code, body: originalBody, metadata = {} } = validateInput(
@@ -33,11 +34,20 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		: {};
 
 	try {
-		const neo4jResult = await queryBuilder('CREATE', input, body)
+		const { neo4jResult, queryContext } = await queryBuilder(
+			'CREATE',
+			input,
+			body,
+		)
 			.constructProperties()
 			.createRelationships()
 			.setLockFields(documents)
 			.execute();
+
+		const relationships = {
+			added: queryContext.addedRelationships || {},
+		};
+		logChanges('CREATE', neo4jResult, { relationships });
 
 		const responseData = Object.assign(
 			neo4jResult.toJson({ type }),

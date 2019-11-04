@@ -7,7 +7,7 @@ const getNeo4jRecordCypherQuery = ({
 } = {}) => stripIndents`
 	${includeWithStatement ? `WITH ${nodeName}` : ''}
 	OPTIONAL MATCH (${nodeName})-[relationship]-(related)
-	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest AS relatedRequestId`;
+	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest`;
 
 const getNeo4jRecord = (type, code, richRelationshipsFlag) => {
 	return executeQuery(

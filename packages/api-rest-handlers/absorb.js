@@ -7,6 +7,7 @@ const { getType } = require('../schema-sdk');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { getRemovedRelationships } = require('./lib/relationships/input');
+const { logChanges } = require('../api-publish');
 
 const fetchNode = async (nodeType, code, paramName = 'code') => {
 	const query = `MATCH (node:${nodeType} { code: $${paramName} })
@@ -173,6 +174,13 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	try {
 		// Merge Neo4j relationships
 		result = await mergeRelationships(nodeType, absorbedCode, code);
+
+		logChanges('UPDATE', result, {
+			relationships: {
+				removed: removedRelationships,
+			},
+		});
+		logChanges('DELETE', absorbedNode);
 	} catch (err) {
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },
