@@ -1,3 +1,4 @@
+const httpErrors = require('http-errors');
 const { logger } = require('../lib/request-context');
 
 if (!process.env.API_KEY) {
@@ -24,10 +25,7 @@ const hasApiKey = req => {
 
 const requireApiKey = (req, res, next) => {
 	if (!hasApiKey(req)) {
-		return res
-			.status(401)
-			.send('Missing or invalid api-key header')
-			.end();
+		throw httpErrors(401, 'Missing or invalid api-key header');
 	}
 	return next();
 };

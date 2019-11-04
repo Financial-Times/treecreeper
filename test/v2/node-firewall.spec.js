@@ -21,19 +21,22 @@ describe('v2 - node generic', () => {
 					.expect(405);
 			});
 		});
+
+		describe('GET', () => {
+			it('405 Method Not Allowed', () => {
+				return sandbox
+					.request(app)
+					.get(teamRestUrl)
+					.namespacedAuth()
+					.expect(405);
+			});
+		});
 	});
 	describe('api key auth', () => {
 		it('HEAD no api_key returns 401', async () => {
 			return sandbox
 				.request(app)
 				.head(teamRestUrl)
-				.set('client-id', 'test-client-id')
-				.expect(401);
-		});
-		it('GET no api_key returns 401', async () => {
-			return sandbox
-				.request(app)
-				.get(teamRestUrl)
 				.set('client-id', 'test-client-id')
 				.expect(401);
 		});
@@ -76,14 +79,6 @@ describe('v2 - node generic', () => {
 					.expect(400);
 			});
 
-			it('GET no client-id or client-user-id returns 400', async () => {
-				return sandbox
-					.request(app)
-					.get(teamRestUrl)
-					.set('API_KEY', API_KEY)
-					.expect(400);
-			});
-
 			it('POST no client-id or client-user-id returns 400', async () => {
 				await sandbox
 					.request(app)
@@ -121,18 +116,6 @@ describe('v2 - node generic', () => {
 				return sandbox
 					.request(app)
 					.head(teamRestUrl)
-					.set('API_KEY', API_KEY)
-					.set('client-id', 'test-client-id')
-					.expect(200);
-			});
-			it('GET client-id but no client-user-id returns 200', async () => {
-				await sandbox.createNode('Team', {
-					code: `${namespace}-team`,
-					name: 'name1',
-				});
-				return sandbox
-					.request(app)
-					.get(teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-id', 'test-client-id')
 					.expect(200);
@@ -182,19 +165,6 @@ describe('v2 - node generic', () => {
 				return sandbox
 					.request(app)
 					.head(teamRestUrl)
-					.set('API_KEY', API_KEY)
-					.set('client-user-id', 'test-user-id')
-					.expect(200);
-			});
-
-			it('GET client-user-id but no client-id returns 200', async () => {
-				await sandbox.createNode('Team', {
-					code: `${namespace}-team`,
-					name: 'name1',
-				});
-				return sandbox
-					.request(app)
-					.get(teamRestUrl)
 					.set('API_KEY', API_KEY)
 					.set('client-user-id', 'test-user-id')
 					.expect(200);
@@ -250,20 +220,6 @@ describe('v2 - node generic', () => {
 					.expect(200);
 			});
 
-			it('GET client-id and client-user-id returns 200', async () => {
-				await sandbox.createNode('Team', {
-					code: `${namespace}-team`,
-					name: 'name1',
-				});
-				return sandbox
-					.request(app)
-					.get(teamRestUrl)
-					.set('API_KEY', API_KEY)
-					.set('client-id', 'test-client-id')
-					.set('client-user-id', 'test-user-id')
-					.expect(200);
-			});
-
 			it('POST client-id and client-user-id returns 200', async () => {
 				return sandbox
 					.request(app)
@@ -308,7 +264,6 @@ describe('v2 - node generic', () => {
 	[
 		['post', true],
 		['patch', true],
-		['get', false],
 		['head', false],
 		['delete', false],
 	].forEach(([method, checkBody]) => {
