@@ -5,11 +5,13 @@ const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
-describe.skip('rest PATCH update', () => {
+describe('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
 	const mainCode = `${namespace}-main`;
 
-	const { createNode, meta, getMetaPayload } = setupMocks(namespace);
+	const { createNode, createNodes, meta, getMetaPayload } = setupMocks(
+		namespace,
+	);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
@@ -24,7 +26,7 @@ describe.skip('rest PATCH update', () => {
 	const createMainNode = (props = {}) =>
 		createNode('MainType', Object.assign({ code: mainCode }, props));
 
-	describe('updating disconnected records', () => {
+	describe.skip('updating disconnected records', () => {
 		it('updates record with properties', async () => {
 			await createMainNode({
 				someString: 'some string',
@@ -311,11 +313,47 @@ describe.skip('rest PATCH update', () => {
 		});
 	});
 
-	describe('generic error states', () => {
+	describe.skip('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
 			await expect(basicHandler()).rejects.toThrow('oh no');
+		});
+	});
+
+	describe('rich relationship information', () => {
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const childCode = `${namespace}-child`;
+			const parentCode = `${namespace}-parent`;
+			await createMainNode();
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+
+			const { body, status } = await basicHandler(
+				{ children: childCode, parents: parentCode },
+				{
+					upsert: true,
+					relationshipAction: 'merge',
+					richRelationships: true,
+				},
+			);
+
+			expect(status).toBe(200);
+			[...body.children, ...body.parents].forEach(relationship =>
+				expect(relationship).toHaveProperty(
+					'code',
+					'_updatedByClient',
+					'_updatedByRequest',
+					'_updatedTimestamp',
+					'_updatedByUser',
+					'_createdByClient',
+					'_createdByRequest',
+					'_createdTimestamp',
+					'_createdByUser',
+				),
+			);
 		});
 	});
 });
