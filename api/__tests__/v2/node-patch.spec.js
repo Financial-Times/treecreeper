@@ -1585,7 +1585,8 @@ describe('v2 - node PATCH', () => {
 								code: mainCode,
 							}),
 
-								[{
+							[
+								{
 									type: 'HAS_CHILD',
 									direction: 'outgoing',
 									props: sandbox.withMeta({}),
@@ -1595,7 +1596,10 @@ describe('v2 - node PATCH', () => {
 									props: sandbox.withMeta({
 										code: `${childCode}-1`,
 									}),
-								}],[{
+								},
+							],
+							[
+								{
 									type: 'HAS_CHILD',
 									direction: 'outgoing',
 									props: sandbox.withCreateMeta({}),
@@ -1605,8 +1609,8 @@ describe('v2 - node PATCH', () => {
 									props: sandbox.withMeta({
 										code: `${childCode}-2`,
 									}),
-								}]
-
+								},
+							],
 						);
 
 						sandbox.expectKinesisEvents(

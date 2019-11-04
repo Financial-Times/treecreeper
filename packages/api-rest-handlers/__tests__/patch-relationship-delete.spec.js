@@ -168,7 +168,6 @@ describe('rest PATCH relationship delete', () => {
 						'!children': [childCode1, childCode3],
 					});
 					expect(status).toBe(200);
-					console.log(body);
 					expect(body).toMatchObject({
 						children: [childCode2],
 					});

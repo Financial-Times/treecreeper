@@ -18,6 +18,7 @@ const bizOpsRecord = record => {
 	return {
 		get: (...args) => record.get(...args),
 		has: (...args) => record.has(...args),
+		richRelationship: ifRelationship(() => record.get('relationship')),
 		relationship: ifRelationship(() => record.get('relationship').type),
 		inverseDirection: ifRelationship(() =>
 			invertDirection(getDirection(record, node)),
@@ -28,7 +29,12 @@ const bizOpsRecord = record => {
 	};
 };
 
-const constructOutput = (nodeType, result, excludeMeta = false) => {
+const constructOutput = ({
+	type: nodeType,
+	result,
+	excludeMeta = false,
+	richRelationshipsFlag = false,
+}) => {
 	if (!result.hasRecords()) {
 		return;
 	}
@@ -61,7 +67,14 @@ const constructOutput = (nodeType, result, excludeMeta = false) => {
 								relationship === record.relationship() &&
 								propertyType === record.relatedType(),
 						)
-						.map(record => record.relatedCode());
+						.map(record =>
+							richRelationshipsFlag
+								? {
+										...record.richRelationship().properties,
+										code: record.relatedCode(),
+								  }
+								: record.relatedCode(),
+						);
 
 					if (codes.length) {
 						response[propName] = hasMany ? codes : codes[0];
@@ -82,8 +95,13 @@ const addBizOpsEnhancements = result => {
 			result.records[0].get('relatedCode')
 		);
 
-	result.toJson = (type, excludeMeta) =>
-		constructOutput(type, result, excludeMeta);
+	result.toJson = ({ type, richRelationshipsFlag, excludeMeta }) =>
+		constructOutput({
+			type,
+			result,
+			excludeMeta,
+			richRelationshipsFlag,
+		});
 
 	result.getNode = () =>
 		result.records &&

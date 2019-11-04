@@ -10,6 +10,7 @@ const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { logChanges } = require('../api-publish');
 
 const patchHandler = ({ documentStore } = {}) => {
 	const post = postHandler({ documentStore });
@@ -32,7 +33,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
-		const initialContent = preflightRequest.toJson(type);
+		const initialContent = preflightRequest.toJson({ type });
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)
@@ -54,8 +55,13 @@ const patchHandler = ({ documentStore } = {}) => {
 
 			let neo4jResultBody;
 			if (builder.isNeo4jUpdateNeeded()) {
-				const neo4jResult = await builder.execute();
-				neo4jResultBody = neo4jResult.toJson(type);
+				const { neo4jResult, queryContext } = await builder.execute();
+				neo4jResultBody = neo4jResult.toJson({ type });
+				const relationships = {
+					added: queryContext.addedRelationships,
+					removed: queryContext.removedRelationships,
+				};
+				logChanges('UPDATE', neo4jResult, { relationships });
 			} else {
 				neo4jResultBody = initialContent;
 			}

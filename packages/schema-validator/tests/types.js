@@ -15,6 +15,7 @@ const { getStringValidator } = sdk;
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 
 const primitiveTypesMap = require('../../../packages/schema-sdk/lib/primitive-types-map');
+
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
 
 const getTwinnedRelationship = (

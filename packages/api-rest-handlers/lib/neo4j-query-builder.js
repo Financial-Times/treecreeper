@@ -55,8 +55,8 @@ const queryBuilder = (method, input, body = {}) => {
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
 
-	// context is used for keep boolean flags to update record
-	const context = {};
+	// context is used for stacking data to update record
+	const context = { upsert };
 
 	const queryParts = [getBaseQuery(type, method)];
 	let parameters = {
@@ -97,6 +97,7 @@ const queryBuilder = (method, input, body = {}) => {
 		} = prepareToWriteRelationships(type, relationships, upsert);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
+		context.addedRelationships = relationships;
 		return builder;
 	};
 
@@ -117,6 +118,7 @@ const queryBuilder = (method, input, body = {}) => {
 		}
 		context.willDeleteRelationships = !!Object.keys(removedRelationships)
 			.length;
+		context.removedRelationships = removedRelationships;
 		return builder;
 	};
 
@@ -135,6 +137,7 @@ const queryBuilder = (method, input, body = {}) => {
 			updateParameter(addRelationshipParams);
 		}
 		context.willAddRelationships = !!Object.keys(addedRelationships).length;
+		context.addedRelationships = addedRelationships;
 		return builder;
 	};
 
@@ -178,9 +181,7 @@ const queryBuilder = (method, input, body = {}) => {
 	const execute = async () => {
 		queryParts.push(getNeo4jRecordCypherQuery());
 		const neo4jQuery = queryParts.join('\n');
-
 		let neo4jResult = await executeQuery(neo4jQuery, parameters);
-		console.log(neo4jQuery, neo4jResult.hasRelationships());
 		// In _theory_ we could return the above all the time (it works most of the
 		// time) but behaviour when deleting relationships is weird, and difficult
 		// to obtain consistent results, so for safety we do a fresh get when
@@ -188,7 +189,10 @@ const queryBuilder = (method, input, body = {}) => {
 		if (context.willDeleteRelationships) {
 			neo4jResult = await getNeo4jRecord(type, code);
 		}
-		return neo4jResult;
+		return {
+			neo4jResult,
+			queryContext: context,
+		};
 	};
 
 	const isNeo4jUpdateNeeded = () => {

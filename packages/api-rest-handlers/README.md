@@ -107,6 +107,7 @@ The `metadata` object is typically constructed from information sent to the appl
 | relationshipAction | patch             | missing            | If the body defines any relationships, a 400 error will be thrown                                                                                                       |
 |                    |                   | `merge`            | Existing relationships will be kept, and ones defined in the body will also be created                                                                                  |
 |                    |                   | `replace`          | Existing relationships will be replaced by those specified in the body                                                                                                  |
+| richRelationship   | get               | `true`             | If the body has any relationships, it provides more information about the relationships than just their `code`                                                          |
 
 #### Field locking
 
