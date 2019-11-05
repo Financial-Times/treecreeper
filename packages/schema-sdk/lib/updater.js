@@ -26,7 +26,6 @@ class SchemaUpdater {
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
-		console.log({ schemaDirectory });
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
