@@ -26,7 +26,7 @@ describe('rest PATCH update', () => {
 	const createMainNode = (props = {}) =>
 		createNode('MainType', Object.assign({ code: mainCode }, props));
 
-	describe.skip('updating disconnected records', () => {
+	describe('updating disconnected records', () => {
 		it('updates record with properties', async () => {
 			await createMainNode({
 				someString: 'some string',
@@ -364,7 +364,7 @@ describe('rest PATCH update', () => {
 		});
 	});
 
-	describe.skip('generic error states', () => {
+	describe('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
