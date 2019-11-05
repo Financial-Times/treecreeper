@@ -1,3 +1,4 @@
+const httpErrors = require('http-errors');
 const express = require('express');
 const { logger, setContext } = require('./request-context');
 const {
@@ -22,46 +23,45 @@ const requestLog = (endpointName, method, req) => {
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
-// const unimplemented = (endpointName, method, alternativeMethod) => req => {
-// 	requestLog(endpointName, method, req);
-// 	throw httpErrors(
-// 		405,
-// 		`${method} is unimplemented. Use ${alternativeMethod}`,
-// 	);
-// };
-
-const createController = allowedMethods => (method, handler) => {
-	return (req, res, next) => {
-		if (!allowedMethods.includes(method)) {
-			res.status(405).json({
-				message: 'Method not allowed',
-			});
-			return;
+const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
+	let appMethod = req.method.toUpperCase();
+	if (appMethod === 'POST') {
+		const { type, code } = req.params;
+		// the ABOSRB method doesn't exist in HTTP verb actually, so we can determine from accessing url
+		if (req.url.indexOf(`/${type}/${code}/absorb`) === 0) {
+			appMethod = 'ABSORB';
 		}
-		requestLog('rest', method, req);
-		handler(
-			Object.assign(
-				{
-					// TODO completely remove use of res.locals now we have getContext()
-					metadata: {
-						requestId: res.locals.requestId,
-						// Defaults to null rather than undefined because, when writing to
-						// neo4j, it avoids a 'missing parameter' error and it unsets any
-						// previous values when updating.
-						clientId: res.locals.clientId || null,
-						clientUserId: res.locals.clientUserId || null,
-					},
-					body: req.body,
-					query: req.query || {},
+	}
+	if (!allowedRestMethods.includes(appMethod)) {
+		throw httpErrors(405, `${appMethod} is unimplemented`);
+	}
+	next();
+};
+
+const controller = (method, handler) => (req, res, next) => {
+	requestLog('rest', method, req);
+	handler(
+		Object.assign(
+			{
+				// TODO completely remove use of res.locals now we have getContext()
+				metadata: {
+					requestId: res.locals.requestId,
+					// Defaults to null rather than undefined because, when writing to
+					// neo4j, it avoids a 'missing parameter' error and it unsets any
+					// previous values when updating.
+					clientId: res.locals.clientId || null,
+					clientUserId: res.locals.clientUserId || null,
 				},
-				req.params,
-			),
+				body: req.body,
+				query: req.query || {},
+			},
+			req.params,
+		),
+	)
+		.then(({ status, body }) =>
+			body ? res.status(status).json(body) : res.status(status).end(),
 		)
-			.then(({ status, body }) =>
-				body ? res.status(status).json(body) : res.status(status).end(),
-			)
-			.catch(next);
-	};
+		.catch(next);
 };
 
 const getRestApi = (config = {}) => {
@@ -74,13 +74,11 @@ const getRestApi = (config = {}) => {
 	const {
 		restMethods = ['HEAD', 'GET', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
 	} = config;
-
-	// accept lowercase method names by converting to uppercase
 	const allowedMethods = restMethods.map(method => method.toUpperCase());
-	const controller = createController(allowedMethods);
 
 	router
 		.route('/:type/:code')
+		.all(allowedMethodsMiddleware(allowedMethods))
 		.head(controller('HEAD', headHandler(config)))
 		.get(controller('GET', getHandler(config)))
 		.post(controller('POST', postHandler(config)))
@@ -90,6 +88,7 @@ const getRestApi = (config = {}) => {
 
 	router.post(
 		'/:type/:code/absorb/:codeToAbsorb',
+		allowedMethodsMiddleware(allowedMethods),
 		controller('ABSORB', absorbHandler(config)),
 	);
 

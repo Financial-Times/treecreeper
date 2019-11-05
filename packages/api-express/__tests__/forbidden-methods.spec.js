@@ -30,7 +30,13 @@ describe('api-express disallows methods', () => {
 				.set('client-user-id', 'test-user-id')
 				.set('request-id', 'test-request-id')
 				.expect(
-					...expectMessage(405, { message: 'Method not allowed' }),
+					...expectMessage(405, {
+						errors: [
+							{
+								message: `${method.toUpperCase()} is unimplemented`,
+							},
+						],
+					}),
 				);
 		});
 	});
