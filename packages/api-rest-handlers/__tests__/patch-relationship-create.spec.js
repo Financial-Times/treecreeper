@@ -637,4 +637,34 @@ describe('rest PATCH relationship create', () => {
 			});
 		});
 	});
+
+	describe('rich relationship information', () => {
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const parentCode = `${namespace}-parent`;
+			await createMainNode();
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+
+			const { body, status } = await basicHandler(
+				{ children: childCode, parents: parentCode },
+				{
+					upsert: true,
+					relationshipAction: 'merge',
+					richRelationships: true,
+				},
+			);
+
+			expect(status).toBe(200);
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: childCode, ...meta.create })
+			);
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: parentCode, ...meta.create })
+			);
+		});
+	});
+
 });
