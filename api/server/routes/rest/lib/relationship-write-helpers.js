@@ -55,8 +55,8 @@ const prepareToWriteRelationships = (
 
 	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
 		const propDef = validProperties[propName];
-
-		const key = `${propDef.relationship}${propDef.direction}${propDef.type}`;
+		const { type: relatedType, direction, relationship } = propDef;
+		const key = `${relationship}${direction}${relatedType}`;
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver

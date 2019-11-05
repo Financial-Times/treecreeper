@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const validURL = require('valid-url');
-const { readYaml } = require('../../../packages/schema-updater');
+const readYaml = require('../../../packages/schema-sdk/lib/read-yaml');
 
 const { SDK } = require('../../../packages/schema-sdk');
 
@@ -14,7 +14,7 @@ const enums = sdk.rawData.getEnums();
 const { getStringValidator } = sdk;
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 
-const primitiveTypesMap = require('../../../packages/schema-sdk/primitive-types-map');
+const primitiveTypesMap = require('../../../packages/schema-sdk/lib/primitive-types-map');
 
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
 

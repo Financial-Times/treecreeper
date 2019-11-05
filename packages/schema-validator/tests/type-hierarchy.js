@@ -1,5 +1,5 @@
 /* global it, describe, expect */
-const { readYaml } = require('../../../packages/schema-updater');
+const readYaml = require('../../../packages/schema-sdk/lib/read-yaml');
 const { SDK } = require('../../schema-sdk');
 
 const { rawData } = new SDK();

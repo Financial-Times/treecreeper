@@ -76,6 +76,7 @@ module.exports = Object.assign(
 );
 
 if (process.argv[1] === __filename) {
+	schema.init();
 	initConstraints()
 		.then(() => {
 			logger.info('Completed init');

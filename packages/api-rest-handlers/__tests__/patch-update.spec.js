@@ -62,7 +62,7 @@ describe('rest PATCH update', () => {
 		it('updates metadata', async () => {
 			await createMainNode();
 			const { status, body } = await basicHandler(
-				undefined,
+				{ someString: 'updated string' },
 				undefined,
 				getMetaPayload(),
 			);
@@ -82,7 +82,7 @@ describe('rest PATCH update', () => {
 					await createMainNode();
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISOstring(),
+						someDate: new Date(date).toISOString(),
 					});
 
 					expect(status).toBe(200);
@@ -93,7 +93,6 @@ describe('rest PATCH update', () => {
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
 							someDate: date,
 						});
 				});
@@ -105,22 +104,40 @@ describe('rest PATCH update', () => {
 					});
 					const date = '2019-01-09';
 					const { status, body } = await basicHandler({
-						someDate: new Date(date).toISOstring(),
+						someDate: new Date(date).toISOString(),
 					});
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						code: mainCode,
 						someDate: date,
 					});
 					await neo4jTest('MainType', mainCode)
 						.exists()
 						.match({
-							code: mainCode,
 							someDate: date,
 						});
 				});
-				it.skip("doesn't update when effectively the same Date", async () => {});
+				it("doesn't update when effectively the same Date", async () => {
+					const date = '2019-01-09';
+					await createMainNode({
+						someDate: neo4jTemporalTypes.Date.fromStandardDate(
+							new Date(date),
+						),
+					});
+					const dbQuerySpy = spyDbQuery();
+					const { status, body } = await basicHandler({
+						someDate: new Date(date).toISOString(),
+					});
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						someDate: date,
+					});
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
 			});
 
 			describe('Time', () => {
@@ -169,7 +186,7 @@ describe('rest PATCH update', () => {
 				});
 
 				it("doesn't update when effectively the same Time", async () => {
-					const time = '12:34:56.789Z';
+					const time = '12:34:56.789';
 					await createMainNode({
 						someTime: neo4jTemporalTypes.Time.fromStandardDate(
 							new Date(`2018-01-09T${time}`),
@@ -177,7 +194,7 @@ describe('rest PATCH update', () => {
 					});
 					const dbQuerySpy = spyDbQuery();
 					const { status } = await basicHandler({
-						someTime: time,
+						someTime: `${time}0000000`,
 					});
 
 					expect(status).toBe(200);
@@ -208,8 +225,8 @@ describe('rest PATCH update', () => {
 				});
 				it('updates existing Datetime', async () => {
 					await createMainNode({
-						someDatetime: neo4jTemporalTypes.Time.fromStandardDate(
-							new Date('2018-01-09'),
+						someDatetime: neo4jTemporalTypes.DateTime.fromStandardDate(
+							new Date('2018-01-09T00:00:00.001Z'),
 						),
 					});
 					const datetime = '2019-01-09T00:00:00.001Z';
@@ -227,7 +244,26 @@ describe('rest PATCH update', () => {
 							someDatetime: neo4jTimePrecision(datetime),
 						});
 				});
-				it.skip("doesn't update when effectively the same Datetime", async () => {});
+				it("doesn't update when effectively the same Datetime", async () => {
+					const datetime = '2019-01-09T00:00:00.001Z';
+					await createMainNode({
+						someDatetime: neo4jTemporalTypes.DateTime.fromStandardDate(
+							new Date('2019-01-09T00:00:00.001Z'),
+						),
+					});
+					const dbQuerySpy = spyDbQuery();
+					const { status, body } = await basicHandler({
+						someDatetime: datetime.replace('Z', '000Z'),
+					});
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						someDatetime: neo4jTimePrecision(datetime),
+					});
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
 			});
 		});
 
@@ -270,25 +306,39 @@ describe('rest PATCH update', () => {
 		});
 		it('no clientId, deletes the _updatedByClient property', async () => {
 			await createMainNode();
-			const { body } = await basicHandler(undefined, undefined, {
-				clientUserId: 'still-here',
-			});
+			const { body } = await basicHandler(
+				{ someString: 'some string' },
+				undefined,
+				{
+					clientUserId: 'still-here',
+				},
+			);
 			expect(body).toMatchObject({
 				_updatedByUser: 'still-here',
 			});
 			expect(body).not.toMatchObject({
 				_updatedByClient: expect.any(String),
 			});
+			await neo4jTest('MainType', mainCode).notMatch({
+				_updatedByClient: expect.any(String),
+			});
 		});
 		it('no clientUserId, deletes the _updatedByUser property', async () => {
 			await createMainNode();
-			const { body } = await basicHandler(undefined, undefined, {
-				clientId: 'still-here',
-			});
+			const { body } = await basicHandler(
+				{ someString: 'some string' },
+				undefined,
+				{
+					clientId: 'still-here',
+				},
+			);
 			expect(body).toMatchObject({
 				_updatedByClient: 'still-here',
 			});
 			expect(body).not.toMatchObject({
+				_updatedByUser: expect.any(String),
+			});
+			await neo4jTest('MainType', mainCode).notMatch({
 				_updatedByUser: expect.any(String),
 			});
 		});
@@ -298,7 +348,6 @@ describe('rest PATCH update', () => {
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
-			await neo4jTest('MainType', mainCode).notExists();
 		});
 
 		it('throws 400 if attempting to write property not in schema', async () => {
@@ -309,7 +358,9 @@ describe('rest PATCH update', () => {
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('MainType', mainCode).notMatch({
+				notInSchema: 'a string',
+			});
 		});
 	});
 
@@ -317,7 +368,9 @@ describe('rest PATCH update', () => {
 		it('throws if neo4j query fails', async () => {
 			await createMainNode();
 			dbUnavailable({ skip: 1 });
-			await expect(basicHandler()).rejects.toThrow('oh no');
+			await expect(
+				basicHandler({ someString: 'a string' }),
+			).rejects.toThrow('oh no');
 		});
 	});
 
