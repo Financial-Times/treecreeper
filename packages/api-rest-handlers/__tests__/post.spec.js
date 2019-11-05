@@ -321,7 +321,7 @@ describe('rest POST', () => {
 		});
 	});
 
-	describe.skip('field locking', () => {
+	describe('field locking', () => {
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
@@ -333,16 +333,16 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -358,18 +358,18 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
 				anotherString: 'another string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
 					anotherString: 'another string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -382,16 +382,16 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -401,10 +401,14 @@ describe('rest POST', () => {
 					{ someString: 'some string' },
 					{ lockFields: 'all' },
 				),
-			).rejects.toThrow({
-				status: 400,
-				message: /clientId needs to be set to a valid system code in order to lock fields/,
-			});
+			).rejects.toThrow(
+				expect.objectContaining({
+					status: 400,
+					message: expect.stringMatching(
+						/clientId needs to be set to a valid system code in order to lock fields/,
+					),
+				}),
+			);
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 	});
