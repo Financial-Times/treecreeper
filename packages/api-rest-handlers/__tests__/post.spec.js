@@ -301,18 +301,13 @@ describe('rest POST', () => {
 			);
 
 			expect(status).toBe(200);
-			[...body.children, ...body.parents].forEach(relationship =>
-				expect(relationship).toHaveProperty(
-					'code',
-					'_updatedByClient',
-					'_updatedByRequest',
-					'_updatedTimestamp',
-					'_updatedByUser',
-					'_createdByClient',
-					'_createdByRequest',
-					'_createdTimestamp',
-					'_createdByUser',
-				),
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: childCode, ...meta.create }),
+			);
+
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: parentCode, ...meta.create }),
 			);
 		});
 	});
