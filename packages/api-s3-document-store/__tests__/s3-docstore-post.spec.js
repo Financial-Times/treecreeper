@@ -9,8 +9,10 @@ const {
 	s3DeleteObjectResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const { getLogger } = require('../../api-express-logger');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
+const logger = getLogger();
 
 const mockS3Post = versionMarker => {
 	// s3Post depends on upload module so we create stub for upload module
@@ -56,7 +58,7 @@ describe('S3 document helper post', () => {
 		const { stubUpload, stubDeleteOnUndo, s3Instance } = mockS3Post(
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const exampleData = createExampleBodyData();
 
 		const result = await store.post(
@@ -77,6 +79,7 @@ describe('S3 document helper post', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'POST',
+			logger,
 		});
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,

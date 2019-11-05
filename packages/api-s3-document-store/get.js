@@ -1,10 +1,12 @@
+const { getLogger } = require('../api-express-logger');
+
 const s3Get = async ({
 	s3Instance,
 	bucketName,
 	nodeType,
 	code,
 	versionMarker,
-	logger,
+	logger = getLogger(),
 }) => {
 	const params = {
 		Bucket: bucketName,
@@ -48,17 +50,22 @@ const s3Get = async ({
 	}
 };
 
-const composeS3Get = ({ s3Instance, bucketName, logger }) => ({
-	get: async (nodeType, code, versionMarker) =>
-		s3Get({
-			s3Instance,
-			bucketName,
-			nodeType,
-			code,
-			versionMarker,
-			logger,
-		}),
-});
+const composeS3Get = (composeOptions = {}) => {
+	const { s3Instance, bucketName, logger } = composeOptions;
+
+	return {
+		...composeOptions,
+		get: async (nodeType, code, versionMarker) =>
+			s3Get({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				versionMarker,
+				logger,
+			}),
+	};
+};
 
 module.exports = {
 	s3Get,

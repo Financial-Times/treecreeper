@@ -6,9 +6,11 @@ const { undo } = require('../undo');
 const {
 	s3DeleteObjectResponseFixture,
 } = require('../__fixtures__/s3-object-fixture');
+const { getLogger } = require('../../api-express-logger');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 const consistentNodeType = 'System';
+const logger = getLogger();
 
 const mockUndo = (systemCode, versionMarker) => {
 	let deletePromise = jest.fn();
@@ -41,6 +43,7 @@ const mockUndo = (systemCode, versionMarker) => {
 		nodeType: consistentNodeType,
 		code: systemCode,
 		versionMarker,
+		logger,
 	};
 
 	return {

@@ -1,6 +1,7 @@
 const KinesisAdaptor = require('./lib/kinesis-adaptor');
 const ConsoleAdaptor = require('./lib/console-adaptor');
 const DiscardAdaptor = require('./lib/discard-adaptor');
+const Adaptor = require('./lib/adaptor');
 
 const { TREECREEPER_KINESIS_STREAM_NAME = 'kinesis-stream' } = process.env;
 
@@ -23,4 +24,5 @@ module.exports = {
 	ConsoleAdaptor,
 	DiscardAdaptor,
 	composeAdaptor,
+	Adaptor,
 };

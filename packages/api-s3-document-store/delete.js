@@ -1,4 +1,5 @@
 const { undo } = require('./undo');
+const { getLogger } = require('../api-express-logger');
 
 const s3Delete = async ({
 	s3Instance,
@@ -6,7 +7,7 @@ const s3Delete = async ({
 	nodeType,
 	code,
 	versionMarker,
-	logger,
+	logger = getLogger(),
 }) => {
 	const params = {
 		Bucket: bucketName,
@@ -34,6 +35,7 @@ const s3Delete = async ({
 				code,
 				versionMarker: response.VersionId,
 				undoType: 'DELETE',
+				logger,
 			}),
 		};
 	} catch (err) {
@@ -48,18 +50,22 @@ const s3Delete = async ({
 	}
 };
 
-const composeS3Delete = ({ s3Instance, bucketName, logger }) => options => ({
-	...options,
-	delete: async (nodeType, code, versionMarker) =>
-		s3Delete({
-			s3Instance,
-			bucketName,
-			nodeType,
-			code,
-			versionMarker,
-			logger,
-		}),
-});
+const composeS3Delete = (composeOptions = {}) => {
+	const { s3Instance, bucketName, logger } = composeOptions;
+
+	return {
+		...composeOptions,
+		delete: async (nodeType, code, versionMarker) =>
+			s3Delete({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				versionMarker,
+				logger,
+			}),
+	};
+};
 
 module.exports = {
 	s3Delete,

@@ -2,6 +2,7 @@ const { diff } = require('deep-diff');
 const { upload } = require('./upload');
 const { undo } = require('./undo');
 const { s3Get } = require('./get');
+const { getLogger } = require('../api-express-logger');
 
 const s3Patch = async ({
 	s3Instance,
@@ -9,7 +10,7 @@ const s3Patch = async ({
 	nodeType,
 	code,
 	body,
-	logger,
+	logger = getLogger(),
 }) => {
 	const { body: existingBody } = await s3Get({
 		s3Instance,
@@ -56,22 +57,27 @@ const s3Patch = async ({
 			code,
 			versionMarker: versionId,
 			undoType: 'PATCH',
+			logger,
 		}),
 	};
 };
 
-const composeS3Patch = ({ s3Instance, bucketName, logger }) => options => ({
-	...options,
-	patch: async (nodeType, code, body) =>
-		s3Patch({
-			s3Instance,
-			bucketName,
-			nodeType,
-			code,
-			body,
-			logger,
-		}),
-});
+const composeS3Patch = (composeOptions = {}) => {
+	const { s3Instance, bucketName, logger } = composeOptions;
+
+	return {
+		...composeOptions,
+		patch: async (nodeType, code, body) =>
+			s3Patch({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				body,
+				logger,
+			}),
+	};
+};
 
 module.exports = {
 	s3Patch,

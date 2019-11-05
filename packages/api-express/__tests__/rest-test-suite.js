@@ -3,6 +3,7 @@ const httpErrors = require('http-errors');
 const request = require('supertest');
 const { setupMocks } = require('../../../test-helpers');
 const { createLogger } = require('../../api-express-logger');
+const { Adaptor } = require('../../api-publish-adaptors');
 
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {
@@ -70,6 +71,7 @@ const testSuite = (method, goodStatus) => {
 				fake: 'config',
 				logger: config.logger,
 				documentStore: undefined,
+				publishAdaptor: expect.any(Adaptor),
 			});
 		});
 
@@ -132,7 +134,7 @@ const testSuite = (method, goodStatus) => {
 						clientUserId: 'test-user-id',
 					},
 					body: useBody ? { property: 'value' } : {},
-					query: method !== 'absorb' ? { upsert: 'yes' } : {},
+					query: { upsert: 'yes' },
 					type: 'MainType',
 					code: mainCode,
 				};

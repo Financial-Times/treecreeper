@@ -11,8 +11,10 @@ const {
 	s3DeleteObjectResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const { getLogger } = require('../../api-express-logger');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
+const logger = getLogger();
 
 const createStub = (module, method, resolvedValue) =>
 	jest.spyOn(module, method).mockResolvedValue(resolvedValue);
@@ -60,6 +62,7 @@ describe('S3 document helper patch', () => {
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 		nodeType: consistentNodeType,
 		code: systemCode,
+		logger,
 	});
 
 	test('returns existing body object when patch object is completely same', async () => {
@@ -69,7 +72,7 @@ describe('S3 document helper patch', () => {
 		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const expectedData = createExampleBodyData();
 
 		const result = await store.patch(
@@ -101,7 +104,7 @@ describe('S3 document helper patch', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Patch(givenVersionMarker);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const expectedData = createExampleBodyData();
 
 		const patchBody = {
@@ -131,6 +134,7 @@ describe('S3 document helper patch', () => {
 			s3Instance,
 			params: callParams,
 			requestType: 'PATCH',
+			logger,
 		});
 		expect(stubGetObject).toHaveBeenCalled();
 		expect(stubGetObject).toHaveBeenCalledWith(

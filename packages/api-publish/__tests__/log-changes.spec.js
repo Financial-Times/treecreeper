@@ -1,8 +1,16 @@
-jest.mock('../../api-express/lib/request-context');
-
 const { logChanges } = require('..');
 const { setupMocks } = require('../../../test-helpers');
-const requestContext = require('../../api-express/lib/request-context');
+const { createLogger } = require('../../api-express-logger');
+const { Adaptor } = require('../../api-publish-adaptors');
+
+class MockAdaptor extends Adaptor {
+	constructor(pluckFields = []) {
+		super(console);
+		this._pluckFields = pluckFields;
+
+		this.publish = jest.fn(async payload => payload);
+	}
+}
 
 describe('logChanges', () => {
 	const namespace = 'api-publish-log-changes';
@@ -12,9 +20,10 @@ describe('logChanges', () => {
 	const mainType = 'MainType';
 	const requestId = `${namespace}-default-request`;
 	const anotherRequestId = `${requestId}-another`;
+	const logger = createLogger();
 
 	beforeEach(() => {
-		jest.spyOn(requestContext, 'getContext').mockReturnValue({
+		jest.spyOn(logger, 'getContext').mockReturnValue({
 			requestId,
 		});
 	});
@@ -25,10 +34,7 @@ describe('logChanges', () => {
 
 	setupMocks(namespace);
 
-	const createMockAdaptor = () => ({
-		getName: () => 'mock-adaptor',
-		publish: jest.fn(async payload => payload),
-	});
+	const createMockAdaptor = () => new MockAdaptor();
 
 	const matcher = (action, type, code, props) => ({
 		action,

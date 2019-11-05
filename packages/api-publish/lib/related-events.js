@@ -1,5 +1,5 @@
 const schema = require('../../schema-sdk');
-const { getContext } = require('../../api-express/lib/request-context');
+const { getLogger } = require('../../api-express-logger');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
@@ -33,7 +33,7 @@ const makeAddedRelationshipEvents = (
 	if (!Object.keys(addedRelationships).length) {
 		return [];
 	}
-	const { requestId } = getContext();
+	const { requestId } = getLogger().getContext();
 	const createdNodes = neo4jRecords
 		.filter(record => record.get('related._createdByRequest') === requestId)
 		.map(node => ({

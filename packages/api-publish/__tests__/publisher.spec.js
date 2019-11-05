@@ -1,16 +1,19 @@
 const { createPublisher } = require('..');
+const { Adaptor } = require('../../api-publish-adaptors');
+
+class MockAdaptor extends Adaptor {
+	constructor(pluckFields = []) {
+		super(console);
+		this._pluckFields = pluckFields;
+
+		this.publish = jest.fn(async payload => payload);
+	}
+}
 
 describe('publisher', () => {
-	const createMockAdaptor = ({ pluckFields } = {}) => {
-		const adaptor = {
-			getName: jest.fn(() => 'mock-adaptor'),
-			publish: jest.fn(async payload => payload),
-		};
-		if (pluckFields) {
-			adaptor.pluckFields = jest.fn(() => pluckFields);
-		}
-		return adaptor;
-	};
+	const createMockAdaptor = ({ pluckFields } = {}) =>
+		new MockAdaptor(pluckFields);
+
 	const defaultPayload = {
 		action: 'test-action',
 		code: 'api-publish',
@@ -26,21 +29,12 @@ describe('publisher', () => {
 		}, {});
 
 	describe('Interface satisfaction', () => {
-		it('throw error if missing `publish` method', async () => {
-			const adaptor = {
-				getName: () => 'example-adaptor',
-			};
-			expect(() => createPublisher(adaptor)).toThrow(
-				/Interface satisfaction error/,
-			);
-		});
-
-		it('throw error if missing `getName` method', async () => {
+		it("throw error if adaptor doesn't extend Adaptor", async () => {
 			const adaptor = {
 				publish: async payload => payload,
 			};
 			expect(() => createPublisher(adaptor)).toThrow(
-				/Interface satisfaction error/,
+				/must be extended Adaptor/,
 			);
 		});
 	});
@@ -65,7 +59,6 @@ describe('publisher', () => {
 				action: undefined,
 				time: expect.any(Number),
 			});
-			expect(adaptor.getName).toHaveBeenCalled();
 		});
 
 		it("write wrning log if payload doens't have required fields which is extended by adaptor", async () => {
@@ -76,7 +69,6 @@ describe('publisher', () => {
 				...defaultPayload,
 				time: expect.any(Number),
 			});
-			expect(adaptor.getName).toHaveBeenCalled();
 		});
 	});
 });

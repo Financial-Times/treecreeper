@@ -30,7 +30,6 @@ const publishEvent = async (adaptor, payload) => {
 			{
 				event: 'INVALID_PUBLISH_EVENT',
 				missingFields,
-				adaptorName: adaptor.getName(),
 				payload,
 			},
 			'Missing required fields for event log record',

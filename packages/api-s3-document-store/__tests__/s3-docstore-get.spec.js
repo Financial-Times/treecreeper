@@ -69,7 +69,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.get(consistentNodeType, givenSystemCode);
 
@@ -90,7 +90,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const result = await store.get(consistentNodeType, givenSystemCode);
 
 		expect(Object.keys(result)).toHaveLength(0);
@@ -108,7 +108,7 @@ describe('S3 document helper get', () => {
 			expectedData,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		await expect(
 			store.get(consistentNodeType, givenSystemCode),

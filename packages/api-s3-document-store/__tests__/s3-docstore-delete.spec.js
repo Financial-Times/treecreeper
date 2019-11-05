@@ -61,7 +61,7 @@ describe('S3 document helper delete', () => {
 			givenSystemCode,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.delete(
 			consistentNodeType,
@@ -94,7 +94,7 @@ describe('S3 document helper delete', () => {
 			givenSystemCode,
 			givenVersionMarker,
 		);
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		await expect(
 			store.delete(

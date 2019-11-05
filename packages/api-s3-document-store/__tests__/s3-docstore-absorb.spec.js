@@ -14,9 +14,11 @@ const {
 	s3DeleteObjectResponseFixture,
 	createExampleBodyData,
 } = require('../__fixtures__/s3-object-fixture');
+const { getLogger } = require('../../api-express-logger');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 const consistentNodeType = 'System';
+const logger = getLogger();
 
 const createSourceBodyData = () => ({
 	extraField: 'willBeAbsorbed',
@@ -80,6 +82,7 @@ const mockS3Absorb = (
 					nodeType: consistentNodeType,
 					code,
 					versionMarker: toVersionMarker,
+					logger,
 				}),
 			};
 		});
@@ -103,6 +106,7 @@ const mockS3Absorb = (
 					code: fromSystemCode,
 					versionMarker: fromVersionMarker,
 					undoType: 'DELETE',
+					logger,
 				}),
 			},
 			rejected: {
@@ -119,6 +123,7 @@ const mockS3Absorb = (
 					code: toSystemCode,
 					versionMarker: toVersionMarker,
 					undoType: 'DELETE',
+					logger,
 				}),
 			},
 			rejected: {
@@ -150,6 +155,7 @@ describe('S3 document helper absorb', () => {
 		nodeType: consistentNodeType,
 		code,
 		...(body ? { body } : {}),
+		logger,
 	});
 
 	const s3CallMatcher = (code, versionMarker) => ({
@@ -177,7 +183,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.absorb(
 			consistentNodeType,
@@ -242,7 +248,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 
 		const result = await store.absorb(
 			consistentNodeType,
@@ -277,7 +283,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		await expect(
 			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
@@ -325,7 +331,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		await expect(
 			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
@@ -377,7 +383,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		await expect(
 			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
 		).rejects.toThrow(Error);
@@ -429,7 +435,7 @@ describe('S3 document helper absorb', () => {
 			{ toSystemCode, toNodeBody, toVersionMarker },
 		);
 
-		const store = docstore(s3Instance);
+		const store = docstore({ s3Instance });
 		const result = await store.absorb(
 			consistentNodeType,
 			fromSystemCode,

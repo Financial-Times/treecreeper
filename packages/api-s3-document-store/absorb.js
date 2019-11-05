@@ -3,6 +3,7 @@ const { s3Get } = require('./get');
 const { s3Delete } = require('./delete');
 const { s3Post } = require('./post');
 const { diffProperties } = require('./diff');
+const { getLogger } = require('../api-express-logger');
 
 const s3Absorb = async ({
 	s3Instance,
@@ -10,14 +11,26 @@ const s3Absorb = async ({
 	nodeType,
 	sourceCode,
 	destinationCode,
-	logger,
+	logger = getLogger(),
 }) => {
 	const [
 		{ body: sourceNodeBody },
 		{ body: destinationNodeBody },
 	] = await Promise.all([
-		s3Get({ s3Instance, bucketName, nodeType, code: sourceCode }),
-		s3Get({ s3Instance, bucketName, nodeType, code: destinationCode }),
+		s3Get({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code: sourceCode,
+			logger,
+		}),
+		s3Get({
+			s3Instance,
+			bucketName,
+			nodeType,
+			code: destinationCode,
+			logger,
+		}),
 	]);
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
@@ -132,18 +145,22 @@ const s3Absorb = async ({
 	};
 };
 
-const composeS3Absorb = ({ s3Instance, bucketName, logger }) => options => ({
-	...options,
-	absorb: async (nodeType, sourceCode, destinationCode) =>
-		s3Absorb({
-			s3Instance,
-			bucketName,
-			nodeType,
-			sourceCode,
-			destinationCode,
-			logger,
-		}),
-});
+const composeS3Absorb = (composeOptions = {}) => {
+	const { s3Instance, bucketName, logger } = composeOptions;
+
+	return {
+		...composeOptions,
+		absorb: async (nodeType, sourceCode, destinationCode) =>
+			s3Absorb({
+				s3Instance,
+				bucketName,
+				nodeType,
+				sourceCode,
+				destinationCode,
+				logger,
+			}),
+	};
+};
 
 module.exports = {
 	s3Absorb,

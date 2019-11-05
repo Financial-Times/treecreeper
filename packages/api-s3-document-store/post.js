@@ -1,5 +1,6 @@
 const { upload } = require('./upload');
 const { undo } = require('./undo');
+const { getLogger } = require('../api-express-logger');
 
 const s3Post = async ({
 	s3Instance,
@@ -7,7 +8,7 @@ const s3Post = async ({
 	nodeType,
 	code,
 	body,
-	logger,
+	logger = getLogger(),
 }) => {
 	const params = {
 		Bucket: bucketName,
@@ -37,18 +38,22 @@ const s3Post = async ({
 	};
 };
 
-const composeS3Post = ({ s3Instance, bucketName, logger }) => options => ({
-	...options,
-	post: async (nodeType, code, body) =>
-		s3Post({
-			s3Instance,
-			bucketName,
-			nodeType,
-			code,
-			body,
-			logger,
-		}),
-});
+const composeS3Post = (composeOptions = {}) => {
+	const { s3Instance, bucketName, logger } = composeOptions;
+
+	return {
+		...composeOptions,
+		post: async (nodeType, code, body) =>
+			s3Post({
+				s3Instance,
+				bucketName,
+				nodeType,
+				code,
+				body,
+				logger,
+			}),
+	};
+};
 
 module.exports = {
 	s3Post,

@@ -5,13 +5,15 @@ const { s3Patch, composeS3Patch } = require('./patch');
 const { s3Delete, composeS3Delete } = require('./delete');
 const { s3Absorb, composeS3Absorb } = require('./absorb');
 const Composer = require('../api-express/lib/composer');
+const { getLogger } = require('../api-express-logger');
 
 const { TREECREEPER_DOCSTORE_S3_BUCKET } = process.env;
 
-const docstore = (
+const docstore = ({
 	s3Instance = defaultS3Instance,
 	bucketName = TREECREEPER_DOCSTORE_S3_BUCKET,
-) => {
+	logger = getLogger(),
+} = {}) => {
 	return {
 		get: async (nodeType, code) =>
 			s3Get({
@@ -19,6 +21,7 @@ const docstore = (
 				bucketName,
 				nodeType,
 				code,
+				logger,
 			}),
 		post: async (nodeType, code, body) =>
 			s3Post({
@@ -27,6 +30,7 @@ const docstore = (
 				nodeType,
 				code,
 				body,
+				logger,
 			}),
 		patch: async (nodeType, code, body) =>
 			s3Patch({
@@ -35,6 +39,7 @@ const docstore = (
 				nodeType,
 				code,
 				body,
+				logger,
 			}),
 		delete: async (nodeType, code, versionMarker) =>
 			s3Delete({
@@ -43,6 +48,7 @@ const docstore = (
 				nodeType,
 				code,
 				versionMarker,
+				logger,
 			}),
 		absorb: async (nodeType, sourceCode, destinationCode) =>
 			s3Absorb({
@@ -51,6 +57,7 @@ const docstore = (
 				nodeType,
 				sourceCode,
 				destinationCode,
+				logger,
 			}),
 	};
 };
