@@ -41,7 +41,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		)
 			.constructProperties()
 			.createRelationships()
-			.setLockFields(documents)
+			.setLockFields()
 			.execute();
 
 		const relationships = {

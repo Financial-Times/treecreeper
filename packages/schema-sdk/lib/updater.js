@@ -18,7 +18,7 @@ class SchemaUpdater {
 		ttl = 60000,
 		logger = console,
 		version,
-		schemaBaseUrl,
+		schemaBaseUrl = process.env.TREECREEPER_SCHEMA_URL,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
 		schemaData,
 	} = {}) {
@@ -26,6 +26,7 @@ class SchemaUpdater {
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
+		console.log({ schemaDirectory });
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
