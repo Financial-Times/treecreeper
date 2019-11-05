@@ -6,16 +6,13 @@ const { getGraphqlDefs, getTypes } = require('../../../packages/schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
 const resolveDocumentProperty = async ({ code }, args, context, info) => {
-	console.log(code);
 	if (!code) {
 		throw new Error(
 			'Must include code in body of query that requests any Document properties',
 		);
 	}
 	const key = `${info.parentType.name}/${code}`;
-	console.log({ key });
 	const record = await context.documentStoreDataLoader.load(key);
-	console.log({ record });
 	return record[info.fieldName];
 };
 

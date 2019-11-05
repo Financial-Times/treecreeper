@@ -2,16 +2,22 @@ const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 
-describe.skip('rest PATCH relationship create', () => {
+describe('rest PATCH relationship create', () => {
 	const namespace = 'api-rest-handlers-patch-relationship-create';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
+	const childCode1 = `${childCode}-1`;
+	const childCode2 = `${childCode}-2`;
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
-		namespace,
-	);
+	const {
+		createNodes,
+		createNode,
+		connectNodes,
+		meta,
+		getMetaPayload,
+	} = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -40,7 +46,10 @@ describe.skip('rest PATCH relationship create', () => {
 	});
 
 	describe('__-to-one relationships', () => {
-		['merge', 'replace'].forEach(action => {
+		[
+			'merge',
+			// 'replace'
+		].forEach(action => {
 			const handler = body =>
 				patchHandler()(getInput(body, { relationshipAction: action }));
 
@@ -113,17 +122,14 @@ describe.skip('rest PATCH relationship create', () => {
 			it('error if trying to write multiple relationships', async () => {
 				await createNodes(
 					['MainType', mainCode],
-					['ChildType', `${childCode}-1`],
-					['ChildType', `${childCode}-2`],
+					['ChildType', childCode1],
+					['ChildType', childCode2],
 				);
 				await expect(
 					basicHandler({
-						favouriteChild: [`${childCode}-1`, `${childCode}-2`],
+						favouriteChild: [childCode1, childCode2],
 					}),
-				).rejects.toThrow({
-					status: 400,
-					message: 'Can only have one favouriteChild',
-				});
+				).rejects.toThrow(/Can only have one favouriteChild/);
 
 				await neo4jTest('MainType', mainCode).noRels();
 			});
@@ -131,19 +137,19 @@ describe.skip('rest PATCH relationship create', () => {
 			it('replace existing relationship', async () => {
 				const [main, child1] = await createNodes(
 					['MainType', mainCode],
-					['ChildType', `${childCode}-1`],
-					['ChildType', `${childCode}-2`],
+					['ChildType', childCode1],
+					['ChildType', childCode2],
 				);
 
 				await connectNodes(main, 'HAS_FAVOURITE_CHILD', child1);
 
 				const { status, body } = await handler({
-					favouriteChild: [childCode],
+					favouriteChild: childCode2,
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					favouriteChild: [`${childCode}-2`],
+					favouriteChild: childCode2,
 				});
 
 				await neo4jTest('MainType', mainCode)
@@ -158,7 +164,7 @@ describe.skip('rest PATCH relationship create', () => {
 							type: 'ChildType',
 							props: Object.assign(
 								{
-									code: `${childCode}-2`,
+									code: childCode2,
 								},
 								meta.default,
 							),
@@ -169,14 +175,22 @@ describe.skip('rest PATCH relationship create', () => {
 			it('strictly enforces one-to-__', async () => {
 				const [main, child1] = await createNodes(
 					['MainType', mainCode],
-					['ChildType', `${childCode}-1`],
-					['ChildType', `${childCode}-2`],
+					['ChildType', childCode1],
+					['ChildType', childCode2],
 				);
 
 				await connectNodes(main, 'HAS_FAVOURITE_CHILD', child1);
 
-				const { status, body } = await handler({
-					isFavouriteChildOf: [mainCode],
+				const { status, body } = await patchHandler()({
+					type: 'ChildType',
+					code: childCode2,
+					body: {
+						isFavouriteChildOf: [mainCode],
+					},
+					query: {
+						relationshipAction: action,
+					},
+					metadata: getMetaPayload(),
 				});
 
 				expect(status).toBe(200);
@@ -196,9 +210,9 @@ describe.skip('rest PATCH relationship create', () => {
 							type: 'ChildType',
 							props: Object.assign(
 								{
-									code: `${childCode}-2`,
+									code: childCode2,
 								},
-								meta.default,
+								meta.update,
 							),
 						},
 					);
@@ -207,14 +221,22 @@ describe.skip('rest PATCH relationship create', () => {
 			it(`leaves __-to-__ unchanged`, async () => {
 				const [main, child1] = await createNodes(
 					['MainType', mainCode],
-					['ChildType', `${childCode}-1`],
-					['ChildType', `${childCode}-2`],
+					['ChildType', childCode1],
+					['ChildType', childCode2],
 				);
 
 				await connectNodes(main, 'HAS_CHILD', child1);
 
-				const { status, body } = await handler({
-					isChildOf: [mainCode],
+				const { status, body } = await patchHandler()({
+					type: 'ChildType',
+					code: childCode2,
+					body: {
+						isChildOf: [mainCode],
+					},
+					query: {
+						relationshipAction: action,
+					},
+					metadata: getMetaPayload(),
 				});
 
 				expect(status).toBe(200);
@@ -234,9 +256,9 @@ describe.skip('rest PATCH relationship create', () => {
 							type: 'ChildType',
 							props: Object.assign(
 								{
-									code: `${childCode}-2`,
+									code: childCode2,
 								},
-								meta.default,
+								meta.update,
 							),
 						},
 					)
@@ -250,7 +272,7 @@ describe.skip('rest PATCH relationship create', () => {
 							type: 'ChildType',
 							props: Object.assign(
 								{
-									code: `${childCode}-1`,
+									code: childCode1,
 								},
 								meta.default,
 							),
@@ -291,18 +313,18 @@ describe.skip('rest PATCH relationship create', () => {
 		it('can merge with relationships if relationshipAction=merge', async () => {
 			const [main, child1] = await createNodes(
 				['MainType', mainCode],
-				['ChildType', `${childCode}-1`],
-				['ChildType', `${childCode}-2`],
+				['ChildType', childCode1],
+				['ChildType', childCode2],
 			);
 			await connectNodes(main, ['HAS_CHILD'], child1);
 
 			const { status, body } = await mergeHandler({
-				children: [`${childCode}-2`],
+				children: [childCode2],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [`${childCode}-2`, `${childCode}-1`],
+				children: [childCode2, childCode1],
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -316,7 +338,7 @@ describe.skip('rest PATCH relationship create', () => {
 					{
 						type: 'ChildType',
 						props: Object.assign(
-							{ code: `${childCode}-1` },
+							{ code: childCode1 },
 							meta.default,
 						),
 					},
@@ -330,7 +352,7 @@ describe.skip('rest PATCH relationship create', () => {
 					{
 						type: 'ChildType',
 						props: Object.assign(
-							{ code: `${childCode}-2` },
+							{ code: childCode2 },
 							meta.default,
 						),
 					},
@@ -362,10 +384,7 @@ describe.skip('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign(
-							{ code: `${childCode}-1` },
-							meta.default,
-						),
+						props: Object.assign({ code: childCode }, meta.default),
 					},
 				);
 		});
@@ -373,18 +392,18 @@ describe.skip('rest PATCH relationship create', () => {
 		it('can replace relationships if relationshipAction=replace', async () => {
 			const [main, child1] = await createNodes(
 				['MainType', mainCode],
-				['ChildType', `${childCode}-1`],
-				['ChildType', `${childCode}-2`],
+				['ChildType', childCode1],
+				['ChildType', childCode2],
 			);
 			await connectNodes(main, ['HAS_CHILD'], child1);
 
 			const { status, body } = await replaceHandler({
-				children: [`${childCode}-2`],
+				children: [childCode2],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [`${childCode}-2`],
+				children: [childCode2],
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -398,7 +417,7 @@ describe.skip('rest PATCH relationship create', () => {
 					{
 						type: 'ChildType',
 						props: Object.assign(
-							{ code: `${childCode}-2` },
+							{ code: childCode2 },
 							meta.default,
 						),
 					},
@@ -438,7 +457,7 @@ describe.skip('rest PATCH relationship create', () => {
 						type: 'MainType',
 						props: Object.assign(
 							{
-								code: [`${mainCode}-2`],
+								code: `${mainCode}-2`,
 							},
 							meta.default,
 						),
@@ -505,7 +524,7 @@ describe.skip('rest PATCH relationship create', () => {
 						type: 'MainType',
 						props: Object.assign(
 							{
-								code: [`${mainCode}-3`],
+								code: `${mainCode}-3`,
 							},
 							meta.default,
 						),
@@ -545,10 +564,7 @@ describe.skip('rest PATCH relationship create', () => {
 					await createMainNode();
 					await expect(
 						handler({ children: [childCode] }),
-					).rejects.toThrow({
-						status: 400,
-						message: 'Missing related node',
-					});
+					).rejects.toThrow('Missing related node');
 				});
 
 				it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -574,7 +590,7 @@ describe.skip('rest PATCH relationship create', () => {
 								props: meta.create,
 							},
 							{
-								type: 'MainType',
+								type: 'ChildType',
 								props: Object.assign(
 									{
 										code: childCode,
@@ -608,7 +624,7 @@ describe.skip('rest PATCH relationship create', () => {
 								props: meta.create,
 							},
 							{
-								type: 'MainType',
+								type: 'ChildType',
 								props: Object.assign(
 									{
 										code: childCode,

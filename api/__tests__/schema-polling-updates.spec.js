@@ -3,7 +3,7 @@ const schemaPublisher = require('../../packages/schema-publisher');
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );
-const { getSchemaFilename } = require('../../packages/schema-utils');
+const { getSchemaFilename } = require('../../packages/schema-file-name');
 
 jest.useFakeTimers();
 

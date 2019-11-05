@@ -2,7 +2,7 @@ const { patchHandler } = require('../patch');
 
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 
-describe.skip('rest PATCH relationship delete', () => {
+describe('rest PATCH relationship delete', () => {
 	const namespace = 'api-rest-handlers-patch-relationship-delete';
 	const mainCode = `${namespace}-main`;
 	const mainCode2 = `${mainCode}2`;
@@ -13,11 +13,15 @@ describe.skip('rest PATCH relationship delete', () => {
 	const childCode2 = `${childCode}2`;
 	const childCode3 = `${childCode}3`;
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
-		namespace,
-	);
+	const {
+		createNodes,
+		createNode,
+		connectNodes,
+		meta,
+		getMetaPayload,
+	} = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -229,13 +233,13 @@ describe.skip('rest PATCH relationship delete', () => {
 						.hasRel(
 							{
 								type: 'HAS_YOUNGER_SIBLING',
-								direction: 'outgoing',
+								direction: 'incoming',
 								props: meta.default,
 							},
 							{
 								type: 'MainType',
 								props: Object.assign(
-									{ code: `${mainCode}1` },
+									{ code: `${mainCode}2` },
 									meta.default,
 								),
 							},
@@ -264,7 +268,7 @@ describe.skip('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: meta.create,
 							},
 							{
 								type: 'ChildType',
@@ -400,7 +404,10 @@ describe.skip('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'MainType',
-								props: meta.default,
+								props: Object.assign(
+									{ code: mainCode2 },
+									meta.default,
+								),
 							},
 						)
 						.hasRel(
