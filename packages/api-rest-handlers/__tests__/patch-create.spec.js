@@ -204,26 +204,21 @@ describe('rest PATCH create', () => {
 
 			const { body, status } = await basicHandler(
 				{ children: childCode, parents: parentCode },
-				{
-					upsert: true,
-					relationshipAction: 'merge',
-					richRelationships: true,
-				},
+				{ relationshipAction: 'merge', richRelationships: true }
 			);
 
 			expect(status).toBe(201);
-			[...body.children, ...body.parents].forEach(relationship =>
-				expect(relationship).toHaveProperty(
-					'code',
-					'_updatedByClient',
-					'_updatedByRequest',
-					'_updatedTimestamp',
-					'_updatedByUser',
-					'_createdByClient',
-					'_createdByRequest',
-					'_createdTimestamp',
-					'_createdByUser',
-				),
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.default,
+				}),
+			);
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.default,
+				}),
 			);
 		});
 	});
