@@ -6,8 +6,7 @@ const dbConnection = require('./db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
-const initConstraints = async (options = {}) => {
-	const { logger = defaultLogger } = options;
+const initConstraints = async (logger = defaultLogger) => {
 	await schema.ready();
 	const executeQuery = dbConnection.executeQueryWithSharedSession();
 
@@ -71,8 +70,8 @@ const initConstraints = async (options = {}) => {
 module.exports = Object.assign(
 	{
 		initConstraints,
-		listenForSchemaChanges: initOptions =>
-			schema.onChange(() => initConstraints(initOptions)),
+		listenForSchemaChanges: logger =>
+			schema.onChange(() => initConstraints(logger)),
 	},
 	dbConnection,
 );

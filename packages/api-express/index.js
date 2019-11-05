@@ -29,7 +29,7 @@ const getApp = async (options = {}) => {
 		logger,
 	} = options;
 	const appLogger = createLogger(logger);
-	updateConstraintsOnSchemaChange({ logger: appLogger });
+	updateConstraintsOnSchemaChange(appLogger);
 	schema.init();
 
 	const router = new express.Router();
