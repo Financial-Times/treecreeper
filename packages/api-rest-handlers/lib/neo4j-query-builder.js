@@ -95,7 +95,7 @@ const queryBuilder = (method, input, body = {}) => {
 		const {
 			relationshipParameters,
 			relationshipQueries,
-		} = prepareToWriteRelationships(type, relationships, upsert);
+		} = prepareToWriteRelationships(type, relationships, upsert, parameters);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
 		context.addedRelationships = relationships;

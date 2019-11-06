@@ -48,20 +48,49 @@ const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
 	upsert,
+	parameters,
 ) => {
 	const { properties: validProperties } = getType(nodeType);
 
 	const relationshipParameters = {};
 	const relationshipQueries = [];
 
-	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
+	Object.entries(relationshipsToCreate).forEach(([propName, values]) => {
 		const propDef = validProperties[propName];
 		const { type: relatedType, direction, relationship } = propDef;
 		const key = `${relationship}${direction}${relatedType}`;
 
+		const retrievedCodes = [];
+		const relationshipsProperties = {};
+		let isObjectIncluded = false;
+
+		// values could be just array of string or array of string and object mixed
+		values.forEach(value => {
+			if (typeof value === 'string') {
+				retrievedCodes.push(value);
+			} else {
+				retrievedCodes.push(value.code);
+				relationshipsProperties[value.code] = { ...value };
+				delete relationshipsProperties[value.code].code;
+				isObjectIncluded = true;
+			}
+		});
+
+		// neo4j driver only accept primitive types or arrays thereof
+		// need to take out objects from the parameters' array
+		if (isObjectIncluded) {
+			const newProperties = { ...parameters.properties };
+			newProperties[propName] = retrievedCodes;
+			Object.assign(relationshipParameters, {
+				properties: newProperties,
+			});
+		}
+
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
-		Object.assign(relationshipParameters, { [key]: codes });
+		Object.assign(relationshipParameters, relationshipsProperties, {
+			[key]: retrievedCodes,
+		});
 
 		// Note on the limitations of cypher:
 		// It would be so nice to use UNWIND to create all these from a list parameter,
