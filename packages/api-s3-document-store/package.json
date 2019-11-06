@@ -1,0 +1,17 @@
+{
+  "name": "@treecreeper/api-s3-document-store",
+  "version": "0.1.1",
+  "description": "Module for connecting a Treecreeper&tm; api to an s3 bucket to use as an additional data store for storing properties that are too large to allow efficient querying in neo4j.",
+  "main": "index.js",
+  "scripts": {
+    "test": "TREECREEPER_DOCSTORE_S3_BUCKET=example-bucket DEBUG=true TIMEOUT=500000 jest --testEnvironment=node"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@treecreeper/api-express-logger": "^0.0.1",
+    "aws-sdk": "^2.564.0",
+    "deep-diff": "^1.0.2",
+    "lodash.isempty": "^4.4.0"
+  }
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const logger = require('@financial-times/n-logger').default;
-const schema = require('../../packages/schema-sdk');
+const schema = require('@treecreeper/schema-sdk');
 const dbConnection = require('./db-connection');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));

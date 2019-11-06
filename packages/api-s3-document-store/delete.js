@@ -1,4 +1,4 @@
-const { logger } = require('../api-express/lib/request-context');
+const { logger } = require('@treecreeper/api-express-logger');
 const { undo } = require('./undo');
 
 const s3Delete = async ({

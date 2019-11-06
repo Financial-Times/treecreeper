@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { validators, BizOpsError } = require('../../../packages/schema-sdk');
+const { validators, BizOpsError } = require('@treecreeper/schema-sdk');
 
 const sdkValidators = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {

@@ -1,6 +1,6 @@
-const { logger } = require('../../packages/api-express/lib/request-context');
-const { onChange } = require('../../packages/schema-sdk');
-const { sendSchemaToS3 } = require('../../packages/schema-publisher');
+const { logger } = require('@treecreeper/api-express-logger');
+const { onChange } = require('@treecreeper/schema-sdk');
+const { sendSchemaToS3 } = require('@treecreeper/schema-publisher');
 const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
 
 const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {

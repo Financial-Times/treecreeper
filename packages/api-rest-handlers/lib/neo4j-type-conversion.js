@@ -4,7 +4,7 @@ const {
 	isTime,
 } = require('neo4j-driver/lib/v1/temporal-types');
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const { getType } = require('../../../packages/schema-sdk');
+const { getType } = require('@treecreeper/schema-sdk');
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 

@@ -1,5 +1,5 @@
-const schema = require('../../schema-sdk');
-const { getContext } = require('../../api-express/lib/request-context');
+const schema = require('@treecreeper/schema-sdk');
+const { getContext } = require('@treecreeper/api-express-logger');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

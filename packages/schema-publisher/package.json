@@ -1,0 +1,17 @@
+{
+  "name": "@treecreeper/schema-publisher",
+  "version": "0.0.1",
+  "description": "This package saves a treecreeper schema to s3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@treecreeper/schema-file-name": "^0.0.1",
+    "@treecreeper/schema-sdk": "^0.0.1",
+    "aws-sdk": "^2.564.0",
+    "stream": "0.0.2"
+  }
+}

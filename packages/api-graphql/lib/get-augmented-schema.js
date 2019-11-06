@@ -2,7 +2,7 @@ const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { applyMiddleware } = require('graphql-middleware');
 const { parse } = require('graphql');
-const { getGraphqlDefs, getTypes } = require('../../../packages/schema-sdk');
+const { getGraphqlDefs, getTypes } = require('@treecreeper/schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
 const resolveDocumentProperty = async ({ code }, args, context, info) => {

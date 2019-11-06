@@ -1,0 +1,20 @@
+{
+  "name": "@treecreeper/api-publish",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest  --testEnvironment=node"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@treecreeper/api-publish-adaptors": "^0.0.1",
+    "@treecreeper/api-express-logger": "^0.0.1",
+    "@treecreeper/schema-sdk": "^0.0.1",
+    "lodash.groupby": "^4.6.0"
+  }
+}

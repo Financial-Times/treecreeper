@@ -1,5 +1,5 @@
 /* global it, describe, expect */
-const { SDK } = require('../../../packages/schema-sdk');
+const { SDK } = require('@treecreeper/schema-sdk');
 
 const enums = new SDK().rawData.getEnums();
 

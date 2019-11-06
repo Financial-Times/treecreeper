@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { setContext } = require('../lib/request-context');
+const { setContext } = require('@treecreeper/api-express-logger');
 
 module.exports = (req, res, next) => {
 	if (!req.get('client-id') && !req.get('client-user-id')) {

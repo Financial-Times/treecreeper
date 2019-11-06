@@ -1,13 +1,13 @@
 const httpErrors = require('http-errors');
+const { logger } = require('@treecreeper/api-express-logger');
+const { logChanges } = require('@treecreeper/api-publish');
 const { validateInput, validateCode } = require('./lib/validation');
-const { logger } = require('../api-express/lib/request-context');
 const { executeQuery } = require('./lib/neo4j-model');
 const { diffProperties } = require('./lib/diff-properties');
 const { getType } = require('../schema-sdk');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { getRemovedRelationships } = require('./lib/relationships/input');
-const { logChanges } = require('../api-publish');
 
 const fetchNode = async (nodeType, code, paramName = 'code') => {
 	const query = `MATCH (node:${nodeType} { code: $${paramName} })

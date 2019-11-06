@@ -1,0 +1,19 @@
+{
+  "name": "@treecreeper/schema-validator",
+  "version": "0.0.1",
+  "description": "Tests to validate that a set of yaml files conforms to the treecreeper schema specification",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@treecreeper/schema-sdk": "^0.0.1",
+    "graphql": "^14.5.8",
+    "valid-url": "^1.0.9"
+  }
+}

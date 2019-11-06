@@ -1,5 +1,5 @@
 const _isEmpty = require('lodash.isempty');
-const { logger } = require('../../api-express/lib/request-context');
+const { logger } = require('@treecreeper/api-express-logger');
 
 const normalizeFields = (fieldParam, body = {}) => {
 	if (!fieldParam) {

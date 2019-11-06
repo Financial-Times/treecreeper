@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
+const { getSchemaFilename } = require('@treecreeper/schema-file-name');
 const readYaml = require('./read-yaml');
-const { getSchemaFilename } = require('../../../packages/schema-file-name');
 const { version: libVersion } = require('../../../package.json');
 
 class SchemaUpdater {

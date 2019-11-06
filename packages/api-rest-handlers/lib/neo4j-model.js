@@ -1,6 +1,6 @@
-const { getType } = require('../../../packages/schema-sdk');
+const { getType } = require('@treecreeper/schema-sdk');
+const { executeQuery } = require('@treecreeper/api-db-manager');
 const { convertNeo4jToJson } = require('./neo4j-type-conversion');
-const { executeQuery } = require('../../api-db-manager');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

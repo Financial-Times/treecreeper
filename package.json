@@ -37,6 +37,7 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
+    "@financial-times/athloi": "^1.0.0-beta.28",
     "@financial-times/rel-engage": "^7.1.4",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
@@ -52,7 +53,9 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "athloi run test",
+    "link-local": "athloi script scripts/link-local.js --concurrency=1",
+    "unlink-local": "athloi exec npm unlink"
   },
   "repository": {
     "type": "git",
@@ -63,5 +66,6 @@
   "bugs": {
     "url": "https://github.com/Financial-Times/treecreeper/issues"
   },
-  "homepage": "https://github.com/Financial-Times/treecreeper#readme"
+  "homepage": "https://github.com/Financial-Times/treecreeper#readme",
+  "workspaces": ["packages/*"]
 }

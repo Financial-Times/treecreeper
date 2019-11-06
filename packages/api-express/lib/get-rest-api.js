@@ -1,5 +1,5 @@
 const express = require('express');
-const { logger, setContext } = require('./request-context');
+const { logger, setContext } = require('@treecreeper/api-express-logger');
 const {
 	headHandler,
 	getHandler,
@@ -7,7 +7,7 @@ const {
 	postHandler,
 	patchHandler,
 	absorbHandler,
-} = require('../../../packages/api-rest-handlers');
+} = require('@treecreeper/api-rest-handlers');
 
 const { errorToErrors } = require('../middleware/errors');
 

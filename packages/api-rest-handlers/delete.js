@@ -1,8 +1,8 @@
 const httpErrors = require('http-errors');
+const { logChanges } = require('@treecreeper/api-publish');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 const { executeQuery } = require('./lib/neo4j-model');
-const { logChanges } = require('../api-publish');
 
 const deleteHandler = ({
 	documentStore,

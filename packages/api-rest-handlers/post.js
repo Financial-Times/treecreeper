@@ -1,11 +1,11 @@
 const httpErrors = require('http-errors');
 const _isEmpty = require('lodash.isempty');
+const { logChanges } = require('@treecreeper/api-publish');
+const { getType } = require('@treecreeper/schema-sdk');
 const { validateInput } = require('./lib/validation');
-const { getType } = require('../schema-sdk');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
-const { logChanges } = require('../api-publish');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const { type, code, body: originalBody, metadata = {} } = validateInput(

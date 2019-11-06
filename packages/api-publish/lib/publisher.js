@@ -1,5 +1,5 @@
 const groupBy = require('lodash.groupby');
-const { logger } = require('../../api-express/lib/request-context');
+const { logger } = require('@treecreeper/api-express-logger');
 
 const requiredPluckFieldNames = ['action', 'code', 'type', 'updatedProperties'];
 const requiredInterfaceMethods = ['publish', 'getName'];

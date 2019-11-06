@@ -1,5 +1,5 @@
-const { logger } = require('../../api-express/lib/request-context');
-const { KinesisAdaptor } = require('../../api-publish-adaptors');
+const { logger } = require('@treecreeper/api-express-logger');
+const { KinesisAdaptor } = require('@treecreeper/api-publish-adaptors');
 const { createPublisher } = require('./publisher');
 const {
 	makeAddedRelationshipEvents,

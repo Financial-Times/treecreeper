@@ -1,5 +1,5 @@
 const _isEmpty = require('lodash.isempty');
-const { getType } = require('../../schema-sdk');
+const { getType } = require('@treecreeper/schema-sdk');
 
 const separateDocsFromBody = (nodeType, body = {}) => {
 	const { properties } = getType(nodeType);

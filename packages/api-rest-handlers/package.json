@@ -1,0 +1,24 @@
+{
+  "name": "@treecreeper/api-rest-handlers",
+  "version": "0.0.1",
+  "description": "Treecreeper&tm; functions for handling CRUD actions via a RESTful interface.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest  --testEnvironment=node"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@treecreeper/api-express-logger": "^0.0.1",
+    "@treecreeper/api-publish": "^0.0.1",
+    "@treecreeper/schema-sdk": "^0.0.1",
+    "@treecreeper/api-db-manager": "^0.0.1",
+    "common-tags": "^1.8.0",
+    "http-errors": "^1.7.3",
+    "lodash.isempty": "^4.4.0",
+    "neo4j-driver": "^1.7.6"
+  }
+}

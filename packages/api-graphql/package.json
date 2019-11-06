@@ -1,0 +1,26 @@
+{
+  "name": "@treecreeper/api-graphql",
+  "version": "0.0.1",
+  "description": "Treecreeper&tm; graphql express middleware to sit in front of a neo4j database instance",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node --watch"
+  },
+  "dependencies": {
+    "@financial-times/n-logger": "^6.1.0",
+    "@treecreeper/schema-publisher": "^0.0.1",
+    "@treecreeper/api-express-logger": "^0.0.1",
+    "@treecreeper/schema-sdk": "^0.0.1",
+    "@treecreeper/api-db-manager": "^0.0.1",
+    "apollo-server-express": "^2.9.7",
+    "dataloader": "^1.4.0",
+    "graphql": "^14.5.8",
+    "graphql-middleware": "^4.0.2",
+    "neo4j-graphql-js": "^2.8.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

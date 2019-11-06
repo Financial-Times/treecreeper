@@ -1,5 +1,5 @@
+const schema = require('@treecreeper/schema-sdk');
 const { sendSchemaToS3 } = require('..');
-const schema = require('../../../packages/schema-sdk');
 
 schema.init({ schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY });
 

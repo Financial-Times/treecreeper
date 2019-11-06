@@ -1,8 +1,8 @@
 const { ApolloServer } = require('apollo-server-express');
 const DataLoader = require('dataloader');
+const { logger } = require('@treecreeper/api-express-logger');
+const { driver } = require('@treecreeper/api-db-manager');
 const { getAugmentedSchema } = require('./get-augmented-schema');
-const { logger } = require('../../../packages/api-express/lib/request-context');
-const { driver } = require('../../../packages/api-db-manager');
 const { Tracer } = require('./request-tracer');
 
 const getApolloMiddleware = ({ documentStore }) => {

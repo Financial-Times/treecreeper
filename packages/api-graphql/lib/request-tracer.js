@@ -1,5 +1,5 @@
-const { getType } = require('../../../packages/schema-sdk');
-const { logger } = require('../../../packages/api-express/lib/request-context');
+const { getType } = require('@treecreeper/schema-sdk');
+const { logger } = require('@treecreeper/api-express-logger');
 
 class Tracer {
 	constructor() {
