@@ -320,6 +320,21 @@ describe('rest POST', () => {
 				}),
 			);
 		});
+
+		it('creates record with relationship which has properties', async () => {
+			const relationshipProps = { code: childCode, someProp: 'some property' };
+			const { status, body } = await basicHandler(
+				{ children: [ relationshipProps ] },
+				{ upsert: true, richRelationships: true },
+				getMetaPayload(),
+			);
+
+			expect(status).toBe(200);
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({ ...relationshipProps, ...meta.create }),
+			);
+		});
 	});
 
 	describe('restricted types', () => {
