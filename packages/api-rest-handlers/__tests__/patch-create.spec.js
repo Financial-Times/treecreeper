@@ -9,7 +9,7 @@ describe('rest PATCH create', () => {
 
 	const { meta, getMetaPayload, createNodes } = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -211,13 +211,13 @@ describe('rest PATCH create', () => {
 			body.children.forEach(relationship =>
 				expect(relationship).toMatchObject({
 					code: childCode,
-					...meta.default,
+					...meta.create,
 				}),
 			);
 			body.parents.forEach(relationship =>
 				expect(relationship).toMatchObject({
 					code: parentCode,
-					...meta.default,
+					...meta.create,
 				}),
 			);
 		});
