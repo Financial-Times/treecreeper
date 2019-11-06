@@ -66,9 +66,16 @@ const validateProperty = ({ getType, getEnums }) => {
 			if (!hasMany && codesList.length > 1) {
 				exit(`Can only have one ${propertyName}`);
 			}
-			codesList.map(value =>
-				recursivelyCallableValidator(type, 'code', value),
-			);
+			codesList.map(value => {
+				if (typeof value === 'string') {
+					recursivelyCallableValidator(type, 'code', value);
+				} else {
+					Object.keys(value).forEach(key => {
+						// TODO: need to impletment rich relationship schema to run below
+						// recursivelyCallableValidator(type, key, value[key]);
+					})
+				}
+			});
 		} else if (type === 'Boolean') {
 			if (typeof propertyValue !== 'boolean') {
 				exit('Must be a Boolean');
