@@ -61,18 +61,23 @@ const prepareToWriteRelationships = (
 		const key = `${relationship}${direction}${relatedType}`;
 
 		const retrievedCodes = [];
-		const relationshipsProperties = {};
+		const relationshipPropQueries = [];
 		let isObjectIncluded = false;
 
-		// values could be just array of string or array of string and object mixed
+		// values could be just an array of strings, objects or mixed
 		values.forEach(value => {
 			if (typeof value === 'string') {
 				retrievedCodes.push(value);
 			} else {
 				retrievedCodes.push(value.code);
-				relationshipsProperties[value.code] = { ...value };
-				delete relationshipsProperties[value.code].code;
 				isObjectIncluded = true;
+				if (value.someProp) {
+					relationshipPropQueries.push(
+						`WITH node, related, relationship
+						WHERE related.code = '${value.code}'
+						SET relationship.someProp = '${value.someProp}'`,
+					);
+				}
 			}
 		});
 
@@ -88,7 +93,7 @@ const prepareToWriteRelationships = (
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
-		Object.assign(relationshipParameters, relationshipsProperties, {
+		Object.assign(relationshipParameters, {
 			[key]: retrievedCodes,
 		});
 
@@ -102,6 +107,7 @@ const prepareToWriteRelationships = (
 			WITH node, related
 			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
+			${relationshipPropQueries.join('')}
 		`,
 		);
 
