@@ -626,7 +626,6 @@ describe('get-type', () => {
 				isRelationship: true,
 				showInactive: true,
 				writeInactive: false,
-				isRecursive: false,
 				description: 'test description',
 				label: 'test label',
 			});
@@ -650,7 +649,6 @@ describe('get-type', () => {
 				direction: 'incoming',
 				type: 'Type2',
 				isRelationship: true,
-				isRecursive: false,
 				showInactive: true,
 				writeInactive: false,
 				hasMany: false,
@@ -699,15 +697,14 @@ describe('get-type', () => {
 			expect(type.properties.testName2.direction).toBe('incoming');
 		});
 
-		it('define recursive relationships', () => {
+		it('define relationships with cypher query', () => {
 			const type = typeFromRawData({
 				name: 'Type1',
 				properties: {
 					testName: {
 						type: 'Type2',
-						direction: 'outgoing',
-						isRecursive: true,
-						relationship: 'HAS',
+						cypher:
+							'MATCH (this)-[]->(related) RETURN DISTINCT related',
 						label: 'test label',
 						description: 'test description',
 					},
@@ -717,12 +714,10 @@ describe('get-type', () => {
 			expect(type.properties.testName).toEqual({
 				type: 'Type2',
 				hasMany: false,
-				direction: 'outgoing',
 				showInactive: true,
 				writeInactive: false,
-				isRecursive: true,
+				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				isRelationship: true,
-				relationship: 'HAS',
 				description: 'test description',
 				label: 'test label',
 			});
@@ -743,10 +738,15 @@ describe('get-type', () => {
 						direction: 'incoming',
 						relationship: 'HAS',
 					},
+					cypherMany: {
+						type: 'Type2',
+						hasMany: true,
+						cypher:
+							'MATCH (this)-[]->(related) RETURN DISTINCT related',
+					},
 				},
 			});
 			expect(type.properties.many).toEqual({
-				isRecursive: false,
 				isRelationship: true,
 				showInactive: true,
 				writeInactive: false,
@@ -755,8 +755,15 @@ describe('get-type', () => {
 				direction: 'outgoing',
 				hasMany: true,
 			});
+			expect(type.properties.cypherMany).toEqual({
+				isRelationship: true,
+				showInactive: true,
+				writeInactive: false,
+				type: 'Type2',
+				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
+				hasMany: true,
+			});
 			expect(type.properties.singular).toEqual({
-				isRecursive: false,
 				isRelationship: true,
 				showInactive: true,
 				writeInactive: false,
