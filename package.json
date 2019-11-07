@@ -54,7 +54,7 @@
   },
   "scripts": {
     "test": "athloi run test",
-    "link-local": "athloi script scripts/link-local.js --concurrency=1",
+    "link-local": "athloi script scripts/link-local.js",
     "unlink-local": "athloi exec npm unlink"
   },
   "repository": {

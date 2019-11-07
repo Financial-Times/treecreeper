@@ -20,5 +20,8 @@
     "http-errors": "^1.7.3",
     "lodash.isempty": "^4.4.0",
     "neo4j-driver": "^1.7.6"
+  },
+  "devDependencies": {
+    "@treecreeper/api-s3-document-store": "^0.0.1"
   }
 }

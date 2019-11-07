@@ -1,4 +1,4 @@
-/* global jest beforeAll beforeEach afterEach */
+/* global jest beforeAll beforeEach afterEach afterAll */
 const lolex = require('lolex'); // eslint-disable-line import/no-extraneous-dependencies
 const dbConnection = require('./db-connection');
 const { schemaReady } = require('../api/server/lib/init-schema');
@@ -24,6 +24,9 @@ const setupMocks = namespace => {
 		jest.restoreAllMocks();
 		clock = clock.uninstall();
 		await dropFixtures(namespace);
+	});
+	afterAll(async () => {
+		await dbConnection.driver.close();
 	});
 	return fixtureBuilder(namespace, now, then);
 };

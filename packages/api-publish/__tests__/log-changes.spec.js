@@ -1,4 +1,4 @@
-jest.mock('../../api-express/lib/request-context');
+jest.mock('@treecreeper/api-express-logger');
 
 const apiExpressLogger = require('@treecreeper/api-express-logger');
 const { logChanges } = require('..');
@@ -13,17 +13,13 @@ describe('logChanges', () => {
 	const requestId = `${namespace}-default-request`;
 	const anotherRequestId = `${requestId}-another`;
 
-	beforeEach(() => {
+	setupMocks(namespace);
+
+	beforeAll(async () => {
 		jest.spyOn(apiExpressLogger, 'getContext').mockReturnValue({
 			requestId,
 		});
 	});
-
-	afterEach(() => {
-		jest.resetAllMocks();
-	});
-
-	setupMocks(namespace);
 
 	const createMockAdaptor = () => ({
 		getName: () => 'mock-adaptor',

@@ -1,6 +1,6 @@
 {
   "name": "@treecreeper/api-s3-document-store",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "description": "Module for connecting a Treecreeper&tm; api to an s3 bucket to use as an additional data store for storing properties that are too large to allow efficient querying in neo4j.",
   "main": "index.js",
   "scripts": {

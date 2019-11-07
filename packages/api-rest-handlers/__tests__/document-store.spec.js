@@ -1,3 +1,4 @@
+const { docstore } = require('@treecreeper/api-s3-document-store');
 const {
 	getHandler,
 	deleteHandler,
@@ -6,7 +7,6 @@ const {
 	absorbHandler,
 } = require('..');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { docstore } = require('../../api-s3-document-store');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest document store integration', () => {

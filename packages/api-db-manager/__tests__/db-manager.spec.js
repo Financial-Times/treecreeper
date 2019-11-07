@@ -1,4 +1,4 @@
-const schema = require('../../../packages/schema-sdk');
+const schema = require('@treecreeper/schema-sdk');
 
 schema.init();
 const { initConstraints } = require('..');

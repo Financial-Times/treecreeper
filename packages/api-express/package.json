@@ -24,5 +24,8 @@
     "uuid": "^3.3.3"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "supertest": "^4.0.2"
+  }
 }

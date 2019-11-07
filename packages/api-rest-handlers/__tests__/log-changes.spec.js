@@ -1,4 +1,5 @@
-jest.mock('../../api-publish');
+jest.mock('@treecreeper/api-publish');
+const apiPublish = require('@treecreeper/api-publish');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const {
 	deleteHandler,
@@ -6,7 +7,6 @@ const {
 	patchHandler,
 	absorbHandler,
 } = require('..');
-const apiPublish = require('../../api-publish');
 
 describe('Rest logChanges module integration', () => {
 	const namespace = 'api-rest-handlers-logchanges';

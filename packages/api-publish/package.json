@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest  --testEnvironment=node"
+    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node"
   },
   "author": "",
   "license": "ISC",

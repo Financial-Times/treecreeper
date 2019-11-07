@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node --watch"
+    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node --detectOpenHandles --forceExit"
   },
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
@@ -22,5 +22,9 @@
     "neo4j-graphql-js": "^2.8.0"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.17.1",
+    "supertest": "^4.0.2"
+  }
 }
