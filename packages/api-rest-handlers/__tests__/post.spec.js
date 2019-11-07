@@ -149,7 +149,7 @@ describe('rest POST', () => {
 			});
 			await expect(
 				basicHandler({ someString: 'some string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 409,
 				message: `MainType ${mainCode} already exists`,
 			});
@@ -159,7 +159,9 @@ describe('rest POST', () => {
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
-			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
+			await expect(
+				basicHandler({ code: 'wrong-code' }),
+			).rejects.httpError({
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
@@ -169,7 +171,7 @@ describe('rest POST', () => {
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
 				basicHandler({ notInSchema: 'a string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});
@@ -243,8 +245,10 @@ describe('rest POST', () => {
 					children: [childCode],
 					parents: [parentCode],
 				}),
-			).rejects.toThrow(/Missing related node/);
-			// { status: 400, message: expect.toMatch(
+			).rejects.httpError({
+				status: 400,
+				message: /Missing related node/,
+			});
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 
@@ -289,6 +293,33 @@ describe('rest POST', () => {
 					},
 				);
 		});
+
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const { status, body } = await basicHandler(
+				{
+					children: [childCode],
+					parents: [parentCode],
+				},
+				{ upsert: true, richRelationships: true },
+				getMetaPayload(),
+			);
+
+			expect(status).toBe(200);
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.create,
+				}),
+			);
+
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.create,
+				}),
+			);
+		});
 	});
 
 	describe('restricted types', () => {
@@ -300,7 +331,7 @@ describe('rest POST', () => {
 					type: 'RestrictedType',
 					code: restrictedCode,
 				}),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: `RestrictedTypes can only be created by restricted-type-creator`,
 			});
@@ -321,7 +352,7 @@ describe('rest POST', () => {
 		});
 	});
 
-	describe.skip('field locking', () => {
+	describe('field locking', () => {
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
@@ -333,16 +364,16 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -358,18 +389,18 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
 				anotherString: 'another string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
 					anotherString: 'another string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -382,16 +413,16 @@ describe('rest POST', () => {
 				},
 			);
 
-			expect(status).ToBe(200);
+			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				someString: 'some string',
-				_lockedFields: `{"someString":${lockClient}}`,
+				_lockedFields: `{"someString":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someString: 'some string',
-					_lockedFields: `{"someString":${lockClient}}`,
+					_lockedFields: `{"someString":"${lockClient}"}`,
 				});
 		});
 
@@ -401,7 +432,7 @@ describe('rest POST', () => {
 					{ someString: 'some string' },
 					{ lockFields: 'all' },
 				),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: /clientId needs to be set to a valid system code in order to lock fields/,
 			});

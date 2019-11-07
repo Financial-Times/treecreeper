@@ -73,7 +73,10 @@ describe('rest POST (absorb)', () => {
 						codeToAbsorb: `${absorbedCode}@@@@@`,
 					}),
 				),
-			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
+			).rejects.httpError({
+				status: 400,
+				message: /Invalid value.+codeToAbsorb/,
+			});
 		});
 
 		it('errors if no code to absorb supplied', async () => {
@@ -85,7 +88,10 @@ describe('rest POST (absorb)', () => {
 						code: mainCode,
 					}),
 				),
-			).rejects.toThrow(/Invalid value.+codeToAbsorb/);
+			).rejects.httpError({
+				status: 400,
+				message: /Invalid value.+codeToAbsorb/,
+			});
 			await neo4jTest('MainType', mainCode).match({
 				code: mainCode,
 			});
@@ -96,7 +102,7 @@ describe('rest POST (absorb)', () => {
 				code: absorbedCode,
 				someString: 'fake1',
 			});
-			await expect(absorbHandler()(getInput())).rejects.toThrow({
+			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
 				message: `MainType record missing for \`code\``,
 			});
@@ -111,7 +117,7 @@ describe('rest POST (absorb)', () => {
 				code: mainCode,
 				someString: 'fake2',
 			});
-			await expect(absorbHandler()(getInput())).rejects.toThrow({
+			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
 				message: `MainType record missing for \`codeToAbsorb\``,
 			});
@@ -329,6 +335,36 @@ describe('rest POST (absorb)', () => {
 					);
 
 				await neo4jTest('MainType', absorbedCode).notExists();
+			});
+		});
+
+		describe('rich relationship information', () => {
+			it('returns record with rich relationship information if richRelationships query is true', async () => {
+				const [, absorbed] = await createNodePair();
+				const child = await createNode('ChildType', childCode);
+				const parent = await createNode('ParentType', parentCode);
+				await connectNodes(absorbed, 'HAS_CHILD', child);
+				await connectNodes(parent, 'IS_PARENT_OF', absorbed);
+
+				const { status, body } = await absorb({
+					...getInput(),
+					query: { richRelationships: true },
+				});
+
+				expect(status).toBe(200);
+
+				body.children.forEach(relationship =>
+					expect(relationship).toMatchObject({
+						code: childCode,
+						...meta.default,
+					}),
+				);
+				body.parents.forEach(relationship =>
+					expect(relationship).toMatchObject({
+						code: parentCode,
+						...meta.default,
+					}),
+				);
 			});
 		});
 	});

@@ -8,21 +8,27 @@ const { getSchemaFilename } = require('../../packages/schema-file-name');
 jest.useFakeTimers();
 
 // Skipping for now as the consant refactors play havoc with jest's mocking
-describe.skip('schema polling updates', () => {
+describe('schema polling updates', () => {
 	describe('api updates', () => {
 		let app;
 		beforeAll(async () => {
 			process.env.NODE_ENV = 'production';
+			delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
+			process.env.TREECREEPER_SCHEMA_URL = 'http://example.com';
 			schemaPublisher.sendSchemaToS3 = jest.fn();
 
 			fetch.config.fallbackToNetwork = false;
 			fetch
 				.getOnce(
-					`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
+					`${
+						process.env.TREECREEPER_SCHEMA_URL
+					}/${getSchemaFilename()}`,
 					{ version: 'not-null' },
 				)
 				.getOnce(
-					`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
+					`${
+						process.env.TREECREEPER_SCHEMA_URL
+					}/${getSchemaFilename()}`,
 					{
 						version: 'new-test',
 						schema: {
@@ -99,7 +105,9 @@ describe.skip('schema polling updates', () => {
 
 				fetch
 					.getOnce(
-						`${process.env.SCHEMA_BASE_URL}/${getSchemaFilename()}`,
+						`${
+							process.env.TREECREEPER_SCHEMA_URL
+						}/${getSchemaFilename()}`,
 						{
 							version: 'new-test2',
 							schema: {
@@ -178,16 +186,14 @@ describe.skip('schema polling updates', () => {
 
 	// Not testing this as directly as I'd like as it's tricky
 	it('reinitialises database contraints', async () => {
-		const on = jest.fn();
+		const onChange = jest.fn();
 		jest.doMock('../../packages/schema-sdk', () => ({
-			updater: {
-				on,
-				configure: () => null,
-				startPolling: () => Promise.resolve(),
-			},
+			init: () => null,
+			onChange,
+			ready: () => Promise.resolve(),
 		}));
 		const { initConstraints } = require('../server/init-db');
-		expect(on).toHaveBeenCalledWith('change', initConstraints);
+		expect(onChange).toHaveBeenCalledWith(initConstraints);
 		jest.dontMock('../../packages/schema-sdk');
 	});
 });

@@ -342,7 +342,9 @@ describe('rest PATCH update', () => {
 		});
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await createMainNode();
-			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
+			await expect(
+				basicHandler({ code: 'wrong-code' }),
+			).rejects.httpError({
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
@@ -352,7 +354,7 @@ describe('rest PATCH update', () => {
 			await createMainNode();
 			await expect(
 				basicHandler({ notInSchema: 'a string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});

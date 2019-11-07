@@ -8,9 +8,13 @@ const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 
 const postHandler = ({ documentStore } = {}) => async input => {
-	const { type, code, body: originalBody, metadata = {} } = validateInput(
-		input,
-	);
+	const {
+		type,
+		code,
+		body: originalBody,
+		metadata = {},
+		query: { richRelationships } = {},
+	} = validateInput(input);
 	const { clientId } = metadata;
 
 	const { documents = {}, body } = documentStore
@@ -41,7 +45,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		)
 			.constructProperties()
 			.createRelationships()
-			.setLockFields(documents)
+			.setLockFields()
 			.execute();
 
 		const relationships = {
@@ -50,7 +54,10 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		logChanges('CREATE', neo4jResult, { relationships });
 
 		const responseData = Object.assign(
-			neo4jResult.toJson({ type }),
+			neo4jResult.toJson({
+				type,
+				richRelationshipsFlag: richRelationships,
+			}),
 			newBodyDocs,
 		);
 

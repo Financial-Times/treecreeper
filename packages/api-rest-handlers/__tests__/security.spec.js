@@ -60,9 +60,10 @@ describe('rest security', () => {
 						code: mainCode,
 					};
 					modifier(input);
-					await expect(handler(input)).rejects.toThrow(
-						expect.objectContaining({ status: 400 }),
-					);
+					await expect(handler(input)).rejects.httpError({
+						status: 400,
+						message: /Invalid .*/,
+					});
 				});
 			});
 		});

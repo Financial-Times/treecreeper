@@ -1,3 +1,4 @@
+const httpErrors = require('http-errors');
 const express = require('express');
 const { logger, setContext } = require('@treecreeper/api-express-logger');
 const {
@@ -22,13 +23,20 @@ const requestLog = (endpointName, method, req) => {
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
-// const unimplemented = (endpointName, method, alternativeMethod) => req => {
-// 	requestLog(endpointName, method, req);
-// 	throw httpErrors(
-// 		405,
-// 		`${method} is unimplemented. Use ${alternativeMethod}`,
-// 	);
-// };
+const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
+	let appMethod = req.method.toUpperCase();
+	if (appMethod === 'POST') {
+		const { type, code } = req.params;
+		// the ABOSRB method doesn't exist in HTTP verb actually, so we can determine from accessing url
+		if (req.url.indexOf(`/${type}/${code}/absorb`) === 0) {
+			appMethod = 'ABSORB';
+		}
+	}
+	if (!allowedRestMethods.includes(appMethod)) {
+		throw httpErrors(405, `${appMethod} is unimplemented`);
+	}
+	next();
+};
 
 const controller = (method, handler) => (req, res, next) => {
 	requestLog('rest', method, req);
@@ -63,8 +71,14 @@ const getRestApi = (config = {}) => {
 	// 	// updateStream, // : kinesisAdaptor
 	// } = {}) => {
 	const router = new express.Router();
+	const {
+		restMethods = ['HEAD', 'GET', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
+	} = config;
+	const allowedMethods = restMethods.map(method => method.toUpperCase());
+
 	router
 		.route('/:type/:code')
+		.all(allowedMethodsMiddleware(allowedMethods))
 		.head(controller('HEAD', headHandler(config)))
 		.get(controller('GET', getHandler(config)))
 		.post(controller('POST', postHandler(config)))
@@ -74,6 +88,7 @@ const getRestApi = (config = {}) => {
 
 	router.post(
 		'/:type/:code/absorb/:codeToAbsorb',
+		allowedMethodsMiddleware(allowedMethods),
 		controller('ABSORB', absorbHandler(config)),
 	);
 

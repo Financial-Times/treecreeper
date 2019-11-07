@@ -1,8 +1,8 @@
 module.exports = {
 	files: {
 		allow: [
-			'api/scripts/neo4j-plugins',
-			'api/scripts/neo4j-wait-for-start',
+			'scripts/neo4j-plugins',
+			'scripts/neo4j-wait-for-start',
 			'api/__tests__/mocha.opts'
 		],
 		allowOverrides: []

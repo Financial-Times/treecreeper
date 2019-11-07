@@ -18,7 +18,7 @@ class SchemaUpdater {
 		ttl = 60000,
 		logger = console,
 		version,
-		schemaBaseUrl,
+		schemaBaseUrl = process.env.TREECREEPER_SCHEMA_URL,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
 		schemaData,
 	} = {}) {

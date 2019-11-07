@@ -165,12 +165,12 @@ const queryBuilder = (method, input, body = {}) => {
 		return builder;
 	};
 
-	const setLockFields = bodyDocuments => {
-		const lockedFields = setLockedFields(
+	const setLockFields = () => {
+		const lockedFields = setLockedFields({
 			clientId,
-			lockFields,
-			bodyDocuments,
-		);
+			lockFieldList: lockFields,
+			body,
+		});
 		updateProperties({
 			_lockedFields: Object.keys(lockedFields).length
 				? JSON.stringify(lockedFields)

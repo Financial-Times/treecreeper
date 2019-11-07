@@ -216,7 +216,7 @@ describe('rest document store integration', () => {
 							handler({ documentStore })(
 								getInput({ someDocument }),
 							),
-						).rejects.toThrow({
+						).rejects.httpError({
 							status: 409,
 							message: `MainType ${mainCode} already exists`,
 						});

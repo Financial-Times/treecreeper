@@ -1,5 +1,6 @@
 const _isEmpty = require('lodash.isempty');
 const { logger } = require('@treecreeper/api-express-logger');
+const httpErrors = require('http-errors');
 
 const normalizeFields = (fieldParam, body = {}) => {
 	if (!fieldParam) {
@@ -34,27 +35,33 @@ const removeLockedFields = (clientId, unlockFields, existingLockedFields) => {
 	});
 	return removedFields;
 };
-
-const setLockedFields = (clientId, lockFieldList, existingLockedFields) => {
-	const conflictFields = normalizeFields(lockFieldList).reduce(
-		(conflicts, fieldName) => {
-			const lockedByExistingClientId = existingLockedFields[fieldName];
-			if (
-				lockedByExistingClientId &&
-				lockedByExistingClientId !== clientId
-			) {
-				conflicts.push(
-					`${fieldName} is locked by ${lockedByExistingClientId}`,
-				);
-			}
-			existingLockedFields[fieldName] = clientId;
-			return conflicts;
-		},
-		[],
-	);
+const setLockedFields = ({
+	clientId,
+	lockFieldList,
+	existingLockedFields = {},
+	body = {},
+}) => {
+	const fieldsToLock = normalizeFields(lockFieldList, body);
+	if (fieldsToLock.length && !clientId) {
+		throw httpErrors(
+			400,
+			'clientId needs to be set to a valid system code in order to lock fields',
+		);
+	}
+	const conflictFields = fieldsToLock.reduce((conflicts, fieldName) => {
+		const lockedByExistingClientId = existingLockedFields[fieldName];
+		if (lockedByExistingClientId && lockedByExistingClientId !== clientId) {
+			conflicts.push(
+				`${fieldName} is locked by ${lockedByExistingClientId}`,
+			);
+		}
+		existingLockedFields[fieldName] = clientId;
+		return conflicts;
+	}, []);
 
 	if (conflictFields.length) {
-		throw new Error(
+		throw httpErrors(
+			409,
 			`The following fields cannot be locked because they are locked by another client: ${conflictFields.join(
 				', ',
 			)}`,
@@ -78,7 +85,8 @@ const validatePropertiesAgainstLocked = (clientId, body, newLockedFields) => {
 	}, []);
 
 	if (clashes.length) {
-		throw new Error(
+		throw httpErrors(
+			409,
 			`The following fields cannot be written because they are locked by another client: ${clashes.join(
 				', ',
 			)}`,
@@ -101,7 +109,8 @@ const mergeLockedFields = ({
 	let lockFieldList = [];
 	if (lockFields.length > 0) {
 		if (!clientId) {
-			throw new Error(
+			throw httpErrors(
+				400,
 				'clientId needs to be set to a valid system code in order to lock fields',
 			);
 		}
@@ -115,11 +124,11 @@ const mergeLockedFields = ({
 			? removeLockedFields(clientId, unlockFields, existingLockedFields)
 			: {};
 	}
-	const newLockedFields = setLockedFields(
+	const newLockedFields = setLockedFields({
 		clientId,
 		lockFieldList,
-		unchangedLockFields,
-	);
+		existingLockedFields: unchangedLockFields,
+	});
 
 	if (needValidate) {
 		validatePropertiesAgainstLocked(clientId, body, newLockedFields);

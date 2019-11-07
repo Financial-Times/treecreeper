@@ -36,7 +36,7 @@ describe('rest PATCH relationship create', () => {
 			basicHandler({
 				children: [childCode],
 			}),
-		).rejects.toThrow({
+		).rejects.httpError({
 			status: 400,
 			message:
 				'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
@@ -129,7 +129,10 @@ describe('rest PATCH relationship create', () => {
 					basicHandler({
 						favouriteChild: [childCode1, childCode2],
 					}),
-				).rejects.toThrow(/Can only have one favouriteChild/);
+				).rejects.httpError({
+					status: 400,
+					message: /Can only have one favouriteChild/,
+				});
 
 				await neo4jTest('MainType', mainCode).noRels();
 			});
@@ -564,7 +567,10 @@ describe('rest PATCH relationship create', () => {
 					await createMainNode();
 					await expect(
 						handler({ children: [childCode] }),
-					).rejects.toThrow('Missing related node');
+					).rejects.httpError({
+						status: 400,
+						message: 'Missing related node',
+					});
 				});
 
 				it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -635,6 +641,41 @@ describe('rest PATCH relationship create', () => {
 						);
 				});
 			});
+		});
+	});
+
+	describe('rich relationship information', () => {
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const parentCode = `${namespace}-parent`;
+			await createMainNode();
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+
+			const { body, status } = await basicHandler(
+				{ children: childCode, parents: parentCode },
+				{
+					upsert: true,
+					relationshipAction: 'merge',
+					richRelationships: true,
+				},
+			);
+
+			expect(status).toBe(200);
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.create,
+				}),
+			);
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.create,
+				}),
+			);
 		});
 	});
 });

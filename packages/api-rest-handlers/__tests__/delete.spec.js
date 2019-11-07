@@ -36,15 +36,15 @@ describe('rest DELETE', () => {
 			[parent, 'IS_PARENT_OF', main],
 		);
 
-		await expect(deleteHandler()(input)).rejects.toThrow({
-			status: 400,
+		await expect(deleteHandler()(input)).rejects.httpError({
+			status: 409,
 			message: `Cannot delete - MainType ${mainCode} has relationships.`,
 		});
 		await neo4jTest('MainType', mainCode).exists();
 	});
 
 	it('throws 404 error if no record', async () => {
-		await expect(deleteHandler()(input)).rejects.toThrow({
+		await expect(deleteHandler()(input)).rejects.httpError({
 			status: 404,
 			message: `MainType ${mainCode} does not exist`,
 		});

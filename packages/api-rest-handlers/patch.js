@@ -20,7 +20,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			type,
 			code,
 			body: originalBody,
-			query: { relationshipAction } = {},
+			query: { relationshipAction, richRelationships } = {},
 		} = validateInput(input);
 
 		if (containsRelationshipData(type, originalBody)) {
@@ -56,7 +56,10 @@ const patchHandler = ({ documentStore } = {}) => {
 			let neo4jResultBody;
 			if (builder.isNeo4jUpdateNeeded()) {
 				const { neo4jResult, queryContext } = await builder.execute();
-				neo4jResultBody = neo4jResult.toJson({ type });
+				neo4jResultBody = neo4jResult.toJson({
+					type,
+					richRelationshipsFlag: richRelationships,
+				});
 				const relationships = {
 					added: queryContext.addedRelationships,
 					removed: queryContext.removedRelationships,
