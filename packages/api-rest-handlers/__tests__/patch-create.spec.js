@@ -138,7 +138,9 @@ describe('rest PATCH create', () => {
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
-			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
+			await expect(
+				basicHandler({ code: 'wrong-code' }),
+			).rejects.httpError({
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
@@ -148,7 +150,7 @@ describe('rest PATCH create', () => {
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
 				basicHandler({ notInSchema: 'a string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});
@@ -172,7 +174,7 @@ describe('rest PATCH create', () => {
 					type: 'RestrictedType',
 					code: restrictedCode,
 				}),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: `RestrictedTypes can only be created by restricted-type-creator`,
 			});

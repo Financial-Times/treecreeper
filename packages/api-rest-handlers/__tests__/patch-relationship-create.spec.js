@@ -36,7 +36,7 @@ describe('rest PATCH relationship create', () => {
 			basicHandler({
 				children: [childCode],
 			}),
-		).rejects.toThrow({
+		).rejects.httpError({
 			status: 400,
 			message:
 				'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
@@ -129,7 +129,10 @@ describe('rest PATCH relationship create', () => {
 					basicHandler({
 						favouriteChild: [childCode1, childCode2],
 					}),
-				).rejects.toThrow(/Can only have one favouriteChild/);
+				).rejects.httpError({
+					status: 400,
+					message: /Can only have one favouriteChild/,
+				});
 
 				await neo4jTest('MainType', mainCode).noRels();
 			});
@@ -564,7 +567,10 @@ describe('rest PATCH relationship create', () => {
 					await createMainNode();
 					await expect(
 						handler({ children: [childCode] }),
-					).rejects.toThrow('Missing related node');
+					).rejects.httpError({
+						status: 400,
+						message: 'Missing related node',
+					});
 				});
 
 				it('create node related to non-existent nodes when using upsert=true', async () => {

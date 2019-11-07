@@ -35,37 +35,37 @@ deploy-aws:
 
 test:
 	@if [ -z $(CI) ]; \
-		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest --config="./jest.config.js"-junit; \
 	fi
 
 test-pkg:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch ; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch ; \
 
 test-schema:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 
 test-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 
 test-ql:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "api/.*__tests__.*/graphql.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "api/.*__tests__.*/graphql.spec.js" --testEnvironment=node --watch; \
 
 
 test-pkg-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
 
 test-pkg-docstore:
-	TREECREEPER_DOCSTORE_S3_BUCKET=example-bucket DEBUG=true TIMEOUT=500000 jest "packages/api-s3-document-store/__tests__/.*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_DOCSTORE_S3_BUCKET=example-bucket DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-s3-document-store/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
 test-pkg-rest-handlers:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/.*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-rest-handlers/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
 test-api-docs:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch; \
 
 test-pkg-api-publish:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
 
 run:

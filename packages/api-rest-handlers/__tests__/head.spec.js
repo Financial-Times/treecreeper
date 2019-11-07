@@ -41,7 +41,7 @@ describe('rest HEAD', () => {
 	});
 
 	it('throws 404 error if no record', async () => {
-		await expect(getHandler()(input)).rejects.toThrow({
+		await expect(getHandler()(input)).rejects.httpError({
 			status: 404,
 			message: `MainType ${mainCode} does not exist`,
 		});
