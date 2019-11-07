@@ -188,6 +188,7 @@ describe('rest POST', () => {
 
 	describe('creating relationships', () => {
 		const childCode = `${namespace}-child`;
+		const childCodeTwo = `${namespace}-child-2`;
 		const parentCode = `${namespace}-parent`;
 
 		it('creates record related to existing records', async () => {
@@ -294,46 +295,176 @@ describe('rest POST', () => {
 				);
 		});
 
-		it('returns record with rich relationship information if richRelationships query is true', async () => {
-			const { status, body } = await basicHandler(
-				{
-					children: [childCode],
-					parents: [parentCode],
-				},
-				{ upsert: true, richRelationships: true },
-				getMetaPayload(),
-			);
+		describe('rich relatioship information', () => {
+			const someProp = 'some property';
+			const anotherProp = 'another property';
+			const childRelationshipProps = { code: childCode, someProp };
+			const childRelationshipTwoProps = { code: childCode, someProp, anotherProp };
+			const childTwoRelationshipProps = {
+				code: childCodeTwo,
+				anotherProp,
+			};
+			const parentRelationshipProps = { code: parentCode, anotherProp };
 
-			expect(status).toBe(200);
+			it('returns record with rich relationship information if richRelationships query is true', async () => {
+				const { status, body } = await basicHandler(
+					{ children: [childCode], parents: [parentCode] },
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
 
-			body.children.forEach(relationship =>
-				expect(relationship).toMatchObject({
-					code: childCode,
-					...meta.create,
-				}),
-			);
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [{ code: childCode, ...meta.create }],
+					parents: [{ code: parentCode, ...meta.create }],
+				});
+			});
 
-			body.parents.forEach(relationship =>
-				expect(relationship).toMatchObject({
-					code: parentCode,
-					...meta.create,
-				}),
-			);
-		});
+			it('creates record with relationship which has properties (one child one prop)', async () => {
+				const { status, body } = await basicHandler(
+					{ children: [childRelationshipProps] },
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
 
-		it('creates record with relationship which has properties', async () => {
-			const relationshipProps = { code: childCode, someProp: 'some property' };
-			const { status, body } = await basicHandler(
-				{ children: [ relationshipProps ] },
-				{ upsert: true, richRelationships: true },
-				getMetaPayload(),
-			);
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [{ ...childRelationshipProps, ...meta.create }],
+				});
 
-			expect(status).toBe(200);
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { someProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					);
+			});
 
-			body.children.forEach(relationship =>
-				expect(relationship).toMatchObject({ ...relationshipProps, ...meta.create }),
-			);
+			it('creates record with relationship which has properties (one child two props)', async () => {
+				const { status, body } = await basicHandler(
+					{ children: [childRelationshipTwoProps] },
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [{ ...childRelationshipTwoProps, ...meta.create }],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { someProp, anotherProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationship which has properties (two children)', async () => {
+				const { status, body } = await basicHandler(
+					{
+						children: [
+							childRelationshipProps,
+							childTwoRelationshipProps,
+						],
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [
+						{ ...childRelationshipProps, ...meta.create },
+						{ ...childTwoRelationshipProps, ...meta.create },
+					],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(2)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { someProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { anotherProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCodeTwo, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationship which has properties (child and parent)', async () => {
+				const { status, body } = await basicHandler(
+					{
+						children: [childRelationshipProps],
+						parents: [parentRelationshipProps]
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [{ ...childRelationshipProps, ...meta.create }],
+					parents: [{ ...parentRelationshipProps, ...meta.create }],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(2)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { someProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					)
+					.hasRel(
+						{
+							type: 'IS_PARENT_OF',
+							direction: 'incoming',
+							props: { anotherProp, ...meta.create },
+						},
+						{
+							type: 'ParentType',
+							props: { code: parentCode, ...meta.create },
+						},
+					);
+			});
 		});
 	});
 
