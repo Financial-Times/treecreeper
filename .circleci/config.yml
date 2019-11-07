@@ -72,7 +72,7 @@ jobs:
             make init-db
       - run:
           name: Run v2 tests
-          command: make test
+          command: make setup-packages && make test
           environment:
             JEST_JUNIT_OUTPUT: "junit/test-results.xml"
       - store_test_results:
