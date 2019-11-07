@@ -134,14 +134,13 @@ const getType = function(
 
 	if (withRelationships) {
 		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
+			if (def.relationship || def.cypher) {
 				if (def.hidden) {
 					delete typeSchema.properties[propName];
 				}
 				Object.assign(def, {
 					hasMany: def.hasMany || false,
-					isRelationship: !!def.relationship,
-					isRecursive: def.isRecursive || false,
+					isRelationship: !!(def.relationship || def.cypher),
 					writeInactive:
 						'writeInactive' in def ? def.writeInactive : false,
 					showInactive:
