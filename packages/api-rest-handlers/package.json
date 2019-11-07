@@ -3,11 +3,8 @@
   "version": "0.0.1",
   "description": "Treecreeper&tm; functions for handling CRUD actions via a RESTful interface.",
   "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest  --testEnvironment=node"
+    "test": "cross-env TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +19,13 @@
     "neo4j-driver": "^1.7.6"
   },
   "devDependencies": {
-    "@treecreeper/api-s3-document-store": "^0.0.1"
+    "@treecreeper/api-s3-document-store": "^0.0.1",
+    "cross-env": "^6.0.3"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../test-helpers/jest.env.js",
+      "../../test-helpers/extend-jest.js"
+    ]
   }
 }

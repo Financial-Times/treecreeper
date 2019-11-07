@@ -4,7 +4,7 @@
   "description": "stuff to babysit db constraints based on schema",
   "main": "index.js",
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema jest --testEnvironment=node"
+    "test": "cross-env TREECREEPER_SCHEMA_DIRECTORY=../../example-schema jest --testEnvironment=node"
   },
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
@@ -14,5 +14,11 @@
     "next-metrics": "^3.1.22"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^6.0.3"
+  },
+  "jest": {
+    "setupFilesAfterEnv": ["../../test-helpers/jest.env.js"]
+  }
 }

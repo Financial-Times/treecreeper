@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node"
+    "test": "cross-env TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=true TIMEOUT=500000 jest --testEnvironment=node"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +16,13 @@
     "@treecreeper/api-express-logger": "^0.0.1",
     "@treecreeper/schema-sdk": "^0.0.1",
     "lodash.groupby": "^4.6.0"
+  },
+  "devDependencies": {
+    "cross-env": "^6.0.3"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../test-helpers/jest.env.js"
+    ]
   }
 }

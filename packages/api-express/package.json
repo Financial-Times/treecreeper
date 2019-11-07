@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=TRUE TIMEOUT=500000 jest \"__tests__/.*.spec.js\" --testEnvironment=node"
+    "test": "cross-env TREECREEPER_SCHEMA_DIRECTORY=../../example-schema DEBUG=TRUE TIMEOUT=500000 jest \"__tests__/.*.spec.js\" --testEnvironment=node"
   },
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
@@ -26,6 +26,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^6.0.3",
     "supertest": "^4.0.2"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../test-helpers/jest.env.js"
+    ]
   }
 }
