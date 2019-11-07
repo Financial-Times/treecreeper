@@ -59,6 +59,10 @@ jobs:
       - *attach_workspace
 
       - run:
+          name: Set up packages
+          command: make setup-packages
+
+      - run:
           name: Prepare neo4j database
           command: |
             java -version
@@ -72,7 +76,7 @@ jobs:
             make init-db
       - run:
           name: Run v2 tests
-          command: make setup-packages && make test
+          command: make test
           environment:
             JEST_JUNIT_OUTPUT: "junit/test-results.xml"
       - store_test_results:
