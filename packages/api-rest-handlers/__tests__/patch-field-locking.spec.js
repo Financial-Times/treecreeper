@@ -346,7 +346,7 @@ describe('rest PATCH field-locking', () => {
 							},
 						),
 					),
-				).rejects.toThrow({
+				).rejects.httpError({
 					status: 400,
 					message:
 						'clientId needs to be set to a valid system code in order to lock fields',
@@ -364,8 +364,8 @@ describe('rest PATCH field-locking', () => {
 
 				await expect(
 					lockHandler({ someString: 'new some string' }),
-				).rejects.toThrow({
-					status: 400,
+				).rejects.httpError({
+					status: 409,
 					message: `The following fields cannot be written because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 
@@ -381,8 +381,8 @@ describe('rest PATCH field-locking', () => {
 
 				await expect(
 					lockHandler(undefined, { lockFields: 'someString' }),
-				).rejects.toThrow({
-					status: 400,
+				).rejects.httpError({
+					status: 409,
 					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 
@@ -404,8 +404,8 @@ describe('rest PATCH field-locking', () => {
 						},
 						{ lockFields: 'all' },
 					),
-				).rejects.toThrow({
-					status: 400,
+				).rejects.httpError({
+					status: 409,
 					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
 				});
 				await neo4jTest('MainType', mainCode).match({

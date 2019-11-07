@@ -44,7 +44,7 @@ describe('rest PATCH relationship delete', () => {
 					basicHandler({
 						children: null,
 					}),
-				).rejects.toThrow({
+				).rejects.httpError({
 					status: 400,
 					message:
 						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
@@ -58,7 +58,7 @@ describe('rest PATCH relationship delete', () => {
 					basicHandler({
 						'!children': [childCode],
 					}),
-				).rejects.toThrow({
+				).rejects.httpError({
 					status: 400,
 					message:
 						'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
@@ -289,7 +289,7 @@ describe('rest PATCH relationship delete', () => {
 							children: [childCode],
 							'!children': [childCode],
 						}),
-					).rejects.toThrow({
+					).rejects.httpError({
 						status: 400,
 						message:
 							'Trying to add and remove a relationship to a record at the same time',

@@ -149,7 +149,7 @@ describe('rest POST', () => {
 			});
 			await expect(
 				basicHandler({ someString: 'some string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 409,
 				message: `MainType ${mainCode} already exists`,
 			});
@@ -159,7 +159,9 @@ describe('rest POST', () => {
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
-			await expect(basicHandler({ code: 'wrong-code' })).rejects.toThrow({
+			await expect(
+				basicHandler({ code: 'wrong-code' }),
+			).rejects.httpError({
 				status: 400,
 				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			});
@@ -169,7 +171,7 @@ describe('rest POST', () => {
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
 				basicHandler({ notInSchema: 'a string' }),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: 'Invalid property `notInSchema` on type `MainType`.',
 			});
@@ -243,8 +245,10 @@ describe('rest POST', () => {
 					children: [childCode],
 					parents: [parentCode],
 				}),
-			).rejects.toThrow(/Missing related node/);
-			// { status: 400, message: expect.toMatch(
+			).rejects.httpError({
+				status: 400,
+				message: /Missing related node/,
+			});
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 
@@ -300,7 +304,7 @@ describe('rest POST', () => {
 					type: 'RestrictedType',
 					code: restrictedCode,
 				}),
-			).rejects.toThrow({
+			).rejects.httpError({
 				status: 400,
 				message: `RestrictedTypes can only be created by restricted-type-creator`,
 			});
@@ -401,14 +405,10 @@ describe('rest POST', () => {
 					{ someString: 'some string' },
 					{ lockFields: 'all' },
 				),
-			).rejects.toThrow(
-				expect.objectContaining({
-					status: 400,
-					message: expect.stringMatching(
-						/clientId needs to be set to a valid system code in order to lock fields/,
-					),
-				}),
-			);
+			).rejects.httpError({
+				status: 400,
+				message: /clientId needs to be set to a valid system code in order to lock fields/,
+			});
 			await neo4jTest('MainType', mainCode).notExists();
 		});
 	});
