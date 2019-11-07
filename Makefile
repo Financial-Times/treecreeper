@@ -36,7 +36,7 @@ deploy-aws:
 test:
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest --config="./jest.config.js"-junit; \
+		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 test-pkg:
