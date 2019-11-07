@@ -293,6 +293,27 @@ describe('rest POST', () => {
 					},
 				);
 		});
+
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const { status, body } = await basicHandler(
+				{
+					children: [childCode],
+					parents: [parentCode],
+				},
+				{ upsert: true, richRelationships: true },
+				getMetaPayload(),
+			);
+
+			expect(status).toBe(200);
+
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: childCode, ...meta.create }),
+			);
+
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({ code: parentCode, ...meta.create }),
+			);
+		});
 	});
 
 	describe('restricted types', () => {

@@ -67,14 +67,15 @@ const constructOutput = ({
 								relationship === record.relationship() &&
 								propertyType === record.relatedType(),
 						)
-						.map(record =>
-							richRelationshipsFlag
+						.map(record => {
+							const convertedRelationshipsProps = convertNeo4jToJson(Object.assign({}, record.richRelationship().properties))
+							return richRelationshipsFlag
 								? {
-										...record.richRelationship().properties,
+										...convertedRelationshipsProps,
 										code: record.relatedCode(),
 								  }
-								: record.relatedCode(),
-						);
+								: record.relatedCode()
+						});
 
 					if (codes.length) {
 						response[propName] = hasMany ? codes : codes[0];

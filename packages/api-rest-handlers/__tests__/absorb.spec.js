@@ -337,5 +337,35 @@ describe('rest POST (absorb)', () => {
 				await neo4jTest('MainType', absorbedCode).notExists();
 			});
 		});
+
+		describe('rich relationship information', () => {
+			it('returns record with rich relationship information if richRelationships query is true', async () => {
+				const [, absorbed] = await createNodePair();
+				const child = await createNode('ChildType', childCode);
+				const parent = await createNode('ParentType', parentCode);
+				await connectNodes(absorbed, 'HAS_CHILD', child);
+				await connectNodes(parent, 'IS_PARENT_OF', absorbed);
+
+				const { status, body } = await absorb({
+					...getInput(),
+					query: { richRelationships: true },
+				});
+
+				expect(status).toBe(200);
+
+				body.children.forEach(relationship =>
+					expect(relationship).toMatchObject({
+						code: childCode,
+						...meta.default,
+					}),
+				);
+				body.parents.forEach(relationship =>
+					expect(relationship).toMatchObject({
+						code: parentCode,
+						...meta.default,
+					}),
+				);
+			});
+		});
 	});
 });

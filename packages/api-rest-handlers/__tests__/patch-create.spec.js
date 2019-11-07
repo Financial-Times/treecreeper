@@ -7,9 +7,9 @@ describe('rest PATCH create', () => {
 	const namespace = 'api-rest-handlers-patch-create';
 	const mainCode = `${namespace}-main`;
 
-	const { meta, getMetaPayload } = setupMocks(namespace);
+	const { meta, getMetaPayload, createNodes } = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -192,6 +192,36 @@ describe('rest PATCH create', () => {
 
 			expect(status).toBe(201);
 			await neo4jTest('RestrictedType', restrictedCode).exists();
+		});
+	});
+
+	describe('rich relationship information', () => {
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const childCode = `${namespace}-child`;
+			const parentCode = `${namespace}-parent`;
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+
+			const { body, status } = await basicHandler(
+				{ children: childCode, parents: parentCode },
+				{ relationshipAction: 'merge', richRelationships: true }
+			);
+
+			expect(status).toBe(201);
+			body.children.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.create,
+				}),
+			);
+			body.parents.forEach(relationship =>
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.create,
+				}),
+			);
 		});
 	});
 });
