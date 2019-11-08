@@ -299,7 +299,11 @@ describe('rest POST', () => {
 			const someProp = 'some property';
 			const anotherProp = 'another property';
 			const childRelationshipProps = { code: childCode, someProp };
-			const childRelationshipTwoProps = { code: childCode, someProp, anotherProp };
+			const childRelationshipTwoProps = {
+				code: childCode,
+				someProp,
+				anotherProp,
+			};
 			const childTwoRelationshipProps = {
 				code: childCodeTwo,
 				anotherProp,
@@ -357,7 +361,9 @@ describe('rest POST', () => {
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					children: [{ ...childRelationshipTwoProps, ...meta.create }],
+					children: [
+						{ ...childRelationshipTwoProps, ...meta.create },
+					],
 				});
 
 				await neo4jTest('MainType', mainCode)
@@ -427,7 +433,7 @@ describe('rest POST', () => {
 				const { status, body } = await basicHandler(
 					{
 						children: [childRelationshipProps],
-						parents: [parentRelationshipProps]
+						parents: [parentRelationshipProps],
 					},
 					{ upsert: true, richRelationships: true },
 					getMetaPayload(),
@@ -458,6 +464,49 @@ describe('rest POST', () => {
 							type: 'IS_PARENT_OF',
 							direction: 'incoming',
 							props: { anotherProp, ...meta.create },
+						},
+						{
+							type: 'ParentType',
+							props: { code: parentCode, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationships which has a property and also no property', async () => {
+				const { status, body } = await basicHandler(
+					{
+						children: [childRelationshipProps],
+						parents: [parentCode],
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					children: [{ ...childRelationshipProps, ...meta.create }],
+					parents: [{ code: parentCode, ...meta.create }],
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(2)
+					.hasRel(
+						{
+							type: 'HAS_CHILD',
+							direction: 'outgoing',
+							props: { someProp, ...meta.create },
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					)
+					.hasRel(
+						{
+							type: 'IS_PARENT_OF',
+							direction: 'incoming',
+							props: { ...meta.create },
 						},
 						{
 							type: 'ParentType',
