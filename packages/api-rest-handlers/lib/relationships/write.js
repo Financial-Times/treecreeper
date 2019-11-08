@@ -44,6 +44,23 @@ WHERE related.code IN $${key}
 `;
 };
 
+const addPropsToQueries = (relationshipPropQueries, value) => {
+	// value: { code: 'node code', someProp: 'some property'...}
+	Object.entries(value).forEach(([k, v]) => {
+		if (k !== 'code') {
+			// hack: CASE statement to either return an empty list or a list with one element.
+			// That result is passed to a FOREACH loop.
+			// If the result is an empty list, then the FOREACH clause won’t execute (because there’s nothing to iterate over.)
+			// If the result is a list with one element, then the FOREACH clause will execute once (because it iterated over one element.)
+			relationshipPropQueries.push(`
+				FOREACH (target in CASE related.code
+					WHEN '${value.code}' THEN [1]
+					ELSE [] END | SET relationship.${k} = '${v}')
+					`);
+		}
+	});
+};
+
 const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
@@ -71,13 +88,7 @@ const prepareToWriteRelationships = (
 			} else {
 				retrievedCodes.push(value.code);
 				isObjectIncluded = true;
-				if (value.someProp) {
-					relationshipPropQueries.push(
-						`WITH node, related, relationship
-						WHERE related.code = '${value.code}'
-						SET relationship.someProp = '${value.someProp}'`,
-					);
-				}
+				addPropsToQueries(relationshipPropQueries, value);
 			}
 		});
 
