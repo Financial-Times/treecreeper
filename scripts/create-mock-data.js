@@ -1,4 +1,4 @@
-const { patchHandler } = require('../packages/api-rest-handlers');
+const { patchHandler } = require('../packages/treecreeper-api-rest-handlers');
 
 const { schemaReady } = require('../api/server/lib/init-schema');
 
