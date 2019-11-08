@@ -72,6 +72,9 @@ test-api-docs:
 test-pkg-api-publish:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
+setup-packages:
+	npm run link-local
+	npm run install-all
 
 run:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js

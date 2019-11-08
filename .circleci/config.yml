@@ -59,6 +59,10 @@ jobs:
       - *attach_workspace
 
       - run:
+          name: Set up packages
+          command: make setup-packages
+
+      - run:
           name: Prepare neo4j database
           command: |
             java -version

@@ -22,3 +22,7 @@ for (const pkg of internalPackages) {
 }
 console.log(`linking this package`);
 execSync(`npm link`, { cwd: process.cwd() });
+
+if (existsSync('./package-lock.json')) {
+	unlinkSync('./package-lock.json');
+}
