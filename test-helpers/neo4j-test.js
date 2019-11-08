@@ -1,7 +1,7 @@
 /* global expect */
 const {
 	convertNeo4jToJson,
-} = require('../packages/api-rest-handlers/lib/neo4j-type-conversion');
+} = require('../packages/treecreeper-api-rest-handlers/lib/neo4j-type-conversion');
 const { driver } = require('./db-connection');
 
 const executeQuery = (query, parameters) =>

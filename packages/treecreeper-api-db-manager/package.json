@@ -1,0 +1,19 @@
+{
+  "name": "@financial-times/treecreeper-api-db-manager",
+  "version": "0.0.0",
+  "description": "stuff to babysit db constraints based on schema",
+  "main": "index.js",
+  "dependencies": {
+    "@financial-times/n-logger": "^6.1.0",
+    "@financial-times/treecreeper-api-express-logger": "file:../treecreeper-api-express-logger",
+    "@financial-times/treecreeper-schema-sdk": "file:../treecreeper-schema-sdk",
+    "neo4j-driver": "^1.7.6",
+    "next-metrics": "^3.1.22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  },
+  "author": "",
+  "license": "ISC"
+}

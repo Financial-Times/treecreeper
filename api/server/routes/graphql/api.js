@@ -5,8 +5,10 @@ const security = require('../../middleware/security');
 const maintenance = require('../../middleware/maintenance');
 const clientId = require('../../middleware/client-id');
 const { TIMEOUT } = require('../../constants');
-const { onChange } = require('../../../../packages/schema-sdk');
-const { sendSchemaToS3 } = require('../../../../packages/schema-publisher');
+const { onChange } = require('../../../../packages/treecreeper-schema-sdk');
+const {
+	sendSchemaToS3,
+} = require('../../../../packages/treecreeper-schema-publisher');
 
 let schemaVersionIsConsistent = true;
 let graphqlAPI;

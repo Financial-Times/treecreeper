@@ -1,9 +1,11 @@
 const fetch = require('node-fetch');
-const schemaPublisher = require('../../packages/schema-publisher');
+const schemaPublisher = require('../../packages/treecreeper-schema-publisher');
 const request = require('./helpers/supertest').getNamespacedSupertest(
 	'schema-polling',
 );
-const { getSchemaFilename } = require('../../packages/schema-file-name');
+const {
+	getSchemaFilename,
+} = require('../../packages/treecreeper-schema-file-name');
 
 jest.useFakeTimers();
 
@@ -187,13 +189,13 @@ describe('schema polling updates', () => {
 	// Not testing this as directly as I'd like as it's tricky
 	it('reinitialises database contraints', async () => {
 		const onChange = jest.fn();
-		jest.doMock('../../packages/schema-sdk', () => ({
+		jest.doMock('../../packages/treecreeper-schema-sdk', () => ({
 			init: () => null,
 			onChange,
 			ready: () => Promise.resolve(),
 		}));
 		const { initConstraints } = require('../server/init-db');
 		expect(onChange).toHaveBeenCalledWith(initConstraints);
-		jest.dontMock('../../packages/schema-sdk');
+		jest.dontMock('../../packages/treecreeper-schema-sdk');
 	});
 });

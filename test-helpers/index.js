@@ -1,7 +1,11 @@
 /* global jest beforeAll beforeEach afterEach afterAll */
-const lolex = require('lolex'); // eslint-disable-line import/no-extraneous-dependencies
-const dbConnection = require('./db-connection');
+
+/* eslint-disable import/no-extraneous-dependencies */
+const lolex = require('lolex');
 const { schemaReady } = require('../api/server/lib/init-schema');
+/* eslint-enable import/no-extraneous-dependencies */
+
+const dbConnection = require('./db-connection');
 
 const { neo4jTest } = require('./neo4j-test');
 const { fixtureBuilder, dropFixtures } = require('./test-fixtures');

@@ -53,9 +53,7 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "athloi run test",
-    "link-local": "athloi script scripts/link-local.js",
-    "unlink-local": "athloi exec npm unlink"
+    "package-version": "node scripts/package-version.js"
   },
   "repository": {
     "type": "git",
@@ -67,5 +65,7 @@
     "url": "https://github.com/Financial-Times/treecreeper/issues"
   },
   "homepage": "https://github.com/Financial-Times/treecreeper#readme",
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }

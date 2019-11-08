@@ -1,4 +1,4 @@
-const schema = require('../../../packages/schema-sdk');
+const schema = require('../../../packages/treecreeper-schema-sdk');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

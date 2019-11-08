@@ -1,0 +1,23 @@
+{
+  "name": "@financial-times/treecreeper-api-rest-handlers",
+  "version": "0.0.0",
+  "description": "Treecreeper&tm; functions for handling CRUD actions via a RESTful interface.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@financial-times/treecreeper-api-express-logger": "file:../treecreeper-api-express-logger",
+    "@financial-times/treecreeper-api-publish": "file:../treecreeper-api-publish",
+    "@financial-times/treecreeper-schema-sdk": "file:../treecreeper-schema-sdk",
+    "@financial-times/treecreeper-api-db-manager": "file:../treecreeper-api-db-manager",
+    "@financial-times/treecreeper-api-s3-document-store": "file:../treecreeper-api-s3-document-store",
+    "common-tags": "^1.8.0",
+    "http-errors": "^1.7.3",
+    "lodash.isempty": "^4.4.0",
+    "neo4j-driver": "^1.7.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  }
+}

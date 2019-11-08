@@ -1,1 +1,1 @@
-require('../../packages/schema-validator');
+require('../../packages/treecreeper-schema-validator');

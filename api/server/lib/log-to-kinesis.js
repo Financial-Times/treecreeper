@@ -1,5 +1,5 @@
 const groupBy = require('lodash.groupby');
-const { getType } = require('../../../packages/schema-sdk');
+const { getType } = require('../../../packages/treecreeper-schema-sdk');
 const { getContext } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');

@@ -1,5 +1,7 @@
 const { stripIndents } = require('common-tags');
-const { getType } = require('../../../../../../packages/schema-sdk');
+const {
+	getType,
+} = require('../../../../../../packages/treecreeper-schema-sdk');
 const { validateParams, validatePayload } = require('../../lib/validation');
 const {
 	dbErrorHandlers,

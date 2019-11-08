@@ -1,4 +1,4 @@
-const schema = require('../../../packages/schema-sdk');
+const schema = require('../../../packages/treecreeper-schema-sdk');
 
 schema.init({ updateMode: 'poll' });
 

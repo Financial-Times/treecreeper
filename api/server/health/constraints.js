@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getTypes } = require('../../../packages/schema-sdk');
+const { getTypes } = require('../../../packages/treecreeper-schema-sdk');
 const { logger } = require('../lib/request-context');
 const healthcheck = require('./healthcheck');
 const { executeQuery } = require('../lib/db-connection');

@@ -1,0 +1,27 @@
+{
+  "name": "@financial-times/treecreeper-api-express",
+  "version": "0.0.0",
+  "description": "Treecreeper&tm; api to sit in front of a neo4j database instance. It provides",
+  "main": "index.js",
+  "dependencies": {
+    "@financial-times/n-logger": "^6.1.0",
+    "@financial-times/treecreeper-api-db-manager": "file:../treecreeper-api-db-manager",
+    "@financial-times/treecreeper-api-express-logger": "file:../treecreeper-api-express-logger",
+    "@financial-times/treecreeper-api-graphql": "file:../treecreeper-api-graphql",
+    "@financial-times/treecreeper-api-rest-handlers": "file:../treecreeper-api-rest-handlers",
+    "@financial-times/treecreeper-schema-file-name": "file:../treecreeper-schema-file-name",
+    "@financial-times/treecreeper-schema-sdk": "file:../treecreeper-schema-sdk",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "http-errors": "^1.7.3",
+    "supertest": "^4.0.2",
+    "uuid": "^3.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
