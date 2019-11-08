@@ -42,6 +42,7 @@ jobs:
           name: Install dependencies
           command: |
             npm install --no-save
+            make install-monorepo
       - run:
           name: Get test env vars
           command: make env
@@ -57,10 +58,6 @@ jobs:
     <<: *default_container_config
     steps:
       - *attach_workspace
-
-      - run:
-          name: Set up packages
-          command: make setup-packages
 
       - run:
           name: Prepare neo4j database
