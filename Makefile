@@ -81,7 +81,7 @@ run-db:
 	docker-compose up
 
 init-db:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/treecreeper-api-db-manager/index.js
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
 
 # load-testing
 load-test-run:
