@@ -618,22 +618,23 @@ describe('rest PATCH relationship create', () => {
 	describe('rich relationship information', () => {
 		const someProp = 'some property';
 		const anotherProp = 'another property';
+		const queries = {
+			upsert: true,
+			relationshipAction: 'merge',
+			richRelationships: true,
+		}
+
 		const childRelationshipProps = { code: childCode, someProp };
 		const childRelationshipTwoProps = {
 			code: childCode,
 			someProp,
 			anotherProp,
 		};
-		const childTwoRelationshipProps = {
+		const child2RelationshipProps = {
 			code: childCode2,
 			anotherProp,
 		};
 		const parentRelationshipProps = { code: parentCode, anotherProp };
-		const queries = {
-			upsert: true,
-			relationshipAction: 'merge',
-			richRelationships: true,
-		}
 
 		it('returns record with rich relationship information if richRelationships query is true', async () => {
 			await createMainNode();
@@ -728,7 +729,7 @@ describe('rest PATCH relationship create', () => {
 				{
 					children: [
 						childRelationshipProps,
-						childTwoRelationshipProps,
+						child2RelationshipProps,
 					],
 				},
 				queries,
@@ -738,9 +739,10 @@ describe('rest PATCH relationship create', () => {
 			expect(body).toMatchObject({
 				children: [
 					{ ...childRelationshipProps, ...meta.create },
-					{ ...childTwoRelationshipProps, ...meta.create },
+					{ ...child2RelationshipProps, ...meta.create },
 				],
 			});
+
 			await neo4jTest('MainType', mainCode)
 				.match(meta.update)
 				.hasRels(2)
