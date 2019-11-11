@@ -54,7 +54,7 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "package-version": "node scripts/package-version.js"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
