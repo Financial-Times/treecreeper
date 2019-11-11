@@ -33,10 +33,9 @@ install:
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
-TARGET=$(or ${target}, ".*")
 test:
 	@if [ -z $(CI) ]; \
-		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "${TARGET}/__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" ".*/__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
@@ -71,10 +70,6 @@ test-api-docs:
 
 test-pkg-api-publish:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
-
-setup-packages:
-	npm run link-local
-	npm run install-all
 
 run:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
