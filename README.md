@@ -24,6 +24,12 @@ Install dependencies:
 make install
 ```
 
+And also install monorepo dependencies:
+
+```shell
+make install-monorepo
+```
+
 Start the [neo4j](https://neo4j.com/) community edition database. This requires the [APOC procedures](http://github.com/neo4j-contrib/neo4j-apoc-procedures) library to be added to a `plugins` directory:
 
 ```shell
