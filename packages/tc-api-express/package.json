@@ -26,5 +26,6 @@
     "url": "https://github.com/Financial-Times/treecreeper.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "publish": true
 }

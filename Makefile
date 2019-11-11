@@ -28,6 +28,10 @@ verify:
 
 install:
 
+npm-publish:
+	npm version --no-git-tag-version $(CIRCLE_TAG)
+	npx athloi publish --filter publish:true
+
 .PHONY: test
 
 deploy-aws:

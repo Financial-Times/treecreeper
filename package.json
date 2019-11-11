@@ -1,5 +1,6 @@
 {
   "name": "treecreeper",
+  "private": true,
   "version": "0.0.0",
   "description": "A set of tools for building adnmin interfaces on top of graph data",
   "main": "index.js",

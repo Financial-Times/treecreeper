@@ -30,6 +30,10 @@ references:
       paths:
         - ./node_modules/
 
+  only_version_tags: &only_version_tags
+    tags:
+      only: /^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)\.\d+)?$/
+
 jobs:
   install:
     <<: *default_container_config
@@ -90,6 +94,14 @@ jobs:
           name: Verify
           command: make verify -j 3
 
+  publish:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+      - run:
+          name: Publish to npm registry
+          command: make npm-publish
+
 workflows:
   version: 2
   build-and-deploy:
@@ -103,3 +115,12 @@ workflows:
           context: rel-eng-creds
           requires:
             - install
+      - publish:
+          context: rel-env-creds
+          requires:
+            - install
+            - test
+          filters:
+            <<: *only_version_tags
+            branches:
+              ignore: /.*/
