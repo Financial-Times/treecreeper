@@ -63,7 +63,7 @@ const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
 	upsert,
-	parameters,
+	parameters = {},
 ) => {
 	const { properties: validProperties } = getType(nodeType);
 
@@ -151,7 +151,7 @@ const prepareToWriteRelationships = (
 
 	// neo4j driver only accept primitive types or arrays thereof
 	// need to replace objects in parameters to an array of codes
-	if (Object.keys(replaceObjects).length) {
+	if (parameters.properties && Object.keys(replaceObjects).length) {
 		Object.assign(relationshipParameters, {
 			properties: { ...parameters.properties, ...replaceObjects },
 		});
