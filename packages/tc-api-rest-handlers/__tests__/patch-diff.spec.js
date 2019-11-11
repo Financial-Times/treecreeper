@@ -1,8 +1,7 @@
+const { setupMocks } = require('@financial-times/tc-test-helpers');
+const { spyDbQuery } = require('@financial-times/tc-test-helpers/db-spies');
+
 const { patchHandler } = require('../patch');
-
-const { setupMocks } = require('../../../test-helpers');
-
-const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
@@ -22,7 +21,7 @@ describe('rest PATCH diff', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it("doesn't write if no real property changes detected", async () => {
 		await createMainNode({

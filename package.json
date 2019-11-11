@@ -27,7 +27,7 @@
     "lodash.groupby": "^4.6.0",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqby": "^4.7.0",
-    "neo4j-driver": "^1.7.5",
+    "neo4j-driver": "^1.7.6",
     "neo4j-graphql-js": "^2.6.3",
     "next-metrics": "^3.1.9",
     "node-fetch": "^2.6.0",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@financial-times/athloi": "^1.0.0-beta.28",
-    "@financial-times/rel-engage": "^7.1.4",
+    "@financial-times/rel-engage": "7.1.4",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
     "dotenv": "^8.2.0",

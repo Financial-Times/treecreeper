@@ -3,8 +3,8 @@
 const express = require('express');
 const request = require('supertest');
 /* eslint-enable import/no-extraneous-dependencies */
+const { setupMocks } = require('@financial-times/tc-test-helpers');
 const { getGraphqlApi } = require('..');
-const { setupMocks } = require('../../../test-helpers');
 
 describe('graphql', () => {
 	let app;

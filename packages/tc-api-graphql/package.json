@@ -15,6 +15,9 @@
     "graphql-middleware": "^4.0.2",
     "neo4j-graphql-js": "^2.8.0"
   },
+  "devDependencies": {
+    "@financial-times/tc-test-helpers": "file:../tc-test-helpers"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"

@@ -1,7 +1,8 @@
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const {
+	dbUnavailable,
+} = require('@financial-times/tc-test-helpers/error-stubs');
 const { postHandler } = require('../post');
-
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest POST', () => {
 	const namespace = 'api-rest-handlers-post';
@@ -220,7 +221,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
+						props: { code: childCode, ...meta.default },
 					},
 				)
 				.hasRel(
@@ -231,10 +232,10 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ParentType',
-						props: Object.assign(
-							{ code: parentCode },
-							meta.default,
-						),
+						props: {
+							code: parentCode,
+							...meta.default,
+						},
 					},
 				);
 		});
@@ -278,7 +279,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.create),
+						props: { code: childCode, ...meta.create },
 					},
 				)
 				.hasRel(
@@ -289,7 +290,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ParentType',
-						props: Object.assign({ code: parentCode }, meta.create),
+						props: { code: parentCode, ...meta.create },
 					},
 				);
 		});

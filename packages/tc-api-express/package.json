@@ -18,6 +18,9 @@
     "supertest": "^4.0.2",
     "uuid": "^3.3.3"
   },
+  "devDependencies": {
+    "@financial-times/tc-test-helpers": "file:../tc-test-helpers/"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"

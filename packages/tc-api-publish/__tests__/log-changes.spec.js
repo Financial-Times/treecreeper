@@ -1,7 +1,7 @@
 jest.mock('@financial-times/tc-api-express-logger');
 
 const apiExpressLogger = require('@financial-times/tc-api-express-logger');
-const { setupMocks } = require('../../../test-helpers');
+const { setupMocks } = require('@financial-times/tc-test-helpers');
 const { logChanges } = require('..');
 
 describe('logChanges', () => {

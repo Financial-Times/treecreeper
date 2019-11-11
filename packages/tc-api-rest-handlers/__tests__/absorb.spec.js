@@ -1,7 +1,9 @@
-const { absorbHandler } = require('../absorb');
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const {
+	dbUnavailable,
+} = require('@financial-times/tc-test-helpers/error-stubs');
 
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { dbUnavailable } = require('../../../test-helpers/error-stubs');
+const { absorbHandler } = require('../absorb');
 
 describe('rest POST (absorb)', () => {
 	const namespace = 'api-rest-handlers-absorb';
@@ -36,21 +38,17 @@ describe('rest POST (absorb)', () => {
 		const nodes = [
 			[
 				'MainType',
-				Object.assign(
-					{
-						code: mainCode,
-					},
-					mainBody || {},
-				),
+				{
+					code: mainCode,
+					...(mainBody || {}),
+				},
 			],
 			[
 				'MainType',
-				Object.assign(
-					{
-						code: absorbedCode,
-					},
-					absorbedBody || {},
-				),
+				{
+					code: absorbedCode,
+					...(absorbedBody || {}),
+				},
 			],
 		];
 		return createNodes(...nodes);
@@ -204,10 +202,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: childCode },
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 				await neo4jTest('MainType', absorbedCode).notExists();
@@ -234,10 +232,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ParentType',
-							props: Object.assign(
-								{ code: parentCode },
-								meta.default,
-							),
+							props: {
+								code: parentCode,
+								...meta.default,
+							},
 						},
 					);
 				await neo4jTest('MainType', absorbedCode).notExists();
@@ -268,10 +266,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: childCode },
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 
@@ -327,10 +325,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: `${namespace}-child1` },
-								meta.default,
-							),
+							props: {
+								code: `${namespace}-child1`,
+								...meta.default,
+							},
 						},
 					);
 

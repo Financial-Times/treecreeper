@@ -3,6 +3,8 @@
 const logger = require('@financial-times/n-logger').default;
 const schema = require('@financial-times/tc-schema-sdk');
 const dbConnection = require('./db-connection');
+const dbModel = require('./lib/neo4j-model');
+const dbTypeConversion = require('./lib/neo4j-type-conversion');
 
 const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
@@ -67,13 +69,13 @@ const initConstraints = async () => {
 	}
 };
 
-module.exports = Object.assign(
-	{
-		initConstraints,
-		listenForSchemaChanges: () => schema.onChange(initConstraints),
-	},
-	dbConnection,
-);
+module.exports = {
+	initConstraints,
+	listenForSchemaChanges: () => schema.onChange(initConstraints),
+	...dbConnection,
+	...dbModel,
+	...dbTypeConversion,
+};
 
 if (process.argv[1] === __filename) {
 	schema.init();

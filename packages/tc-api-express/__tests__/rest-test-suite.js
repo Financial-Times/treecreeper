@@ -2,7 +2,7 @@ const defaultHandler = () => () => null;
 const httpErrors = require('http-errors');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const request = require('supertest');
-const { setupMocks } = require('../../../test-helpers');
+const { setupMocks } = require('@financial-times/tc-test-helpers');
 
 const testSuite = (method, goodStatus) => {
 	describe(`api-express - ${method}`, () => {

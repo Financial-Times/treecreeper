@@ -1,6 +1,6 @@
-const { patchHandler } = require('../patch');
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
 
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
+const { patchHandler } = require('../patch');
 
 describe('rest PATCH relationship delete', () => {
 	const namespace = 'api-rest-handlers-patch-relationship-delete';
@@ -32,7 +32,7 @@ describe('rest PATCH relationship delete', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	describe('relationshipAction query string', () => {
 		['updating', 'creating'].forEach(mode => {
@@ -99,10 +99,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode2 },
-									meta.default,
-								),
+								props: {
+									code: childCode2,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -144,10 +144,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode1 },
-									meta.default,
-								),
+								props: {
+									code: childCode1,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -181,10 +181,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode2 },
-									meta.default,
-								),
+								props: {
+									code: childCode2,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -238,10 +238,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'MainType',
-								props: Object.assign(
-									{ code: `${mainCode}2` },
-									meta.default,
-								),
+								props: {
+									code: `${mainCode}2`,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -272,10 +272,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode2 },
-									meta.default,
-								),
+								props: {
+									code: childCode2,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -363,10 +363,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode },
-									meta.default,
-								),
+								props: {
+									code: childCode,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -404,10 +404,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'MainType',
-								props: Object.assign(
-									{ code: mainCode2 },
-									meta.default,
-								),
+								props: {
+									code: mainCode2,
+									...meta.default,
+								},
 							},
 						)
 						.hasRel(
@@ -418,10 +418,10 @@ describe('rest PATCH relationship delete', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{ code: childCode },
-									meta.default,
-								),
+								props: {
+									code: childCode,
+									...meta.default,
+								},
 							},
 						);
 				});

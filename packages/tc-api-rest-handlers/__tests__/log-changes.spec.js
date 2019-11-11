@@ -1,6 +1,6 @@
 jest.mock('@financial-times/tc-api-publish');
 const apiPublish = require('@financial-times/tc-api-publish');
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
 const {
 	deleteHandler,
 	postHandler,
@@ -26,7 +26,7 @@ describe('Rest logChanges module integration', () => {
 
 	const { createNode, createNodes, connectNodes } = setupMocks(namespace);
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	const createLogChangeMock = () =>
 		jest.spyOn(apiPublish, 'logChanges').mockResolvedValue({});

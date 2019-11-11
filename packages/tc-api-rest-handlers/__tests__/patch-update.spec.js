@@ -1,9 +1,11 @@
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const { patchHandler } = require('../patch');
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const {
+	dbUnavailable,
+} = require('@financial-times/tc-test-helpers/error-stubs');
+const { spyDbQuery } = require('@financial-times/tc-test-helpers/db-spies');
 
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { dbUnavailable } = require('../../../test-helpers/error-stubs');
-const { spyDbQuery } = require('../../../test-helpers/db-spies');
+const { patchHandler } = require('../patch');
 
 describe('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
@@ -22,7 +24,7 @@ describe('rest PATCH update', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	describe('updating disconnected records', () => {
 		it('updates record with properties', async () => {

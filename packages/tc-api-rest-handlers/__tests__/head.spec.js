@@ -1,6 +1,8 @@
+const { setupMocks } = require('@financial-times/tc-test-helpers');
+const {
+	dbUnavailable,
+} = require('@financial-times/tc-test-helpers/error-stubs');
 const { getHandler } = require('../get');
-const { setupMocks } = require('../../../test-helpers');
-const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 describe('rest HEAD', () => {
 	const namespace = 'api-rest-handlers-head';
@@ -13,7 +15,7 @@ describe('rest HEAD', () => {
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it('gets record without relationships', async () => {
 		await createMainNode({

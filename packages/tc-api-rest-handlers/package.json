@@ -16,6 +16,9 @@
     "lodash.isempty": "^4.4.0",
     "neo4j-driver": "^1.7.6"
   },
+  "devDependencies": {
+    "@financial-times/tc-test-helpers": "file:../tc-test-helpers"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"

@@ -1,7 +1,9 @@
-const { patchHandler } = require('../patch');
+const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const {
+	dbUnavailable,
+} = require('@financial-times/tc-test-helpers/error-stubs');
 
-const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const { dbUnavailable } = require('../../../test-helpers/error-stubs');
+const { patchHandler } = require('../patch');
 
 describe('rest PATCH create', () => {
 	const namespace = 'api-rest-handlers-patch-create';

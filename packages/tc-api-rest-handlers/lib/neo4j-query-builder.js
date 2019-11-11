@@ -1,10 +1,13 @@
 const { stripIndents } = require('common-tags');
 const {
+	executeQuery,
+	constructNeo4jProperties,
+} = require('@financial-times/tc-api-db-manager');
+const {
 	metaPropertiesForCreate,
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
 } = require('./metadata-helpers');
-const { constructNeo4jProperties } = require('./neo4j-type-conversion');
 const {
 	getRelationships,
 	getAddedRelationships,
@@ -16,7 +19,6 @@ const {
 } = require('./relationships/write');
 const { setLockedFields, mergeLockedFields } = require('./locked-fields');
 const { getNeo4jRecordCypherQuery, getNeo4jRecord } = require('./read-helpers');
-const { executeQuery } = require('./neo4j-model');
 const { diffProperties } = require('./diff-properties');
 
 const isObjectEqual = (base, compare) => {

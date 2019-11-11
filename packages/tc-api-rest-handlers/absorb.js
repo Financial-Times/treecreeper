@@ -2,8 +2,8 @@ const httpErrors = require('http-errors');
 const { logger } = require('@financial-times/tc-api-express-logger');
 const { logChanges } = require('@financial-times/tc-api-publish');
 const { getType } = require('@financial-times/tc-schema-sdk');
+const { executeQuery } = require('@financial-times/tc-api-db-manager');
 const { validateInput, validateCode } = require('./lib/validation');
-const { executeQuery } = require('./lib/neo4j-model');
 const { diffProperties } = require('./lib/diff-properties');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
@@ -50,10 +50,10 @@ const removeRelationships = async (
 		...deleteRelationshipQueries,
 		'RETURN node',
 	];
-	await executeQuery(
-		queries.join('\n'),
-		Object.assign({}, parameters, { code: absorbedCode }),
-	);
+	await executeQuery(queries.join('\n'), {
+		...parameters,
+		code: absorbedCode,
+	});
 };
 
 const getWriteProperties = ({
@@ -195,14 +195,13 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		}
 	}
 
-	const body = Object.assign(
-		{},
-		result.toJson({
+	const body = {
+		...result.toJson({
 			type: nodeType,
 			richRelationshipsFlag: richRelationships,
 		}),
-		updatedDocstoreBody,
-	);
+		...updatedDocstoreBody,
+	};
 	return {
 		status: 200,
 		body: Object.keys(body).reduce((filteredBody, key) => {

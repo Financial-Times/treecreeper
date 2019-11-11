@@ -11,6 +11,9 @@
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "lodash.groupby": "^4.6.0"
   },
+  "devDependencies": {
+    "@financial-times/tc-test-helpers": "file:../tc-test-helpers"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"
