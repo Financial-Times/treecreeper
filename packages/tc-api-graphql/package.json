@@ -1,0 +1,24 @@
+{
+  "name": "@financial-times/tc-api-graphql",
+  "version": "0.0.0",
+  "description": "Treecreeper&tm; graphql express middleware to sit in front of a neo4j database instance",
+  "main": "index.js",
+  "dependencies": {
+    "@financial-times/n-logger": "^6.1.0",
+    "@financial-times/tc-schema-publisher": "file:../tc-schema-publisher",
+    "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
+    "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
+    "@financial-times/tc-api-db-manager": "file:../tc-api-db-manager",
+    "apollo-server-express": "^2.9.7",
+    "dataloader": "^1.4.0",
+    "graphql": "^14.5.8",
+    "graphql-middleware": "^4.0.2",
+    "neo4j-graphql-js": "^2.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  },
+  "author": "",
+  "license": "ISC"
+}

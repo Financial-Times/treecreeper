@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const logger = require('@financial-times/n-logger').default;
-const schema = require('../../packages/treecreeper-schema-sdk');
+const schema = require('../../packages/tc-schema-sdk');
 const { schemaReady } = require('./lib/init-schema');
 const { executeQueryWithSharedSession } = require('./lib/db-connection');
 

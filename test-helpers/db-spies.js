@@ -1,5 +1,5 @@
 /* global jest */
-const { driver } = require('../packages/treecreeper-api-db-manager');
+const { driver } = require('../packages/tc-api-db-manager');
 
 const spyDbQuery = () => {
 	const originalSession = driver.session.bind(driver);

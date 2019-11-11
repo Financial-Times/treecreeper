@@ -1,0 +1,18 @@
+{
+  "name": "@financial-times/tc-api-s3-document-store",
+  "version": "0.0.0",
+  "description": "Module for connecting a Treecreeper&tm; api to an s3 bucket to use as an additional data store for storing properties that are too large to allow efficient querying in neo4j.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
+    "aws-sdk": "^2.564.0",
+    "deep-diff": "^1.0.2",
+    "lodash.isempty": "^4.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  }
+}

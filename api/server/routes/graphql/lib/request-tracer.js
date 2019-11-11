@@ -1,4 +1,4 @@
-const { getType } = require('../../../../../packages/treecreeper-schema-sdk');
+const { getType } = require('../../../../../packages/tc-schema-sdk');
 const { logger } = require('../../../lib/request-context');
 
 class Tracer {

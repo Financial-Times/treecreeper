@@ -1,7 +1,5 @@
 const fetch = require('node-fetch');
-const {
-	getSchemaFilename,
-} = require('../../packages/treecreeper-schema-file-name');
+const { getSchemaFilename } = require('../../packages/tc-schema-file-name');
 
 jest.useFakeTimers();
 

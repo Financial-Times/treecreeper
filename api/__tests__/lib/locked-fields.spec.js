@@ -1,4 +1,4 @@
-const schema = require('../../../packages/treecreeper-schema-sdk');
+const schema = require('../../../packages/tc-schema-sdk');
 
 const {
 	mergeLockedFields,

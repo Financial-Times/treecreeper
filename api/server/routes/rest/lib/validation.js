@@ -2,7 +2,7 @@ const httpErrors = require('http-errors');
 const {
 	validators,
 	BizOpsError,
-} = require('../../../../../packages/treecreeper-schema-sdk');
+} = require('../../../../../packages/tc-schema-sdk');
 
 const validation = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {

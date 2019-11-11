@@ -1,7 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
 const _isEmpty = require('lodash.isempty');
-const { getType } = require('../../../../../packages/treecreeper-schema-sdk');
+const { getType } = require('../../../../../packages/tc-schema-sdk');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');

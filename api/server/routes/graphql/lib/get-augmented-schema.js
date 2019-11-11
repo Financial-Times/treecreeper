@@ -5,7 +5,7 @@ const { parse } = require('graphql');
 const {
 	getGraphqlDefs,
 	getTypes,
-} = require('../../../../../packages/treecreeper-schema-sdk');
+} = require('../../../../../packages/tc-schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
 const getDocs = async (obj, args, context, info) => {
