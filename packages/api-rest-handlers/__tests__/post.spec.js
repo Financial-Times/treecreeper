@@ -188,7 +188,7 @@ describe('rest POST', () => {
 
 	describe('creating relationships', () => {
 		const childCode = `${namespace}-child`;
-		const childCodeTwo = `${namespace}-child-2`;
+		const childCode2 = `${namespace}-child-2`;
 		const parentCode = `${namespace}-parent`;
 
 		it('creates record related to existing records', async () => {
@@ -304,8 +304,8 @@ describe('rest POST', () => {
 				someProp,
 				anotherProp,
 			};
-			const childTwoRelationshipProps = {
-				code: childCodeTwo,
+			const child2RelationshipProps = {
+				code: childCode2,
 				anotherProp,
 			};
 			const parentRelationshipProps = { code: parentCode, anotherProp };
@@ -387,7 +387,7 @@ describe('rest POST', () => {
 					{
 						children: [
 							childRelationshipProps,
-							childTwoRelationshipProps,
+							child2RelationshipProps,
 						],
 					},
 					{ upsert: true, richRelationships: true },
@@ -398,7 +398,7 @@ describe('rest POST', () => {
 				expect(body).toMatchObject({
 					children: [
 						{ ...childRelationshipProps, ...meta.create },
-						{ ...childTwoRelationshipProps, ...meta.create },
+						{ ...child2RelationshipProps, ...meta.create },
 					],
 				});
 
@@ -424,7 +424,7 @@ describe('rest POST', () => {
 						},
 						{
 							type: 'ChildType',
-							props: { code: childCodeTwo, ...meta.create },
+							props: { code: childCode2, ...meta.create },
 						},
 					);
 			});
