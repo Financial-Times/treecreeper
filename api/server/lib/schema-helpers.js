@@ -1,4 +1,4 @@
-const schema = require('../../../packages/tc-schema-sdk');
+const schema = require('@financial-times/tc-schema-sdk');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';

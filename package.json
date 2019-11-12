@@ -7,6 +7,8 @@
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
     "@financial-times/s3o-middleware": "^3.0.1",
+    "@financial-times/tc-schema-sdk": "file:./packages/tc-schema-sdk",
+    "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
     "apollo-server-express": "^2.8.1",
     "aws-sdk": "^2.504.0",
     "body-parser": "^1.19.0",

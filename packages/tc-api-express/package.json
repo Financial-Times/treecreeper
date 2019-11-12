@@ -15,11 +15,11 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "http-errors": "^1.7.3",
-    "supertest": "^4.0.2",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@financial-times/tc-test-helpers": "file:../tc-test-helpers/"
+    "@financial-times/tc-test-helpers": "file:../tc-test-helpers/",
+    "supertest": "^4.0.2"
   },
   "repository": {
     "type": "git",

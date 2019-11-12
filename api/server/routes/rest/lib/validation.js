@@ -1,8 +1,5 @@
 const httpErrors = require('http-errors');
-const {
-	validators,
-	BizOpsError,
-} = require('../../../../../packages/tc-schema-sdk');
+const { validators, BizOpsError } = require('@financial-times/tc-schema-sdk');
 
 const validation = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
@@ -41,10 +38,8 @@ const validatePayload = ({ nodeType, code, body: newContent }) => {
 	});
 };
 
-module.exports = Object.assign(
-	{
-		validateParams,
-		validatePayload,
-	},
-	validation,
-);
+module.exports = {
+	validateParams,
+	validatePayload,
+	...validation,
+};

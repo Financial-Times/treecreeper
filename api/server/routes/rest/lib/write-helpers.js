@@ -1,7 +1,7 @@
 const { stripIndents } = require('common-tags');
 const httpError = require('http-errors');
 const _isEmpty = require('lodash.isempty');
-const { getType } = require('../../../../../packages/tc-schema-sdk');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { executeQuery } = require('./neo4j-model');
 const { getAddedRelationships } = require('./diff-helpers');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');
@@ -176,9 +176,7 @@ const createNewNode = ({ nodeType, code, clientId, query, body, method }) => {
 		);
 	}
 
-	const lockedFields = mergeLockedFields(
-		Object.assign({ clientId, body }, query),
-	);
+	const lockedFields = mergeLockedFields({ clientId, body, ...query });
 
 	return writeNode({
 		nodeType,

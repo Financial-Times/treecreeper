@@ -164,10 +164,10 @@ describe('logChanges', () => {
 				1,
 				matcher('UPDATE', mainType, mainCode, ['someString']),
 			);
-			// expect(adaptor.publish).toHaveBeenNthCalledWith(
-			// 	2,
-			// 	matcher('CREATE', mainType, childCode, ['children']),
-			// );
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				2,
+				matcher('CREATE', mainType, childCode, ['children']),
+			);
 			expect(adaptor.publish).toHaveBeenNthCalledWith(
 				3,
 				matcher('UPDATE', 'ParentType', otherCode, []),

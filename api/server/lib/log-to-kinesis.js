@@ -1,5 +1,6 @@
 const groupBy = require('lodash.groupby');
-const { getType } = require('../../../packages/tc-schema-sdk');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { getContext } = require('./request-context');
 const EventLogWriter = require('./event-log-writer');
 const Kinesis = require('./kinesis-client');

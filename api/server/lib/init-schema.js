@@ -1,4 +1,4 @@
-const schema = require('../../../packages/tc-schema-sdk');
+const schema = require('@financial-times/tc-schema-sdk');
 
 schema.init({ updateMode: 'poll' });
 

@@ -1,4 +1,4 @@
-const schema = require('../../packages/tc-schema-sdk');
+const schema = require('@financial-times/tc-schema-sdk');
 const { initConstraints } = require('../server/init-db');
 const { driver } = require('../server/lib/db-connection');
 

@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getTypes } = require('../../../packages/tc-schema-sdk');
+const { getTypes } = require('@financial-times/tc-schema-sdk');
 const { logger } = require('../lib/request-context');
 const healthcheck = require('./healthcheck');
 const { executeQuery } = require('../lib/db-connection');
