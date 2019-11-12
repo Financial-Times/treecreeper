@@ -1,8 +1,5 @@
-/* global beforeAll describe it expect  */
-/* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
 const request = require('supertest');
-/* eslint-enable import/no-extraneous-dependencies */
 const { setupMocks } = require('@financial-times/tc-test-helpers');
 const { getGraphqlApi } = require('..');
 
