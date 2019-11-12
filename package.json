@@ -5,7 +5,6 @@
   "description": "A set of tools for building adnmin interfaces on top of graph data",
   "main": "index.js",
   "dependencies": {
-    "@financial-times/n-cluster": "^1.0.0",
     "@financial-times/n-logger": "^6.1.0",
     "@financial-times/s3o-middleware": "^3.0.1",
     "apollo-server-express": "^2.8.1",
