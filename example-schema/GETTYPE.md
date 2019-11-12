@@ -39,7 +39,6 @@ Two forms of the object representation are available: grouped and ungrouped (the
             description: 'test description',
             hasMany: false,
             isRelationship: true,
-            isRecursive: false,
             fieldset: 'main',
          },
       },
@@ -124,7 +123,6 @@ Two forms of the object representation are available: grouped and ungrouped (the
                        description: 'test description',
                        hasMany: false,
                        isRelationship: true,
-                       isRecursive: false,
                     },
                 }
             },

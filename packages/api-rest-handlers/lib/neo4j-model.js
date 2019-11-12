@@ -52,8 +52,7 @@ const constructOutput = ({
 	if (result.hasRelationships()) {
 		Object.entries(schema.properties)
 			.filter(
-				([, { isRecursive, isRelationship }]) =>
-					isRelationship && !isRecursive,
+				([, { cypher, isRelationship }]) => isRelationship && !cypher,
 			)
 			.forEach(
 				([
@@ -68,13 +67,18 @@ const constructOutput = ({
 								propertyType === record.relatedType(),
 						)
 						.map(record => {
-							const convertedRelationshipsProps = convertNeo4jToJson(Object.assign({}, record.richRelationship().properties))
+							const convertedRelationshipsProps = convertNeo4jToJson(
+								Object.assign(
+									{},
+									record.richRelationship().properties,
+								),
+							);
 							return richRelationshipsFlag
 								? {
 										...convertedRelationshipsProps,
 										code: record.relatedCode(),
 								  }
-								: record.relatedCode()
+								: record.relatedCode();
 						});
 
 					if (codes.length) {
