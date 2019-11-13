@@ -1,5 +1,5 @@
-const { setupMocks } = require('@financial-times/tc-test-helpers');
-const { spyDbQuery } = require('@financial-times/tc-test-helpers/db-spies');
+const { setupMocks } = require('../../../test-helpers');
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 const { patchHandler } = require('../patch');
 

@@ -1,4 +1,4 @@
-const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
 
 const { patchHandler } = require('../patch');
 

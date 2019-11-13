@@ -1,5 +1,5 @@
-const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
-const { spyDbQuery } = require('@financial-times/tc-test-helpers/db-spies');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 const { patchHandler } = require('../patch');
 

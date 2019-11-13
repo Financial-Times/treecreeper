@@ -1,4 +1,4 @@
-const { setupMocks } = require('@financial-times/tc-test-helpers');
+const { setupMocks } = require('../../../test-helpers');
 const { getHandler } = require('../get');
 const { deleteHandler } = require('../delete');
 const { postHandler } = require('../post');

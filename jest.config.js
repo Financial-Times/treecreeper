@@ -1,3 +1,3 @@
 module.exports = {
-	setupFilesAfterEnv: ['./packages/tc-test-helpers/extend-jest.js'],
+	setupFilesAfterEnv: ['./test-helpers/extend-jest.js'],
 };

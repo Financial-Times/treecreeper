@@ -1,8 +1,8 @@
 const { docstore } = require('@financial-times/tc-api-s3-document-store');
-const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const {
 	dbUnavailable,
-} = require('@financial-times/tc-test-helpers/error-stubs');
+} = require('../../../test-helpers/error-stubs');
 const {
 	getHandler,
 	deleteHandler,

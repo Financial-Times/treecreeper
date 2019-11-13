@@ -1,6 +1,6 @@
 const express = require('express');
 const request = require('supertest');
-const { setupMocks } = require('@financial-times/tc-test-helpers');
+const { setupMocks } = require('../../../test-helpers');
 const { getGraphqlApi } = require('..');
 
 describe('graphql', () => {

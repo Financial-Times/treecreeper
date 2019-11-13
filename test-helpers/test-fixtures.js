@@ -1,6 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
 const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-/* eslint-enable import/no-extraneous-dependencies */
 
 const { driver } = require('./db-connection');
 

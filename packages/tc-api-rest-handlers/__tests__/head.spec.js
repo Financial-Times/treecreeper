@@ -1,7 +1,7 @@
-const { setupMocks } = require('@financial-times/tc-test-helpers');
+const { setupMocks } = require('../../../test-helpers');
 const {
 	dbUnavailable,
-} = require('@financial-times/tc-test-helpers/error-stubs');
+} = require('../../../test-helpers/error-stubs');
 const { getHandler } = require('../get');
 
 describe('rest HEAD', () => {

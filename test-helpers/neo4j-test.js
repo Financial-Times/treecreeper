@@ -1,6 +1,5 @@
 /* global expect */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { convertNeo4jToJson } = require('@financial-times/tc-api-db-manager');
 const { driver } = require('./db-connection');
 

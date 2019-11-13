@@ -1,6 +1,5 @@
 /* global  jest */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { driver } = require('@financial-times/tc-api-db-manager');
 
 const asyncErrorFunction = async () => {

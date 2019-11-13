@@ -1,9 +1,9 @@
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const { setupMocks, neo4jTest } = require('@financial-times/tc-test-helpers');
+const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const {
 	dbUnavailable,
-} = require('@financial-times/tc-test-helpers/error-stubs');
-const { spyDbQuery } = require('@financial-times/tc-test-helpers/db-spies');
+} = require('../../../test-helpers/error-stubs');
+const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 const { patchHandler } = require('../patch');
 

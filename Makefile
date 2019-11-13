@@ -26,11 +26,17 @@ env:
 
 verify:
 
-install:
+# monorepo task should be ran before root installation
+# because root of package.json reffers some pacakges/tc-* package internally
+install: monorepo install-treecreeper
+
+monorepo:
+	npm install -D @financial-times/athloi
+	npx athloi exec -- npm install --no-package-lock
 
 npm-publish:
-	npm version --no-git-tag-version $(CIRCLE_TAG)
-	npx athloi publish --filter publish:true
+	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)
+	npx athloi publish
 
 .PHONY: test
 
@@ -42,10 +48,6 @@ test:
 		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
-
-install-monorepo:
-	npm i --no-package-lock
-	npx athloi exec -- npm i --no-package-lock
 
 test-pkg:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch ; \
