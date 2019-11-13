@@ -158,13 +158,13 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 
 const defineType = ({ name, description, properties }) => {
 	return `
-	"""
-	${description}
-	"""
-	type ${name} {
-		${indentMultiline(defineProperties(properties), 2, true)}
-		${indentMultiline(defineRichRelationships(properties, name), 2, true)}
-	}`;
+"""
+${description}
+"""
+type ${name} {
+	${indentMultiline(defineProperties(properties), 2, true)}
+	${indentMultiline(defineRichRelationships(properties, name), 2, true)}
+}`;
 };
 
 const defineQueries = config => [
@@ -198,13 +198,13 @@ const defineEnumOption = ([, { value, description }]) => {
 const defineEnum = ([name, { description, options }]) => {
 	const enums = Object.entries(options).map(defineEnumOption);
 
-	return stripIndent`
-		"""
-		${description}
-		"""
-		enum ${name} {
-		${indentMultiline(enums.join('\n'), 3)}
-		}`;
+	return `
+"""
+${description}
+"""
+enum ${name} {
+${indentMultiline(enums.join('\n'), 2)}
+}`;
 };
 
 const getRelationshipProperties = ({ name, properties }) => {
