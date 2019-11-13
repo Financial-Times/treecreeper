@@ -249,12 +249,9 @@ describe('validateProperty', () => {
 							relationship: 'HAS',
 							hasMany: false,
 						},
-						testRecursiveRelationship: {
+						testCypherRelationship: {
 							type: 'EndType',
-							direction: 'outgoing',
-							relationship: 'HAS',
-							isRecursive: true,
-							hasMany: false,
+							cypher: 'ha',
 						},
 					},
 				},
@@ -284,15 +281,11 @@ describe('validateProperty', () => {
 			).toThrow(/Can only have one testRelationship/);
 		});
 
-		it('reject when writing to recursive relationship', () => {
+		it('reject when writing to cypher relationship', () => {
 			expect(() =>
-				validateProperty(
-					'StartType',
-					'testRecursiveRelationship',
-					'code',
-				),
+				validateProperty('StartType', 'testCypherRelationship', 'code'),
 			).toThrow(
-				/Cannot write recursive relationship `testRecursiveRelationship`/,
+				/Cannot write relationship `testCypherRelationship` - it is defined using a custom, read-only query/,
 			);
 		});
 

@@ -52,8 +52,7 @@ const constructOutput = ({
 	if (result.hasRelationships()) {
 		Object.entries(schema.properties)
 			.filter(
-				([, { isRecursive, isRelationship }]) =>
-					isRelationship && !isRecursive,
+				([, { cypher, isRelationship }]) => isRelationship && !cypher,
 			)
 			.forEach(
 				([

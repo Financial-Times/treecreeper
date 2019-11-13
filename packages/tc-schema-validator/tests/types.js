@@ -200,7 +200,7 @@ describe('types', () => {
 												'relationship',
 												'hasMany',
 												'useInSummary',
-												'isRecursive',
+												'cypher',
 												'hidden',
 												'autoPopulated',
 												'showInactive',
@@ -360,8 +360,10 @@ describe('types', () => {
 									}
 								});
 								it('may be recursive', () => {
-									if (config.isRecursive) {
-										expect(config.isRecursive).toBe(true);
+									if (config.cypher) {
+										expect(typeof config.cypher).toBe(
+											'string',
+										);
 									}
 								});
 								it('is defined at both ends', () => {

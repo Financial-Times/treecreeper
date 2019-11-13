@@ -43,7 +43,7 @@ const validateProperty = ({ getType, getEnums }) => {
 			validator,
 			isRelationship,
 			hasMany,
-			isRecursive,
+			cypher,
 		} = propertyDefinition;
 
 		const type =
@@ -57,8 +57,10 @@ const validateProperty = ({ getType, getEnums }) => {
 			aliasPropertyName,
 		);
 		if (isRelationship) {
-			if (isRecursive) {
-				exit(`Cannot write recursive relationship \`${propertyName}\``);
+			if (cypher) {
+				exit(
+					`Cannot write relationship \`${propertyName}\` - it is defined using a custom, read-only query`,
+				);
 			}
 			const codesList = toArray(propertyValue);
 			if (!hasMany && codesList.length > 1) {
