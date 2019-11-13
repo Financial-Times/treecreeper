@@ -50,10 +50,10 @@ const removeRelationships = async (
 		...deleteRelationshipQueries,
 		'RETURN node',
 	];
-	await executeQuery(
-		queries.join('\n'),
-		Object.assign({}, parameters, { code: absorbedCode }),
-	);
+	await executeQuery(queries.join('\n'), {
+		...parameters,
+		code: absorbedCode,
+	});
 };
 
 const getWriteProperties = ({
@@ -195,14 +195,13 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		}
 	}
 
-	const body = Object.assign(
-		{},
-		result.toJson({
+	const body = {
+		...result.toJson({
 			type: nodeType,
 			richRelationshipsFlag: richRelationships,
 		}),
-		updatedDocstoreBody,
-	);
+		...updatedDocstoreBody,
+	};
 	return {
 		status: 200,
 		body: Object.keys(body).reduce((filteredBody, key) => {

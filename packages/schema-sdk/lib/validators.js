@@ -95,9 +95,7 @@ const validateProperty = ({ getType, getEnums }) => {
 					.match(/\.\{\d+,(\d+)\}\$/);
 				if (maxlength) {
 					exit(
-						`Must match pattern ${validator} and be no more than ${
-							maxlength[1]
-						} characters`,
+						`Must match pattern ${validator} and be no more than ${maxlength[1]} characters`,
 					);
 				}
 				exit(`Must match pattern ${validator}`);

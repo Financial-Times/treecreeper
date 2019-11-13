@@ -28,44 +28,31 @@ describe('Event log writer', () => {
 
 	it('should add the action', async () => {
 		const givenValue = 'UPDATE';
-		await eventLogWriter.sendEvent(
-			Object.assign({}, defaultEvent, {
-				action: givenValue,
-			}),
-		);
+		await eventLogWriter.sendEvent({ ...defaultEvent, action: givenValue });
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].action).toBe(givenValue);
 	});
 
 	it('should add the code', async () => {
 		const givenValue = 'dummySystemCode';
-		await eventLogWriter.sendEvent(
-			Object.assign({}, defaultEvent, {
-				code: givenValue,
-			}),
-		);
+		await eventLogWriter.sendEvent({ ...defaultEvent, code: givenValue });
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].code).toBe(givenValue);
 	});
 
 	it('should add the type', async () => {
 		const givenValue = 'RepositorY';
-		await eventLogWriter.sendEvent(
-			Object.assign({}, defaultEvent, {
-				type: givenValue,
-			}),
-		);
+		await eventLogWriter.sendEvent({ ...defaultEvent, type: givenValue });
 
 		expect(stubKinesis.putRecord.mock.calls[0][0].type).toBe('RepositorY');
 	});
 
 	it('should add the updatedProperties', async () => {
 		const givenValue = ['name'];
-		await eventLogWriter.sendEvent(
-			Object.assign({}, defaultEvent, {
-				updatedProperties: givenValue,
-			}),
-		);
+		await eventLogWriter.sendEvent({
+			...defaultEvent,
+			updatedProperties: givenValue,
+		});
 
 		expect(
 			stubKinesis.putRecord.mock.calls[0][0].updatedProperties,

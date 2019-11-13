@@ -34,7 +34,7 @@ const updateAPI = () => {
 		}
 	} catch (error) {
 		schemaVersionIsConsistent = false;
-		console.log('jenny error.....', error)
+		console.log('jenny error.....', error);
 		logger.error(
 			{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
 			'Graphql schema update failed',

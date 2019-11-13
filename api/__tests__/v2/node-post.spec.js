@@ -207,10 +207,10 @@ describe('v2 - node POST', () => {
 				_updatedByClient: 'restricted-type-creator',
 			},
 		);
-		const completeResult = Object.assign(
-			{ someDocument: 'Fake Document' },
-			neo4jResult,
-		);
+		const completeResult = {
+			someDocument: 'Fake Document',
+			...neo4jResult,
+		};
 		await sandbox
 			.request(app)
 			.post(`/v2/node/RestrictedType/${restrictedCode}`)

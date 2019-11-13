@@ -67,13 +67,11 @@ const initConstraints = async () => {
 	}
 };
 
-module.exports = Object.assign(
-	{
-		initConstraints,
-		listenForSchemaChanges: () => schema.onChange(initConstraints),
-	},
-	dbConnection,
-);
+module.exports = {
+	initConstraints,
+	listenForSchemaChanges: () => schema.onChange(initConstraints),
+	...dbConnection,
+};
 
 if (process.argv[1] === __filename) {
 	schema.init();

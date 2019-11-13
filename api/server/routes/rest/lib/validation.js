@@ -41,10 +41,8 @@ const validatePayload = ({ nodeType, code, body: newContent }) => {
 	});
 };
 
-module.exports = Object.assign(
-	{
-		validateParams,
-		validatePayload,
-	},
-	validation,
-);
+module.exports = {
+	validateParams,
+	validatePayload,
+	...validation,
+};

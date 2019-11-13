@@ -22,7 +22,7 @@ describe('rest PATCH update', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	describe('updating disconnected records', () => {
 		it('updates record with properties', async () => {
