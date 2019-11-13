@@ -1,5 +1,13 @@
 const stripIndent = require('common-tags/lib/stripIndent');
 
+const flatten = (arr) => {
+	return arr.reduce((flat, toFlatten) => {
+		return flat.concat(
+			Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten,
+		);
+	}, []);
+}
+
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
 	return [...new Array(Math.max(hardCoded.length, vars.length))]
@@ -18,11 +26,9 @@ const indentMultiline = (str, indent, trimFirst) => {
 		.join('\n');
 };
 
-const graphqlDirection = direction => (direction === 'outgoing' ? 'OUT' : 'IN');
+const maybePluralType = ({type, hasMany}) => (hasMany ? `[${type}]` : type);
 
-const maybePluralType = def => (def.hasMany ? `[${def.type}]` : def.type);
-
-const maybePaginate = def => (def.hasMany ? '(first: Int, offset: Int)' : '');
+const maybePaginate = ({hasMany}) => (hasMany ? '(first: Int, offset: Int)' : '');
 
 const snakeToCamel = str => {
 	const camel = str
@@ -42,7 +48,7 @@ const maybeDirective = def => {
 	if (def.relationship) {
 		return `@relation(name: "${
 			def.relationship
-		}", direction: "${graphqlDirection(def.direction)}")`;
+		}", direction: "${graphqlDirection(def.direction === 'outgoing' ? 'OUT' : 'IN')}")`;
 	}
 
 	return '';
@@ -59,34 +65,40 @@ const defineProperties = properties => properties
 		.map(
 			([name, def]) =>
 				stripEmptyFirstLine`
-			"""
-			${def.description}
-			"""
-			${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDirective(
-					def,
-				)} ${maybeDeprecate(def)}`,
+		"""
+		${def.description}
+		"""
+		${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDirective(def)} ${maybeDeprecate(def)}`,
 		)
 		.join('');
 
-const definePropertiesForRelationshipSchema = (properties, firstNode) => properties
-		.map(
-			([name, def]) =>
-				stripEmptyFirstLine`
-				"""
-				${def.description}
-				"""
-				${name}${maybePaginate(def)}: ${def.isRelationship ? relationshipPluralType(def, firstNode) : maybePluralType(def)} ${maybeDeprecate(def)}`
-			)
-		.join('');
-
-const relationshipPluralType = (def, firstNode) => {
-	const from = def.direction === 'incoming' ? def.type : firstNode;
-	const to = def.direction === 'incoming' ? firstNode : def.type;
+const relationshipType = (def, rootType) => {
+	const from = (def.direction === 'incoming') ? def.type : rootType;
+	const to = (def.direction === 'incoming') ? rootType : def.type;
 	const fullNameCaps = `${from.toUpperCase()}_${
 		def.relationship
 	}_${to.toUpperCase()}`;
-	return `[${snakeToCamel(fullNameCaps)}]`
+	return maybePluralType({
+		type: `${snakeToCamel(fullNameCaps)}`
+		hasMany: def.hasMany
+	})
 }
+
+const defineRichRelationships = (properties, rootType) => properties
+		.filter(([, {relationship}]) => relationship)
+		.map(
+			([name, def]) =>
+		stripEmptyFirstLine`
+		"""
+		*NOTE: This gives access to properties on the relationships between records
+		as well as on the records themselves. Use '${name}' instead if you do not need this*
+		${def.description}
+		"""
+		${name}REL${maybePaginate(def)}: ${relationshipType(def, rootType)} ${maybeDeprecate(def)}`
+			)
+		.join('');
+
+
 
 
 const PAGINATE = indentMultiline(
@@ -133,19 +145,8 @@ const defineType = config => {
 	"""
 	type ${config.name} {
 		${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
+		${indentMultiline(defineRichRelationships(Object.entries(config.properties), config.name), 2, true)}
 	}`;
-}
-
-const defineTypeWithRelationshipSchema = config => {
-	// const properties = Object.entries(config.properties).filter(([name, def]) => !def.isRelationship)
-	const properties = definePropertiesForRelationshipSchema(Object.entries(config.properties), config.name);
-	return `
-		"""
-		${config.description}
-		"""
-		type ${config.name} {
-			${indentMultiline(properties, 2, true)}
-		}`;
 }
 
 const defineRelationshipTypes = config => {
@@ -154,13 +155,14 @@ const defineRelationshipTypes = config => {
 	return [...relationshipTypes]
 }
 
-const defineRelationshipType = (firstNode) => ([name, def]) => {
-	const from = def.direction === 'incoming' ? def.type : firstNode;
-	const to = def.direction === 'incoming' ? firstNode : def.type;
+const defineRelationshipType = (rootType) => ([name, def]) => {
+	const from = def.direction === 'incoming' ? def.type : rootType;
+	const to = def.direction === 'incoming' ? rootType : def.type;
 	const fullNameCaps = `${from.toUpperCase()}_${
 		def.relationship
 	}_${to.toUpperCase()}`;
-	return `\n\ttype ${snakeToCamel(fullNameCaps)} @relation(name: ${def.relationship}) {
+	return stripIndents`
+	type ${snakeToCamel(fullNameCaps)} @relation(name: ${def.relationship}) {
 		from: ${from}
 		to: ${to}
 	}`;
@@ -204,16 +206,10 @@ const defineEnum = ([name, { description, options }]) => {
 		}`;
 };
 
-function flatten(arr) {
-	return arr.reduce(function(flat, toFlatten) {
-		return flat.concat(
-			Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten,
-		);
-	}, []);
-}
+
 
 module.exports = {
-	accessor(representRelationshipsAsNodes = true) {
+	accessor() {
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
 			includeMetaFields: true,
@@ -223,26 +219,19 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		// const typeNamesAndDescriptions = typesFromSchema.map(defineType);
-		const mapTypes = representRelationshipsAsNodes
-			? defineTypeWithRelationshipSchema
-			: defineType;
+		const types = typesFromSchema.map(defineType);
 
-		const typeNamesAndDescriptions = typesFromSchema.map(mapTypes);
-
-		const relationshipTypes = flatten(typesFromSchema.map(defineRelationshipTypes));
-
-		const uniqueRelationshipTypes = [
-			...new Set(relationshipTypes),
-		];
+		const relationshipTypes = [
+			...new Set(flatten(typesFromSchema.map(defineRelationshipTypes)))];
 
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
 
 		return [].concat(
-			customDateTimeTypes + typeNamesAndDescriptions,
-			...uniqueRelationshipTypes,
+			customDateTimeTypes,
+			...types,
+			...relationshipTypes,
 			'type Query {\n',
 			...typesFromSchema.map(defineQueries),
 			'}',
