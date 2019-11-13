@@ -44,7 +44,9 @@ jobs:
 
       - run:
           name: Install dependencies
-          command: make install
+          command: |
+            npm install -no-save
+            make monorepo
 
       - run:
           name: Get test env vars
