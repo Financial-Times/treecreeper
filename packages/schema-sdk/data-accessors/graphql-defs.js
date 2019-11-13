@@ -19,6 +19,39 @@ const indentMultiline = (str, indent, trimFirst) => {
 		.join('\n');
 };
 
+const describedBlock = (description, content) => stripEmptyFirstLine`
+"""
+${description}
+"""
+${content}
+`;
+
+const generateProperty = ({
+	description,
+	name,
+	pagination,
+	type,
+	directive,
+	deprecation,
+}) =>
+	describedBlock(
+		description,
+		`${name}${pagination}: ${type} ${directive} ${deprecation}`,
+	);
+
+const generateEnumOption = ({ value, description }) =>
+	describedBlock(description || value, value);
+
+const generateRelationshipType = ({ from, to, typeName, relationship }) =>
+	describedBlock(
+		'Internal use only',
+		stripIndent`
+	type ${typeName} @relation(name: ${relationship}) {
+		from: ${from}
+		to: ${to}
+	}`,
+	);
+
 const maybePluralType = ({ type, hasMany }) => (hasMany ? `[${type}]` : type);
 
 const maybePaginate = ({ hasMany }) =>
@@ -58,7 +91,7 @@ const maybeDeprecate = ({ deprecationReason }) => {
 	return '';
 };
 
-const getPropertyConfig = ([name, def]) => ({
+const toPropertyModel = ([name, def]) => ({
 	description: def.description,
 	name,
 	pagination: maybePaginate(def),
@@ -67,38 +100,27 @@ const getPropertyConfig = ([name, def]) => ({
 	deprecation: maybeDeprecate(def),
 });
 
-const outputProperty = ({
-	description,
-	name,
-	pagination,
-	type,
-	directive,
-	deprecation,
-}) =>
-	stripEmptyFirstLine`
-		"""
-		${description}
-		"""
-		${name}${pagination}: ${type} ${directive} ${deprecation}`;
-
 const defineProperties = properties => {
 	if (!Array.isArray(properties)) {
 		properties = Object.entries(properties);
 	}
 	properties
-		.map(getPropertyConfig)
-		.map(outputProperty)
+		.map(toPropertyModel)
+		.map(generateProperty)
 		.join('');
 };
 
-const getRichRelationshipType = (def, rootType) => {
-	const from = def.direction === 'incoming' ? def.type : rootType;
-	const to = def.direction === 'incoming' ? rootType : def.type;
-	const fullNameCaps = `${from.toUpperCase()}_${
-		def.relationship
-	}_${to.toUpperCase()}`;
+const getFromTo = (direction, rootType, otherType) =>
+	direction === 'outgoing' ? [rootType, otherType] : [otherType, rootType];
+
+const getRichRelationshipType = (from, relationship, to) =>
+	snakeToCamel(`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`);
+
+const getRichRelationshipPropertyType = (def, rootType) => {
+	const [from, to] = getFromTo(def.direction, rootType, def.type);
+
 	return maybePluralType({
-		type: `${snakeToCamel(fullNameCaps)}`,
+		type: getRichRelationshipType(from, def.relationship, to),
 		hasMany: def.hasMany,
 	});
 };
@@ -109,7 +131,7 @@ const getRichRelationshipConfig = rootType => ([name, def]) => ({
 		${def.description}`,
 	name: `${name}REL`,
 	pagination: maybePaginate(def),
-	type: getRichRelationshipType(def, rootType),
+	type: getRichRelationshipPropertyType(def, rootType),
 	deprecation: maybeDeprecate(def),
 	directive: '',
 });
@@ -142,30 +164,27 @@ const defineRichRelationships = (properties, rootType) =>
 	Object.entries(properties)
 		.filter(([, { relationship }]) => relationship)
 		.map(getRichRelationshipConfig(rootType))
-		.map(outputProperty)
+		.map(generateProperty)
 		.join('');
 
-const defineQuery = ({ name, type, description, properties, paginate }) => {
-	return `
-	"""
-	${description}
-	"""
-	${name}(
+const defineQuery = ({ name, type, description, properties, paginate }) =>
+	describedBlock(
+		description,
+		`${name}(
 		${paginate ? PAGINATE : ''}
 		${indentMultiline(defineProperties(properties), 4, true)}
-	): ${type}`;
-};
+	): ${type}`,
+	);
 
-const defineType = ({ name, description, properties }) => {
-	return `
-"""
-${description}
-"""
+const defineType = ({ name, description, properties }) =>
+	describedBlock(
+		description,
+		stripEmptyFirstLine`
 type ${name} {
 	${indentMultiline(defineProperties(properties), 2, true)}
 	${indentMultiline(defineRichRelationships(properties, name), 2, true)}
-}`;
-};
+}`,
+	);
 
 const defineQueries = config => [
 	defineQuery({
@@ -183,58 +202,35 @@ const defineQueries = config => [
 	}),
 ];
 
-const defineEnumOption = ([, { value, description }]) => {
-	if (description) {
-		return stripIndent`
-				"""
-				${description}
-				"""
-				${value}`;
-	}
-
-	return `${value}`;
-};
-
 const defineEnum = ([name, { description, options }]) => {
-	const enums = Object.entries(options).map(defineEnumOption);
+	const enums = Object.values(options).map(generateEnumOption);
 
-	return `
-"""
-${description}
-"""
-enum ${name} {
+	return describedBlock(
+		description,
+		`enum ${name} {
 ${indentMultiline(enums.join('\n'), 2)}
-}`;
+}`,
+	);
 };
 
-const getRelationshipProperties = ({ name, properties }) => {
+const getRelationshipTypeConfig = ({ name, properties }) => {
 	return properties
 		.filter(({ relationship }) => !!relationship)
 		.map(({ relationship, direction, type }) => {
-			const from = direction === 'incoming' ? type : name;
-			const to = direction === 'incoming' ? name : type;
+			const [from, to] = getFromTo(direction, name, type);
 			return {
 				from,
 				to,
 				relationship,
-				typeName: snakeToCamel(
-					`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`,
-				),
+				typeName: getRichRelationshipType(from, relationship, to),
 			};
 		});
 };
 
-const defineRelationshipTypes = types => {
-	return uniqBy(
-		[].concat(...types.map(getRelationshipProperties), 'typeName'),
-	).map(
-		({ from, to, typeName, relationship }) => stripIndent`
-	type ${typeName} @relation(name: ${relationship}) {
-		from: ${from}
-		to: ${to}
-	}`,
+const defineRelationshipTypes = types =>
+	uniqBy([].concat(...types.map(getRelationshipTypeConfig), 'typeName')).map(
+		generateRelationshipType,
 	);
-};
 
 module.exports = {
 	accessor() {
@@ -249,18 +245,20 @@ module.exports = {
 	`;
 		const types = typesFromSchema.map(defineType);
 
-		const relationshipTypes = defineRelationshipTypes(types);
+		const relationshipTypes = defineRelationshipTypes(typesFromSchema);
 
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
 
+		const queries = typesFromSchema.map(defineQueries);
+
 		return [].concat(
 			customDateTimeTypes,
-			...types,
-			...relationshipTypes,
+			types,
+			relationshipTypes,
 			'type Query {\n',
-			...typesFromSchema.map(defineQueries),
+			...queries,
 			'}',
 			enums,
 		);
