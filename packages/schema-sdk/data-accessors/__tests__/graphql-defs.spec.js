@@ -1,6 +1,6 @@
-const primitiveTypesMap = require('../../primitive-types-map');
+const primitiveTypesMap = require('../../lib/primitive-types-map');
 const { SDK } = require('../../sdk');
-const { readYaml } = require('../../../../packages/schema-updater');
+const { readYaml } = require('../../lib/updater');
 
 const stringPatterns = readYaml.file(
 	process.env.TREECREEPER_SCHEMA_DIRECTORY,
@@ -48,10 +48,9 @@ describe('graphql def creation', () => {
 						},
 						hasNestedGroups: {
 							type: 'Group',
-							relationship: 'PAYS_FOR',
-							direction: 'outgoing',
 							hasMany: true,
-							isRecursive: true,
+							cypher:
+								'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
 							description:
 								'The recursive groups which are costed to the cost centre',
 						},
@@ -87,14 +86,6 @@ describe('graphql def creation', () => {
 							description:
 								'The Cost Centre associated with the group',
 						},
-						hasEventualBudget: {
-							type: 'CostCentre',
-							description:
-								'The Cost Centre associated with the group in the end',
-							isRecursive: true,
-							relationship: 'PAYS_FOR',
-							direction: 'incoming',
-						},
 					},
 				},
 			],
@@ -120,7 +111,6 @@ describe('graphql def creation', () => {
 		const generated = [].concat(
 			...graphqlFromRawData(schema).map(explodeString),
 		);
-
 		expect(generated).toEqual(
 			explodeString(
 				`
@@ -147,9 +137,7 @@ hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", directio
 """
 The recursive groups which are costed to the cost centre
 """
-hasNestedGroups(first: Int, offset: Int): [Group] @cypher(
-statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related"
-)
+hasNestedGroups(first: Int, offset: Int): [Group] @cypher(statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related")
 
 """
 The client that was used to make the creation
@@ -204,12 +192,6 @@ isActive: Boolean
 The Cost Centre associated with the group
 """
 hasBudget: CostCentre @relation(name: "PAYS_FOR", direction: "IN")
-"""
-The Cost Centre associated with the group in the end
-"""
-hasEventualBudget: CostCentre @cypher(
-statement: "MATCH (this)<-[:PAYS_FOR*1..20]-(related:CostCentre) RETURN DISTINCT related"
-)
 
 """
 The client that was used to make the creation

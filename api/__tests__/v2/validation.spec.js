@@ -19,13 +19,13 @@ describe('validation', () => {
 		it('should call when POSTing node', async () => {
 			await sandbox
 				.request(app)
-				.post(`/v2/node/Team/${namespace}-team`)
+				.post(`/v2/node/MainType/${namespace}-main`)
 				.namespacedAuth()
 				.send({
 					foo: 'created',
 				});
 			expect(validation.validateProperty).toHaveBeenCalledWith(
-				'Team',
+				'MainType',
 				'foo',
 				'created',
 			);
@@ -33,13 +33,13 @@ describe('validation', () => {
 		it('should call when PATCHing node', async () => {
 			await sandbox
 				.request(app)
-				.patch(`/v2/node/Team/${namespace}-team`)
+				.patch(`/v2/node/MainType/${namespace}-main`)
 				.namespacedAuth()
 				.send({
 					foo: 'updated',
 				});
 			expect(validation.validateProperty).toHaveBeenCalledWith(
-				'Team',
+				'MainType',
 				'foo',
 				'updated',
 			);

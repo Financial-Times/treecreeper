@@ -1,26 +1,49 @@
-# biz-ops-schema
+# @treecreeper/schema-sdk
 
-Schema for biz-ops data store and api. It provides two things:
+In many ways, this is the beating heart of Treecreeper&TM;. It consumes the schema files that define what sort of records can be stored in the neo4j instance, and what relationships can exist between them. These schema files may exist locally or be hosted somewhere remote. Once these files are consumed, schema-sdk then takes care of:
 
--   yaml files which define which types, properties and relationships are allowed. These are intended to be edited by anybody who wants to add to the things the api models
--   a nodejs library for accessing subsets this information
+-   Updating the schema held locally when the remote copy changes, and making sure the change to the schema is propagated everywhere within the application
+    Generating the GraphQl SDL schema that underlies the graphql API
+-   Providing methods that allow validation of input data against the schema
+-   Providing utility methods that allow various aspects of the schema to be interrogated and used for e.g. constructing a UI for the data
 
 ## Installation and usage
 
-`npm install @financial-times/biz-ops-schema`
+`npm install @treecreeper/schema-sdk`
 
-In production the component should be used in either 'poll' or 'stale' update modes, depending on the type of environment.
+The package exports a singleton instance, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application. It should be initialised _once and once only per application_. It also exports a reference to the underlying `SDK` class, but this is only exposed for use by other packages' integration tests.
 
-The component should be initialised _once and once only per application_. The component is a singleton, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application, and will already be hydrated with schema data.
+### Initialisation
 
-### Persistent nodejs process (e.g. heroku)
+The package exports an `init(options)` function, that takes the following options:
+
+-   `schemaDirectory` - absolute path to a directory that contains schema files as yaml. Will use the `TREECREEPER_SCHEMA_DIRECTORY` environment variable if defined. This is the preferred way of specifying the directory
+-   `schemaData` - a javascript object containing a complete Treecreeper schema. Generally only used in tests
+-   `schemaBaseUrl` - The root url the sdk will look under to retrieve new versions of the schema. This should be the same url the `schema-publisher` package publishes to
+-   `ttl` (default 60000) - when fetching the schema from a url, the time in milliseconds to cache the schema locally for before checking for updates
+-   `updateMode` - 'poll' or 'stale'. 'poll' will start polling on an interval for schema updates, whereas 'stale' will fetch whenever a user calls the sdk's `refresh()` method and the schema is older than the `ttl`
+-   `logger` (default `console`) - choice of logger to use in the sdk
+-   `version` - used to specify the version of he schema being used. Only used in tests
+
+One of `schemaDirectory`, `schemaData` or `schemaBaseUrl` must be defined. If `chemaBaseUrl` is defined, then `updateMode` must also be defined.
+
+### Update APIs
+
+-   `init(options)` - described above
+-   `ready()` - returns a `Promise` that resolves once the schem-sdk has loaded the schema files
+-   `onChange(func)` method, that can be used to attach handlers that need to respond when the schema changes.
+-   `refresh()` - used to update the schema when sdk has `updateMode: 'stale'`
+
+### Examples
+
+#### Persistent nodejs process (e.g. heroku)
 
 ```js
-const { init, ready } = require('@financial-times/biz-ops-schema');
+const { init, ready } = require('@treecreeper/schema-sdk');
 init({
-	schemaUrl: process.env.SCHEMA_BASE_URL,
+	schemaUrl: 'http://my-static-host.com/treecreeper-schema',
 	updateMode: 'poll',
-	logger: require('n-logger'), // or whichever logger you prefer
+	logger: require('@financial-times/n-logger'), // or whichever logger you prefer
 	ttl: 10000, // in milliseconds, defaults to 60000
 });
 
@@ -29,14 +52,14 @@ ready().then(() => {
 });
 ```
 
-### Transient nodejs process (e.g. AWS lambda)
+#### Transient nodejs process (e.g. AWS lambda)
 
 ```js
 const { init, ready } = require('@financial-times/biz-ops-schema');
 init({
-	schemaUrl: process.env.SCHEMA_BASE_URL,
+	schemaUrl: 'http://my-static-host.com/treecreeper-schema',
 	updateMode: 'stale',
-	logger: require('n-lambda-logger'), // or whichever logger you prefer
+	logger: require('@financial-times/lambda-logger'), // or whichever logger you prefer
 	ttl: 10000, // in milliseconds, defaults to 60000
 });
 
@@ -47,33 +70,11 @@ const handler = async event => {
 };
 ```
 
-Speak to a member of the [biz ops team](https://financialtimes.slack.com/messages/C9S0V2KPV) to obtain a suitable value for `SCHEMA_BASE_URL` (it's just an S3 bucket).
+#### Local development
 
-### Local development
+When working with local schema files, set the environment variable `TREECREEPER_SCHEMA_DIRECTORY` to the absolute path where your schema files live. This will override any other settings you have for schema updating.
 
-When working with local schema files, set the environment variable `TREECREEPER_SCHEMA_DIRECTORY` to the path, relative to the current working directory, of your schema files.
-
-## Adding to the schema
-
-See [CONTRIBUTING.md](CONTRIBUTING.md)
-
-## Releasing
-
-Create an appropriate semver tag:
-
--   for additions to the schema release as a patch
--   for additions to the api relase as a minor
--   breaking changes to the API or changes to the structure of data in the yaml files should be released as major
-
-### Release process details
-
-![image](https://user-images.githubusercontent.com/447559/55995243-e4d77800-5cab-11e9-8713-8d0ea7485108.png)
-
-Creating a github tag (1.) triggers a circleci build (2.) which, on success, publishes the schema files to s3 on the path `/latest/vX.json` (where X is the major version) (3a.), and publishes the javascript library to NPM (3b.). biz-ops-api polls `/latest/vX.json` (4.) and when an update is detected, it constructs and updated graphQL api, then publishes the schema file to `/api/vX.json` (5.). biz-ops-admin and other secondary consumers of the data poll `/api/vX.json` for updates to the schema (6.).
-
-The reasoning behind this solution can be seen [in this gist](https://gist.github.com/wheresrhys/dd4c5d856812e0fb8c705feeabffd754)
-
-## API
+### Schema access APIs
 
 All methods use an internal caching mechanism, whih is flushed whenever the schema updates. For this reason
 
@@ -133,7 +134,7 @@ Retrieves graphql defs to be used to power a graphql api
 
 ### normalizeTypeName
 
-Should be used when reading a type name from e.g. a url. Currently is a noop, but will allow consistent rolling out of more forgiving url parsing in futre if necessary
+Should be used when reading a type name from e.g. a url. Currently is a noop, but will allow consistent rolling out of more forgiving url parsing in future if necessary
 
 _The methods below are unimplemented_
 

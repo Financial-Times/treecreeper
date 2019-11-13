@@ -20,16 +20,9 @@ const indentMultiline = (str, indent, trimFirst) => {
 
 const graphqlDirection = direction => (direction === 'outgoing' ? 'OUT' : 'IN');
 
-const relFragment = (type, direction, depth = '') => {
-	const left = direction === 'incoming' ? '<' : '';
-	const right = direction === 'outgoing' ? '>' : '';
-	return `${left}-[:${type}${depth}]-${right}`;
-};
-
 const maybePluralType = def => (def.hasMany ? `[${def.type}]` : def.type);
 
-const maybePaginate = def =>
-	def.isRelationship && def.hasMany ? '(first: Int, offset: Int)' : '';
+const maybePaginate = def => (def.hasMany ? '(first: Int, offset: Int)' : '');
 
 const snakeToCamel = str => {
 	const camel = str
@@ -42,22 +35,17 @@ const snakeToCamel = str => {
 	return camel;
 };
 
-const cypherResolver = def => {
-	if (!def.isRelationship) {
-		return '';
+const maybeDirective = def => {
+	if (def.cypher) {
+		return `@cypher(statement: "${def.cypher}")`;
 	}
-	if (def.isRecursive) {
-		return `@cypher(
-			statement: "MATCH (this)${relFragment(
-				def.relationship,
-				def.direction,
-				'*1..20',
-			)}(related:${def.type}) RETURN DISTINCT related"
-		)`;
+	if (def.relationship) {
+		return `@relation(name: "${
+			def.relationship
+		}", direction: "${graphqlDirection(def.direction)}")`;
 	}
-	return `@relation(name: "${
-		def.relationship
-	}", direction: "${graphqlDirection(def.direction)}")`;
+
+	return '';
 };
 
 const maybeDeprecate = ({ deprecationReason }) => {
@@ -67,37 +55,29 @@ const maybeDeprecate = ({ deprecationReason }) => {
 	return `@deprecated(reason: "${deprecationReason.replace(/"/g, '\\"')}")`;
 };
 
-const defineProperties = properties => {
-	return properties
+const defineProperties = properties => properties
 		.map(
-			([name, def]) => {
-
-				return 	stripEmptyFirstLine`
-				"""
-				${def.description}
-				"""
-				${name}${maybePaginate(def)}: ${maybePluralType(def)} ${cypherResolver(
-						def,
-					)} ${maybeDeprecate(def)}`
-			})
+			([name, def]) =>
+				stripEmptyFirstLine`
+			"""
+			${def.description}
+			"""
+			${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDirective(
+					def,
+				)} ${maybeDeprecate(def)}`,
+		)
 		.join('');
-};
 
-const definePropertiesForRelationshipSchema = (properties, firstNode) => {
-	return properties
+const definePropertiesForRelationshipSchema = (properties, firstNode) => properties
 		.map(
-			([name, def]) => {
-				const mapVal = stripEmptyFirstLine`
+			([name, def]) =>
+				stripEmptyFirstLine`
 				"""
 				${def.description}
 				"""
 				${name}${maybePaginate(def)}: ${def.isRelationship ? relationshipPluralType(def, firstNode) : maybePluralType(def)} ${maybeDeprecate(def)}`
-				return mapVal
-			}
-
-		)
+			)
 		.join('');
-};
 
 const relationshipPluralType = (def, firstNode) => {
 	const from = def.direction === 'incoming' ? def.type : firstNode;
@@ -132,7 +112,7 @@ const getIdentifyingFields = config =>
 
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(
-		([, value]) => !Object.keys(value).includes('relationship'),
+		([, { isRelationship }]) => !isRelationship,
 	);
 
 const defineQuery = ({ name, type, description, properties, paginate }) => {
@@ -236,7 +216,6 @@ module.exports = {
 	accessor(representRelationshipsAsNodes = true) {
 		const typesFromSchema = this.getTypes({
 			primitiveTypes: 'graphql',
-			relationshipStructure: 'graphql',
 			includeMetaFields: true,
 		});
 		const customDateTimeTypes = stripIndent`
@@ -260,10 +239,6 @@ module.exports = {
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
 		);
-
-		console.log('done')
-
-
 
 		return [].concat(
 			customDateTimeTypes + typeNamesAndDescriptions,

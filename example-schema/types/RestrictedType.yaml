@@ -1,0 +1,21 @@
+name: RestrictedType
+description: RestrictedType description.
+createPermissions:
+  - restricted-type-creator
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  someDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  someString:
+    type: Word
+    description: Word description.
+    label: Word label
+

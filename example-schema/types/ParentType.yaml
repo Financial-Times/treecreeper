@@ -1,0 +1,19 @@
+name: ParentType
+description: Description of ParentType.
+moreInformation: |
+    More information for ParentType
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  isParentOf:
+    relationship: IS_PARENT_OF
+    type: MainType
+    description: Is parent of description.
+    label: Is parent of label
+    direction: outgoing
+    hasMany: true

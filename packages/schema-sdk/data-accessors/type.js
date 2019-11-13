@@ -1,7 +1,7 @@
 const clone = require('clone');
-const primitiveTypesMap = require('../primitive-types-map');
-const metaProperties = require('../meta-properties');
-const BizOpsError = require('../biz-ops-error');
+const primitiveTypesMap = require('../lib/primitive-types-map');
+const metaProperties = require('../lib/meta-properties');
+const BizOpsError = require('../lib/biz-ops-error');
 
 const BIZ_OPS = 'biz-ops';
 
@@ -134,14 +134,13 @@ const getType = function(
 
 	if (withRelationships) {
 		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
+			if (def.relationship || def.cypher) {
 				if (def.hidden) {
 					delete typeSchema.properties[propName];
 				}
 				Object.assign(def, {
 					hasMany: def.hasMany || false,
-					isRelationship: !!def.relationship,
-					isRecursive: def.isRecursive || false,
+					isRelationship: !!(def.relationship || def.cypher),
 					writeInactive:
 						'writeInactive' in def ? def.writeInactive : false,
 					showInactive:
