@@ -1,12 +1,5 @@
 const stripIndent = require('common-tags/lib/stripIndent');
-
-const flatten = arr => {
-	return arr.reduce((flat, toFlatten) => {
-		return flat.concat(
-			Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten,
-		);
-	}, []);
-};
+const uniqBy = require('lodash.uniqby');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -56,27 +49,49 @@ const maybeDirective = def => {
 };
 
 const maybeDeprecate = ({ deprecationReason }) => {
-	if (!deprecationReason) {
-		return '';
+	if (deprecationReason) {
+		return `@deprecated(reason: "${deprecationReason.replace(
+			/"/g,
+			'\\"',
+		)}")`;
 	}
-	return `@deprecated(reason: "${deprecationReason.replace(/"/g, '\\"')}")`;
+	return '';
 };
 
-const defineProperties = properties =>
-	properties
-		.map(
-			([name, def]) =>
-				stripEmptyFirstLine`
-		"""
-		${def.description}
-		"""
-		${name}${maybePaginate(def)}: ${maybePluralType(def)} ${maybeDirective(
-					def,
-				)} ${maybeDeprecate(def)}`,
-		)
-		.join('');
+const getPropertyConfig = ([name, def]) => ({
+	description: def.description,
+	name,
+	pagination: maybePaginate(def),
+	type: maybePluralType(def),
+	directive: maybeDirective(def),
+	deprecation: maybeDeprecate(def),
+});
 
-const relationshipType = (def, rootType) => {
+const outputProperty = ({
+	description,
+	name,
+	pagination,
+	type,
+	directive,
+	deprecation,
+}) =>
+	stripEmptyFirstLine`
+		"""
+		${description}
+		"""
+		${name}${pagination}: ${type} ${directive} ${deprecation}`;
+
+const defineProperties = properties => {
+	if (!Array.isArray(properties)) {
+		properties = Object.entries(properties);
+	}
+	properties
+		.map(getPropertyConfig)
+		.map(outputProperty)
+		.join('');
+};
+
+const getRichRelationshipType = (def, rootType) => {
 	const from = def.direction === 'incoming' ? def.type : rootType;
 	const to = def.direction === 'incoming' ? rootType : def.type;
 	const fullNameCaps = `${from.toUpperCase()}_${
@@ -88,38 +103,29 @@ const relationshipType = (def, rootType) => {
 	});
 };
 
-const defineRichRelationships = (properties, rootType) =>
-	properties
-		.filter(([, { relationship }]) => relationship)
-		.map(
-			([name, def]) =>
-				stripEmptyFirstLine`
-		"""
-		*NOTE: This gives access to properties on the relationships between records
+const getRichRelationshipConfig = rootType => ([name, def]) => ({
+	description: `*NOTE: This gives access to properties on the relationships between records
 		as well as on the records themselves. Use '${name}' instead if you do not need this*
-		${def.description}
-		"""
-		${name}REL${maybePaginate(def)}: ${relationshipType(
-					def,
-					rootType,
-				)} ${maybeDeprecate(def)}`,
-		)
-		.join('');
+		${def.description}`,
+	name: `${name}REL`,
+	pagination: maybePaginate(def),
+	type: getRichRelationshipType(def, rootType),
+	deprecation: maybeDeprecate(def),
+	directive: '',
+});
 
 const PAGINATE = indentMultiline(
-	defineProperties(
-		Object.entries({
-			offset: {
-				type: 'Int = 0',
-				description: 'The pagination offset to use',
-			},
-			first: {
-				type: 'Int = 20000',
-				description:
-					'The number of records to return after the pagination offset. This uses the default neo4j ordering',
-			},
-		}),
-	),
+	defineProperties({
+		offset: {
+			type: 'Int = 0',
+			description: 'The pagination offset to use',
+		},
+		first: {
+			type: 'Int = 20000',
+			description:
+				'The number of records to return after the pagination offset. This uses the default neo4j ordering',
+		},
+	}),
 	4,
 	true,
 );
@@ -132,6 +138,13 @@ const getFilteringFields = config =>
 		([, { isRelationship }]) => !isRelationship,
 	);
 
+const defineRichRelationships = (properties, rootType) =>
+	Object.entries(properties)
+		.filter(([, { relationship }]) => relationship)
+		.map(getRichRelationshipConfig(rootType))
+		.map(outputProperty)
+		.join('');
+
 const defineQuery = ({ name, type, description, properties, paginate }) => {
 	return `
 	"""
@@ -143,49 +156,15 @@ const defineQuery = ({ name, type, description, properties, paginate }) => {
 	): ${type}`;
 };
 
-const defineType = config => {
+const defineType = ({ name, description, properties }) => {
 	return `
 	"""
-	${config.description}
+	${description}
 	"""
-	type ${config.name} {
-		${indentMultiline(defineProperties(Object.entries(config.properties)), 2, true)}
-		${indentMultiline(
-			defineRichRelationships(
-				Object.entries(config.properties),
-				config.name,
-			),
-			2,
-			true,
-		)}
+	type ${name} {
+		${indentMultiline(defineProperties(properties), 2, true)}
+		${indentMultiline(defineRichRelationships(properties, name), 2, true)}
 	}`;
-};
-
-const defineRelationshipType = rootType => ([
-	,
-	{ relationship, direction, type },
-]) => {
-	const from = direction === 'incoming' ? type : rootType;
-	const to = direction === 'incoming' ? rootType : type;
-	const relationshipTypeName = snakeToCamel(
-		`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`,
-	);
-
-	return stripIndent`
-	type ${relationshipTypeName} @relation(name: ${relationship}) {
-		from: ${from}
-		to: ${to}
-	}`;
-};
-
-const defineRelationshipTypes = config => {
-	const relationships = Object.entries(config.properties).filter(
-		([, def]) => def.isRelationship,
-	);
-	const relationshipTypes = relationships.map(
-		defineRelationshipType(config.name),
-	);
-	return [...relationshipTypes];
 };
 
 const defineQueries = config => [
@@ -204,18 +183,20 @@ const defineQueries = config => [
 	}),
 ];
 
-const defineEnum = ([name, { description, options }]) => {
-	const enums = Object.entries(options).map(([, option]) => {
-		if (option.description) {
-			return stripIndent`
+const defineEnumOption = ([, { value, description }]) => {
+	if (description) {
+		return stripIndent`
 				"""
-				${option.description}
+				${description}
 				"""
-				${option.value}`;
-		}
+				${value}`;
+	}
 
-		return `${option.value}`;
-	});
+	return `${value}`;
+};
+
+const defineEnum = ([name, { description, options }]) => {
+	const enums = Object.entries(options).map(defineEnumOption);
 
 	return stripIndent`
 		"""
@@ -224,6 +205,35 @@ const defineEnum = ([name, { description, options }]) => {
 		enum ${name} {
 		${indentMultiline(enums.join('\n'), 3)}
 		}`;
+};
+
+const getRelationshipProperties = ({ name, properties }) => {
+	return properties
+		.filter(({ relationship }) => !!relationship)
+		.map(({ relationship, direction, type }) => {
+			const from = direction === 'incoming' ? type : name;
+			const to = direction === 'incoming' ? name : type;
+			return {
+				from,
+				to,
+				relationship,
+				typeName: snakeToCamel(
+					`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`,
+				),
+			};
+		});
+};
+
+const defineRelationshipTypes = types => {
+	return uniqBy(
+		[].concat(...types.map(getRelationshipProperties), 'typeName'),
+	).map(
+		({ from, to, typeName, relationship }) => stripIndent`
+	type ${typeName} @relation(name: ${relationship}) {
+		from: ${from}
+		to: ${to}
+	}`,
+	);
 };
 
 module.exports = {
@@ -239,9 +249,7 @@ module.exports = {
 	`;
 		const types = typesFromSchema.map(defineType);
 
-		const relationshipTypes = [
-			...new Set(flatten(typesFromSchema.map(defineRelationshipTypes))),
-		];
+		const relationshipTypes = defineRelationshipTypes(types);
 
 		const enums = Object.entries(this.getEnums({ withMeta: true })).map(
 			defineEnum,
