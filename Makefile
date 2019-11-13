@@ -27,7 +27,7 @@ env:
 verify:
 
 # monorepo task should be ran before root installation
-# because root of package.json reffers some pacakges/tc-* package internally
+# because root of package.json refers some pacakges/tc-* package internally
 install: monorepo install-treecreeper
 
 monorepo:
