@@ -1,8 +1,6 @@
 const { stripIndents } = require('common-tags');
-const {
-	executeQuery,
-	constructNeo4jProperties,
-} = require('@financial-times/tc-api-db-manager');
+const { executeQuery } = require('./neo4j-model');
+const { constructNeo4jProperties } = require('./neo4j-type-conversion');
 const {
 	metaPropertiesForCreate,
 	metaPropertiesForUpdate,

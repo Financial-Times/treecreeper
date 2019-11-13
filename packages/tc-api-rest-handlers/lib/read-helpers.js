@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { executeQuery } = require('@financial-times/tc-api-db-manager');
+const { executeQuery } = require('./neo4j-model');
 
 const getNeo4jRecordCypherQuery = ({
 	nodeName = 'node',

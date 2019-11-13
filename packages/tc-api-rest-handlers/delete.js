@@ -1,6 +1,6 @@
 const httpErrors = require('http-errors');
-const { executeQuery } = require('@financial-times/tc-api-db-manager');
 const { logChanges } = require('@financial-times/tc-api-publish');
+const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 
