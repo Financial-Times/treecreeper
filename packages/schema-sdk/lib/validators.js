@@ -70,10 +70,10 @@ const validateProperty = ({ getType, getEnums }) => {
 				if (typeof value === 'string') {
 					recursivelyCallableValidator(type, 'code', value);
 				} else {
-					Object.keys(value).forEach(key => {
+					Object.keys(value).forEach(() => {
 						// TODO: need to impletment rich relationship schema to run below
 						// recursivelyCallableValidator(type, key, value[key]);
-					})
+					});
 				}
 			});
 		} else if (type === 'Boolean') {
