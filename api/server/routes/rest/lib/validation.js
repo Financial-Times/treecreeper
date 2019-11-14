@@ -1,7 +1,7 @@
 const httpErrors = require('http-errors');
 const {
 	validators,
-	BizOpsError,
+	TreecreeperUserError,
 } = require('../../../../../packages/schema-sdk');
 
 const validation = Object.entries(validators).reduce(
@@ -10,7 +10,7 @@ const validation = Object.entries(validators).reduce(
 			try {
 				return validator(...args);
 			} catch (e) {
-				if (e instanceof BizOpsError) {
+				if (e instanceof TreecreeperUserError) {
 					throw httpErrors(400, e.message);
 				}
 				throw e;

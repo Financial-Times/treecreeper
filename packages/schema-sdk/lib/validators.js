@@ -4,7 +4,7 @@ const primitiveTypesMap = require('./primitive-types-map');
 
 const toArray = value => (Array.isArray(value) ? value : [value]);
 
-const BizOpsError = require('./biz-ops-error');
+const TreecreeperUserError = require('./biz-ops-error');
 
 const validateTypeName = getType => type => getType(type);
 
@@ -15,7 +15,7 @@ const throwInvalidValueError = (
 	aliasPropertyName,
 ) => reason => {
 	const propName = aliasPropertyName || propertyName;
-	throw new BizOpsError(
+	throw new TreecreeperUserError(
 		stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
 	);
 };
@@ -30,7 +30,7 @@ const validateProperty = ({ getType, getEnums }) => {
 		const propertyDefinition = getType(typeName).properties[propertyName];
 
 		if (!propertyDefinition) {
-			throw new BizOpsError(
+			throw new TreecreeperUserError(
 				`Invalid property \`${propertyName}\` on type \`${typeName}\`.`,
 			);
 		}
@@ -122,7 +122,7 @@ const validatePropertyName = name => {
 	// FIXME: allow SF_ID as, at least for a while, we need this to exist so that
 	// salesforce sync works during the transition to the new architecture
 	if (name !== 'SF_ID' && !propertyNameRegex.test(name)) {
-		throw new BizOpsError(
+		throw new TreecreeperUserError(
 			`Invalid property name \`${name}\`. Must be a camelCase string, i.e.
 			beginning with a lower case letter, and only containing upper and lower case letters
 			and digits`,
