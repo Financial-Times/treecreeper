@@ -4,9 +4,10 @@ const schema = require('../../../packages/schema-sdk');
 schema.init({ schemaDirectory: process.env.TREECREEPER_SCHEMA_DIRECTORY });
 
 schema.ready().then(() => {
-	const schemaObject = Object.assign({}, schema.rawData.getAll(), {
+	const schemaObject = {
+		...schema.rawData.getAll(),
 		version: process.env.CIRCLE_TAG,
-	});
+	};
 
 	sendSchemaToS3(
 		process.env.TREECREEPER_SCHEMA_BUCKET,

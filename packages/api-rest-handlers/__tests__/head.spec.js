@@ -13,7 +13,7 @@ describe('rest HEAD', () => {
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it('gets record without relationships', async () => {
 		await createMainNode({

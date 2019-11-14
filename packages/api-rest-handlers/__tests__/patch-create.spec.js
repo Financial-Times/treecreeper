@@ -206,7 +206,7 @@ describe('rest PATCH create', () => {
 
 			const { body, status } = await basicHandler(
 				{ children: childCode, parents: parentCode },
-				{ relationshipAction: 'merge', richRelationships: true }
+				{ relationshipAction: 'merge', richRelationships: true },
 			);
 
 			expect(status).toBe(201);

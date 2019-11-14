@@ -15,7 +15,7 @@ const getNodeCreator = (namespace, defaultProps) => async (
 		props = { code: props };
 	}
 	const result = await executeQuery(`CREATE (n:${type} $props) RETURN n`, {
-		props: Object.assign({}, defaultProps, props),
+		props: { ...defaultProps, ...props },
 	});
 	return result.records[0].get('n').identity;
 };
@@ -38,7 +38,7 @@ RETURN n1, n2, rel`,
 		{
 			id1,
 			id2,
-			props: Object.assign({}, defaultProps, props),
+			props: { ...defaultProps, ...props },
 		},
 	);
 
@@ -68,60 +68,45 @@ const testDataCreators = (namespace, sandbox, now, then) => {
 	sandbox.createNodes = (...nodes) =>
 		Promise.all(nodes.map(args => createNode(...args)));
 
-	sandbox.withMeta = (obj = {}) =>
-		Object.assign(
-			{
-				_createdByRequest: `${namespace}-init-request`,
-				_createdByClient: `${namespace}-init-client`,
-				_createdByUser: `${namespace}-init-user`,
-				_createdTimestamp: DateTime.fromStandardDate(
-					new Date(then),
-				).toString(),
-				_updatedByRequest: `${namespace}-request`,
-				_updatedByClient: `${namespace}-client`,
-				_updatedByUser: `${namespace}-user`,
-				_updatedTimestamp: DateTime.fromStandardDate(
-					new Date(now),
-				).toString(),
-			},
-			obj,
-		);
+	sandbox.withMeta = (obj = {}) => ({
+		_createdByRequest: `${namespace}-init-request`,
+		_createdByClient: `${namespace}-init-client`,
+		_createdByUser: `${namespace}-init-user`,
+		_createdTimestamp: DateTime.fromStandardDate(new Date(then)).toString(),
+		_updatedByRequest: `${namespace}-request`,
+		_updatedByClient: `${namespace}-client`,
+		_updatedByUser: `${namespace}-user`,
+		_updatedTimestamp: DateTime.fromStandardDate(new Date(now)).toString(),
+		...obj,
+	});
 
 	sandbox.withCreateMeta = (obj = {}) =>
-		sandbox.withMeta(
-			Object.assign(
-				{
-					_createdByClient: `${namespace}-client`,
-					_createdByUser: `${namespace}-user`,
-					_createdByRequest: `${namespace}-request`,
-					_createdTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp),
-					).toString(),
-					_updatedByClient: `${namespace}-client`,
-					_updatedByUser: `${namespace}-user`,
-					_updatedByRequest: `${namespace}-request`,
-					_updatedTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp),
-					).toString(),
-				},
-				obj,
-			),
-		);
+		sandbox.withMeta({
+			_createdByClient: `${namespace}-client`,
+			_createdByUser: `${namespace}-user`,
+			_createdByRequest: `${namespace}-request`,
+			_createdTimestamp: DateTime.fromStandardDate(
+				new Date(formattedTimestamp),
+			).toString(),
+			_updatedByClient: `${namespace}-client`,
+			_updatedByUser: `${namespace}-user`,
+			_updatedByRequest: `${namespace}-request`,
+			_updatedTimestamp: DateTime.fromStandardDate(
+				new Date(formattedTimestamp),
+			).toString(),
+			...obj,
+		});
 
 	sandbox.withUpdateMeta = (obj = {}) =>
-		sandbox.withMeta(
-			Object.assign(
-				{
-					_updatedByClient: `${namespace}-client`,
-					_updatedByUser: `${namespace}-user`,
-					_updatedByRequest: `${namespace}-request`,
-					_updatedTimestamp: DateTime.fromStandardDate(
-						new Date(formattedTimestamp),
-					).toString(),
-				},
-				obj,
-			),
-		);
+		sandbox.withMeta({
+			_updatedByClient: `${namespace}-client`,
+			_updatedByUser: `${namespace}-user`,
+			_updatedByRequest: `${namespace}-request`,
+			_updatedTimestamp: DateTime.fromStandardDate(
+				new Date(formattedTimestamp),
+			).toString(),
+			...obj,
+		});
 };
 
 const dropDb = namespace =>

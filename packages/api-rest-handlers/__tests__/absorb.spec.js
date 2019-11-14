@@ -36,21 +36,17 @@ describe('rest POST (absorb)', () => {
 		const nodes = [
 			[
 				'MainType',
-				Object.assign(
-					{
-						code: mainCode,
-					},
-					mainBody || {},
-				),
+				{
+					code: mainCode,
+					...(mainBody || {}),
+				},
 			],
 			[
 				'MainType',
-				Object.assign(
-					{
-						code: absorbedCode,
-					},
-					absorbedBody || {},
-				),
+				{
+					code: absorbedCode,
+					...(absorbedBody || {}),
+				},
 			],
 		];
 		return createNodes(...nodes);
@@ -204,10 +200,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: childCode },
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 				await neo4jTest('MainType', absorbedCode).notExists();
@@ -234,10 +230,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ParentType',
-							props: Object.assign(
-								{ code: parentCode },
-								meta.default,
-							),
+							props: {
+								code: parentCode,
+								...meta.default,
+							},
 						},
 					);
 				await neo4jTest('MainType', absorbedCode).notExists();
@@ -268,10 +264,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: childCode },
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 
@@ -327,10 +323,10 @@ describe('rest POST (absorb)', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{ code: `${namespace}-child1` },
-								meta.default,
-							),
+							props: {
+								code: `${namespace}-child1`,
+								...meta.default,
+							},
 						},
 					);
 

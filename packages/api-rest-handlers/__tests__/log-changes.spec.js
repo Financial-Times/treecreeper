@@ -26,7 +26,7 @@ describe('Rest logChanges module integration', () => {
 
 	const { createNode, createNodes, connectNodes } = setupMocks(namespace);
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	const createLogChangeMock = () =>
 		jest.spyOn(apiPublish, 'logChanges').mockResolvedValue({});

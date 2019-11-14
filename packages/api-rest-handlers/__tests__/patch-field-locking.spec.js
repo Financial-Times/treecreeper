@@ -24,7 +24,7 @@ describe('rest PATCH field-locking', () => {
 		patchHandler()(getInput(body, query, { clientId }));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	const lock = (client, ...fields) =>
 		JSON.stringify(

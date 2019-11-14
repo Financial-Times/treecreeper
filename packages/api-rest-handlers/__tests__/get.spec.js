@@ -15,7 +15,7 @@ describe('rest GET', () => {
 	);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it('gets record without relationships', async () => {
 		await createMainNode({
@@ -82,9 +82,10 @@ describe('rest GET', () => {
 				[parent, 'IS_PARENT_OF', main],
 			);
 
-			const { body, status } = await getHandler()(
-				Object.assign({ query: { richRelationships: true } }, input),
-			);
+			const { body, status } = await getHandler()({
+				query: { richRelationships: true },
+				...input,
+			});
 
 			expect(status).toBe(200);
 			[...body.children, ...body.parents].forEach(relationship =>

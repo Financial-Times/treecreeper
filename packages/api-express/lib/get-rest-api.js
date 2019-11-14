@@ -40,24 +40,20 @@ const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
 
 const controller = (method, handler) => (req, res, next) => {
 	requestLog('rest', method, req);
-	handler(
-		Object.assign(
-			{
-				// TODO completely remove use of res.locals now we have getContext()
-				metadata: {
-					requestId: res.locals.requestId,
-					// Defaults to null rather than undefined because, when writing to
-					// neo4j, it avoids a 'missing parameter' error and it unsets any
-					// previous values when updating.
-					clientId: res.locals.clientId || null,
-					clientUserId: res.locals.clientUserId || null,
-				},
-				body: req.body,
-				query: req.query || {},
-			},
-			req.params,
-		),
-	)
+	handler({
+		// TODO completely remove use of res.locals now we have getContext()
+		metadata: {
+			requestId: res.locals.requestId,
+			// Defaults to null rather than undefined because, when writing to
+			// neo4j, it avoids a 'missing parameter' error and it unsets any
+			// previous values when updating.
+			clientId: res.locals.clientId || null,
+			clientUserId: res.locals.clientUserId || null,
+		},
+		body: req.body,
+		query: req.query || {},
+		...req.params,
+	})
 		.then(({ status, body }) =>
 			body ? res.status(status).json(body) : res.status(status).end(),
 		)

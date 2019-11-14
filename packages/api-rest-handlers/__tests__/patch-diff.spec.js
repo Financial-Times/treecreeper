@@ -22,7 +22,7 @@ describe('rest PATCH diff', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it("doesn't write if no real property changes detected", async () => {
 		await createMainNode({
