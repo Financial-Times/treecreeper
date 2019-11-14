@@ -37,7 +37,7 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
-    "@financial-times/rel-engage": "^7.1.4",
+    "@financial-times/rel-engage": "^7.2.2",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
     "dotenv": "^8.0.0",
