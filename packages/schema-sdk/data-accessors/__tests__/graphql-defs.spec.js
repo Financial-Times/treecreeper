@@ -10,20 +10,12 @@ const stringPatterns = readYaml.file(
 const graphqlFromRawData = schema =>
 	new SDK({ schemaData: { schema } }).getGraphqlDefs();
 
-const explodeString = str => {
-	try {
-		return (
-			str
-				.split('\n')
-				// exclude strings which are just whitespace or empty
-				.filter(string => !/^[\s]*$/.test(string))
-				.map(string => string.trim())
-		);
-	} catch (e) {
-		console.log({ str });
-		throw e;
-	}
-};
+const explodeString = str =>
+	str
+		.split('\n')
+		// exclude strings which are just whitespace or empty
+		.filter(string => !/^[\s]*$/.test(string))
+		.map(string => string.trim());
 
 describe('graphql def creation', () => {
 	it('generates expected graphql def given schema', () => {
