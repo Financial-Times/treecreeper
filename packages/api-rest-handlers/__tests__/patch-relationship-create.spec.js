@@ -313,7 +313,7 @@ describe('rest PATCH relationship create', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode2, childCode1],
+				children: [childCode1, childCode2],
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -727,9 +727,6 @@ describe('rest PATCH relationship create', () => {
 			);
 
 			expect(status).toBe(200);
-
-			// to pass the assertion below, body.children needs to have the same order as expected values
-			body.children.sort((a, b) => a.code > b.code);
 			expect(body).toMatchObject({
 				children: [
 					{ ...childRelationshipProps, ...meta.create },
