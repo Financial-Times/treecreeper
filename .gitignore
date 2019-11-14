@@ -1,7 +1,6 @@
 .DS_Store
 .vscode
 *.env*
-.eslintrc.js
 .scss-lint.yml
 
 /bower_components/
