@@ -28,7 +28,7 @@ describe('rest PATCH relationship create', () => {
 	const basicHandler = (...args) => patchHandler()(getInput(...args));
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it('errors if updating relationships without relationshipAction query string', async () => {
 		await createMainNode();
@@ -77,12 +77,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode,
-								},
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 			});
@@ -110,12 +108,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode,
-								},
-								meta.default,
-							),
+							props: {
+								code: childCode,
+								...meta.default,
+							},
 						},
 					);
 			});
@@ -165,12 +161,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode2,
-								},
-								meta.default,
-							),
+							props: {
+								code: childCode2,
+								...meta.default,
+							},
 						},
 					);
 			});
@@ -211,12 +205,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode2,
-								},
-								meta.update,
-							),
+							props: {
+								code: childCode2,
+								...meta.update,
+							},
 						},
 					);
 			});
@@ -257,12 +249,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode2,
-								},
-								meta.update,
-							),
+							props: {
+								code: childCode2,
+								...meta.update,
+							},
 						},
 					)
 					.hasRel(
@@ -273,12 +263,10 @@ describe('rest PATCH relationship create', () => {
 						},
 						{
 							type: 'ChildType',
-							props: Object.assign(
-								{
-									code: childCode1,
-								},
-								meta.default,
-							),
+							props: {
+								code: childCode1,
+								...meta.default,
+							},
 						},
 					);
 			});
@@ -309,7 +297,7 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
+						props: { code: childCode, ...meta.default },
 					},
 				);
 		});
@@ -340,10 +328,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign(
-							{ code: childCode1 },
-							meta.default,
-						),
+						props: {
+							code: childCode1,
+							...meta.default,
+						},
 					},
 				)
 				.hasRel(
@@ -354,10 +342,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign(
-							{ code: childCode2 },
-							meta.default,
-						),
+						props: {
+							code: childCode2,
+							...meta.default,
+						},
 					},
 				);
 		});
@@ -387,7 +375,7 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
+						props: { code: childCode, ...meta.default },
 					},
 				);
 		});
@@ -419,10 +407,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign(
-							{ code: childCode2 },
-							meta.default,
-						),
+						props: {
+							code: childCode2,
+							...meta.default,
+						},
 					},
 				);
 		});
@@ -458,12 +446,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'MainType',
-						props: Object.assign(
-							{
-								code: `${mainCode}-2`,
-							},
-							meta.default,
-						),
+						props: {
+							code: `${mainCode}-2`,
+							...meta.default,
+						},
 					},
 				)
 				.hasRel(
@@ -474,12 +460,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'MainType',
-						props: Object.assign(
-							{
-								code: `${mainCode}-3`,
-							},
-							meta.default,
-						),
+						props: {
+							code: `${mainCode}-3`,
+							...meta.default,
+						},
 					},
 				)
 				.hasRel(
@@ -490,7 +474,7 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
+						props: { code: childCode, ...meta.default },
 					},
 				);
 		});
@@ -525,12 +509,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'MainType',
-						props: Object.assign(
-							{
-								code: `${mainCode}-3`,
-							},
-							meta.default,
-						),
+						props: {
+							code: `${mainCode}-3`,
+							...meta.default,
+						},
 					},
 				)
 				.hasRel(
@@ -541,12 +523,10 @@ describe('rest PATCH relationship create', () => {
 					},
 					{
 						type: 'MainType',
-						props: Object.assign(
-							{
-								code: `${mainCode}-2`,
-							},
-							meta.default,
-						),
+						props: {
+							code: `${mainCode}-2`,
+							...meta.default,
+						},
 					},
 				);
 		});
@@ -556,10 +536,7 @@ describe('rest PATCH relationship create', () => {
 		['merge', 'replace'].forEach(action => {
 			const handler = (body, query = {}) =>
 				patchHandler()(
-					getInput(
-						body,
-						Object.assign({ relationshipAction: action }, query),
-					),
+					getInput(body, { relationshipAction: action, ...query }),
 				);
 
 			describe(`with ${action}`, () => {
@@ -597,12 +574,10 @@ describe('rest PATCH relationship create', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{
-										code: childCode,
-									},
-									meta.create,
-								),
+								props: {
+									code: childCode,
+									...meta.create,
+								},
 							},
 						);
 				});
@@ -631,12 +606,10 @@ describe('rest PATCH relationship create', () => {
 							},
 							{
 								type: 'ChildType',
-								props: Object.assign(
-									{
-										code: childCode,
-									},
-									meta.default,
-								),
+								props: {
+									code: childCode,
+									...meta.default,
+								},
 							},
 						);
 				});
@@ -665,12 +638,17 @@ describe('rest PATCH relationship create', () => {
 			expect(status).toBe(200);
 
 			body.children.forEach(relationship =>
-				expect(relationship).toMatchObject({ code: childCode, ...meta.create })
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.create,
+				}),
 			);
 			body.parents.forEach(relationship =>
-				expect(relationship).toMatchObject({ code: parentCode, ...meta.create })
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.create,
+				}),
 			);
 		});
 	});
-
 });

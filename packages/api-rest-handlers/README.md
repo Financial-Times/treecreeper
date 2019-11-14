@@ -134,7 +134,11 @@ This is used to merge one record, B, into another, A, using the following merge 
 The following creates a connected record and then deletes it, encountering some user errors along the way
 
 ```js
-const {postHandler, deleteHandler, patchHandler} = require('@treecreeper/api-rest-handlers');
+const {
+	postHandler,
+	deleteHandler,
+	patchHandler,
+} = require('@treecreeper/api-rest-handlers');
 
 const post = postHandler();
 const patch = patchHandler();
@@ -142,41 +146,41 @@ const delete = deleteHandler();
 
 // metadata objects in input omited for brevity
 post({
-    type: 'DogBreed',
-    code: 'spaniel',
-    body: {
-        name: 'Spaniel',
-        likes: ['walkies', 'tummy-rub']
-    },
-}) // upsert error
+	type: 'DogBreed',
+	code: 'spaniel',
+	body: {
+		name: 'Spaniel',
+		likes: ['walkies', 'tummy-rub'],
+	},
+}); // upsert error
 
 post({
-    type: 'DogBreed',
-    code: 'spaniel',
-    body: {
-        name: 'Spaniel',
-        likes: ['walkies', 'tummy-rub']
-    },
-    query: {
-        upsert: true
-    }
-}) // 200, successfully created
+	type: 'DogBreed',
+	code: 'spaniel',
+	body: {
+		name: 'Spaniel',
+		likes: ['walkies', 'tummy-rub'],
+	},
+	query: {
+		upsert: true,
+	},
+}); // 200, successfully created
 
-delete({
-    type: 'DogBreed',
-    code: 'spaniel',
-}) // error, connected record
+delete {
+	type: 'DogBreed',
+	code: 'spaniel',
+}; // error, connected record
 
 patch({
-    type: 'DogBreed',
-    code: 'spaniel',
-    body: {
-        likes: null
-    },
-}) // 200, successfully removed relatioships
+	type: 'DogBreed',
+	code: 'spaniel',
+	body: {
+		likes: null,
+	},
+}); // 200, successfully removed relatioships
 
-delete({
-    type: 'DogBreed',
-    code: 'spaniel',
-}) // 204, successfully deleted
+delete {
+	type: 'DogBreed',
+	code: 'spaniel',
+}; // 204, successfully deleted
 ```
