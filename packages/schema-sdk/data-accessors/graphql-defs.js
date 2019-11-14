@@ -84,10 +84,10 @@ const printPropertyDefinitions = properties => {
 	if (!Array.isArray(properties)) {
 		properties = Object.entries(properties);
 	}
-	properties
+	return properties
 		.map(buildPropertyModel)
 		.map(printPropertyDefinition)
-		.join('');
+		.join('\n');
 };
 
 /*
@@ -121,7 +121,7 @@ const getRichRelationshipPropertyType = (def, rootType) => {
 };
 
 const buildRelationshipTypeModel = ({ name, properties }) => {
-	return properties
+	return Object.values(properties)
 		.filter(({ relationship }) => !!relationship)
 		.map(({ relationship, direction, type }) => {
 			const [from, to] = getFromTo(direction, name, type);
@@ -135,9 +135,10 @@ const buildRelationshipTypeModel = ({ name, properties }) => {
 };
 
 const buildRichRelationshipPropertyModel = rootType => ([name, def]) => ({
-	description: `*NOTE: This gives access to properties on the relationships between records
-		as well as on the records themselves. Use '${name}' instead if you do not need this*
-		${def.description}`,
+	description: stripEmptyFirstLine`
+		${def.description}
+		*NOTE: This gives access to properties on the relationships between records
+		as well as on the records themselves. Use '${name}' instead if you do not need this*`,
 	name: `${name}REL`,
 	pagination: maybePaginate(def),
 	type: getRichRelationshipPropertyType(def, rootType),
@@ -168,10 +169,10 @@ const printRelationshipTypeDefinition = ({
 	);
 
 const printRelationshipTypeDefinitions = types =>
-	uniqBy([].concat(...types.map(buildRelationshipTypeModel), 'typeName')).map(
-		printRelationshipTypeDefinition,
-	);
-
+	uniqBy(
+		[].concat(...types.map(buildRelationshipTypeModel)),
+		({ typeName }) => typeName,
+	).map(printRelationshipTypeDefinition);
 /*
 	Outputting Query definitions
 */
@@ -220,21 +221,23 @@ const printQueryDefinition = ({
 
 const printQueryDefinitions = types => [
 	'type Query {\n',
-	...types.map(config => [
-		printQueryDefinition({
-			name: config.name,
-			type: config.name,
-			description: config.description,
-			properties: getIdentifyingFields(config),
-		}),
-		printQueryDefinition({
-			name: config.pluralName,
-			type: `[${config.name}]`,
-			description: config.description,
-			properties: getFilteringFields(config),
-			paginate: true,
-		}),
-	]),
+	...types.map(config =>
+		[
+			printQueryDefinition({
+				name: config.name,
+				type: config.name,
+				description: config.description,
+				properties: getIdentifyingFields(config),
+			}),
+			printQueryDefinition({
+				name: config.pluralName,
+				type: `[${config.name}]`,
+				description: config.description,
+				properties: getFilteringFields(config),
+				paginate: true,
+			}),
+		].join('\n'),
+	),
 	'}',
 ];
 
@@ -257,7 +260,7 @@ type ${name} {
 	);
 
 const printEnumOptionDefinition = ({ value, description }) =>
-	printDescribedBlock(description || value, value);
+	description ? printDescribedBlock(description, value) : value;
 
 const printEnumDefinition = ([name, { description, options }]) => {
 	const enums = Object.values(options).map(printEnumOptionDefinition);
