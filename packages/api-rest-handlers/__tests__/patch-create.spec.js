@@ -313,9 +313,6 @@ describe('rest PATCH create', () => {
 			);
 
 			expect(status).toBe(201);
-
-			// to pass the assertion below, body.children needs to have the same order as expected values
-			body.children.sort((a, b) => a.code > b.code);
 			expect(body).toMatchObject({
 				children: [
 					{ ...childRelationshipProps, ...meta.create },
