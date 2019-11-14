@@ -167,8 +167,13 @@ _updatedTimestamp: DateTime
 Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
 """
 _lockedFields: String
-
-},
+"""
+The groups which are costed to the cost centre
+*NOTE: This gives access to properties on the relationships between records
+as well as on the records themselves. Use 'hasGroups' instead if you do not need this*
+"""
+hasGroupsREL(first: Int, offset: Int): [CostcentrePaysForGroup]
+}
 
 """
 An overarching group which contains teams and is costed separately
@@ -221,7 +226,19 @@ _updatedTimestamp: DateTime
 Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
 """
 _lockedFields: String
-
+"""
+The Cost Centre associated with the group
+*NOTE: This gives access to properties on the relationships between records
+as well as on the records themselves. Use 'hasBudget' instead if you do not need this*
+"""
+hasBudgetREL: CostcentrePaysForGroup
+}
+"""
+Internal use only
+"""
+type CostcentrePaysForGroup @relation(name: PAYS_FOR) {
+from: CostCentre
+to: Group
 }
 type Query {
 """
@@ -400,8 +417,8 @@ Green
 			const schema = {
 				types: [
 					{
-						name: 'Dummy',
-						description: 'dummy type description',
+						name: 'Fake',
+						description: 'Fake type description',
 						properties: {
 							prop: {
 								type: 'Boolean',
@@ -425,11 +442,11 @@ Green
 			const schema = {
 				types: [
 					{
-						name: 'Dummy',
-						description: 'dummy type description',
+						name: 'Fake',
+						description: 'Fake type description',
 						properties: {
 							prop: {
-								type: 'Boolean',
+								type: 'Fake',
 								deprecationReason: 'not needed',
 								description: 'a description',
 								relationship: 'HAS',
@@ -445,7 +462,7 @@ Green
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
-				'prop(first: Int, offset: Int): [Boolean] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
+				'prop(first: Int, offset: Int): [Fake] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
 			);
 		});
 	});
@@ -457,8 +474,8 @@ Green
 					const schema = {
 						types: [
 							{
-								name: 'Dummy',
-								description: 'dummy type description',
+								name: 'Fake',
+								description: 'Fake type description',
 								properties: {
 									prop: {
 										type: bizopsType,

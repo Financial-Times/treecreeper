@@ -46,10 +46,7 @@ describe('rest PATCH relationship create', () => {
 	});
 
 	describe('__-to-one relationships', () => {
-		[
-			'merge',
-			// 'replace'
-		].forEach(action => {
+		['merge', 'replace'].forEach(action => {
 			const handler = body =>
 				patchHandler()(getInput(body, { relationshipAction: action }));
 
