@@ -622,7 +622,7 @@ describe('rest PATCH relationship create', () => {
 			upsert: true,
 			relationshipAction: 'merge',
 			richRelationships: true,
-		}
+		};
 
 		const childRelationshipProps = { code: childCode, someProp };
 		const childRelationshipTwoProps = {
@@ -657,9 +657,7 @@ describe('rest PATCH relationship create', () => {
 
 		it('creates record with relationship which has properties (one child one prop)', async () => {
 			await createMainNode();
-			await createNodes(
-				['ChildType', childCode]
-			);
+			await createNodes(['ChildType', childCode]);
 			const { status, body } = await basicHandler(
 				{ children: [childRelationshipProps] },
 				queries,
@@ -688,9 +686,7 @@ describe('rest PATCH relationship create', () => {
 
 		it('creates record with relationship which has properties (one child two props)', async () => {
 			await createMainNode();
-			await createNodes(
-				['ChildType', childCode]
-			);
+			await createNodes(['ChildType', childCode]);
 			const { status, body } = await basicHandler(
 				{ children: [childRelationshipTwoProps] },
 				queries,
@@ -698,9 +694,7 @@ describe('rest PATCH relationship create', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [
-					{ ...childRelationshipTwoProps, ...meta.create },
-				],
+				children: [{ ...childRelationshipTwoProps, ...meta.create }],
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -727,10 +721,7 @@ describe('rest PATCH relationship create', () => {
 			);
 			const { status, body } = await basicHandler(
 				{
-					children: [
-						childRelationshipProps,
-						child2RelationshipProps,
-					],
+					children: [childRelationshipProps, child2RelationshipProps],
 				},
 				queries,
 			);
