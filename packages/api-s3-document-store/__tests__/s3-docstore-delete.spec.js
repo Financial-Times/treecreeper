@@ -47,10 +47,9 @@ describe('S3 document helper delete', () => {
 		jest.restoreAllMocks();
 	});
 
-	const matcher = (systemCode, versionMarker) => ({
+	const matcher = systemCode => ({
 		Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
 		Key: `${consistentNodeType}/${systemCode}`,
-		VersionId: versionMarker,
 	});
 
 	test('returns exact versionMarker and can undo it', async () => {
@@ -63,11 +62,7 @@ describe('S3 document helper delete', () => {
 		);
 		const store = docstore(s3Instance);
 
-		const result = await store.delete(
-			consistentNodeType,
-			givenSystemCode,
-			givenVersionMarker,
-		);
+		const result = await store.delete(consistentNodeType, givenSystemCode);
 
 		expect(result).toMatchObject({
 			versionMarker: givenVersionMarker,
@@ -75,9 +70,7 @@ describe('S3 document helper delete', () => {
 		});
 
 		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
-		expect(stubDeleteObject).toHaveBeenCalledWith(
-			matcher(givenSystemCode, givenVersionMarker),
-		);
+		expect(stubDeleteObject).toHaveBeenCalledWith(matcher(givenSystemCode));
 
 		const undoResult = await result.undo();
 		expect(undoResult).toMatchObject({
@@ -105,8 +98,6 @@ describe('S3 document helper delete', () => {
 		).rejects.toThrow(Error);
 
 		expect(stubDeleteObject).toHaveBeenCalledTimes(1);
-		expect(stubDeleteObject).toHaveBeenCalledWith(
-			matcher(givenSystemCode, givenVersionMarker),
-		);
+		expect(stubDeleteObject).toHaveBeenCalledWith(matcher(givenSystemCode));
 	});
 });

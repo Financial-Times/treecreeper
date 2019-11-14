@@ -77,7 +77,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code,
 					versionMarker: toVersionMarker,
 				}),
@@ -99,7 +99,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code: fromSystemCode,
 					versionMarker: fromVersionMarker,
 					undoType: 'DELETE',
@@ -115,7 +115,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code: toSystemCode,
 					versionMarker: toVersionMarker,
 					undoType: 'DELETE',
@@ -147,7 +147,7 @@ describe('S3 document helper absorb', () => {
 	const matcher = (s3Instance, code, body) => ({
 		s3Instance,
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-		nodeType: consistentNodeType,
+		type: consistentNodeType,
 		code,
 		...(body ? { body } : {}),
 	});
