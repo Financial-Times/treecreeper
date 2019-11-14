@@ -12,7 +12,7 @@ const getNodeCreator = (namespace, defaultProps) => async (
 		props = { code: props };
 	}
 	const result = await executeQuery(`CREATE (n:${type} $props) RETURN n`, {
-		props: Object.assign({}, defaultProps, props),
+		props: { ...defaultProps, ...props },
 	});
 	return result.records[0].get('n').identity;
 };
@@ -35,7 +35,7 @@ RETURN n1, n2, rel`,
 		{
 			id1,
 			id2,
-			props: Object.assign({}, defaultProps, props),
+			props: { ...defaultProps, ...props },
 		},
 	);
 

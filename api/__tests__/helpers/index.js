@@ -254,12 +254,10 @@ const stubS3Unavailable = sandbox => {
 	});
 };
 
-module.exports = Object.assign(
-	{
-		stubKinesis,
-		setupMocks,
-		stubS3Unavailable,
-	},
-	dbConnection,
-	testDataCheckers,
-);
+module.exports = {
+	stubKinesis,
+	setupMocks,
+	stubS3Unavailable,
+	...dbConnection,
+	...testDataCheckers,
+};

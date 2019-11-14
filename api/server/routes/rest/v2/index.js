@@ -43,21 +43,17 @@ const controller = (endpointName, method, controllerImplementation) => (
 	res.nextMetricsName = `${endpointName}_${req.params.nodeType ||
 		req.body.type}`;
 	requestLog(endpointName, method, req);
-	controllerImplementation(
-		Object.assign(
-			{
-				// TODO completely remove use of res.locals now we have getContext()
-				requestId: res.locals.requestId,
-				// Defaults to null rather than undefined because it avoids a 'missing
-				// parameter' error and it unsets any previous values when updating.
-				clientId: res.locals.clientId || null,
-				clientUserId: res.locals.clientUserId || null,
-				body: req.body,
-				query: req.query,
-			},
-			req.params,
-		),
-	)
+	controllerImplementation({
+		// TODO completely remove use of res.locals now we have getContext()
+		requestId: res.locals.requestId,
+		// Defaults to null rather than undefined because it avoids a 'missing
+		// parameter' error and it unsets any previous values when updating.
+		clientId: res.locals.clientId || null,
+		clientUserId: res.locals.clientUserId || null,
+		body: req.body,
+		query: req.query,
+		...req.params,
+	})
 		.then(result => {
 			if (method === 'HEAD') {
 				return res.status(result.status).end();

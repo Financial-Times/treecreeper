@@ -28,10 +28,8 @@ const setupMocks = namespace => {
 	return fixtureBuilder(namespace, now, then);
 };
 
-module.exports = Object.assign(
-	{
-		setupMocks,
-		neo4jTest,
-	},
-	dbConnection,
-);
+module.exports = {
+	setupMocks,
+	neo4jTest,
+	...dbConnection,
+};

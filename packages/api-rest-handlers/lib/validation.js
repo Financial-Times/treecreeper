@@ -113,11 +113,9 @@ const validateRelationshipInput = body => {
 		});
 };
 
-module.exports = Object.assign(
-	{
-		validateInput,
-		validateRelationshipAction,
-		validateRelationshipInput,
-	},
-	sdkValidators,
-);
+module.exports = {
+	validateInput,
+	validateRelationshipAction,
+	validateRelationshipInput,
+	...sdkValidators,
+};

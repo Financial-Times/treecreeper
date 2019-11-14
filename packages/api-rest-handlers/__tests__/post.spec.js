@@ -220,7 +220,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.default),
+						props: { code: childCode, ...meta.default },
 					},
 				)
 				.hasRel(
@@ -231,10 +231,10 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ParentType',
-						props: Object.assign(
-							{ code: parentCode },
-							meta.default,
-						),
+						props: {
+							code: parentCode,
+							...meta.default,
+						},
 					},
 				);
 		});
@@ -278,7 +278,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ChildType',
-						props: Object.assign({ code: childCode }, meta.create),
+						props: { code: childCode, ...meta.create },
 					},
 				)
 				.hasRel(
@@ -289,7 +289,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'ParentType',
-						props: Object.assign({ code: parentCode }, meta.create),
+						props: { code: parentCode, ...meta.create },
 					},
 				);
 		});
@@ -307,11 +307,17 @@ describe('rest POST', () => {
 			expect(status).toBe(200);
 
 			body.children.forEach(relationship =>
-				expect(relationship).toMatchObject({ code: childCode, ...meta.create }),
+				expect(relationship).toMatchObject({
+					code: childCode,
+					...meta.create,
+				}),
 			);
 
 			body.parents.forEach(relationship =>
-				expect(relationship).toMatchObject({ code: parentCode, ...meta.create }),
+				expect(relationship).toMatchObject({
+					code: parentCode,
+					...meta.create,
+				}),
 			);
 		});
 	});

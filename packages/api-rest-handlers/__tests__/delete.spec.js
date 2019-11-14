@@ -14,7 +14,7 @@ describe('rest DELETE', () => {
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', Object.assign({ code: mainCode }, props));
+		createNode('MainType', { code: mainCode, ...props });
 
 	it('deletes record without relationships', async () => {
 		await createMainNode();
