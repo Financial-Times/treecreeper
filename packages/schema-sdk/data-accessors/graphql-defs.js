@@ -185,23 +185,21 @@ const getFilteringFields = config =>
 		([, { isRelationship }]) => !isRelationship,
 	);
 
+const paginationConfig = {
+	offset: {
+		type: 'Int = 0',
+		description: 'The pagination offset to use',
+	},
+	first: {
+		type: 'Int = 20000',
+		description:
+			'The number of records to return after the pagination offset. This uses the default neo4j ordering',
+	},
+};
+
 const printPaginationDefinition = paginate =>
 	paginate
-		? indentMultiline(
-				printPropertyDefinitions({
-					offset: {
-						type: 'Int = 0',
-						description: 'The pagination offset to use',
-					},
-					first: {
-						type: 'Int = 20000',
-						description:
-							'The number of records to return after the pagination offset. This uses the default neo4j ordering',
-					},
-				}),
-				4,
-				true,
-		  )
+		? indentMultiline(printPropertyDefinitions(paginationConfig), 4, true)
 		: '';
 
 const printQueryDefinition = ({
