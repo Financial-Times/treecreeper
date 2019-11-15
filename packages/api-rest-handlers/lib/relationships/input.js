@@ -1,4 +1,5 @@
 const { getType } = require('../../../../packages/schema-sdk');
+const { retrieveCodesFromRelProps } = require('./properties');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -50,7 +51,9 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 ]) => {
 	const isCardinalityOne = !schema.properties[relType].hasMany;
 	if (action === 'replace' || isCardinalityOne) {
-		const existingCodes = initialContent[relType];
+		const existingCodes = retrieveCodesFromRelProps(
+			initialContent[relType],
+		);
 		if (!existingCodes) {
 			return;
 		}
@@ -63,7 +66,7 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 
 const findActualAdditions = initialContent => ([relType, newCodes]) => [
 	relType,
-	arrDiff(newCodes, initialContent[relType]),
+	arrDiff(newCodes, retrieveCodesFromRelProps(initialContent[relType])),
 ];
 
 const getRemovedRelationships = ({

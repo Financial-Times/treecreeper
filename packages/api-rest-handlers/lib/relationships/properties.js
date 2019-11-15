@@ -31,8 +31,22 @@ const findInversePropertyNames = (rootType, propName) => {
 	});
 };
 
+// relatioshipProps could be just an array of strings(codes), objects(code and properties) or mixed
+const retrieveCodesFromRelProps = relatioshipsProps => {
+	const codes = [];
+	relatioshipsProps.forEach(props => {
+		if (typeof props === 'string') {
+			codes.push(props);
+		} else {
+			codes.push(props.code);
+		}
+	});
+	return codes;
+};
+
 module.exports = {
 	invertDirection,
 	findPropertyNames,
 	findInversePropertyNames,
+	retrieveCodesFromRelProps,
 };

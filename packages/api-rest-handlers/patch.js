@@ -33,7 +33,10 @@ const patchHandler = ({ documentStore } = {}) => {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
-		const initialContent = preflightRequest.toJson({ type });
+		const initialContent = preflightRequest.toJson({
+			type,
+			richRelationshipsFlag: true,
+		});
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)
