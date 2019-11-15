@@ -133,6 +133,33 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
+	it.skip("doesn't write if no real relationship property changes detected(mixed)", async () => {
+		const [main, child1, child2] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', `${childCode}-1`],
+			['ChildType', `${childCode}-2`],
+		);
+		await connectNodes(
+			[main, 'HAS_CHILD', child1, { someProp: 'some property' }],
+			[main, 'HAS_CHILD', child2],
+		);
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{
+				children: [
+					{ code: `${childCode}-1`, someProp: 'some property' },
+					`${childCode}-2`,
+				],
+			},
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
 	it('writes if one of the relationship properties changes detected', async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],
