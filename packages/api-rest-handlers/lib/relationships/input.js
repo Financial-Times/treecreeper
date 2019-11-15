@@ -64,9 +64,45 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 	}
 };
 
-const findActualAdditions = initialContent => ([relType, newCodes]) => [
+const dealWithProps = (newProps, initialRelProps) => {
+	const isObject = newProps.some(code => typeof code === 'object');
+	const initialRelCodes = retrieveCodesFromRelProps(initialRelProps);
+	const result = [];
+	if (isObject) {
+		newProps.forEach(props => {
+			if (typeof props === 'string') {
+				if (!initialRelCodes.includes(props)) {
+					result.push(props);
+				}
+			} else {
+				const updateProps = {};
+				const matchedRel = initialRelProps.find(
+					initialProps => initialProps.code === props.code,
+				);
+				Object.keys(props).forEach(k => {
+					const targetPropValue = matchedRel[k];
+					if (targetPropValue) {
+						if (props[k] !== targetPropValue) {
+							updateProps[k] = props[k];
+						}
+					} else {
+						updateProps[k] = props[k];
+					}
+				});
+				if (Object.keys(updateProps).length) {
+					updateProps.code = props.code;
+				}
+				result.push(updateProps);
+			}
+		});
+		return result;
+	}
+	return arrDiff(newProps, initialRelCodes);
+};
+
+const findActualAdditions = initialContent => ([relType, newProps]) => [
 	relType,
-	arrDiff(newCodes, retrieveCodesFromRelProps(initialContent[relType])),
+	dealWithProps(newProps, initialContent[relType]),
 ];
 
 const getRemovedRelationships = ({
