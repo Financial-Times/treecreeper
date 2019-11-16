@@ -35,6 +35,20 @@ describe('rest GET', () => {
 		expect(body).toMatchObject(meta.default);
 	});
 
+	it('retrieves array data', async () => {
+		await createMainNode({
+			someStringList: ['one', 'two'],
+			someMultipleChoice: ['First', 'Second']
+		});
+		const { body, status } = await getHandler()(input);
+
+		expect(status).toBe(200);
+		expect(body).toMatchObject({
+			someStringList: ['one', 'two'],
+			someMultipleChoice: ['First', 'Second']
+		});
+	});
+
 	it('gets record with relationships', async () => {
 		const [main, child, parent] = await createNodes(
 			['MainType', mainCode],
