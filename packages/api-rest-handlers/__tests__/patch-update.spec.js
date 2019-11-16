@@ -74,20 +74,20 @@ describe('rest PATCH update', () => {
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({
 				someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second']
+				someMultipleChoice: ['First', 'Second'],
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second']
+				someMultipleChoice: ['First', 'Second'],
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someStringList: ['one', 'two'],
-					someMultipleChoice: ['First', 'Second']
-				})
+					someMultipleChoice: ['First', 'Second'],
+				});
 		});
 		describe('temporal properties', () => {
 			const neo4jTimePrecision = timestamp =>

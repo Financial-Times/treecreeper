@@ -39,15 +39,15 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
-		it("doesn't write if no real array property changes detected", async () => {
+	it("doesn't write if no real array property changes detected", async () => {
 		await createMainNode({
 			someStringList: ['one', 'two'],
-			someMultipleChoice: ['First', 'Second']
+			someMultipleChoice: ['First', 'Second'],
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler({
 			someStringList: ['two', 'one'],
-			someMultipleChoice: ['Second', 'First']
+			someMultipleChoice: ['Second', 'First'],
 		});
 		expect(status).toBe(200);
 		expect(dbQuerySpy()).not.toHaveBeenCalledWith(

@@ -68,20 +68,20 @@ describe('rest PATCH create', () => {
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({
 				someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second']
+				someMultipleChoice: ['First', 'Second'],
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second']
+				someMultipleChoice: ['First', 'Second'],
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
 					someStringList: ['one', 'two'],
-					someMultipleChoice: ['First', 'Second']
-				})
+					someMultipleChoice: ['First', 'Second'],
+				});
 		});
 		it("doesn't set a property when empty string provided", async () => {
 			const { status, body } = await basicHandler({ someString: '' });
