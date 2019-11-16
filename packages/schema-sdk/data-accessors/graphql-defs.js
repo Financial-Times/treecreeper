@@ -32,8 +32,8 @@ ${content}
 
 const maybePluralType = ({ type, hasMany }) => (hasMany ? `[${type}]` : type);
 
-const maybePaginate = ({ hasMany }) =>
-	hasMany ? '(first: Int, offset: Int)' : '';
+const maybePaginate = ({ hasMany, isRelationship }) =>
+	hasMany && isRelationship ? '(first: Int, offset: Int)' : '';
 
 const maybeDirective = def => {
 	if (def.cypher) {
@@ -182,7 +182,7 @@ const getIdentifyingFields = config =>
 
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(
-		([, { isRelationship }]) => !isRelationship,
+		([, { isRelationship, hasMany }]) => !(isRelationship || hasMany),
 	);
 
 const paginationConfig = {

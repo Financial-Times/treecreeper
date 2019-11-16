@@ -186,6 +186,7 @@ describe('types', () => {
 									'description',
 									'label',
 									'deprecationReason',
+									'hasMany',
 								];
 								if (fieldsets) {
 									commonKeys.push('fieldset');
@@ -197,7 +198,7 @@ describe('types', () => {
 											commonKeys.concat([
 												'direction',
 												'relationship',
-												'hasMany',
+
 												'useInSummary',
 												'cypher',
 												'hidden',
@@ -329,6 +330,12 @@ describe('types', () => {
 										expect(
 											Array.isArray(config.examples),
 										).toBe(true);
+									}
+								});
+
+								it('may allow many strings or enums', () => {
+									if (config.hasMany) {
+										expect([...validEnums].concat('Word')).toContain(config.type)
 									}
 								});
 							});

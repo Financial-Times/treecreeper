@@ -22,6 +22,11 @@ properties:
     type: Word
     description: Word description.
     label: Word label
+  someStringList:
+    type: Word
+    hasMany: true
+    description: String list description
+    label: String list label
   someBoolean:
     type: Boolean
     description: Boolean description.
@@ -30,6 +35,11 @@ properties:
     type: AnEnum
     description: Enum description.
     label: Enum label
+  someMultipleChoice:
+    type: AnEnum
+    hasMany: true
+    description: Multiple choice description
+    label: Multiple choice label
   someInteger:
     type: Int
     description: Int description.

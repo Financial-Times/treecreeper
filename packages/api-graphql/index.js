@@ -8,12 +8,12 @@ const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
 	let graphqlHandler;
 
 	const updateAPI = () => {
+		console.log('asjkdhkjsa dajs sss1111')
 		try {
 			graphqlHandler = getApolloMiddleware({ documentStore });
 
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
-
 			if (republishSchema) {
 				sendSchemaToS3('api')
 					.then(() => {

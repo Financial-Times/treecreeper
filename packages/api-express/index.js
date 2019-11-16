@@ -30,8 +30,7 @@ const getApp = async (options = {}) => {
 		restPath = '/rest',
 		restMiddlewares = [],
 	} = options;
-	updateConstraintsOnSchemaChange();
-	schema.init();
+
 
 	const router = new express.Router();
 	router.use(contextMiddleware);
@@ -47,7 +46,9 @@ const getApp = async (options = {}) => {
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
 	} = getGraphqlApi(options);
 
+	schema.init();
 	updateGraphqlApiOnSchemaChange();
+	updateConstraintsOnSchemaChange();
 
 	graphqlMethods.forEach(method =>
 		router[method](graphqlPath, graphqlMiddlewares, graphqlHandler),
