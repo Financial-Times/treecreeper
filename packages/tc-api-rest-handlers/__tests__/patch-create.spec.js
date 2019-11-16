@@ -71,7 +71,7 @@ describe('rest PATCH create', () => {
 				someMultipleChoice: ['First', 'Second'],
 			});
 
-			expect(status).toBe(200);
+			expect(status).toBe(201);
 			expect(body).toMatchObject({
 				someStringList: ['one', 'two'],
 				someMultipleChoice: ['First', 'Second'],
