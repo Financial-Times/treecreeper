@@ -92,26 +92,32 @@ const validateProperty = ({ getType, getEnums }) => {
 				exit('Must be a finite integer');
 			}
 		} else if (type === 'String') {
-			if (typeof propertyValue !== 'string') {
-				exit('Must be a string');
-			}
-
-			if (validator && !validator.test(propertyValue)) {
-				const maxlength = validator
-					.toString()
-					.match(/\.\{\d+,(\d+)\}\$/);
-				if (maxlength) {
-					exit(
-						`Must match pattern ${validator} and be no more than ${maxlength[1]} characters`,
-					);
+			const values = hasMany ? propertyValue : [propertyValue];
+			values.forEach(value => {
+				if (typeof value !== 'string') {
+					exit('Must be a string');
 				}
-				exit(`Must match pattern ${validator}`);
-			}
+
+				if (validator && !validator.test(value)) {
+					const maxlength = validator
+						.toString()
+						.match(/\.\{\d+,(\d+)\}\$/);
+					if (maxlength) {
+						exit(
+							`Must match pattern ${validator} and be no more than ${maxlength[1]} characters`,
+						);
+					}
+					exit(`Must match pattern ${validator}`);
+				}
+			});
 		} else if (type in getEnums()) {
+			const values = hasMany ? propertyValue : [propertyValue];
 			const validVals = Object.values(getEnums()[type]);
-			if (!validVals.includes(propertyValue)) {
-				exit(`Must be a valid enum: ${validVals.join(', ')}`);
-			}
+			values.forEach(value => {
+				if (!validVals.includes(value)) {
+					exit(`Must be a valid enum: ${validVals.join(', ')}`);
+				}
+			});
 		}
 	};
 

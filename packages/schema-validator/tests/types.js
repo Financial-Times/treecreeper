@@ -335,7 +335,9 @@ describe('types', () => {
 
 								it('may allow many strings or enums', () => {
 									if (config.hasMany) {
-										expect([...validEnums].concat('Word')).toContain(config.type)
+										expect(
+											[...validEnums].concat('Word'),
+										).toContain(config.type);
 									}
 								});
 							});

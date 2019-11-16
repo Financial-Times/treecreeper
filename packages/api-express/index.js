@@ -31,7 +31,6 @@ const getApp = async (options = {}) => {
 		restMiddlewares = [],
 	} = options;
 
-
 	const router = new express.Router();
 	router.use(contextMiddleware);
 	router.use(requestId);

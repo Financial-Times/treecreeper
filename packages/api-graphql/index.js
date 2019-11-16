@@ -8,7 +8,7 @@ const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
 	let graphqlHandler;
 
 	const updateAPI = () => {
-		console.log('asjkdhkjsa dajs sss1111')
+		console.log('asjkdhkjsa dajs sss1111');
 		try {
 			graphqlHandler = getApolloMiddleware({ documentStore });
 
