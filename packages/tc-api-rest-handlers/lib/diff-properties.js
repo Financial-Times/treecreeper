@@ -32,28 +32,40 @@ const isProperty = type => {
 
 const getPropertyChangeDetector = (properties, initialContent) => ([
 	propName,
-	val,
+	newVal,
 ]) => {
-	const { type } = properties[propName] || {};
+	const { type, hasMany } = properties[propName] || {};
 
 	if (!(propName in initialContent)) {
-		return !isNullValue(val);
+		return !isNullValue(newVal);
 	}
 
-	if (isNullValue(val)) {
+	if (isNullValue(newVal)) {
 		return true;
 	}
+
+	const oldVal = initialContent[propName];
 
 	if (isTemporalTypeName(type)) {
 		return !datesAreEqual(
 			type,
-			val,
+			newVal,
 			initialContent[propName],
 			neo4jTemporalTypes[type],
 		);
 	}
 
-	return val !== initialContent[propName];
+	if (hasMany) {
+		const sortedNew = newVal.sort();
+		const sortedOld = oldVal.sort();
+
+		return (
+			sortedNew.some((val, i) => sortedOld[i] !== val) ||
+			sortedOld.some((val, i) => sortedNew[i] !== val)
+		);
+	}
+
+	return newVal !== oldVal;
 };
 
 const detectPropertyChanges = (type, initialContent = {}) => {
