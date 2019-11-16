@@ -22,3 +22,6 @@ getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
 		console.log(`Listening on ${PORT}`);
 	});
 });
+
+require('@babel/register');
+app.use('/view', require('./view').handler);
