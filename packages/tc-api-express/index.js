@@ -59,6 +59,10 @@ const getApp = async (options = {}) => {
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
 	} = getGraphqlApi(options);
 
+	schema.init();
+	updateGraphqlApiOnSchemaChange();
+	updateConstraintsOnSchemaChange();
+
 	graphqlMethods.forEach(method =>
 		router[method](
 			graphqlPath,

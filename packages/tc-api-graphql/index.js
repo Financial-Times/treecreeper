@@ -12,6 +12,7 @@ const getGraphqlApi = ({
 	let graphqlHandler;
 
 	const updateAPI = () => {
+		console.log('asjkdhkjsa dajs sss1111');
 		try {
 			graphqlHandler = getApolloMiddleware({ documentStore });
 
