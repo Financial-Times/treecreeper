@@ -70,6 +70,25 @@ describe('rest POST', () => {
 				.match(meta.create);
 		});
 
+		it('sets array data', async () => {
+			const { body, status } = await basicHandler({
+				someStringList: ['one', 'two'],
+				someMultipleChoice: ['First', 'Second'],
+			});
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				someStringList: ['one', 'two'],
+				someMultipleChoice: ['First', 'Second'],
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					someStringList: ['one', 'two'],
+					someMultipleChoice: ['First', 'Second'],
+				});
+		});
+
 		it("doesn't set a property when empty string provided", async () => {
 			const { status, body } = await basicHandler({ someString: '' });
 
