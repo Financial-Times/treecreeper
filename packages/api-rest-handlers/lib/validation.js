@@ -1,6 +1,9 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { validators, BizOpsError } = require('../../../packages/schema-sdk');
+const {
+	validators,
+	TreecreeperUserError,
+} = require('../../../packages/schema-sdk');
 
 const sdkValidators = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
@@ -8,7 +11,7 @@ const sdkValidators = Object.entries(validators).reduce(
 			try {
 				return validator(...args);
 			} catch (e) {
-				if (e instanceof BizOpsError) {
+				if (e instanceof TreecreeperUserError) {
 					throw httpErrors(400, e.message);
 				}
 				throw e;

@@ -1,7 +1,7 @@
 const clone = require('clone');
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/meta-properties');
-const BizOpsError = require('../lib/biz-ops-error');
+const TreecreeperUserError = require('../lib/biz-ops-error');
 
 const BIZ_OPS = 'biz-ops';
 
@@ -82,7 +82,7 @@ const getFromRawData = (typeName, rawData) => {
 		.find(type => type.name === typeName);
 
 	if (!typeDefinition) {
-		throw new BizOpsError(`Invalid type \`${typeName}\``);
+		throw new TreecreeperUserError(`Invalid type \`${typeName}\``);
 	}
 
 	return clone(typeDefinition);

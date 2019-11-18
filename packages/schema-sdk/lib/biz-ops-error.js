@@ -1,8 +1,8 @@
 /* eslint-disable no-useless-constructor */
-class BizOpsError extends Error {
+class TreecreeperUserError extends Error {
 	constructor(message) {
 		super(message);
 	}
 }
 
-module.exports = BizOpsError;
+module.exports = TreecreeperUserError;
