@@ -12,44 +12,43 @@ const docstore = (
 	bucketName = TREECREEPER_DOCSTORE_S3_BUCKET,
 ) => {
 	return {
-		get: async (nodeType, code) =>
+		get: async (type, code) =>
 			s3Get({
 				s3Instance,
 				bucketName,
-				nodeType,
+				type,
 				code,
 			}),
-		post: async (nodeType, code, body) =>
+		post: async (type, code, body) =>
 			s3Post({
 				s3Instance,
 				bucketName,
-				nodeType,
+				type,
 				code,
 				body,
 			}),
-		patch: async (nodeType, code, body) =>
+		patch: async (type, code, body) =>
 			s3Patch({
 				s3Instance,
 				bucketName,
-				nodeType,
+				type,
 				code,
 				body,
 			}),
-		delete: async (nodeType, code, versionMarker) =>
+		delete: async (type, code) =>
 			s3Delete({
 				s3Instance,
 				bucketName,
-				nodeType,
+				type,
 				code,
-				versionMarker,
 			}),
-		absorb: async (nodeType, sourceCode, destinationCode) =>
+		absorb: async (type, absorbedCode, code) =>
 			s3Absorb({
 				s3Instance,
 				bucketName,
-				nodeType,
-				sourceCode,
-				destinationCode,
+				type,
+				absorbedCode,
+				code,
 			}),
 	};
 };

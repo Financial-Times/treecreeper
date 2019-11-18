@@ -1,15 +1,9 @@
 const { logger } = require('../api-express/lib/request-context');
 
-const s3Get = async ({
-	s3Instance,
-	bucketName,
-	nodeType,
-	code,
-	versionMarker,
-}) => {
+const s3Get = async ({ s3Instance, bucketName, type, code, versionMarker }) => {
 	const params = {
 		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
+		Key: `${type}/${code}`,
 	};
 	if (versionMarker) {
 		params.VersionId = versionMarker;

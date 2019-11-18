@@ -4,11 +4,11 @@ const { upload } = require('./upload');
 const { undo } = require('./undo');
 const { s3Get } = require('./get');
 
-const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
+const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 	const { body: existingBody } = await s3Get({
 		s3Instance,
 		bucketName,
-		nodeType,
+		type,
 		code,
 	});
 
@@ -29,7 +29,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 	const newBodyDocument = Object.assign(existingBody, body);
 	const params = {
 		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
+		Key: `${type}/${code}`,
 		Body: JSON.stringify(newBodyDocument),
 		ContentType: 'application/json',
 	};
@@ -44,7 +44,7 @@ const s3Patch = async ({ s3Instance, bucketName, nodeType, code, body }) => {
 		undo: undo({
 			s3Instance,
 			bucketName,
-			nodeType,
+			type,
 			code,
 			versionMarker: versionId,
 			undoType: 'PATCH',

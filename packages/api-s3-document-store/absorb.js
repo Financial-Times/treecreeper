@@ -8,16 +8,16 @@ const { diffProperties } = require('./diff');
 const s3Absorb = async ({
 	s3Instance,
 	bucketName,
-	nodeType,
-	sourceCode,
-	destinationCode,
+	type,
+	code,
+	absorbedCode,
 }) => {
 	const [
 		{ body: sourceNodeBody },
 		{ body: destinationNodeBody },
 	] = await Promise.all([
-		s3Get({ s3Instance, bucketName, nodeType, code: sourceCode }),
-		s3Get({ s3Instance, bucketName, nodeType, code: destinationCode }),
+		s3Get({ s3Instance, bucketName, type, code: absorbedCode }),
+		s3Get({ s3Instance, bucketName, type, code }),
 	]);
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
@@ -50,8 +50,8 @@ const s3Absorb = async ({
 			return await s3Post({
 				s3Instance,
 				bucketName,
-				nodeType,
-				code: destinationCode,
+				type,
+				code,
 				// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
 				body: { ...destinationNodeBody, ...writeProperties },
 			});
@@ -70,7 +70,7 @@ const s3Absorb = async ({
 			undo: undoPost = async () => ({ versionMarker: null }),
 		},
 	] = await Promise.all([
-		s3Delete({ s3Instance, bucketName, nodeType, code: sourceCode }),
+		s3Delete({ s3Instance, bucketName, type, code: absorbedCode }),
 		postDestinationBody(),
 	]);
 
