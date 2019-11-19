@@ -13,8 +13,8 @@ module.exports = {
 		'./node_modules/@financial-times/rel-engage/packages/dotfiles/eslint.js',
 	],
 	rules: {
-		"unicorn/prefer-flat-map": "off",
-		"unicorn/consistent-function-scoping": "off",
+		"unicorn/prefer-flat-map": "warn",
+		"unicorn/consistent-function-scoping": "warn",
 		"unicorn/prefer-string-slice": 'off',
 		"jest/valid-describe": "off",
 	}
