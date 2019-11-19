@@ -43,6 +43,7 @@
     "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
     "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
     "@financial-times/tc-schema-sdk": "file:./packages/tc-schema-sdk",
+    "@ljharb/eslint-config": "^15.0.2",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
     "dotenv": "^8.2.0",
