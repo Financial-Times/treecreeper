@@ -3,7 +3,7 @@ const { logger } = require('@financial-times/tc-api-express-logger');
 const undo = ({
 	s3Instance,
 	bucketName,
-	nodeType,
+	type,
 	code,
 	versionMarker,
 	undoType = 'POST',
@@ -20,7 +20,7 @@ const undo = ({
 
 	const params = {
 		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
+		Key: `${type}/${code}`,
 		VersionId: versionMarker,
 	};
 

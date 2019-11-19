@@ -1,15 +1,9 @@
 const { logger } = require('@financial-times/tc-api-express-logger');
 
-const s3Get = async ({
-	s3Instance,
-	bucketName,
-	nodeType,
-	code,
-	versionMarker,
-}) => {
+const s3Get = async ({ s3Instance, bucketName, type, code, versionMarker }) => {
 	const params = {
 		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
+		Key: `${type}/${code}`,
 	};
 	if (versionMarker) {
 		params.VersionId = versionMarker;

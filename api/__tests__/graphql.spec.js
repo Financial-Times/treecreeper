@@ -10,7 +10,7 @@ const security = require('../server/middleware/security');
 describe('graphql', () => {
 	const sandbox = {};
 
-	const namespace = 'graphql';
+	const namespace = 'graphql-old-api';
 	setupMocks(sandbox, { namespace });
 
 	const mainCode = `${namespace}-main`;
@@ -128,13 +128,13 @@ describe('graphql', () => {
 					data: {
 						MainType: {
 							code: mainCode,
-							_createdByClient: 'graphql-init-client',
-							_createdByUser: 'graphql-init-user',
+							_createdByClient: `${namespace}-init-client`,
+							_createdByUser: `${namespace}-init-user`,
 							_createdTimestamp: {
 								formatted: '2015-11-15T08:12:27.908000000Z',
 							},
-							_updatedByClient: 'graphql-client',
-							_updatedByUser: 'graphql-user',
+							_updatedByClient: `${namespace}-client`,
+							_updatedByUser: `${namespace}-user`,
 							_updatedTimestamp: {
 								formatted: '2019-01-09T09:08:22.908000000Z',
 							},
@@ -169,13 +169,13 @@ describe('graphql', () => {
 					data: {
 						MainType: {
 							code: mainCode,
-							_createdByClient: 'graphql-init-client',
-							_createdByUser: 'graphql-init-user',
+							_createdByClient: `${namespace}-init-client`,
+							_createdByUser: `${namespace}-init-user`,
 							_createdTimestamp: {
 								formatted: '2015-11-15T08:12:27.908000000Z',
 							},
-							_updatedByClient: 'graphql-client',
-							_updatedByUser: 'graphql-user',
+							_updatedByClient: `${namespace}-client`,
+							_updatedByUser: `${namespace}-user`,
 							_updatedTimestamp: {
 								formatted: '2019-01-09T09:08:22.908000000Z',
 							},

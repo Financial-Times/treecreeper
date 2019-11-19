@@ -1,7 +1,7 @@
 const { Cache } = require('./lib/cache');
 const { RawDataWrapper } = require('./lib/raw-data-wrapper');
 const getValidators = require('./lib/validators');
-const BizOpsError = require('./lib/biz-ops-error');
+const TreecreeperUserError = require('./lib/biz-ops-error');
 const type = require('./data-accessors/type');
 const graphqlDefs = require('./data-accessors/graphql-defs');
 const stringValidator = require('./data-accessors/string-validator');
@@ -13,7 +13,7 @@ class SDK {
 	constructor(options = {}) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
-		this.BizOpsError = BizOpsError;
+		this.TreecreeperUserError = TreecreeperUserError;
 		this.subscribers = [];
 
 		this.getEnums = this.createEnrichedAccessor(enums);

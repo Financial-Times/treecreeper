@@ -1,20 +1,11 @@
 const { logger } = require('@financial-times/tc-api-express-logger');
 const { undo } = require('./undo');
 
-const s3Delete = async ({
-	s3Instance,
-	bucketName,
-	nodeType,
-	code,
-	versionMarker,
-}) => {
+const s3Delete = async ({ s3Instance, bucketName, type, code }) => {
 	const params = {
 		Bucket: bucketName,
-		Key: `${nodeType}/${code}`,
+		Key: `${type}/${code}`,
 	};
-	if (versionMarker) {
-		params.VersionId = versionMarker;
-	}
 
 	try {
 		const response = await s3Instance.deleteObject(params).promise();
@@ -30,7 +21,7 @@ const s3Delete = async ({
 			undo: undo({
 				s3Instance,
 				bucketName,
-				nodeType,
+				type,
 				code,
 				versionMarker: response.VersionId,
 				undoType: 'DELETE',

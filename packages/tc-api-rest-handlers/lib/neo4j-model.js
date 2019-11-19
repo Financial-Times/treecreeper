@@ -41,7 +41,7 @@ const constructOutput = ({
 	const schema = getType(nodeType);
 	const node = result.records[0].get('node');
 	// TODO deep clone
-	const response = convertNeo4jToJson(Object.assign({}, node.properties));
+	const response = convertNeo4jToJson({ ...node.properties });
 	if (excludeMeta) {
 		Object.keys(response).forEach(key => {
 			if (key.charAt(0) === '_') {
@@ -68,10 +68,9 @@ const constructOutput = ({
 						)
 						.map(record => {
 							const convertedRelationshipsProps = convertNeo4jToJson(
-								Object.assign(
-									{},
-									record.richRelationship().properties,
-								),
+								{
+									...record.richRelationship().properties,
+								},
 							);
 							return richRelationshipsFlag
 								? {

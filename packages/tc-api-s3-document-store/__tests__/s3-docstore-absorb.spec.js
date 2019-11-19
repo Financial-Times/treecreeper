@@ -77,7 +77,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code,
 					versionMarker: toVersionMarker,
 				}),
@@ -99,7 +99,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code: fromSystemCode,
 					versionMarker: fromVersionMarker,
 					undoType: 'DELETE',
@@ -115,7 +115,7 @@ const mockS3Absorb = (
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-					nodeType: consistentNodeType,
+					type: consistentNodeType,
 					code: toSystemCode,
 					versionMarker: toVersionMarker,
 					undoType: 'DELETE',
@@ -147,7 +147,7 @@ describe('S3 document helper absorb', () => {
 	const matcher = (s3Instance, code, body) => ({
 		s3Instance,
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-		nodeType: consistentNodeType,
+		type: consistentNodeType,
 		code,
 		...(body ? { body } : {}),
 	});
@@ -188,7 +188,7 @@ describe('S3 document helper absorb', () => {
 		expect(result).toMatchObject({
 			versionMarker: toVersionMarker,
 			siblingVersionMarker: fromVersionMarker,
-			body: Object.assign({}, toNodeBody, fromNodeBody),
+			body: { ...toNodeBody, ...fromNodeBody },
 			undo: expect.any(Function),
 		});
 
@@ -203,11 +203,10 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(
-				s3Instance,
-				toSystemCode,
-				Object.assign({}, toNodeBody, fromNodeBody),
-			),
+			matcher(s3Instance, toSystemCode, {
+				...toNodeBody,
+				...fromNodeBody,
+			}),
 		);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
@@ -298,11 +297,10 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(
-				s3Instance,
-				toSystemCode,
-				Object.assign({}, toNodeBody, fromNodeBody),
-			),
+			matcher(s3Instance, toSystemCode, {
+				...toNodeBody,
+				...fromNodeBody,
+			}),
 		);
 	});
 
@@ -346,11 +344,10 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(
-				s3Instance,
-				toSystemCode,
-				Object.assign({}, toNodeBody, fromNodeBody),
-			),
+			matcher(s3Instance, toSystemCode, {
+				...toNodeBody,
+				...fromNodeBody,
+			}),
 		);
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(1);
 		expect(stubDeleteOnUndo).toHaveBeenCalledWith(
@@ -398,11 +395,10 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(
-				s3Instance,
-				toSystemCode,
-				Object.assign({}, toNodeBody, fromNodeBody),
-			),
+			matcher(s3Instance, toSystemCode, {
+				...toNodeBody,
+				...fromNodeBody,
+			}),
 		);
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(1);
 		expect(stubDeleteOnUndo).toHaveBeenCalledWith(

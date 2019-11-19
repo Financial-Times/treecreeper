@@ -38,7 +38,7 @@ const mockUndo = (systemCode, versionMarker) => {
 			secretAccessKey: 'testSecretAccessKey',
 		}),
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-		nodeType: consistentNodeType,
+		type: consistentNodeType,
 		code: systemCode,
 		versionMarker,
 	};

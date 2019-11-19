@@ -44,24 +44,64 @@ WHERE related.code IN $${key}
 `;
 };
 
+const addPropsToQueries = (relationshipPropQueries, value) => {
+	// value: { code: 'node code', someProp: 'some property'...}
+	Object.entries(value).forEach(([k, v]) => {
+		if (k !== 'code') {
+			// If no node matches the CASE expression, the expression returns a null.
+			// and no action will be taken
+			relationshipPropQueries.push(`
+				SET (CASE
+				WHEN related.code = '${value.code}'
+				THEN relationship END).${k} = '${v}'
+				`);
+		}
+	});
+};
+
 const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
 	upsert,
+	parameters = {},
 ) => {
 	const { properties: validProperties } = getType(nodeType);
 
 	const relationshipParameters = {};
 	const relationshipQueries = [];
+	const replaceObjects = {};
 
-	Object.entries(relationshipsToCreate).forEach(([propName, codes]) => {
+	Object.entries(relationshipsToCreate).forEach(([propName, values]) => {
 		const propDef = validProperties[propName];
 		const { type: relatedType, direction, relationship } = propDef;
 		const key = `${relationship}${direction}${relatedType}`;
 
+		const retrievedCodes = [];
+		const relationshipPropQueries = [];
+		let propValueType;
+
+		// values could be just an array of strings(codes), objects(code and properties) or mixed
+		values.forEach(value => {
+			propValueType = typeof value;
+			if (propValueType === 'string') {
+				retrievedCodes.push(value);
+			} else {
+				retrievedCodes.push(value.code);
+				addPropsToQueries(relationshipPropQueries, value);
+			}
+		});
+
+		// neo4j driver only accept primitive types or arrays thereof
+		// store an array of codes here to replace relationship values in parameters later
+		if (propValueType === 'object') {
+			replaceObjects[propName] = retrievedCodes;
+		}
+
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
-		Object.assign(relationshipParameters, { [key]: codes });
+		Object.assign(relationshipParameters, {
+			[key]: retrievedCodes,
+		});
 
 		// Note on the limitations of cypher:
 		// It would be so nice to use UNWIND to create all these from a list parameter,
@@ -73,6 +113,7 @@ const prepareToWriteRelationships = (
 			WITH node, related
 			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
+			${relationshipPropQueries.join('')}
 		`,
 		);
 
@@ -107,6 +148,14 @@ const prepareToWriteRelationships = (
 			}
 		}
 	});
+
+	// neo4j driver only accept primitive types or arrays thereof
+	// need to replace objects in parameters to an array of codes
+	if (parameters.properties && Object.keys(replaceObjects).length) {
+		Object.assign(relationshipParameters, {
+			properties: { ...parameters.properties, ...replaceObjects },
+		});
+	}
 
 	return { relationshipParameters, relationshipQueries };
 };
