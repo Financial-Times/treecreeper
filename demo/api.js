@@ -2,7 +2,7 @@ const express = require('express');
 const rewrite = require('express-urlrewrite'); // eslint-disable-line  import/no-extraneous-dependencies
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
-const { getApp } = require('../packages/api-express');
+const { getApp } = require('../packages/tc-api-express');
 
 const PORT = process.env.PORT || 8888;
 const app = express();
