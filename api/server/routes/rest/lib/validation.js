@@ -2,7 +2,7 @@ const httpErrors = require('http-errors');
 const {
 	validators,
 	TreecreeperUserError,
-} = require('../../../../../packages/schema-sdk');
+} = require('@financial-times/tc-schema-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const validation = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {

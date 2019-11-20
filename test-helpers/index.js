@@ -1,7 +1,14 @@
-/* global jest beforeAll beforeEach afterEach */
-const lolex = require('lolex'); // eslint-disable-line import/no-extraneous-dependencies
+/* global jest beforeAll beforeEach afterEach afterAll */
+
+/* eslint-disable import/no-extraneous-dependencies */
+const lolex = require('lolex');
+const schema = require('@financial-times/tc-schema-sdk');
+/* eslint-enable import/no-extraneous-dependencies */
+
+schema.init({ updateMode: 'poll' });
+const schemaReady = schema.ready();
+
 const dbConnection = require('./db-connection');
-const { schemaReady } = require('../api/server/lib/init-schema');
 
 const { neo4jTest } = require('./neo4j-test');
 const { fixtureBuilder, dropFixtures } = require('./test-fixtures');
@@ -24,6 +31,9 @@ const setupMocks = namespace => {
 		jest.restoreAllMocks();
 		clock = clock.uninstall();
 		await dropFixtures(namespace);
+	});
+	afterAll(async () => {
+		await dbConnection.driver.close();
 	});
 	return fixtureBuilder(namespace, now, then);
 };

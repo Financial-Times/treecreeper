@@ -1,4 +1,4 @@
-const { getType } = require('../../../../../packages/schema-sdk');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { logger } = require('../../../lib/request-context');
 
 class Tracer {

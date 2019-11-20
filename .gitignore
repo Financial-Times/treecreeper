@@ -12,4 +12,6 @@ yarn-error.log
 /neo4j
 .eslintcache
 junit.xml
+packages/*/node_modules
+packages/**/package-lock.json
 

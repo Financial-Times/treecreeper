@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { getType } = require('../../../../../packages/schema-sdk');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { validateTypeName } = require('../lib/validation');
 const { executeQuery } = require('../lib/neo4j-model');
 const { setContext } = require('../../../lib/request-context');

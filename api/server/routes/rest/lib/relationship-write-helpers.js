@@ -1,5 +1,5 @@
 const { stripIndents } = require('common-tags');
-const { getType } = require('../../../../../packages/schema-sdk');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { metaPropertiesForCreate } = require('./metadata-helpers');
 const { findInversePropertyNames } = require('../../../lib/schema-helpers');
 

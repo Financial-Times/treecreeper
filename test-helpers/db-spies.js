@@ -1,5 +1,5 @@
 /* global jest */
-const { driver } = require('../packages/api-db-manager');
+const { driver } = require('@financial-times/tc-api-db-manager');
 
 const spyDbQuery = () => {
 	const originalSession = driver.session.bind(driver);

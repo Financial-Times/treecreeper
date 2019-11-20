@@ -26,7 +26,20 @@ env:
 
 verify:
 
-install:
+# monorepo task should be ran before root installation
+# because root of package.json refers some pacakges/tc-* package internally.
+#
+# And install-treecreeper task is just fake task in order to run `instal%` task of rel-engage.
+# see https://github.com/Financial-Times/rel-engage/blob/master/index.mk#L100
+install: monorepo install-treecreeper
+
+monorepo:
+	npm install ysugimoto/athloi
+	npx athloi exec -- npm install --no-package-lock
+
+npm-publish:
+	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)
+	npx athloi publish
 
 .PHONY: test
 
@@ -67,7 +80,6 @@ test-api-docs:
 test-pkg-api-publish:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
 
-
 run:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
@@ -78,7 +90,7 @@ run-db:
 	docker-compose up
 
 init-db:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/api-db-manager/index.js
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
 
 # load-testing
 load-test-run:

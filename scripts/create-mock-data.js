@@ -1,4 +1,4 @@
-const { patchHandler } = require('../packages/api-rest-handlers');
+const { patchHandler } = require('../packages/tc-api-rest-handlers');
 
 const { schemaReady } = require('../api/server/lib/init-schema');
 

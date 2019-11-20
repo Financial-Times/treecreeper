@@ -12,3 +12,4 @@ dist
 coverage
 
 secret-squirrel.js
+packages/**/node_modules

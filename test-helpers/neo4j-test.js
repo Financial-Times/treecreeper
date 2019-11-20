@@ -1,7 +1,10 @@
 /* global expect */
+
+/* eslint-disable import/no-extraneous-dependencies */
 const {
 	convertNeo4jToJson,
-} = require('../packages/api-rest-handlers/lib/neo4j-type-conversion');
+} = require('@financial-times/tc-api-rest-handlers/lib/neo4j-type-conversion');
+/* eslint-enable import/no-extraneous-dependencies */
 const { driver } = require('./db-connection');
 
 const executeQuery = (query, parameters) =>

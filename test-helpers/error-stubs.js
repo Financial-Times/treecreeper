@@ -1,5 +1,6 @@
 /* global  jest */
-const { driver } = require('../packages/api-db-manager');
+
+const { driver } = require('@financial-times/tc-api-db-manager');
 
 const asyncErrorFunction = async () => {
 	throw new Error('oh no');

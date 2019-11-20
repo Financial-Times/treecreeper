@@ -1,10 +1,10 @@
 {
   "name": "treecreeper",
+  "private": true,
   "version": "0.0.0",
   "description": "A set of tools for building adnmin interfaces on top of graph data",
   "main": "index.js",
   "dependencies": {
-    "@financial-times/n-cluster": "^1.0.0",
     "@financial-times/n-logger": "^6.1.0",
     "@financial-times/s3o-middleware": "^3.0.1",
     "apollo-server-express": "^2.8.1",
@@ -27,20 +27,26 @@
     "lodash.groupby": "^4.6.0",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqby": "^4.7.0",
-    "neo4j-driver": "^1.7.5",
+    "neo4j-driver": "^1.7.6",
     "neo4j-graphql-js": "^2.6.3",
     "next-metrics": "^3.1.9",
     "node-fetch": "^2.6.0",
     "semver": "^6.3.0",
     "snyk": "^1.242.0",
     "uuid": "^3.3.2",
-    "valid-url": "^1.0.9"
+    "valid-url": "^1.0.9",
+    "@financial-times/tc-api-db-manager": "file:./packages/tc-api-db-manager",
+    "@financial-times/tc-schema-sdk": "file:./packages/tc-schema-sdk",
+    "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher"
   },
   "devDependencies": {
+    "@financial-times/athloi": "github:ysugimoto/athloi",
     "@financial-times/rel-engage": "^7.2.2",
+    "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
+    "@ljharb/eslint-config": "^15.0.2",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.2.0",
     "express-urlrewrite": "^1.2.0",
     "fetch-mock": "^7.3.9",
     "jest": "^24.8.0",
@@ -52,7 +58,7 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -63,5 +69,8 @@
   "bugs": {
     "url": "https://github.com/Financial-Times/treecreeper/issues"
   },
-  "homepage": "https://github.com/Financial-Times/treecreeper#readme"
+  "homepage": "https://github.com/Financial-Times/treecreeper#readme",
+  "workspaces": [
+    "packages/*"
+  ]
 }

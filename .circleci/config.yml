@@ -30,6 +30,10 @@ references:
       paths:
         - ./node_modules/
 
+  only_version_tags: &only_version_tags
+    tags:
+      only: /^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)\.\d+)?$/
+
 jobs:
   install:
     <<: *default_container_config
@@ -41,7 +45,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            npm install --no-save
+            npm install -no-save
+            make monorepo
+
       - run:
           name: Get test env vars
           command: make env
@@ -89,6 +95,17 @@ jobs:
           name: Verify
           command: make verify -j 3
 
+  publish:
+    <<: *default_container_config
+    steps:
+      - *attach_workspace
+      - run:
+          name: Setup npm credetials
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > ~/.npmrc
+      # - run:
+      #     name: Publish to npm registry
+      #     command: make npm-publish
+
 workflows:
   version: 2
   build-and-deploy:
@@ -102,3 +119,12 @@ workflows:
           context: rel-eng-creds
           requires:
             - install
+      - publish:
+          context: rel-eng-creds
+          requires:
+            - install
+            - test
+          filters:
+            <<: *only_version_tags
+            branches:
+              ignore: /.*/

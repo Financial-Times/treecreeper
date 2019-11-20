@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('../../packages/schema-file-name');
+const { getSchemaFilename } = require('../../packages/tc-schema-file-name');
 
 jest.useFakeTimers();
 

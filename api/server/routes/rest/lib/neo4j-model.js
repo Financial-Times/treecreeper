@@ -1,4 +1,4 @@
-const { getType } = require('../../../../../packages/schema-sdk');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const { convertNeo4jTypes } = require('./neo4j-type-conversion');
 const { executeQuery } = require('../../../lib/db-connection');
 
