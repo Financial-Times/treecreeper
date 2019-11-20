@@ -1,0 +1,13 @@
+name: HasFavouriteChild
+properties:
+  somePropForHasFavouriteChild:
+    type: Word
+    description: Word description.
+    label: Word label
+from:
+  type: MainType
+  hasMany: false
+to:
+  type: ChildType
+  hasMany: false
+isMutal: true

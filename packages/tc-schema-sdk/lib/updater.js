@@ -1,8 +1,15 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
+const deepFreeze = require('deep-freeze');
 const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const readYaml = require('./read-yaml');
 const { version: libVersion } = require('../../../package.json');
+
+const toSnakeUpperCase = name =>
+	name
+		.replace(/([A-Z])/g, '_$1')
+		.replace(/^_|_$/g, '')
+		.toUpperCase();
 
 class SchemaUpdater {
 	constructor(options, rawData, cache) {
@@ -20,6 +27,8 @@ class SchemaUpdater {
 		version,
 		schemaBaseUrl = process.env.TREECREEPER_SCHEMA_URL,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
+		backwardCompatibility = process.env
+			.TREECREEPER_SCHEMA_BACKWORD_COMPATIBILITY,
 		schemaData,
 	} = {}) {
 		this.updateMode = updateMode;
@@ -29,7 +38,15 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: readYaml.directory(schemaDirectory, 'types'),
+					types: [].concat(
+						readYaml.directory(schemaDirectory, 'types'),
+						readYaml
+							.directory(schemaDirectory, 'relationships')
+							.map(rel => ({
+								...rel,
+								relationship: toSnakeUpperCase(rel.name),
+							})),
+					),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',
@@ -43,6 +60,11 @@ class SchemaUpdater {
 			};
 		}
 		if (schemaData) {
+			if (backwardCompatibility) {
+				schemaData.schema.types = this.enableBackwordCompatibility(
+					schemaData.schema.types,
+				);
+			}
 			this.isStatic = true;
 			this.rawData.set(schemaData);
 			this.eventEmitter.emit('change', {
@@ -53,6 +75,57 @@ class SchemaUpdater {
 		}
 
 		this.url = `${schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
+	}
+
+	enableBackwordCompatibility(types) {
+		return types.reduce((compat, type) => {
+			if ('to' in type && 'from' in type) {
+				return compat;
+			}
+			const { properties } = type;
+			const compatProperties = Object.entries(properties).reduce(
+				(props, [propName, propDef]) => {
+					const relType = types.find(
+						rootType => propDef.type === rootType.name,
+					);
+					if (!relType) {
+						return {
+							...props,
+							[propName]: propDef,
+						};
+					}
+					let direction;
+					let relationshipTo;
+					let hasMany;
+					if (
+						propDef.direction !== 'to' &&
+						relType.from.type === type.name
+					) {
+						direction = 'outgoing';
+						relationshipTo = relType.to.type;
+						hasMany = relType.to.hasMany;
+					} else {
+						direction = 'incoming';
+						relationshipTo = relType.from.type;
+						hasMany = relType.from.hasMany;
+					}
+					return {
+						...props,
+						[propName]: {
+							relationship: relType.relationship,
+							type: relationshipTo,
+							description: propDef.description,
+							label: propDef.label,
+							direction,
+							hasMany,
+						},
+					};
+				},
+				{},
+			);
+			compat.push(deepFreeze({ ...type, properties: compatProperties }));
+			return compat;
+		}, []);
 	}
 
 	on(event, func) {

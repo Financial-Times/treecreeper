@@ -1,0 +1,13 @@
+name: HasYoungerSibling
+properties:
+  somePropForHasYoungerSibling:
+    type: Word
+    description: Word description.
+    label: Word label
+from:
+  type: MainType
+  hasMany: true
+to:
+  type: MainType
+  hasMany: true
+isMutal: true
