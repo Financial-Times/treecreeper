@@ -9,5 +9,5 @@ from:
   hasMany: false
 to:
   type: ChildType
-  hasMany: false
+  hasMany: true
 isMutal: true

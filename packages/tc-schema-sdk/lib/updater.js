@@ -1,10 +1,11 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
-const deepFreeze = require('deep-freeze');
 const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const readYaml = require('./read-yaml');
 const { version: libVersion } = require('../../../package.json');
+const { compatBackward } = require('./compat-backward');
 
+// e.g HasChild -> HAS_CHILD
 const toSnakeUpperCase = name =>
 	name
 		.replace(/([A-Z])/g, '_$1')
@@ -61,7 +62,7 @@ class SchemaUpdater {
 		}
 		if (schemaData) {
 			if (backwardCompatibility) {
-				schemaData.schema.types = this.enableBackwordCompatibility(
+				schemaData.schema.types = compatBackward(
 					schemaData.schema.types,
 				);
 			}
@@ -75,57 +76,6 @@ class SchemaUpdater {
 		}
 
 		this.url = `${schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
-	}
-
-	enableBackwordCompatibility(types) {
-		return types.reduce((compat, type) => {
-			if ('to' in type && 'from' in type) {
-				return compat;
-			}
-			const { properties } = type;
-			const compatProperties = Object.entries(properties).reduce(
-				(props, [propName, propDef]) => {
-					const relType = types.find(
-						rootType => propDef.type === rootType.name,
-					);
-					if (!relType) {
-						return {
-							...props,
-							[propName]: propDef,
-						};
-					}
-					let direction;
-					let relationshipTo;
-					let hasMany;
-					if (
-						propDef.direction !== 'to' &&
-						relType.from.type === type.name
-					) {
-						direction = 'outgoing';
-						relationshipTo = relType.to.type;
-						hasMany = relType.to.hasMany;
-					} else {
-						direction = 'incoming';
-						relationshipTo = relType.from.type;
-						hasMany = relType.from.hasMany;
-					}
-					return {
-						...props,
-						[propName]: {
-							relationship: relType.relationship,
-							type: relationshipTo,
-							description: propDef.description,
-							label: propDef.label,
-							direction,
-							hasMany,
-						},
-					};
-				},
-				{},
-			);
-			compat.push(deepFreeze({ ...type, properties: compatProperties }));
-			return compat;
-		}, []);
 	}
 
 	on(event, func) {
