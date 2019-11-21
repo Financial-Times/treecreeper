@@ -18,3 +18,7 @@ properties:
     type: HasFavouriteChild
     description: Is favourite child of description.
     label: Is favourite child of label
+  relatedChildOf:
+    type: RelatedWithProperties
+    description: RelatedWithProperties description.
+    label: RelatedWithProperties label

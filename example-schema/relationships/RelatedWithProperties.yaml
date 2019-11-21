@@ -1,0 +1,28 @@
+name: RelatedWithProperties
+properties:
+  someRelatedInteger:
+    type: Int
+    description: Int description.
+    label: Int label
+  someRelatedString:
+    type: Word
+    description: Word description.
+    label: Word label
+  someRelatedDocument:
+    type: Document
+    description: Document description.
+    label: Document label
+  someRelatedEnum:
+    type: AnEnum
+    description: Enum description.
+    label: Enum label
+from:
+  type: MainType
+  hasMany: true
+to:
+  type: ChildType
+  hasMany: true
+isMutal: true
+
+
+

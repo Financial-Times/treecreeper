@@ -71,3 +71,11 @@ properties:
     direction: to
     description: Parents description.
     label: Parents label
+  relatedChildren:
+    type: RelatedWithProperties
+    description: RelatedWithProperties description.
+    label: RelatedWithProperties label
+  relatedToSelf:
+    type: RelatedToSelfWithProperties
+    description: RelatedToSelfWithProperties description.
+    label: RelatedToSelfWithProperties label
