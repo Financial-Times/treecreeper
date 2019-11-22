@@ -48,7 +48,9 @@ class SchemaUpdater {
 				oldVersion: undefined,
 				newVersion: this.version,
 			});
-			this.version = schemaData.version;
+			if (schemaData.version) {
+				this.version = schemaData.version;
+			}
 			return;
 		}
 
