@@ -34,9 +34,8 @@ verify:
 install: monorepo install-treecreeper
 
 monorepo:
-	node scripts/install-monorepo.js
-	#npm install -D @financial-times/athloi
-	#npx athloi exec -- npm install --no-package-lock
+	npm install ysugimoto/athloi
+	npx athloi exec -- npm install --no-package-lock
 
 npm-publish:
 	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)

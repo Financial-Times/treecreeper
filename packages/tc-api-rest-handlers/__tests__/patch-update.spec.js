@@ -1,8 +1,6 @@
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const {
-	dbUnavailable,
-} = require('../../../test-helpers/error-stubs');
+const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 const { patchHandler } = require('../patch');

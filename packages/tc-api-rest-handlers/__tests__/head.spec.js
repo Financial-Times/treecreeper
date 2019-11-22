@@ -1,7 +1,5 @@
 const { setupMocks } = require('../../../test-helpers');
-const {
-	dbUnavailable,
-} = require('../../../test-helpers/error-stubs');
+const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 const { getHandler } = require('../get');
 
 describe('rest HEAD', () => {

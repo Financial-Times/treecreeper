@@ -105,10 +105,10 @@ describe('logChanges', () => {
 				1,
 				matcher('CREATE', mainType, mainCode, ['children']),
 			);
-			// expect(adaptor.publish).toHaveBeenNthCalledWith(
-			// 	2,
-			// 	matcher('CREATE', mainType, childCode, ['children']),
-			// );
+			expect(adaptor.publish).toHaveBeenNthCalledWith(
+				2,
+				matcher('CREATE', mainType, childCode, ['children']),
+			);
 		});
 		it('event should be sent with UPDATE related event', async () => {
 			const neo4jResult = mockNeo4jResult(

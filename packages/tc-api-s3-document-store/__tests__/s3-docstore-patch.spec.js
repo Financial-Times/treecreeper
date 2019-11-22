@@ -58,7 +58,7 @@ describe('S3 document helper patch', () => {
 	const matcher = (s3Instance, systemCode) => ({
 		s3Instance,
 		bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
-		nodeType: consistentNodeType,
+		type: consistentNodeType,
 		code: systemCode,
 	});
 
@@ -113,7 +113,7 @@ describe('S3 document helper patch', () => {
 			patchBody,
 		);
 
-		const expectedBody = Object.assign({}, expectedData, patchBody);
+		const expectedBody = { ...expectedData, ...patchBody };
 		const callParams = {
 			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
 			Key: `${consistentNodeType}/${givenSystemCode}`,

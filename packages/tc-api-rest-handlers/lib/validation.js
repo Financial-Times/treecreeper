@@ -1,6 +1,9 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { validators, BizOpsError } = require('@financial-times/tc-schema-sdk');
+const {
+	validators,
+	TreecreeperUserError,
+} = require('@financial-times/tc-schema-sdk');
 
 const sdkValidators = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
@@ -8,7 +11,7 @@ const sdkValidators = Object.entries(validators).reduce(
 			try {
 				return validator(...args);
 			} catch (e) {
-				if (e instanceof BizOpsError) {
+				if (e instanceof TreecreeperUserError) {
 					throw httpErrors(400, e.message);
 				}
 				throw e;
@@ -113,11 +116,9 @@ const validateRelationshipInput = body => {
 		});
 };
 
-module.exports = Object.assign(
-	{
-		validateInput,
-		validateRelationshipAction,
-		validateRelationshipInput,
-	},
-	sdkValidators,
-);
+module.exports = {
+	validateInput,
+	validateRelationshipAction,
+	validateRelationshipInput,
+	...sdkValidators,
+};

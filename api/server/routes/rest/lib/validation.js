@@ -1,5 +1,8 @@
 const httpErrors = require('http-errors');
-const { validators, BizOpsError } = require('@financial-times/tc-schema-sdk');
+const {
+	validators,
+	TreecreeperUserError,
+} = require('@financial-times/tc-schema-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const validation = Object.entries(validators).reduce(
 	(methods, [key, validator]) => {
@@ -7,7 +10,7 @@ const validation = Object.entries(validators).reduce(
 			try {
 				return validator(...args);
 			} catch (e) {
-				if (e instanceof BizOpsError) {
+				if (e instanceof TreecreeperUserError) {
 					throw httpErrors(400, e.message);
 				}
 				throw e;

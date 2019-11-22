@@ -1,7 +1,5 @@
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
-const {
-	dbUnavailable,
-} = require('../../../test-helpers/error-stubs');
+const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 const { absorbHandler } = require('../absorb');
 

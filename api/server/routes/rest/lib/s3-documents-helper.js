@@ -55,7 +55,7 @@ class S3DocumentsHelper {
 		if (diff(existingBody, body)) {
 			const newBodyDocs = Object.assign(existingBody, body);
 			const versionId = await this.uploadToS3(
-				Object.assign({ Body: JSON.stringify(newBodyDocs) }, params),
+				{ Body: JSON.stringify(newBodyDocs), ...params },
 				'PATCH',
 			);
 			return { versionId, newBodyDocs };

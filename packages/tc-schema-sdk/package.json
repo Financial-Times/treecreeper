@@ -12,11 +12,11 @@
     "common-tags": "^1.8.0",
     "deep-freeze": "0.0.1",
     "js-yaml": "^3.13.1",
+    "lodash.uniqby": "^4.7.0",
     "node-fetch": "^2.6.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"
-  },
-  "publish": true
+  }
 }
