@@ -2,9 +2,15 @@ const fetch = require('node-fetch');
 
 jest.useFakeTimers();
 
-jest.mock('../../../../package.json', () => ({ version: '8.9.10' }), {
-	virtual: true,
-});
+jest.mock(
+	'@financial-times/tc-schema-file-name',
+	() => ({
+		getSchemaFilename: () => 'v8.json',
+	}),
+	{
+		virtual: true,
+	},
+);
 
 const { SchemaUpdater } = require('../updater');
 // TODO move into schema-utils

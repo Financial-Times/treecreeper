@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const readYaml = require('./read-yaml');
-const { version: libVersion } = require('../../../package.json');
 
 class SchemaUpdater {
 	constructor(options, rawData, cache) {
@@ -49,10 +48,11 @@ class SchemaUpdater {
 				oldVersion: undefined,
 				newVersion: this.version,
 			});
+			this.version = schemaData.version;
 			return;
 		}
 
-		this.url = `${schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
+		this.url = `${schemaBaseUrl}/${getSchemaFilename()}`;
 	}
 
 	on(event, func) {
