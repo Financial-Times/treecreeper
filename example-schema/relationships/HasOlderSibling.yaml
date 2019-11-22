@@ -1,10 +1,10 @@
-name: HasYoungerSibling
+name: HasOlderSibling
 relationship: HAS_YOUNGER_SIBLING
 properties:
-  somePropForHasYoungerSibling:
+  somePropForHasOlderSibling:
     type: Word
     description: Word description.
     label: Word label
-from:
+to:
   type: MainType
   hasMany: true

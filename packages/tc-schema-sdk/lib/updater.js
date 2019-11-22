@@ -45,7 +45,9 @@ class SchemaUpdater {
 							.directory(schemaDirectory, 'relationships')
 							.map(rel => ({
 								...rel,
-								relationship: toSnakeUpperCase(rel.name),
+								relationship:
+									rel.relationship ||
+									toSnakeUpperCase(rel.name),
 							})),
 					),
 					typeHierarchy: readYaml.file(
