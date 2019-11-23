@@ -845,7 +845,7 @@ describe('v2 - node PATCH', () => {
 								'patch',
 							);
 						});
-						it('leaves relationships in the opposite direction unaffected', async () => {
+						it.only('leaves relationships in the opposite direction unaffected', async () => {
 							const [
 								main1,
 								main2,
@@ -1549,133 +1549,7 @@ describe('v2 - node PATCH', () => {
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
-					it('strictly enforces one-to-__', async () => {
-						const [team, group1] = await sandbox.createNodes(
-							['Team', teamCode],
-							['Group', `${groupCode}-1`],
-							['Group', `${groupCode}-2`],
-						);
 
-						await sandbox.connectNodes(group1, 'HAS_TEAM', team);
-
-						await testPatchRequest(
-							`/v2/node/Group/${groupCode}-2?relationshipAction=${action}`,
-							{
-								teams: [teamCode],
-							},
-							200,
-							sandbox.withMeta({
-								code: `${groupCode}-2`,
-								teams: [teamCode],
-								topLevelTeams: [teamCode],
-							}),
-						);
-
-						await testNode(
-							'Team',
-							teamCode,
-							sandbox.withMeta({
-								code: teamCode,
-							}),
-							[
-								{
-									type: 'HAS_TEAM',
-									direction: 'incoming',
-									props: sandbox.withCreateMeta({}),
-								},
-								{
-									type: 'Group',
-									props: sandbox.withMeta({
-										code: `${groupCode}-2`,
-									}),
-								},
-							],
-						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								`${childCode}-2`,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-							[
-								'UPDATE',
-								teamCode,
-								'Team',
-								['parentGroup', 'group'],
-							],
-							// TODO: log deletion of the relationship with the first group
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-					});
-
-					it(`leaves __-to-__ unchanged`, async () => {
-						const [system, dependency1] = await sandbox.createNodes(
-							['System', systemCode],
-							['System', `${systemCode}-dep-1`],
-							['System', `${systemCode}-dep-2`],
-						);
-
-						await sandbox.connectNodes(
-							system,
-							'DEPENDS_ON',
-							dependency1,
-						);
-
-						await testPatchRequest(
-							`/v2/node/System/${systemCode}-dep-2?relationshipAction=${action}`,
-							{
-								dependents: [systemCode],
-							},
-							200,
-							sandbox.withMeta({
-								code: `${systemCode}-dep-2`,
-								dependents: [systemCode],
-							}),
-						);
-
-						await testNode(
-							'System',
-							systemCode,
-							sandbox.withMeta({
-								code: systemCode,
-							}),
-							...[1, 2].map(dependency => [
-								{
-									type: 'DEPENDS_ON',
-									direction: 'outgoing',
-									props: sandbox[
-										dependency === 1
-											? 'withMeta'
-											: 'withCreateMeta'
-									]({}),
-								},
-								{
-									type: 'System',
-									props: sandbox.withMeta({
-										code: `${systemCode}-dep-${dependency}`,
-									}),
-								},
-							]),
-						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								`${systemCode}-dep-2`,
-								'System',
-								['dependents', 'recursiveDependents'],
-							],
-							[
-								'UPDATE',
-								systemCode,
-								'System',
-								['dependencies', 'recursiveDependencies'],
-							],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-					});
 
 					it(`leaves __-to-__ unchanged`, async () => {
 						const [main, child1] = await sandbox.createNodes(

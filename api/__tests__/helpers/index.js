@@ -143,6 +143,7 @@ const setupMocks = (
 		}
 
 		sandbox.expectKinesisEvents = (...events) => {
+			console.log(events, JSON.stringify(sandbox.stubSendEvent.calls, null, 2))
 			expect(sandbox.stubSendEvent).toHaveBeenCalledTimes(events.length);
 			events.forEach(
 				([action, code, type, updatedProperties, clientId], call) => {
