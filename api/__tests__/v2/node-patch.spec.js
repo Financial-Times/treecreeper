@@ -845,7 +845,7 @@ describe('v2 - node PATCH', () => {
 								'patch',
 							);
 						});
-						it.only('leaves relationships in the opposite direction unaffected', async () => {
+						it('leaves relationships in the opposite direction unaffected', async () => {
 							const [
 								main1,
 								main2,
@@ -892,16 +892,17 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
+									`${mainCode}-2`,
+									'MainType',
+									['youngerSiblings'],
+								],[
+									'UPDATE',
 									`${mainCode}-3`,
 									'MainType',
 									['olderSiblings'],
 								],
-								[
-									'UPDATE',
-									`${mainCode}-2`,
-									'MainType',
-									['youngerSiblings'],
-								],
+
+
 							);
 							sandbox.expectNoS3Actions(
 								'upload',
@@ -957,16 +958,16 @@ describe('v2 - node PATCH', () => {
 								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'UPDATE',
+									`${childCode}-2`,
+									'ChildType',
+									['isChildOf'],
+								],[
+									'UPDATE',
 									`${childCode}-1`,
 									'ChildType',
 									['isChildOf'],
 								],
-								[
-									'UPDATE',
-									`${childCode}-2`,
-									'ChildType',
-									['isChildOf'],
-								],
+
 							);
 							sandbox.expectNoS3Actions(
 								'upload',
@@ -1479,16 +1480,17 @@ describe('v2 - node PATCH', () => {
 							],
 							[
 								'UPDATE',
-								`${childCode}-1`,
+								`${childCode}-2`,
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
 							[
 								'UPDATE',
-								`${childCode}-2`,
+								`${childCode}-1`,
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
+
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1542,10 +1544,16 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
+								`${childCode}-2`,
+								'ChildType',
+								['isFavouriteChildOf'],
+							],[
+								'UPDATE',
 								mainCode,
 								'MainType',
 								['favouriteChild'],
 							],
+
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1608,13 +1616,13 @@ describe('v2 - node PATCH', () => {
 						);
 
 						sandbox.expectKinesisEvents(
-							['UPDATE', mainCode, 'MainType', ['children']],
 							[
 								'UPDATE',
 								`${childCode}-2`,
 								'ChildType',
 								['isChildOf'],
-							],
+							],['UPDATE', mainCode, 'MainType', ['children']],
+
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1820,16 +1828,16 @@ describe('v2 - node PATCH', () => {
 						['UPDATE', mainCode, 'MainType', ['children']],
 						[
 							'UPDATE',
+							`${childCode}-2`,
+							'ChildType',
+							['isChildOf'],
+						],[
+							'UPDATE',
 							`${childCode}-1`,
 							'ChildType',
 							['isChildOf'],
 						],
-						[
-							'UPDATE',
-							`${childCode}-2`,
-							'ChildType',
-							['isChildOf'],
-						],
+
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
@@ -1913,13 +1921,13 @@ describe('v2 - node PATCH', () => {
 							`${mainCode}-2`,
 							'MainType',
 							['youngerSiblings'],
-						],
-						[
+						],[
 							'UPDATE',
 							`${mainCode}-3`,
 							'MainType',
 							['olderSiblings'],
 						],
+
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
@@ -1991,16 +1999,17 @@ describe('v2 - node PATCH', () => {
 					sandbox.expectKinesisEvents(
 						[
 							'UPDATE',
-							`${mainCode}-1`,
+							`${mainCode}-2`,
 							'MainType',
 							['olderSiblings', 'youngerSiblings'],
 						],
 						[
 							'UPDATE',
-							`${mainCode}-2`,
+							`${mainCode}-1`,
 							'MainType',
 							['olderSiblings', 'youngerSiblings'],
 						],
+
 						[
 							'UPDATE',
 							`${mainCode}-3`,

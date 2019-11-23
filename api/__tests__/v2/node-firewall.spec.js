@@ -26,7 +26,7 @@ describe('v2 - node firewall', () => {
 			it('405 Method Not Allowed', () => {
 				return sandbox
 					.request(app)
-					.get(teamRestUrl)
+					.get(restUrl)
 					.namespacedAuth()
 					.expect(405);
 			});
@@ -294,7 +294,7 @@ describe('v2 - node firewall', () => {
 					req,
 					400,
 					new RegExp(
-						`Invalid value \`.*\` for property \`code\` on type \`Team\``,
+						`Invalid value \`.*\` for property \`code\` on type \`MainType\``,
 					),
 				);
 			});
@@ -376,9 +376,7 @@ describe('v2 - node firewall', () => {
 							})
 							.expect(
 								400,
-								new RegExp(
-									`Invalid value \`${ESCAPED_INJECTION_ATTACK_STRING}\` for property \`code\` on type \`ChildType\``,
-								),
+								/Invalid value .* for property `code` on type `ChildType`/
 							);
 					});
 				});
