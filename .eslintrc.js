@@ -15,7 +15,6 @@ module.exports = {
 	rules: {
 		"unicorn/prefer-flat-map": "warn",
 		"unicorn/consistent-function-scoping": "warn",
-		"unicorn/prefer-string-slice": 'off',
 		"jest/valid-describe": "off",
 	}
 };
