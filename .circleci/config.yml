@@ -115,13 +115,16 @@ workflows:
     jobs:
       - install:
           context: rel-eng-creds
+          filters: *only_version_tags
       - test:
           requires:
             - install
+          filters: *only_version_tags
       - verify:
           context: rel-eng-creds
           requires:
             - install
+          filters: *only_version_tags
       #Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
