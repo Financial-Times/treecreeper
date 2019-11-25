@@ -114,6 +114,10 @@ describe('graphql def creation', () => {
 		expect(generated).toEqual(
 			explodeString(
 				`
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
+
 scalar DateTime
 scalar Date
 scalar Time

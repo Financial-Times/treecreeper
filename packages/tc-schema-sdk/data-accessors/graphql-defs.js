@@ -279,7 +279,11 @@ module.exports = {
 		});
 		const enums = this.getEnums({ withMeta: true });
 
-		const temporalTypeDefinitions = stripIndent`
+		const staticTypeDefinitions = stripIndent`
+		directive @deprecated(
+		  reason: String = "No longer supported"
+		) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
+
 		scalar DateTime
 		scalar Date
 		scalar Time
@@ -295,7 +299,7 @@ module.exports = {
 		const queryDefinition = printQueryDefinitions(types);
 
 		return [].concat(
-			temporalTypeDefinitions,
+			staticTypeDefinitions,
 			typeDefinitions,
 			relationshipTypeDefinitions,
 			queryDefinition,
