@@ -105,9 +105,9 @@ jobs:
       - run:
           name: Setup npm credetials
           command: echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > ~/.npmrc
-      # - run:
-      #     name: Publish to npm registry
-      #     command: make npm-publish
+      - run:
+          name: Publish to npm registry
+          command: make npm-publish
 
 workflows:
   version: 2
