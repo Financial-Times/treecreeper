@@ -1,4 +1,4 @@
-const { driver } = require('../../server/lib/db-connection');
+const { driver } = require('../../../packages/tc-api-db-manager');
 
 const spyDbQuery = ({ sinon }) => {
 	const originalSession = driver.session.bind(driver);

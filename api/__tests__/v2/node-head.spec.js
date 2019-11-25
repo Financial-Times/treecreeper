@@ -1,4 +1,6 @@
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 
 const { setupMocks, stubDbUnavailable } = require('../helpers');
 
@@ -15,6 +17,10 @@ describe('v2 - node HEAD', () => {
 			.head(url)
 			.namespacedAuth()
 			.expect(...expectations);
+
+	beforeAll(async () => {
+		app = await createApp();
+	});
 
 	it('gets node without relationships', async () => {
 		await sandbox.createNode('MainType', {

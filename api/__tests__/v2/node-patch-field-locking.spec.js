@@ -1,4 +1,6 @@
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 
 const { setupMocks, spyDbQuery } = require('../helpers');
 
@@ -22,6 +24,9 @@ describe('v2 - node PATCH - field locking', () => {
 
 		return req.expect(...expectations);
 	};
+	beforeAll(async () => {
+		app = await createApp();
+	});
 
 	describe('lockedFields', () => {
 		const lockedFieldName = '{"someString":"v2-node-locking-client"}';
@@ -38,7 +43,7 @@ describe('v2 - node PATCH - field locking', () => {
 				{
 					someString: 'new someString',
 				},
-				400,
+				409,
 			);
 		});
 
@@ -91,9 +96,9 @@ describe('v2 - node PATCH - field locking', () => {
 			await testPatchRequest(
 				`/v2/node/MainType/${mainCode}?lockFields=someString`,
 				{
-					description: 'not relevant to the test',
+					anotherString: 'not relevant to the test',
 				},
-				400,
+				409,
 			);
 		});
 
@@ -289,7 +294,7 @@ describe('v2 - node PATCH - field locking', () => {
 				{
 					someString: 'new someString',
 				},
-				400,
+				409,
 				/The following fields cannot be locked because they are locked by another client: someString is locked by another-api/,
 			);
 		});
@@ -331,7 +336,7 @@ describe('v2 - node PATCH - field locking', () => {
 				code: mainCode,
 				someString: 'someString 1',
 				_lockedFields:
-					'{"someString":"v2-node-locking-client","description":"other-client","anotherString":"v2-node-locking-client"}',
+					'{"someString":"v2-node-locking-client","anotherString":"other-client","anotherString":"v2-node-locking-client"}',
 			});
 
 			const dbQuerySpy = spyDbQuery(sandbox);
@@ -344,7 +349,7 @@ describe('v2 - node PATCH - field locking', () => {
 					code: mainCode,
 					someString: 'someString 1',
 					_lockedFields:
-						'{"someString":"v2-node-locking-client","description":"other-client","anotherString":"v2-node-locking-client"}',
+						'{"someString":"v2-node-locking-client","anotherString":"other-client","anotherString":"v2-node-locking-client"}',
 				}),
 			);
 
