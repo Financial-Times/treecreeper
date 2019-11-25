@@ -18,7 +18,9 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "supertest": "^4.0.2"
+    "node-fetch": "^2.6.0",
+    "supertest": "^4.0.2",
+    "@financial-times/tc-schema-publisher": "file:../tc-schema-publisher"
   },
   "repository": {
     "type": "git",

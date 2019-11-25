@@ -29,9 +29,8 @@ const getApp = async (options = {}) => {
 		graphqlMiddlewares = [],
 		restPath = '/rest',
 		restMiddlewares = [],
+		schemaOptions,
 	} = options;
-	updateConstraintsOnSchemaChange();
-	schema.init();
 
 	const router = new express.Router();
 	router.use(contextMiddleware);
@@ -47,18 +46,22 @@ const getApp = async (options = {}) => {
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
 	} = getGraphqlApi(options);
 
-	updateGraphqlApiOnSchemaChange();
-
 	graphqlMethods.forEach(method =>
 		router[method](graphqlPath, graphqlMiddlewares, graphqlHandler),
 	);
 
 	app.use(treecreeperPath, router);
-	await schema.ready();
 	app.treecreeper = {
 		logger,
 		isSchemaUpdating,
 	};
+
+	schema.init(schemaOptions);
+	updateGraphqlApiOnSchemaChange();
+	updateConstraintsOnSchemaChange();
+
+	await schema.ready();
+
 	return app;
 };
 

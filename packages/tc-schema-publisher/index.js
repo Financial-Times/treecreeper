@@ -4,7 +4,11 @@ const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 
 const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
-const sendSchemaToS3 = async (bucketName, environment, schemaObject) => {
+const sendSchemaToS3 = async (
+	environment,
+	bucketName = process.env.TREECREEPER_SCHEMA_BUCKET,
+	schemaObject,
+) => {
 	const { version } = schemaObject;
 	const schemaFilename = getSchemaFilename(version);
 	const schema = JSON.stringify(schemaObject, null, 2);
