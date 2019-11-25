@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const { getApp } = require('..');
 
 describe('schema polling startup', () => {
@@ -22,9 +21,7 @@ describe('schema polling startup', () => {
 			initialised = true;
 		});
 		await fetch.flush(true);
-		expect(fetch.lastUrl()).toEqual(
-			`http://example.com/${getSchemaFilename()}`,
-		);
+		expect(fetch.lastUrl()).toEqual(`http://example.com/schema.json`);
 		await new Promise(res => setTimeout(res));
 		expect(initialised).toBe(true);
 		fetch.reset();

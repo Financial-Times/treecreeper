@@ -1,6 +1,5 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const readYaml = require('./read-yaml');
 
 class SchemaUpdater {
@@ -54,7 +53,7 @@ class SchemaUpdater {
 			return;
 		}
 
-		this.url = `${schemaBaseUrl}/${getSchemaFilename()}`;
+		this.url = `${schemaBaseUrl}/schema.json`;
 	}
 
 	on(event, func) {
