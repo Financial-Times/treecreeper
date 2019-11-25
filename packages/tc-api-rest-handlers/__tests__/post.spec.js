@@ -211,6 +211,10 @@ describe('rest POST', () => {
 
 			await neo4jTest('MainType', mainCode)
 				.match(meta.create)
+				.notMatch({
+					children: [childCode],
+					parents: [parentCode],
+				})
 				.hasRels(2)
 				.hasRel(
 					{
