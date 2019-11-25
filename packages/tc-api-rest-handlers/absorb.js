@@ -8,6 +8,10 @@ const { diffProperties } = require('./lib/diff-properties');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const { getRemovedRelationships } = require('./lib/relationships/input');
+const {
+	metaPropertiesForUpdate,
+	prepareMetadataForNeo4jQuery,
+} = require('./lib/metadata-helpers');
 
 const fetchNode = async (nodeType, code, paramName = 'code') => {
 	const query = `MATCH (node:${nodeType} { code: $${paramName} })
@@ -23,22 +27,30 @@ const fetchNode = async (nodeType, code, paramName = 'code') => {
 	return node;
 };
 
-const mergeRelationships = async (nodeType, absorbedCode, code) => {
-	const query = [
-		`OPTIONAL MATCH (absorbedNode:${nodeType} { code: $absorbedCode }), (mainNode:${nodeType} { code: $code })`,
-		'CALL apoc.refactor.mergeNodes([mainNode, absorbedNode], { properties:"discard", mergeRels:true })',
-		'YIELD node',
-		getNeo4jRecordCypherQuery({ includeWithStatement: false }),
-	];
+const mergeRelationships = async ({
+	nodeType,
+	absorbedCode,
+	code,
+	metadata,
+}) => {
+	const query = `OPTIONAL MATCH (absorbedNode:${nodeType} { code: $absorbedCode }), (mainNode:${nodeType} { code: $code })
+		CALL apoc.refactor.mergeNodes([mainNode, absorbedNode], { properties:"discard", mergeRels:true })
+		YIELD node
+		SET ${metaPropertiesForUpdate('node')}
+		${getNeo4jRecordCypherQuery({ includeWithStatement: true })}`;
 
-	return executeQuery(query.join('\n'), { absorbedCode, code }, true);
+	return executeQuery(
+		query,
+		{ absorbedCode, code, ...prepareMetadataForNeo4jQuery(metadata) },
+		true,
+	);
 };
 
-const removeRelationships = async (
+const removeRelationships = async ({
 	nodeType,
 	absorbedCode,
 	removedRelationships,
-) => {
+}) => {
 	const queryParts = [`MATCH (node:${nodeType} { code: $code })`];
 	const {
 		parameters,
@@ -123,6 +135,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		code,
 		codeToAbsorb: absorbedCode,
 		query: { richRelationships } = {},
+		metadata,
 	} = validateInput(input);
 	validateCode(nodeType, absorbedCode, 'codeToAbsorb');
 
@@ -157,7 +170,11 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	// Remove relationships for absorbed code if exists
 	if (Object.keys(removedRelationships).length > 0) {
-		await removeRelationships(nodeType, absorbedCode, removedRelationships);
+		await removeRelationships({
+			nodeType,
+			absorbedCode,
+			removedRelationships,
+		});
 	}
 
 	let updatedDocstoreBody;
@@ -176,7 +193,12 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	let result;
 	try {
 		// Merge Neo4j relationships
-		result = await mergeRelationships(nodeType, absorbedCode, code);
+		result = await mergeRelationships({
+			nodeType,
+			absorbedCode,
+			code,
+			metadata,
+		});
 
 		logChanges('UPDATE', result, {
 			relationships: {
@@ -205,7 +227,10 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 	return {
 		status: 200,
 		body: Object.keys(body).reduce((filteredBody, key) => {
-			if (key in properties) {
+			// HACK: We need to provide a definitive reference for metaproperties
+			// somewhere that various parts of the code base can chek against.
+			// probably in SDK
+			if (key in properties || key.charAt(0) === '_') {
 				filteredBody[key] = body[key];
 			}
 			return filteredBody;

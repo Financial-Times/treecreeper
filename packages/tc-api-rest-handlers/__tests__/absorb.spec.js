@@ -10,9 +10,13 @@ describe('rest POST (absorb)', () => {
 	const childCode = `${namespace}-child`;
 	const parentCode = `${namespace}-parent`;
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
-		namespace,
-	);
+	const {
+		createNodes,
+		createNode,
+		connectNodes,
+		meta,
+		getMetaPayload,
+	} = setupMocks(namespace);
 
 	const documentStore = {};
 
@@ -25,11 +29,12 @@ describe('rest POST (absorb)', () => {
 	});
 
 	const absorb = absorbHandler({ documentStore });
-	const getInput = override =>
+	const getInput = (override, metadata = {}) =>
 		override || {
 			type: 'MainType',
 			code: mainCode,
 			codeToAbsorb: absorbedCode,
+			metadata,
 		};
 
 	const createNodePair = (mainBody, absorbedBody) => {
@@ -131,6 +136,19 @@ describe('rest POST (absorb)', () => {
 
 				const { status } = await absorb(getInput());
 				expect(status).toBe(200);
+
+				await neo4jTest('MainType', mainCode).exists();
+				await neo4jTest('MainType', absorbedCode).notExists();
+			});
+
+			it('sets correct metadata', async () => {
+				await createNodePair();
+
+				const { status, body } = await absorb(
+					getInput(null, getMetaPayload()),
+				);
+				expect(status).toBe(200);
+				expect(body).toMatchObject(meta.update);
 
 				await neo4jTest('MainType', mainCode).exists();
 				await neo4jTest('MainType', absorbedCode).notExists();
