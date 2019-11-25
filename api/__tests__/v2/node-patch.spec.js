@@ -895,14 +895,13 @@ describe('v2 - node PATCH', () => {
 									`${mainCode}-2`,
 									'MainType',
 									['youngerSiblings'],
-								],[
+								],
+								[
 									'UPDATE',
 									`${mainCode}-3`,
 									'MainType',
 									['olderSiblings'],
 								],
-
-
 							);
 							sandbox.expectNoS3Actions(
 								'upload',
@@ -961,13 +960,13 @@ describe('v2 - node PATCH', () => {
 									`${childCode}-2`,
 									'ChildType',
 									['isChildOf'],
-								],[
+								],
+								[
 									'UPDATE',
 									`${childCode}-1`,
 									'ChildType',
 									['isChildOf'],
 								],
-
 							);
 							sandbox.expectNoS3Actions(
 								'upload',
@@ -1490,7 +1489,6 @@ describe('v2 - node PATCH', () => {
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
-
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1547,17 +1545,16 @@ describe('v2 - node PATCH', () => {
 								`${childCode}-2`,
 								'ChildType',
 								['isFavouriteChildOf'],
-							],[
+							],
+							[
 								'UPDATE',
 								mainCode,
 								'MainType',
 								['favouriteChild'],
 							],
-
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
-
 
 					it(`leaves __-to-__ unchanged`, async () => {
 						const [main, child1] = await sandbox.createNodes(
@@ -1621,8 +1618,8 @@ describe('v2 - node PATCH', () => {
 								`${childCode}-2`,
 								'ChildType',
 								['isChildOf'],
-							],['UPDATE', mainCode, 'MainType', ['children']],
-
+							],
+							['UPDATE', mainCode, 'MainType', ['children']],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1831,13 +1828,13 @@ describe('v2 - node PATCH', () => {
 							`${childCode}-2`,
 							'ChildType',
 							['isChildOf'],
-						],[
+						],
+						[
 							'UPDATE',
 							`${childCode}-1`,
 							'ChildType',
 							['isChildOf'],
 						],
-
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
@@ -1921,13 +1918,13 @@ describe('v2 - node PATCH', () => {
 							`${mainCode}-2`,
 							'MainType',
 							['youngerSiblings'],
-						],[
+						],
+						[
 							'UPDATE',
 							`${mainCode}-3`,
 							'MainType',
 							['olderSiblings'],
 						],
-
 					);
 					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});

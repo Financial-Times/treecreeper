@@ -491,7 +491,6 @@ describe('merge', () => {
 				sandbox.expectKinesisEvents(
 					['UPDATE', mainCode2, 'MainType', ['olderSiblings']],
 					['DELETE', mainCode1, 'MainType'],
-
 				);
 			});
 
@@ -546,8 +545,8 @@ describe('merge', () => {
 						`${namespace}-child1`,
 						'ChildType',
 						['isFavouriteChildOf'],
-					],['DELETE', `${namespace}-main1`, 'MainType'],
-
+					],
+					['DELETE', `${namespace}-main1`, 'MainType'],
 				);
 			});
 		});

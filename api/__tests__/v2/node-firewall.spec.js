@@ -376,7 +376,7 @@ describe('v2 - node firewall', () => {
 							})
 							.expect(
 								400,
-								/Invalid value .* for property `code` on type `ChildType`/
+								/Invalid value .* for property `code` on type `ChildType`/,
 							);
 					});
 				});
