@@ -122,6 +122,12 @@ workflows:
           context: rel-eng-creds
           requires:
             - install
+      #Scan package.json for vulnerable dependencies while developing
+      - ft-snyk-orb/scan-js-packages:
+          context: rel-eng-creds
+          requires:
+          - install
+          filters: *only_version_tags
       - publish:
           context: rel-eng-creds
           requires:
