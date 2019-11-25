@@ -47,6 +47,8 @@ deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
 test:
+	# Make sure db constraints are set up to avoid race conditions between the first two test suites
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 TREECREEPER_SCHEMA_BACKWARD_COMPATIBILITY=1 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
@@ -66,7 +68,7 @@ test-ql:
 
 
 test-pkg-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/tc-api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
 
 test-pkg-docstore:
 	TREECREEPER_DOCSTORE_S3_BUCKET=example-bucket DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-s3-document-store/__tests__/.*.spec.js" --testEnvironment=node --watch; \
@@ -115,7 +117,3 @@ load-test-writeQueriesForTeams:
 
 load-test-cleanUp:
 	node scripts/load-testing/clean-up
-
-s3-publish:
-	@node schema/scripts/deploy
-

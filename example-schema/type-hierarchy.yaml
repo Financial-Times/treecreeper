@@ -6,3 +6,11 @@ test:
     - ParentType
     - ChildType
     - RestrictedType
+  relationships:
+    - HasChild
+    - HasFavouriteChild
+    - HasOlderSibling
+    - HasYoungerSibling
+    - IsParentOf
+    - RelatedToSelfWithProperties
+    - RelatedWithProperties

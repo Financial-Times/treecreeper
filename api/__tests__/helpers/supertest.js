@@ -15,8 +15,7 @@ const request = (app, { useCached = true } = {}) => {
 	if (useCached && typeof cache !== 'undefined') {
 		return cache;
 	}
-	const instance =
-		typeof app === 'function' ? supertest(app()) : supertest(app);
+	const instance = supertest(app);
 
 	if (useCached) {
 		cache = instance;

@@ -67,8 +67,7 @@ properties:
     description: Parents description.
     label: Parents label
   olderSiblings:
-    type: HasYoungerSibling
-    direction: to
+    type: HasOlderSibling
     description: Parents description.
     label: Parents label
   relatedChildren:

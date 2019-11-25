@@ -1,5 +1,5 @@
-const s3o = require('@financial-times/s3o-middleware');
-const { logger } = require('../lib/request-context');
+const httpErrors = require('http-errors');
+const { logger } = require('../../../packages/tc-api-express-logger');
 
 if (!process.env.API_KEY) {
 	throw new Error('Critical error: No API_KEY environment variable defined.');
@@ -25,23 +25,11 @@ const hasApiKey = req => {
 
 const requireApiKey = (req, res, next) => {
 	if (!hasApiKey(req)) {
-		return res
-			.status(401)
-			.send('Missing or invalid api-key header')
-			.end();
-	}
-	return next();
-};
-
-const requireApiKeyOrS3o = (req, res, next) => {
-	if (!hasApiKey(req)) {
-		return s3o.authS3ONoRedirect(req, res, next);
+		throw httpErrors(401, 'Missing or invalid api-key header');
 	}
 	return next();
 };
 
 module.exports = {
-	requireS3o: s3o,
 	requireApiKey,
-	requireApiKeyOrS3o,
 };

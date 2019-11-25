@@ -1,9 +1,10 @@
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 
 const {
 	setupMocks,
 	stubDbUnavailable,
-	stubS3Unavailable,
 	testNode,
 	verifyNotExists,
 } = require('../helpers');
@@ -18,7 +19,9 @@ describe('v2 - node POST', () => {
 	const restrictedCode = `${namespace}-restricted`;
 
 	setupMocks(sandbox, { namespace });
-
+	beforeAll(async () => {
+		app = await createApp();
+	});
 	const testPostRequest = (url, data, ...expectations) =>
 		sandbox
 			.request(app)
@@ -37,38 +40,6 @@ describe('v2 - node POST', () => {
 			},
 			500,
 		);
-		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions(
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({ someDocument: 'Fake Document' }),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `MainType/${mainCode}`,
-					ContentType: 'application/json',
-				},
-				requestType: 'POST',
-			},
-			{
-				action: 'delete',
-				nodeType: 'MainType',
-				code: mainCode,
-				versionId: 'FakeVersionId',
-			},
-		);
-		sandbox.expectNoS3Actions('patch');
-	});
-
-	it('responds with 500 if s3 query fails', async () => {
-		stubS3Unavailable(sandbox);
-		await testPostRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{ someString: 'name1', someDocument: 'Fake Document' },
-			500,
-		);
-		sandbox.expectNoKinesisEvents();
-		// S3DocumentsHelper throws on instantiation
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('creates node with non-document properties only', async () => {
@@ -90,95 +61,6 @@ describe('v2 - node POST', () => {
 				someString: 'name1',
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['code', 'someString'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-	});
-
-	it('creates node with only document properties and writes to s3', async () => {
-		await testPostRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{ someDocument: 'Fake Document' },
-			200,
-			sandbox.withCreateMeta({
-				code: mainCode,
-				someDocument: 'Fake Document',
-			}),
-		);
-
-		await testNode(
-			'MainType',
-			mainCode,
-			sandbox.withCreateMeta({
-				code: mainCode,
-			}),
-		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['code', 'someDocument'],
-		]);
-
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					someDocument: 'Fake Document',
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `MainType/${mainCode}`,
-				ContentType: 'application/json',
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
-	});
-
-	it('creates node with document and non-document properties and writes to s3', async () => {
-		await testPostRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{ someString: 'name1', someDocument: 'Fake Document' },
-			200,
-			sandbox.withCreateMeta({
-				code: mainCode,
-				someString: 'name1',
-				someDocument: 'Fake Document',
-			}),
-		);
-
-		await testNode(
-			'MainType',
-			mainCode,
-			sandbox.withCreateMeta({
-				code: mainCode,
-				someString: 'name1',
-			}),
-		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['code', 'someString', 'someDocument'],
-		]);
-
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					someDocument: 'Fake Document',
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `MainType/${mainCode}`,
-				ContentType: 'application/json',
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -192,8 +74,6 @@ describe('v2 - node POST', () => {
 		);
 
 		verifyNotExists('RestrictedType', restrictedCode);
-		sandbox.expectNoKinesisEvents();
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // as this error will throw before s3 actions
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
@@ -207,10 +87,6 @@ describe('v2 - node POST', () => {
 				_updatedByClient: 'restricted-type-creator',
 			},
 		);
-		const completeResult = {
-			someDocument: 'Fake Document',
-			...neo4jResult,
-		};
 		await sandbox
 			.request(app)
 			.post(`/v2/node/RestrictedType/${restrictedCode}`)
@@ -220,31 +96,10 @@ describe('v2 - node POST', () => {
 			.set('client-id', 'restricted-type-creator')
 			.send({
 				someString: 'name1',
-				someDocument: 'Fake Document',
 			})
-			.expect(200, completeResult);
+			.expect(200, neo4jResult);
 
 		await testNode('RestrictedType', restrictedCode, neo4jResult);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			restrictedCode,
-			'RestrictedType',
-			['someString', 'code', 'someDocument'],
-			'restricted-type-creator',
-		]);
-		sandbox.expectS3Actions({
-			action: 'upload',
-			params: {
-				Body: JSON.stringify({
-					someDocument: 'Fake Document',
-				}),
-				Bucket: 'biz-ops-documents.510688331160',
-				Key: `RestrictedType/${restrictedCode}`,
-				ContentType: 'application/json',
-			},
-			requestType: 'POST',
-		});
-		sandbox.expectNoS3Actions('delete', 'patch');
 	});
 
 	it('Not set property when empty string provided', async () => {
@@ -266,20 +121,7 @@ describe('v2 - node POST', () => {
 				someString: 'name1',
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['code', 'someString'],
-		]);
 	});
-
-	it.skip('Not set Document property when empty string provided', async () => {
-		// TODO need to write a test here
-	});
-
-	it.skip('Set DateTime property', async () => {});
-	it.skip('Set Time property', async () => {});
 
 	// TODO - once we have a test schema, need to test other temporal types
 	it('Set Date property', async () => {
@@ -303,12 +145,6 @@ describe('v2 - node POST', () => {
 				someDate: isoDateString,
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['code', 'someDate'],
-		]);
 	});
 
 	it('error when creating duplicate node', async () => {
@@ -323,26 +159,6 @@ describe('v2 - node POST', () => {
 			409,
 			new RegExp(`MainType ${mainCode} already exists`),
 		);
-		sandbox.expectNoKinesisEvents();
-		sandbox.expectS3Actions(
-			{
-				action: 'upload',
-				params: {
-					Body: JSON.stringify({ someDocument: 'Fake Document' }),
-					Bucket: 'biz-ops-documents.510688331160',
-					Key: `MainType/${mainCode}`,
-					ContentType: 'application/json',
-				},
-				requestType: 'POST',
-			},
-			{
-				action: 'delete',
-				nodeType: 'MainType',
-				code: mainCode,
-				versionId: 'FakeVersionId',
-			},
-		);
-		sandbox.expectNoS3Actions('patch');
 	});
 
 	it('error when conflicting code values', async () => {
@@ -355,9 +171,8 @@ describe('v2 - node POST', () => {
 				`Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
 			),
 		);
-		sandbox.expectNoKinesisEvents();
+
 		await verifyNotExists('MainType', mainCode);
-		sandbox.expectNoS3Actions('upload', 'patch', 'delete'); // as this error will throw before s3 actions
 	});
 
 	it('error when unrecognised property', async () => {
@@ -367,9 +182,8 @@ describe('v2 - node POST', () => {
 			400,
 			/Invalid property `notInSchema` on type `MainType`/,
 		);
-		expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
+
 		await verifyNotExists('MainType', mainCode);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // as this error will throw before s3 actions
 	});
 
 	it('create node related to existing nodes', async () => {
@@ -420,17 +234,6 @@ describe('v2 - node POST', () => {
 				},
 			],
 		);
-
-		sandbox.expectKinesisEvents(
-			['CREATE', mainCode, 'MainType', ['code', 'children', 'parents']],
-			['UPDATE', childCode, 'ChildType', ['isChildOf']],
-			['UPDATE', parentCode, 'ParentType', ['isParentOf']],
-		);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-	});
-
-	it.skip('sends events for recursive fields', () => {
-		// for the time being don't have any of them defined or used in new tests
 	});
 
 	it('error when creating node related to non-existent nodes', async () => {
@@ -443,9 +246,8 @@ describe('v2 - node POST', () => {
 			400,
 			/Missing related node/,
 		);
-		sandbox.expectNoKinesisEvents();
+
 		await verifyNotExists('MainType', mainCode);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('create node related to non-existent nodes when using upsert=true', async () => {
@@ -492,13 +294,6 @@ describe('v2 - node POST', () => {
 				},
 			],
 		);
-
-		sandbox.expectKinesisEvents(
-			['CREATE', mainCode, 'MainType', ['code', 'children', 'parents']],
-			['CREATE', childCode, 'ChildType', ['code', 'isChildOf']],
-			['CREATE', parentCode, 'ParentType', ['code', 'isParentOf']],
-		);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	describe('locked Fields', () => {
@@ -552,7 +347,6 @@ describe('v2 - node POST', () => {
 					400,
 					/clientId needs to be set to a valid system code in order to lock fields/,
 				);
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch'); // mergeLockedFields throws an error before s3 actions
 			});
 		});
 	});

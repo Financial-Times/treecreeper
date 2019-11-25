@@ -1,22 +1,22 @@
 const express = require('express');
 require('express-async-errors');
 const metrics = require('next-metrics');
-const graphiql = require('./routes/graphql/graphiql');
-const graphql = require('./routes/graphql/api');
-const v2 = require('./routes/rest/v2');
+const timeout = require('connect-timeout');
+const { getApp } = require('../../packages/tc-api-express');
+// const { createStore } = require('../../packages/tc-api-s3-document-store');
 const health = require('./health');
-const { middleware: contextMiddleware } = require('./lib/request-context');
 
-const requestId = require('./middleware/request-id');
 const {
 	errorToErrors,
 	notFound,
 	uncaughtError,
 } = require('./middleware/errors');
 
-const ONE_HOUR = 60 * 60 * 1000;
+const { TIMEOUT } = require('./constants');
+const security = require('./middleware/security');
+const maintenance = require('./middleware/maintenance');
 
-const createApp = () => {
+const createApp = async () => {
 	const app = express();
 
 	// __gtg and __health need no preconditions satisfying to respond
@@ -37,24 +37,26 @@ const createApp = () => {
 	});
 
 	// Always assign/propagate requestId and setup request tracing
-	app.use(contextMiddleware);
-	app.use(requestId);
 	app.set('case sensitive routing', true);
-	app.set('s3o-cookie-ttl', ONE_HOUR);
+	app.use(timeout(TIMEOUT));
+	app.use(security.requireApiKey);
+	app.use(maintenance.disableWrites);
+	app.use(maintenance.disableReads);
 
-	app.use('/graphiql', graphiql(new express.Router()));
-
-	// Redirect legacy graphql url
-	app.use('/api/graphql', (req, res) => {
-		res.redirect('/graphql');
+	await getApp({
+		app,
+		graphqlMethods: ['post', 'get'],
+		restPath: '/v2/node',
+		restMethods: ['HEAD', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
+		schemaOptions: { updateMode: 'poll' },
+		republishSchemaPrefix: 'api',
+		republishSchema: true,
+		// documentStore: createStore(),
+	}).then(() => {
+		app.use(errorToErrors);
+		app.use(notFound);
+		app.use(uncaughtError);
 	});
-
-	app.use('/graphql', graphql(new express.Router()));
-	app.use('/v2', v2(new express.Router()));
-
-	app.use(errorToErrors);
-	app.use(notFound);
-	app.use(uncaughtError);
 
 	return app;
 };

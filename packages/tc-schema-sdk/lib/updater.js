@@ -1,8 +1,6 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
-const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const readYaml = require('./read-yaml');
-const { version: libVersion } = require('../../../package.json');
 const { compatBackward } = require('./compat-backward');
 
 // e.g HasChild -> HAS_CHILD
@@ -74,10 +72,13 @@ class SchemaUpdater {
 				oldVersion: undefined,
 				newVersion: this.version,
 			});
+			if (schemaData.version) {
+				this.version = schemaData.version;
+			}
 			return;
 		}
 
-		this.url = `${schemaBaseUrl}/${getSchemaFilename(libVersion)}`;
+		this.url = `${schemaBaseUrl}/schema.json`;
 	}
 
 	on(event, func) {

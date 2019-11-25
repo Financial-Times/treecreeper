@@ -77,9 +77,13 @@ const queryBuilder = (method, input, body = {}) => {
 	};
 
 	const constructProperties = initialContent => {
-		const bodyDiff = initialContent
-			? diffProperties({ type, newContent: body, initialContent })
-			: body;
+		// we need the diff even if no initial content as it gets rid of
+		// relationship properties
+		const bodyDiff = diffProperties({
+			type,
+			newContent: body,
+			initialContent,
+		});
 		const properties = constructNeo4jProperties({
 			type,
 			code,

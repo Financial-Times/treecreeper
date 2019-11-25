@@ -281,18 +281,6 @@ const relationshipTestSuite = (types, type) => {
 		it('has a name', () => {
 			expect(typeof type.name).toBe('string');
 		});
-		it('has an exact from relationship', () => {
-			expect(type.from).toMatchObject({
-				type: expect.any(String),
-				hasMany: expect.any(Boolean),
-			});
-		});
-		it('has an exact to relationship', () => {
-			expect(type.to).toMatchObject({
-				type: expect.any(String),
-				hasMany: expect.any(Boolean),
-			});
-		});
 		it('may have a isMutal', () => {
 			if ('isMutal' in type) {
 				expect(typeof type.isMutal).toBe('boolean');
@@ -309,47 +297,81 @@ const relationshipTestSuite = (types, type) => {
 
 		if (from) {
 			describe('from', () => {
+				const fromType = types.find(t => t.name === from.type);
+				it('has an exact from relationship', () => {
+					expect(type.from).toMatchObject({
+						type: expect.any(String),
+						hasMany: expect.any(Boolean),
+					});
+				});
 				it('has existing type', () => {
-					const fromType = types.find(t => t.name === from.type);
-					expect(fromType).not.toBeNull();
+					expect(fromType).toBeDefined();
 					// assert the relationship node doesn't have more relationship
 					expect(isRichRelationshipType(fromType)).toBe(false);
 				});
 
 				if (!to) {
-					// If the relationship doesn't have `to` property,
-					// we need to validate if the relationship is end
-					it('has relationship of the end', () => {});
+					// If the relationship doesn't have `to` property, it means single direction.
+					// we need to validate if the relationship is ended properly
+					it('must defined end of realtionship property at same type', () => {
+						const outType = Object.values(fromType.properties).find(
+							propValue => {
+								const relType = types.find(
+									t => t.name === propValue.type,
+								);
+								return (
+									relType &&
+									relType.relationship ===
+										type.relationship &&
+									!('from' in relType) &&
+									'to' in relType
+								);
+							},
+						);
+						expect(outType).toBeDefined();
+					});
 				}
 			});
 		}
 
 		if (to) {
 			describe('to', () => {
+				const toType = types.find(t => t.name === to.type);
+				it('has an exact to relationship', () => {
+					expect(type.to).toMatchObject({
+						type: expect.any(String),
+						hasMany: expect.any(Boolean),
+					});
+				});
 				it('has existing type', () => {
-					const toType = types.find(t => t.name === to.type);
-					expect(toType).not.toBeNull();
+					expect(toType).toBeDefined();
 					// assert the relationship node doesn't have more relationship
 					expect(isRichRelationshipType(toType)).toBe(false);
 				});
+
+				if (!from) {
+					// If the relationship doesn't have `from` property, it means single direction
+					// we need to validate if the relationship is entered properly
+					it('must defined end of realtionship property at same type', () => {
+						const enterType = Object.values(toType.properties).find(
+							propValue => {
+								const relType = types.find(
+									t => t.name === propValue.type,
+								);
+								return (
+									relType &&
+									relType.relationship ===
+										type.relationship &&
+									!('to' in relType) &&
+									'from' in relType
+								);
+							},
+						);
+						expect(enterType).toBeDefined();
+					});
+				}
 			});
 		}
-
-		// TODO: validate twinned relationship ( defined as both ends )
-		// const getTwinnedRelationship = (
-		// 	homeTypeName,
-		// 	awayTypeName,
-		// 	relationshipName,
-		// 	homeDirection,
-		// ) => {
-		// 	const awayType = types.find(({ name }) => name === awayTypeName);
-		// 	return Object.values(awayType.properties).find(
-		// 		({ relationship, type, direction }) =>
-		// 			relationship === relationshipName &&
-		// 			type === homeTypeName &&
-		// 			direction !== homeDirection,
-		// 	);
-		// };
 	});
 };
 
