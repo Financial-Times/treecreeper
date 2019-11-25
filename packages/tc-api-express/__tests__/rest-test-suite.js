@@ -145,34 +145,34 @@ const testSuite = (method, goodStatus) => {
 					.expect(goodStatus);
 			});
 
-			const expectError = (status, message) =>
-				method === 'head' ? [status] : [status, message];
+			const expectError = async (res, status, message) =>
+				method === 'head'
+					? res.expect(status).then(({ headers }) => {
+							expect(headers['debug-error']).toEqual(message);
+					  })
+					: res.expect(status, {
+							errors: [{ message }],
+					  });
 
 			it('must respond with expected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(httpErrors(404, 'hahaha'));
-				await request(app)
+				const res = request(app)
 					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
-					.set('request-id', 'test-request-id')
-					.expect(
-						...expectError(404, {
-							errors: [{ message: 'hahaha' }],
-						}),
-					);
+					.set('request-id', 'test-request-id');
+
+				await expectError(res, 404, 'hahaha');
 			});
 			it('must respond with unexpected errors accordingly', async () => {
 				mockHandler.mockRejectedValue(new Error('hahaha'));
-				await request(app)
+				const res = request(app)
 					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
 					.set('client-user-id', 'test-user-id')
-					.set('request-id', 'test-request-id')
-					.expect(
-						...expectError(500, {
-							errors: [{ message: 'Error: hahaha' }],
-						}),
-					);
+					.set('request-id', 'test-request-id');
+
+				await expectError(res, 500, 'hahaha');
 			});
 		});
 	});
