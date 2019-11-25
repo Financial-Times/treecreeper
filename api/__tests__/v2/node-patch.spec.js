@@ -1,11 +1,12 @@
 const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 
 const { API_KEY } = process.env;
 const {
 	setupMocks,
 	stubDbUnavailable,
-	stubS3Unavailable,
 	testNode,
 	spyDbQuery,
 	verifyNotExists,
@@ -21,7 +22,9 @@ describe('v2 - node PATCH', () => {
 	const parentCode = `${namespace}-parent`;
 
 	setupMocks(sandbox, { namespace });
-
+	beforeAll(async () => {
+		app = await createApp();
+	});
 	const testPatchRequest = (url, data, ...expectations) => {
 		let req = sandbox
 			.request(app)
@@ -60,98 +63,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['someString'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-	});
-
-	it('update node in s3 with document properties only', async () => {
-		await sandbox.createNode('MainType', {
-			code: mainCode,
-		});
-		await testPatchRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{
-				someDocument: 'Another Fake Document',
-			},
-			200,
-			sandbox.withUpdateMeta({
-				code: mainCode,
-				someDocument: 'Another Fake Document',
-			}),
-		);
-
-		await testNode(
-			'MainType',
-			mainCode,
-			sandbox.withUpdateMeta({
-				code: mainCode,
-			}),
-		);
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['someDocument'],
-		]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'MainType',
-			code: mainCode,
-			body: {
-				someDocument: 'Another Fake Document',
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
-	});
-
-	it('update node in neo4j and s3 with document and non-document properties', async () => {
-		await sandbox.createNode('MainType', {
-			code: mainCode,
-		});
-		await testPatchRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{
-				someString: 'name1',
-				someDocument: 'Another Fake Document',
-			},
-			200,
-			sandbox.withUpdateMeta({
-				code: mainCode,
-				someString: 'name1',
-				someDocument: 'Another Fake Document',
-			}),
-		);
-
-		await testNode(
-			'MainType',
-			mainCode,
-			sandbox.withUpdateMeta({
-				someString: 'name1',
-				code: mainCode,
-			}),
-		);
-
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['someString', 'someDocument'],
-		]);
-		sandbox.expectS3Actions({
-			action: 'patch',
-			nodeType: 'MainType',
-			code: mainCode,
-			body: {
-				someDocument: 'Another Fake Document',
-			},
-		});
-		sandbox.expectNoS3Actions('upload', 'delete');
 	});
 
 	it('Not create property when passed empty string', async () => {
@@ -179,12 +90,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-		sandbox.expectNoKinesisEvents();
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-	});
-
-	it.skip('Not set Document property when empty string provided', async () => {
-		// TODO need to write a test here
 	});
 
 	describe('temporal properties', () => {
@@ -212,13 +117,6 @@ describe('v2 - node PATCH', () => {
 					someDate: isoDateString,
 				}),
 			);
-			sandbox.expectKinesisEvents([
-				'UPDATE',
-				mainCode,
-				'MainType',
-				['someDate'],
-			]);
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('Overwrite existing Date property', async () => {
@@ -249,13 +147,6 @@ describe('v2 - node PATCH', () => {
 					someDate: isoDateString,
 				}),
 			);
-			sandbox.expectKinesisEvents([
-				'UPDATE',
-				mainCode,
-				'MainType',
-				['someDate'],
-			]);
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it("Not overwrite when 'same' Date sent", async () => {
@@ -284,21 +175,7 @@ describe('v2 - node PATCH', () => {
 					someDate: isoDateString,
 				}),
 			);
-			sandbox.expectNoKinesisEvents();
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
-
-		it.skip('Set DateTime property when no previous value', async () => {});
-
-		it.skip('Overwrite existing DateTime property', async () => {});
-
-		it.skip("Not overwrite when 'same' DateTime sent", async () => {});
-
-		it.skip('Set Time property when no previous value', async () => {});
-
-		it.skip('Overwrite existing Time property', async () => {});
-
-		it.skip("Not overwrite when 'same' Time sent", async () => {});
 	});
 
 	it('Remove property when empty string sent in payload', async () => {
@@ -326,13 +203,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['anotherString'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not remove property when falsy value sent in payload', async () => {
@@ -359,13 +229,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['someBoolean'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Create when patching non-existent node', async () => {
@@ -389,13 +252,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			mainCode,
-			'MainType',
-			['someString', 'code'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Not create when patching non-existent restricted node', async () => {
@@ -411,8 +267,6 @@ describe('v2 - node PATCH', () => {
 		);
 
 		await verifyNotExists('RestrictedType', restrictedCode);
-		sandbox.expectNoKinesisEvents();
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('Create when patching non-existent restricted node with correct client-id', async () => {
@@ -439,14 +293,6 @@ describe('v2 - node PATCH', () => {
 			.expect(201, result);
 
 		await testNode('RestrictedType', restrictedCode, result);
-		sandbox.expectKinesisEvents([
-			'CREATE',
-			restrictedCode,
-			'RestrictedType',
-			['someString', 'code'],
-			'restricted-type-creator',
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when conflicting code values', async () => {
@@ -462,9 +308,8 @@ describe('v2 - node PATCH', () => {
 			),
 		);
 		await verifyNotExists('MainType', mainCode);
-		sandbox.expectNoKinesisEvents();
+
 		// validatePayload throws before S3 actions
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('error when unrecognised attribute', async () => {
@@ -477,9 +322,8 @@ describe('v2 - node PATCH', () => {
 			/Invalid property `notInSchema` on type `MainType`/,
 		);
 		await verifyNotExists('MainType', mainCode);
-		sandbox.expectNoKinesisEvents();
+
 		// getType from biz-ops-schema throws before s3 actions
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('responds with 500 if neo4j query fails', async () => {
@@ -491,23 +335,8 @@ describe('v2 - node PATCH', () => {
 			},
 			500,
 		);
-		sandbox.expectNoKinesisEvents();
-		// getNodeWithRelationships throws error before s3 delete
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-	});
 
-	it('responds with 500 if s3 query fails', async () => {
-		stubS3Unavailable(sandbox);
-		await testPatchRequest(
-			`/v2/node/MainType/${mainCode}`,
-			{
-				someDocument: 'Fake Document',
-			},
-			500,
-		);
-		sandbox.expectNoKinesisEvents();
-		// S3DocumentsHelper throws on instantiation
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
+		// getNodeWithRelationships throws error before s3 delete
 	});
 
 	it("deletes attributes which are provided as 'null'", async () => {
@@ -533,13 +362,6 @@ describe('v2 - node PATCH', () => {
 				code: mainCode,
 			}),
 		);
-		sandbox.expectKinesisEvents([
-			'UPDATE',
-			mainCode,
-			'MainType',
-			['someString'],
-		]);
-		sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 	});
 
 	it('no client-id header deletes the _updatedByClient metaProperty from the database', async () => {
@@ -594,8 +416,6 @@ describe('v2 - node PATCH', () => {
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
-				sandbox.expectNoKinesisEvents();
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 
 			it('errors if no relationshipAction query string when deleting individual relationship', async () => {
@@ -608,8 +428,6 @@ describe('v2 - node PATCH', () => {
 					400,
 					/PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`/,
 				);
-				sandbox.expectNoKinesisEvents();
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 			['merge', 'replace'].forEach(action =>
 				describe(`with ${action} action`, () => {
@@ -657,12 +475,6 @@ describe('v2 - node PATCH', () => {
 									code: mainCode,
 								}),
 							);
-							sandbox.expectNoKinesisEvents();
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 
 						it("can attempt to delete a specific relationship that doesn't exist", async () => {
@@ -704,12 +516,6 @@ describe('v2 - node PATCH', () => {
 										}),
 									},
 								],
-							);
-							sandbox.expectNoKinesisEvents();
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -764,26 +570,6 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectKinesisEvents(
-								['UPDATE', mainCode, 'MainType', ['children']],
-								[
-									'UPDATE',
-									`${childCode}-1`,
-									'ChildType',
-									['isChildOf'],
-								],
-								[
-									'UPDATE',
-									`${childCode}-3`,
-									'ChildType',
-									['isChildOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 
 						it('can delete multiple specific relationships of different kinds', async () => {
@@ -818,31 +604,6 @@ describe('v2 - node PATCH', () => {
 								sandbox.withMeta({
 									code: mainCode,
 								}),
-							);
-							sandbox.expectKinesisEvents(
-								[
-									'UPDATE',
-									mainCode,
-									'MainType',
-									['children', 'parents'],
-								],
-								[
-									'UPDATE',
-									childCode,
-									'ChildType',
-									['isChildOf'],
-								],
-								[
-									'UPDATE',
-									parentCode,
-									'ParentType',
-									['isParentOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 						it('leaves relationships in the opposite direction unaffected', async () => {
@@ -889,25 +650,6 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectKinesisEvents(
-								[
-									'UPDATE',
-									`${mainCode}-2`,
-									'MainType',
-									['youngerSiblings'],
-								],
-								[
-									'UPDATE',
-									`${mainCode}-3`,
-									'MainType',
-									['olderSiblings'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 						it('can add and remove relationships of the same type at the same time', async () => {
 							const [main, child1] = await sandbox.createNodes(
@@ -953,26 +695,6 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-							sandbox.expectKinesisEvents(
-								['UPDATE', mainCode, 'MainType', ['children']],
-								[
-									'UPDATE',
-									`${childCode}-2`,
-									'ChildType',
-									['isChildOf'],
-								],
-								[
-									'UPDATE',
-									`${childCode}-1`,
-									'ChildType',
-									['isChildOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 						it('errors if deleting and adding the same relationship to the same record', async () => {
 							await sandbox.createNodes(
@@ -996,12 +718,6 @@ describe('v2 - node PATCH', () => {
 									code: mainCode,
 								}),
 							);
-							sandbox.expectNoKinesisEvents();
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 					});
 
@@ -1023,12 +739,6 @@ describe('v2 - node PATCH', () => {
 								sandbox.withMeta({
 									code: mainCode,
 								}),
-							);
-							sandbox.expectNoKinesisEvents();
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -1062,32 +772,6 @@ describe('v2 - node PATCH', () => {
 								sandbox.withMeta({
 									code: mainCode,
 								}),
-							);
-
-							sandbox.expectKinesisEvents(
-								[
-									'UPDATE',
-									mainCode,
-									'MainType',
-									['children', 'parents'],
-								],
-								[
-									'UPDATE',
-									childCode,
-									'ChildType',
-									['isChildOf'],
-								],
-								[
-									'UPDATE',
-									parentCode,
-									'ParentType',
-									['isParentOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -1142,26 +826,6 @@ describe('v2 - node PATCH', () => {
 										}),
 									},
 								],
-							);
-
-							sandbox.expectKinesisEvents(
-								[
-									'UPDATE',
-									`${mainCode}-2`,
-									'MainType',
-									['children'],
-								],
-								[
-									'UPDATE',
-									childCode,
-									'ChildType',
-									['isChildOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -1239,26 +903,6 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-
-							sandbox.expectKinesisEvents(
-								[
-									'UPDATE',
-									`${mainCode}-2`,
-									'MainType',
-									['youngerSiblings'],
-								],
-								[
-									'UPDATE',
-									`${mainCode}-3`,
-									'MainType',
-									['olderSiblings'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 					});
 				}),
@@ -1281,8 +925,6 @@ describe('v2 - node PATCH', () => {
 					mainCode,
 					sandbox.withMeta({ code: mainCode }),
 				);
-				sandbox.expectNoKinesisEvents();
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 
 			describe('__-to-one relationships', () => {
@@ -1324,22 +966,6 @@ describe('v2 - node PATCH', () => {
 								},
 							],
 						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								mainCode,
-								'MainType',
-								['favouriteChild'],
-							],
-							[
-								'UPDATE',
-								childCode,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('accept an array of length one', async () => {
 						await sandbox.createNodes(
@@ -1378,22 +1004,6 @@ describe('v2 - node PATCH', () => {
 								},
 							],
 						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								mainCode,
-								'MainType',
-								['favouriteChild'],
-							],
-							[
-								'UPDATE',
-								childCode,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 					it('error if trying to write multiple relationships', async () => {
 						await sandbox.createNodes(
@@ -1420,9 +1030,6 @@ describe('v2 - node PATCH', () => {
 								code: mainCode,
 							}),
 						);
-
-						sandbox.expectNoKinesisEvents();
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 
 					it('replace existing relationship', async () => {
@@ -1469,28 +1076,6 @@ describe('v2 - node PATCH', () => {
 								},
 							],
 						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								mainCode,
-								'MainType',
-								['favouriteChild'],
-							],
-							[
-								'UPDATE',
-								`${childCode}-2`,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-							[
-								'UPDATE',
-								`${childCode}-1`,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 
 					it('strictly enforces one-to-__', async () => {
@@ -1538,22 +1123,6 @@ describe('v2 - node PATCH', () => {
 								},
 							],
 						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								`${childCode}-2`,
-								'ChildType',
-								['isFavouriteChildOf'],
-							],
-							[
-								'UPDATE',
-								mainCode,
-								'MainType',
-								['favouriteChild'],
-							],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
 
 					it(`leaves __-to-__ unchanged`, async () => {
@@ -1611,20 +1180,6 @@ describe('v2 - node PATCH', () => {
 								},
 							],
 						);
-
-						sandbox.expectKinesisEvents(
-							[
-								'UPDATE',
-								`${childCode}-2`,
-								'ChildType',
-								['isChildOf'],
-							],
-							['UPDATE', mainCode, 'MainType', ['children']],
-						);
-						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
-					});
-					it.skip('not replace existing relationship in opposite direction', async () => {
-						// schema doesn't support any one-to-one relationships in both directions, so not possible to test this yet,
 					});
 				});
 			});
@@ -1665,11 +1220,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectKinesisEvents(
-						['UPDATE', mainCode, 'MainType', ['children']],
-						['UPDATE', childCode, 'ChildType', ['isChildOf']],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 				it('can merge with relationships if relationshipAction=merge', async () => {
 					const [main, child1] = await sandbox.createNodes(
@@ -1687,7 +1237,7 @@ describe('v2 - node PATCH', () => {
 						200,
 						sandbox.withMeta({
 							code: mainCode,
-							children: [`${childCode}-2`, `${childCode}-1`],
+							children: [`${childCode}-1`, `${childCode}-2`],
 						}),
 					);
 
@@ -1724,16 +1274,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectKinesisEvents(
-						['UPDATE', mainCode, 'MainType', ['children']],
-						[
-							'UPDATE',
-							`${childCode}-2`,
-							'ChildType',
-							['isChildOf'],
-						],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 			});
 
@@ -1773,12 +1313,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-
-					sandbox.expectKinesisEvents(
-						['UPDATE', mainCode, 'MainType', ['children']],
-						['UPDATE', childCode, 'ChildType', ['isChildOf']],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('can replace relationships if relationshipAction=replace', async () => {
@@ -1821,22 +1355,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectKinesisEvents(
-						['UPDATE', mainCode, 'MainType', ['children']],
-						[
-							'UPDATE',
-							`${childCode}-2`,
-							'ChildType',
-							['isChildOf'],
-						],
-						[
-							'UPDATE',
-							`${childCode}-1`,
-							'ChildType',
-							['isChildOf'],
-						],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('leaves relationships in other direction and of other types untouched when replacing', async () => {
@@ -1911,22 +1429,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-
-					sandbox.expectKinesisEvents(
-						[
-							'UPDATE',
-							`${mainCode}-2`,
-							'MainType',
-							['youngerSiblings'],
-						],
-						[
-							'UPDATE',
-							`${mainCode}-3`,
-							'MainType',
-							['olderSiblings'],
-						],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 
 				it('replaces relationships in multiple directions', async () => {
@@ -1993,28 +1495,6 @@ describe('v2 - node PATCH', () => {
 							},
 						],
 					);
-					sandbox.expectKinesisEvents(
-						[
-							'UPDATE',
-							`${mainCode}-2`,
-							'MainType',
-							['olderSiblings', 'youngerSiblings'],
-						],
-						[
-							'UPDATE',
-							`${mainCode}-1`,
-							'MainType',
-							['olderSiblings', 'youngerSiblings'],
-						],
-
-						[
-							'UPDATE',
-							`${mainCode}-3`,
-							'MainType',
-							['olderSiblings', 'youngerSiblings'],
-						],
-					);
-					sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 				});
 			});
 
@@ -2029,12 +1509,6 @@ describe('v2 - node PATCH', () => {
 								},
 								400,
 								/Missing related node/,
-							);
-							sandbox.expectNoKinesisEvents();
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -2070,21 +1544,6 @@ describe('v2 - node PATCH', () => {
 										}),
 									},
 								],
-							);
-
-							sandbox.expectKinesisEvents(
-								['UPDATE', mainCode, 'MainType', ['children']],
-								[
-									'CREATE',
-									childCode,
-									'ChildType',
-									['code', 'isChildOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
 							);
 						});
 
@@ -2122,21 +1581,6 @@ describe('v2 - node PATCH', () => {
 									},
 								],
 							);
-
-							sandbox.expectKinesisEvents(
-								['UPDATE', mainCode, 'MainType', ['children']],
-								[
-									'UPDATE',
-									childCode,
-									'ChildType',
-									['isChildOf'],
-								],
-							);
-							sandbox.expectNoS3Actions(
-								'upload',
-								'delete',
-								'patch',
-							);
 						});
 					});
 				});
@@ -2162,8 +1606,6 @@ describe('v2 - node PATCH', () => {
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
-			sandbox.expectNoKinesisEvents();
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
@@ -2182,8 +1624,6 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
-			sandbox.expectNoKinesisEvents();
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it("doesn't write if no real relationship changes detected in MERGE mode", async () => {
@@ -2202,8 +1642,6 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(false);
-			sandbox.expectNoKinesisEvents();
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it("doesn't write if no real lockField changes detected", async () => {
@@ -2220,8 +1658,6 @@ describe('v2 - node PATCH', () => {
 			dbQuerySpy().args.forEach(args => {
 				expect(args[0]).not.toMatch(/MERGE|CREATE/);
 			});
-			sandbox.expectNoKinesisEvents();
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('writes if property but no relationship changes detected', async () => {
@@ -2240,13 +1676,6 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectKinesisEvents([
-				'UPDATE',
-				mainCode,
-				'MainType',
-				['someString'],
-			]);
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('writes if relationship but no property changes detected', async () => {
@@ -2266,11 +1695,6 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectKinesisEvents(
-				['UPDATE', mainCode, 'MainType', ['children']],
-				['UPDATE', `${childCode}-2`, 'ChildType', ['isChildOf']],
-			);
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		it('detects deleted property as a change', async () => {
@@ -2288,13 +1712,6 @@ describe('v2 - node PATCH', () => {
 			expect(
 				dbQuerySpy().args.some(args => /MERGE|CREATE/.test(args[0])),
 			).toBe(true);
-			sandbox.expectKinesisEvents([
-				'UPDATE',
-				mainCode,
-				'MainType',
-				['someString'],
-			]);
-			sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 		});
 
 		describe('patching with fewer relationships', () => {
@@ -2322,11 +1739,6 @@ describe('v2 - node PATCH', () => {
 						/MERGE|CREATE/.test(args[0]),
 					),
 				).toBe(true);
-				sandbox.expectKinesisEvents(
-					['UPDATE', mainCode, 'MainType', ['children']],
-					['UPDATE', `${childCode}-2`, 'ChildType', ['isChildOf']],
-				);
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 
 			it('treats fewer relationships as no change when merging relationships', async () => {
@@ -2353,8 +1765,6 @@ describe('v2 - node PATCH', () => {
 						/MERGE|CREATE/.test(args[0]),
 					),
 				).toBe(false);
-				sandbox.expectNoKinesisEvents();
-				sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 			});
 		});
 	});

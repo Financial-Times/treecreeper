@@ -1,4 +1,6 @@
-const app = require('../server/app.js');
+const createApp = require('../server/create-app.js');
+
+let app;
 const { setupMocks } = require('./helpers');
 
 const request = require('./helpers/supertest').getNamespacedSupertest(
@@ -12,7 +14,9 @@ describe('graphql', () => {
 	setupMocks(sandbox, { namespace });
 
 	const mainCode = `${namespace}-main`;
-
+	beforeAll(async () => {
+		app = await createApp();
+	});
 	it('Return a single record', async () => {
 		await sandbox.createNode('MainType', {
 			code: mainCode,
@@ -39,35 +43,6 @@ describe('graphql', () => {
 							code: mainCode,
 							someEnum: 'First',
 							someString: 'name1',
-						},
-					},
-				});
-			});
-	});
-
-	it('Return a single record with Document property', async () => {
-		sandbox.setS3Responses({ get: { someDocument: 'Fake Document' } });
-		await sandbox.createNode('MainType', {
-			code: mainCode,
-		});
-		return sandbox
-			.request(app)
-			.post('/graphql')
-			.send({
-				query: `{
-					MainType(code: "${mainCode}") {
-						code
-						someDocument
-					}}`,
-			})
-			.namespacedAuth()
-			.expect(200)
-			.then(({ body }) => {
-				expect(body).toEqual({
-					data: {
-						MainType: {
-							code: mainCode,
-							someDocument: 'Fake Document',
 						},
 					},
 				});

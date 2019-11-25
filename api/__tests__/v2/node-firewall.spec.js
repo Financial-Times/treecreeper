@@ -1,4 +1,6 @@
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 
 const { API_KEY } = process.env;
 const { setupMocks, verifyNotExists } = require('../helpers');
@@ -10,7 +12,9 @@ describe('v2 - node firewall', () => {
 	const restUrl = `/v2/node/MainType/${mainCode}`;
 
 	setupMocks(sandbox, { namespace });
-
+	beforeAll(async () => {
+		app = await createApp();
+	});
 	describe('unimplemented', () => {
 		describe('PUT', () => {
 			it('405 Method Not Allowed', () => {

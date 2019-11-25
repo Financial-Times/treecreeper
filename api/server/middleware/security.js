@@ -1,5 +1,5 @@
 const httpErrors = require('http-errors');
-const { logger } = require('../lib/request-context');
+const { logger } = require('../../../packages/tc-api-express-logger');
 
 if (!process.env.API_KEY) {
 	throw new Error('Critical error: No API_KEY environment variable defined.');

@@ -19,7 +19,7 @@ const metaPropertiesForCreate = recordName => stripIndents`
 `;
 // ${recordName}._lockedFields = $lockedFields,
 
-const prepareMetadataForNeo4jQuery = metadata => ({
+const prepareMetadataForNeo4jQuery = (metadata = {}) => ({
 	timestamp: new Date().toISOString(),
 	requestId: metadata.requestId || null,
 	clientId: metadata.clientId || null,

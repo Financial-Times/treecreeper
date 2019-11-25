@@ -356,7 +356,7 @@ describe('rest PATCH field-locking', () => {
 					_lockedFields: expect.any(String),
 				});
 			});
-			it('throws 400 when trying to write a field that is locked by another clientId', async () => {
+			it('throws 409 when trying to write a field that is locked by another clientId', async () => {
 				await createNode('MainType', {
 					code: mainCode,
 					_lockedFields: otherLockedSomeString,
@@ -373,7 +373,7 @@ describe('rest PATCH field-locking', () => {
 					_lockedFields: otherLockedSomeString,
 				});
 			});
-			it('throws 400 when trying to lock a field that is locked by another clientId', async () => {
+			it('throws 409 when trying to lock a field that is locked by another clientId', async () => {
 				await createNode('MainType', {
 					code: mainCode,
 					_lockedFields: otherLockedSomeString,
@@ -390,7 +390,7 @@ describe('rest PATCH field-locking', () => {
 					_lockedFields: otherLockedSomeString,
 				});
 			});
-			it('throws 400 when locking all fields, including some that are locked by another clientId', async () => {
+			it('throws 409 when locking all fields, including some that are locked by another clientId', async () => {
 				await createNode('MainType', {
 					code: mainCode,
 					someString: 'some string',

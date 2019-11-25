@@ -1,8 +1,8 @@
 const { stripIndents } = require('common-tags');
 const { getTypes } = require('@financial-times/tc-schema-sdk');
-const { logger } = require('../lib/request-context');
+const { logger } = require('../../../packages/tc-api-express-logger');
 const healthcheck = require('./healthcheck');
-const { executeQuery } = require('../lib/db-connection');
+const { executeQuery } = require('../../../packages/tc-api-db-manager');
 
 const constraintsCheck = async () => {
 	// FIXME: Could this be done better using arr.reduce or map and filter

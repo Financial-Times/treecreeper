@@ -1,4 +1,4 @@
-const { logger } = require('../lib/request-context');
+const { logger } = require('../../../packages/tc-api-express-logger');
 
 // eslint-disable-next-line no-unused-vars
 const errorToErrors = (err, req, res, next) => {

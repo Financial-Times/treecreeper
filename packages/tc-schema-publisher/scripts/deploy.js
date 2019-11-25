@@ -41,7 +41,7 @@ const action = async (...args) => {
 			...schema.rawData.getAll(),
 			version: process.env.CIRCLE_TAG,
 		};
-		await sendSchemaToS3(bucketName, 'latest', schemaObject);
+		await sendSchemaToS3(environment, bucketName, schemaObject);
 		console.log('successfully deployed');
 	} catch (err) {
 		console.error('Failed to deploy');

@@ -1,11 +1,23 @@
-const { DateTime } = require('neo4j-driver/lib/v1/temporal-types.js');
-const { driver } = require('../../server/lib/db-connection');
+const {
+	isDateTime,
+	isDate,
+	isTime,
+	DateTime,
+} = require('neo4j-driver/lib/v1/temporal-types');
+const { driver } = require('../../../test-helpers/db-connection');
 
 const executeQuery = (query, parameters) =>
 	driver.session().run(query, parameters);
-const {
-	convertNeo4jTypes,
-} = require('../../server/routes/rest/lib/neo4j-type-conversion');
+
+const isTemporalType = val => isDateTime(val) || isDate(val) || isTime(val);
+const convertNeo4jTypes = obj => {
+	Object.entries(obj).forEach(([key, val]) => {
+		if (isTemporalType(val)) {
+			obj[key] = val.toString();
+		}
+	});
+	return obj;
+};
 
 const getNodeCreator = (namespace, defaultProps) => async (
 	type,
@@ -135,7 +147,6 @@ const testConnectedNode = async (type, code, props, relationships) => {
 	);
 
 	expect(records.length).toBe(relationships.length);
-
 	expect(convertNeo4jTypes(records[0].get('node').properties)).toEqual(props);
 
 	relationships.forEach(

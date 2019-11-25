@@ -1,8 +1,10 @@
 const { patchHandler } = require('../packages/tc-api-rest-handlers');
 
-const { schemaReady } = require('../api/server/lib/init-schema');
+const schemaSdk = require('../packages/tc-schema-sdk');
 
-schemaReady.then(async () => {
+schemaSdk.init();
+
+schemaSdk.ready().then(async () => {
 	await patchHandler()({
 		type: 'MainType',
 		code: 'main1',

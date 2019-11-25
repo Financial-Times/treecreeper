@@ -3,8 +3,12 @@ const { onChange } = require('@financial-times/tc-schema-sdk');
 const { sendSchemaToS3 } = require('@financial-times/tc-schema-publisher');
 const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
 
-const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
-	let schemaDidUpdate = false;
+const getGraphqlApi = ({
+	documentStore,
+	republishSchema,
+	republishSchemaPrefix = 'api',
+} = {}) => {
+	let schemaDidUpdate;
 	let graphqlHandler;
 
 	const updateAPI = () => {
@@ -15,7 +19,7 @@ const getGraphqlApi = ({ documentStore, republishSchema } = {}) => {
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
 			if (republishSchema) {
-				sendSchemaToS3('api')
+				sendSchemaToS3(republishSchemaPrefix)
 					.then(() => {
 						logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 					})

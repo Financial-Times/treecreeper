@@ -1,11 +1,12 @@
-const app = require('../../server/app.js');
+const createApp = require('../../server/create-app.js');
+
+let app;
 const {
 	setupMocks,
 	verifyExists,
 	verifyNotExists,
 	testNode,
 	stubDbUnavailable,
-	stubS3Unavailable,
 } = require('../helpers');
 
 describe('merge', () => {
@@ -23,12 +24,15 @@ describe('merge', () => {
 		expectations[0] = expectations[0] || 200;
 		return sandbox
 			.request(app)
-			.post('/v2/merge')
+			.post(
+				`/v2/node/${payload.type}/${payload.destinationCode}/absorb/${payload.sourceCode}`,
+			)
 			.namespacedAuth()
-			.send(payload)
 			.expect(...expectations);
 	};
-
+	beforeAll(async () => {
+		app = await createApp();
+	});
 	describe('error handling', () => {
 		beforeEach(() =>
 			sandbox.createNodes(
@@ -47,78 +51,8 @@ describe('merge', () => {
 				},
 				500,
 			);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 
-		it('responds with 500 if s3 query fails', async () => {
-			stubS3Unavailable(sandbox);
-			await testMergeRequest(
-				{
-					type: 'MainType',
-					sourceCode: mainCode1,
-					destinationCode: mainCode2,
-				},
-				500,
-			);
-			await Promise.all([
-				verifyExists('MainType', mainCode1),
-				verifyExists('MainType', mainCode2),
-			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
-		});
-
-		it('errors if no type supplied', async () => {
-			await testMergeRequest(
-				{
-					sourceCode: mainCode1,
-					destinationCode: mainCode2,
-				},
-				400,
-				/No type/,
-			);
-
-			await Promise.all([
-				verifyExists('MainType', mainCode1),
-				verifyExists('MainType', mainCode2),
-			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
-		});
-
-		it('errors if no source code supplied', async () => {
-			await testMergeRequest(
-				{
-					type: 'MainType',
-					destinationCode: mainCode2,
-				},
-				400,
-				/No sourceCode/,
-			);
-			await Promise.all([
-				verifyExists('MainType', mainCode1),
-				verifyExists('MainType', mainCode2),
-			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
-		});
-		it('errors if no destination code supplied', async () => {
-			await testMergeRequest(
-				{
-					type: 'MainType',
-					sourceCode: mainCode1,
-				},
-				400,
-				/No destinationCode/,
-			);
-			await Promise.all([
-				verifyExists('MainType', mainCode1),
-				verifyExists('MainType', mainCode2),
-			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
-		});
 		it('errors if type invalid', async () => {
 			await testMergeRequest(
 				{
@@ -133,8 +67,6 @@ describe('merge', () => {
 				verifyExists('MainType', mainCode1),
 				verifyExists('MainType', mainCode2),
 			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 
 		it('errors if source code does not exist', async () => {
@@ -151,8 +83,6 @@ describe('merge', () => {
 				verifyExists('MainType', mainCode1),
 				verifyExists('MainType', mainCode2),
 			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 		it('errors if destination code does not exist', async () => {
 			await testMergeRequest(
@@ -168,8 +98,6 @@ describe('merge', () => {
 				verifyExists('MainType', mainCode1),
 				verifyExists('MainType', mainCode2),
 			]);
-			expect(sandbox.stubSendEvent).not.toHaveBeenCalled();
-			sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
 		});
 	});
 	describe('successful application', () => {
@@ -189,11 +117,9 @@ describe('merge', () => {
 					verifyNotExists('MainType', mainCode1),
 					verifyExists('MainType', mainCode2),
 				]);
-				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('merges ordinary properties', async () => {
-				sandbox.setS3Responses({ merge: {} });
 				await sandbox.createNodes(
 					[
 						'MainType',
@@ -224,47 +150,6 @@ describe('merge', () => {
 						anotherString: 'A Third Fake String',
 					}),
 				);
-				sandbox.expectNoS3Actions('upload', 'patch', 'delete', 'merge');
-			});
-
-			it('merges document properties', async () => {
-				await sandbox.createNodes(
-					[
-						'MainType',
-
-						{
-							code: mainCode1,
-							someDocument: 'Fake Document',
-							anotherDocument: 'Another Fake Document',
-						},
-					],
-					[
-						'MainType',
-						{
-							code: mainCode2,
-							anotherDocument: 'A Third Fake Document',
-						},
-					],
-				);
-				await testMergeRequest(
-					{
-						type: 'MainType',
-						sourceCode: mainCode1,
-						destinationCode: mainCode2,
-					},
-					200,
-					sandbox.withUpdateMeta({
-						code: mainCode2,
-						someDocument: 'Fake Document',
-						anotherDocument: 'A Third Fake Document',
-					}),
-				);
-				sandbox.expectS3Actions({
-					action: 'merge',
-					nodeType: 'MainType',
-					sourceCode: mainCode1,
-					destinationCode: mainCode2,
-				});
 			});
 
 			it("doesn't error when unrecognised properties exist", async () => {
@@ -291,7 +176,6 @@ describe('merge', () => {
 						notInSchema: 'someVal',
 					}),
 				);
-				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('not modify existing properties of destination node', async () => {
@@ -312,8 +196,6 @@ describe('merge', () => {
 						someString: 'tomato',
 					}),
 				);
-
-				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('add new properties to destination node', async () => {
@@ -333,11 +215,6 @@ describe('merge', () => {
 						code: mainCode2,
 						someString: 'potato',
 					}),
-				);
-
-				sandbox.expectKinesisEvents(
-					['DELETE', mainCode1, 'MainType'],
-					['UPDATE', mainCode2, 'MainType', ['someString']],
 				);
 			});
 		});
@@ -377,12 +254,6 @@ describe('merge', () => {
 						},
 					],
 				);
-
-				sandbox.expectKinesisEvents(
-					['DELETE', mainCode1, 'MainType'],
-					['UPDATE', mainCode2, 'MainType', ['children']],
-					['UPDATE', childCode, 'ChildType', ['isChildOf']],
-				);
 			});
 
 			it('move incoming relationships', async () => {
@@ -418,12 +289,6 @@ describe('merge', () => {
 							props: sandbox.withMeta({ code: parentCode }),
 						},
 					],
-				);
-
-				sandbox.expectKinesisEvents(
-					['DELETE', mainCode1, 'MainType'],
-					['UPDATE', mainCode2, 'MainType', ['parents']],
-					['UPDATE', parentCode, 'ParentType', ['isParentOf']],
 				);
 			});
 
@@ -464,7 +329,6 @@ describe('merge', () => {
 						},
 					],
 				);
-				sandbox.expectKinesisEvents(['DELETE', mainCode1, 'MainType']);
 			});
 
 			it('discard any newly reflexive relationships', async () => {
@@ -487,10 +351,6 @@ describe('merge', () => {
 					sandbox.withMeta({
 						code: mainCode2,
 					}),
-				);
-				sandbox.expectKinesisEvents(
-					['UPDATE', mainCode2, 'MainType', ['olderSiblings']],
-					['DELETE', mainCode1, 'MainType'],
 				);
 			});
 
@@ -538,15 +398,6 @@ describe('merge', () => {
 							}),
 						},
 					],
-				);
-				sandbox.expectKinesisEvents(
-					[
-						'UPDATE',
-						`${namespace}-child1`,
-						'ChildType',
-						['isFavouriteChildOf'],
-					],
-					['DELETE', `${namespace}-main1`, 'MainType'],
 				);
 			});
 		});
