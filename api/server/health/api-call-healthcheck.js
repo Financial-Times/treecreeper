@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { logger } = require('../lib/request-context');
+const { logger } = require('../../../packages/tc-api-express-logger');
 
 module.exports = async ({ headers, url, type }) => {
 	try {

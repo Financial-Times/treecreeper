@@ -1,5 +1,5 @@
-const { logger } = require('../lib/request-context');
-const { executeQuery } = require('../lib/db-connection');
+const { logger } = require('../../../packages/tc-api-express-logger');
+const { executeQuery } = require('../../../packages/tc-api-db-manager');
 const healthcheck = require('./healthcheck');
 
 const runQueryCheck = async () => {
