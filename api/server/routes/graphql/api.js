@@ -45,13 +45,8 @@ onChange(updateAPI);
 
 module.exports = router => {
 	router.use(timeout(TIMEOUT));
-	router.use((req, res, next) => {
-		if (req.get('client-id')) {
-			return clientId(req, res, next);
-		}
-		next();
-	});
-	router.use(security.requireApiKeyOrS3o);
+	router.use(clientId);
+	router.use(security.requireApiKey);
 	router.use(maintenance.disableReads);
 	router.use([
 		bodyParser.json({ limit: '8mb' }),

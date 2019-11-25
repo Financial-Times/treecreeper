@@ -11,6 +11,11 @@ const errorToErrors = (err, req, res, next) => {
 		logger.error({ error: err });
 		err = { status: 500, message: err.toString() };
 	}
+	if (req.method === 'HEAD') {
+		const message = err.message.replace(/\n/g, ' ');
+		res.set('Debug-Error', message);
+		return res.status(err.status).end();
+	}
 	return res.status(err.status).json({ errors: [{ message: err.message }] });
 };
 

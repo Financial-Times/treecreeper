@@ -28,7 +28,7 @@ module.exports.setSalesforceIdForSystem = async (
 		return;
 	}
 	try {
-		const salesforceName = (name || code).substr(0, 80);
+		const salesforceName = (name || code).slice(0, 80);
 		const conn = await login();
 		const { id: newSalesforceId } = await conn
 			.sobject('BMCServiceDesk__BMC_BaseElement__c')
@@ -36,7 +36,7 @@ module.exports.setSalesforceIdForSystem = async (
 				Name: salesforceName,
 				BMCServiceDesk__Name__c: salesforceName,
 				BMCServiceDesk__TokenId__c: salesforceName,
-				System_Code__c: code.substr(0, 48),
+				System_Code__c: code.slice(0, 48),
 				RecordTypeId: '012D0000000Qn40IAC', // this is the id for the 'System' type
 				BMCServiceDesk__Description__c: `See https://dewey.in.ft.com/view/system/${code}`,
 			});

@@ -66,7 +66,6 @@ const controller = (endpointName, method, controllerImplementation) => (
 };
 
 const headHandler = require('./node/head');
-const getHandler = require('./node/get');
 const postHandler = require('./node/post');
 const patchHandler = require('./node/patch');
 const deleteHandler = require('./node/delete');
@@ -84,9 +83,9 @@ module.exports = router => {
 	router
 		.route('/node/:nodeType/:code')
 		.head(controller('node', 'HEAD', headHandler))
-		.get(controller('node', 'GET', getHandler))
+		.get(unimplemented('node', 'GET', 'HEAD or the /graphql endpoint'))
 		.post(controller('node', 'POST', postHandler))
-		.put(unimplemented('PUT', 'PATCH'))
+		.put(unimplemented('node', 'PUT', 'PATCH'))
 		.patch(controller('node', 'PATCH', patchHandler))
 		.delete(controller('node', 'DELETE', deleteHandler));
 

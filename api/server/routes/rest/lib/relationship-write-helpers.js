@@ -27,20 +27,20 @@ const relationshipFragmentWithEndNodes = (
 
 const locateRelatedNodes = ({ type }, key, upsert) => {
 	if (upsert) {
-		return `
-UNWIND $${key} as nodeCodes
-MERGE (related:${type} {code: nodeCodes} )
-	ON CREATE SET ${metaPropertiesForCreate('related')}
-`;
+		return stripIndents`
+			UNWIND $${key} as nodeCodes
+			MERGE (related:${type} {code: nodeCodes} )
+				ON CREATE SET ${metaPropertiesForCreate('related')}
+		`;
 	}
 	// Uses OPTIONAL MATCH when trying to match a node as it returns [null]
 	// rather than [] if the node doesn't exist
 	// This means the next line tries to create a relationship pointing
 	// at null, so we get an informative error
-	return `
-OPTIONAL MATCH (related:${type})
-WHERE related.code IN $${key}
-`;
+	return stripIndents`
+		OPTIONAL MATCH (related:${type})
+		WHERE related.code IN $${key}
+	`;
 };
 
 const prepareToWriteRelationships = (
@@ -70,10 +70,7 @@ const prepareToWriteRelationships = (
 			WITH node
 			${locateRelatedNodes(propDef, key, upsert)}
 			WITH node, related
-			MERGE (node)${relationshipFragment(
-				propDef.relationship,
-				propDef.direction,
-			)}(related)
+			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
 		`,
 		);

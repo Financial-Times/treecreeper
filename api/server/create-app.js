@@ -1,7 +1,6 @@
 const express = require('express');
 require('express-async-errors');
 const metrics = require('next-metrics');
-const graphiql = require('./routes/graphql/graphiql');
 const graphql = require('./routes/graphql/api');
 const v2 = require('./routes/rest/v2');
 const health = require('./health');
@@ -13,8 +12,6 @@ const {
 	notFound,
 	uncaughtError,
 } = require('./middleware/errors');
-
-const ONE_HOUR = 60 * 60 * 1000;
 
 const createApp = () => {
 	const app = express();
@@ -40,15 +37,6 @@ const createApp = () => {
 	app.use(contextMiddleware);
 	app.use(requestId);
 	app.set('case sensitive routing', true);
-	app.set('s3o-cookie-ttl', ONE_HOUR);
-
-	app.use('/graphiql', graphiql(new express.Router()));
-
-	// Redirect legacy graphql url
-	app.use('/api/graphql', (req, res) => {
-		res.redirect('/graphql');
-	});
-
 	app.use('/graphql', graphql(new express.Router()));
 	app.use('/v2', v2(new express.Router()));
 

@@ -892,15 +892,15 @@ describe('v2 - node PATCH', () => {
 							sandbox.expectKinesisEvents(
 								[
 									'UPDATE',
-									`${mainCode}-3`,
-									'MainType',
-									['olderSiblings'],
-								],
-								[
-									'UPDATE',
 									`${mainCode}-2`,
 									'MainType',
 									['youngerSiblings'],
+								],
+								[
+									'UPDATE',
+									`${mainCode}-3`,
+									'MainType',
+									['olderSiblings'],
 								],
 							);
 							sandbox.expectNoS3Actions(
@@ -957,13 +957,13 @@ describe('v2 - node PATCH', () => {
 								['UPDATE', mainCode, 'MainType', ['children']],
 								[
 									'UPDATE',
-									`${childCode}-1`,
+									`${childCode}-2`,
 									'ChildType',
 									['isChildOf'],
 								],
 								[
 									'UPDATE',
-									`${childCode}-2`,
+									`${childCode}-1`,
 									'ChildType',
 									['isChildOf'],
 								],
@@ -1479,13 +1479,13 @@ describe('v2 - node PATCH', () => {
 							],
 							[
 								'UPDATE',
-								`${childCode}-1`,
+								`${childCode}-2`,
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
 							[
 								'UPDATE',
-								`${childCode}-2`,
+								`${childCode}-1`,
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
@@ -1542,17 +1542,16 @@ describe('v2 - node PATCH', () => {
 						sandbox.expectKinesisEvents(
 							[
 								'UPDATE',
-								mainCode,
-								'MainType',
-								['favouriteChild'],
-							],
-							[
-								'UPDATE',
 								`${childCode}-2`,
 								'ChildType',
 								['isFavouriteChildOf'],
 							],
-							// TODO: log deletion of the relationship with the first child
+							[
+								'UPDATE',
+								mainCode,
+								'MainType',
+								['favouriteChild'],
+							],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1614,13 +1613,13 @@ describe('v2 - node PATCH', () => {
 						);
 
 						sandbox.expectKinesisEvents(
-							['UPDATE', mainCode, 'MainType', ['children']],
 							[
 								'UPDATE',
 								`${childCode}-2`,
 								'ChildType',
 								['isChildOf'],
 							],
+							['UPDATE', mainCode, 'MainType', ['children']],
 						);
 						sandbox.expectNoS3Actions('upload', 'delete', 'patch');
 					});
@@ -1826,13 +1825,13 @@ describe('v2 - node PATCH', () => {
 						['UPDATE', mainCode, 'MainType', ['children']],
 						[
 							'UPDATE',
-							`${childCode}-1`,
+							`${childCode}-2`,
 							'ChildType',
 							['isChildOf'],
 						],
 						[
 							'UPDATE',
-							`${childCode}-2`,
+							`${childCode}-1`,
 							'ChildType',
 							['isChildOf'],
 						],
@@ -1997,16 +1996,17 @@ describe('v2 - node PATCH', () => {
 					sandbox.expectKinesisEvents(
 						[
 							'UPDATE',
-							`${mainCode}-1`,
+							`${mainCode}-2`,
 							'MainType',
 							['olderSiblings', 'youngerSiblings'],
 						],
 						[
 							'UPDATE',
-							`${mainCode}-2`,
+							`${mainCode}-1`,
 							'MainType',
 							['olderSiblings', 'youngerSiblings'],
 						],
+
 						[
 							'UPDATE',
 							`${mainCode}-3`,
