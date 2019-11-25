@@ -60,6 +60,9 @@ test-pkg:
 test-schema:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 
+test-schema-sdk:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/tc-schema-sdk/data-accessors/__tests__/.*.spec.js" --testEnvironment=node --watch; \
+
 test-api:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 

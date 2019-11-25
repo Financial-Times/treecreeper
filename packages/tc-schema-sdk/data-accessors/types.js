@@ -15,7 +15,7 @@ module.exports = {
 			return [].concat(
 				...Object.values(hierarchy).map(({ types, relationships }) =>
 					types
-						.concat(relationships)
+						.concat(relationships || [])
 						.map(name => this.getType(name, options)),
 				),
 			);
@@ -27,7 +27,7 @@ module.exports = {
 				[categoryName, { label, description, types, relationships }],
 			) => {
 				types = types
-					.concat(relationships)
+					.concat(relationships || [])
 					.map(name => this.getType(name, options));
 				return Object.assign(result, {
 					[categoryName]: { label, description, types },
