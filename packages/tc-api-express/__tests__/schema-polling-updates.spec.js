@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
 const schemaPublisher = require('@financial-times/tc-schema-publisher');
 const request = require('supertest');
-const { getSchemaFilename } = require('@financial-times/tc-schema-file-name');
 const { getApp } = require('..');
 
 jest.useFakeTimers();
@@ -20,39 +19,32 @@ describe('schema polling updates', () => {
 			schemaPublisher.sendSchemaToS3.mockResolvedValue(true);
 			fetch.config.fallbackToNetwork = false;
 			fetch
-				.getOnce(
-					`${
-						process.env.TREECREEPER_SCHEMA_URL
-					}/${getSchemaFilename()}`,
-					{
-						version: 'not-null',
-						schema: {
-							types: [
-								{
-									name: 'OldTestType',
-									description: 'A test type.',
-									properties: {
-										code: {
-											type: 'Code',
-											description: 'The code.',
-											canIdentify: true,
-										},
-										testProp: {
-											type: 'Paragraph',
-											description: 'A test property.',
-										},
+				.getOnce(`${process.env.TREECREEPER_SCHEMA_URL}/schema.json`, {
+					version: 'not-null',
+					schema: {
+						types: [
+							{
+								name: 'OldTestType',
+								description: 'A test type.',
+								properties: {
+									code: {
+										type: 'Code',
+										description: 'The code.',
+										canIdentify: true,
+									},
+									testProp: {
+										type: 'Paragraph',
+										description: 'A test property.',
 									},
 								},
-							],
-							enums: {},
-							stringPatterns: {},
-						},
+							},
+						],
+						enums: {},
+						stringPatterns: {},
 					},
-				)
+				})
 				.getOnce(
-					`${
-						process.env.TREECREEPER_SCHEMA_URL
-					}/${getSchemaFilename()}`,
+					`${process.env.TREECREEPER_SCHEMA_URL}/schema.json`,
 					{
 						version: 'new-test',
 						schema: {
@@ -137,9 +129,7 @@ describe('schema polling updates', () => {
 
 				fetch
 					.getOnce(
-						`${
-							process.env.TREECREEPER_SCHEMA_URL
-						}/${getSchemaFilename()}`,
+						`${process.env.TREECREEPER_SCHEMA_URL}/schema.json`,
 						{
 							version: 'new-test2',
 							schema: {

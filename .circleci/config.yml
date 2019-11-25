@@ -6,7 +6,7 @@ orbs:
 references:
 
   default_container_config: &default_container_config
-    working_directory: ~/biz-ops-api
+    working_directory: ~/treecreeper
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
       - image: circleci/node:10.15.3-browsers
@@ -23,13 +23,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v1-dependency-npm-{{ checksum "package.json" }}-
-        - v1-dependency-npm-{{ checksum "package.json" }}
-        - v1-dependency-npm-
+        - v2-dependency-npm-{{ checksum "package.json" }}-
+        - v2-dependency-npm-{{ checksum "package.json" }}
+        - v2-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v1-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v2-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
@@ -60,7 +60,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - biz-ops-api
+            - treecreeper
 
   test:
     <<: *default_container_config
