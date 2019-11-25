@@ -151,7 +151,7 @@ const testSuite = (method, goodStatus) => {
 							expect(headers['debug-error']).toEqual(message);
 					  })
 					: res.expect(status, {
-							errors: [{ message: `Error: ${message}` }],
+							errors: [{ message }],
 					  });
 
 			it('must respond with expected errors accordingly', async () => {
@@ -172,7 +172,7 @@ const testSuite = (method, goodStatus) => {
 					.set('client-user-id', 'test-user-id')
 					.set('request-id', 'test-request-id');
 
-				await expectError(res, 500, 'hahaha');
+				await expectError(res, 500, 'Error: hahaha');
 			});
 		});
 	});
