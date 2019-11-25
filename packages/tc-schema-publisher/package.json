@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@financial-times/tc-schema-file-name": "file:../tc-schema-file-name",
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "aws-sdk": "^2.564.0",
     "commander": "^4.0.1",

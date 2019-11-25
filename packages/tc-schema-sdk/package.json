@@ -7,7 +7,6 @@
   "license": "ISC",
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
-    "@financial-times/tc-schema-file-name": "file:../tc-schema-file-name",
     "clone": "^2.1.2",
     "common-tags": "^1.8.0",
     "deep-freeze": "0.0.1",
