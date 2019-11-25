@@ -28,7 +28,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
 	it('fetches when ready method called', async () => {
@@ -37,7 +37,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		let isPending = true;
 		schema.ready().then(() => {
 			isPending = false;
@@ -55,7 +55,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		schema.ready();
 		await fetch.flush();
 		fetch.resetHistory();
@@ -75,7 +75,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'stale',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		schema.ready();
 		await fetch.flush();
 		fetch.resetHistory();
@@ -99,10 +99,12 @@ describe('refreshing schema when stale', () => {
 				updateMode: 'stale',
 			});
 
-			schema.version = 'v0.9.10';
+			schema.version = 'some-hash';
 			const listener = jest.fn();
 			schema.on('change', listener);
-			fetch.mock('https://base.url/v0.json', { version: 'v0.9.10' });
+			fetch.mock('https://base.url/schema.json', {
+				version: 'some-hash',
+			});
 			schema.ready();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
@@ -117,7 +119,7 @@ describe('refreshing schema when stale', () => {
 			const listener = jest.fn();
 			schema.on('change', listener);
 			const data = {
-				version: 'v0.9.10',
+				version: 'some-hash',
 				schema: {
 					types: [
 						{
@@ -126,11 +128,11 @@ describe('refreshing schema when stale', () => {
 					],
 				},
 			};
-			fetch.mock('https://base.url/v0.json', data);
+			fetch.mock('https://base.url/schema.json', data);
 			schema.ready();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalledWith({
-				newVersion: 'v0.9.10',
+				newVersion: 'some-hash',
 				oldVersion: undefined,
 			});
 		});

@@ -29,7 +29,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'poll',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		expect(fetch.called()).toBe(false);
 	});
 	it('fetches when startPolling method called', async () => {
@@ -38,7 +38,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'poll',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		let isPending = true;
 		schema.startPolling().then(() => {
 			isPending = false;
@@ -57,7 +57,7 @@ describe('refreshing schema when stale', () => {
 			schemaBaseUrl: 'https://base.url',
 			updateMode: 'poll',
 		});
-		fetch.mock('https://base.url/v0.json', { result: true });
+		fetch.mock('https://base.url/schema.json', { result: true });
 		schema.startPolling();
 		await fetch.flush();
 		fetch.resetHistory();
@@ -73,10 +73,12 @@ describe('refreshing schema when stale', () => {
 				schemaBaseUrl: 'https://base.url',
 				updateMode: 'poll',
 			});
-			schema.version = 'v0.9.10';
+			schema.version = 'some-hash';
 			const listener = jest.fn();
 			schema.on('change', listener);
-			fetch.mock('https://base.url/v0.json', { version: 'v0.9.10' });
+			fetch.mock('https://base.url/schema.json', {
+				version: 'some-hash',
+			});
 			schema.startPolling();
 			await fetch.flush();
 			expect(listener).not.toHaveBeenCalled();
@@ -92,7 +94,7 @@ describe('refreshing schema when stale', () => {
 			const listener = jest.fn();
 			schema.on('change', listener);
 			const data = {
-				version: 'v0.9.10',
+				version: 'some-hash',
 				schema: {
 					types: [
 						{
@@ -101,11 +103,11 @@ describe('refreshing schema when stale', () => {
 					],
 				},
 			};
-			fetch.mock('https://base.url/v0.json', data);
+			fetch.mock('https://base.url/schema.json', data);
 			schema.startPolling();
 			await fetch.flush();
 			expect(listener).toHaveBeenCalledWith({
-				newVersion: 'v0.9.10',
+				newVersion: 'some-hash',
 				oldVersion: undefined,
 			});
 			schema.stopPolling();
