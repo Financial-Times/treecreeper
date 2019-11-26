@@ -39,21 +39,20 @@ describe('graphql def creation', () => {
 							description: 'The name of the cost centre',
 						},
 						hasGroups: {
-							type: 'Group',
-							relationship: 'PAYS_FOR',
-							direction: 'outgoing',
-							hasMany: true,
+							type: 'PaysFor',
 							description:
 								'The groups which are costed to the cost centre',
 						},
-						hasNestedGroups: {
-							type: 'Group',
-							hasMany: true,
-							cypher:
-								'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
-							description:
-								'The recursive groups which are costed to the cost centre',
-						},
+						// At the moment, we don't support raw cypher query
+						// When we start to support, below tests must be passed.
+						// hasNestedGroups: {
+						// 	type: 'Group',
+						// 	hasMany: true,
+						// 	cypher:
+						// 		'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
+						// 	description:
+						// 		'The recursive groups which are costed to the cost centre',
+						// },
 					},
 				},
 				{
@@ -80,12 +79,22 @@ describe('graphql def creation', () => {
 								'Whether or not the group is still in existence',
 						},
 						hasBudget: {
-							type: 'CostCentre',
-							relationship: 'PAYS_FOR',
-							direction: 'incoming',
+							type: 'PaysFor',
 							description:
 								'The Cost Centre associated with the group',
 						},
+					},
+				},
+				{
+					name: 'PaysFor',
+					relationship: 'PAYS_FOR',
+					from: {
+						type: 'CostCentre',
+						hasMany: false,
+					},
+					to: {
+						type: 'Group',
+						hasMany: true,
 					},
 				},
 			],
@@ -134,11 +143,6 @@ name: String
 The groups which are costed to the cost centre
 """
 hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
-"""
-The recursive groups which are costed to the cost centre
-"""
-hasNestedGroups(first: Int, offset: Int): [Group] @cypher(statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related")
-
 """
 The client that was used to make the creation
 """
@@ -446,13 +450,23 @@ Green
 						description: 'Fake type description',
 						properties: {
 							prop: {
-								type: 'Fake',
+								type: 'FakeRel',
 								deprecationReason: 'not needed',
 								description: 'a description',
-								relationship: 'HAS',
-								direction: 'outgoing',
-								hasMany: true,
+								direction: 'from',
 							},
+						},
+					},
+					{
+						name: 'FakeRel',
+						relationship: 'HAS',
+						from: {
+							type: 'Fake',
+							hasMany: true,
+						},
+						to: {
+							type: 'Fake',
+							hasMany: true,
 						},
 					},
 				],

@@ -8,3 +8,6 @@ properties:
 from:
   type: MainType
   hasMany: true
+to:
+  type: MainType
+  hasMany: true

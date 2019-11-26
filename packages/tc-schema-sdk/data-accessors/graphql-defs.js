@@ -26,6 +26,8 @@ ${description}
 ${content}
 `;
 
+const formatDirection = direction => (direction === 'from' ? 'OUT' : 'IN');
+
 /*
 	Outputting property definitions
 */
@@ -69,20 +71,24 @@ const printPropertyDefinition = ({
 		`${name}${pagination}: ${type} ${directive} ${deprecation}`,
 	);
 
-const getRelationship = (relType, name) => {
+const getRelationship = (relType, name, explicitDirection) => {
 	const { from = {}, to = {}, relationship } = relType;
 	let type;
 	let hasMany;
 	let direction;
 
 	if (from.type === name) {
-		type = from.type || to.type;
-		hasMany = !!from.hasMany;
-		direction = 'IN';
+		type = to.type;
+		hasMany = to.hasMany;
+		direction = explicitDirection
+			? formatDirection(explicitDirection)
+			: 'OUT';
 	} else {
-		type = to.type || from.type;
-		hasMany = !!to.hasMany;
-		direction = 'OUT';
+		type = from.type;
+		hasMany = from.hasMany;
+		direction = explicitDirection
+			? formatDirection(explicitDirection)
+			: 'IN';
 	}
 	return {
 		type,
@@ -100,6 +106,7 @@ const printRichRelationshipModel = (types, name, [propName, def]) => {
 	const { type, relationship, hasMany, direction } = getRelationship(
 		relType,
 		name,
+		def.direction,
 	);
 
 	return {
@@ -139,6 +146,24 @@ const printPropertyDefinitions = (types, name, properties) => {
 	Outputting rich relationships
 */
 
+const snakeToCamel = str => {
+	const camel = str
+		.split('_')
+		.map(
+			word =>
+				word.charAt(0).toUpperCase() + word.substring(1).toLowerCase(),
+		)
+		.join('');
+	return camel;
+};
+
+const getRichRelationshipTypeName = (from, relationship, to) =>
+	[
+		snakeToCamel(from.toUpperCase()),
+		relationship,
+		snakeToCamel(to.toUpperCase()),
+	].join('');
+
 const buildRelationshipTypeModel = ({
 	from = {},
 	to = {},
@@ -146,8 +171,8 @@ const buildRelationshipTypeModel = ({
 	name,
 	properties = {},
 }) => ({
-	from: from.type || to.type,
-	to: to.type || from.type,
+	from: from.type,
+	to: to.type,
 	relationship,
 	name,
 	properties,
@@ -157,11 +182,15 @@ const buildRichRelationshipPropertyModel = (types, name) => ([
 	propName,
 	propDef,
 ]) => {
-	const relType = types.find(type => type.name === propDef.type);
+	const relType = types.find(
+		type => type.name === propDef.type && 'relationship' in type,
+	);
 	if (!relType) {
 		return;
 	}
-	const { hasMany } = getRelationship(relType, name);
+	const { hasMany } = getRelationship(relType, name, propDef.direction);
+	const { from, to } = relType;
+	const type = getRichRelationshipTypeName(from.type, relType.name, to.type);
 
 	return {
 		description: stripEmptyFirstLine`
@@ -170,7 +199,7 @@ const buildRichRelationshipPropertyModel = (types, name) => ([
 		as well as on the records themselves. Use '${propName}' instead if you do not need this*`,
 		name: `${propName}REL`,
 		pagination: maybePaginate({ hasMany }),
-		type: maybePluralType({ type: relType.name, hasMany }),
+		type: maybePluralType({ type, hasMany }),
 		deprecation: maybeDeprecate(propDef),
 		directive: '',
 	};
@@ -186,16 +215,29 @@ const printRichRelationshipPropertyDefinitions = (types, name, properties) =>
 const printRelationshipTypeDefinition = (
 	types,
 	{ from, to, name, relationship, properties },
-) =>
-	printDescribedBlock(
+) => {
+	const type = getRichRelationshipTypeName(from, name, to);
+	let propDefString = '';
+	// Property always includes meta properties,
+	// but if relationship doesn't have any user specified property, prevent to print definition
+	if (Object.keys(properties).find(key => !key.startsWith('_'))) {
+		propDefString = indentMultiline(
+			printPropertyDefinitions(types, name, properties),
+			4,
+			true,
+		);
+	}
+
+	return printDescribedBlock(
 		'Internal use only',
 		stripIndent`
-	type ${name} @relation(name: ${relationship}) {
+	type ${type} @relation(name: ${relationship}) {
 		from: ${from}
 		to: ${to}
-		${indentMultiline(printPropertyDefinitions(types, name, properties), 4, true)}
+		${propDefString}
 	}`,
 	);
+};
 
 const printRelationshipTypeDefinitions = types => {
 	const relationshipTypes = types.filter(

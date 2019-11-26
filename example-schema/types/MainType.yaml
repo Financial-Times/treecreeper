@@ -64,17 +64,25 @@ properties:
     label: Favourite label
   youngerSiblings:
     type: HasYoungerSibling
+    direction: from
     description: Parents description.
     label: Parents label
   olderSiblings:
-    type: HasOlderSibling
+    type: HasYoungerSibling
+    direction: to
     description: Parents description.
     label: Parents label
   relatedChildren:
     type: RelatedWithProperties
     description: RelatedWithProperties description.
     label: RelatedWithProperties label
-  relatedToSelf:
+  relatedToSelfFrom:
     type: RelatedToSelfWithProperties
+    direction: from
+    description: RelatedToSelfWithProperties description.
+    label: RelatedToSelfWithProperties label
+  relatedToSelfTo:
+    type: RelatedToSelfWithProperties
+    direction: to
     description: RelatedToSelfWithProperties description.
     label: RelatedToSelfWithProperties label

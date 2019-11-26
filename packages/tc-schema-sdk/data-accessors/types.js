@@ -13,22 +13,15 @@ module.exports = {
 
 		if (!grouped) {
 			return [].concat(
-				...Object.values(hierarchy).map(({ types, relationships }) =>
-					types
-						.concat(relationships || [])
-						.map(name => this.getType(name, options)),
+				...Object.values(hierarchy).map(({ types }) =>
+					types.map(name => this.getType(name, options)),
 				),
 			);
 		}
 
 		return Object.entries(hierarchy).reduce(
-			(
-				result,
-				[categoryName, { label, description, types, relationships }],
-			) => {
-				types = types
-					.concat(relationships || [])
-					.map(name => this.getType(name, options));
+			(result, [categoryName, { label, description, types }]) => {
+				types = types.map(name => this.getType(name, options));
 				return Object.assign(result, {
 					[categoryName]: { label, description, types },
 				});

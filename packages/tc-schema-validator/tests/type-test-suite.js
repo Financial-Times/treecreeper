@@ -90,6 +90,14 @@ const propertyTestSuite = ({ typeNames, properties, fieldsets }) => {
 				}
 			});
 
+			it('has valid direction', () => {
+				if (config.direction) {
+					expect(config.direction).toEqual(
+						expect.arrayContaining(['from', 'to']),
+					);
+				}
+			});
+
 			if (!typeNames.includes(config.type)) {
 				describe('direct property', () => {
 					// tests for direct properties
@@ -278,6 +286,18 @@ const relationshipTestSuite = (types, type) => {
 				);
 			});
 		});
+		it('has from direction', () => {
+			expect(type.from).toMatchObject({
+				type: expect.any(String),
+				hasMany: expect.any(Boolean),
+			});
+		});
+		it('has to direction', () => {
+			expect(type.to).toMatchObject({
+				type: expect.any(String),
+				hasMany: expect.any(Boolean),
+			});
+		});
 		it('has a name', () => {
 			expect(typeof type.name).toBe('string');
 		});
@@ -295,83 +315,51 @@ const relationshipTestSuite = (types, type) => {
 			properties,
 		});
 
-		if (from) {
-			describe('from', () => {
+		describe('from', () => {
+			it('has existing from type', () => {
 				const fromType = types.find(t => t.name === from.type);
-				it('has an exact from relationship', () => {
-					expect(type.from).toMatchObject({
-						type: expect.any(String),
-						hasMany: expect.any(Boolean),
-					});
-				});
-				it('has existing type', () => {
-					expect(fromType).toBeDefined();
-					// assert the relationship node doesn't have more relationship
-					expect(isRichRelationshipType(fromType)).toBe(false);
-				});
-
-				if (!to) {
-					// If the relationship doesn't have `to` property, it means single direction.
-					// we need to validate if the relationship is ended properly
-					it('must defined end of realtionship property at same type', () => {
-						const outType = Object.values(fromType.properties).find(
-							propValue => {
-								const relType = types.find(
-									t => t.name === propValue.type,
-								);
-								return (
-									relType &&
-									relType.relationship ===
-										type.relationship &&
-									!('from' in relType) &&
-									'to' in relType
-								);
-							},
-						);
-						expect(outType).toBeDefined();
-					});
+				expect(fromType).toBeDefined();
+				// assert the relationship node doesn't have more relationship
+				expect(isRichRelationshipType(fromType)).toBe(false);
+			});
+			it('relationship must be closed', () => {
+				const endType = types.find(t => t.name === to.type);
+				const propExists = Object.values(endType.properties).filter(
+					prop => prop.type === type.name,
+				);
+				expect(propExists.length).toBeGreaterThan(0);
+				// If from and to type are the same, we should validate direction
+				if (from.type === to.type) {
+					const closeRel = propExists.find(
+						prop => prop.direction === 'to',
+					);
+					expect(closeRel).toBeDefined();
 				}
 			});
-		}
+		});
 
-		if (to) {
-			describe('to', () => {
+		describe('to', () => {
+			it('has existing to type', () => {
 				const toType = types.find(t => t.name === to.type);
-				it('has an exact to relationship', () => {
-					expect(type.to).toMatchObject({
-						type: expect.any(String),
-						hasMany: expect.any(Boolean),
-					});
-				});
-				it('has existing type', () => {
-					expect(toType).toBeDefined();
-					// assert the relationship node doesn't have more relationship
-					expect(isRichRelationshipType(toType)).toBe(false);
-				});
-
-				if (!from) {
-					// If the relationship doesn't have `from` property, it means single direction
-					// we need to validate if the relationship is entered properly
-					it('must defined end of realtionship property at same type', () => {
-						const enterType = Object.values(toType.properties).find(
-							propValue => {
-								const relType = types.find(
-									t => t.name === propValue.type,
-								);
-								return (
-									relType &&
-									relType.relationship ===
-										type.relationship &&
-									!('to' in relType) &&
-									'from' in relType
-								);
-							},
-						);
-						expect(enterType).toBeDefined();
-					});
+				expect(toType).toBeDefined();
+				// assert the relationship node doesn't have more relationship
+				expect(isRichRelationshipType(toType)).toBe(false);
+			});
+			it('relationship must be closed', () => {
+				const endType = types.find(t => t.name === from.type);
+				const propExists = Object.values(endType.properties).filter(
+					prop => prop.type === type.name,
+				);
+				expect(propExists.length).toBeGreaterThan(0);
+				// If from and to type are the same, we should validate direction
+				if (from.type === to.type) {
+					const closeRel = propExists.find(
+						prop => prop.direction === 'from',
+					);
+					expect(closeRel).toBeDefined();
 				}
 			});
-		}
+		});
 	});
 };
 
