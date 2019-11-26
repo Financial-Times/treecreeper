@@ -1,12 +1,8 @@
 const { logger } = require('@financial-times/tc-api-express-logger');
-const { KinesisAdaptor } = require('@financial-times/tc-api-publish-adaptors');
-const { createPublisher } = require('./publisher');
 const {
 	makeAddedRelationshipEvents,
 	makeRemovedRelationshipEvents,
 } = require('./related-events');
-
-const { TREECREPER_EVENT_LOG_STREAM_NAME = 'test-stream-name' } = process.env;
 
 const makeEvents = (action, neo4jEntity, relationships) => {
 	const record = neo4jEntity.records[0];
@@ -50,10 +46,7 @@ const acceptableActions = ['CREATE', 'UPDATE', 'DELETE'];
 const getChangeLogger = publisher => (
 	action,
 	entity,
-	{
-		relationships = {},
-		adaptor = KinesisAdaptor(TREECREPER_EVENT_LOG_STREAM_NAME),
-	} = {},
+	{ relationships = {} } = {},
 ) => {
 	if (!acceptableActions.includes(action)) {
 		const message = `Invalid action: ${action}. action must be either of ${acceptableActions.join(
