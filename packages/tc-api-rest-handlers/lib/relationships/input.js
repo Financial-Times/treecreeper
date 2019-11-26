@@ -1,4 +1,5 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
+const { retrieveRelationshipCodes } = require('./properties');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -79,24 +80,34 @@ const isWriteAndDeleteRelationship = type => {
 		(isRelationship(propName) && codes !== null);
 };
 
-const findActualDeletions = initialContent => ([propName, codesToDelete]) => {
+const findActualDeletions = initialContent => ([propName, newValues]) => {
+	const codesToDelete = newValues && newValues.map(value => value.code);
 	const realPropName = unNegatePropertyName(propName);
 	const isDeleteAll = realPropName === propName && codesToDelete === null;
+	const initialCodes = retrieveRelationshipCodes(
+		realPropName,
+		initialContent,
+	);
+
 	return [
 		realPropName,
-		toArray(
-			isDeleteAll ? initialContent[realPropName] : codesToDelete,
-		).filter(code => (initialContent[realPropName] || []).includes(code)),
+		toArray(isDeleteAll ? initialCodes : codesToDelete).filter(code =>
+			(initialCodes || []).includes(code),
+		),
 	];
 };
 
 const findImplicitDeletions = (initialContent, schema, action) => ([
 	relType,
-	newCodes,
+	newValues,
 ]) => {
+	const newCodes = newValues.map(value => value.code);
 	const isCardinalityOne = !schema.properties[relType].hasMany;
 	if (action === 'replace' || isCardinalityOne) {
-		const existingCodes = initialContent[relType];
+		const existingCodes = retrieveRelationshipCodes(
+			relType,
+			initialContent,
+		);
 		if (!existingCodes) {
 			return;
 		}
