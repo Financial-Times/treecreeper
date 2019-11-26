@@ -1,5 +1,4 @@
 const _isEmpty = require('lodash.isempty');
-const { logChanges } = require('@financial-times/tc-api-publish');
 const {
 	validateInput,
 	validateRelationshipAction,
@@ -12,7 +11,7 @@ const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 
-const patchHandler = ({ documentStore } = {}) => {
+const patchHandler = ({ documentStore, logChanges } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {

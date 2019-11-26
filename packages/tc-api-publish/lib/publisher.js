@@ -56,7 +56,10 @@ const publishEvent = async (adaptor, payload) => {
 	await adaptor.publish(pluckedPayload);
 };
 
-const createPublisher = adaptor => {
+const createPublisher = adaptors => {
+	if (!Array.isArray(adaptors)) {
+		adaptors = [adaptors];
+	}
 	const notImplemented = requiredInterfaceMethods.filter(
 		method => !isImplemented(adaptor, method),
 	);
@@ -67,13 +70,17 @@ const createPublisher = adaptor => {
 			)} method.`,
 		);
 	}
-	return {
+	const publisher = {
 		publish: async (...events) => {
 			uniquifyEvents(events).forEach(payload =>
-				publishEvent(adaptor, payload),
+				adaptors.forEach(adaptor => publishEvent(adaptor, payload)),
 			);
 		},
 	};
+
+	return {
+		logChanges: getChangeLogger(publisher)
+	}
 };
 
 module.exports = {

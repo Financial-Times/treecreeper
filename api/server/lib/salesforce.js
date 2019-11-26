@@ -11,9 +11,10 @@ const login = () => {
 		.then(() => conn);
 };
 
+
 module.exports.setSalesforceIdForSystem = async (
-	{ code, name, SF_ID },
-	patchHandler,
+	{ code, name, action },
+	patch
 ) => {
 	if (!process.env.SALESFORCE_USER) {
 		logger.info(
@@ -21,10 +22,7 @@ module.exports.setSalesforceIdForSystem = async (
 		);
 		return;
 	}
-	if (SF_ID) {
-		logger.info(
-			'Skipping salesforce system creation - system already exists in salesforce',
-		);
+	if (action !== 'CREATE') {
 		return;
 	}
 	try {
@@ -48,10 +46,10 @@ module.exports.setSalesforceIdForSystem = async (
 			},
 			'Create system in salesforce',
 		);
-		await patchHandler({
-			nodeType: 'System',
+		await patch({
+			type: 'System',
 			code,
-			clientId: 'biz-ops-api',
+			metadata: {clientId: 'biz-ops-api'},
 			query: {
 				lockFields: 'SF_ID',
 			},
