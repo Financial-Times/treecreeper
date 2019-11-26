@@ -1,5 +1,6 @@
 const jsforce = require('jsforce');
-const salesforceSync = require('../server/lib/salesforce-sync');
+const dbConnection = require('@financial-times/tc-api-db-manager');
+const salesforceSync = require('../server/lib/salesforce');
 
 /* eslint no-use-before-define: "warn" */
 const loginStub = jest.fn(() => Promise.resolve(new JsforceConnection()));
@@ -23,8 +24,6 @@ class JsforceConnection {
 /* eslint-enable class-methods-use-this */
 
 jsforce.Connection = jest.fn(() => new JsforceConnection());
-
-const dbConnection = require('../../server/lib/db-connection');
 
 jest.spyOn(dbConnection, 'executeQuery').mockReturnValue(Promise.resolve('ok'));
 
@@ -116,7 +115,7 @@ describe('salesforce sync unit', () => {
 			);
 			expect(patchHandlerSpy).toHaveBeenCalledWith({
 				body: { SF_ID: 'test-id' },
-				metadata: {clientId: 'biz-ops-api'},
+				metadata: { clientId: 'biz-ops-api' },
 				code: 'elephants',
 				type: 'System',
 				query: { lockFields: 'SF_ID' },

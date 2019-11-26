@@ -3,6 +3,7 @@ const { logger } = require('@financial-times/tc-api-express-logger');
 
 const requiredPluckFieldNames = ['action', 'code', 'type', 'updatedProperties'];
 const requiredInterfaceMethods = ['publish', 'getName'];
+const { getChangeLogger } = require('./log-changes');
 
 const isImplemented = (adaptor, method) =>
 	method in adaptor && typeof adaptor[method] === 'function';
@@ -60,16 +61,18 @@ const createPublisher = adaptors => {
 	if (!Array.isArray(adaptors)) {
 		adaptors = [adaptors];
 	}
-	const notImplemented = requiredInterfaceMethods.filter(
-		method => !isImplemented(adaptor, method),
-	);
-	if (notImplemented.length > 0) {
-		throw new TypeError(
-			`Interface satisfaction error: adaptor must implement ${notImplemented.join(
-				',',
-			)} method.`,
+	adaptors.forEach(adaptor => {
+		const notImplemented = requiredInterfaceMethods.filter(
+			method => !isImplemented(adaptor, method),
 		);
-	}
+		if (notImplemented.length > 0) {
+			throw new TypeError(
+				`Interface satisfaction error: adaptor must implement ${notImplemented.join(
+					',',
+				)} method.`,
+			);
+		}
+	});
 	const publisher = {
 		publish: async (...events) => {
 			uniquifyEvents(events).forEach(payload =>
@@ -79,8 +82,8 @@ const createPublisher = adaptors => {
 	};
 
 	return {
-		logChanges: getChangeLogger(publisher)
-	}
+		logChanges: getChangeLogger(publisher),
+	};
 };
 
 module.exports = {

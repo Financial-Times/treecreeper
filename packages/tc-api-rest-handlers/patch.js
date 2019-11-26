@@ -11,7 +11,7 @@ const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 
-const patchHandler = ({ documentStore, logChanges } = {}) => {
+const patchHandler = ({ documentStore, logChanges = () => null } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {

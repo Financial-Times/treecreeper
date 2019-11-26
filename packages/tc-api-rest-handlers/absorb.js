@@ -128,7 +128,7 @@ const collectRemovedRelationships = ({
 
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
-const absorbHandler = ({ documentStore, logChanges } = {}) => async input => {
+const absorbHandler = ({ documentStore, logChanges = () => null } = {}) => async input => {
 	const {
 		type: nodeType,
 		code,

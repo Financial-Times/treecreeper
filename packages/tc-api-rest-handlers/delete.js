@@ -5,7 +5,7 @@ const { getNeo4jRecord } = require('./lib/read-helpers');
 
 const deleteHandler = ({
 	documentStore,
-	logChanges
+	logChanges = () => null,
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
