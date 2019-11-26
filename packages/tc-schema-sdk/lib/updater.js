@@ -37,17 +37,14 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: [].concat(
-						readYaml.directory(schemaDirectory, 'types'),
-						readYaml
-							.directory(schemaDirectory, 'relationships')
-							.map(rel => ({
-								...rel,
-								relationship:
-									rel.relationship ||
-									toSnakeUpperCase(rel.name),
-							})),
-					),
+					types: readYaml.directory(schemaDirectory, 'types'),
+					relationships: readYaml
+						.directory(schemaDirectory, 'relationships')
+						.map(rel => ({
+							...rel,
+							relationship:
+								rel.relationship || toSnakeUpperCase(rel.name),
+						})),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',
@@ -67,6 +64,7 @@ class SchemaUpdater {
 				);
 				schemaData.schema.types = compatBackward(
 					schemaData.schema.types,
+					schemaData.schema.relationships,
 				);
 			}
 

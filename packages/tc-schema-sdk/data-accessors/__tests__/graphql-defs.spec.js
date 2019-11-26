@@ -9,7 +9,7 @@ const stringPatterns = readYaml.file(
 );
 
 const graphqlFromRawData = schema => {
-	schema.types = compatBackward(schema.types);
+	schema.types = compatBackward(schema.types, schema.relationships);
 	return new SDK({ schemaData: { schema } }).getGraphqlDefs();
 };
 
@@ -88,6 +88,8 @@ describe('graphql def creation', () => {
 						},
 					},
 				},
+			],
+			relationships: [
 				{
 					name: 'PaysFor',
 					relationship: 'PAYS_FOR',
@@ -464,6 +466,8 @@ Green
 							},
 						},
 					},
+				],
+				relationships: [
 					{
 						name: 'FakeRel',
 						relationship: 'HAS',

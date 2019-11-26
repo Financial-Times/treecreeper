@@ -7,8 +7,7 @@ const { typeTestSuite, relationshipTestSuite } = require('./type-test-suite');
 const sdk = new SDK();
 
 const types = sdk.rawData.getTypes();
-
-const isRichRelationshipType = type => 'from' in type || 'to' in type;
+const relationships = sdk.rawData.getRelationships();
 
 describe('types', () => {
 	fs.readdirSync(
@@ -29,11 +28,7 @@ describe('types', () => {
 			});
 		});
 
-	types.forEach(type => {
-		if (isRichRelationshipType(type)) {
-			relationshipTestSuite(types, type);
-		} else {
-			typeTestSuite(types, type);
-		}
-	});
+	const allTypes = types.concat(relationships);
+	types.forEach(type => typeTestSuite(allTypes, type));
+	relationships.forEach(rel => relationshipTestSuite(allTypes, rel));
 });

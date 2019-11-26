@@ -24,7 +24,7 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 
 	getRelationships() {
 		this.checkDataExists();
-		return this.rawData.schema.types.filter(type => 'relationship' in type);
+		return this.rawData.schema.relationships;
 	}
 
 	getTypeHierarchy() {

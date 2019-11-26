@@ -108,7 +108,6 @@ const getType = function(
 		groupProperties = false,
 		includeMetaFields = false,
 		useMinimumViableRecord = false,
-		excludeLockingField = false,
 	} = {},
 ) {
 	const typeSchema = getFromRawData(typeName, this.rawData);
@@ -158,9 +157,6 @@ const getType = function(
 	}
 	if (includeMetaFields) {
 		metaProperties.forEach(metaProperty => {
-			if (excludeLockingField && metaProperty.name === '_lockedFields') {
-				return;
-			}
 			typeSchema.properties[metaProperty.name] = metaProperty;
 		});
 	}

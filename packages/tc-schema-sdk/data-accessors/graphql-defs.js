@@ -1,5 +1,7 @@
 const stripIndent = require('common-tags/lib/stripIndent');
 const uniqBy = require('lodash.uniqby');
+const primitiveTypesMap = require('../lib/primitive-types-map');
+const metaProperties = require('../lib/meta-properties');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -120,18 +122,41 @@ const getRichRelationshipPropertyType = (def, rootType) => {
 	});
 };
 
+const buildRelationshipProperties = properties => {
+	metaProperties
+		.filter(meta => meta.name !== '_lockedFields')
+		.forEach(metaProperty => {
+			properties[metaProperty.name] = metaProperty;
+		});
+	return Object.entries(properties).reduce((prop, [name, def]) => {
+		prop[name] = {
+			...def,
+			type: primitiveTypesMap[def.type] || def.type,
+		};
+		return prop;
+	}, {});
+};
+
 const buildRelationshipTypeModel = ({ name, properties }) => {
 	return Object.values(properties)
 		.filter(({ relationship }) => !!relationship)
-		.map(({ relationship, direction, type }) => {
-			const [from, to] = getFromTo(direction, name, type);
-			return {
-				from,
-				to,
+		.map(
+			({
 				relationship,
-				typeName: getRichRelationshipType(from, relationship, to),
-			};
-		});
+				direction,
+				type,
+				relationshipProperties = {},
+			}) => {
+				const [from, to] = getFromTo(direction, name, type);
+				return {
+					from,
+					to,
+					relationship,
+					typeName: getRichRelationshipType(from, relationship, to),
+					relationshipProperties,
+				};
+			},
+		);
 };
 
 const buildRichRelationshipPropertyModel = rootType => ([name, def]) => ({
@@ -158,15 +183,28 @@ const printRelationshipTypeDefinition = ({
 	to,
 	typeName,
 	relationship,
-}) =>
-	printDescribedBlock(
+	relationshipProperties,
+}) => {
+	let propStr = '';
+	if (Object.keys(relationshipProperties).length) {
+		propStr = indentMultiline(
+			printPropertyDefinitions(
+				buildRelationshipProperties({ ...relationshipProperties }),
+			),
+			4,
+			true,
+		);
+	}
+	return printDescribedBlock(
 		'Internal use only',
 		stripIndent`
 	type ${typeName} @relation(name: ${relationship}) {
 		from: ${from}
 		to: ${to}
+		${propStr}
 	}`,
 	);
+};
 
 const printRelationshipTypeDefinitions = types =>
 	uniqBy(
@@ -273,10 +311,11 @@ ${indentMultiline(enums.join('\n'), 2)}
 
 module.exports = {
 	accessor() {
-		const types = this.getTypes({
+		const options = {
 			primitiveTypes: 'graphql',
 			includeMetaFields: true,
-		});
+		};
+		const types = this.getTypes(options);
 		const enums = this.getEnums({ withMeta: true });
 
 		const staticTypeDefinitions = stripIndent`
