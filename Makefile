@@ -37,7 +37,7 @@ monorepo:
 	npm install ysugimoto/athloi
 	npx athloi exec -- npm install --no-package-lock
 
-npm-publish:
+monorepo-publish:
 	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)
 	npx athloi publish --access public
 

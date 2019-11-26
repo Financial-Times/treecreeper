@@ -107,7 +107,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > ~/.npmrc
       - run:
           name: Publish to npm registry
-          command: make npm-publish
+          command: make monorepo-publish
 
 workflows:
   version: 2
