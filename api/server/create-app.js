@@ -1,7 +1,6 @@
 const express = require('express');
 require('express-async-errors');
 const metrics = require('next-metrics');
-const timeout = require('connect-timeout');
 const { getApp } = require('../../packages/tc-api-express');
 // const { createStore } = require('../../packages/tc-api-s3-document-store');
 const health = require('./health');
@@ -38,7 +37,7 @@ const createApp = async () => {
 
 	// Always assign/propagate requestId and setup request tracing
 	app.set('case sensitive routing', true);
-	app.use(timeout(TIMEOUT));
+
 	app.use(security.requireApiKey);
 
 	await getApp({
@@ -52,6 +51,7 @@ const createApp = async () => {
 		schemaOptions: { updateMode: 'poll' },
 		republishSchemaPrefix: 'api',
 		republishSchema: true,
+		timeout: TIMEOUT,
 		// documentStore: createStore(),
 	}).then(() => {
 		app.use(errorToErrors);

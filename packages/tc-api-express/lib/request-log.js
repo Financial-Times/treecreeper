@@ -1,6 +1,8 @@
+const {
 	logger,
 	setContext,
 } = require('@financial-times/tc-api-express-logger');
+
 const requestLog = (endpointName, method, req) => {
 	setContext({
 		endpointName,
@@ -12,4 +14,4 @@ const requestLog = (endpointName, method, req) => {
 	logger.info(`[APP] ${endpointName} ${method}`);
 };
 
-module.exports = {requestLog}
+module.exports = { requestLog };
