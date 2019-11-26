@@ -48,7 +48,10 @@ const createApp = async () => {
 		graphqlMethods: ['post', 'get'],
 		restPath: '/v2/node',
 		restMethods: ['HEAD', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
-		schemaOptions: { updateMode: 'poll' },
+		schemaOptions: {
+			updateMode: 'poll',
+			backwardCompatibility: true,
+		},
 		republishSchemaPrefix: 'api',
 		republishSchema: true,
 		// documentStore: createStore(),

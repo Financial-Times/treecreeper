@@ -27,7 +27,7 @@ class SchemaUpdater {
 		schemaBaseUrl = process.env.TREECREEPER_SCHEMA_URL,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
 		backwardCompatibility = process.env
-			.TREECREEPER_SCHEMA_BACKWORD_COMPATIBILITY,
+			.TREECREEPER_SCHEMA_BACKWARD_COMPATIBILITY,
 		schemaData,
 	} = {}) {
 		this.updateMode = updateMode;
@@ -62,10 +62,14 @@ class SchemaUpdater {
 		}
 		if (schemaData) {
 			if (backwardCompatibility) {
+				console.log(
+					`[SCHEMA] backward compatiliby enabled. SDK transforms to old model definition`,
+				);
 				schemaData.schema.types = compatBackward(
 					schemaData.schema.types,
 				);
 			}
+
 			this.isStatic = true;
 			this.rawData.set(schemaData);
 			this.eventEmitter.emit('change', {

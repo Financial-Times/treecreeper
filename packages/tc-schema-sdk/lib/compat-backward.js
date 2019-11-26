@@ -10,22 +10,23 @@ const transformProperties = (types, type) => {
 				[propName]: propDef,
 			};
 		}
-		const { from, relationship } = relType;
+		const { from, to, relationship } = relType;
 		let direction;
 		let relationshipTo;
 		let hasMany;
 		if (propDef.direction !== 'to' && from.type === type.name) {
 			direction = 'outgoing';
-			relationshipTo = relType.to.type;
-			hasMany = relType.from.hasMany;
+			relationshipTo = to.type;
+			hasMany = from.hasMany;
 		} else {
 			direction = 'incoming';
-			relationshipTo = relType.from.type;
-			hasMany = relType.to.hasMany;
+			relationshipTo = from.type;
+			hasMany = to.hasMany;
 		}
 		return {
 			...props,
 			[propName]: {
+				...propDef,
 				relationship,
 				type: relationshipTo,
 				description: propDef.description,

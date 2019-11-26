@@ -36,6 +36,7 @@ const getGraphqlApi = ({
 				{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
 				'Graphql schema update failed',
 			);
+			console.log(error);
 		}
 	};
 

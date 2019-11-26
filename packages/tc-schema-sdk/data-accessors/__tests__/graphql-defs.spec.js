@@ -1,14 +1,17 @@
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 const { SDK } = require('../../sdk');
 const { readYaml } = require('../../lib/updater');
+const { compatBackward } = require('../../lib/compat-backward');
 
 const stringPatterns = readYaml.file(
 	process.env.TREECREEPER_SCHEMA_DIRECTORY,
 	'string-patterns.yaml',
 );
 
-const graphqlFromRawData = schema =>
-	new SDK({ schemaData: { schema } }).getGraphqlDefs();
+const graphqlFromRawData = schema => {
+	schema.types = compatBackward(schema.types);
+	return new SDK({ schemaData: { schema } }).getGraphqlDefs();
+};
 
 const explodeString = str =>
 	str
@@ -90,11 +93,11 @@ describe('graphql def creation', () => {
 					relationship: 'PAYS_FOR',
 					from: {
 						type: 'CostCentre',
-						hasMany: false,
+						hasMany: true,
 					},
 					to: {
 						type: 'Group',
-						hasMany: true,
+						hasMany: false,
 					},
 				},
 			],
@@ -123,6 +126,10 @@ describe('graphql def creation', () => {
 		expect(generated).toEqual(
 			explodeString(
 				`
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
+
 scalar DateTime
 scalar Date
 scalar Time

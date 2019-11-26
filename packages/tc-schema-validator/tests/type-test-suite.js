@@ -92,8 +92,8 @@ const propertyTestSuite = ({ typeNames, properties, fieldsets }) => {
 
 			it('has valid direction', () => {
 				if (config.direction) {
-					expect(config.direction).toEqual(
-						expect.arrayContaining(['from', 'to']),
+					expect(config.direction).toMatch(
+						arrayToRegExp(['from', 'to']),
 					);
 				}
 			});

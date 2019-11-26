@@ -5,7 +5,11 @@ const lolex = require('lolex');
 const schema = require('@financial-times/tc-schema-sdk');
 /* eslint-enable import/no-extraneous-dependencies */
 
-schema.init({ updateMode: 'poll' });
+schema.init({
+	updateMode: 'poll',
+	// Need to set true until we adopt newer schema definition in app
+	backwardCompatibility: true,
+});
 const schemaReady = schema.ready();
 
 const dbConnection = require('./db-connection');
