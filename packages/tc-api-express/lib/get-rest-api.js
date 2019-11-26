@@ -1,10 +1,6 @@
 const httpErrors = require('http-errors');
 const express = require('express');
 const {
-	logger,
-	setContext,
-} = require('@financial-times/tc-api-express-logger');
-const {
 	headHandler,
 	getHandler,
 	deleteHandler,
@@ -15,7 +11,7 @@ const {
 
 const { errorToErrors } = require('../middleware/errors');
 
-const {requestLog} = require('./request-log')
+const { requestLog } = require('./request-log');
 
 const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
 	let appMethod = req.method.toUpperCase();

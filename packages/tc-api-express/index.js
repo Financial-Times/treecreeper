@@ -1,9 +1,11 @@
 const express = require('express');
+const timeoutMiddleware = require('connect-timeout');
 require('express-async-errors');
 const bodyParser = require('body-parser');
 const schema = require('@financial-times/tc-schema-sdk');
 const {
 	listenForSchemaChanges: updateConstraintsOnSchemaChange,
+	setTimeout: setDbQueryTimeout,
 } = require('@financial-times/tc-api-db-manager');
 const { getGraphqlApi } = require('@financial-times/tc-api-graphql');
 const {
@@ -20,7 +22,7 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
-const {requestLog} = require('./lib/request-log');
+const { requestLog } = require('./lib/request-log');
 
 const getApp = async (options = {}) => {
 	const {
@@ -32,9 +34,14 @@ const getApp = async (options = {}) => {
 		restPath = '/rest',
 		restMiddlewares = [],
 		schemaOptions,
+		timeout,
 	} = options;
 
 	const router = new express.Router();
+	if (timeout) {
+		setDbQueryTimeout(timeout);
+		router.use(timeoutMiddleware(timeout));
+	}
 	router.use(contextMiddleware);
 	router.use(requestId);
 	router.use(clientId);
@@ -49,10 +56,15 @@ const getApp = async (options = {}) => {
 	} = getGraphqlApi(options);
 
 	graphqlMethods.forEach(method =>
-		router[method](graphqlPath, graphqlMiddlewares, (req, res, next) => {
-			requestLog('graphql', req.method.toUpperCase(), req);
-			next()
-		},graphqlHandler),
+		router[method](
+			graphqlPath,
+			graphqlMiddlewares,
+			(req, res, next) => {
+				requestLog('graphql', req.method.toUpperCase(), req);
+				next();
+			},
+			graphqlHandler,
+		),
 	);
 
 	app.use(treecreeperPath, router);

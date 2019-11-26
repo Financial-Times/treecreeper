@@ -20,7 +20,8 @@ getApp({
 	documentStore, // an [optional] reference to a documentStore object, used to store large properties outside the neo4j instance
 	republishSchema, // a boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi
 	republishSchemaPrefix = 'api', // If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicaytes the prefix to use
-	logger // an [optional] logger that implements debug, info, warning and error methods
+	logger, // an [optional] logger that implements debug, info, warning and error methods
+	timeout // optional integer to set maximum time DB will be queried for adn, by association, maximum time a request can stay alive for before being rejected and erroring
 })
 ```
 
