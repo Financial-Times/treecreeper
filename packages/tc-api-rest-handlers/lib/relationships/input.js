@@ -7,6 +7,44 @@ const entryHasValues = ([, values = []]) => values.length;
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
 
+const relationshipPropsDiff = (newRelationship, existingRelationship) => {
+	const diffs = {};
+	Object.keys(newRelationship).forEach(prop => {
+		if (newRelationship[prop] !== existingRelationship[prop]) {
+			diffs[prop] = newRelationship[prop];
+		}
+	});
+	return diffs;
+};
+
+const getDiffs = (newRelationships, initialRelationships = []) => {
+	const allDiffs = [];
+
+	newRelationships.forEach(newRelationship => {
+		const targetIndex = initialRelationships.findIndex(
+			initialRelationship =>
+				initialRelationship.code === newRelationship.code,
+		);
+		const existingRelationship = initialRelationships[targetIndex];
+
+		if (!existingRelationship) {
+			allDiffs.push(newRelationship);
+		} else {
+			const diffs = relationshipPropsDiff(
+				newRelationship,
+				existingRelationship,
+			);
+			if (Object.keys(diffs).length) {
+				// code is needed for creating neo4j queries later
+				diffs.code = newRelationship.code;
+				allDiffs.push(diffs);
+			}
+		}
+	});
+
+	return allDiffs;
+};
+
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
 const unNegatePropertyName = propName => propName.replace(/^!/, '');
@@ -69,9 +107,9 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 	}
 };
 
-const findActualAdditions = initialContent => ([relType, newCodes]) => [
+const findActualAdditions = initialContent => ([relType, newRelationships]) => [
 	relType,
-	arrDiff(newCodes, initialContent[relType]),
+	getDiffs(newRelationships, initialContent[relType]),
 ];
 
 const getRemovedRelationships = ({
