@@ -15,16 +15,7 @@ const {
 
 const { errorToErrors } = require('../middleware/errors');
 
-const requestLog = (endpointName, method, req) => {
-	setContext({
-		endpointName,
-		method,
-		params: req.params,
-		query: req.query,
-		bodyKeys: Object.keys(req.body || {}),
-	});
-	logger.info(`[APP] ${endpointName} ${method}`);
-};
+const {requestLog} = require('./request-log')
 
 const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
 	let appMethod = req.method.toUpperCase();

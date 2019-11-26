@@ -20,6 +20,8 @@ const bodyParsers = [
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
 ];
 
+const {requestLog} = require('./lib/request-log');
+
 const getApp = async (options = {}) => {
 	const {
 		app = express(),
@@ -47,7 +49,10 @@ const getApp = async (options = {}) => {
 	} = getGraphqlApi(options);
 
 	graphqlMethods.forEach(method =>
-		router[method](graphqlPath, graphqlMiddlewares, graphqlHandler),
+		router[method](graphqlPath, graphqlMiddlewares, (req, res, next) => {
+			requestLog('graphql', req.method.toUpperCase(), req);
+			next()
+		},graphqlHandler),
 	);
 
 	app.use(treecreeperPath, router);
