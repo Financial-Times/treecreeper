@@ -112,6 +112,75 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
+	it("doesn't write if no real relationship property changes detected", async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CHILD', child, {
+			someProp: 'some property',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{ children: [{ code: childCode, someProp: 'some property' }] },
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it('writes if one of the relationship properties changes detected', async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CHILD', child, {
+			someProp: 'some property',
+			anotherProp: 'another property',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{
+				children: [
+					{
+						code: childCode,
+						someProp: 'some property',
+						anotherProp: 'new another property',
+					},
+				],
+			},
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it('detects deleted relationship property as a change', async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CHILD', child, {
+			someProp: 'some property',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{ children: [{ code: childCode, someProp: null }] },
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
 	it('detects deleted property as a change', async () => {
 		await createNode('MainType', {
 			code: mainCode,
