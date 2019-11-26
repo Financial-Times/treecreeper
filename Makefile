@@ -35,7 +35,7 @@ install: monorepo install-treecreeper
 
 monorepo:
 	npm install ysugimoto/athloi
-	npx athloi exec --concurrency 10 -- npm install --no-package-lock
+	npx athloi exec -- npm install --no-package-lock
 
 monorepo-publish:
 	npx athloi version --concurrency 10 $(CIRCLE_TAG)
