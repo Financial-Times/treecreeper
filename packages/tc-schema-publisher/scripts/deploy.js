@@ -12,16 +12,16 @@ const pkg = JSON.parse(
 
 const action = async (...args) => {
 	const [command] = args;
-	const { schemaDirectory, bucketName, environment } = command;
+	const { schemaDirectory, bucketName, env } = command;
 	try {
 		if (!bucketName) {
 			throw new Error(
 				'bucket name is required. You need to specify it via -B, --bucket-name option',
 			);
 		}
-		if (!environment) {
+		if (!env) {
 			throw new Error(
-				'environment is required. You need to specify it via -E, --environment option',
+				'env is required. You need to specify it via -E, --env option',
 			);
 		}
 		if (!schemaDirectory) {
@@ -41,7 +41,7 @@ const action = async (...args) => {
 			...schema.rawData.getAll(),
 			version: process.env.CIRCLE_TAG,
 		};
-		await sendSchemaToS3(environment, bucketName, schemaObject);
+		await sendSchemaToS3(env, bucketName, schemaObject);
 		console.log('successfully deployed');
 	} catch (err) {
 		console.error('Failed to deploy');
