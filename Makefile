@@ -39,7 +39,7 @@ monorepo:
 
 monorepo-publish:
 	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)
-	npx athloi publish --access public
+	npx athloi publish -- --access public
 
 .PHONY: test
 
