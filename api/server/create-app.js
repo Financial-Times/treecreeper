@@ -40,14 +40,15 @@ const createApp = async () => {
 	app.set('case sensitive routing', true);
 	app.use(timeout(TIMEOUT));
 	app.use(security.requireApiKey);
-	app.use(maintenance.disableWrites);
-	app.use(maintenance.disableReads);
 
 	await getApp({
 		app,
+		graphqlPath: '/graphql',
 		graphqlMethods: ['post', 'get'],
+		graphqlMiddlewares: [maintenance.disableReads],
 		restPath: '/v2/node',
 		restMethods: ['HEAD', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
+		restMiddlewares: [maintenance.disableReads, maintenance.disableWrites],
 		schemaOptions: { updateMode: 'poll' },
 		republishSchemaPrefix: 'api',
 		republishSchema: true,
