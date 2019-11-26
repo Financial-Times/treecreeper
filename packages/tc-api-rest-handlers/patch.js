@@ -33,7 +33,10 @@ const patchHandler = ({ documentStore } = {}) => {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
-		const initialContent = preflightRequest.toJson({ type });
+		const initialContent = preflightRequest.toJson({
+			type,
+			richRelationshipsFlag: true,
+		});
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)
@@ -60,13 +63,17 @@ const patchHandler = ({ documentStore } = {}) => {
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
+
 				const relationships = {
 					added: queryContext.addedRelationships,
 					removed: queryContext.removedRelationships,
 				};
 				logChanges('UPDATE', neo4jResult, { relationships });
 			} else {
-				neo4jResultBody = initialContent;
+				neo4jResultBody = preflightRequest.toJson({
+					type,
+					richRelationshipsFlag: richRelationships,
+				});
 			}
 
 			return {
