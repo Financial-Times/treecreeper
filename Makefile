@@ -34,7 +34,7 @@ verify:
 install: monorepo install-treecreeper
 
 monorepo:
-	npm install ysugimoto/athloi
+	npm install @financial-times/athloi
 	npx athloi exec --concurrency 10 -- npm install --no-package-lock
 
 monorepo-publish:
