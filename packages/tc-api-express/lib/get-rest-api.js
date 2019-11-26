@@ -9,6 +9,9 @@ const {
 	absorbHandler,
 } = require('@financial-times/tc-api-rest-handlers');
 
+
+const {createPublisher} = require('@financial-times/tc-api-publish');
+
 const { errorToErrors } = require('../middleware/errors');
 
 const { requestLog } = require('./request-log');
@@ -59,8 +62,11 @@ const getRestApi = (config = {}) => {
 	const router = new express.Router();
 	const {
 		restMethods = ['HEAD', 'GET', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
+		publishAdaptors = []
 	} = config;
 	const allowedMethods = restMethods.map(method => method.toUpperCase());
+
+	config.logChanges = publishAdaptors.length ? createPublisher(publishAdaptors).logChanges() : () => null
 
 	router
 		.route('/:type/:code')

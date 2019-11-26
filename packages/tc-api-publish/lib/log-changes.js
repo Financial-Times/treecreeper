@@ -47,7 +47,7 @@ const makeEvents = (action, neo4jEntity, relationships) => {
 
 const acceptableActions = ['CREATE', 'UPDATE', 'DELETE'];
 
-const logChanges = (
+const getChangeLogger = publisher => (
 	action,
 	entity,
 	{
@@ -67,10 +67,9 @@ const logChanges = (
 	}
 
 	const events = makeEvents(action, entity, relationships);
-	const publisher = createPublisher(adaptor);
 	publisher.publish(...events);
 };
 
 module.exports = {
-	logChanges,
+	getChangeLogger,
 };

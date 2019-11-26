@@ -14,7 +14,9 @@ const {
 const { TIMEOUT } = require('./constants');
 const security = require('./middleware/security');
 const maintenance = require('./middleware/maintenance');
+const {setSalesforceIdForSystem} = require('./lib/salesforce')
 
+const {patchHandler} = require('@financial-times/tc-api-rest-handlers')
 const createApp = async () => {
 	const app = express();
 
@@ -40,6 +42,10 @@ const createApp = async () => {
 
 	app.use(security.requireApiKey);
 
+	const rePatch = patchHandler({
+		publishAdaptors: [kinesisAdaptor]
+	})
+
 	await getApp({
 		app,
 		graphqlPath: '/graphql',
@@ -52,6 +58,7 @@ const createApp = async () => {
 		republishSchemaPrefix: 'api',
 		republishSchema: true,
 		timeout: TIMEOUT,
+		publishAdaptors: [(event => setSalesforceIdForSystem(event, rePatch), kinesisAdaptor]
 		// documentStore: createStore(),
 	}).then(() => {
 		app.use(errorToErrors);

@@ -1,11 +1,11 @@
 const httpErrors = require('http-errors');
-const { logChanges } = require('@financial-times/tc-api-publish');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 
 const deleteHandler = ({
 	documentStore,
+	logChanges
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
