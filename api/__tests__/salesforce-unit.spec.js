@@ -1,5 +1,5 @@
 const jsforce = require('jsforce');
-const salesforceSync = require('../../server/lib/salesforce-sync');
+const salesforceSync = require('../server/lib/salesforce-sync');
 
 /* eslint no-use-before-define: "warn" */
 const loginStub = jest.fn(() => Promise.resolve(new JsforceConnection()));
@@ -48,16 +48,17 @@ describe('salesforce sync unit', () => {
 			process.env.SALESFORCE_TOKEN = 'test-sf-token';
 		});
 
-		it("doesn't call if SF_ID already exists in biz-ops", async () => {
+		it("doesn't call if not create  biz-ops", async () => {
 			await salesforceSync.setSalesforceIdForSystem({
+				action: 'CREATE',
 				code: 'elephants',
-				SF_ID: '12345',
 			});
 			expect(loginStub).not.toHaveBeenCalled();
 		});
 
 		it('logs in to salesforce', async () => {
 			await salesforceSync.setSalesforceIdForSystem({
+				action: 'CREATE',
 				code: 'elephants',
 			});
 			expect(loginStub).toHaveBeenCalledWith(
@@ -68,6 +69,7 @@ describe('salesforce sync unit', () => {
 
 		it('calls with minimal set of data to create System', async () => {
 			await salesforceSync.setSalesforceIdForSystem({
+				action: 'CREATE',
 				code: 'elephants',
 				name: 'We Elephants',
 			});
@@ -86,6 +88,7 @@ describe('salesforce sync unit', () => {
 		});
 		it('uses code if no name specified', async () => {
 			await salesforceSync.setSalesforceIdForSystem({
+				action: 'CREATE',
 				code: 'elephants',
 			});
 			expect(sobjectStub).toHaveBeenCalledWith(
@@ -105,6 +108,7 @@ describe('salesforce sync unit', () => {
 			const patchHandlerSpy = jest.fn();
 			await salesforceSync.setSalesforceIdForSystem(
 				{
+					action: 'CREATE',
 					code: 'elephants',
 					name: 'We Elephants',
 				},
@@ -112,9 +116,9 @@ describe('salesforce sync unit', () => {
 			);
 			expect(patchHandlerSpy).toHaveBeenCalledWith({
 				body: { SF_ID: 'test-id' },
-				clientId: 'biz-ops-api',
+				metadata: {clientId: 'biz-ops-api'},
 				code: 'elephants',
-				nodeType: 'System',
+				type: 'System',
 				query: { lockFields: 'SF_ID' },
 			});
 		});

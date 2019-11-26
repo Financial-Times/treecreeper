@@ -1,5 +1,5 @@
 const jsforce = require('jsforce');
-const { logger } = require('../../../packages/tc-api-express-logger');
+const { logger, getContext } = require('../../../packages/tc-api-express-logger');
 
 const login = () => {
 	const conn = new jsforce.Connection();
@@ -46,10 +46,11 @@ module.exports.setSalesforceIdForSystem = async (
 			},
 			'Create system in salesforce',
 		);
+		const {requestId} = getContext()
 		await patch({
 			type: 'System',
 			code,
-			metadata: {clientId: 'biz-ops-api'},
+			metadata: {clientId: 'biz-ops-api', requestId},
 			query: {
 				lockFields: 'SF_ID',
 			},

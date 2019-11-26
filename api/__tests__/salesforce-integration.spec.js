@@ -1,13 +1,12 @@
-const salesforceSync = require('../../server/lib/salesforce-sync');
-const app = require('../../server/app.js');
-const { schemaReady } = require('../../server/lib/init-schema');
+const salesforceSync = require('../server/lib/salesforce-sync');
+let createApp = require('../server/app.js');
 
 const namespace = 'salesforce-sync';
 const { dropDb } = require('../helpers/test-data');
 const { setupMocks } = require('../helpers');
 
 describe('salesforce sync integration', () => {
-	beforeAll(() => schemaReady);
+	beforeAll(async () => app = await createApp());
 	beforeEach(async () => {
 		dropDb(namespace);
 	});
