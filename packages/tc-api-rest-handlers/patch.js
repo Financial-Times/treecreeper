@@ -6,7 +6,10 @@ const {
 	validateRelationshipInput,
 } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
-const { containsRelationshipData } = require('./lib/relationships/input');
+const {
+	containsRelationshipData,
+	normaliseRelationshipProps,
+} = require('./lib/relationships/input');
 const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
@@ -26,6 +29,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
 			validateRelationshipInput(originalBody);
+			normaliseRelationshipProps(type, originalBody);
 		}
 
 		const preflightRequest = await getNeo4jRecord(type, code);
@@ -37,6 +41,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			type,
 			richRelationshipsFlag: true,
 		});
+		normaliseRelationshipProps(type, initialContent);
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)

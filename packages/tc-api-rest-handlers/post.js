@@ -6,6 +6,7 @@ const { validateInput } = require('./lib/validation');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { normaliseRelationshipProps } = require('./lib/relationships/input');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const {
@@ -16,6 +17,8 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		query: { richRelationships } = {},
 	} = validateInput(input);
 	const { clientId } = metadata;
+
+	normaliseRelationshipProps(type, originalBody);
 
 	const { documents = {}, body } = documentStore
 		? separateDocsFromBody(type, originalBody)
