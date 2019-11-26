@@ -136,6 +136,8 @@ workflows:
           requires:
             - install
             - test
+            - verify
+            - ft-snyk-orb/scan-js-packages
           filters:
             <<: *only_version_tags
             branches:
