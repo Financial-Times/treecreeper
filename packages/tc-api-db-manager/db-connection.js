@@ -64,7 +64,7 @@ driver.session = (...sessionArgs) => {
 
 module.exports = {
 	driver,
-	setDbQueryTimeout: timeout => {
+	setTimeout: timeout => {
 		TIMEOUT = timeout;
 	},
 	executeQuery: (query, parameters) =>
