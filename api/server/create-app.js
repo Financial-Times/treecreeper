@@ -1,6 +1,7 @@
 const express = require('express');
 require('express-async-errors');
 const metrics = require('next-metrics');
+const { patchHandler } = require('@financial-times/tc-api-rest-handlers');
 const { getApp } = require('../../packages/tc-api-express');
 // const { createStore } = require('../../packages/tc-api-s3-document-store');
 const health = require('./health');
@@ -11,9 +12,9 @@ const {
 	uncaughtError,
 } = require('./middleware/errors');
 
-const { TIMEOUT } = require('./constants');
 const security = require('./middleware/security');
 const maintenance = require('./middleware/maintenance');
+const { setSalesforceIdForSystem } = require('./lib/salesforce');
 
 const createApp = async () => {
 	const app = express();
@@ -37,7 +38,6 @@ const createApp = async () => {
 
 	// Always assign/propagate requestId and setup request tracing
 	app.set('case sensitive routing', true);
-
 	app.use(security.requireApiKey);
 
 	await getApp({
@@ -49,11 +49,17 @@ const createApp = async () => {
 		restMethods: ['HEAD', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
 		restMiddlewares: [maintenance.disableReads, maintenance.disableWrites],
 		schemaOptions: { updateMode: 'poll' },
-		republishSchemaPrefix: 'api',
 		republishSchema: true,
-		timeout: TIMEOUT,
+		republishSchemaPrefix: 'api',
+		timeout: 15000,
 		// documentStore: createStore(),
-	}).then(() => {
+	}).then(({ treecreeper: { emitter, availableEvents } }) => {
+		const kinesisPublish = () => null;
+		availableEvents.forEach(eventName =>
+			emitter.on(eventName, kinesisPublish),
+		);
+		const rePatch = patchHandler({});
+		emitter.on('CREATE', event => setSalesforceIdForSystem(event, rePatch));
 		app.use(errorToErrors);
 		app.use(notFound);
 		app.use(uncaughtError);
