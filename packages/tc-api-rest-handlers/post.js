@@ -7,7 +7,7 @@ const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 const { broadcast } = require('./lib/events');
 
-const postHandler = ({ documentStore, logChanges = () => null } = {}) => async input => {
+const postHandler = ({ documentStore } = {}) => async input => {
 	const {
 		type,
 		code,

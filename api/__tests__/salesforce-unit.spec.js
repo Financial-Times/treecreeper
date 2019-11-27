@@ -47,15 +47,9 @@ describe('salesforce sync unit', () => {
 			process.env.SALESFORCE_TOKEN = 'test-sf-token';
 		});
 
-<<<<<<< HEAD
 		it("doesn't call if not create", async () => {
 			await salesforceSync.setSalesforceIdForSystem({
 				action: 'UPDATE',
-=======
-		it("doesn't call if not create  biz-ops", async () => {
-			await salesforceSync.setSalesforceIdForSystem({
-				action: 'CREATE',
->>>>>>> d4639caaacc83ea3757711c96c9b42ef90291fef
 				code: 'elephants',
 			});
 			expect(loginStub).not.toHaveBeenCalled();

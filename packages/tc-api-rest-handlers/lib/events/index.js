@@ -99,3 +99,4 @@ module.exports = {
 	availableEvents: acceptableActions,
 	emitter,
 	broadcast,
+};
