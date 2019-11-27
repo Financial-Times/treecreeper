@@ -123,3 +123,4 @@ clean-deps:
 	rm -rf node_modules
 	rm package-lock.json
 	make install
+	npm install
