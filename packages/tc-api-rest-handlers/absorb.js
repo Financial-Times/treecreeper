@@ -2,7 +2,10 @@ const httpErrors = require('http-errors');
 const { logger } = require('@financial-times/tc-api-express-logger');
 const { logChanges } = require('@financial-times/tc-api-publish');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { executeQuery } = require('./lib/neo4j-model');
+const {
+	executeQuery,
+	executeQueryWithTransaction,
+} = require('./lib/neo4j-model');
 const { validateInput, validateCode } = require('./lib/validation');
 const { diffProperties } = require('./lib/diff-properties');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
@@ -27,7 +30,7 @@ const fetchNode = async (nodeType, code, paramName = 'code') => {
 	return node;
 };
 
-const mergeRelationships = async ({
+const createMergeRelationshipsQuery = ({
 	nodeType,
 	absorbedCode,
 	code,
@@ -39,14 +42,17 @@ const mergeRelationships = async ({
 		SET ${metaPropertiesForUpdate('node')}
 		${getNeo4jRecordCypherQuery({ includeWithStatement: true })}`;
 
-	return executeQuery(
+	return {
 		query,
-		{ absorbedCode, code, ...prepareMetadataForNeo4jQuery(metadata) },
-		true,
-	);
+		parameters: {
+			absorbedCode,
+			code,
+			...prepareMetadataForNeo4jQuery(metadata),
+		},
+	};
 };
 
-const removeRelationships = async ({
+const createRemoveRelationshipsQuery = ({
 	nodeType,
 	absorbedCode,
 	removedRelationships,
@@ -62,10 +68,13 @@ const removeRelationships = async ({
 		...deleteRelationshipQueries,
 		'RETURN node',
 	];
-	await executeQuery(queries.join('\n'), {
-		...parameters,
-		code: absorbedCode,
-	});
+	return {
+		query: queries.join('\n'),
+		parameters: {
+			...parameters,
+			code: absorbedCode,
+		},
+	};
 };
 
 const getWriteProperties = ({
@@ -168,15 +177,6 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		mainRecord,
 	});
 
-	// Remove relationships for absorbed code if exists
-	if (Object.keys(removedRelationships).length > 0) {
-		await removeRelationships({
-			nodeType,
-			absorbedCode,
-			removedRelationships,
-		});
-	}
-
 	let updatedDocstoreBody;
 	let undoDocstoreWrite;
 
@@ -192,13 +192,33 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	let result;
 	try {
-		// Merge Neo4j relationships
-		result = await mergeRelationships({
-			nodeType,
-			absorbedCode,
-			code,
-			metadata,
-		});
+		const queries = [];
+
+		if (Object.keys(removedRelationships).length > 0) {
+			queries.push(
+				createRemoveRelationshipsQuery({
+					nodeType,
+					absorbedCode,
+					removedRelationships,
+				}),
+			);
+		}
+
+		queries.push(
+			createMergeRelationshipsQuery({
+				nodeType,
+				absorbedCode,
+				code,
+				metadata,
+			}),
+		);
+
+		// Entire queries which affects current node should run in transaction.
+		// So we stack queries and execute all at once
+		const results = await executeQueryWithTransaction(...queries);
+
+		// Merged result always exists at last index
+		result = results.pop();
 
 		logChanges('UPDATE', result, {
 			relationships: {
