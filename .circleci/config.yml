@@ -23,13 +23,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v3-dependency-npm-{{ checksum "package.json" }}-
-        - v3-dependency-npm-{{ checksum "package.json" }}
-        - v3-dependency-npm-
+        - v4-dependency-npm-{{ checksum "package.json" }}-
+        - v4-dependency-npm-{{ checksum "package.json" }}
+        - v4-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v3-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v4-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
