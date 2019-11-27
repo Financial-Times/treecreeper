@@ -25,7 +25,7 @@ references:
       keys:
         - v5-dependency-npm-{{ checksum "package.json" }}-
         - v5-dependency-npm-{{ checksum "package.json" }}
-        - v5-dependency-npm-
+        # - v5-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
