@@ -6,7 +6,8 @@ const namespace = 'salesforce-sync';
 const { dropDb } = require('./helpers/test-data');
 const { setupMocks } = require('./helpers');
 
-describe('salesforce sync integration', () => {
+// can't test against the test schema - very biz ops specific
+describe.skip('salesforce sync integration', () => {
 	beforeAll(async () => {
 		app = await createApp();
 	});
