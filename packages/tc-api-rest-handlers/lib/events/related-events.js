@@ -4,24 +4,33 @@ const { getContext } = require('@financial-times/tc-api-express-logger');
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
 
-const findPropertyNames = ({
+const findPropertyName = ({
 	sourceType,
 	destinationType,
 	relationship,
 	direction,
-	inverse = false,
 }) => {
 	const { properties: sourceProperties } = schema.getType(sourceType);
-	direction = inverse ? invertDirection(direction) : direction;
-	return Object.entries(sourceProperties)
-		.filter(
-			([, definition]) =>
-				definition.type === destinationType &&
-				definition.relationship === relationship &&
-				definition.direction === direction,
-		)
-		.map(([propName]) => propName)
-		.sort();
+	const [propName] = Object.entries(sourceProperties).find(
+		([, definition]) =>
+			definition.type === destinationType &&
+			definition.relationship === relationship &&
+			definition.direction === direction,
+	);
+	return propName;
+};
+
+const findInversePropertyName = (rootType, propName) => {
+	const { type, relationship, direction } = schema.getType(
+		rootType,
+	).properties[propName];
+
+	return findPropertyName({
+		sourceType: type,
+		direction: invertDirection(direction),
+		relationship,
+		destinationType: rootType,
+	});
 };
 
 const makeAddedRelationshipEvents = (
@@ -48,25 +57,21 @@ const makeAddedRelationshipEvents = (
 		);
 
 	const { properties } = schema.getType(nodeType);
-	return Object.entries(properties)
-		.filter(([name]) => name in addedRelationships)
-		.reduce((events, [name, { type, direction, relationship }]) => {
-			const updatedProperties = findPropertyNames({
-				sourceType: nodeType,
-				destinationType: type,
-				relationship,
-				direction,
-			});
+	return Object.entries(addedRelationships)
+		.reduce((events, [propName, codes]) => {
+			const { type } = properties[propName];
 
-			addedRelationships[name].forEach(code => {
+			const updatedProperty = findInversePropertyName(nodeType, propName);
+
+			codes.forEach(code => {
 				const isCreated = isCreatedNode(type, code);
 				events.push({
 					action: isCreated ? 'CREATE' : 'UPDATE',
 					code,
-					type: nodeType,
+					type,
 					updatedProperties: isCreated
-						? ['code'].concat(updatedProperties).sort()
-						: updatedProperties,
+						? ['code', updatedProperty].sort()
+						: [updatedProperty],
 				});
 			});
 			return events;
@@ -79,18 +84,14 @@ const makeRemovedRelationshipEvents = (nodeType, removedRelationships) => {
 	return Object.entries(removedRelationships).reduce(
 		(events, [propName, codes]) => {
 			codes.forEach(removedCode => {
-				const { type, relationship, direction } = properties[propName];
+				const { type } = properties[propName];
 				events.push({
 					action: 'UPDATE',
 					code: removedCode,
 					type,
-					updatedProperties: findPropertyNames({
-						sourceType: nodeType,
-						destinationType: type,
-						relationship,
-						direction,
-						inverse: true,
-					}),
+					updatedProperties: [
+						findInversePropertyName(nodeType, propName),
+					],
 				});
 			});
 			return events;

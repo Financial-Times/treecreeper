@@ -13,12 +13,23 @@ const makeEvents = (action, neo4jEntity, relationships) => {
 	const nodeType = labels[0];
 	const { code } = properties;
 	const events = [];
-	const updatedProperties = Object.keys(properties);
 
 	const {
 		added: addedRelationships = {},
 		removed: removedRelationships = {},
 	} = relationships;
+
+	const updatedProperties = [
+		...new Set(
+			Object.keys(properties).concat(
+				Object.keys(addedRelationships),
+				Object.keys(removedRelationships),
+			),
+		),
+	]
+		.filter(key => !(action === 'UPDATE' && key === 'code'))
+		.sort();
+
 	events.push({
 		action,
 		code,
@@ -54,12 +65,39 @@ const uniquifyEvents = events => {
 		);
 		const updatedProperties = [
 			...new Set([].concat(...updatedPropertiesList)),
-		].sort();
+		]
+			.filter(name => name.charAt(0) !== '_')
+			.sort();
 		// Merge to first event object
 		return Object.assign(groupedEvent[0], {
 			updatedProperties,
 		});
 	});
+};
+const requiredPluckFieldNames = ['action', 'code', 'type', 'updatedProperties'];
+
+const publishEvent = payload => {
+	const missingFields = requiredPluckFieldNames.filter(
+		field => !(field in payload),
+	);
+	if (missingFields.length > 0) {
+		logger.warn(
+			{
+				event: 'INVALID_PUBLISH_EVENT',
+				missingFields,
+				payload,
+			},
+			'Missing required fields for event log record',
+		);
+	}
+
+	return requiredPluckFieldNames.reduce(
+		(plucked, fieldName) =>
+			Object.assign(plucked, { [fieldName]: payload[fieldName] }),
+		{
+			time: Math.floor(Date.now() / 1000),
+		},
+	);
 };
 
 const emitter = new EventEmitter();
@@ -77,7 +115,7 @@ const broadcast = (action, entity, { relationships = {} } = {}) => {
 	}
 
 	const events = uniquifyEvents(makeEvents(action, entity, relationships));
-	events.forEach(event => emitter.emit(event.action, event));
+	events.forEach(event => emitter.emit(event.action, publishEvent(event)));
 };
 
 module.exports = {
