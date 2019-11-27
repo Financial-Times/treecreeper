@@ -10,8 +10,9 @@ const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { broadcast } = require('./lib/events');
 
-const patchHandler = ({ documentStore, logChanges = () => null } = {}) => {
+const patchHandler = ({ documentStore } = {}) => {
 	const post = postHandler({ documentStore });
 
 	return async input => {
@@ -63,7 +64,7 @@ const patchHandler = ({ documentStore, logChanges = () => null } = {}) => {
 					added: queryContext.addedRelationships,
 					removed: queryContext.removedRelationships,
 				};
-				logChanges('UPDATE', neo4jResult, { relationships });
+				broadcast('UPDATE', neo4jResult, { relationships });
 			} else {
 				neo4jResultBody = initialContent;
 			}

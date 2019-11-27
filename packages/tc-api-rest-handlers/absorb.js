@@ -11,6 +11,7 @@ const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
+const { broadcast } = require('./lib/events');
 
 const fetchNode = async (nodeType, code, paramName = 'code') => {
 	const query = `MATCH (node:${nodeType} { code: $${paramName} })
@@ -128,7 +129,7 @@ const collectRemovedRelationships = ({
 
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
-const absorbHandler = ({ documentStore, logChanges = () => null } = {}) => async input => {
+const absorbHandler = ({ documentStore } = {}) => async input => {
 	const {
 		type: nodeType,
 		code,
@@ -199,12 +200,12 @@ const absorbHandler = ({ documentStore, logChanges = () => null } = {}) => async
 			metadata,
 		});
 
-		logChanges('UPDATE', result, {
+		broadcast('UPDATE', result, {
 			relationships: {
 				removed: removedRelationships,
 			},
 		});
-		logChanges('DELETE', absorbedNode);
+		broadcast('DELETE', absorbedNode);
 	} catch (err) {
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },

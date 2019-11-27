@@ -39,12 +39,9 @@ const createApp = async () => {
 
 	// Always assign/propagate requestId and setup request tracing
 	app.set('case sensitive routing', true);
-
 	app.use(security.requireApiKey);
-	const kinesisAdaptor = {publish: () => null, getName: () => 'dummy-kinesis'};
-	const rePatch = patchHandler({
-		publishAdaptors: [kinesisAdaptor],
-	});
+	const kinesisPublish = () => null;
+	const rePatch = patchHandler({});
 
 	await getApp({
 		app,
@@ -58,12 +55,12 @@ const createApp = async () => {
 		republishSchemaPrefix: 'api',
 		republishSchema: true,
 		timeout: TIMEOUT,
-		publishAdaptors: [
-			{publish: event => setSalesforceIdForSystem(event, rePatch), getName: () => 'salesforce-sync'},
-			kinesisAdaptor,
-		],
 		// documentStore: createStore(),
-	}).then(() => {
+	}).then(({ treecreeper: { emitter, availableEvents } }) => {
+		availableEvents.forEach(eventName =>
+			emitter.on(eventName, kinesisPublish),
+		);
+		emitter.on('CREATE', event => setSalesforceIdForSystem(event, rePatch));
 		app.use(errorToErrors);
 		app.use(notFound);
 		app.use(uncaughtError);

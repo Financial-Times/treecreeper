@@ -2,10 +2,10 @@ const httpErrors = require('http-errors');
 const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
+const { broadcast } = require('./lib/events');
 
 const deleteHandler = ({
 	documentStore,
-	logChanges = () => null,
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
@@ -38,7 +38,7 @@ const deleteHandler = ({
 
 	try {
 		await executeQuery(query, { code });
-		logChanges('DELETE', neo4jResult);
+		broadcast('DELETE', neo4jResult);
 	} catch (error) {
 		logger.error(
 			{ event: 'NEO4J_DELETE_FAILURE', error },
