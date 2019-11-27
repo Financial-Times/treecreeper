@@ -36,13 +36,13 @@
     "valid-url": "^1.0.9",
     "@financial-times/tc-api-db-manager": "file:./packages/tc-api-db-manager",
     "@financial-times/tc-schema-sdk": "file:./packages/tc-schema-sdk",
-    "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher"
+    "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
+    "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers"
   },
   "devDependencies": {
     "@financial-times/athloi": "^1.0.0-beta.29",
     "@financial-times/rel-engage": "^7.3.0",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
-    "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
     "@ljharb/eslint-config": "^15.0.2",
     "artillery": "^1.6.0-28",
     "artillery-plugin-statsd": "^2.2.1",
