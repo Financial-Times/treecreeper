@@ -40,6 +40,11 @@ const createApp = async () => {
 	app.set('case sensitive routing', true);
 	app.use(security.requireApiKey);
 
+	const kinesisAdaptor = {publish: () => null, getName: () => 'dummy-kinesis'};
+	const rePatch = patchHandler({
+		publishAdaptors: [kinesisAdaptor],
+	});
+
 	await getApp({
 		app,
 		graphqlPath: '/graphql',

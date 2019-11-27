@@ -6,6 +6,7 @@ const { broadcast } = require('./lib/events');
 
 const deleteHandler = ({
 	documentStore,
+	logChanges = () => null,
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);

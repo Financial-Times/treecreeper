@@ -87,8 +87,7 @@ const broadcast = (action, entity, { relationships = {} } = {}) => {
 		throw new Error(message);
 	}
 
-	const events = makeEvents(action, entity, relationships);
-	events.forEach(event =>
+	makeEvents(action, entity, relationships).forEach(event =>
 		emitter.emit(event.action, {
 			time: Math.floor(Date.now() / 1000),
 			...event,
@@ -100,4 +99,3 @@ module.exports = {
 	availableEvents: acceptableActions,
 	emitter,
 	broadcast,
-};
