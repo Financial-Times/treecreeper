@@ -1,6 +1,5 @@
 const httpErrors = require('http-errors');
 const { logger } = require('@financial-times/tc-api-express-logger');
-const { logChanges } = require('@financial-times/tc-api-publish');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const {
 	executeQuery,
@@ -15,6 +14,7 @@ const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
 } = require('./lib/metadata-helpers');
+const { broadcast } = require('./lib/events');
 
 const fetchNode = async (nodeType, code, paramName = 'code') => {
 	const query = `MATCH (node:${nodeType} { code: $${paramName} })
@@ -220,12 +220,12 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		// Merged result always exists at last index
 		result = results.pop();
 
-		logChanges('UPDATE', result, {
+		broadcast('UPDATE', result, {
 			relationships: {
 				removed: removedRelationships,
 			},
 		});
-		logChanges('DELETE', absorbedNode);
+		broadcast('DELETE', absorbedNode);
 	} catch (err) {
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },
