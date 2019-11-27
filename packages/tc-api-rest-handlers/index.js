@@ -4,6 +4,7 @@ const { deleteHandler } = require('./delete');
 const { postHandler } = require('./post');
 const { patchHandler } = require('./patch');
 const { absorbHandler } = require('./absorb');
+const { emitter, availableEvents } = require('./lib/events');
 
 module.exports = {
 	headHandler,
@@ -12,4 +13,6 @@ module.exports = {
 	postHandler,
 	patchHandler,
 	absorbHandler,
+	emitter,
+	availableEvents,
 };
