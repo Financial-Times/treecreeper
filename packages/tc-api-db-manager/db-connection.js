@@ -2,7 +2,10 @@ const neo4j = require('neo4j-driver').v1;
 const metrics = require('next-metrics');
 const { logger } = require('@financial-times/tc-api-express-logger');
 
-const { TIMEOUT } = { TIMEOUT: 15000 };
+let TIMEOUT;
+
+const timeoutErrorMessage = timeout =>
+	`Neo4j query took more than ${timeout} milliseconds: closing session`;
 
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL,
@@ -15,6 +18,16 @@ const driver = neo4j.driver(
 
 const originalSession = driver.session;
 
+const getTimeoutRacePromise = timeout =>
+	new Promise((res, rej) => {
+		setTimeout(
+			() =>
+				// note that this will cause the finally block to run, which closes the session
+				rej(new Error(timeoutErrorMessage(timeout))),
+			TIMEOUT,
+		);
+	});
+
 const runQueryWithMetrics = async ({
 	session,
 	runner,
@@ -24,21 +37,9 @@ const runQueryWithMetrics = async ({
 	metrics.count('neo4j.query.count');
 	let isSuccessful = false;
 	try {
-		const result = await Promise.race([
-			runner(),
-			new Promise((res, rej) => {
-				setTimeout(
-					() =>
-						// note that this will cause the finally block to run, which closes the session
-						rej(
-							new Error(
-								'Neo4j query took more than 15 seconds: closing session',
-							),
-						),
-					TIMEOUT,
-				);
-			}),
-		]);
+		const result = TIMEOUT
+			? await Promise.race([runner(), getTimeoutRacePromise(TIMEOUT)])
+			: runner();
 
 		isSuccessful = true;
 		return result;
@@ -75,6 +76,9 @@ driver.session = (...sessionArgs) => {
 
 module.exports = {
 	driver,
+	setTimeout: timeout => {
+		TIMEOUT = timeout;
+	},
 	executeQuery: (query, parameters) =>
 		driver.session().run(query, parameters),
 	executeQueryWithSharedSession: (session = driver.session()) => {
