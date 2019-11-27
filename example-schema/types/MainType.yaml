@@ -51,27 +51,40 @@ properties:
     description: DateTime description.
     label: DateTime label
   children:
-    type: HasChild
+    relationship: HAS_CHILD
+    type: ChildType
     description: Children description.
     label: Children label
+    direction: outgoing
+    hasMany: true
   parents:
-    type: IsParentOf
+    relationship: IS_PARENT_OF
+    type: ParentType
     description: Parents description.
     label: Parents label
+    direction: incoming
+    hasMany: true
   favouriteChild:
-    type: HasFavouriteChild
+    relationship: HAS_FAVOURITE_CHILD
+    type: ChildType
     description: Favourite child description.
     label: Favourite label
+    hasMany: false
+    direction: outgoing
   youngerSiblings:
-    type: HasYoungerSibling
-    direction: from
+    relationship: HAS_YOUNGER_SIBLING
+    type: MainType
     description: Parents description.
     label: Parents label
+    direction: outgoing
+    hasMany: true
   olderSiblings:
-    type: HasYoungerSibling
-    direction: to
+    relationship: HAS_YOUNGER_SIBLING
+    type: MainType
     description: Parents description.
     label: Parents label
+    direction: incoming
+    hasMany: true
   relatedChildren:
     type: RelatedWithProperties
     description: RelatedWithProperties description.
