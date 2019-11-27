@@ -23,13 +23,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v2-dependency-npm-{{ checksum "package.json" }}-
-        - v2-dependency-npm-{{ checksum "package.json" }}
-        - v2-dependency-npm-
+        - v6-dependency-npm-{{ checksum "package.json" }}-
+        - v6-dependency-npm-{{ checksum "package.json" }}
+        # - v6-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v2-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v6-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
@@ -43,13 +43,13 @@ jobs:
     steps:
       - checkout
 
-      - *restore_node_modules
+      # - *restore_node_modules
 
       - run:
           name: Install dependencies
           command: |
-            npm install -no-save
             make monorepo
+            npm install --no-save
 
       - run:
           name: Get test env vars
