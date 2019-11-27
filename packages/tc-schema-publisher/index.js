@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const AWS = require('aws-sdk');
 const { Readable } = require('stream');
+const schema = require('@financial-times/tc-schema-sdk');
 
 const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
@@ -15,13 +16,16 @@ const getVersion = schemaObject => {
 const sendSchemaToS3 = async (
 	environment,
 	bucketName = process.env.TREECREEPER_SCHEMA_BUCKET,
-	schemaObject,
 ) => {
+	await schema.ready();
+	const schemaObject = {
+		...schema.rawData.getAll(),
+	};
 	schemaObject.version = schemaObject.version || getVersion(schemaObject);
-	const schema = JSON.stringify(schemaObject, null, 2);
+	const schemaAsString = JSON.stringify(schemaObject, null, 2);
 
 	const uploadStream = new Readable();
-	uploadStream.push(schema);
+	uploadStream.push(schemaAsString);
 	uploadStream.push(null);
 
 	console.log(

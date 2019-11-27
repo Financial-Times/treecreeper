@@ -34,12 +34,12 @@ verify:
 install: monorepo install-treecreeper
 
 monorepo:
-	npm install ysugimoto/athloi
-	npx athloi exec -- npm install --no-package-lock
+	npm install @financial-times/athloi
+	npx athloi exec --concurrency 1 -- npm install --no-package-lock
 
-npm-publish:
-	npx athloi exec -- npm version --no-git-tag-version $(CIRCLE_TAG)
-	npx athloi publish
+monorepo-publish:
+	npx athloi version --concurrency 10 $(CIRCLE_TAG)
+	npx athloi publish --concurrency 10 -- --access public
 
 .PHONY: test
 
