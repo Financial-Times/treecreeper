@@ -1,5 +1,5 @@
-jest.mock('@financial-times/tc-api-publish');
-const apiPublish = require('@financial-times/tc-api-publish');
+jest.mock('../lib/events');
+const events = require('../lib/events');
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const {
 	deleteHandler,
@@ -8,8 +8,8 @@ const {
 	absorbHandler,
 } = require('..');
 
-describe('Rest logChanges module integration', () => {
-	const namespace = 'api-rest-handlers-logchanges';
+describe('Rest events module integration', () => {
+	const namespace = 'api-rest-handlers-broadcast';
 	const mainCode = `${namespace}-main`;
 	const mainType = 'MainType';
 	const otherCode = `${namespace}-other`;
@@ -28,8 +28,8 @@ describe('Rest logChanges module integration', () => {
 	const createMainNode = (props = {}) =>
 		createNode('MainType', { code: mainCode, ...props });
 
-	const createLogChangeMock = () =>
-		jest.spyOn(apiPublish, 'logChanges').mockResolvedValue({});
+	const createBroadcastMock = () =>
+		jest.spyOn(events, 'broadcast').mockResolvedValue({});
 
 	afterEach(() => {
 		jest.resetAllMocks();
@@ -38,13 +38,13 @@ describe('Rest logChanges module integration', () => {
 	describe('DELETE', () => {
 		it('will send DELETE log', async () => {
 			await createMainNode();
-			const logChangesMock = createLogChangeMock();
+			const broadcastMock = createBroadcastMock();
 
 			const { status } = await deleteHandler()(input);
 
 			expect(status).toBe(204);
-			expect(logChangesMock).toHaveBeenCalledTimes(1);
-			expect(logChangesMock).toHaveBeenCalledWith(
+			expect(broadcastMock).toHaveBeenCalledTimes(1);
+			expect(broadcastMock).toHaveBeenCalledWith(
 				'DELETE',
 				expect.any(Object),
 			);
@@ -54,7 +54,7 @@ describe('Rest logChanges module integration', () => {
 
 	describe('POST', () => {
 		it('will send CREATE log', async () => {
-			const logChangesMock = createLogChangeMock();
+			const broadcastMock = createBroadcastMock();
 
 			const { status } = await postHandler()(
 				getInput({
@@ -63,8 +63,8 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(logChangesMock).toHaveBeenCalledTimes(1);
-			expect(logChangesMock).toHaveBeenCalledWith(
+			expect(broadcastMock).toHaveBeenCalledTimes(1);
+			expect(broadcastMock).toHaveBeenCalledWith(
 				'CREATE',
 				expect.any(Object),
 				{
@@ -78,7 +78,7 @@ describe('Rest logChanges module integration', () => {
 
 	describe('PATCH create', () => {
 		it("will send CREATE logs when node doesn't exist", async () => {
-			const logChangesMock = createLogChangeMock();
+			const broadcastMock = createBroadcastMock();
 
 			const { status } = await patchHandler()(
 				getInput({
@@ -87,8 +87,8 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(201);
-			expect(logChangesMock).toHaveBeenCalledTimes(1);
-			expect(logChangesMock).toHaveBeenCalledWith(
+			expect(broadcastMock).toHaveBeenCalledTimes(1);
+			expect(broadcastMock).toHaveBeenCalledWith(
 				'CREATE',
 				expect.any(Object),
 				{
@@ -101,7 +101,7 @@ describe('Rest logChanges module integration', () => {
 
 		it('will send UPDATE logs when node already exists', async () => {
 			await createMainNode();
-			const logChangesMock = createLogChangeMock();
+			const broadcastMock = createBroadcastMock();
 
 			const { status } = await patchHandler()(
 				getInput({
@@ -111,8 +111,8 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(logChangesMock).toHaveBeenCalledTimes(1);
-			expect(logChangesMock).toHaveBeenCalledWith(
+			expect(broadcastMock).toHaveBeenCalledTimes(1);
+			expect(broadcastMock).toHaveBeenCalledWith(
 				'UPDATE',
 				expect.any(Object),
 				{
@@ -133,7 +133,7 @@ describe('Rest logChanges module integration', () => {
 			);
 			await connectNodes([main, 'HAS_YOUNGER_SIBLING', other]);
 
-			const logChangesMock = createLogChangeMock();
+			const broadcastMock = createBroadcastMock();
 
 			const { status } = await absorbHandler()(
 				Object.assign(
@@ -148,8 +148,8 @@ describe('Rest logChanges module integration', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(logChangesMock).toHaveBeenCalledTimes(2);
-			expect(logChangesMock).toHaveBeenNthCalledWith(
+			expect(broadcastMock).toHaveBeenCalledTimes(2);
+			expect(broadcastMock).toHaveBeenNthCalledWith(
 				1,
 				'UPDATE',
 				expect.any(Object),
@@ -161,7 +161,7 @@ describe('Rest logChanges module integration', () => {
 					},
 				},
 			);
-			expect(logChangesMock).toHaveBeenNthCalledWith(
+			expect(broadcastMock).toHaveBeenNthCalledWith(
 				2,
 				'DELETE',
 				expect.any(Object),

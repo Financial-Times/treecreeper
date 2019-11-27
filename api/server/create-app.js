@@ -12,7 +12,6 @@ const {
 	uncaughtError,
 } = require('./middleware/errors');
 
-const { TIMEOUT } = require('./constants');
 const security = require('./middleware/security');
 const maintenance = require('./middleware/maintenance');
 const { setSalesforceIdForSystem } = require('./lib/salesforce');
@@ -40,8 +39,6 @@ const createApp = async () => {
 	// Always assign/propagate requestId and setup request tracing
 	app.set('case sensitive routing', true);
 	app.use(security.requireApiKey);
-	const kinesisPublish = () => null;
-	const rePatch = patchHandler({});
 
 	await getApp({
 		app,
@@ -52,14 +49,16 @@ const createApp = async () => {
 		restMethods: ['HEAD', 'POST', 'DELETE', 'PATCH', 'ABSORB'],
 		restMiddlewares: [maintenance.disableReads, maintenance.disableWrites],
 		schemaOptions: { updateMode: 'poll' },
-		republishSchemaPrefix: 'api',
 		republishSchema: true,
-		timeout: TIMEOUT,
+		republishSchemaPrefix: 'api',
+		timeout: 15000,
 		// documentStore: createStore(),
 	}).then(({ treecreeper: { emitter, availableEvents } }) => {
+		const kinesisPublish = () => null;
 		availableEvents.forEach(eventName =>
 			emitter.on(eventName, kinesisPublish),
 		);
+		const rePatch = patchHandler({});
 		emitter.on('CREATE', event => setSalesforceIdForSystem(event, rePatch));
 		app.use(errorToErrors);
 		app.use(notFound);
