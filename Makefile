@@ -58,3 +58,10 @@ run-db:
 
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
+
+clean-deps:
+	rm -rf packages/*/node_modules
+	rm -rf node_modules
+	rm package-lock.json
+	make install
+	npm install
