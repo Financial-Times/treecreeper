@@ -23,13 +23,13 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v5-dependency-npm-{{ checksum "package.json" }}-
-        - v5-dependency-npm-{{ checksum "package.json" }}
-        # - v5-dependency-npm-
+        - v6-dependency-npm-{{ checksum "package.json" }}-
+        - v6-dependency-npm-{{ checksum "package.json" }}
+        # - v6-dependency-npm-
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v5-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: v6-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
       paths:
         - ./node_modules/
 
@@ -55,7 +55,7 @@ jobs:
           name: Get test env vars
           command: make env
 
-      - *cache_node_modules
+      # - *cache_node_modules
 
       - persist_to_workspace:
           root: *workspace_root
