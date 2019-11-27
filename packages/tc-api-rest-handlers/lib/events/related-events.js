@@ -33,6 +33,32 @@ const findInversePropertyName = (rootType, propName) => {
 	});
 };
 
+const generateRelatedEvents = ({
+	rootType,
+	getEventType,
+	getUpdatedProperties,
+	relationships,
+}) => {
+	const { properties } = schema.getType(rootType);
+	return Object.entries(relationships).reduce((events, [propName, codes]) => {
+		codes.forEach(code => {
+			const { type } = properties[propName];
+			events.push({
+				action: getEventType(type, code),
+				code,
+				type,
+				updatedProperties: getUpdatedProperties({
+					rootType,
+					propName,
+					type,
+					code,
+				}),
+			});
+		});
+		return events;
+	}, []);
+};
+
 const makeAddedRelationshipEvents = (
 	nodeType,
 	mainCode,
@@ -43,62 +69,39 @@ const makeAddedRelationshipEvents = (
 		return [];
 	}
 	const { requestId } = getContext();
-	const createdNodes = neo4jRecords
-		.filter(record => record.get('related._createdByRequest') === requestId)
-		.map(node => ({
-			relatedCode: node.relatedCode(),
-			relatedType: node.relatedType(),
-		}));
-
-	const isCreatedNode = (type, code) =>
-		createdNodes.some(
-			({ relatedCode, relatedType }) =>
-				type === relatedType && code === relatedCode,
-		);
-
-	const { properties } = schema.getType(nodeType);
-	return Object.entries(addedRelationships)
-		.reduce((events, [propName, codes]) => {
-			const { type } = properties[propName];
-
-			const updatedProperty = findInversePropertyName(nodeType, propName);
-
-			codes.forEach(code => {
-				const isCreated = isCreatedNode(type, code);
-				events.push({
-					action: isCreated ? 'CREATE' : 'UPDATE',
-					code,
-					type,
-					updatedProperties: isCreated
-						? ['code', updatedProperty].sort()
-						: [updatedProperty],
-				});
-			});
-			return events;
-		}, []);
-};
-
-const makeRemovedRelationshipEvents = (nodeType, removedRelationships) => {
-	const { properties } = schema.getType(nodeType);
-
-	return Object.entries(removedRelationships).reduce(
-		(events, [propName, codes]) => {
-			codes.forEach(removedCode => {
-				const { type } = properties[propName];
-				events.push({
-					action: 'UPDATE',
-					code: removedCode,
-					type,
-					updatedProperties: [
-						findInversePropertyName(nodeType, propName),
-					],
-				});
-			});
-			return events;
-		},
-		[],
+	const createdNodes = new Set(
+		neo4jRecords
+			.filter(
+				record => record.get('related._createdByRequest') === requestId,
+			)
+			.map(node => `${node.relatedType()}:${node.relatedCode()}`),
 	);
+
+	const isCreated = (type, code) => createdNodes.has(`${type}:${code}`);
+
+	return generateRelatedEvents({
+		rootType: nodeType,
+		getEventType: (type, code) =>
+			isCreated(type, code) ? 'CREATE' : 'UPDATE',
+		getUpdatedProperties: ({ rootType, propName, type, code }) => {
+			const updatedProperty = findInversePropertyName(rootType, propName);
+			return isCreated(type, code)
+				? ['code', updatedProperty].sort()
+				: [updatedProperty];
+		},
+		relationships: addedRelationships,
+	});
 };
+
+const makeRemovedRelationshipEvents = (nodeType, removedRelationships) =>
+	generateRelatedEvents({
+		rootType: nodeType,
+		getEventType: () => 'UPDATE',
+		getUpdatedProperties: ({ rootType, propName }) => [
+			findInversePropertyName(rootType, propName),
+		],
+		relationships: removedRelationships,
+	});
 
 module.exports = {
 	makeAddedRelationshipEvents,
