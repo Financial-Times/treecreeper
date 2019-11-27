@@ -43,13 +43,13 @@ jobs:
     steps:
       - checkout
 
-      - *restore_node_modules
+      # - *restore_node_modules
 
       - run:
           name: Install dependencies
           command: |
-            npm install -no-save
             make monorepo
+            npm install
 
       - run:
           name: Get test env vars
