@@ -12,6 +12,10 @@ const {
 	logger,
 	middleware: contextMiddleware,
 } = require('@financial-times/tc-api-express-logger');
+const {
+	emitter,
+	availableEvents,
+} = require('@financial-times/tc-api-rest-handlers');
 const { getRestApi } = require('./lib/get-rest-api');
 const clientId = require('./middleware/client-id');
 const requestId = require('./middleware/request-id');
@@ -71,6 +75,8 @@ const getApp = async (options = {}) => {
 	app.treecreeper = {
 		logger,
 		isSchemaUpdating,
+		emitter,
+		availableEvents,
 	};
 
 	schema.init(schemaOptions);
