@@ -9,7 +9,6 @@
     "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
     "@financial-times/tc-api-graphql": "file:../tc-api-graphql",
     "@financial-times/tc-api-rest-handlers": "file:../tc-api-rest-handlers",
-    "@financial-times/tc-api-publish": "file:../tc-api-publish",
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "body-parser": "^1.19.0",
     "connect-timeout": "^1.9.0",
