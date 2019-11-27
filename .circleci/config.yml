@@ -49,13 +49,13 @@ jobs:
           name: Install dependencies
           command: |
             make monorepo
-            npm install
+            npm install --no-save
 
       - run:
           name: Get test env vars
           command: make env
 
-      # - *cache_node_modules
+      - *cache_node_modules
 
       - persist_to_workspace:
           root: *workspace_root
