@@ -43,8 +43,10 @@ test:
 	# Make sure db constraints are set up to avoid race conditions between the first two test suites
 	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
 	@if [ -z $(CI) ]; \
-		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+		then TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
+			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+		else TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
+			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 run:
