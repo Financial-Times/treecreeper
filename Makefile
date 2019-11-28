@@ -26,11 +26,8 @@ env:
 
 verify:
 
-# monorepo task should be ran before root installation
-# because root of package.json refers some pacakges/tc-* package internally.
-#
-# And install-treecreeper task is just fake task in order to run `instal%` task of rel-engage.
-# see https://github.com/Financial-Times/rel-engage/blob/master/index.mk#L100
+# note that this invokes npm install, and in package.json there is a postinstall script
+# defined too, which installs all the node_modules for the packages
 install:
 
 monorepo-publish:
