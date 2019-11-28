@@ -31,11 +31,7 @@ verify:
 #
 # And install-treecreeper task is just fake task in order to run `instal%` task of rel-engage.
 # see https://github.com/Financial-Times/rel-engage/blob/master/index.mk#L100
-install: monorepo install-treecreeper
-
-monorepo:
-	npm install @financial-times/athloi
-	npx athloi exec --concurrency 1 -- npm install --no-package-lock
+install:
 
 monorepo-publish:
 	npx athloi version --concurrency 10 $(CIRCLE_TAG)
