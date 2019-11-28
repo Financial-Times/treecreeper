@@ -63,13 +63,11 @@ const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
 	upsert,
-	parameters = {},
 ) => {
 	const { properties: validProperties } = getType(nodeType);
 
 	const relationshipParameters = {};
 	const relationshipQueries = [];
-	const replaceObjects = {};
 
 	Object.entries(relationshipsToCreate).forEach(([propName, values]) => {
 		const propDef = validProperties[propName];
@@ -78,24 +76,11 @@ const prepareToWriteRelationships = (
 
 		const retrievedCodes = [];
 		const relationshipPropQueries = [];
-		let propValueType;
 
-		// values could be just an array of strings(codes), objects(code and properties) or mixed
 		values.forEach(value => {
-			propValueType = typeof value;
-			if (propValueType === 'string') {
-				retrievedCodes.push(value);
-			} else {
-				retrievedCodes.push(value.code);
-				addPropsToQueries(relationshipPropQueries, value);
-			}
+			retrievedCodes.push(value.code);
+			addPropsToQueries(relationshipPropQueries, value);
 		});
-
-		// neo4j driver only accept primitive types or arrays thereof
-		// store an array of codes here to replace relationship values in parameters later
-		if (propValueType === 'object') {
-			replaceObjects[propName] = retrievedCodes;
-		}
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
@@ -148,14 +133,6 @@ const prepareToWriteRelationships = (
 			}
 		}
 	});
-
-	// neo4j driver only accept primitive types or arrays thereof
-	// need to replace objects in parameters to an array of codes
-	if (parameters.properties && Object.keys(replaceObjects).length) {
-		Object.assign(relationshipParameters, {
-			properties: { ...parameters.properties, ...replaceObjects },
-		});
-	}
 
 	return { relationshipParameters, relationshipQueries };
 };
