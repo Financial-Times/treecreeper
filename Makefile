@@ -48,72 +48,20 @@ deploy-aws:
 
 test:
 	# Make sure db constraints are set up to avoid race conditions between the first two test suites
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
+	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_SCHEMA_DIRECTORY=example-schema jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
-test-pkg:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/.*__tests__.*/*.spec.js" --testEnvironment=node --watch ; \
-
-test-schema:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "example-schema/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-
-test-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "api/.*__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-
-test-ql:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "api/.*__tests__.*/graphql.spec.js" --testEnvironment=node --watch; \
-
-
-test-pkg-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/tc-api.*/.*__tests__.*spec.js" --testEnvironment=node --watch; \
-
-test-pkg-docstore:
-	TREECREEPER_DOCSTORE_S3_BUCKET=example-bucket DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-s3-document-store/__tests__/.*.spec.js" --testEnvironment=node --watch; \
-
-test-pkg-rest-handlers:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-rest-handlers/__tests__/.*.spec.js" --testEnvironment=node --watch; \
-
-test-api-docs:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-rest-handlers/__tests__/document-store\.spec.js" --testEnvironment=node --watch; \
-
-test-pkg-api-publish:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 jest --config="./jest.config.js" "packages/api-publish/__tests__/.*.spec.js" --testEnvironment=node --watch; \
-
 run:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
+	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
 demo-api:
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
+	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 run-db:
 	docker-compose up
 
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
-
-# load-testing
-load-test-run:
-	docker-compose -f scripts/load-testing/statsd/docker-compose.yaml up -d && \
-	artillery run scripts/load-testing/$(TEST_NAME).yaml && \
-	docker-compose -f scripts/load-testing/statsd/docker-compose.yaml down
-
-load-test-generateData:
-	node scripts/load-testing/lib/generate/index
-
-load-test-readQueries:
-	TEST_NAME=readQueries npm run test:load:run
-
-load-test-writeQueriesForGroups:
-	TEST_NAME=writeQueriesForGroups npm run test:load:run && node scripts/load-testing/clean-up
-
-load-test-writeQueriesForSystems:
-	TEST_NAME=writeQueriesForSystems npm run test:load:run && node scripts/load-testing/clean-up
-
-load-test-writeQueriesForTeams:
-	TEST_NAME=writeQueriesForTeams npm run test:load:run && node scripts/load-testing/clean-up
-
-load-test-cleanUp:
-	node scripts/load-testing/clean-up

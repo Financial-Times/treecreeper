@@ -18,7 +18,10 @@ const getGraphqlApi = ({
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
-			if (republishSchema) {
+			if (
+				republishSchema &&
+				!process.env.TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH
+			) {
 				sendSchemaToS3(republishSchemaPrefix)
 					.then(() => {
 						logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
