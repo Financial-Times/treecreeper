@@ -10,6 +10,12 @@ jest.mock('@financial-times/tc-schema-publisher', () => ({
 
 // Skipping for now as the consant refactors play havoc with jest's mocking
 describe('schema polling updates', () => {
+	beforeAll(() => {
+		delete process.env.TREECREEPER_TEST;
+	});
+	afterAll(() => {
+		process.env.TREECREEPER_TEST = 'true';
+	});
 	describe('api updates', () => {
 		let app;
 		beforeAll(async () => {
