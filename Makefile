@@ -41,19 +41,19 @@ deploy-aws:
 
 test:
 	# Make sure db constraints are set up to avoid race conditions between the first two test suites
-	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
 	@if [ -z $(CI) ]; \
-		then TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
+		then TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
-		else TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
+		else TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 run:
-	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
+	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
 demo-api:
-	TREECREEPER_SUPPRESS_SCHEMA_REPUBLISH=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
+	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 run-db:
 	docker-compose up

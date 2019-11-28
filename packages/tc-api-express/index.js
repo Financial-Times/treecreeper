@@ -81,7 +81,11 @@ const getApp = async (options = {}) => {
 
 	schema.init(schemaOptions);
 	updateGraphqlApiOnSchemaChange();
-	updateConstraintsOnSchemaChange();
+	// avoids this running in every single spec file
+	// instead we explictly set up the constraints once before we start the test suite
+	if (!process.env.TREECREEPER_TEST) {
+		updateConstraintsOnSchemaChange();
+	}
 
 	await schema.ready();
 
