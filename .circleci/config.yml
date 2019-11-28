@@ -23,13 +23,11 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - v2-dependency-npm-{{ checksum "package.json" }}-
-        - v2-dependency-npm-{{ checksum "package.json" }}
-        - v2-dependency-npm-
+        - cache-v1-{{ .Branch }}-{{ checksum "./package.json" }}
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: v2-dependency-npm-{{ checksum "package.json" }}-{{ epoch }}
+      key: cache-v1-{{ .Branch }}-{{ checksum "./package.json" }}
       paths:
         - ./node_modules/
 
