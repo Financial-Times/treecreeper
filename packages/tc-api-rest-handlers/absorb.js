@@ -4,7 +4,7 @@ const { logChanges } = require('@financial-times/tc-api-publish');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const {
 	executeQuery,
-	executeQueryWithTransaction,
+	executeQueriesWithTransaction,
 } = require('./lib/neo4j-model');
 const { validateInput, validateCode } = require('./lib/validation');
 const { diffProperties } = require('./lib/diff-properties');
@@ -215,7 +215,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 		// Entire queries which affects current node should run in transaction.
 		// So we stack queries and execute all at once
-		const results = await executeQueryWithTransaction(...queries);
+		const results = await executeQueriesWithTransaction(...queries);
 
 		// Merged result always exists at last index
 		result = results.pop();

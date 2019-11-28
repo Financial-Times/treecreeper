@@ -90,7 +90,7 @@ module.exports = {
 
 		return executeQuery;
 	},
-	executeQueryWithTransaction: async (...queries) => {
+	executeQueriesWithTransaction: async (...queries) => {
 		const session = originalSession.apply(driver, []);
 		const result = await session.writeTransaction(async tx =>
 			Promise.all(

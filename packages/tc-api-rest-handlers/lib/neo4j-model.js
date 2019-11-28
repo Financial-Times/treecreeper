@@ -1,7 +1,7 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
 const {
 	executeQuery,
-	executeQueryWithTransaction,
+	executeQueriesWithTransaction,
 } = require('@financial-times/tc-api-db-manager');
 const { convertNeo4jToJson } = require('./neo4j-type-conversion');
 
@@ -124,8 +124,8 @@ const addBizOpsEnhancements = result => {
 module.exports = {
 	executeQuery: async (query, params) =>
 		addBizOpsEnhancements(await executeQuery(query, params)),
-	executeQueryWithTransaction: async (...queries) => {
-		const results = await executeQueryWithTransaction(...queries);
+	executeQueriesWithTransaction: async (...queries) => {
+		const results = await executeQueriesWithTransaction(...queries);
 		return results.map(addBizOpsEnhancements);
 	},
 };
