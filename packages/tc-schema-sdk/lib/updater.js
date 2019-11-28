@@ -1,7 +1,6 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const readYaml = require('./read-yaml');
-const { compatBackward } = require('./compat-backward');
 
 // e.g HasChild -> HAS_CHILD
 const toSnakeUpperCase = name =>
@@ -26,8 +25,6 @@ class SchemaUpdater {
 		version,
 		schemaBaseUrl = process.env.TREECREEPER_SCHEMA_URL,
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
-		backwardCompatibility = process.env
-			.TREECREEPER_SCHEMA_BACKWARD_COMPATIBILITY,
 		schemaData,
 	} = {}) {
 		this.updateMode = updateMode;
@@ -37,14 +34,17 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: readYaml.directory(schemaDirectory, 'types'),
-					relationships: readYaml
-						.directory(schemaDirectory, 'relationships')
-						.map(rel => ({
-							...rel,
-							relationship:
-								rel.relationship || toSnakeUpperCase(rel.name),
-						})),
+					types: [].concat(
+						readYaml.directory(schemaDirectory, 'types'),
+						readYaml
+							.directory(schemaDirectory, 'relationships')
+							.map(rel => ({
+								...rel,
+								relationship:
+									rel.relationship ||
+									toSnakeUpperCase(rel.name),
+							})),
+					),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',
@@ -58,16 +58,6 @@ class SchemaUpdater {
 			};
 		}
 		if (schemaData) {
-			if (backwardCompatibility) {
-				console.log(
-					`[SCHEMA] backward compatiliby enabled. SDK transforms to old model definition`,
-				);
-				schemaData.schema.types = compatBackward(
-					schemaData.schema.types,
-					schemaData.schema.relationships,
-				);
-			}
-
 			this.isStatic = true;
 			this.rawData.set(schemaData);
 			this.eventEmitter.emit('change', {

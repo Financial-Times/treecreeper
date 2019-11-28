@@ -1,4 +1,5 @@
 const deepFreeze = require('deep-freeze');
+const { compatBackward } = require('./compat-backward');
 
 class RawDataWrapper {
 	constructor() {
@@ -20,11 +21,6 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 	getTypes() {
 		this.checkDataExists();
 		return this.rawData.schema.types;
-	}
-
-	getRelationships() {
-		this.checkDataExists();
-		return this.rawData.schema.relationships;
 	}
 
 	getTypeHierarchy() {
@@ -52,6 +48,7 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 	}
 
 	set(data) {
+		data.schema.types = compatBackward(data.schema.types);
 		this.rawData = deepFreeze(data);
 		this.isHydrated = true;
 	}

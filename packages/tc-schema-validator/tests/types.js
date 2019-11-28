@@ -2,12 +2,11 @@
 const fs = require('fs');
 const path = require('path');
 const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
-const { typeTestSuite, relationshipTestSuite } = require('./type-test-suite');
+const { typeTestSuite } = require('./type-test-suite');
 
 const sdk = new SDK();
 
 const types = sdk.rawData.getTypes();
-const relationships = sdk.rawData.getRelationships();
 
 describe('types', () => {
 	fs.readdirSync(
@@ -28,7 +27,5 @@ describe('types', () => {
 			});
 		});
 
-	const allTypes = types.concat(relationships);
-	types.forEach(type => typeTestSuite(allTypes, type));
-	relationships.forEach(rel => relationshipTestSuite(allTypes, rel));
+	types.forEach(type => typeTestSuite(types, type));
 });

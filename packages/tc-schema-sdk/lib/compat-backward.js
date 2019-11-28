@@ -1,10 +1,10 @@
-const deepFreeze = require('deep-freeze');
-
-const transformProperties = (types, type, relationships) => {
+const transformProperties = (types, type) => {
 	const { properties } = type;
 
 	return Object.entries(properties).reduce((props, [propName, propDef]) => {
-		const relType = relationships.find(t => propDef.type === t.name);
+		const relType = types.find(
+			t => propDef.type === t.name && 'relationship' in t,
+		);
 		if (!relType) {
 			return {
 				...props,
@@ -45,17 +45,15 @@ const transformProperties = (types, type, relationships) => {
 	}, {});
 };
 
-const compatBackward = (types, relationships = []) => {
+const compatBackward = types => {
 	return types.reduce((compat, type) => {
 		if ('to' in type && 'from' in type) {
 			return compat;
 		}
-		compat.push(
-			deepFreeze({
-				...type,
-				properties: transformProperties(types, type, relationships),
-			}),
-		);
+		compat.push({
+			...type,
+			properties: transformProperties(types, type),
+		});
 		return compat;
 	}, []);
 };
