@@ -11,6 +11,7 @@ const {
 	getRemovedRelationships,
 	normaliseRelationshipProps,
 } = require('./lib/relationships/input');
+const { retrieveRelationshipCodes } = require('./lib/relationships/properties');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -117,7 +118,9 @@ const collectRemovedRelationships = ({
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
-		if (!absorbedRecord[propName].includes(code)) {
+		const absorbedRelationshipCodes =
+			retrieveRelationshipCodes(propName, absorbedRecord) || [];
+		if (!absorbedRelationshipCodes.includes(code)) {
 			return;
 		}
 		if (removedRelationships[propName]) {
