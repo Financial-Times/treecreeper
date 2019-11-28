@@ -15,3 +15,4 @@ junit.xml
 packages/*/node_modules
 packages/**/package-lock.json
 
+package-lock.json
