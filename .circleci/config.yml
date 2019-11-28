@@ -47,7 +47,7 @@ jobs:
           name: Install dependencies
           command: make install
       - run:
-          name: Install monorepo node modeules
+          name: Install monorepo node modules
           command: npm install
 
       - run:
