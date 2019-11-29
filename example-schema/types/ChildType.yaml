@@ -24,7 +24,3 @@ properties:
     description: Is favourite child of description.
     label: Is favourite child of label
     direction: incoming
-  relatedChildOf:
-    type: RelatedWithProperties
-    description: RelatedWithProperties description.
-    label: RelatedWithProperties label

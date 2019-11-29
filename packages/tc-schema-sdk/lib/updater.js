@@ -9,6 +9,16 @@ const toSnakeUpperCase = name =>
 		.replace(/^_|_$/g, '')
 		.toUpperCase();
 
+const readRelationships = schemaDirectory => {
+	if (!readYaml.isDirectory(schemaDirectory, 'relationships')) {
+		return [];
+	}
+	return readYaml.directory(schemaDirectory, 'relationships').map(rel => ({
+		...rel,
+		relationship: rel.relationship || toSnakeUpperCase(rel.name),
+	}));
+};
+
 class SchemaUpdater {
 	constructor(options, rawData, cache) {
 		this.eventEmitter = new EventEmitter();
@@ -36,14 +46,7 @@ class SchemaUpdater {
 				schema: {
 					types: [].concat(
 						readYaml.directory(schemaDirectory, 'types'),
-						readYaml
-							.directory(schemaDirectory, 'relationships')
-							.map(rel => ({
-								...rel,
-								relationship:
-									rel.relationship ||
-									toSnakeUpperCase(rel.name),
-							})),
+						readRelationships(schemaDirectory),
 					),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,

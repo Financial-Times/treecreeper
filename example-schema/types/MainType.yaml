@@ -85,17 +85,3 @@ properties:
     label: Parents label
     direction: incoming
     hasMany: true
-  relatedChildren:
-    type: RelatedWithProperties
-    description: RelatedWithProperties description.
-    label: RelatedWithProperties label
-  relatedToSelfFrom:
-    type: RelatedToSelfWithProperties
-    direction: from
-    description: RelatedToSelfWithProperties description.
-    label: RelatedToSelfWithProperties label
-  relatedToSelfTo:
-    type: RelatedToSelfWithProperties
-    direction: to
-    description: RelatedToSelfWithProperties description.
-    label: RelatedToSelfWithProperties label

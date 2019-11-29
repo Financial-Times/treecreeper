@@ -13,13 +13,33 @@ const validStringPatternsRX = arrayToRegExp(Object.keys(stringPatterns));
 const validEnums = Object.keys(enums);
 const isRichRelationshipType = type => 'from' in type && 'to' in type;
 
-const propertyTestSuite = ({ properties, fieldsets }) => {
+const getTwinnedRelationship = (
+	homeTypeName,
+	awayTypeName,
+	relationshipName,
+	homeDirection,
+) => {
+	const awayType = sdk.rawData
+		.getTypes()
+		.find(({ name }) => name === awayTypeName);
+	return Object.values(awayType.properties).find(
+		({ relationship, type, direction }) =>
+			relationship === relationshipName &&
+			type === homeTypeName &&
+			direction !== homeDirection,
+	);
+};
+
+const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
+	const typeNames = sdk.getTypes().map(({ name }) => name);
 	const relationshipTypeNames = sdk
 		.getRelationshipTypes()
 		.map(({ name }) => name);
+	const declaredTypeNames = [].concat(typeNames, relationshipTypeNames);
+
 	const validPropTypes = validEnums.concat(
 		Object.keys(primitiveTypesMap),
-		relationshipTypeNames,
+		declaredTypeNames,
 	);
 	const validFieldsetNames = fieldsets
 		? ['self'].concat(Object.keys(fieldsets))
@@ -38,22 +58,40 @@ const propertyTestSuite = ({ properties, fieldsets }) => {
 					if (fieldsets) {
 						commonKeys.push('fieldset');
 					}
-					expect(key).toMatch(
-						arrayToRegExp(
-							commonKeys.concat([
-								'unique',
-								'required',
-								'canIdentify',
-								'useInSummary',
-								'autoPopulated',
-								'pattern',
-								'examples',
-								'trueLabel',
-								'falseLabel',
-								'direction',
-							]),
-						),
-					);
+					if (declaredTypeNames.includes(config.type)) {
+						// it's a relationship
+						expect(key).toMatch(
+							arrayToRegExp(
+								commonKeys.concat([
+									'direction',
+									'relationship',
+									'hasMany',
+									'useInSummary',
+									'hidden',
+									'cypher',
+									'autoPopulated',
+									'showInactive',
+									'writeInactive',
+								]),
+							),
+						);
+					} else {
+						expect(key).toMatch(
+							arrayToRegExp(
+								commonKeys.concat([
+									'unique',
+									'required',
+									'canIdentify',
+									'useInSummary',
+									'autoPopulated',
+									'pattern',
+									'examples',
+									'trueLabel',
+									'falseLabel',
+								]),
+							),
+						);
+					}
 				});
 			});
 
@@ -100,6 +138,44 @@ const propertyTestSuite = ({ properties, fieldsets }) => {
 						['relationship', 'hasMany', 'pattern'].forEach(field =>
 							expect(config[field]).not.toBeDefined(),
 						);
+					});
+				});
+			} else if (typeNames.includes(config.type)) {
+				const RELATIONSHIP_NAME = getStringValidator(
+					'RELATIONSHIP_NAME',
+				);
+				describe('relationship property', () => {
+					it('must specify underlying relationship', () => {
+						expect(config.relationship).toMatch(RELATIONSHIP_NAME);
+					});
+					it('must specify direction', () => {
+						expect(config.direction).toMatch(/^incoming|outgoing$/);
+					});
+					it('may be hidden', () => {
+						if (config.hidden) {
+							expect(config.hidden).toBe(true);
+						}
+					});
+
+					it('may have many', () => {
+						if (config.hasMany) {
+							expect(config.hasMany).toBe(true);
+						}
+					});
+					it('may have cypher', () => {
+						if (config.cypher) {
+							expect(typeof config.cypher).toBe('string');
+						}
+					});
+					it('is defined at both ends', () => {
+						expect(
+							getTwinnedRelationship(
+								typeName,
+								config.type,
+								config.relationship,
+								config.direction,
+							),
+						).toBeDefined();
 					});
 				});
 			} else {
@@ -161,7 +237,7 @@ const propertyTestSuite = ({ properties, fieldsets }) => {
 					});
 					it('has valid hasMany', () => {
 						if (config.hasMany) {
-							expect(config.hasMany).toBe('boolean');
+							expect(typeof config.hasMany).toBe('boolean');
 						}
 					});
 				});
@@ -282,6 +358,7 @@ const typeTestSuite = type => {
 			});
 
 			propertyTestSuite({
+				typeName: type.name,
 				properties: type.properties,
 				fieldsets,
 			});
@@ -331,6 +408,7 @@ const relationshipTestSuite = type => {
 		const { properties = {}, from, to } = type;
 
 		propertyTestSuite({
+			typeName: type.name,
 			properties,
 		});
 

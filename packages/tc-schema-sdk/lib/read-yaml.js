@@ -33,7 +33,19 @@ const readDirectory = (rootDirectory, directory) => {
 	}
 };
 
+const isDirectory = (rootDirectory, directory) => {
+	try {
+		const stat = fs.statSync(
+			path.join(process.cwd(), rootDirectory, directory),
+		);
+		return stat.isDirectory();
+	} catch (e) {
+		return false;
+	}
+};
+
 module.exports = {
 	directory: readDirectory,
 	file: readFile,
+	isDirectory,
 };
