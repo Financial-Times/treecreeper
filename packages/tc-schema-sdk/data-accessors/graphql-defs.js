@@ -1,7 +1,5 @@
 const stripIndent = require('common-tags/lib/stripIndent');
 const uniqBy = require('lodash.uniqby');
-const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('../lib/meta-properties');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
@@ -107,74 +105,45 @@ const snakeToCamel = str => {
 	return camel;
 };
 
-const getFromTo = (direction, rootType, otherType) =>
-	direction === 'outgoing' ? [rootType, otherType] : [otherType, rootType];
-
 const getRichRelationshipType = (from, relationship, to) =>
 	snakeToCamel(`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`);
 
-const getRichRelationshipPropertyType = (def, rootType) => {
-	const [from, to] = getFromTo(def.direction, rootType, def.type);
-
+const getRichRelationshipPropertyType = ({
+	from,
+	to,
+	relationship,
+	hasMany,
+}) => {
 	return maybePluralType({
-		type: getRichRelationshipType(from, def.relationship, to),
-		hasMany: def.hasMany,
+		type: getRichRelationshipType(from, relationship, to),
+		hasMany,
 	});
 };
 
-const buildRelationshipProperties = properties => {
-	metaProperties
-		.filter(meta => meta.name !== '_lockedFields')
-		.forEach(metaProperty => {
-			properties[metaProperty.name] = metaProperty;
-		});
-	return Object.entries(properties).reduce((prop, [name, def]) => {
-		prop[name] = {
-			...def,
-			type: primitiveTypesMap[def.type] || def.type,
-		};
-		return prop;
-	}, {});
+const buildRelationshipTypeModel = relationshipType => {
+	const { from, relationship, to } = relationshipType;
+	return {
+		typeName: getRichRelationshipType(from, relationship, to),
+		...relationshipType,
+	};
 };
 
-const buildRelationshipTypeModel = ({ name, properties }) => {
-	return Object.values(properties)
-		.filter(({ relationship }) => !!relationship)
-		.map(
-			({
-				relationship,
-				direction,
-				type,
-				relationshipProperties = {},
-			}) => {
-				const [from, to] = getFromTo(direction, name, type);
-				return {
-					from,
-					to,
-					relationship,
-					typeName: getRichRelationshipType(from, relationship, to),
-					relationshipProperties,
-				};
-			},
-		);
-};
-
-const buildRichRelationshipPropertyModel = rootType => ([name, def]) => ({
+const buildRichRelationshipPropertyModel = ([name, def]) => ({
 	description: stripEmptyFirstLine`
 		${def.description}
 		*NOTE: This gives access to properties on the relationships between records
 		as well as on the records themselves. Use '${name}' instead if you do not need this*`,
 	name: `${name}REL`,
 	pagination: maybePaginate(def),
-	type: getRichRelationshipPropertyType(def, rootType),
+	type: getRichRelationshipPropertyType(def),
 	deprecation: maybeDeprecate(def),
 	directive: '',
 });
 
-const printRichRelationshipPropertyDefinitions = (properties, rootType) =>
+const printRichRelationshipPropertyDefinitions = properties =>
 	Object.entries(properties)
 		.filter(([, { relationship }]) => relationship)
-		.map(buildRichRelationshipPropertyModel(rootType))
+		.map(buildRichRelationshipPropertyModel)
 		.map(printPropertyDefinition)
 		.join('');
 
@@ -183,14 +152,12 @@ const printRelationshipTypeDefinition = ({
 	to,
 	typeName,
 	relationship,
-	relationshipProperties,
+	properties,
 }) => {
 	let propStr = '';
-	if (Object.keys(relationshipProperties).length) {
+	if (Object.keys(properties).length) {
 		propStr = indentMultiline(
-			printPropertyDefinitions(
-				buildRelationshipProperties({ ...relationshipProperties }),
-			),
+			printPropertyDefinitions(properties),
 			4,
 			true,
 		);
@@ -206,9 +173,9 @@ const printRelationshipTypeDefinition = ({
 	);
 };
 
-const printRelationshipTypeDefinitions = types =>
+const printRelationshipTypeDefinitions = relationships =>
 	uniqBy(
-		[].concat(...types.map(buildRelationshipTypeModel)),
+		[].concat(...relationships.map(buildRelationshipTypeModel)),
 		({ typeName }) => typeName,
 	).map(printRelationshipTypeDefinition);
 /*
@@ -220,7 +187,7 @@ const getIdentifyingFields = config =>
 
 const getFilteringFields = config =>
 	Object.entries(config.properties).filter(
-		([, { isRelationship }]) => !isRelationship,
+		([, { relationship, cypher }]) => !relationship && !cypher,
 	);
 
 const paginationConfig = {
@@ -246,14 +213,15 @@ const printQueryDefinition = ({
 	description,
 	properties,
 	paginate,
-}) =>
-	printDescribedBlock(
+}) => {
+	return printDescribedBlock(
 		description,
 		`${name}(
 		${printPaginationDefinition(paginate)}
 		${indentMultiline(printPropertyDefinitions(properties), 4, true)}
 	): ${type}`,
 	);
+};
 
 const printQueryDefinitions = types => [
 	'type Query {\n',
@@ -311,11 +279,12 @@ ${indentMultiline(enums.join('\n'), 2)}
 
 module.exports = {
 	accessor() {
-		const options = {
+		const retrieveOptions = {
 			primitiveTypes: 'graphql',
 			includeMetaFields: true,
 		};
-		const types = this.getTypes(options);
+
+		const types = this.getTypes(retrieveOptions);
 		const enums = this.getEnums({ withMeta: true });
 
 		const staticTypeDefinitions = stripIndent`
@@ -327,15 +296,19 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		const typeDefinitions = types.map(printTypeDefinition);
+		const typeDefinitions = types
+			.filter(({ from, to }) => !from && !to)
+			.map(printTypeDefinition);
 
 		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
-			types,
+			this.getRelationshipTypes(retrieveOptions),
 		);
 
 		const enumDefinitions = Object.entries(enums).map(printEnumDefinition);
 
-		const queryDefinition = printQueryDefinitions(types);
+		const queryDefinition = printQueryDefinitions(
+			types.filter(({ from, to }) => !from && !to),
+		);
 
 		return [].concat(
 			staticTypeDefinitions,

@@ -1,7 +1,6 @@
 const primitiveTypesMap = require('../../lib/primitive-types-map');
 const { SDK } = require('../../sdk');
 const { readYaml } = require('../../lib/updater');
-const { compatBackward } = require('../../lib/compat-backward');
 
 const stringPatterns = readYaml.file(
 	process.env.TREECREEPER_SCHEMA_DIRECTORY,
@@ -9,7 +8,6 @@ const stringPatterns = readYaml.file(
 );
 
 const graphqlFromRawData = schema => {
-	schema.types = compatBackward(schema.types, schema.relationships);
 	return new SDK({ schemaData: { schema } }).getGraphqlDefs();
 };
 
@@ -20,114 +18,7 @@ const explodeString = str =>
 		.filter(string => !/^[\s]*$/.test(string))
 		.map(string => string.trim());
 
-describe('graphql def creation', () => {
-	it('generates expected graphql def given schema', () => {
-		const schema = {
-			types: [
-				{
-					name: 'CostCentre',
-					description: 'A cost centre which groups are costed to',
-					properties: {
-						code: {
-							type: 'Word',
-							required: true,
-							unique: true,
-							canIdentify: true,
-							description: 'Unique code/id for this item',
-							pattern: 'COST_CENTRE',
-						},
-						name: {
-							type: 'Word',
-							canIdentify: true,
-							description: 'The name of the cost centre',
-						},
-						hasGroups: {
-							type: 'PaysFor',
-							description:
-								'The groups which are costed to the cost centre',
-						},
-						// At the moment, we don't support raw cypher query
-						// When we start to support, below tests must be passed.
-						// hasNestedGroups: {
-						// 	type: 'Group',
-						// 	hasMany: true,
-						// 	cypher:
-						// 		'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
-						// 	description:
-						// 		'The recursive groups which are costed to the cost centre',
-						// },
-					},
-				},
-				{
-					name: 'Group',
-					description:
-						'An overarching group which contains teams and is costed separately',
-					properties: {
-						code: {
-							type: 'Word',
-							required: true,
-							unique: true,
-							canIdentify: true,
-							description: 'Unique code/id for this item',
-							pattern: 'COST_CENTRE',
-						},
-						name: {
-							type: 'Word',
-							canIdentify: true,
-							description: 'The name of the group',
-						},
-						isActive: {
-							type: 'Boolean',
-							description:
-								'Whether or not the group is still in existence',
-						},
-						hasBudget: {
-							type: 'PaysFor',
-							description:
-								'The Cost Centre associated with the group',
-						},
-					},
-				},
-			],
-			relationships: [
-				{
-					name: 'PaysFor',
-					relationship: 'PAYS_FOR',
-					from: {
-						type: 'CostCentre',
-						hasMany: true,
-					},
-					to: {
-						type: 'Group',
-						hasMany: false,
-					},
-				},
-			],
-			enums: {
-				Lifecycle: {
-					description: 'The lifecycle stage of a product',
-					options: {
-						Incubate: 'Incubate description',
-						Sustain: 'Sustain description',
-						Grow: 'Grow description',
-						Sunset: 'Sunset description',
-					},
-				},
-				TrafficLight: {
-					description:
-						'Quality rating based on Red, Amber and Green.',
-					options: ['Red', 'Amber', 'Green'],
-				},
-			},
-			stringPatterns,
-		};
-
-		const generated = [].concat(
-			...graphqlFromRawData(schema).map(explodeString),
-		);
-		expect(generated).toEqual(
-			explodeString(
-				`
+const expectedGraphqlSchemaString = `
 directive @deprecated(
   reason: String = "No longer supported"
 ) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
@@ -152,6 +43,11 @@ name: String
 The groups which are costed to the cost centre
 """
 hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
+"""
+The recursive groups which are costed to the cost centre
+"""
+hasNestedGroups(first: Int, offset: Int): [Group] @cypher(statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related")
+
 """
 The client that was used to make the creation
 """
@@ -420,9 +316,206 @@ Red
 Amber
 Green
 }
-`,
-			),
+`;
+
+describe('graphql def creation', () => {
+	it('generates expected graphql def given schema', () => {
+		const schema = {
+			types: [
+				{
+					name: 'CostCentre',
+					description: 'A cost centre which groups are costed to',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the cost centre',
+						},
+						hasGroups: {
+							type: 'Group',
+							relationship: 'PAYS_FOR',
+							direction: 'outgoing',
+							hasMany: true,
+							description:
+								'The groups which are costed to the cost centre',
+						},
+						hasNestedGroups: {
+							type: 'Group',
+							hasMany: true,
+							cypher:
+								'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
+							description:
+								'The recursive groups which are costed to the cost centre',
+						},
+					},
+				},
+				{
+					name: 'Group',
+					description:
+						'An overarching group which contains teams and is costed separately',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the group',
+						},
+						isActive: {
+							type: 'Boolean',
+							description:
+								'Whether or not the group is still in existence',
+						},
+						hasBudget: {
+							type: 'CostCentre',
+							relationship: 'PAYS_FOR',
+							direction: 'incoming',
+							description:
+								'The Cost Centre associated with the group',
+						},
+					},
+				},
+			],
+			enums: {
+				Lifecycle: {
+					description: 'The lifecycle stage of a product',
+					options: {
+						Incubate: 'Incubate description',
+						Sustain: 'Sustain description',
+						Grow: 'Grow description',
+						Sunset: 'Sunset description',
+					},
+				},
+				TrafficLight: {
+					description:
+						'Quality rating based on Red, Amber and Green.',
+					options: ['Red', 'Amber', 'Green'],
+				},
+			},
+			stringPatterns,
+		};
+
+		const generated = [].concat(
+			...graphqlFromRawData(schema).map(explodeString),
 		);
+		expect(generated).toEqual(explodeString(expectedGraphqlSchemaString));
+	});
+
+	it('generates expected graphql def given schema using rich relationships', () => {
+		const schema = {
+			types: [
+				{
+					name: 'CostCentre',
+					description: 'A cost centre which groups are costed to',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the cost centre',
+						},
+						hasGroups: {
+							type: 'PaysFor',
+							description:
+								'The groups which are costed to the cost centre',
+						},
+						hasNestedGroups: {
+							type: 'Group',
+							hasMany: true,
+							cypher:
+								'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
+							description:
+								'The recursive groups which are costed to the cost centre',
+						},
+					},
+				},
+				{
+					name: 'Group',
+					description:
+						'An overarching group which contains teams and is costed separately',
+					properties: {
+						code: {
+							type: 'Word',
+							required: true,
+							unique: true,
+							canIdentify: true,
+							description: 'Unique code/id for this item',
+							pattern: 'COST_CENTRE',
+						},
+						name: {
+							type: 'Word',
+							canIdentify: true,
+							description: 'The name of the group',
+						},
+						isActive: {
+							type: 'Boolean',
+							description:
+								'Whether or not the group is still in existence',
+						},
+						hasBudget: {
+							type: 'PaysFor',
+							description:
+								'The Cost Centre associated with the group',
+						},
+					},
+				},
+				{
+					name: 'PaysFor',
+					relationship: 'PAYS_FOR',
+					from: {
+						type: 'CostCentre',
+						hasMany: false,
+					},
+					to: {
+						type: 'Group',
+						hasMany: true,
+					},
+				},
+			],
+			enums: {
+				Lifecycle: {
+					description: 'The lifecycle stage of a product',
+					options: {
+						Incubate: 'Incubate description',
+						Sustain: 'Sustain description',
+						Grow: 'Grow description',
+						Sunset: 'Sunset description',
+					},
+				},
+				TrafficLight: {
+					description:
+						'Quality rating based on Red, Amber and Green.',
+					options: ['Red', 'Amber', 'Green'],
+				},
+			},
+			stringPatterns,
+		};
+
+		const generated = [].concat(
+			...graphqlFromRawData(schema).map(explodeString),
+		);
+		expect(generated).toEqual(explodeString(expectedGraphqlSchemaString));
 	});
 
 	describe('deprecation', () => {
@@ -466,8 +559,6 @@ Green
 							},
 						},
 					},
-				],
-				relationships: [
 					{
 						name: 'FakeRel',
 						relationship: 'HAS',
@@ -479,6 +570,7 @@ Green
 							type: 'Fake',
 							hasMany: true,
 						},
+						isMutal: true,
 					},
 				],
 				enums: {},

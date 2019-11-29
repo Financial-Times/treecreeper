@@ -11,3 +11,4 @@ from:
 to:
   type: MainType
   hasMany: true
+isMutal: true

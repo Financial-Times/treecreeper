@@ -6,8 +6,7 @@ properties:
     label: Word label
 from:
   type: MainType
-  hasMany: false
+  hasMany: true
 to:
   type: ChildType
-  hasMany: true
-isMutal: true
+  hasMany: false

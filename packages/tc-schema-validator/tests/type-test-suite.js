@@ -13,10 +13,13 @@ const validStringPatternsRX = arrayToRegExp(Object.keys(stringPatterns));
 const validEnums = Object.keys(enums);
 const isRichRelationshipType = type => 'from' in type && 'to' in type;
 
-const propertyTestSuite = ({ typeNames, properties, fieldsets }) => {
+const propertyTestSuite = ({ properties, fieldsets }) => {
+	const relationshipTypeNames = sdk
+		.getRelationshipTypes()
+		.map(({ name }) => name);
 	const validPropTypes = validEnums.concat(
 		Object.keys(primitiveTypesMap),
-		typeNames,
+		relationshipTypeNames,
 	);
 	const validFieldsetNames = fieldsets
 		? ['self'].concat(Object.keys(fieldsets))
@@ -90,17 +93,17 @@ const propertyTestSuite = ({ typeNames, properties, fieldsets }) => {
 				}
 			});
 
-			it('has valid direction', () => {
-				if (config.direction) {
-					expect(config.direction).toMatch(
-						arrayToRegExp(['from', 'to']),
-					);
-				}
-			});
-
-			if (!typeNames.includes(config.type)) {
+			// property is rich relationship
+			if (relationshipTypeNames.includes(config.type)) {
+				describe('relationship property', () => {
+					it('should not define relationship related fields', () => {
+						['relationship', 'hasMany', 'pattern'].forEach(field =>
+							expect(config[field]).not.toBeDefined(),
+						);
+					});
+				});
+			} else {
 				describe('direct property', () => {
-					// tests for direct properties
 					it('may be required', () => {
 						if (config.required) {
 							expect(config.required).toBe(true);
@@ -144,6 +147,23 @@ const propertyTestSuite = ({ typeNames, properties, fieldsets }) => {
 							expect(Array.isArray(config.examples)).toBe(true);
 						}
 					});
+					it('has valid direction', () => {
+						if (config.direction) {
+							expect(config.direction).toMatch(
+								arrayToRegExp(['incoming', 'outgoing']),
+							);
+						}
+					});
+					it('has valid relationship', () => {
+						if (config.relationship) {
+							expect(config.relationship).toMatch(/^[A-Z_]+$/);
+						}
+					});
+					it('has valid hasMany', () => {
+						if (config.hasMany) {
+							expect(config.hasMany).toBe('boolean');
+						}
+					});
 				});
 			}
 		});
@@ -177,7 +197,7 @@ const fieldsetTestSuite = fieldsets => {
 	});
 };
 
-const typeTestSuite = (types, type) => {
+const typeTestSuite = type => {
 	describe(`${type.name} as Type`, () => {
 		it('has no unrecognised properties', () => {
 			Object.keys(type).forEach(key => {
@@ -262,7 +282,6 @@ const typeTestSuite = (types, type) => {
 			});
 
 			propertyTestSuite({
-				typeNames: types.map(({ name }) => name),
 				properties: type.properties,
 				fieldsets,
 			});
@@ -270,7 +289,7 @@ const typeTestSuite = (types, type) => {
 	});
 };
 
-const relationshipTestSuite = (types, type) => {
+const relationshipTestSuite = type => {
 	describe(`${type.name} as Relationship`, () => {
 		it('has no unrecognised fields', () => {
 			Object.keys(type).forEach(key => {
@@ -304,14 +323,14 @@ const relationshipTestSuite = (types, type) => {
 		it('may have a isMutal', () => {
 			if ('isMutal' in type) {
 				expect(typeof type.isMutal).toBe('boolean');
+				expect(type.from.type === type.to.type).toBe(true);
 			}
 		});
 
-		const typeNames = types.map(({ name }) => name);
+		const types = sdk.rawData.getTypes();
 		const { properties = {}, from, to } = type;
 
 		propertyTestSuite({
-			typeNames,
 			properties,
 		});
 

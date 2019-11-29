@@ -133,25 +133,53 @@ const getType = function(
 	}
 
 	if (withRelationships) {
-		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship || def.cypher) {
-				if (def.hidden) {
-					delete typeSchema.properties[propName];
-				}
-				Object.assign(def, {
-					hasMany: def.hasMany || false,
-					isRelationship: !!(def.relationship || def.cypher),
-					writeInactive:
-						'writeInactive' in def ? def.writeInactive : false,
-					showInactive:
-						'showInactive' in def ? def.showInactive : true,
+		Object.keys(typeSchema.properties).forEach(key => {
+			let definition;
+			try {
+				definition = this.getRelationshipType(typeSchema.name, key, {
+					primitiveTypes,
+					includeMetaFields,
 				});
+			} catch (error) {
+				definition = typeSchema.properties[key];
+			}
+
+			if (definition.relationship || definition.cypher) {
+				if (definition.hidden) {
+					delete typeSchema.properties[key];
+					return;
+				}
+				typeSchema.properties[key] = {
+					...definition,
+					hasMany: definition.hasMany || false,
+					isRelationship: !!(
+						definition.relationship || definition.cypher
+					),
+					writeInactive:
+						'writeInactive' in definition
+							? definition.writeInactive
+							: false,
+					showInactive:
+						'showInactive' in definition
+							? definition.showInactive
+							: true,
+				};
 			}
 		});
 	} else {
-		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
-				delete typeSchema.properties[propName];
+		Object.keys(typeSchema.properties).forEach(key => {
+			let definition;
+			try {
+				definition = this.getRelationshipType(typeSchema.name, key, {
+					primitiveTypes,
+					includeMetaFields,
+				});
+			} catch (error) {
+				definition = typeSchema.properties[key];
+			}
+
+			if (definition.relationship) {
+				delete typeSchema.properties[key];
 			}
 		});
 	}
