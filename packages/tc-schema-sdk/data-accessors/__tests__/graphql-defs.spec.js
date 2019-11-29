@@ -480,6 +480,8 @@ describe('graphql def creation', () => {
 						},
 					},
 				},
+			],
+			relationshipTypes: [
 				{
 					name: 'PaysFor',
 					relationship: 'PAYS_FOR',
@@ -559,6 +561,8 @@ describe('graphql def creation', () => {
 							},
 						},
 					},
+				],
+				relationshipTypes: [
 					{
 						name: 'FakeRel',
 						relationship: 'HAS',

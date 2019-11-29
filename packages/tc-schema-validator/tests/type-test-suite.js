@@ -139,6 +139,20 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 							expect(config[field]).not.toBeDefined(),
 						);
 					});
+					it('may have direction', () => {
+						if (config.direction) {
+							expect(config.direction).toMatch(/^from|to$/);
+						}
+					});
+					it('can determine relationship direction explicitly', () => {
+						const relType = sdk
+							.getRelationshipTypes()
+							.find(rel => rel.name === config.type);
+						expect(relType).toBeDefined();
+						if (relType.from.type === relType.to.type) {
+							expect(config.direction).toBeDefined();
+						}
+					});
 				});
 			} else if (typeNames.includes(config.type)) {
 				const RELATIONSHIP_NAME = getStringValidator(

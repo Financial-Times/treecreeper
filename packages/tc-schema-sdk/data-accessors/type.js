@@ -1,12 +1,18 @@
 const clone = require('clone');
-const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('../lib/meta-properties');
 const TreecreeperUserError = require('../lib/biz-ops-error');
+const {
+	assignMetaProperties,
+	transformPrimitiveTypes,
+} = require('../lib/property-assign');
 
 const BIZ_OPS = 'biz-ops';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
+
+const isRelationship = (richRelationshipTypes, propDef) =>
+	'relationship' in propDef ||
+	richRelationshipTypes.find(relType => relType.name === propDef.type);
 
 const hydrateFieldsets = ({
 	properties,
@@ -46,7 +52,7 @@ const hydrateFieldsets = ({
 		targetFieldset.properties.push([prop, def]);
 	};
 
-	properties.forEach(([prop, def]) => {
+	Object.entries(properties).forEach(([prop, def]) => {
 		const { fieldset } = def;
 
 		if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {
@@ -132,74 +138,82 @@ const getType = function(
 		});
 	}
 
+	let properties = { ...typeSchema.properties };
+	const richRelationshipTypes = this.rawData.getRelationshipTypes();
+
 	if (withRelationships) {
-		Object.keys(typeSchema.properties).forEach(key => {
-			let definition;
-			try {
-				definition = this.getRelationshipType(typeSchema.name, key, {
-					primitiveTypes,
-					includeMetaFields,
-				});
-			} catch (error) {
-				definition = typeSchema.properties[key];
-			}
-
-			if (definition.relationship || definition.cypher) {
-				if (definition.hidden) {
-					delete typeSchema.properties[key];
-					return;
+		properties = Object.entries(properties).reduce(
+			(updatedProps, [propName, propDef]) => {
+				if (isRelationship(richRelationshipTypes, propDef)) {
+					propDef = this.getRelationshipType(
+						typeSchema.name,
+						propName,
+						{
+							primitiveTypes,
+							includeMetaFields,
+						},
+					);
 				}
-				typeSchema.properties[key] = {
-					...definition,
-					hasMany: definition.hasMany || false,
-					isRelationship: !!(
-						definition.relationship || definition.cypher
-					),
-					writeInactive:
-						'writeInactive' in definition
-							? definition.writeInactive
-							: false,
-					showInactive:
-						'showInactive' in definition
-							? definition.showInactive
-							: true,
-				};
-			}
-		});
-	} else {
-		Object.keys(typeSchema.properties).forEach(key => {
-			let definition;
-			try {
-				definition = this.getRelationshipType(typeSchema.name, key, {
-					primitiveTypes,
-					includeMetaFields,
-				});
-			} catch (error) {
-				definition = typeSchema.properties[key];
-			}
 
-			if (definition.relationship) {
-				delete typeSchema.properties[key];
-			}
-		});
+				if (propDef.relationship || propDef.cypher) {
+					if (propDef.hidden) {
+						return updatedProps;
+					}
+					propDef = {
+						...propDef,
+						hasMany: propDef.hasMany || false,
+						isRelationship: !!(
+							propDef.relationship || propDef.cypher
+						),
+						writeInactive:
+							'writeInactive' in propDef
+								? propDef.writeInactive
+								: false,
+						showInactive:
+							'showInactive' in propDef
+								? propDef.showInactive
+								: true,
+					};
+				}
+				return {
+					...updatedProps,
+					[propName]: propDef,
+				};
+			},
+			{},
+		);
+	} else {
+		properties = Object.entries(properties).reduce(
+			(updatedProps, [propName, propDef]) => {
+				if (isRelationship(richRelationshipTypes, propDef)) {
+					propDef = this.getRelationshipType(
+						typeSchema.name,
+						propName,
+						{
+							primitiveTypes,
+							includeMetaFields,
+						},
+					);
+				}
+				if (propDef.relationship) {
+					return updatedProps;
+				}
+				return {
+					...updatedProps,
+					[propName]: propDef,
+				};
+			},
+			{},
+		);
 	}
 	if (includeMetaFields) {
-		metaProperties.forEach(metaProperty => {
-			typeSchema.properties[metaProperty.name] = metaProperty;
-		});
+		properties = assignMetaProperties(properties);
 	}
-	const properties = Object.entries(typeSchema.properties)
-		.map(([name, def]) => {
-			if (primitiveTypes === 'graphql') {
-				// If not a primitive type we assume it's an enum and leave it unaltered
-				def.type = primitiveTypesMap[def.type] || def.type;
-			}
-			if (def.pattern) {
-				def.validator = this.getStringValidator(def.pattern);
-			}
-			return [name, def];
-		})
-		.filter(entry => !!entry);
+	properties = transformPrimitiveTypes(
+		properties,
+		primitiveTypes,
+		this.getStringValidator,
+	);
 
 	if (groupProperties) {
 		typeSchema.fieldsets = hydrateFieldsets({
@@ -211,7 +225,7 @@ const getType = function(
 		});
 		delete typeSchema.properties;
 	} else {
-		typeSchema.properties = entriesArrayToObject(properties);
+		typeSchema.properties = properties;
 	}
 	return typeSchema;
 };

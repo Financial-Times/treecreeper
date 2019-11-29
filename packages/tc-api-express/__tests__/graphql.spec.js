@@ -6,9 +6,6 @@ describe('api-express graphql', () => {
 	const config = {
 		fake: 'config',
 		graphqlMethods: ['post', 'get'],
-		schemaOptions: {
-			backwardCompatibility: true,
-		},
 	};
 	beforeAll(async () => {
 		apiGraphql = require('@financial-times/tc-api-graphql');

@@ -1,6 +1,8 @@
-const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('../lib/meta-properties');
 const TreecreeperUserError = require('../lib/biz-ops-error');
+const {
+	assignMetaProperties,
+	transformPrimitiveTypes,
+} = require('../lib/property-assign');
 
 const BIZ_OPS = 'biz-ops';
 
@@ -13,11 +15,6 @@ const transformRichRelationship = (
 	let relationshipTo;
 	let hasMany;
 	let dest;
-	if (from.type === to.type && !direction) {
-		throw new TreecreeperUserError(
-			`Cannot determine the relationship direction for ${name} of ${rootType}`,
-		);
-	}
 	if (direction !== 'to' && from.type === rootType) {
 		dest = 'outgoing';
 		relationshipTo = to.type;
@@ -49,7 +46,7 @@ const getFromRawData = (rootType, propertyName, rawData) => {
 
 	if (!type) {
 		throw new TreecreeperUserError(
-			`Invalid relationship type \`${rootType}`,
+			`Invalid relationship type \`${rootType}\``,
 		);
 	}
 
@@ -73,9 +70,10 @@ const getFromRawData = (rootType, propertyName, rawData) => {
 			to,
 		};
 	}
-	const richRelationshipType = types.find(
-		t => t.name === property.type && t.from && t.to,
-	);
+	const richRelationshipType = rawData
+		.getRelationshipTypes()
+		.find(relType => relType.name === property.type);
+
 	if (richRelationshipType) {
 		return transformRichRelationship(
 			rootType,
@@ -111,28 +109,18 @@ const getRelationshipType = function(
 	if (!('properties' in relationshipType)) {
 		relationshipType.properties = {};
 	}
-	if (includeMetaFields && Object.keys(relationshipType.properties).length) {
-		metaProperties
-			.filter(meta => meta.name !== '_lockedFields')
-			.forEach(meta => {
-				relationshipType.properties[meta.name] = meta;
-			});
-	}
-	relationshipType.properties = Object.entries(relationshipType.properties)
-		.map(([name, def]) => {
-			const cloned = { ...def };
-			if (primitiveTypes === 'graphql') {
-				cloned.type = primitiveTypesMap[def.type] || def.type;
-			}
-			if (def.pattern) {
-				cloned.validator = this.getStringValidator(def.pattern);
-			}
-			return [name, cloned];
-		})
-		.filter(entry => !!entry)
-		.reduce((obj, [name, def]) => ({ ...obj, [name]: def }), {});
+	let properties = { ...relationshipType.properties };
 
-	return relationshipType;
+	if (includeMetaFields && Object.keys(relationshipType.properties).length) {
+		properties = assignMetaProperties(properties, '_lockedFields');
+	}
+	properties = transformPrimitiveTypes(
+		properties,
+		primitiveTypes,
+		this.getStringValidator,
+	);
+
+	return { ...relationshipType, properties };
 };
 
 module.exports = {

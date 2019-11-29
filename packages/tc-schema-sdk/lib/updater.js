@@ -2,21 +2,11 @@ const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const readYaml = require('./read-yaml');
 
-// e.g HasChild -> HAS_CHILD
-const toSnakeUpperCase = name =>
-	name
-		.replace(/([A-Z])/g, '_$1')
-		.replace(/^_|_$/g, '')
-		.toUpperCase();
-
-const readRelationships = schemaDirectory => {
+const readRelationshipTypes = schemaDirectory => {
 	if (!readYaml.isDirectory(schemaDirectory, 'relationships')) {
 		return [];
 	}
-	return readYaml.directory(schemaDirectory, 'relationships').map(rel => ({
-		...rel,
-		relationship: rel.relationship || toSnakeUpperCase(rel.name),
-	}));
+	return readYaml.directory(schemaDirectory, 'relationships');
 };
 
 class SchemaUpdater {
@@ -44,10 +34,8 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: [].concat(
-						readYaml.directory(schemaDirectory, 'types'),
-						readRelationships(schemaDirectory),
-					),
+					types: readYaml.directory(schemaDirectory, 'types'),
+					relationshipTypes: readRelationshipTypes(schemaDirectory),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',
