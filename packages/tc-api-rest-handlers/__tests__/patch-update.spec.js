@@ -386,9 +386,52 @@ describe('rest PATCH update', () => {
 	});
 
 	describe('Relationship properties', () => {
+		const childCode = `${namespace}-child`;
+
+		it("update existing relationship's property", async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CHILD', child, {
+				someProp: 'some property',
+			});
+			const { body, status } = await basicHandler(
+				{
+					children: [
+						{ code: childCode, someProp: 'new some property' },
+					],
+				},
+				{ relationshipAction: 'merge', richRelationships: true },
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				children: [{ someProp: 'new some property' }],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someProp: 'new some property',
+							...meta.update,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
+		});
 		// skip until implementing updating meta times when relationship properties are changed
 		it.skip('deletes a property as an update', async () => {
-			const childCode = `${namespace}-child`;
 			const [main, child] = await createNodes(
 				['MainType', mainCode],
 				['ChildType', childCode],
