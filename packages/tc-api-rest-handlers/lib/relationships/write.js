@@ -69,17 +69,17 @@ const prepareToWriteRelationships = (
 	const relationshipParameters = {};
 	const relationshipQueries = [];
 
-	Object.entries(relationshipsToCreate).forEach(([propName, values]) => {
-		const propDef = validProperties[propName];
-		const { type: relatedType, direction, relationship } = propDef;
+	Object.entries(relationshipsToCreate).forEach(([relType, relProps]) => {
+		const relDef = validProperties[relType];
+		const { type: relatedType, direction, relationship } = relDef;
 		const key = `${relationship}${direction}${relatedType}`;
 
 		const retrievedCodes = [];
 		const relationshipPropQueries = [];
 
-		values.forEach(value => {
-			retrievedCodes.push(value.code);
-			addPropsToQueries(relationshipPropQueries, value);
+		relProps.forEach(relProp => {
+			retrievedCodes.push(relProp.code);
+			addPropsToQueries(relationshipPropQueries, relProp);
 		});
 
 		// make sure the parameter referenced in the query exists on the
@@ -94,19 +94,19 @@ const prepareToWriteRelationships = (
 		relationshipQueries.push(
 			stripIndents`
 			WITH node
-			${locateRelatedNodes(propDef, key, upsert)}
+			${locateRelatedNodes(relDef, key, upsert)}
 			WITH node, related
-			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
+			MERGE ${relationshipFragmentWithEndNodes('node', relDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
 			${relationshipPropQueries.join('')}
 		`,
 		);
 
-		if (propDef.hasMany) {
+		if (relDef.hasMany) {
 			const { properties: relatedProperties } = getType(relatedType);
 			const inverseProperties = findInversePropertyNames(
 				nodeType,
-				propName,
+				relType,
 			);
 			if (
 				inverseProperties.some(
@@ -120,7 +120,7 @@ const prepareToWriteRelationships = (
 				WITH node, related
 				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
 					'otherNode',
-					propDef,
+					relDef,
 					'related',
 					{
 						label: 'conflictingRelationship',
