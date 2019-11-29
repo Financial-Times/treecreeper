@@ -11,13 +11,19 @@ properties:
     pattern: CODE
     label: Code label
   isChildOf:
-    type: HasChild
+    relationship: HAS_CHILD
+    type: MainType
     description: Is child of description.
     label: Is child of label
+    direction: incoming
+    hasMany: true
   isFavouriteChildOf:
-    type: HasFavouriteChild
+    relationship: HAS_FAVOURITE_CHILD
+    type: MainType
+    hasMany: true
     description: Is favourite child of description.
     label: Is favourite child of label
+    direction: incoming
   relatedChildOf:
     type: RelatedWithProperties
     description: RelatedWithProperties description.
