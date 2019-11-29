@@ -77,6 +77,21 @@ describe('rest PATCH update', () => {
 				.exists()
 				.match(meta.update);
 		});
+		it('deletes a property as an update', async () => {
+			await createMainNode({
+				someString: 'someString',
+			});
+			const { body, status } = await basicHandler({ someString: null });
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				someString: 'someString',
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.notMatch({
+					someString: 'someString',
+				});
+		});
 		describe('temporal properties', () => {
 			const neo4jTimePrecision = timestamp =>
 				timestamp.replace('Z', '000000Z');
@@ -370,25 +385,9 @@ describe('rest PATCH update', () => {
 		});
 	});
 
-	describe('deletes a property as an update', () => {
-		it('with node property', async () => {
-			await createMainNode({
-				someString: 'someString',
-			});
-			const { body, status } = await basicHandler({ someString: null });
-			expect(status).toBe(200);
-			expect(body).not.toMatchObject({
-				someString: 'someString',
-			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.notMatch({
-					someString: 'someString',
-				});
-		});
-
+	describe('Relationship properties', () => {
 		// skip until implementing updating meta times when relationship properties are changed
-		it.skip('with relationship property', async () => {
+		it.skip('deletes a property as an update', async () => {
 			const childCode = `${namespace}-child`;
 			const [main, child] = await createNodes(
 				['MainType', mainCode],
@@ -412,13 +411,13 @@ describe('rest PATCH update', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.default,
+						props: meta.update,
 					},
 					{
 						type: 'ChildType',
 						props: {
 							code: childCode,
-							...meta.update,
+							...meta.default,
 						},
 					},
 				);
