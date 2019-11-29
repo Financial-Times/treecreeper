@@ -9,7 +9,13 @@ describe('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
 	const mainCode = `${namespace}-main`;
 
-	const { createNode, meta, getMetaPayload } = setupMocks(namespace);
+	const {
+		createNode,
+		createNodes,
+		meta,
+		getMetaPayload,
+		connectNodes,
+	} = setupMocks(namespace);
 
 	const getInput = (body, query, metadata) => ({
 		type: 'MainType',
@@ -361,6 +367,61 @@ describe('rest PATCH update', () => {
 			await neo4jTest('MainType', mainCode).notMatch({
 				notInSchema: 'a string',
 			});
+		});
+	});
+
+	describe('deletes a property as an update', () => {
+		it('with node property', async () => {
+			await createMainNode({
+				someString: 'someString',
+			});
+			const { body, status } = await basicHandler({ someString: null });
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				someString: 'someString',
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.notMatch({
+					someString: 'someString',
+				});
+		});
+
+		// skip until implementing updating meta times when relationship properties are changed
+		it.skip('with relationship property', async () => {
+			const childCode = `${namespace}-child`;
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CHILD', child, {
+				someProp: 'some property',
+			});
+			const { body, status } = await basicHandler(
+				{ children: [{ code: childCode, someProp: null }] },
+				{ relationshipAction: 'merge', richRelationships: true },
+			);
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				children: [{ someProp: 'some property' }],
+			});
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CHILD',
+						direction: 'outgoing',
+						props: meta.default,
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.update,
+						},
+					},
+				);
 		});
 	});
 
