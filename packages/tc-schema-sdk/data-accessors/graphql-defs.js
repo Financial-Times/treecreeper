@@ -133,7 +133,7 @@ const buildRichRelationshipPropertyModel = ([name, def]) => ({
 		${def.description}
 		*NOTE: This gives access to properties on the relationships between records
 		as well as on the records themselves. Use '${name}' instead if you do not need this*`,
-	name: `${name}REL`,
+	name: `${name}_rel`,
 	pagination: maybePaginate(def),
 	type: getRichRelationshipPropertyType(def),
 	deprecation: maybeDeprecate(def),

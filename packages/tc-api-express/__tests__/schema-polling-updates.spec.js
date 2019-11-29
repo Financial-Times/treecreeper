@@ -7,9 +7,15 @@ jest.useFakeTimers();
 jest.mock('@financial-times/tc-schema-publisher', () => ({
 	sendSchemaToS3: jest.fn(),
 }));
+delete process.env.TREECREEPER_TEST;
 
-// Skipping for now as the consant refactors play havoc with jest's mocking
 describe('schema polling updates', () => {
+	// beforeAll(() => {
+
+	// });
+	// afterAll(() => {
+	// 	process.env.TREECREEPER_TEST = 'true';
+	// });
 	describe('api updates', () => {
 		let app;
 		beforeAll(async () => {

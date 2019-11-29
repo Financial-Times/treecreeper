@@ -28,37 +28,49 @@ const getTimeoutRacePromise = timeout =>
 		);
 	});
 
+const runQueryWithMetrics = async ({
+	session,
+	runner,
+	isTransaction = false,
+}) => {
+	const start = Date.now();
+	metrics.count('neo4j.query.count');
+	let isSuccessful = false;
+	try {
+		const result = TIMEOUT
+			? await Promise.race([runner(), getTimeoutRacePromise(TIMEOUT)])
+			: runner();
+
+		isSuccessful = true;
+		return result;
+	} finally {
+		if (!isTransaction) {
+			session.close();
+		}
+		const totalTime = Date.now() - start;
+		const metricPrefix = `neo4j.query.${
+			isSuccessful ? 'success' : 'failure'
+		}`;
+		metrics.histogram(`${metricPrefix}.time`, totalTime);
+		metrics.count(`${metricPrefix}.count`);
+		logger.info({
+			event: 'NEO4J_QUERY',
+			successful: isSuccessful,
+			totalTime,
+		});
+	}
+};
+
 driver.session = (...sessionArgs) => {
 	const session = originalSession.apply(driver, sessionArgs);
 	const originalRun = session.run;
 
-	session.run = async (...runArgs) => {
-		const start = Date.now();
-		metrics.count('neo4j.query.count');
-		let isSuccessful = false;
-		try {
-			const dbCall = originalRun.apply(session, runArgs);
-			const result = TIMEOUT
-				? await Promise.race([dbCall, getTimeoutRacePromise(TIMEOUT)])
-				: dbCall;
+	session.run = async (...runArgs) =>
+		runQueryWithMetrics({
+			session,
+			runner: () => originalRun.apply(session, runArgs),
+		});
 
-			isSuccessful = true;
-			return result;
-		} finally {
-			session.close();
-			const totalTime = Date.now() - start;
-			const metricPrefix = `neo4j.query.${
-				isSuccessful ? 'success' : 'failure'
-			}`;
-			metrics.histogram(`${metricPrefix}.time`, totalTime);
-			metrics.count(`${metricPrefix}.count`);
-			logger.info({
-				event: 'NEO4J_QUERY',
-				successful: isSuccessful,
-				totalTime,
-			});
-		}
-	};
 	return session;
 };
 
@@ -77,5 +89,21 @@ module.exports = {
 		executeQuery.close = () => session.close();
 
 		return executeQuery;
+	},
+	executeQueriesWithTransaction: async (...queries) => {
+		const session = originalSession.apply(driver, []);
+		const result = await session.writeTransaction(async tx =>
+			Promise.all(
+				queries.map(({ query, parameters }) =>
+					runQueryWithMetrics({
+						session,
+						runner: () => tx.run(query, parameters),
+						isTransaction: true,
+					}),
+				),
+			),
+		);
+		session.close();
+		return result;
 	},
 };

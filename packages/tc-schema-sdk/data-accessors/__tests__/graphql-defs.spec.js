@@ -81,7 +81,7 @@ The groups which are costed to the cost centre
 *NOTE: This gives access to properties on the relationships between records
 as well as on the records themselves. Use 'hasGroups' instead if you do not need this*
 """
-hasGroupsREL(first: Int, offset: Int): [CostcentrePaysForGroup]
+hasGroups_rel(first: Int, offset: Int): [CostcentrePaysForGroup]
 }
 
 """
@@ -140,7 +140,7 @@ The Cost Centre associated with the group
 *NOTE: This gives access to properties on the relationships between records
 as well as on the records themselves. Use 'hasBudget' instead if you do not need this*
 """
-hasBudgetREL: CostcentrePaysForGroup
+hasBudget_rel: CostcentrePaysForGroup
 }
 """
 Internal use only
