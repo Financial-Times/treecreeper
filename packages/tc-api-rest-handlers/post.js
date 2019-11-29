@@ -1,12 +1,12 @@
 const httpErrors = require('http-errors');
 const _isEmpty = require('lodash.isempty');
-const { logChanges } = require('@financial-times/tc-api-publish');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { validateInput } = require('./lib/validation');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
 const { normaliseRelationshipProps } = require('./lib/relationships/input');
+const { broadcast } = require('./lib/events');
 
 const postHandler = ({ documentStore } = {}) => async input => {
 	const {
@@ -54,7 +54,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		const relationships = {
 			added: queryContext.addedRelationships || {},
 		};
-		logChanges('CREATE', neo4jResult, { relationships });
+		broadcast('CREATE', neo4jResult, { relationships });
 
 		const responseData = Object.assign(
 			neo4jResult.toJson({

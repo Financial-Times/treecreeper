@@ -2,9 +2,6 @@ const { logger } = require('../../../packages/tc-api-express-logger');
 
 // eslint-disable-next-line no-unused-vars
 const errorToErrors = (err, req, res, next) => {
-	if (process.env.DEBUG) {
-		console.log(err); // eslint-disable-line no-console
-	}
 	logger.error({ event: 'BIZ_OPS_API_ERROR', error: err });
 
 	if (!err.status) {
