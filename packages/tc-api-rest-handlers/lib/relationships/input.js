@@ -22,11 +22,10 @@ const getDiffs = (newRelationships, initialRelationships = []) => {
 	const allDiffs = [];
 
 	newRelationships.forEach(newRelationship => {
-		const targetIndex = initialRelationships.findIndex(
+		const existingRelationship = initialRelationships.find(
 			initialRelationship =>
 				initialRelationship.code === newRelationship.code,
 		);
-		const existingRelationship = initialRelationships[targetIndex];
 
 		if (!existingRelationship) {
 			allDiffs.push(newRelationship);
@@ -70,14 +69,6 @@ const isDeleteRelationship = type => {
 		(propName.charAt(0) === '!' &&
 			isRelationship(unNegatePropertyName(propName))) ||
 		(isRelationship(propName) && codes === null);
-};
-
-const isWriteAndDeleteRelationship = type => {
-	const isRelationship = identifyRelationships(type);
-	return ([propName, codes]) =>
-		(propName.charAt(0) === '!' &&
-			isRelationship(unNegatePropertyName(propName))) ||
-		(isRelationship(propName) && codes !== null);
 };
 
 const findActualDeletions = initialContent => ([propName, newValues]) => {
@@ -163,16 +154,6 @@ const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 		: newRelationships;
 };
 
-const getWriteAndDeleteRelationships = ({ type, body = {} }, reduce = true) => {
-	const newRelationships = Object.entries(body)
-		.filter(isWriteAndDeleteRelationship(type))
-		.map(([propName, codes]) => [propName, toArray(codes)]);
-
-	return reduce
-		? newRelationships.reduce(entriesToObject, {})
-		: newRelationships;
-};
-
 const getAddedRelationships = ({ type, initialContent, newContent }) => {
 	let newRelationships = getWriteRelationships(
 		{ type, body: newContent },
@@ -197,24 +178,30 @@ const containsRelationshipData = (type, payload = {}) => {
 
 // relationship value could be just a String(code), an Object or an Array of strings(codes) / objects(code and properties) / mixed
 // this function is to normalise them into an Array of objects
-const normaliseRelationshipProps = (type, body) => {
-	const relationships = getWriteAndDeleteRelationships({ type, body });
+const normaliseRelationshipProps = (type, body = {}) => {
+	const isRelationship = identifyRelationships(type);
+	const relationships = Object.keys(body).filter(propName =>
+		isRelationship(unNegatePropertyName(propName)),
+	);
 
-	Object.keys(relationships).forEach(relType => {
+	relationships.forEach(relType => {
 		const relValues = body[relType];
-		if (typeof relValues === 'string') {
-			body[relType] = [{ code: relValues }];
-		} else if (Array.isArray(relValues)) {
-			const normalisedRelValues = [];
-			relValues.forEach(relValue =>
-				typeof relValue === 'string'
-					? normalisedRelValues.push({ code: relValue })
-					: normalisedRelValues.push(relValue),
-			);
-			body[relType] = normalisedRelValues;
-		} else {
-			// when value is an object
-			body[relType] = [relValues];
+
+		if (relValues !== null) {
+			if (typeof relValues === 'string') {
+				body[relType] = [{ code: relValues }];
+			} else if (Array.isArray(relValues)) {
+				const normalisedRelValues = [];
+				relValues.forEach(relValue =>
+					typeof relValue === 'string'
+						? normalisedRelValues.push({ code: relValue })
+						: normalisedRelValues.push(relValue),
+				);
+				body[relType] = normalisedRelValues;
+			} else {
+				// when value is an object
+				body[relType] = [relValues];
+			}
 		}
 	});
 };
