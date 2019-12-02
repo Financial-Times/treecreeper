@@ -38,7 +38,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		: {};
 
 	try {
-		const { neo4jResult, queryContext } = await queryBuilder(
+		const { neo4jResult, queryContext, parameters } = await queryBuilder(
 			'CREATE',
 			input,
 			body,
@@ -48,11 +48,6 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			.setLockFields()
 			.execute();
 
-		const relationships = {
-			added: queryContext.addedRelationships || {},
-		};
-		broadcast('CREATE', neo4jResult, { relationships });
-
 		const responseData = Object.assign(
 			neo4jResult.toJson({
 				type,
@@ -60,7 +55,20 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			}),
 			newBodyDocs,
 		);
-
+		broadcast({
+			type,
+			code,
+			updatedProperties: [
+				...new Set([
+					...Object.keys(parameters.properties),
+					...Object.keys(queryContext.addedRelationships || {}),
+					...Object.keys(documents),
+				]),
+			],
+			neo4jResult,
+			requestId: metadata.requestId,
+			addedRelationships: queryContext.addedRelationships,
+		});
 		return { status: 200, body: responseData };
 	} catch (err) {
 		if (undoDocstoreWrite) {
