@@ -93,7 +93,7 @@ describe('broadcast', () => {
 				time: expect.any(Number),
 				code: mainCode,
 				type: mainType,
-				updatedProperties: expect.any(Array),
+				updatedProperties: ['code', 'someString'],
 			});
 		});
 	});
