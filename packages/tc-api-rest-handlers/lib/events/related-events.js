@@ -94,7 +94,6 @@ const makeAddedRelationshipEvents = (
 };
 
 const makeRemovedRelationshipEvents = (nodeType, removedRelationships = {}) =>
-	console.log(nodeType, removedRelationships) ||
 	generateRelatedEvents({
 		rootType: nodeType,
 		getEventType: () => 'UPDATE',

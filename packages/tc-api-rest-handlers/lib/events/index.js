@@ -32,10 +32,8 @@ const combineSimilarEvents = events => {
 	});
 };
 
-const isCreatedBy = requestId => node =>
-	node.properties._createdByRequest === requestId;
-
 const makeEvents = ({
+	action,
 	code,
 	type,
 	addedRelationships,
@@ -44,16 +42,7 @@ const makeEvents = ({
 	neo4jResult,
 	requestId,
 }) => {
-	console.log({
-		code,
-		type,
-		addedRelationships,
-		removedRelationships,
-		updatedProperties,
-		neo4jResult,
-		requestId,
-	});
-	if (!neo4jResult.records.length) {
+	if (action === 'DELETE') {
 		return [
 			{
 				action: 'DELETE',
@@ -62,10 +51,6 @@ const makeEvents = ({
 			},
 		];
 	}
-	const action = isCreatedBy(requestId)(neo4jResult.records[0].get('node'))
-		? 'CREATE'
-		: 'UPDATE';
-
 	if (action === 'UPDATE') {
 		updatedProperties = updatedProperties.filter(prop => prop !== 'code');
 	}
@@ -78,23 +63,22 @@ const makeEvents = ({
 			updatedProperties,
 		});
 	}
-
-	const addedRelationshipEvents = makeAddedRelationshipEvents(
-		type,
-		code,
-		neo4jResult.records,
-		addedRelationships,
-		requestId,
-	);
-	events.push(...addedRelationshipEvents);
-
+	if (addedRelationships) {
+		const addedRelationshipEvents = makeAddedRelationshipEvents(
+			type,
+			code,
+			neo4jResult.records,
+			addedRelationships,
+			requestId,
+		);
+		events.push(...addedRelationshipEvents);
+	}
 	const removedRelationshipEvents = makeRemovedRelationshipEvents(
 		type,
 		removedRelationships,
 	);
 	events.push(...removedRelationshipEvents);
 
-	console.log(events);
 	return combineSimilarEvents(events);
 };
 
