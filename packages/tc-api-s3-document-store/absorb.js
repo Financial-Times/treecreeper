@@ -106,7 +106,7 @@ const s3Absorb = async ({
 		versionMarker: postedVersionId,
 		siblingVersionMarker: deletedVersionId,
 		// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
-		body: { ...destinationNodeBody, ...sourceNodeBody },
+		body: { ...sourceNodeBody, ...destinationNodeBody },
 
 		// On undo absorb, we have to delete both of posted destination version and deleted source version
 		undo: async () => {
