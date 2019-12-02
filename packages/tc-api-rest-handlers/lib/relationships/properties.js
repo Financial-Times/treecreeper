@@ -31,8 +31,12 @@ const findInversePropertyNames = (rootType, propName) => {
 	});
 };
 
+const retrieveRelationshipCodes = (relType, content) =>
+	content[relType] && content[relType].map(relationship => relationship.code);
+
 module.exports = {
 	invertDirection,
 	findPropertyNames,
 	findInversePropertyNames,
+	retrieveRelationshipCodes,
 };

@@ -5,7 +5,10 @@ const {
 	validateRelationshipInput,
 } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
-const { containsRelationshipData } = require('./lib/relationships/input');
+const {
+	containsRelationshipData,
+	normaliseRelationshipProps,
+} = require('./lib/relationships/input');
 const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
@@ -26,6 +29,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
 			validateRelationshipInput(originalBody);
+			normaliseRelationshipProps(type, originalBody);
 		}
 
 		const preflightRequest = await getNeo4jRecord(type, code);
@@ -33,7 +37,11 @@ const patchHandler = ({ documentStore } = {}) => {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
-		const initialContent = preflightRequest.toJson({ type });
+		const initialContent = preflightRequest.toJson({
+			type,
+			richRelationshipsFlag: true,
+		});
+		normaliseRelationshipProps(type, initialContent);
 
 		const { documents = {}, body } = documentStore
 			? separateDocsFromBody(type, originalBody)
@@ -60,13 +68,17 @@ const patchHandler = ({ documentStore } = {}) => {
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
+
 				const relationships = {
 					added: queryContext.addedRelationships,
 					removed: queryContext.removedRelationships,
 				};
 				broadcast('UPDATE', neo4jResult, { relationships });
 			} else {
-				neo4jResultBody = initialContent;
+				neo4jResultBody = preflightRequest.toJson({
+					type,
+					richRelationshipsFlag: richRelationships,
+				});
 			}
 
 			return {

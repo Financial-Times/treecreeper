@@ -9,7 +9,11 @@ const { validateInput, validateCode } = require('./lib/validation');
 const { diffProperties } = require('./lib/diff-properties');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
-const { getRemovedRelationships } = require('./lib/relationships/input');
+const {
+	getRemovedRelationships,
+	normaliseRelationshipProps,
+} = require('./lib/relationships/input');
+const { retrieveRelationshipCodes } = require('./lib/relationships/properties');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -123,7 +127,9 @@ const collectRemovedRelationships = ({
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
-		if (!absorbedRecord[propName].includes(code)) {
+		const absorbedRelationshipCodes =
+			retrieveRelationshipCodes(propName, absorbedRecord) || [];
+		if (!absorbedRelationshipCodes.includes(code)) {
 			return;
 		}
 		if (removedRelationships[propName]) {
@@ -158,6 +164,9 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		type: nodeType,
 		excludeMeta: true,
 	});
+	normaliseRelationshipProps(nodeType, mainRecord);
+	normaliseRelationshipProps(nodeType, absorbedRecord);
+
 	const { properties } = getType(nodeType);
 
 	// This object will be used for logging
