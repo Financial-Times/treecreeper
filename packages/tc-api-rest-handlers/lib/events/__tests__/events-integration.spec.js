@@ -8,7 +8,7 @@ const {
 	deleteHandler,
 	postHandler,
 	patchHandler,
-	// absorbHandler,
+	absorbHandler,
 } = require('../../..');
 
 const eventTester = desiredAction => (type, code, updatedProperties) => {
@@ -49,6 +49,7 @@ describe('Rest events module integration', () => {
 	const mainType = 'MainType';
 	const childType = 'ChildType';
 	const childCode = `${namespace}-child`;
+	const absorbedCode = `${namespace}-absorbed`;
 	const input = {
 		type: mainType,
 		code: mainCode,
@@ -220,42 +221,138 @@ describe('Rest events module integration', () => {
 	});
 
 	describe('ABSORB', () => {
-		// 		it('will send UPDATE and DELETE log twice', async () => {
-		// 			const [main, other] = await createNodes(
-		// 				[mainType, mainCode],
-		// 				[mainType, otherCode],
-		// 			);
-		// 			await connectNodes([main, 'HAS_YOUNGER_SIBLING', other]);
-		// 			const { status } = await absorbHandler()(
-		// 				Object.assign(
-		// 					getInput({
-		// 						someString: 'some string',
-		// 						anotherString: 'another string',
-		// 					}),
-		// 					{
-		// 						codeToAbsorb: otherCode,
-		// 					},
-		// 				),
-		// 			);
-		// 			expect(status).toBe(200);
-		// 			expect(broadcastMock).toHaveBeenCalledTimes(2);
-		// 			expect(broadcastMock).toHaveBeenNthCalledWith(
-		// 				1,
-		// 				'UPDATE',
-		// 				expect.any(Object),
-		// 				{
-		// 					relationships: {
-		// 						removed: {
-		// 							olderSiblings: [mainCode],
-		// 						},
-		// 					},
-		// 				},
-		// 			);
-		// 			expect(broadcastMock).toHaveBeenNthCalledWith(
-		// 				2,
-		// 				'DELETE',
-		// 				expect.any(Object),
-		// 			);
-		// 		});
+		it('should send DELETE and UPDATE events for main nodes', async () => {
+			await Promise.all([
+				createMainNode(),
+				createNode(mainType, {
+					code: absorbedCode,
+					someString: 'some string',
+				}),
+			]);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectUpdateEvent(mainType, mainCode, ['someString']);
+			expectDeleteEvent(mainType, absorbedCode);
+		});
+
+		it('should send no update event if no real changes absorbed', async () => {
+			await Promise.all([
+				createNode(mainType, {
+					code: mainCode,
+					someString: 'some string',
+				}),
+				createNode(mainType, {
+					code: absorbedCode,
+					someString: 'some string',
+				}),
+			]);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(1);
+
+			expectDeleteEvent(mainType, absorbedCode);
+		});
+		it('should send extra update events when relationships are absorbed', async () => {
+			const [, absorbed, child] = await Promise.all([
+				createMainNode(),
+				createNode(mainType, { code: absorbedCode }),
+				createNode(childType, { code: childCode }),
+			]);
+
+			await connectNodes(absorbed, 'HAS_CHILD', child);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(3);
+			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent(mainType, mainCode, ['children']);
+			expectUpdateEvent(childType, childCode, ['isChildOf']);
+		});
+		it.skip('should send no main update events when identical relationship is absorbed', async () => {
+			// Sends too many events. BUG - but not critical
+			const [main, absorbed, child] = await Promise.all([
+				createMainNode(),
+				createNode(mainType, { code: absorbedCode }),
+				createNode(childType, { code: childCode }),
+			]);
+
+			await connectNodes(main, 'HAS_CHILD', child);
+			await connectNodes(absorbed, 'HAS_CHILD', child);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent(childType, childCode, ['isChildOf']);
+		});
+		it.skip('should send update events when reflective relationships are absorbed', async () => {
+			// Sends too many events. BUG - but not critical
+			const [main, absorbed] = await Promise.all([
+				createMainNode(),
+				createNode(mainType, { code: absorbedCode }),
+			]);
+
+			await connectNodes(main, 'HAS_YOUNGER_SIBLING', absorbed);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent(mainType, mainCode, [
+				'olderSiblings',
+				'youngerSiblings',
+			]);
+		});
+		it.skip('should send no extra update events when N-to-1 relationships are absorbed', async () => {
+			// Sends too many events. BUG - but not critical
+			const [main, absorbed, child, child2] = await Promise.all([
+				createMainNode(),
+				createNode(mainType, { code: absorbedCode }),
+				createNode(childType, { code: childCode }),
+				createNode(childType, { code: childCode + 2 }),
+			]);
+
+			await connectNodes(main, 'HAS_FAVOURITE_CHILD', child);
+			await connectNodes(absorbed, 'HAS_FAVOURITE_CHILD', child2);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent(childType, childCode, ['isFavouriteChildOf']);
+		});
 	});
 });

@@ -9,7 +9,10 @@ const { validateInput, validateCode } = require('./lib/validation');
 const { diffProperties } = require('./lib/diff-properties');
 const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
-const { getRemovedRelationships } = require('./lib/relationships/input');
+const {
+	getRemovedRelationships,
+	getAddedRelationships,
+} = require('./lib/relationships/input');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -136,6 +139,23 @@ const collectRemovedRelationships = ({
 	return removedRelationships;
 };
 
+// const filterOutReflections = (type, code) => record => {
+// 	const { properties } = getType(type);
+// 	Object.entries(properties).forEach(([name, { type: otherType }]) => {
+// 		if (otherType === type && record[name]) {
+// 			const val = Array.isArray(record[name])
+// 				? record[name]
+// 				: [record[name]];
+// 			const filteredVal = val.filter(theCode => theCode !== code);
+// 			if (filteredVal.length) {
+// 				record[name] = filteredVal;
+// 			} else {
+// 				delete record[name];
+// 			}
+// 		}
+// 	});
+// };
+
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
 const absorbHandler = ({ documentStore } = {}) => async input => {
@@ -158,6 +178,9 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		type: nodeType,
 		excludeMeta: true,
 	});
+
+	// filterOutReflections(nodeType, code)(absorbedRecord)
+
 	const { properties } = getType(nodeType);
 
 	// This object will be used for logging
@@ -220,13 +243,31 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		// Merged result always exists at last index
 		result = results.pop();
 
-		broadcast('UPDATE', result, {
-			relationships: {
-				removed: removedRelationships,
-			},
+		const addedRelationships = getAddedRelationships({
+			type: nodeType,
+			initialContent: mainRecord,
+			newContent: result.toJson({ type: nodeType, excludeMeta: true }),
 		});
-		broadcast('DELETE', absorbedNode);
+
+		broadcast({
+			type: nodeType,
+			code: absorbedCode,
+			neo4jResult: { records: [] },
+		});
+		broadcast({
+			code,
+			type: nodeType,
+			addedRelationships,
+			removedRelationships,
+			updatedProperties: [
+				...Object.keys(writeProperties),
+				...Object.keys(addedRelationships),
+				...Object.keys(removedRelationships),
+			],
+			neo4jResult: result,
+		});
 	} catch (err) {
+		console.log(err);
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },
 			err,
