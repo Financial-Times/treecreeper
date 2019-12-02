@@ -10,9 +10,15 @@ const BIZ_OPS = 'biz-ops';
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const isRelationship = (richRelationshipTypes, propDef) =>
-	'relationship' in propDef ||
+const isUserDefinedRelationship = propDef =>
+	['relationship', 'cypher'].some(name => name in propDef);
+
+const isRichRelationship = (richRelationshipTypes, propDef) =>
 	richRelationshipTypes.find(relType => relType.name === propDef.type);
+
+const isRelationship = (richRelationshipTypes, propDef) =>
+	isUserDefinedRelationship(propDef) ||
+	isRichRelationship(richRelationshipTypes, propDef);
 
 const hydrateFieldsets = ({
 	properties,
@@ -94,6 +100,62 @@ const getFromRawData = (typeName, rawData) => {
 	return clone(typeDefinition);
 };
 
+const assignRelationshipInfo = propDef => ({
+	...propDef,
+	hasMany: propDef.hasMany || false,
+	isRelationship: isUserDefinedRelationship(propDef),
+	writeInactive: 'writeInactive' in propDef ? propDef.writeInactive : false,
+	showInactive: 'showInactive' in propDef ? propDef.showInactive : true,
+});
+
+const createPropertiesWithRelationships = function(
+	richRelationshipTypes,
+	properties,
+	relationshipGetter,
+) {
+	return Object.entries(properties).reduce(
+		(updatedProps, [propName, propDef]) => {
+			if (isRelationship(richRelationshipTypes, propDef)) {
+				propDef = relationshipGetter(propName);
+			}
+
+			if (isUserDefinedRelationship(propDef)) {
+				if (propDef.hidden) {
+					return updatedProps;
+				}
+				propDef = assignRelationshipInfo(propDef);
+			}
+			return {
+				...updatedProps,
+				[propName]: propDef,
+			};
+		},
+		{},
+	);
+};
+
+const createPropertiesWithoutRelationships = function(
+	richRelationshipTypes,
+	properties,
+	relationshipGetter,
+) {
+	return Object.entries(properties).reduce(
+		(updatedProps, [propName, propDef]) => {
+			if (isRelationship(richRelationshipTypes, propDef)) {
+				propDef = relationshipGetter(propName);
+			}
+			if (propDef.relationship) {
+				return updatedProps;
+			}
+			return {
+				...updatedProps,
+				[propName]: propDef,
+			};
+		},
+		{},
+	);
+};
+
 const cacheKeyGenerator = (
 	typeName,
 	{
@@ -140,72 +202,31 @@ const getType = function(
 
 	let properties = { ...typeSchema.properties };
 	const richRelationshipTypes = this.rawData.getRelationshipTypes();
+	const relationshipGetter = propName =>
+		this.getRelationshipType(
+			typeSchema.name,
+			propName,
+			richRelationshipTypes,
+			{
+				primitiveTypes,
+				includeMetaFields,
+			},
+		);
 
 	if (withRelationships) {
-		properties = Object.entries(properties).reduce(
-			(updatedProps, [propName, propDef]) => {
-				if (isRelationship(richRelationshipTypes, propDef)) {
-					propDef = this.getRelationshipType(
-						typeSchema.name,
-						propName,
-						{
-							primitiveTypes,
-							includeMetaFields,
-						},
-					);
-				}
-
-				if (propDef.relationship || propDef.cypher) {
-					if (propDef.hidden) {
-						return updatedProps;
-					}
-					propDef = {
-						...propDef,
-						hasMany: propDef.hasMany || false,
-						isRelationship: !!(
-							propDef.relationship || propDef.cypher
-						),
-						writeInactive:
-							'writeInactive' in propDef
-								? propDef.writeInactive
-								: false,
-						showInactive:
-							'showInactive' in propDef
-								? propDef.showInactive
-								: true,
-					};
-				}
-				return {
-					...updatedProps,
-					[propName]: propDef,
-				};
-			},
-			{},
+		properties = createPropertiesWithRelationships(
+			richRelationshipTypes,
+			properties,
+			relationshipGetter,
 		);
 	} else {
-		properties = Object.entries(properties).reduce(
-			(updatedProps, [propName, propDef]) => {
-				if (isRelationship(richRelationshipTypes, propDef)) {
-					propDef = this.getRelationshipType(
-						typeSchema.name,
-						propName,
-						{
-							primitiveTypes,
-							includeMetaFields,
-						},
-					);
-				}
-				if (propDef.relationship) {
-					return updatedProps;
-				}
-				return {
-					...updatedProps,
-					[propName]: propDef,
-				};
-			},
-			{},
+		properties = createPropertiesWithoutRelationships(
+			richRelationshipTypes,
+			properties,
+			relationshipGetter,
 		);
 	}
+
 	if (includeMetaFields) {
 		properties = assignMetaProperties(properties);
 	}

@@ -2,13 +2,6 @@ const EventEmitter = require('events');
 const fetch = require('node-fetch');
 const readYaml = require('./read-yaml');
 
-const readRelationshipTypes = schemaDirectory => {
-	if (!readYaml.isDirectory(schemaDirectory, 'relationships')) {
-		return [];
-	}
-	return readYaml.directory(schemaDirectory, 'relationships');
-};
-
 class SchemaUpdater {
 	constructor(options, rawData, cache) {
 		this.eventEmitter = new EventEmitter();
@@ -34,8 +27,14 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: readYaml.directory(schemaDirectory, 'types'),
-					relationshipTypes: readRelationshipTypes(schemaDirectory),
+					types: [].concat(
+						readYaml.directory(schemaDirectory, 'types'),
+						readYaml.directory(schemaDirectory, 'relationships'),
+					),
+					relationshipTypes: readYaml.directory(
+						schemaDirectory,
+						'relationships',
+					),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',

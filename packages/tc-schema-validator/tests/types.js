@@ -5,7 +5,6 @@ const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
 const { typeTestSuite, relationshipTestSuite } = require('./type-test-suite');
 
 const sdk = new SDK();
-const types = sdk.rawData.getTypes();
 
 const makePath = dir =>
 	path.join(process.cwd(), process.env.TREECREEPER_SCHEMA_DIRECTORY, dir);
@@ -43,11 +42,9 @@ describe('consistent name property', () => {
 });
 
 describe('validate types', () => {
-	types.filter(({ from, to }) => !from && !to).forEach(typeTestSuite);
+	sdk.rawData.getTypes().forEach(typeTestSuite);
 });
 
 describe('validate rich relationships', () => {
-	types
-		.filter(({ from, to }) => !!from && !!to)
-		.forEach(relationshipTestSuite);
+	sdk.rawData.getRelationshipTypes().forEach(relationshipTestSuite);
 });

@@ -1,32 +1,43 @@
-const type = require('./type');
+const BIZ_OPS = 'biz-ops';
 
 module.exports = {
-	// todo move to object rest parameters for options when upgrading node
-	accessor(options = {}) {
-		const types = this.rawData.getTypes();
-		const relationshipTypes = this.rawData.getRelationshipTypes();
+	// Note that this accessor will return *all* relationship types
+	// which includes user defined one and automatically generated using
+	// root rich relationship types with having the same property definitions
+	accessor({
+		primitiveTypes = BIZ_OPS,
+		includeMetaFields = false,
+		excludeCypherRelationships = false,
+	} = {}) {
+		const types = this.getTypes({
+			withRelationships: true,
+		});
 
-		// Find relationships from type properties
 		return types.reduce((relationships, { name, properties }) => {
-			Object.entries(properties).forEach(
-				([propName, { relationship, type: typeName }]) => {
-					if (
-						relationship ||
-						relationshipTypes.find(
-							relType => relType.name === typeName,
-						)
-					) {
-						relationships.push(
-							this.getRelationshipType(name, propName, options),
-						);
-					}
-				},
-			);
-			return relationships;
+			let relationshipTypes = Object.entries(properties)
+				.filter(([, { isRelationship }]) => !!isRelationship)
+				.map(([propName]) =>
+					this.getRelationshipType(name, propName, {
+						primitiveTypes,
+						includeMetaFields,
+					}),
+				);
+			// If we're accessing for graphql generation.
+			// We should exlcude cypher relationship
+			if (excludeCypherRelationships) {
+				relationshipTypes = relationshipTypes.filter(
+					({ cypher }) => !cypher,
+				);
+			}
+
+			return [...relationships, ...relationshipTypes];
 		}, []);
 	},
-	// todo move to object rest parameters for options when upgrading node
-	cacheKeyGenerator: (options = {}) => {
-		return `relationship:${type.cacheKeyGenerator('all', options)}`;
+	cacheKeyGenerator({
+		primitiveTypes = BIZ_OPS,
+		includeMetaFields = false,
+		excludeCypherRelationships = false,
+	} = {}) {
+		return `relationship:all:${primitiveTypes}:${includeMetaFields}:${excludeCypherRelationships}`;
 	},
 };

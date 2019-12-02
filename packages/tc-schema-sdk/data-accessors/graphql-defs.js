@@ -301,7 +301,10 @@ module.exports = {
 			.map(printTypeDefinition);
 
 		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
-			this.getRelationshipTypes(retrieveOptions),
+			this.getRelationshipTypes({
+				...retrieveOptions,
+				excludeCypherRelationships: true,
+			}),
 		);
 
 		const enumDefinitions = Object.entries(enums).map(printEnumDefinition);

@@ -6,7 +6,24 @@ const {
 
 const BIZ_OPS = 'biz-ops';
 
-const transformRichRelationship = (
+const getFromTo = (direction, rootType, otherType) =>
+	direction === 'outgoing' ? [rootType, otherType] : [otherType, rootType];
+
+const isCypherQueryIncluded = property => 'cypher' in property;
+
+const formatUserDefinedRelationship = (rootType, property) => {
+	if (isCypherQueryIncluded(property)) {
+		return { ...property };
+	}
+	const [from, to] = getFromTo(property.direction, rootType, property.type);
+	return {
+		...property,
+		from,
+		to,
+	};
+};
+
+const formatRichRelationship = (
 	rootType,
 	property,
 	{ name, from, to, relationship, properties },
@@ -37,50 +54,46 @@ const transformRichRelationship = (
 	};
 };
 
-const getFromTo = (direction, rootType, otherType) =>
-	direction === 'outgoing' ? [rootType, otherType] : [otherType, rootType];
-
-const getFromRawData = (rootType, propertyName, rawData) => {
-	const types = rawData.getTypes();
-	const type = types.find(t => t.name === rootType);
-
+const getTypeProperty = (rootType, propertyName, rawData) => {
+	const type = rawData.getTypes().find(typeDef => typeDef.name === rootType);
 	if (!type) {
 		throw new TreecreeperUserError(
 			`Invalid relationship type \`${rootType}\``,
 		);
 	}
 
-	const property = type.properties[propertyName];
+	return type.properties[propertyName];
+};
 
+const isUserDefinedRelationship = property =>
+	['relationship', 'cypher'].some(propName => propName in property);
+
+const getRichRelationshipDefinition = ({ type }, rawData) =>
+	rawData.getRelationshipTypes().find(({ name }) => name === type);
+
+const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
+	const property = getTypeProperty(rootType, propertyName, rawData);
 	if (!property) {
 		throw new TreecreeperUserError(
 			`${rootType} doesn't have ${propertyName} property`,
 		);
 	}
 
-	if ('relationship' in property) {
-		const [from, to] = getFromTo(
-			property.direction,
-			rootType,
-			property.type,
-		);
-		return {
-			...property,
-			from,
-			to,
-		};
+	if (isUserDefinedRelationship(property)) {
+		return formatUserDefinedRelationship(rootType, property);
 	}
-	const richRelationshipType = rawData
-		.getRelationshipTypes()
-		.find(relType => relType.name === property.type);
-
-	if (richRelationshipType) {
-		return transformRichRelationship(
+	const richRelationshipDefinition = getRichRelationshipDefinition(
+		property,
+		rawData,
+	);
+	if (richRelationshipDefinition) {
+		return formatRichRelationship(
 			rootType,
 			property,
-			richRelationshipType,
+			richRelationshipDefinition,
 		);
 	}
+
 	throw new TreecreeperUserError(
 		`${propertyName} property in ${rootType} is not a relationship`,
 	);
@@ -99,19 +112,21 @@ const getRelationshipType = function(
 	{
 		primitiveTypes = BIZ_OPS, // graphql
 		includeMetaFields = false,
-	},
+	} = {},
 ) {
-	const relationshipType = getFromRawData(
+	const relationshipType = getRelationshipTypeFromRawData(
 		rootType,
 		propertyName,
 		this.rawData,
 	);
-	if (!('properties' in relationshipType)) {
-		relationshipType.properties = {};
+	// if relationshipType has cypher field, it cannot have from/to direction and properties
+	// because it can only express relationship via cypher query
+	if (isCypherQueryIncluded(relationshipType)) {
+		return relationshipType;
 	}
-	let properties = { ...relationshipType.properties };
+	let properties = { ...(relationshipType.properties || {}) };
 
-	if (includeMetaFields && Object.keys(relationshipType.properties).length) {
+	if (includeMetaFields && Object.keys(properties).length) {
 		properties = assignMetaProperties(properties, '_lockedFields');
 	}
 	properties = transformPrimitiveTypes(
