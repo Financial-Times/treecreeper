@@ -30,7 +30,7 @@ const s3Get = async ({ s3Instance, bucketName, type, code, versionMarker }) => {
 				},
 				params.Key,
 			);
-			return {};
+			return { body: {} };
 		}
 		logger.info(
 			{
