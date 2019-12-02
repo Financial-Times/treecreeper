@@ -33,7 +33,7 @@ const deleteHandler = ({
 
 	try {
 		const neo4jResult = await executeQuery(query, { code });
-		broadcast({ code, type, neo4jResult });
+		broadcast({ action: 'DELETE', code, type, neo4jResult });
 	} catch (error) {
 		logger.error(
 			{ event: 'NEO4J_DELETE_FAILURE', error },

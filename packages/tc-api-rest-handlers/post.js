@@ -56,6 +56,7 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			newBodyDocs,
 		);
 		broadcast({
+			action: 'CREATE',
 			type,
 			code,
 			updatedProperties: [
