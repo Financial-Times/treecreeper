@@ -17,7 +17,7 @@ describe('rest PATCH update', () => {
 		connectNodes,
 	} = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -430,8 +430,8 @@ describe('rest PATCH update', () => {
 					},
 				);
 		});
-		// skip until implementing updating meta times when relationship properties are changed
-		it.skip('deletes a property as an update', async () => {
+
+		it('deletes a property as an update', async () => {
 			const [main, child] = await createNodes(
 				['MainType', mainCode],
 				['ChildType', childCode],

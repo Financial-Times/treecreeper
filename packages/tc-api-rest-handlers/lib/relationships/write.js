@@ -3,6 +3,7 @@ const { stripIndents } = require('common-tags');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { metaPropertiesForCreate } = require('../metadata-helpers');
 const { findInversePropertyNames } = require('./properties');
+const { metaPropertiesForUpdate } = require('../metadata-helpers');
 
 const relationshipFragment = (
 	type,
@@ -55,6 +56,15 @@ const addPropsToQueries = (relationshipPropQueries, value) => {
 				WHEN related.code = '${value.code}'
 				THEN relationship END).${k} = '${v}'
 				`);
+
+			const updateMetaQueries = metaPropertiesForUpdate(
+				`
+				SET (CASE
+					WHEN related.code = '${value.code}'
+					THEN relationship END)`,
+				true,
+			);
+			relationshipPropQueries.push(updateMetaQueries);
 		}
 	});
 };
