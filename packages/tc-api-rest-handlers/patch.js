@@ -43,7 +43,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		const {
 			body: newBodyDocuments = {},
 			undo: undoDocstoreWrite,
-			updatedDocumentProperties,
+			updatedProperties: updatedDocumentProperties,
 		} = !_isEmpty(documents)
 			? await documentStore.patch(type, code, documents)
 			: {};
@@ -57,6 +57,7 @@ const patchHandler = ({ documentStore } = {}) => {
 
 			let neo4jResultBody;
 			const event = {
+				action: 'UPDATE',
 				type,
 				code,
 				requestId: metadata.requestId,
@@ -83,10 +84,11 @@ const patchHandler = ({ documentStore } = {}) => {
 						...(updatedDocumentProperties || []),
 					]),
 				];
-				broadcast(event);
 			} else {
 				neo4jResultBody = initialContent;
+				event.updatedProperties = updatedDocumentProperties || [];
 			}
+			broadcast(event);
 			const responseData = {
 				...neo4jResultBody,
 				...newBodyDocuments,

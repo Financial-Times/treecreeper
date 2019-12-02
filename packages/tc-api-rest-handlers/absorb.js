@@ -202,17 +202,19 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	let updatedDocstoreBody;
 	let undoDocstoreWrite;
-
+	let updatedDocumentProperties = [];
 	if (documentStore) {
-		const { body, undo } = await documentStore.absorb(
+		const { body, undo, updatedProperties } = await documentStore.absorb(
 			nodeType,
 			absorbedCode,
 			code,
 		);
 		updatedDocstoreBody = body || {};
 		undoDocstoreWrite = undo;
+		updatedDocumentProperties = updatedProperties;
 	}
 
+	console.log({ updatedDocumentProperties });
 	let result;
 	try {
 		const queries = [];
@@ -250,11 +252,12 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		});
 
 		broadcast({
+			action: 'DELETE',
 			type: nodeType,
 			code: absorbedCode,
-			neo4jResult: { records: [] },
 		});
 		broadcast({
+			action: 'UPDATE',
 			code,
 			type: nodeType,
 			addedRelationships,
@@ -263,6 +266,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 				...Object.keys(writeProperties),
 				...Object.keys(addedRelationships),
 				...Object.keys(removedRelationships),
+				...(updatedDocumentProperties || []),
 			],
 			neo4jResult: result,
 		});
