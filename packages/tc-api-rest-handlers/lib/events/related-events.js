@@ -1,5 +1,4 @@
 const schema = require('@financial-times/tc-schema-sdk');
-const { getContext } = require('@financial-times/tc-api-express-logger');
 
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
@@ -63,12 +62,13 @@ const makeAddedRelationshipEvents = (
 	nodeType,
 	mainCode,
 	neo4jRecords,
-	addedRelationships,
+	addedRelationships = {},
+	requestId,
 ) => {
 	if (!Object.keys(addedRelationships).length) {
 		return [];
 	}
-	const { requestId } = getContext();
+
 	const createdNodes = new Set(
 		neo4jRecords
 			.filter(
@@ -93,7 +93,8 @@ const makeAddedRelationshipEvents = (
 	});
 };
 
-const makeRemovedRelationshipEvents = (nodeType, removedRelationships) =>
+const makeRemovedRelationshipEvents = (nodeType, removedRelationships = {}) =>
+	console.log(nodeType, removedRelationships) ||
 	generateRelatedEvents({
 		rootType: nodeType,
 		getEventType: () => 'UPDATE',
