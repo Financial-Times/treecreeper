@@ -44,6 +44,15 @@ const makeEvents = ({
 	neo4jResult,
 	requestId,
 }) => {
+	console.log({
+		code,
+		type,
+		addedRelationships,
+		removedRelationships,
+		updatedProperties,
+		neo4jResult,
+		requestId,
+	});
 	if (!neo4jResult.records.length) {
 		return [
 			{
@@ -53,7 +62,6 @@ const makeEvents = ({
 			},
 		];
 	}
-
 	const action = isCreatedBy(requestId)(neo4jResult.records[0].get('node'))
 		? 'CREATE'
 		: 'UPDATE';
@@ -61,15 +69,15 @@ const makeEvents = ({
 	if (action === 'UPDATE') {
 		updatedProperties = updatedProperties.filter(prop => prop !== 'code');
 	}
-
 	const events = [];
-
-	events.push({
-		action,
-		code,
-		type,
-		updatedProperties,
-	});
+	if (updatedProperties.length) {
+		events.push({
+			action,
+			code,
+			type,
+			updatedProperties,
+		});
+	}
 
 	const addedRelationshipEvents = makeAddedRelationshipEvents(
 		type,
@@ -85,6 +93,8 @@ const makeEvents = ({
 		removedRelationships,
 	);
 	events.push(...removedRelationshipEvents);
+
+	console.log(events);
 	return combineSimilarEvents(events);
 };
 
