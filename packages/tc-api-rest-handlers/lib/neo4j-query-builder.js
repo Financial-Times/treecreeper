@@ -1,3 +1,4 @@
+const _isEmpty = require('lodash.isempty');
 const { stripIndents } = require('common-tags');
 const { executeQuery } = require('./neo4j-model');
 const { constructNeo4jProperties } = require('./neo4j-type-conversion');
@@ -10,6 +11,7 @@ const {
 	getWriteRelationships,
 	getAddedRelationships,
 	getRemovedRelationships,
+	identifyRelationships,
 } = require('./relationships/input');
 const {
 	prepareToWriteRelationships,
@@ -33,7 +35,7 @@ const isObjectEqual = (base, compare) => {
 	return diff.length === 0;
 };
 
-const getBaseQuery = (type, method) => {
+const getBaseQuery = (type, method, willUpdateMeta) => {
 	switch (method) {
 		case 'CREATE':
 			return stripIndents`
@@ -41,10 +43,10 @@ const getBaseQuery = (type, method) => {
 				SET ${metaPropertiesForCreate('node')}
 				WITH node`;
 		case 'MERGE':
-			return stripIndents`MERGE (node:${type} { code: $code })
-				SET ${metaPropertiesForUpdate('node')}
-				SET node += $properties
-				`;
+			return stripIndents`
+				MERGE (node:${type} { code: $code })
+				${willUpdateMeta ? `SET ${metaPropertiesForUpdate('node')}` : ''}
+				SET node += $properties`;
 		default:
 			throw new Error('method must be either of CREATE OR MERGE');
 	}
@@ -58,7 +60,7 @@ const queryBuilder = (method, input, body = {}) => {
 	// context is used for stacking data to update record
 	const context = { upsert };
 
-	const queryParts = [getBaseQuery(type, method)];
+	const queryParts = [];
 	let parameters = {
 		code,
 		...prepareMetadataForNeo4jQuery(metadata),
@@ -141,8 +143,20 @@ const queryBuilder = (method, input, body = {}) => {
 			queryParts.push(...addRelationshipQueries);
 			updateParameter(addRelationshipParams);
 		}
+		const isRelationship = identifyRelationships(type);
+		const initialContentRels = Object.keys(
+			initialContent,
+		).filter(propName => isRelationship(propName));
+
 		context.willAddRelationships = !!Object.keys(addedRelationships).length;
+		context.willCreateRelationships = !_isEmpty(
+			Object.keys(addedRelationships).filter(
+				addedRelationship =>
+					!initialContentRels.includes(addedRelationship),
+			),
+		);
 		context.addedRelationships = addedRelationships;
+
 		return builder;
 	};
 
@@ -184,6 +198,11 @@ const queryBuilder = (method, input, body = {}) => {
 	};
 
 	const execute = async () => {
+		const willUpdateMeta =
+			context.willModifyNode ||
+			context.willCreateRelationships ||
+			context.willDeleteRelationships;
+		queryParts.unshift(getBaseQuery(type, method, willUpdateMeta));
 		queryParts.push(getNeo4jRecordCypherQuery());
 		const neo4jQuery = queryParts.join('\n');
 		const neo4jResult = await executeQuery(neo4jQuery, parameters);

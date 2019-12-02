@@ -411,6 +411,7 @@ describe('rest PATCH update', () => {
 			});
 
 			await neo4jTest('MainType', mainCode)
+				.match(meta.default)
 				.hasRels(1)
 				.hasRel(
 					{

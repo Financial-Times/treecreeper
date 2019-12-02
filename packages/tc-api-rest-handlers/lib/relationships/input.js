@@ -212,4 +212,5 @@ module.exports = {
 	getRemovedRelationships,
 	containsRelationshipData,
 	normaliseRelationshipProps,
+	identifyRelationships,
 };
