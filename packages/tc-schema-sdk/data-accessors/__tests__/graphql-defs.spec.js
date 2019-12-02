@@ -148,6 +148,34 @@ Internal use only
 type CostcentrePaysForGroup @relation(name: PAYS_FOR) {
 from: CostCentre
 to: Group
+"""
+someRelationshipProperty description
+"""
+someRelationshipProperty: String
+"""
+The client that was used to make the creation
+"""
+_createdByClient: String
+"""
+The user that made the creation
+"""
+_createdByUser: String
+"""
+The time and date this record was created
+"""
+_createdTimestamp: DateTime
+"""
+The client that was used to make the update
+"""
+_updatedByClient: String
+"""
+The last user to make an update
+"""
+_updatedByUser: String
+"""
+The time and date this record was last updated
+"""
+_updatedTimestamp: DateTime
 }
 type Query {
 """
@@ -346,6 +374,13 @@ describe('graphql def creation', () => {
 							hasMany: true,
 							description:
 								'The groups which are costed to the cost centre',
+							properties: {
+								someRelationshipProperty: {
+									type: 'Word',
+									description:
+										'someRelationshipProperty description',
+								},
+							},
 						},
 						hasNestedGroups: {
 							type: 'Group',
@@ -386,6 +421,13 @@ describe('graphql def creation', () => {
 							direction: 'incoming',
 							description:
 								'The Cost Centre associated with the group',
+							properties: {
+								someRelationshipProperty: {
+									type: 'Word',
+									description:
+										'someRelationshipProperty description',
+								},
+							},
 						},
 					},
 				},
@@ -485,6 +527,12 @@ describe('graphql def creation', () => {
 				{
 					name: 'PaysFor',
 					relationship: 'PAYS_FOR',
+					properties: {
+						someRelationshipProperty: {
+							type: 'Word',
+							description: 'someRelationshipProperty description',
+						},
+					},
 					from: {
 						type: 'CostCentre',
 						hasMany: false,
