@@ -111,6 +111,7 @@ const collectRemovedRelationships = ({
 	absorbedRecord,
 	mainRecord,
 }) => {
+	// this finds relationships that will be lost via N-to-1 rules
 	const removedRelationships = getRemovedRelationships({
 		type: nodeType,
 		initialContent: absorbedRecord,
@@ -118,17 +119,24 @@ const collectRemovedRelationships = ({
 		action: 'merge',
 	});
 
+	// this finds relationships where the reocrd might end up pointing
+	// at itself
 	const possibleReflections = Object.entries(properties)
 		.filter(([, { type: otherType }]) => nodeType === otherType)
 		.map(([name]) => name);
 
 	possibleReflections.forEach(propName => {
+		// if the absorbedRecord doesn't define this relationship there is
+		// nothing to do
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
+		// if the absorbedRecord doesn't point at the root record in this relationship
+		// there is nothing to do
 		if (!absorbedRecord[propName].includes(code)) {
 			return;
 		}
+		// make sure we tell removed relationships to delete the newly reflective relationship
 		if (removedRelationships[propName]) {
 			removedRelationships[propName].push(code);
 		} else {
@@ -138,6 +146,17 @@ const collectRemovedRelationships = ({
 
 	return removedRelationships;
 };
+
+const getAlteredPeers = ({ properties, absorbedRecord }) =>
+	Object.entries(properties)
+		.filter(
+			([name, { relationship }]) =>
+				absorbedRecord[name] && !!relationship,
+		)
+		.reduce(
+			(obj, [name]) => ({ ...obj, [name]: absorbedRecord[name] }),
+			{},
+		);
 
 // const filterOutReflections = (type, code) => record => {
 // 	const { properties } = getType(type);
@@ -183,8 +202,6 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	const { properties } = getType(nodeType);
 
-	// This object will be used for logging
-	// eslint-disable-next-line no-unused-vars
 	const writeProperties = getWriteProperties({
 		nodeType,
 		properties,
@@ -214,7 +231,6 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		updatedDocumentProperties = updatedProperties;
 	}
 
-	console.log({ updatedDocumentProperties });
 	let result;
 	try {
 		const queries = [];
@@ -251,27 +267,37 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 			newContent: result.toJson({ type: nodeType, excludeMeta: true }),
 		});
 
-		broadcast({
-			action: 'DELETE',
-			type: nodeType,
-			code: absorbedCode,
-		});
-		broadcast({
-			action: 'UPDATE',
-			code,
-			type: nodeType,
-			addedRelationships,
-			removedRelationships,
-			updatedProperties: [
-				...Object.keys(writeProperties),
-				...Object.keys(addedRelationships),
-				...Object.keys(removedRelationships),
-				...(updatedDocumentProperties || []),
-			],
-			neo4jResult: result,
-		});
+		broadcast([
+			{
+				action: 'DELETE',
+				type: nodeType,
+				code: absorbedCode,
+			},
+			{
+				action: 'UPDATE',
+				code: absorbedCode,
+				type: nodeType,
+				removedRelationships: getAlteredPeers({
+					properties,
+					absorbedRecord,
+				}),
+				neo4jResult: results[0],
+			},
+			{
+				action: 'UPDATE',
+				code,
+				type: nodeType,
+				addedRelationships,
+				removedRelationships,
+				updatedProperties: [
+					...Object.keys(writeProperties),
+					...Object.keys(addedRelationships),
+					...(updatedDocumentProperties || []),
+				],
+				neo4jResult: result,
+			},
+		]);
 	} catch (err) {
-		console.log(err);
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },
 			err,

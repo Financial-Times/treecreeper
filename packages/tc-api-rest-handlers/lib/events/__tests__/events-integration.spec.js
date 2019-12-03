@@ -12,13 +12,6 @@ const {
 } = require('../../..');
 
 const eventTester = desiredAction => (type, code, updatedProperties) => {
-	console.log(
-		emitSpy.mock.calls,
-		desiredAction,
-		type,
-		code,
-		updatedProperties,
-	);
 	const matchingEvents = emitSpy.mock.calls.filter(
 		([action, event]) =>
 			action === desiredAction &&
@@ -281,13 +274,14 @@ describe('Rest events module integration', () => {
 			});
 
 			expect(status).toBe(200);
+			console.log(JSON.stringify(emitSpy.mock.calls, null, 2));
 			expect(emitSpy).toHaveBeenCalledTimes(3);
 			expectDeleteEvent(mainType, absorbedCode);
 			expectUpdateEvent(mainType, mainCode, ['children']);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
-		it.skip('should send no main update events when identical relationship is absorbed', async () => {
-			// Sends too many events. BUG - but not critical
+
+		it('should send extra update events for peers who lose relationships', async () => {
 			const [main, absorbed, child] = await Promise.all([
 				createMainNode(),
 				createNode(mainType, { code: absorbedCode }),
@@ -308,8 +302,29 @@ describe('Rest events module integration', () => {
 			expectDeleteEvent(mainType, absorbedCode);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
-		it.skip('should send update events when reflective relationships are absorbed', async () => {
-			// Sends too many events. BUG - but not critical
+
+		it('should send no main update events when identical relationship is absorbed', async () => {
+			const [main, absorbed, child] = await Promise.all([
+				createMainNode(),
+				createNode(mainType, { code: absorbedCode }),
+				createNode(childType, { code: childCode }),
+			]);
+
+			await connectNodes(main, 'HAS_CHILD', child);
+			await connectNodes(absorbed, 'HAS_CHILD', child);
+
+			const { status } = await absorbHandler()({
+				code: mainCode,
+				type: mainType,
+				codeToAbsorb: absorbedCode,
+			});
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent(childType, childCode, ['isChildOf']);
+		});
+		it('should send update events when reflective relationships are absorbed', async () => {
 			const [main, absorbed] = await Promise.all([
 				createMainNode(),
 				createNode(mainType, { code: absorbedCode }),
@@ -326,13 +341,9 @@ describe('Rest events module integration', () => {
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
 			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(mainType, mainCode, [
-				'olderSiblings',
-				'youngerSiblings',
-			]);
+			expectUpdateEvent(mainType, mainCode, ['youngerSiblings']);
 		});
-		it.skip('should send no extra update events when N-to-1 relationships are absorbed', async () => {
-			// Sends too many events. BUG - but not critical
+		it('should send no extra update events when N-to-1 relationships are absorbed', async () => {
 			const [main, absorbed, child, child2] = await Promise.all([
 				createMainNode(),
 				createNode(mainType, { code: absorbedCode }),
@@ -352,7 +363,7 @@ describe('Rest events module integration', () => {
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
 			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(childType, childCode, ['isFavouriteChildOf']);
+			expectUpdateEvent(childType, childCode + 2, ['isFavouriteChildOf']);
 		});
 	});
 });

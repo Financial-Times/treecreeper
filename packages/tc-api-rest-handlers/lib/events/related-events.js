@@ -40,6 +40,9 @@ const generateRelatedEvents = ({
 }) => {
 	const { properties } = schema.getType(rootType);
 	return Object.entries(relationships).reduce((events, [propName, codes]) => {
+		if (!Array.isArray(codes)) {
+			codes = [codes];
+		}
 		codes.forEach(code => {
 			const { type } = properties[propName];
 			events.push({
