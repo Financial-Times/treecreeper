@@ -27,10 +27,7 @@ class SchemaUpdater {
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
-					types: [].concat(
-						readYaml.directory(schemaDirectory, 'types'),
-						readYaml.directory(schemaDirectory, 'relationships'),
-					),
+					types: readYaml.directory(schemaDirectory, 'types'),
 					relationshipTypes: readYaml.directory(
 						schemaDirectory,
 						'relationships',
