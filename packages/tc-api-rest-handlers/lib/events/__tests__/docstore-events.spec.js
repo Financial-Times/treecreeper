@@ -296,7 +296,7 @@ describe('docstore events', () => {
 					Promise.resolve({
 						VersionId: 'lalalala',
 						Body:
-							'{"someDocument": "some document2", "anotherDocument": "another document"}',
+							'{"someDocument": "some document", "anotherDocument": "another document"}',
 					}),
 			}));
 
@@ -336,7 +336,7 @@ describe('docstore events', () => {
 				promise: () =>
 					Promise.resolve({
 						VersionId: 'lalalala',
-						Body: '{"someDocument": "some document2"}',
+						Body: '{"someDocument": "some document"}',
 					}),
 			}));
 

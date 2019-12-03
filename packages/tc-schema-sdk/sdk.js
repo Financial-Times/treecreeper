@@ -8,6 +8,7 @@ const stringValidator = require('./data-accessors/string-validator');
 const enums = require('./data-accessors/enums');
 const types = require('./data-accessors/types');
 const { SchemaUpdater } = require('./lib/updater');
+const utils = require('./lib/utils');
 
 class SDK {
 	constructor(options = {}) {
@@ -24,6 +25,10 @@ class SDK {
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
 		this.onChange = this.onChange.bind(this);
+
+		Object.entries(utils).forEach(([name, method]) => {
+			this[name] = method.bind(this);
+		});
 
 		if (options.init !== false) {
 			this.init(options);

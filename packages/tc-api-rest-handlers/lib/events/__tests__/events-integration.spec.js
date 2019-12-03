@@ -100,7 +100,9 @@ describe('Rest events module integration', () => {
 			expect(emitSpy).toHaveBeenCalledTimes(2);
 			expectCreateEvent(mainType, mainCode, [
 				'children',
+
 				'code',
+				'deprecatedChildren',
 				'someString',
 			]);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
@@ -122,6 +124,7 @@ describe('Rest events module integration', () => {
 			expectCreateEvent(mainType, mainCode, [
 				'children',
 				'code',
+				'deprecatedChildren',
 				'someString',
 			]);
 			expectCreateEvent(childType, childCode, ['code', 'isChildOf']);
@@ -168,7 +171,11 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, ['children', 'someString']);
+			expectUpdateEvent(mainType, mainCode, [
+				'children',
+				'deprecatedChildren',
+				'someString',
+			]);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
 
@@ -186,7 +193,11 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, ['children', 'someString']);
+			expectUpdateEvent(mainType, mainCode, [
+				'children',
+				'deprecatedChildren',
+				'someString',
+			]);
 			expectCreateEvent(childType, childCode, ['code', 'isChildOf']);
 		});
 		it('should send extra UPDATE events when disconnecting from related nodes', async () => {
@@ -208,7 +219,11 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, ['children', 'someString']);
+			expectUpdateEvent(mainType, mainCode, [
+				'children',
+				'deprecatedChildren',
+				'someString',
+			]);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
 	});
@@ -277,7 +292,10 @@ describe('Rest events module integration', () => {
 			console.log(JSON.stringify(emitSpy.mock.calls, null, 2));
 			expect(emitSpy).toHaveBeenCalledTimes(3);
 			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(mainType, mainCode, ['children']);
+			expectUpdateEvent(mainType, mainCode, [
+				'children',
+				'deprecatedChildren',
+			]);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
 

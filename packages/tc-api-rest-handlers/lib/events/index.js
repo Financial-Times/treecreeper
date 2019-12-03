@@ -1,5 +1,5 @@
 const groupBy = require('lodash.groupby');
-
+const schema = require('@financial-times/tc-schema-sdk');
 const EventEmitter = require('events');
 const {
 	makeAddedRelationshipEvents,
@@ -17,12 +17,16 @@ const combineSimilarEvents = events => {
 		({ action, code, type }) => `${action}:${code}:${type}`,
 	);
 	return Object.values(groupedEvents).map(groupedEvent => {
-		const updatedPropertiesList = groupedEvent.map(
+		const updatedPropertiesList = groupedEvent.flatMap(
 			event => event.updatedProperties,
 		);
-		const updatedProperties = unique([].concat(...updatedPropertiesList))
-			.filter(name => name && name.charAt(0) !== '_')
-			.sort();
+		const updatedProperties = unique(
+			unique(updatedPropertiesList)
+				.filter(name => name && name.charAt(0) !== '_')
+				.flatMap(propName =>
+					schema.findPropertyNames(groupedEvent[0].type, propName),
+				),
+		).sort();
 		// Merge to first event object
 		return Object.assign(groupedEvent[0], {
 			...(groupedEvent[0].action === 'DELETE'
@@ -90,12 +94,11 @@ const broadcast = changeSummaries => {
 	if (!Array.isArray(changeSummaries)) {
 		changeSummaries = [changeSummaries];
 	}
-	combineSimilarEvents([].concat(...changeSummaries.map(makeEvents))).forEach(
-		event =>
-			module.exports.emitter.emit(event.action, {
-				time: Math.floor(Date.now() / 1000),
-				...event,
-			}),
+	combineSimilarEvents(changeSummaries.flatMap(makeEvents)).forEach(event =>
+		module.exports.emitter.emit(event.action, {
+			time: Math.floor(Date.now() / 1000),
+			...event,
+		}),
 	);
 };
 

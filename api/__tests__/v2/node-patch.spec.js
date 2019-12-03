@@ -34,7 +34,9 @@ describe('v2 - node PATCH', () => {
 		if (data) {
 			req = req.send(data);
 		}
-
+		if (expectations[1] && expectations[1].children) {
+			expectations[1].deprecatedChildren = expectations[1].children;
+		}
 		return req.expect(...expectations);
 	};
 

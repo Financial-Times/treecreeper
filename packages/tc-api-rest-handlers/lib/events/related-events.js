@@ -1,37 +1,5 @@
 const schema = require('@financial-times/tc-schema-sdk');
 
-const invertDirection = direction =>
-	direction === 'incoming' ? 'outgoing' : 'incoming';
-
-const findPropertyName = ({
-	sourceType,
-	destinationType,
-	relationship,
-	direction,
-}) => {
-	const { properties: sourceProperties } = schema.getType(sourceType);
-	const [propName] = Object.entries(sourceProperties).find(
-		([, definition]) =>
-			definition.type === destinationType &&
-			definition.relationship === relationship &&
-			definition.direction === direction,
-	);
-	return propName;
-};
-
-const findInversePropertyName = (rootType, propName) => {
-	const { type, relationship, direction } = schema.getType(
-		rootType,
-	).properties[propName];
-
-	return findPropertyName({
-		sourceType: type,
-		direction: invertDirection(direction),
-		relationship,
-		destinationType: rootType,
-	});
-};
-
 const generateRelatedEvents = ({
 	rootType,
 	getEventType,
@@ -87,10 +55,13 @@ const makeAddedRelationshipEvents = (
 		getEventType: (type, code) =>
 			isCreated(type, code) ? 'CREATE' : 'UPDATE',
 		getUpdatedProperties: ({ rootType, propName, type, code }) => {
-			const updatedProperty = findInversePropertyName(rootType, propName);
+			const updatedProperties = schema.findInversePropertyNames(
+				rootType,
+				propName,
+			);
 			return isCreated(type, code)
-				? ['code', updatedProperty].sort()
-				: [updatedProperty];
+				? updatedProperties.concat(['code']).sort()
+				: updatedProperties;
 		},
 		relationships: addedRelationships,
 	});
@@ -100,9 +71,9 @@ const makeRemovedRelationshipEvents = (nodeType, removedRelationships = {}) =>
 	generateRelatedEvents({
 		rootType: nodeType,
 		getEventType: () => 'UPDATE',
-		getUpdatedProperties: ({ rootType, propName }) => [
-			findInversePropertyName(rootType, propName),
-		],
+		getUpdatedProperties: ({ rootType, propName }) =>
+			schema.findInversePropertyNames(rootType, propName),
+
 		relationships: removedRelationships,
 	});
 
