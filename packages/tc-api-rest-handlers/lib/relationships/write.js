@@ -1,8 +1,10 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { getType } = require('@financial-times/tc-schema-sdk');
+const {
+	getType,
+	findInversePropertyNames,
+} = require('@financial-times/tc-schema-sdk');
 const { metaPropertiesForCreate } = require('../metadata-helpers');
-const { findInversePropertyNames } = require('./properties');
 
 const relationshipFragment = (
 	type,

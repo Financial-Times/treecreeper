@@ -22,13 +22,17 @@ describe('v2 - node POST', () => {
 	beforeAll(async () => {
 		app = await createApp();
 	});
-	const testPostRequest = (url, data, ...expectations) =>
-		sandbox
+	const testPostRequest = (url, data, ...expectations) => {
+		if (expectations[1] && expectations[1].children) {
+			expectations[1].deprecatedChildren = expectations[1].children;
+		}
+		return sandbox
 			.request(app)
 			.post(url)
 			.namespacedAuth()
 			.send(data)
 			.expect(...expectations);
+	};
 
 	it('responds with 500 if neo4j query fails', async () => {
 		stubDbUnavailable(sandbox);

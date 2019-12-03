@@ -22,6 +22,9 @@ describe('merge', () => {
 
 	const testMergeRequest = (payload, ...expectations) => {
 		expectations[0] = expectations[0] || 200;
+		if (expectations[1] && expectations[1].children) {
+			expectations[1].deprecatedChildren = expectations[1].children;
+		}
 		return sandbox
 			.request(app)
 			.post(
