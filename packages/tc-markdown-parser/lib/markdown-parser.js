@@ -9,7 +9,7 @@ const coerceTreecreeperPropertiesToType = require('./tree-mutators/coerce-treecr
 const validateTreecreeperProperties = require('./tree-mutators/validate-treecreeper-properties');
 const stringifyBoast = require('./unist-stringifiers/stringify-boast');
 
-/* @param schema: bizOpsSchema singleton */
+/* @param schema: Treecreeper schema singleton */
 const unifiedProcessor = function(
 	schema,
 	{
