@@ -30,6 +30,8 @@ describe('rest PATCH update', () => {
 	const createMainNode = (props = {}) =>
 		createNode('MainType', { code: mainCode, ...props });
 
+	const neo4jTimePrecision = timestamp => timestamp.replace('Z', '000000Z');
+
 	describe('updating disconnected records', () => {
 		it('updates record with properties', async () => {
 			await createMainNode({
@@ -93,9 +95,6 @@ describe('rest PATCH update', () => {
 				});
 		});
 		describe('temporal properties', () => {
-			const neo4jTimePrecision = timestamp =>
-				timestamp.replace('Z', '000000Z');
-
 			describe('Date', () => {
 				it('sets Date when no previous value', async () => {
 					await createMainNode();
@@ -465,6 +464,437 @@ describe('rest PATCH update', () => {
 						},
 					},
 				);
+		});
+
+		describe('temporal properties', () => {
+			describe('Date', () => {
+				it('sets Date when no previous value', async () => {
+					const date = '2019-01-09';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child);
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDate: new Date(date).toISOString(),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [{ someDate: date }],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someDate: date,
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it('updates existing Date', async () => {
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someDate: neo4jTemporalTypes.Date.fromStandardDate(
+							new Date('2018-01-09'),
+						),
+					});
+
+					const date = '2019-01-09';
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDate: new Date(date).toISOString(),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [{ someDate: date }],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someDate: date,
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it("doesn't update when effectively the same Date", async () => {
+					const date = '2019-01-09';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someDate: neo4jTemporalTypes.Date.fromStandardDate(
+							new Date(date),
+						),
+					});
+
+					const dbQuerySpy = spyDbQuery();
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDate: new Date(date).toISOString(),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [{ someDate: date }],
+					});
+
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
+			});
+
+			describe('Time', () => {
+				it('sets Time when no previous value', async () => {
+					const time = '12:34:56.789Z';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child);
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someTime: time,
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [{ someTime: neo4jTimePrecision(time) }],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someTime: neo4jTimePrecision(time),
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it('updates existing Time', async () => {
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someTime: neo4jTemporalTypes.Time.fromStandardDate(
+							new Date('2018-01-09'),
+						),
+					});
+
+					const time = '12:34:56.789Z';
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someTime: time,
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [{ someTime: neo4jTimePrecision(time) }],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someTime: neo4jTimePrecision(time),
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it("doesn't update when effectively the same Time", async () => {
+					const time = '12:34:56.789';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someTime: neo4jTemporalTypes.Time.fromStandardDate(
+							new Date(`2018-01-09T${time}`),
+						),
+					});
+
+					const dbQuerySpy = spyDbQuery();
+					const { status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someTime: `${time}0000000`,
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
+			});
+
+			describe('Datetime', () => {
+				it('sets Datetime when no previous value', async () => {
+					const datetime = '2019-01-09T00:00:00.001Z';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child);
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDatetime: neo4jTimePrecision(datetime),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [
+							{ someDatetime: neo4jTimePrecision(datetime) },
+						],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someDatetime: neo4jTimePrecision(datetime),
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it('updates existing Datetime', async () => {
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someDatetime: neo4jTemporalTypes.DateTime.fromStandardDate(
+							new Date('2018-01-09T00:00:00.001Z'),
+						),
+					});
+
+					const datetime = '2019-01-09T00:00:00.001Z';
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDatetime: neo4jTimePrecision(datetime),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [
+							{ someDatetime: neo4jTimePrecision(datetime) },
+						],
+					});
+
+					await neo4jTest('MainType', mainCode)
+						.hasRels(1)
+						.hasRel(
+							{
+								type: 'HAS_CHILD',
+								direction: 'outgoing',
+								props: {
+									...meta.update,
+									someDatetime: neo4jTimePrecision(datetime),
+								},
+							},
+							{
+								type: 'ChildType',
+								props: {
+									code: childCode,
+									...meta.default,
+								},
+							},
+						);
+				});
+
+				it("doesn't update when effectively the same Datetime", async () => {
+					const datetime = '2019-01-09T00:00:00.001Z';
+					const [main, child] = await createNodes(
+						['MainType', mainCode],
+						['ChildType', childCode],
+					);
+					await connectNodes(main, 'HAS_CHILD', child, {
+						someDatetime: neo4jTemporalTypes.DateTime.fromStandardDate(
+							new Date(datetime),
+						),
+					});
+
+					const dbQuerySpy = spyDbQuery();
+					const { body, status } = await basicHandler(
+						{
+							children: [
+								{
+									code: childCode,
+									someDatetime: neo4jTimePrecision(
+										datetime.replace('Z', '000Z'),
+									),
+								},
+							],
+						},
+						{
+							relationshipAction: 'merge',
+							richRelationships: true,
+						},
+					);
+
+					expect(status).toBe(200);
+					expect(body).toMatchObject({
+						children: [
+							{ someDatetime: neo4jTimePrecision(datetime) },
+						],
+					});
+					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+						expect.stringMatching(/MERGE|CREATE/),
+						expect.any(Object),
+					);
+				});
+			});
 		});
 	});
 
