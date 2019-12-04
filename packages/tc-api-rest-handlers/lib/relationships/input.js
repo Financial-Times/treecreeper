@@ -1,5 +1,7 @@
+const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { retrieveRelationshipCodes } = require('./properties');
+const { isTemporalTypeName, datesAreEqual } = require('../diff-properties');
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -8,10 +10,23 @@ const entryHasValues = ([, values = []]) => values.length;
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
 
-const relationshipPropsDiff = (newRelationship, existingRelationship) => {
+const relationshipPropsDiff = (newRelationship, existingRelationship, relType) => {
+	// TODO: should be pass to relType to get properties for relationship
+	const { properties } = getType('MainType');
+
 	const diffs = {};
 	Object.keys(newRelationship).forEach(prop => {
-		if (newRelationship[prop] !== existingRelationship[prop]) {
+		const { type } = properties[prop] || {};
+		const isNewProperty = !existingRelationship[prop];
+		const isTemporalTypeDiff = !isNewProperty && isTemporalTypeName(type) && !datesAreEqual(
+			type,
+			newRelationship[prop],
+			existingRelationship[prop],
+			neo4jTemporalTypes[type],
+		);
+		const isOtherTypeDiff = !isTemporalTypeName(type) && newRelationship[prop] !== existingRelationship[prop];
+
+		if (isNewProperty || isTemporalTypeDiff || isOtherTypeDiff) {
 			diffs[prop] = newRelationship[prop];
 		}
 	});
@@ -111,7 +126,7 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 
 const findActualAdditions = initialContent => ([relType, newRelationships]) => [
 	relType,
-	getDiffs(newRelationships, initialContent[relType]),
+	getDiffs(newRelationships, initialContent[relType], relType),
 ];
 
 const getRemovedRelationships = ({

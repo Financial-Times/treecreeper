@@ -74,4 +74,6 @@ const diffProperties = ({ type, newContent = {}, initialContent = {} }) =>
 
 module.exports = {
 	diffProperties,
+	isTemporalTypeName,
+	datesAreEqual,
 };
