@@ -1,11 +1,11 @@
 const normalizePropertyKey = require('./normalize-property-key');
 
-module.exports = function resolveBizopsPropertyName({
+module.exports = function resolveTreecreeperPropertyName({
 	heading,
-	systemProperties,
+	properties,
 }) {
 	const normalizedHeading = normalizePropertyKey(heading);
-	const propertyEntries = Object.entries(systemProperties);
+	const propertyEntries = Object.entries(properties);
 	return propertyEntries.find(([key, property]) => {
 		return (
 			key === heading ||

@@ -12,7 +12,7 @@ const parser = getParser(schema, {
 });
 
 test('any top level content outside an h2-range is parsed as description', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# well
 
 		hello monkey
@@ -26,7 +26,7 @@ test('any top level content outside an h2-range is parsed as description', async
 });
 
 test('top level content in an h2-range is not parsed as description', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# i have a heading
 		## some string
 		how's tricks

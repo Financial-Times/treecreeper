@@ -1,12 +1,12 @@
 const remarkParse = require('remark-parse');
 const createStream = require('unified-stream');
 const unified = require('unified');
-const createBizopsNameNode = require('./tree-mutators/create-bizops-name-node');
-const createBizopsDescriptionNode = require('./tree-mutators/create-bizops-description-node');
-const createBizopsPropertyNodes = require('./tree-mutators/create-bizops-property-nodes');
-const setBizopsPropertyNames = require('./tree-mutators/set-bizops-property-names');
-const coerceBizopsPropertiesToType = require('./tree-mutators/coerce-bizops-properties-to-type');
-const validateBizopsProperties = require('./tree-mutators/validate-bizops-properties');
+const createTreecreeperNameNode = require('./tree-mutators/create-treecreeper-name-node');
+const createTreecreeperDescriptionNode = require('./tree-mutators/create-treecreeper-description-node');
+const createTreecreeperPropertyNodes = require('./tree-mutators/create-treecreeper-property-nodes');
+const setTreecreeperPropertyNames = require('./tree-mutators/set-treecreeper-property-names');
+const coerceTreecreeperPropertiesToType = require('./tree-mutators/coerce-treecreeper-properties-to-type');
+const validateTreecreeperProperties = require('./tree-mutators/validate-treecreeper-properties');
 const stringifyBoast = require('./unist-stringifiers/stringify-boast');
 
 /* @param schema: bizOpsSchema singleton */
@@ -16,7 +16,7 @@ const unifiedProcessor = function(
 		type,
 		h1Property = 'name',
 		firstParagraphProperty = 'description',
-		fieldWhitelist = [],
+		// fieldWhitelist = [], FIXME: usage?
 		fieldBlacklist = [],
 	},
 ) {
@@ -24,9 +24,7 @@ const unifiedProcessor = function(
 		await schema.ready();
 
 		const types = schema.getTypes();
-
-		const system = schema.getTypes().find(({ name }) => name === type);
-
+		const { properties } = types.find(({ name }) => name === type);
 		const typeNames = new Set(types.map(({ name }) => name));
 
 		const validateProperty = (key, value) => {
@@ -35,20 +33,25 @@ const unifiedProcessor = function(
 
 		return unified()
 			.use(remarkParse)
-			.use(createBizopsNameNode)
-			.use(createBizopsPropertyNodes)
-			.use(createBizopsDescriptionNode)
-			.use(setBizopsPropertyNames, {
-				systemProperties: system.properties,
+			.use(createTreecreeperNameNode, {
+				nameNodeTypeName: h1Property,
 			})
-			.use(coerceBizopsPropertiesToType, {
-				systemProperties: system.properties,
+			.use(createTreecreeperPropertyNodes)
+			.use(createTreecreeperDescriptionNode, {
+				descriptionNodeTypeName: firstParagraphProperty,
+			})
+			.use(setTreecreeperPropertyNames, {
+				properties,
+			})
+			.use(coerceTreecreeperPropertiesToType, {
+				properties,
 				typeNames,
 				primitiveTypesMap: schema.primitiveTypesMap,
 				enums: schema.getEnums(),
 			})
-			.use(validateBizopsProperties, {
+			.use(validateTreecreeperProperties, {
 				validateProperty,
+				propertyNameBlacklist: fieldBlacklist,
 			})
 			.use(stringifyBoast);
 	};
@@ -64,7 +67,7 @@ const getParser = (
 		fieldBlacklist = [],
 	} = {},
 ) => {
-	const runbookMd = unifiedProcessor(schema, {
+	const markdownParser = unifiedProcessor(schema, {
 		type,
 		h1Property,
 		firstParagraphProperty,
@@ -72,13 +75,13 @@ const getParser = (
 		fieldBlacklist,
 	});
 
-	runbookMd.createStream = async function() {
+	markdownParser.createStream = async function() {
 		return createStream(await this());
 	};
 
-	runbookMd.parseRunbookString = async function(runbook) {
+	markdownParser.parseMarkdownString = async function(markdownString) {
 		const processor = await this();
-		const vfile = await processor.process(runbook);
+		const vfile = await processor.process(markdownString);
 		try {
 			return JSON.parse(vfile.contents);
 		} catch (error) {
@@ -88,9 +91,7 @@ const getParser = (
 		}
 	};
 
-	runbookMd.excludedProperties = validateBizopsProperties.excludedProperties;
-
-	return runbookMd;
+	return markdownParser;
 };
 
 module.exports = getParser;

@@ -13,15 +13,15 @@ const parser = getParser(schema, {
 
 describe('boolean types are coerced to boolean', () => {
 	const expects = {
-		'yes': true,
-		'true': true,
+		yes: true,
+		true: true,
 		// the headings for these are using the labels
 		'👍': true,
 		'👎': false,
 	};
 	Object.entries(expects).forEach(([bool, actual]) => {
 		it(`${bool} should be coerced to boolean`, async () => {
-			const { data } = await parser.parseRunbookString(here`
+			const { data } = await parser.parseMarkdownString(here`
 				# name
 
 				## some boolean
@@ -36,7 +36,7 @@ describe('boolean types are coerced to boolean', () => {
 });
 
 test('boolean fields with non-boolean contents are errors', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some boolean
@@ -52,7 +52,7 @@ test('boolean fields with non-boolean contents are errors', async () => {
 });
 
 test('string types are coerced to string', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some string
@@ -69,7 +69,7 @@ test('string types are coerced to string', async () => {
 });
 
 test('enums types correctly return their value', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some enum
@@ -81,7 +81,7 @@ test('enums types correctly return their value', async () => {
 });
 
 test('enums types with incorrect values produce error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some enum
@@ -98,7 +98,7 @@ test('enums types with incorrect values produce error', async () => {
 
 // Before this test, we had links coming out wrapped in triangle brackets
 test('urls should stay urls', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some url
@@ -110,7 +110,7 @@ test('urls should stay urls', async () => {
 });
 
 test('nested fields are coerced to string (the code)', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## favourite child
@@ -122,7 +122,7 @@ test('nested fields are coerced to string (the code)', async () => {
 });
 
 test('properties with hasMany turn bulleted lists into arrays', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## children
@@ -137,18 +137,26 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 
 	expect(errors).toHaveLength(0);
 	expect(data.children).toEqual(['chee-rabbits']);
-	expect(data.youngerSiblings).toEqual(['ft-app-fruitcake', 'apple-quicktime']);
+	expect(data.youngerSiblings).toEqual([
+		'ft-app-fruitcake',
+		'apple-quicktime',
+	]);
 });
 
-test.skip('dependents is banned', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+test('thows error if defined property is included with blacklist', async () => {
+	const blacklistedParser = getParser(schema, {
+		type: 'MainType',
+		fieldBlacklist: ['youngerSiblings'],
+	});
+
+	const { data, errors } = await blacklistedParser.parseMarkdownString(here`
 		# name
 
 		## children
 
 		* chee-rabbits
 
-		## dependents
+		## younger siblings
 
 		* ft-app-fruitcake
 	`);
@@ -157,12 +165,12 @@ test.skip('dependents is banned', async () => {
 	expect(data.children).toEqual(['chee-rabbits']);
 	const [{ message }] = errors;
 	expect(message).toEqual(
-		'dependents is not permitted within runbook.md (to allow other people to edit it)',
+		'youngerSiblings is not permitted within markdown (to allow other people to edit it)',
 	);
 });
 
 test('properties with hasMany must be bulleted lists', async () => {
-	const { errors } = await parser.parseRunbookString(here`
+	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## children
@@ -178,7 +186,7 @@ test('properties with hasMany must be bulleted lists', async () => {
 });
 
 test('properties without hasMany must not be bulleted lists', async () => {
-	const { errors } = await parser.parseRunbookString(here`
+	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some url
@@ -194,7 +202,7 @@ test('properties without hasMany must not be bulleted lists', async () => {
 });
 
 test('subdocuments have their headers reduced two levels', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some document
@@ -208,25 +216,10 @@ test('subdocuments have their headers reduced two levels', async () => {
 	});
 });
 
-test.skip('last review date is banned', async () => {
-	const { errors } = await parser.parseRunbookString(here`
-		# name
-
-		## last review date
-
-		July 21 2018
-	`);
-
-	expect(errors).toHaveLength(1);
-	const [{ message }] = errors;
-	expect(message).toEqual(
-		'lastServiceReviewDate is not permitted within runbook.md (to allow other people to edit it)',
-	);
-});
 // There are currently no date fields permitted in runbook.md; lastServiceReviewDate is reserved for Ops manual entry
 test('date fields are coerced to iso strings', async () => {
 	const naiveJavaScriptIsoStringRegex = /^\d{4}(?:-\d{2}){2}T(?:\d{2}:){2}\d{2}\.\d{3}Z$/;
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some date
@@ -238,7 +231,7 @@ test('date fields are coerced to iso strings', async () => {
 });
 
 test('date fields keep the correct date', async () => {
-	const { data } = await parser.parseRunbookString(here`
+	const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## some date
@@ -255,7 +248,7 @@ test('date fields keep the correct date', async () => {
 });
 
 test('date fields with bad dates are an error', async () => {
-	const { errors } = await parser.parseRunbookString(here`
+	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some date
@@ -272,7 +265,7 @@ test('date fields with bad dates are an error', async () => {
 });
 
 test('empty sections are an error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some string

@@ -19,14 +19,14 @@ function isFieldHeading(heading, node) {
 	return node.depth === 2;
 }
 
-module.exports = function createBizopsPropertyNodes() {
+module.exports = function createTreecreeperPropertyNodes() {
 	return function transform(tree) {
 		while (select('heading[depth=2]', tree)) {
 			/*
-				visitHeadingRanges calls mutate with the nodes between a heading
-				of a given level (in this case h2, because those are our
-			 	property keys)
-			*/
+			 visitHeadingRanges calls mutate with the nodes between a heading
+			 of a given level (in this case h2, because those are our
+			 property keys)
+			 */
 			visitHeadingRanges(tree, isFieldHeading, mutate);
 		}
 	};

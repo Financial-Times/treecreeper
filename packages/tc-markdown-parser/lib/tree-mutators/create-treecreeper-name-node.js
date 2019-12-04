@@ -4,8 +4,8 @@ const convertNodeToProblem = require('./convert-node-to-problem');
 const createProblem = require('../create-problem');
 const append = require('../append-node');
 
-function convertToNameNode(node) {
-	node.type = 'name';
+function convertToNameNode(node, nameNodeTypeName) {
+	node.type = nameNodeTypeName;
 	node.value = flattenNodeToPlainString(node);
 	return node;
 }
@@ -33,7 +33,9 @@ function appendNoNameProblem(tree) {
 	append(problem, tree);
 }
 
-module.exports = function createBizopsNameNode() {
+module.exports = function createTreecreeperNameNode({
+	nameNodeTypeName = 'name',
+}) {
 	return function transform(tree) {
 		const headings = selectAll('heading[depth=1]', tree);
 		switch (headings.length) {
@@ -43,7 +45,7 @@ module.exports = function createBizopsNameNode() {
 					convertToInlineMarkdownProblem(heading);
 					return;
 				}
-				convertToNameNode(heading);
+				convertToNameNode(heading, nameNodeTypeName);
 				return;
 			}
 			case 0: {

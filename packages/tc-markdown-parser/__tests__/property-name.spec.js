@@ -11,19 +11,31 @@ const parser = getParser(schema, {
 	type: 'MainType',
 });
 
-test('a valid property name gets correctly coerced', async () => {
-	const { data } = await parser.parseRunbookString(here`
-		# name
+describe('a valid property name gets correctly coerced', () => {
+	const headings = [
+		'some boolean',
+		'someBoolean',
+		'some Boolean',
+		'SomeBoolean',
+		'Some boolean',
+		'SomeBoolean',
+	];
+	headings.forEach(heading => {
+		it(`${heading} should coerce as someBoolean`, async () => {
+			const { data } = await parser.parseMarkdownString(here`
+				# name
 
-		## some boolean
-		yes
-	`);
+				## ${heading}
+				yes
+				`);
 
-	expect(data).toHaveProperty('someBoolean', true);
+			expect(data).toHaveProperty('someBoolean', true);
+		});
+	});
 });
 
 test('an invalid property name prints an error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## Contains big monkey
@@ -33,5 +45,27 @@ test('an invalid property name prints an error', async () => {
 	expect(errors).toHaveProperty('length', 1);
 	expect(data).toEqual({
 		name: 'name',
+	});
+});
+
+test('cannot set same property name in the definition', async () => {
+	const { data, errors } = await parser.parseMarkdownString(here`
+		# name
+
+		## some string
+		foo
+
+		## some string
+		bar
+	`);
+
+	expect(errors).toHaveProperty('length', 1);
+	const [{ message }] = errors;
+	expect(message).toEqual(
+		'disallowed to define same property name someString in markdown',
+	);
+	expect(data).toEqual({
+		name: 'name',
+		someString: 'foo',
 	});
 });

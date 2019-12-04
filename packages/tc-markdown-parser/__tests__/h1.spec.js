@@ -12,7 +12,7 @@ const parser = getParser(schema, {
 });
 
 test('an h1 is parsed as name', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# hello monkey
 	`);
 	expect(errors.length).toBe(0);
@@ -20,7 +20,7 @@ test('an h1 is parsed as name', async () => {
 });
 
 test('inline markdown in an H1 is an error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		# Hello *monkey* _don't_ worry about a thing
 	`);
 	expect(errors.length).toBe(1);
@@ -28,13 +28,13 @@ test('inline markdown in an H1 is an error', async () => {
 });
 
 test('more than one h1 is an error', async () => {
-	const twoNames = await parser.parseRunbookString(here`
+	const twoNames = await parser.parseMarkdownString(here`
 		# hello monkey
 
 		# also this
 	`);
 
-	const nineNames = await parser.parseRunbookString(here`
+	const nineNames = await parser.parseMarkdownString(here`
 		# hello monkey
 		# bears
 		# also this
@@ -53,7 +53,7 @@ test('more than one h1 is an error', async () => {
 });
 
 test('no h1 is an error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		wow
 	`);
 
@@ -62,7 +62,7 @@ test('no h1 is an error', async () => {
 });
 
 test.skip('content before an h1 is an error', async () => {
-	const { data, errors } = await parser.parseRunbookString(here`
+	const { data, errors } = await parser.parseMarkdownString(here`
 		wow
 		# hello
 	`);

@@ -1,12 +1,14 @@
 const visit = require('unist-util-visit-parents');
-const resolvePropertyName = require('../resolve-system-property-name');
+const resolvePropertyName = require('../resolve-property-name');
 const convertNodeToProblem = require('./convert-node-to-problem');
 
-module.exports = function setBizopsPropertyNames({ systemProperties }) {
+module.exports = function setTreecreeperPropertyNames({ properties }) {
+	const uniquePropertyNames = [];
+
 	function mutate(node) {
 		const property = resolvePropertyName({
 			heading: node.key,
-			systemProperties,
+			properties,
 		});
 
 		if (!property) {
@@ -18,6 +20,14 @@ module.exports = function setBizopsPropertyNames({ systemProperties }) {
 		}
 
 		const [name, type] = property;
+		if (uniquePropertyNames.includes(name)) {
+			convertNodeToProblem({
+				node,
+				message: `disallowed to define same property name ${name} in markdown`,
+			});
+			return;
+		}
+		uniquePropertyNames.push(name);
 
 		node.key = name;
 

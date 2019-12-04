@@ -25,16 +25,16 @@ function getCoercer({ isNested, primitiveType, propertyType }) {
 	return propertyCoercers[primitiveType];
 }
 
-module.exports = function coerceBizopsPropertiesToType({
+module.exports = function coerceTreecreeperPropertiesToType({
 	typeNames,
-	systemProperties,
+	properties,
 	primitiveTypesMap,
 	enums,
 }) {
 	function mutate(node) {
 		const { propertyType } = node;
 
-		const { hasMany } = systemProperties[node.key];
+		const { hasMany } = properties[node.key];
 
 		// If we come across a main type (such as System), then in the markdown
 		// we will specify only a code
