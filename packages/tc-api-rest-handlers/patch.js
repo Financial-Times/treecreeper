@@ -99,7 +99,6 @@ const patchHandler = ({ documentStore } = {}) => {
 				body: responseData,
 			};
 		} catch (err) {
-			console.log(err);
 			if (undoDocstoreWrite) {
 				await undoDocstoreWrite();
 			}

@@ -158,23 +158,6 @@ const getAlteredPeers = ({ properties, absorbedRecord }) =>
 			{},
 		);
 
-// const filterOutReflections = (type, code) => record => {
-// 	const { properties } = getType(type);
-// 	Object.entries(properties).forEach(([name, { type: otherType }]) => {
-// 		if (otherType === type && record[name]) {
-// 			const val = Array.isArray(record[name])
-// 				? record[name]
-// 				: [record[name]];
-// 			const filteredVal = val.filter(theCode => theCode !== code);
-// 			if (filteredVal.length) {
-// 				record[name] = filteredVal;
-// 			} else {
-// 				delete record[name];
-// 			}
-// 		}
-// 	});
-// };
-
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
 const absorbHandler = ({ documentStore } = {}) => async input => {
@@ -197,8 +180,6 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		type: nodeType,
 		excludeMeta: true,
 	});
-
-	// filterOutReflections(nodeType, code)(absorbedRecord)
 
 	const { properties } = getType(nodeType);
 

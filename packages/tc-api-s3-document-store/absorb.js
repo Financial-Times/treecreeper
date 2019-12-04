@@ -20,7 +20,6 @@ const s3Absorb = async ({
 		s3Get({ s3Instance, bucketName, type, code }),
 	]);
 
-	console.log(sourceNodeBody, destinationNodeBody);
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
 	if (_isEmpty(sourceNodeBody)) {
@@ -34,7 +33,6 @@ const s3Absorb = async ({
 	}
 
 	const writeProperties = diffProperties(sourceNodeBody, destinationNodeBody);
-	console.log({ writeProperties });
 	Object.keys(sourceNodeBody).forEach(name => {
 		if (name in destinationNodeBody) {
 			delete writeProperties[name];
