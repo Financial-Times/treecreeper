@@ -48,6 +48,18 @@ const neo4jTest = (type, code) => {
 			);
 			return this;
 		},
+		notHave(props) {
+			test(records => {
+				const nodeProps = convertNeo4jToJson(
+					records[0].get('node').properties,
+				);
+				const notExistentProps = Array.isArray(props) ? props : [props];
+				notExistentProps.forEach(prop =>
+					expect(nodeProps[prop]).not.toBeTruthy(),
+				);
+			});
+			return this;
+		},
 		noRels() {
 			test(records =>
 				expect(

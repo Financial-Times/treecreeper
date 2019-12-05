@@ -88,9 +88,7 @@ describe('rest PATCH update', () => {
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
-				.notMatch({
-					someString: 'someString',
-				});
+				.notHave('someString');
 		});
 		describe('temporal properties', () => {
 			const neo4jTimePrecision = timestamp =>
