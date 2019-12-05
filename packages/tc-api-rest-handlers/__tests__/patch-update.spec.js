@@ -456,6 +456,7 @@ describe('rest PATCH update', () => {
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
 						props: meta.update,
+						notProps: ['someProp'],
 					},
 					{
 						type: 'ChildType',
