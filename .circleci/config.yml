@@ -9,7 +9,7 @@ references:
     working_directory: ~/treecreeper
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
-      - image: circleci/node:10.15.3-browsers
+      - image: circleci/node:12.9.1-browsers
     environment:
       NEO4J_VERSION: "3.5.0"
 
@@ -23,11 +23,11 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - cache-v2-{{ .Branch }}-{{ checksum "./package.json" }}
+        - cache-v3-{{ .Branch }}-{{ checksum "./package.json" }}
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: cache-v2-{{ .Branch }}-{{ checksum "./package.json" }}
+      key: cache-v3-{{ .Branch }}-{{ checksum "./package.json" }}
       paths:
         - ./node_modules/
 

@@ -7,7 +7,7 @@ const separateDocsFromBody = (nodeType, body = {}) => {
 	const bodyNoDocs = {};
 
 	Object.entries(body).forEach(([key, value]) => {
-		if (properties[key].type === 'Document') {
+		if (key.charAt(0) !== '!' && properties[key].type === 'Document') {
 			// We should check the value is empty only when type is Document
 			// because other type will be passed as boolean, number, etc...
 			// then _isEmpty() will returns true

@@ -10,6 +10,7 @@ const types = require('./data-accessors/types');
 const relationshipTypes = require('./data-accessors/relationship-types');
 const relationshipType = require('./data-accessors/relationship-type');
 const { SchemaUpdater } = require('./lib/updater');
+const utils = require('./lib/utils');
 
 class SDK {
 	constructor(options = {}) {
@@ -32,6 +33,10 @@ class SDK {
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
 		this.onChange = this.onChange.bind(this);
+
+		Object.entries(utils).forEach(([name, method]) => {
+			this[name] = method.bind(this);
+		});
 
 		if (options.init !== false) {
 			this.init(options);
