@@ -271,6 +271,8 @@ test('explicit empty section should be an error', async () => {
 		## some string
 
 		## another string
+
+		## some document
 		`);
 	expect(data).toEqual({
 		name: 'name',
@@ -284,6 +286,10 @@ test('explicit empty section should be an error', async () => {
 		{
 			line: 5,
 			message: 'property "anotherString" has no value',
+		},
+		{
+			line: 7,
+			message: 'property "someDocument" has no value',
 		},
 	]);
 });
