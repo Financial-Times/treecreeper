@@ -50,12 +50,12 @@ const neo4jTest = (type, code) => {
 		},
 		notHave(props) {
 			test(records => {
-				const nodeProps = convertNeo4jToJson(
+				const neo4jNodeProps = convertNeo4jToJson(
 					records[0].get('node').properties,
 				);
 				const notExistentProps = Array.isArray(props) ? props : [props];
 				notExistentProps.forEach(prop =>
-					expect(nodeProps[prop]).not.toBeTruthy(),
+					expect(neo4jNodeProps[prop]).not.toBeTruthy(),
 				);
 			});
 			return this;
@@ -106,21 +106,21 @@ const neo4jTest = (type, code) => {
 				});
 
 				expect(record).not.toBeUndefined();
-				const neo4JRelProps = convertNeo4jToJson(
+				const neo4jRelProps = convertNeo4jToJson(
 					record.get('rel').properties,
 				);
 				relationshipProps = Array.isArray(relationshipProps)
 					? relationshipProps
 					: [relationshipProps];
 				relationshipProps.forEach(rp =>
-					expect(neo4JRelProps).toMatchObject(rp),
+					expect(neo4jRelProps).toMatchObject(rp),
 				);
 				if (nonExistentRelProps) {
 					nonExistentRelProps = Array.isArray(nonExistentRelProps)
 						? nonExistentRelProps
 						: [nonExistentRelProps];
 					nonExistentRelProps.forEach(nrp =>
-						expect(neo4JRelProps[nrp]).not.toBeTruthy(),
+						expect(neo4jRelProps[nrp]).not.toBeTruthy(),
 					);
 				}
 				relatedNodeProps = Array.isArray(relatedNodeProps)
