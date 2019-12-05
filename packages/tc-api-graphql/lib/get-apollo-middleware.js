@@ -27,6 +27,7 @@ const getApolloMiddleware = ({ documentStore }) => {
 
 			return context;
 		},
+		introspection: true,
 		formatResponse: (response, { context }) => {
 			context.trace.log();
 			return response;
