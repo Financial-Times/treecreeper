@@ -56,7 +56,7 @@ const addPropsToQueries = (relationshipPropQueries, value) => {
 			relationshipPropQueries.push(`
 				SET (CASE
 				WHEN related.code = '${value.code}'
-				THEN relationship END).${k} = '${v}'
+				THEN relationship END).${k} = ${v === null ? null : `'${v}'`}
 				`);
 			relationshipPropQueries.push(
 				createRelMetaQueryForUpdate(value.code),
