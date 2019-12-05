@@ -18,7 +18,7 @@ function dropHtmlComment(value) {
 
 function omitEmptyPropertyNode(tree) {
 	tree.children = tree.children.reduce((omittedChildren, node) => {
-		// on property node, strip html comments and if its value is empty, omit that node
+		// on property node, omit the node if its value is empty -- maybe true when value includes html comment
 		if (node.type === 'property' && node.value === '') {
 			return omittedChildren;
 		}

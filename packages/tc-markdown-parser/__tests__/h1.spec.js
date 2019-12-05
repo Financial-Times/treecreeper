@@ -11,12 +11,24 @@ const parser = getParser(schema, {
 	type: 'MainType',
 });
 
-test('an h1 is parsed as name', async () => {
+test('an h1 is parsed as name by default', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# hello monkey
 	`);
 	expect(errors.length).toBe(0);
 	expect(data).toHaveProperty('name', 'hello monkey');
+});
+
+test('an h1 is parsed as configured name', async () => {
+	const nameParser = getParser(schema, {
+		type: 'MainType',
+		h1Property: 'configured',
+	});
+	const { data, errors } = await nameParser.parseMarkdownString(here`
+		# hello monkey
+	`);
+	expect(errors.length).toBe(0);
+	expect(data).toHaveProperty('configured', 'hello monkey');
 });
 
 test('inline markdown in an H1 is an error', async () => {

@@ -53,7 +53,10 @@ const unifiedProcessor = function(
 				validateProperty,
 				propertyNameBlacklist: fieldBlacklist,
 			})
-			.use(stringifyBoast);
+			.use(stringifyBoast, {
+				nameNodeTypeName: h1Property,
+				descriptionNodeTypeName: firstParagraphProperty,
+			});
 	};
 };
 

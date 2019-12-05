@@ -25,6 +25,25 @@ test('any top level content outside an h2-range is parsed as description by defa
 	expect(data).toHaveProperty('description', 'hello monkey');
 });
 
+test('any top level content outside an h2-range is parsed as configured field', async () => {
+	const paragraphParser = getParser(schema, {
+		type: 'MainType',
+		firstParagraphProperty: 'configured',
+	});
+
+	const { data, errors } = await paragraphParser.parseMarkdownString(here`
+		# well
+
+		hello monkey
+
+		## some string
+
+		https://ft.com?
+	`);
+	expect(errors.length).toBe(0);
+	expect(data).toHaveProperty('configured', 'hello monkey');
+});
+
 test('top level content in an h2-range is not parsed as description', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# i have a heading
