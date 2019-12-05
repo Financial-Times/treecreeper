@@ -251,7 +251,10 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 		const addedRelationships = getAddedRelationships({
 			type: nodeType,
-			initialContent: mainRecord,
+			initialContent: mainNode.toJson({
+				type: nodeType,
+				excludeMeta: true,
+			}),
 			newContent: result.toJson({ type: nodeType, excludeMeta: true }),
 		});
 

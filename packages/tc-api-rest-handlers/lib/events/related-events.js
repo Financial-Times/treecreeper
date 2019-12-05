@@ -7,26 +7,30 @@ const generateRelatedEvents = ({
 	relationships,
 }) => {
 	const { properties } = schema.getType(rootType);
-	return Object.entries(relationships).reduce((events, [propName, codes]) => {
-		if (!Array.isArray(codes)) {
-			codes = [codes];
-		}
-		codes.forEach(code => {
-			const { type } = properties[propName];
-			events.push({
-				action: getEventType(type, code),
-				code,
-				type,
-				updatedProperties: getUpdatedProperties({
-					rootType,
-					propName,
-					type,
+	return Object.entries(relationships).reduce(
+		(events, [propName, relatedEntities]) => {
+			if (!Array.isArray(relatedEntities)) {
+				relatedEntities = [relatedEntities];
+			}
+			relatedEntities.forEach(entity => {
+				const code = typeof entity === 'string' ? entity : entity.code;
+				const { type } = properties[propName];
+				events.push({
+					action: getEventType(type, code),
 					code,
-				}),
+					type,
+					updatedProperties: getUpdatedProperties({
+						rootType,
+						propName,
+						type,
+						code,
+					}),
+				});
 			});
-		});
-		return events;
-	}, []);
+			return events;
+		},
+		[],
+	);
 };
 
 const makeAddedRelationshipEvents = (

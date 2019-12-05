@@ -21,6 +21,9 @@ const relationshipPropsDiff = (newRelationship, existingRelationship) => {
 };
 
 const getDiffs = (newRelationships, initialRelationships = []) => {
+	if (!Array.isArray(initialRelationships)) {
+		initialRelationships = [initialRelationships];
+	}
 	const allDiffs = [];
 
 	newRelationships.forEach(newRelationship => {
@@ -157,6 +160,7 @@ const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 };
 
 const getAddedRelationships = ({ type, initialContent, newContent }) => {
+	console.log({ type, initialContent, newContent });
 	let newRelationships = getWriteRelationships(
 		{ type, body: newContent },
 		false,
