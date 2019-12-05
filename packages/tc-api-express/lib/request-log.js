@@ -3,15 +3,24 @@ const {
 	setContext,
 } = require('@financial-times/tc-api-express-logger');
 
-const requestLog = (endpointName, method, req) => {
+const requestLog = (endpoint, method, req, res) => {
+	res.nextMetricsName = `${endpoint}_`;
+	if (req.params.type) {
+		res.nextMetricsName = `${res.nextMetricsName}${req.params.type}_`;
+	}
 	setContext({
-		endpointName,
+		endpoint,
 		method,
 		params: req.params,
 		query: req.query,
 		bodyKeys: Object.keys(req.body || {}),
 	});
-	logger.info(`[APP] ${endpointName} ${method}`);
+
+	logger.info(
+		{
+			event: 'ACCESS_LOG',
+		}`[APP] ${endpoint} ${method}`,
+	);
 };
 
 module.exports = { requestLog };

@@ -29,7 +29,7 @@ const allowedMethodsMiddleware = allowedRestMethods => (req, res, next) => {
 };
 
 const controller = (method, handler) => (req, res, next) => {
-	requestLog('rest', method, req);
+	requestLog('rest', method, req, res);
 	handler({
 		// TODO completely remove use of res.locals now we have getContext()
 		metadata: {
