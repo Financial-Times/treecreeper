@@ -1,12 +1,9 @@
 const { stripIndents } = require('common-tags');
 
-const metaPropertiesForUpdate = (
-	recordName,
-	withoutComma = false,
-) => stripIndents`
-	${recordName}._updatedByRequest = $requestId${withoutComma ? '' : ','}
-	${recordName}._updatedByClient = $clientId${withoutComma ? '' : ','}
-	${recordName}._updatedByUser = $clientUserId${withoutComma ? '' : ','}
+const metaPropertiesForUpdate = recordName => stripIndents`
+	${recordName}._updatedByRequest = $requestId,
+	${recordName}._updatedByClient = $clientId,
+	${recordName}._updatedByUser = $clientUserId,
 	${recordName}._updatedTimestamp = datetime($timestamp)
 `;
 // ,
