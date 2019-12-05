@@ -1,37 +1,4 @@
 const schema = require('@financial-times/tc-schema-sdk');
-const { getContext } = require('@financial-times/tc-api-express-logger');
-
-const invertDirection = direction =>
-	direction === 'incoming' ? 'outgoing' : 'incoming';
-
-const findPropertyName = ({
-	sourceType,
-	destinationType,
-	relationship,
-	direction,
-}) => {
-	const { properties: sourceProperties } = schema.getType(sourceType);
-	const [propName] = Object.entries(sourceProperties).find(
-		([, definition]) =>
-			definition.type === destinationType &&
-			definition.relationship === relationship &&
-			definition.direction === direction,
-	);
-	return propName;
-};
-
-const findInversePropertyName = (rootType, propName) => {
-	const { type, relationship, direction } = schema.getType(
-		rootType,
-	).properties[propName];
-
-	return findPropertyName({
-		sourceType: type,
-		direction: invertDirection(direction),
-		relationship,
-		destinationType: rootType,
-	});
-};
 
 const generateRelatedEvents = ({
 	rootType,
@@ -40,35 +7,43 @@ const generateRelatedEvents = ({
 	relationships,
 }) => {
 	const { properties } = schema.getType(rootType);
-	return Object.entries(relationships).reduce((events, [propName, codes]) => {
-		codes.forEach(code => {
-			const { type } = properties[propName];
-			events.push({
-				action: getEventType(type, code),
-				code,
-				type,
-				updatedProperties: getUpdatedProperties({
-					rootType,
-					propName,
-					type,
+	return Object.entries(relationships).reduce(
+		(events, [propName, relatedEntities]) => {
+			if (!Array.isArray(relatedEntities)) {
+				relatedEntities = [relatedEntities];
+			}
+			relatedEntities.forEach(entity => {
+				const code = typeof entity === 'string' ? entity : entity.code;
+				const { type } = properties[propName];
+				events.push({
+					action: getEventType(type, code),
 					code,
-				}),
+					type,
+					updatedProperties: getUpdatedProperties({
+						rootType,
+						propName,
+						type,
+						code,
+					}),
+				});
 			});
-		});
-		return events;
-	}, []);
+			return events;
+		},
+		[],
+	);
 };
 
 const makeAddedRelationshipEvents = (
 	nodeType,
 	mainCode,
 	neo4jRecords,
-	addedRelationships,
+	addedRelationships = {},
+	requestId,
 ) => {
 	if (!Object.keys(addedRelationships).length) {
 		return [];
 	}
-	const { requestId } = getContext();
+
 	const createdNodes = new Set(
 		neo4jRecords
 			.filter(
@@ -84,22 +59,25 @@ const makeAddedRelationshipEvents = (
 		getEventType: (type, code) =>
 			isCreated(type, code) ? 'CREATE' : 'UPDATE',
 		getUpdatedProperties: ({ rootType, propName, type, code }) => {
-			const updatedProperty = findInversePropertyName(rootType, propName);
+			const updatedProperties = schema.findInversePropertyNames(
+				rootType,
+				propName,
+			);
 			return isCreated(type, code)
-				? ['code', updatedProperty].sort()
-				: [updatedProperty];
+				? updatedProperties.concat(['code']).sort()
+				: updatedProperties;
 		},
 		relationships: addedRelationships,
 	});
 };
 
-const makeRemovedRelationshipEvents = (nodeType, removedRelationships) =>
+const makeRemovedRelationshipEvents = (nodeType, removedRelationships = {}) =>
 	generateRelatedEvents({
 		rootType: nodeType,
 		getEventType: () => 'UPDATE',
-		getUpdatedProperties: ({ rootType, propName }) => [
-			findInversePropertyName(rootType, propName),
-		],
+		getUpdatedProperties: ({ rootType, propName }) =>
+			schema.findInversePropertyNames(rootType, propName),
+
 		relationships: removedRelationships,
 	});
 

@@ -628,6 +628,9 @@ describe('get-type', () => {
 				writeInactive: false,
 				description: 'test description',
 				label: 'test label',
+				from: 'Type1',
+				to: 'Type2',
+				properties: {},
 			});
 		});
 
@@ -654,6 +657,9 @@ describe('get-type', () => {
 				hasMany: false,
 				description: 'test description',
 				label: 'test label',
+				from: 'Type2',
+				to: 'Type1',
+				properties: {},
 			});
 		});
 
@@ -754,6 +760,9 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'outgoing',
 				hasMany: true,
+				from: 'Type1',
+				to: 'Type2',
+				properties: {},
 			});
 			expect(type.properties.cypherMany).toEqual({
 				isRelationship: true,
@@ -771,6 +780,9 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
+				from: 'Type2',
+				to: 'Type1',
+				properties: {},
 			});
 		});
 

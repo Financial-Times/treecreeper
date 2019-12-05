@@ -93,7 +93,7 @@ describe('S3 document helper get', () => {
 		const store = docstore(s3Instance);
 		const result = await store.get(consistentNodeType, givenSystemCode);
 
-		expect(Object.keys(result)).toHaveLength(0);
+		expect(result).toEqual({ body: {} });
 		expect(stubGetObject).toHaveBeenCalledTimes(1);
 		expect(stubGetObject).toHaveBeenCalledWith(matcher(givenSystemCode));
 	});

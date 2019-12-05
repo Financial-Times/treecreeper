@@ -1,12 +1,9 @@
-const { getType } = require('@financial-times/tc-schema-sdk');
+const { getType, invertDirection } = require('@financial-times/tc-schema-sdk');
 const {
 	executeQuery,
 	executeQueriesWithTransaction,
 } = require('@financial-times/tc-api-db-manager');
 const { convertNeo4jToJson } = require('./neo4j-type-conversion');
-
-const invertDirection = direction =>
-	direction === 'incoming' ? 'outgoing' : 'incoming';
 
 const getDirection = (record, node) =>
 	record.get('relationship').start === node.identity

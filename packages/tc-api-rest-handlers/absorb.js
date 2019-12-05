@@ -11,9 +11,10 @@ const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const {
 	getRemovedRelationships,
+	getAddedRelationships,
 	normaliseRelationshipProps,
 } = require('./lib/relationships/input');
-const { retrieveRelationshipCodes } = require('./lib/relationships/properties');
+const { retrieveRelationshipCodes } = require('./lib/relationships/input');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -112,6 +113,7 @@ const collectRemovedRelationships = ({
 	absorbedRecord,
 	mainRecord,
 }) => {
+	// this finds relationships that will be lost via N-to-1 rules
 	const removedRelationships = getRemovedRelationships({
 		type: nodeType,
 		initialContent: absorbedRecord,
@@ -119,19 +121,27 @@ const collectRemovedRelationships = ({
 		action: 'merge',
 	});
 
+	// this finds relationships where the reocrd might end up pointing
+	// at itself
 	const possibleReflections = Object.entries(properties)
 		.filter(([, { type: otherType }]) => nodeType === otherType)
 		.map(([name]) => name);
 
 	possibleReflections.forEach(propName => {
+		// if the absorbedRecord doesn't define this relationship there is
+		// nothing to do
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
+
 		const absorbedRelationshipCodes =
 			retrieveRelationshipCodes(propName, absorbedRecord) || [];
+		// if the absorbedRecord doesn't point at the root record in this relationship
+		// there is nothing to do
 		if (!absorbedRelationshipCodes.includes(code)) {
 			return;
 		}
+		// make sure we tell removed relationships to delete the newly reflective relationship
 		if (removedRelationships[propName]) {
 			removedRelationships[propName].push(code);
 		} else {
@@ -141,6 +151,17 @@ const collectRemovedRelationships = ({
 
 	return removedRelationships;
 };
+
+const getAlteredPeers = ({ properties, absorbedRecord }) =>
+	Object.entries(properties)
+		.filter(
+			([name, { relationship }]) =>
+				absorbedRecord[name] && !!relationship,
+		)
+		.reduce(
+			(obj, [name]) => ({ ...obj, [name]: absorbedRecord[name] }),
+			{},
+		);
 
 // e.g POST /v2/{nodeType}/{code}/absorb/{otherCode}
 // Absorbs {otherCode} >>> {code}, then {otherCode} relationships is merged to {code}
@@ -169,8 +190,6 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	const { properties } = getType(nodeType);
 
-	// This object will be used for logging
-	// eslint-disable-next-line no-unused-vars
 	const writeProperties = getWriteProperties({
 		nodeType,
 		properties,
@@ -188,15 +207,16 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 
 	let updatedDocstoreBody;
 	let undoDocstoreWrite;
-
+	let updatedDocumentProperties = [];
 	if (documentStore) {
-		const { body, undo } = await documentStore.absorb(
+		const { body, undo, updatedProperties } = await documentStore.absorb(
 			nodeType,
 			absorbedCode,
 			code,
 		);
 		updatedDocstoreBody = body || {};
 		undoDocstoreWrite = undo;
+		updatedDocumentProperties = updatedProperties;
 	}
 
 	let result;
@@ -229,12 +249,45 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		// Merged result always exists at last index
 		result = results.pop();
 
-		broadcast('UPDATE', result, {
-			relationships: {
-				removed: removedRelationships,
-			},
+		const addedRelationships = getAddedRelationships({
+			type: nodeType,
+			initialContent: mainNode.toJson({
+				type: nodeType,
+				excludeMeta: true,
+			}),
+			newContent: result.toJson({ type: nodeType, excludeMeta: true }),
 		});
-		broadcast('DELETE', absorbedNode);
+
+		broadcast([
+			{
+				action: 'DELETE',
+				type: nodeType,
+				code: absorbedCode,
+			},
+			{
+				action: 'UPDATE',
+				code: absorbedCode,
+				type: nodeType,
+				removedRelationships: getAlteredPeers({
+					properties,
+					absorbedRecord,
+				}),
+				neo4jResult: results[0],
+			},
+			{
+				action: 'UPDATE',
+				code,
+				type: nodeType,
+				addedRelationships,
+				removedRelationships,
+				updatedProperties: [
+					...Object.keys(writeProperties),
+					...Object.keys(addedRelationships),
+					...(updatedDocumentProperties || []),
+				],
+				neo4jResult: result,
+			},
+		]);
 	} catch (err) {
 		logger.info(
 			{ event: `MERGE_NEO4J_FAILURE` },

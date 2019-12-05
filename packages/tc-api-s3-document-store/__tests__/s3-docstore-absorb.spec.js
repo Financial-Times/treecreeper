@@ -40,14 +40,14 @@ const createStub = (module, method, valueMap) => {
 };
 
 const mockS3Absorb = (
-	{ fromSystemCode, fromNodeBody, fromVersionMarker },
-	{ toSystemCode, toNodeBody, toVersionMarker },
+	{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+	{ rootSystemCode, rootNodeBody, rootVersionMarker },
 ) => {
 	const stubDeleteOnUndo = jest.fn(({ Key }) => {
 		const resolveData =
-			Key === `${consistentNodeType}/${fromSystemCode}`
-				? s3DeleteObjectResponseFixture(fromVersionMarker)
-				: s3DeleteObjectResponseFixture(toVersionMarker);
+			Key === `${consistentNodeType}/${absorbedSystemCode}`
+				? s3DeleteObjectResponseFixture(absorbedVersionMarker)
+				: s3DeleteObjectResponseFixture(rootVersionMarker);
 		return {
 			promise: jest.fn().mockImplementation(async () => resolveData),
 		};
@@ -72,36 +72,36 @@ const mockS3Absorb = (
 				throw new Error('unexpected error');
 			}
 			return {
-				versionMarker: toVersionMarker,
+				versionMarker: rootVersionMarker,
 				body,
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 					type: consistentNodeType,
 					code,
-					versionMarker: toVersionMarker,
+					versionMarker: rootVersionMarker,
 				}),
 			};
 		});
 
 	const stubGet = createStub(getModule, 's3Get', {
-		[fromSystemCode]: {
-			resolved: { body: fromNodeBody },
+		[absorbedSystemCode]: {
+			resolved: { body: absorbedNodeBody },
 		},
-		[toSystemCode]: {
-			resolved: { body: toNodeBody },
+		[rootSystemCode]: {
+			resolved: { body: rootNodeBody },
 		},
 	});
 	const stubDelete = createStub(deleteModule, 's3Delete', {
-		[fromSystemCode]: {
+		[absorbedSystemCode]: {
 			resolved: {
-				versionMarker: fromVersionMarker,
+				versionMarker: absorbedVersionMarker,
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 					type: consistentNodeType,
-					code: fromSystemCode,
-					versionMarker: fromVersionMarker,
+					code: absorbedSystemCode,
+					versionMarker: absorbedVersionMarker,
 					undoType: 'DELETE',
 				}),
 			},
@@ -109,15 +109,15 @@ const mockS3Absorb = (
 				versionMarker: null,
 			},
 		},
-		[toSystemCode]: {
+		[rootSystemCode]: {
 			resolved: {
-				versionMarker: toVersionMarker,
+				versionMarker: rootVersionMarker,
 				undo: undo({
 					s3Instance,
 					bucketName: TREECREEPER_DOCSTORE_S3_BUCKET,
 					type: consistentNodeType,
-					code: toSystemCode,
-					versionMarker: toVersionMarker,
+					code: rootSystemCode,
+					versionMarker: rootVersionMarker,
 					undoType: 'DELETE',
 				}),
 			},
@@ -159,12 +159,12 @@ describe('S3 document helper absorb', () => {
 	});
 
 	test('returns with absorbed object, posted version, deleted version and undo function', async () => {
-		const fromSystemCode = 'docstore-absorb-src';
-		const fromNodeBody = createSourceBodyData();
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src';
+		const absorbedNodeBody = createSourceBodyData();
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const {
 			stubGet,
@@ -173,29 +173,29 @@ describe('S3 document helper absorb', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 
 		const result = await store.absorb(
 			consistentNodeType,
-			fromSystemCode,
-			toSystemCode,
+			absorbedSystemCode,
+			rootSystemCode,
 		);
 
 		expect(result).toMatchObject({
-			versionMarker: toVersionMarker,
-			siblingVersionMarker: fromVersionMarker,
-			body: { ...toNodeBody, ...fromNodeBody },
+			versionMarker: rootVersionMarker,
+			siblingVersionMarker: absorbedVersionMarker,
+			body: { ...rootNodeBody, ...absorbedNodeBody },
 			undo: expect.any(Function),
 		});
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -203,14 +203,14 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(s3Instance, toSystemCode, {
-				...toNodeBody,
-				...fromNodeBody,
+			matcher(s3Instance, rootSystemCode, {
+				...rootNodeBody,
+				...absorbedNodeBody,
 			}),
 		);
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
-			matcher(s3Instance, fromSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
 		);
 
 		const undoResult = await result.undo();
@@ -221,38 +221,108 @@ describe('S3 document helper absorb', () => {
 		// undo absorb
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(2);
 		[
-			s3CallMatcher(toSystemCode, result.versionMarker),
-			s3CallMatcher(fromSystemCode, result.siblingVersionMarker),
+			s3CallMatcher(rootSystemCode, result.versionMarker),
+			s3CallMatcher(absorbedSystemCode, result.siblingVersionMarker),
 		].forEach((match, index) => {
 			expect(stubDeleteOnUndo).toHaveBeenNthCalledWith(index + 1, match);
 		});
 	});
 
+	describe('merge behaviour', () => {
+		const testMergedProperties = async ({
+			rootBody,
+			absorbedBody,
+			expectedBody,
+		}) => {
+			const absorbedSystemCode = 'docstore-absorb-src';
+			const absorbedNodeBody = absorbedBody;
+			const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+			const rootSystemCode = 'docstore-absorb-dest';
+			const rootNodeBody = rootBody;
+			const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+
+			const { stubPost, s3Instance } = mockS3Absorb(
+				{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+				{ rootSystemCode, rootNodeBody, rootVersionMarker },
+			);
+
+			const store = docstore(s3Instance);
+
+			const result = await store.absorb(
+				consistentNodeType,
+				absorbedSystemCode,
+				rootSystemCode,
+			);
+
+			expect(result).toMatchObject({
+				body: expectedBody,
+			});
+
+			expect(stubPost).toHaveBeenCalledTimes(1);
+			expect(stubPost).toHaveBeenCalledWith(
+				matcher(s3Instance, rootSystemCode, expectedBody),
+			);
+		};
+
+		it('Leaves property unchanged when only defined on root', async () => {
+			return testMergedProperties({
+				rootBody: { someDocument: 'some document' },
+				absorbedBody: { anotherDocument: 'absorbed another document' },
+				expectedBody: {
+					someDocument: 'some document',
+					anotherDocument: 'absorbed another document',
+				},
+			});
+		});
+
+		it('Writes property when only defined on absorbed', async () => {
+			return testMergedProperties({
+				rootBody: {},
+				absorbedBody: { anotherDocument: 'absorbed another document' },
+				expectedBody: { anotherDocument: 'absorbed another document' },
+			});
+		});
+
+		it('Leaves property unchanged when defined on both', async () => {
+			return testMergedProperties({
+				rootBody: { someDocument: 'some document' },
+				absorbedBody: {
+					someDocument: 'absorbed some document',
+					anotherDocument: 'absorbed another document',
+				},
+				expectedBody: {
+					someDocument: 'some document',
+					anotherDocument: 'absorbed another document',
+				},
+			});
+		});
+	});
+
 	test('returns empty object when source node body is empty', async () => {
-		const fromSystemCode = 'docstore-absorb-src';
-		const fromNodeBody = {};
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src';
+		const absorbedNodeBody = {};
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 
 		const result = await store.absorb(
 			consistentNodeType,
-			fromSystemCode,
-			toSystemCode,
+			absorbedSystemCode,
+			rootSystemCode,
 		);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -264,27 +334,31 @@ describe('S3 document helper absorb', () => {
 	});
 
 	test('throws error when delete and post fail', async () => {
-		const fromSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
-		const fromNodeBody = createSourceBodyData();
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
+		const absorbedNodeBody = createSourceBodyData();
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const { stubGet, stubPost, stubDelete, s3Instance } = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(
+				consistentNodeType,
+				absorbedSystemCode,
+				rootSystemCode,
+			),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -292,25 +366,25 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
-			matcher(s3Instance, fromSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
 		);
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(s3Instance, toSystemCode, {
-				...toNodeBody,
-				...fromNodeBody,
+			matcher(s3Instance, rootSystemCode, {
+				...rootNodeBody,
+				...absorbedNodeBody,
 			}),
 		);
 	});
 
 	test('throws error when post destination body fail', async () => {
-		const fromSystemCode = 'docstore-absorb-src';
-		const fromNodeBody = createSourceBodyData();
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src';
+		const absorbedNodeBody = createSourceBodyData();
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest-s3Post-unexpected';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const {
 			stubGet,
@@ -319,19 +393,23 @@ describe('S3 document helper absorb', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(
+				consistentNodeType,
+				absorbedSystemCode,
+				rootSystemCode,
+			),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -339,29 +417,29 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
-			matcher(s3Instance, fromSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
 		);
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(s3Instance, toSystemCode, {
-				...toNodeBody,
-				...fromNodeBody,
+			matcher(s3Instance, rootSystemCode, {
+				...rootNodeBody,
+				...absorbedNodeBody,
 			}),
 		);
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(1);
 		expect(stubDeleteOnUndo).toHaveBeenCalledWith(
-			s3CallMatcher(fromSystemCode, fromVersionMarker),
+			s3CallMatcher(absorbedSystemCode, absorbedVersionMarker),
 		);
 	});
 
 	test('throws error when delete source body fail', async () => {
-		const fromSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
-		const fromNodeBody = createSourceBodyData();
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src-s3Delete-unexpected';
+		const absorbedNodeBody = createSourceBodyData();
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const {
 			stubGet,
@@ -370,19 +448,23 @@ describe('S3 document helper absorb', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		await expect(
-			store.absorb(consistentNodeType, fromSystemCode, toSystemCode),
+			store.absorb(
+				consistentNodeType,
+				absorbedSystemCode,
+				rootSystemCode,
+			),
 		).rejects.toThrow(Error);
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -390,29 +472,29 @@ describe('S3 document helper absorb', () => {
 
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
-			matcher(s3Instance, fromSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
 		);
 
 		expect(stubPost).toHaveBeenCalledTimes(1);
 		expect(stubPost).toHaveBeenCalledWith(
-			matcher(s3Instance, toSystemCode, {
-				...toNodeBody,
-				...fromNodeBody,
+			matcher(s3Instance, rootSystemCode, {
+				...rootNodeBody,
+				...absorbedNodeBody,
 			}),
 		);
 		expect(stubDeleteOnUndo).toHaveBeenCalledTimes(1);
 		expect(stubDeleteOnUndo).toHaveBeenCalledWith(
-			s3CallMatcher(toSystemCode, toVersionMarker),
+			s3CallMatcher(rootSystemCode, rootVersionMarker),
 		);
 	});
 
 	test('only deletes source version when objects are same between source and destination', async () => {
-		const fromSystemCode = 'docstore-absorb-src';
-		const fromNodeBody = createDestinationBodyData();
-		const fromVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
-		const toSystemCode = 'docstore-absorb-dest';
-		const toNodeBody = createDestinationBodyData();
-		const toVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
+		const absorbedSystemCode = 'docstore-absorb-src';
+		const absorbedNodeBody = createDestinationBodyData();
+		const absorbedVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+		const rootSystemCode = 'docstore-absorb-dest';
+		const rootNodeBody = createDestinationBodyData();
+		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
 		const {
 			stubGet,
@@ -421,28 +503,28 @@ describe('S3 document helper absorb', () => {
 			stubDeleteOnUndo,
 			s3Instance,
 		} = mockS3Absorb(
-			{ fromSystemCode, fromNodeBody, fromVersionMarker },
-			{ toSystemCode, toNodeBody, toVersionMarker },
+			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+			{ rootSystemCode, rootNodeBody, rootVersionMarker },
 		);
 
 		const store = docstore(s3Instance);
 		const result = await store.absorb(
 			consistentNodeType,
-			fromSystemCode,
-			toSystemCode,
+			absorbedSystemCode,
+			rootSystemCode,
 		);
 
 		expect(result).toMatchObject({
 			versionMarker: undefined,
-			siblingVersionMarker: fromVersionMarker,
-			body: toNodeBody,
+			siblingVersionMarker: absorbedVersionMarker,
+			body: rootNodeBody,
 			undo: expect.any(Function),
 		});
 
 		expect(stubGet).toHaveBeenCalledTimes(2);
 		[
-			matcher(s3Instance, fromSystemCode),
-			matcher(s3Instance, toSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
+			matcher(s3Instance, rootSystemCode),
 		].forEach((match, index) => {
 			// Nth starts with 1 so we use index with adding 1
 			expect(stubGet).toHaveBeenNthCalledWith(index + 1, match);
@@ -454,17 +536,17 @@ describe('S3 document helper absorb', () => {
 		// s3Delete should be called for deleting source node
 		expect(stubDelete).toHaveBeenCalledTimes(1);
 		expect(stubDelete).toHaveBeenCalledWith(
-			matcher(s3Instance, fromSystemCode),
+			matcher(s3Instance, absorbedSystemCode),
 		);
 
 		// can undo only in delete
 		const undoResult = await result.undo();
 		expect(undoResult).toMatchObject({
 			versionMarker: null,
-			siblingVersionMarker: fromVersionMarker,
+			siblingVersionMarker: absorbedVersionMarker,
 		});
 		expect(stubDeleteOnUndo).toHaveBeenCalledWith(
-			s3CallMatcher(fromSystemCode, fromVersionMarker),
+			s3CallMatcher(absorbedSystemCode, absorbedVersionMarker),
 		);
 	});
 });

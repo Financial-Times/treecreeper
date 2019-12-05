@@ -213,6 +213,7 @@ const queryBuilder = (method, input, body = {}) => {
 		return {
 			neo4jResult,
 			queryContext: context,
+			parameters,
 		};
 	};
 

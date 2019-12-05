@@ -64,7 +64,7 @@ const getApp = async (options = {}) => {
 			graphqlPath,
 			graphqlMiddlewares,
 			(req, res, next) => {
-				requestLog('graphql', req.method.toUpperCase(), req);
+				requestLog('graphql', req.method.toUpperCase(), req, res);
 				next();
 			},
 			graphqlHandler,

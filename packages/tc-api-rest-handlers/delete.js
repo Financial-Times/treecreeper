@@ -9,20 +9,15 @@ const deleteHandler = ({
 	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
-	const neo4jResult = await getNeo4jRecord(type, code);
+	const prefetchResult = await getNeo4jRecord(type, code);
 
-	if (!neo4jResult.hasRecords()) {
+	if (!prefetchResult.hasRecords()) {
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
-	if (neo4jResult.hasRelationships()) {
+	if (prefetchResult.hasRelationships()) {
 		throw httpErrors(
 			409,
 			`Cannot delete - ${type} ${code} has relationships.`,
-			// TODO add details of which rels exist
-			// OR maybe address the delete UX problems for good??
-			//  + `Remove all ${relationshipsThatExist.join(
-			// 	', ',
-			// )} relationships before attempting to delete this record.`,
 		);
 	}
 
@@ -37,8 +32,8 @@ const deleteHandler = ({
 	}
 
 	try {
-		await executeQuery(query, { code });
-		broadcast('DELETE', neo4jResult);
+		const neo4jResult = await executeQuery(query, { code });
+		broadcast({ action: 'DELETE', code, type, neo4jResult });
 	} catch (error) {
 		logger.error(
 			{ event: 'NEO4J_DELETE_FAILURE', error },

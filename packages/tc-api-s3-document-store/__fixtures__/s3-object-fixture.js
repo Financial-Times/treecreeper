@@ -27,10 +27,8 @@ const s3UploadResponseFixture = (bucket, key, versionMarker) => ({
 });
 
 const createExampleBodyData = () => ({
-	firstLineTroubleshooting: 'firstLineTroubleshooting',
-	moreInformation: 'moreInformation',
-	monitoring: 'monitoring',
-	architectureDiagram: 'architectureDiagram',
+	someDocument: 'Some Document',
+	anotherDocument: 'Another document',
 });
 
 module.exports = {

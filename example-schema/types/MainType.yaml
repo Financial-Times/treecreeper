@@ -57,6 +57,14 @@ properties:
     label: Children label
     direction: outgoing
     hasMany: true
+  deprecatedChildren:
+    relationship: HAS_CHILD
+    type: ChildType
+    description: Children description.
+    label: Children label
+    direction: outgoing
+    hasMany: true
+    deprecationReason: Replaced by children
   parents:
     relationship: IS_PARENT_OF
     type: ParentType

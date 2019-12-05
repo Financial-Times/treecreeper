@@ -1,4 +1,3 @@
-const { diff } = require('deep-diff');
 const { logger } = require('@financial-times/tc-api-express-logger');
 const { upload } = require('./upload');
 const { undo } = require('./undo');
@@ -11,10 +10,12 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 		type,
 		code,
 	});
-
+	const changedProperties = Object.keys(body).filter(
+		key => body[key] !== existingBody[key],
+	);
 	// If PATCHing body is completely same with existing body,
 	// return existing body without upload - won't create new version
-	if (!diff(existingBody, body)) {
+	if (!changedProperties.length) {
 		logger.info(
 			{
 				event: 'PATCH_S3_NOACTION',
@@ -41,6 +42,7 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 	return {
 		versionMarker: versionId,
 		body: newBodyDocument,
+		updatedProperties: changedProperties,
 		undo: undo({
 			s3Instance,
 			bucketName,

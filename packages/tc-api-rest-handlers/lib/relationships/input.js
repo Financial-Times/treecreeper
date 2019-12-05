@@ -1,5 +1,7 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { retrieveRelationshipCodes } = require('./properties');
+
+const retrieveRelationshipCodes = (relType, content) =>
+	content[relType] && content[relType].map(relationship => relationship.code);
 
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
@@ -19,6 +21,9 @@ const relationshipPropsDiff = (newRelationship, existingRelationship) => {
 };
 
 const getDiffs = (newRelationships, initialRelationships = []) => {
+	if (!Array.isArray(initialRelationships)) {
+		initialRelationships = [initialRelationships];
+	}
 	const allDiffs = [];
 
 	newRelationships.forEach(newRelationship => {
@@ -155,6 +160,7 @@ const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 };
 
 const getAddedRelationships = ({ type, initialContent, newContent }) => {
+	console.log({ type, initialContent, newContent });
 	let newRelationships = getWriteRelationships(
 		{ type, body: newContent },
 		false,
@@ -213,4 +219,5 @@ module.exports = {
 	containsRelationshipData,
 	normaliseRelationshipProps,
 	identifyRelationships,
+	retrieveRelationshipCodes,
 };

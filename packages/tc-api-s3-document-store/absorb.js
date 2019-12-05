@@ -19,6 +19,7 @@ const s3Absorb = async ({
 		s3Get({ s3Instance, bucketName, type, code: absorbedCode }),
 		s3Get({ s3Instance, bucketName, type, code }),
 	]);
+
 	// If the source node has no document properties/does not exist
 	// in s3, take no action and return false in place of version ids
 	if (_isEmpty(sourceNodeBody)) {
@@ -32,7 +33,6 @@ const s3Absorb = async ({
 	}
 
 	const writeProperties = diffProperties(sourceNodeBody, destinationNodeBody);
-
 	Object.keys(sourceNodeBody).forEach(name => {
 		if (name in destinationNodeBody) {
 			delete writeProperties[name];
@@ -106,8 +106,8 @@ const s3Absorb = async ({
 		versionMarker: postedVersionId,
 		siblingVersionMarker: deletedVersionId,
 		// We always assign merge values to empty object in order to avoid side-effect to destinationNodeBody unexpectedly.
-		body: { ...destinationNodeBody, ...sourceNodeBody },
-
+		body: { ...sourceNodeBody, ...destinationNodeBody },
+		updatedProperties: Object.keys(writeProperties),
 		// On undo absorb, we have to delete both of posted destination version and deleted source version
 		undo: async () => {
 			const [
