@@ -165,7 +165,7 @@ const printRelationshipTypeDefinition = ({
 	return printDescribedBlock(
 		'Internal use only',
 		stripIndent`
-	type ${typeName} @relation(name: ${relationship}) {
+	type ${typeName} @relation(name: "${relationship}") {
 		from: ${from}
 		to: ${to}
 		${propStr}
@@ -297,7 +297,6 @@ module.exports = {
 		scalar Time
 	`;
 		const typeDefinitions = types
-			.filter(({ from, to }) => !from && !to)
 			.map(printTypeDefinition);
 
 		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
