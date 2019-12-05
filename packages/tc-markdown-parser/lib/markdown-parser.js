@@ -16,7 +16,6 @@ const unifiedProcessor = function(
 		type,
 		h1Property = 'name',
 		firstParagraphProperty = 'description',
-		// fieldWhitelist = [], FIXME: usage?
 		fieldBlacklist = [],
 	},
 ) {
