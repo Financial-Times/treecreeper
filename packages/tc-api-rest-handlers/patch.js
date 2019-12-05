@@ -81,14 +81,14 @@ const patchHandler = ({ documentStore } = {}) => {
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
-				event.addedRelationships = queryContext.addedRelationships;
+				event.changedRelationships = queryContext.changedRelationships;
 				event.removedRelationships = queryContext.removedRelationships;
 				event.neo4jResult = neo4jResult;
 				event.updatedProperties = [
 					...new Set([
 						...Object.keys(parameters.properties),
 						...Object.keys(queryContext.removedRelationships || {}),
-						...Object.keys(queryContext.addedRelationships || {}),
+						...Object.keys(queryContext.changedRelationships || {}),
 						...(updatedDocumentProperties || []),
 					]),
 				];

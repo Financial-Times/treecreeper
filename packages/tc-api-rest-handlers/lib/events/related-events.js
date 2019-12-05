@@ -37,10 +37,10 @@ const makeAddedRelationshipEvents = (
 	nodeType,
 	mainCode,
 	neo4jRecords,
-	addedRelationships = {},
+	changedRelationships = {},
 	requestId,
 ) => {
-	if (!Object.keys(addedRelationships).length) {
+	if (!Object.keys(changedRelationships).length) {
 		return [];
 	}
 
@@ -67,7 +67,7 @@ const makeAddedRelationshipEvents = (
 				? updatedProperties.concat(['code']).sort()
 				: updatedProperties;
 		},
-		relationships: addedRelationships,
+		relationships: changedRelationships,
 	});
 };
 

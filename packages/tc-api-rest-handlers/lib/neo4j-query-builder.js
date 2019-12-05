@@ -104,7 +104,7 @@ const queryBuilder = (method, input, body = {}) => {
 		} = prepareToWriteRelationships(type, relationships, upsert);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
-		context.addedRelationships = relationships;
+		context.changedRelationships = relationships;
 		return builder;
 	};
 
@@ -159,7 +159,7 @@ const queryBuilder = (method, input, body = {}) => {
 					!initialContentRels.includes(changedRelationship),
 			),
 		);
-		context.addedRelationships = changedRelationships;
+		context.changedRelationships = changedRelationships;
 
 		return builder;
 	};
