@@ -19,7 +19,8 @@ const requestLog = (endpoint, method, req, res) => {
 	logger.info(
 		{
 			event: 'ACCESS_LOG',
-		}`[APP] ${endpoint} ${method}`,
+		},
+		`Request received ${endpoint} ${method}`,
 	);
 };
 
