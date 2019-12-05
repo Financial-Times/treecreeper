@@ -5,7 +5,7 @@ const {
 
 const requestLog = (endpoint, method, req, res) => {
 	res.nextMetricsName = `${endpoint}_`;
-	if (req.params.type) {
+	if (req.params && req.params.type) {
 		res.nextMetricsName = `${res.nextMetricsName}${req.params.type}_`;
 	}
 	setContext({
