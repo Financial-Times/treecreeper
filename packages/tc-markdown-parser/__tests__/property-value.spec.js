@@ -146,7 +146,7 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 test('thows error if defined property is included with blacklist', async () => {
 	const blacklistedParser = getParser(schema, {
 		type: 'MainType',
-		fieldBlacklist: ['youngerSiblings'],
+		blacklistPropertyNames: ['youngerSiblings'],
 	});
 
 	const { data, errors } = await blacklistedParser.parseMarkdownString(here`

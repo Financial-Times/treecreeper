@@ -28,7 +28,7 @@ test('any top level content outside an h2-range is parsed as description by defa
 test('any top level content outside an h2-range is parsed as configured field', async () => {
 	const paragraphParser = getParser(schema, {
 		type: 'MainType',
-		firstParagraphProperty: 'configured',
+		descriptionNodeName: 'configured',
 	});
 
 	const { data, errors } = await paragraphParser.parseMarkdownString(here`

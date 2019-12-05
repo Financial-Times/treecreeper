@@ -1,7 +1,7 @@
 const remarkParse = require('remark-parse');
 const createStream = require('unified-stream');
 const unified = require('unified');
-const createTreecreeperNameNode = require('./tree-mutators/create-treecreeper-name-node');
+const createTreecreeperTitleNode = require('./tree-mutators/create-treecreeper-title-node');
 const createTreecreeperDescriptionNode = require('./tree-mutators/create-treecreeper-description-node');
 const createTreecreeperPropertyNodes = require('./tree-mutators/create-treecreeper-property-nodes');
 const setTreecreeperPropertyNames = require('./tree-mutators/set-treecreeper-property-names');
@@ -14,9 +14,9 @@ const unifiedProcessor = function(
 	schema,
 	{
 		type,
-		h1Property = 'name',
-		firstParagraphProperty = 'description',
-		fieldBlacklist = [],
+		titleNodeName = 'name',
+		descriptionNodeName = 'description',
+		blacklistPropertyNames = [],
 	},
 ) {
 	return async () => {
@@ -32,12 +32,12 @@ const unifiedProcessor = function(
 
 		return unified()
 			.use(remarkParse)
-			.use(createTreecreeperNameNode, {
-				nameNodeTypeName: h1Property,
+			.use(createTreecreeperTitleNode, {
+				titleNodeName,
 			})
 			.use(createTreecreeperPropertyNodes)
 			.use(createTreecreeperDescriptionNode, {
-				descriptionNodeTypeName: firstParagraphProperty,
+				descriptionNodeName,
 			})
 			.use(setTreecreeperPropertyNames, {
 				properties,
@@ -50,11 +50,11 @@ const unifiedProcessor = function(
 			})
 			.use(validateTreecreeperProperties, {
 				validateProperty,
-				propertyNameBlacklist: fieldBlacklist,
+				propertyNameBlacklist: blacklistPropertyNames,
 			})
 			.use(stringifyBoast, {
-				nameNodeTypeName: h1Property,
-				descriptionNodeTypeName: firstParagraphProperty,
+				titleNodeName,
+				descriptionNodeName,
 			});
 	};
 };
@@ -63,18 +63,16 @@ const getParser = (
 	schema,
 	{
 		type,
-		h1Property = 'name',
-		firstParagraphProperty = 'description',
-		fieldWhitelist = [],
-		fieldBlacklist = [],
+		titleNodeName = 'name',
+		descriptionNodeName = 'description',
+		blacklistPropertyNames = [],
 	} = {},
 ) => {
 	const markdownParser = unifiedProcessor(schema, {
 		type,
-		h1Property,
-		firstParagraphProperty,
-		fieldWhitelist,
-		fieldBlacklist,
+		titleNodeName,
+		descriptionNodeName,
+		blacklistPropertyNames,
 	});
 
 	markdownParser.createStream = async function() {

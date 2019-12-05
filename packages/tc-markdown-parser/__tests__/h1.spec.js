@@ -22,7 +22,7 @@ test('an h1 is parsed as name by default', async () => {
 test('an h1 is parsed as configured name', async () => {
 	const nameParser = getParser(schema, {
 		type: 'MainType',
-		h1Property: 'configured',
+		titleNodeName: 'configured',
 	});
 	const { data, errors } = await nameParser.parseMarkdownString(here`
 		# hello monkey
