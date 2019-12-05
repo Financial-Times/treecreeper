@@ -159,8 +159,7 @@ const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 		: newRelationships;
 };
 
-const getAddedRelationships = ({ type, initialContent, newContent }) => {
-	console.log({ type, initialContent, newContent });
+const getChangedRelationships = ({ type, initialContent, newContent }) => {
 	let newRelationships = getWriteRelationships(
 		{ type, body: newContent },
 		false,
@@ -214,7 +213,7 @@ const normaliseRelationshipProps = (type, body = {}) => {
 
 module.exports = {
 	getWriteRelationships,
-	getAddedRelationships,
+	getChangedRelationships,
 	getRemovedRelationships,
 	containsRelationshipData,
 	normaliseRelationshipProps,

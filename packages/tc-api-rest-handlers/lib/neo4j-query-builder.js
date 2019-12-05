@@ -9,7 +9,7 @@ const {
 } = require('./metadata-helpers');
 const {
 	getWriteRelationships,
-	getAddedRelationships,
+	getChangedRelationships,
 	getRemovedRelationships,
 	identifyRelationships,
 } = require('./relationships/input');
@@ -129,36 +129,37 @@ const queryBuilder = (method, input, body = {}) => {
 		return builder;
 	};
 
-	const addRelationships = initialContent => {
-		const addedRelationships = getAddedRelationships({
+	const changeRelationships = initialContent => {
+		const changedRelationships = getChangedRelationships({
 			type,
 			initialContent,
 			newContent: body,
 		});
-		if (Object.keys(addedRelationships).length) {
+		if (Object.keys(changedRelationships).length) {
 			const {
-				relationshipParameters: addRelationshipParams,
-				relationshipQueries: addRelationshipQueries,
-			} = prepareToWriteRelationships(type, addedRelationships, upsert);
-			queryParts.push(...addRelationshipQueries);
-			updateParameter(addRelationshipParams);
+				relationshipParameters: changeRelationshipParams,
+				relationshipQueries: changeRelationshipQueries,
+			} = prepareToWriteRelationships(type, changedRelationships, upsert);
+			queryParts.push(...changeRelationshipQueries);
+			updateParameter(changeRelationshipParams);
 		}
 		const isRelationship = identifyRelationships(type);
 		const initialContentRels = Object.keys(
 			initialContent,
 		).filter(propName => isRelationship(propName));
 
-		// context.willAddRelationships indicates
-		// - creating relationships
+		// context.willChangeRelationships indicates these changes are included
+		// - creating new relationships
 		// - updating relationship props (additons and deletions)
-		context.willAddRelationships = !!Object.keys(addedRelationships).length;
+		context.willChangeRelationships = !!Object.keys(changedRelationships)
+			.length;
 		context.willCreateRelationships = !_isEmpty(
-			Object.keys(addedRelationships).filter(
-				addedRelationship =>
-					!initialContentRels.includes(addedRelationship),
+			Object.keys(changedRelationships).filter(
+				changedRelationship =>
+					!initialContentRels.includes(changedRelationship),
 			),
 		);
-		context.addedRelationships = addedRelationships;
+		context.addedRelationships = changedRelationships;
 
 		return builder;
 	};
@@ -221,11 +222,11 @@ const queryBuilder = (method, input, body = {}) => {
 		const {
 			willModifyNode,
 			willDeleteRelationships,
-			willAddRelationships,
+			willChangeRelationships,
 			willModifyLockedFields,
 		} = context;
 		const willModifyRelationships =
-			willDeleteRelationships || willAddRelationships;
+			willDeleteRelationships || willChangeRelationships;
 
 		return !!(
 			willModifyNode ||
@@ -239,7 +240,7 @@ const queryBuilder = (method, input, body = {}) => {
 		constructProperties,
 		createRelationships,
 		removeRelationships,
-		addRelationships,
+		changeRelationships,
 		mergeLockFields,
 		setLockFields,
 		isNeo4jUpdateNeeded,

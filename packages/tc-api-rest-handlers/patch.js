@@ -61,7 +61,7 @@ const patchHandler = ({ documentStore } = {}) => {
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)
-				.addRelationships(initialContent);
+				.changeRelationships(initialContent);
 
 			let neo4jResultBody;
 			const event = {
