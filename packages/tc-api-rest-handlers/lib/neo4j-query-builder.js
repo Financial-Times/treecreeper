@@ -7,7 +7,7 @@ const {
 	prepareMetadataForNeo4jQuery,
 } = require('./metadata-helpers');
 const {
-	getRelationships,
+	getWriteRelationships,
 	getAddedRelationships,
 	getRemovedRelationships,
 } = require('./relationships/input');
@@ -95,16 +95,11 @@ const queryBuilder = (method, input, body = {}) => {
 	};
 
 	const createRelationships = () => {
-		const relationships = getRelationships({ type, body });
+		const relationships = getWriteRelationships({ type, body });
 		const {
 			relationshipParameters,
 			relationshipQueries,
-		} = prepareToWriteRelationships(
-			type,
-			relationships,
-			upsert,
-			parameters,
-		);
+		} = prepareToWriteRelationships(type, relationships, upsert);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
 		context.addedRelationships = relationships;

@@ -1,12 +1,24 @@
 const clone = require('clone');
-const primitiveTypesMap = require('../lib/primitive-types-map');
-const metaProperties = require('../lib/meta-properties');
 const TreecreeperUserError = require('../lib/biz-ops-error');
+const {
+	assignMetaProperties,
+	transformPrimitiveTypes,
+} = require('../lib/property-assign');
 
 const BIZ_OPS = 'biz-ops';
 
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
+
+const isUserDefinedRelationship = propDef =>
+	['relationship', 'cypher'].some(name => name in propDef);
+
+const isRichRelationship = (richRelationshipTypes, propDef) =>
+	richRelationshipTypes.find(relType => relType.name === propDef.type);
+
+const isRelationship = (richRelationshipTypes, propDef) =>
+	isUserDefinedRelationship(propDef) ||
+	isRichRelationship(richRelationshipTypes, propDef);
 
 const hydrateFieldsets = ({
 	properties,
@@ -46,7 +58,7 @@ const hydrateFieldsets = ({
 		targetFieldset.properties.push([prop, def]);
 	};
 
-	properties.forEach(([prop, def]) => {
+	Object.entries(properties).forEach(([prop, def]) => {
 		const { fieldset } = def;
 
 		if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {
@@ -86,6 +98,62 @@ const getFromRawData = (typeName, rawData) => {
 	}
 
 	return clone(typeDefinition);
+};
+
+const assignRelationshipInfo = propDef => ({
+	...propDef,
+	hasMany: propDef.hasMany || false,
+	isRelationship: isUserDefinedRelationship(propDef),
+	writeInactive: 'writeInactive' in propDef ? propDef.writeInactive : false,
+	showInactive: 'showInactive' in propDef ? propDef.showInactive : true,
+});
+
+const createPropertiesWithRelationships = function(
+	richRelationshipTypes,
+	properties,
+	relationshipGetter,
+) {
+	return Object.entries(properties).reduce(
+		(updatedProps, [propName, propDef]) => {
+			if (isRelationship(richRelationshipTypes, propDef)) {
+				propDef = relationshipGetter(propName);
+			}
+
+			if (isUserDefinedRelationship(propDef)) {
+				if (propDef.hidden) {
+					return updatedProps;
+				}
+				propDef = assignRelationshipInfo(propDef);
+			}
+			return {
+				...updatedProps,
+				[propName]: propDef,
+			};
+		},
+		{},
+	);
+};
+
+const createPropertiesWithoutRelationships = function(
+	richRelationshipTypes,
+	properties,
+	relationshipGetter,
+) {
+	return Object.entries(properties).reduce(
+		(updatedProps, [propName, propDef]) => {
+			if (isRelationship(richRelationshipTypes, propDef)) {
+				propDef = relationshipGetter(propName);
+			}
+			if (propDef.relationship) {
+				return updatedProps;
+			}
+			return {
+				...updatedProps,
+				[propName]: propDef,
+			};
+		},
+		{},
+	);
 };
 
 const cacheKeyGenerator = (
@@ -132,46 +200,41 @@ const getType = function(
 		});
 	}
 
+	let properties = { ...typeSchema.properties };
+	const richRelationshipTypes = this.rawData.getRelationshipTypes();
+	const relationshipGetter = propName =>
+		this.getRelationshipType(
+			typeSchema.name,
+			propName,
+			richRelationshipTypes,
+			{
+				primitiveTypes,
+				includeMetaFields,
+			},
+		);
+
 	if (withRelationships) {
-		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship || def.cypher) {
-				if (def.hidden) {
-					delete typeSchema.properties[propName];
-				}
-				Object.assign(def, {
-					hasMany: def.hasMany || false,
-					isRelationship: !!(def.relationship || def.cypher),
-					writeInactive:
-						'writeInactive' in def ? def.writeInactive : false,
-					showInactive:
-						'showInactive' in def ? def.showInactive : true,
-				});
-			}
-		});
+		properties = createPropertiesWithRelationships(
+			richRelationshipTypes,
+			properties,
+			relationshipGetter,
+		);
 	} else {
-		Object.entries(typeSchema.properties).forEach(([propName, def]) => {
-			if (def.relationship) {
-				delete typeSchema.properties[propName];
-			}
-		});
+		properties = createPropertiesWithoutRelationships(
+			richRelationshipTypes,
+			properties,
+			relationshipGetter,
+		);
 	}
+
 	if (includeMetaFields) {
-		metaProperties.forEach(metaProperty => {
-			typeSchema.properties[metaProperty.name] = metaProperty;
-		});
+		properties = assignMetaProperties(properties);
 	}
-	const properties = Object.entries(typeSchema.properties)
-		.map(([name, def]) => {
-			if (primitiveTypes === 'graphql') {
-				// If not a primitive type we assume it's an enum and leave it unaltered
-				def.type = primitiveTypesMap[def.type] || def.type;
-			}
-			if (def.pattern) {
-				def.validator = this.getStringValidator(def.pattern);
-			}
-			return [name, def];
-		})
-		.filter(entry => !!entry);
+	properties = transformPrimitiveTypes(
+		properties,
+		primitiveTypes,
+		this.getStringValidator,
+	);
 
 	if (groupProperties) {
 		typeSchema.fieldsets = hydrateFieldsets({
@@ -183,7 +246,7 @@ const getType = function(
 		});
 		delete typeSchema.properties;
 	} else {
-		typeSchema.properties = entriesArrayToObject(properties);
+		typeSchema.properties = properties;
 	}
 	return typeSchema;
 };

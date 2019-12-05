@@ -44,13 +44,10 @@ test:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
-			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --watch; \
+			jest --config="./jest.config.js" "${pkg}.*__tests__.*/${spec}.*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
-
-run:
-	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect api/server/app.js
 
 demo-api:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js

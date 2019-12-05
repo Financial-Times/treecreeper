@@ -3,7 +3,10 @@ const request = require('supertest');
 describe('api-express graphql', () => {
 	let apiGraphql;
 	let app;
-	const config = { fake: 'config', graphqlMethods: ['post', 'get'] };
+	const config = {
+		fake: 'config',
+		graphqlMethods: ['post', 'get'],
+	};
 	beforeAll(async () => {
 		apiGraphql = require('@financial-times/tc-api-graphql');
 		jest.spyOn(apiGraphql, 'getGraphqlApi');

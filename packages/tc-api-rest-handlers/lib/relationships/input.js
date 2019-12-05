@@ -1,11 +1,51 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
 
+const retrieveRelationshipCodes = (relType, content) =>
+	content[relType] && content[relType].map(relationship => relationship.code);
+
 const toArray = val => (Array.isArray(val) ? val : [val]);
 
 const entryHasValues = ([, values = []]) => values.length;
 
 const arrDiff = (arr1, arr2) =>
 	toArray(arr1).filter(item => !toArray(arr2).includes(item));
+
+const relationshipPropsDiff = (newRelationship, existingRelationship) => {
+	const diffs = {};
+	Object.keys(newRelationship).forEach(prop => {
+		if (newRelationship[prop] !== existingRelationship[prop]) {
+			diffs[prop] = newRelationship[prop];
+		}
+	});
+	return diffs;
+};
+
+const getDiffs = (newRelationships, initialRelationships = []) => {
+	const allDiffs = [];
+
+	newRelationships.forEach(newRelationship => {
+		const existingRelationship = initialRelationships.find(
+			initialRelationship =>
+				initialRelationship.code === newRelationship.code,
+		);
+
+		if (!existingRelationship) {
+			allDiffs.push(newRelationship);
+		} else {
+			const diffs = relationshipPropsDiff(
+				newRelationship,
+				existingRelationship,
+			);
+			if (Object.keys(diffs).length) {
+				// code is needed for creating neo4j queries later
+				diffs.code = newRelationship.code;
+				allDiffs.push(diffs);
+			}
+		}
+	});
+
+	return allDiffs;
+};
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });
 
@@ -33,24 +73,34 @@ const isDeleteRelationship = type => {
 		(isRelationship(propName) && codes === null);
 };
 
-const findActualDeletions = initialContent => ([propName, codesToDelete]) => {
+const findActualDeletions = initialContent => ([propName, newValues]) => {
+	const codesToDelete = newValues && newValues.map(value => value.code);
 	const realPropName = unNegatePropertyName(propName);
 	const isDeleteAll = realPropName === propName && codesToDelete === null;
+	const initialCodes = retrieveRelationshipCodes(
+		realPropName,
+		initialContent,
+	);
+
 	return [
 		realPropName,
-		toArray(
-			isDeleteAll ? initialContent[realPropName] : codesToDelete,
-		).filter(code => (initialContent[realPropName] || []).includes(code)),
+		toArray(isDeleteAll ? initialCodes : codesToDelete).filter(code =>
+			(initialCodes || []).includes(code),
+		),
 	];
 };
 
 const findImplicitDeletions = (initialContent, schema, action) => ([
 	relType,
-	newCodes,
+	newValues,
 ]) => {
+	const newCodes = newValues.map(value => value.code);
 	const isCardinalityOne = !schema.properties[relType].hasMany;
 	if (action === 'replace' || isCardinalityOne) {
-		const existingCodes = initialContent[relType];
+		const existingCodes = retrieveRelationshipCodes(
+			relType,
+			initialContent,
+		);
 		if (!existingCodes) {
 			return;
 		}
@@ -61,9 +111,9 @@ const findImplicitDeletions = (initialContent, schema, action) => ([
 	}
 };
 
-const findActualAdditions = initialContent => ([relType, newCodes]) => [
+const findActualAdditions = initialContent => ([relType, newRelationships]) => [
 	relType,
-	arrDiff(newCodes, initialContent[relType]),
+	getDiffs(newRelationships, initialContent[relType]),
 ];
 
 const getRemovedRelationships = ({
@@ -96,7 +146,7 @@ const getRemovedRelationships = ({
 		.reduce(entriesToObject, {});
 };
 
-const getRelationships = ({ type, body = {} }, reduce = true) => {
+const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 	const newRelationships = Object.entries(body)
 		.filter(isWriteRelationship(type))
 		.map(([propName, codes]) => [propName, toArray(codes)]);
@@ -107,7 +157,10 @@ const getRelationships = ({ type, body = {} }, reduce = true) => {
 };
 
 const getAddedRelationships = ({ type, initialContent, newContent }) => {
-	let newRelationships = getRelationships({ type, body: newContent }, false);
+	let newRelationships = getWriteRelationships(
+		{ type, body: newContent },
+		false,
+	);
 
 	if (initialContent) {
 		newRelationships = newRelationships
@@ -125,9 +178,41 @@ const containsRelationshipData = (type, payload = {}) => {
 		.some(([propName]) => propName in payload || `!${propName}` in payload);
 };
 
+// relationship value could be just a String(code), an Object or an Array of strings(codes) / objects(code and properties) / mixed
+// this function is to normalise them into an Array of objects
+const normaliseRelationshipProps = (type, body = {}) => {
+	const isRelationship = identifyRelationships(type);
+	const relationships = Object.keys(body).filter(propName =>
+		isRelationship(unNegatePropertyName(propName)),
+	);
+
+	relationships.forEach(relType => {
+		const relValues = body[relType];
+
+		if (relValues !== null) {
+			if (typeof relValues === 'string') {
+				body[relType] = [{ code: relValues }];
+			} else if (Array.isArray(relValues)) {
+				const normalisedRelValues = [];
+				relValues.forEach(relValue =>
+					typeof relValue === 'string'
+						? normalisedRelValues.push({ code: relValue })
+						: normalisedRelValues.push(relValue),
+				);
+				body[relType] = normalisedRelValues;
+			} else {
+				// when value is an object
+				body[relType] = [relValues];
+			}
+		}
+	});
+};
+
 module.exports = {
-	getRelationships,
+	getWriteRelationships,
 	getAddedRelationships,
 	getRemovedRelationships,
 	containsRelationshipData,
+	normaliseRelationshipProps,
+	retrieveRelationshipCodes,
 };

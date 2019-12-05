@@ -12,7 +12,9 @@ const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const {
 	getRemovedRelationships,
 	getAddedRelationships,
+	normaliseRelationshipProps,
 } = require('./lib/relationships/input');
+const { retrieveRelationshipCodes } = require('./lib/relationships/input');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -131,9 +133,12 @@ const collectRemovedRelationships = ({
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
+
+		const absorbedRelationshipCodes =
+			retrieveRelationshipCodes(propName, absorbedRecord) || [];
 		// if the absorbedRecord doesn't point at the root record in this relationship
 		// there is nothing to do
-		if (!absorbedRecord[propName].includes(code)) {
+		if (!absorbedRelationshipCodes.includes(code)) {
 			return;
 		}
 		// make sure we tell removed relationships to delete the newly reflective relationship
@@ -180,6 +185,8 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		type: nodeType,
 		excludeMeta: true,
 	});
+	normaliseRelationshipProps(nodeType, mainRecord);
+	normaliseRelationshipProps(nodeType, absorbedRecord);
 
 	const { properties } = getType(nodeType);
 
