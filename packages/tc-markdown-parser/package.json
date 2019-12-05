@@ -14,6 +14,7 @@
     "remark-behead": "^2.3.0",
     "remark-parse": "^7.0.2",
     "remark-stringify": "^7.0.4",
+    "strip-html-comments": "^1.0.0",
     "unified": "^8.4.2",
     "unified-stream": "^1.0.5",
     "unist-builder": "^2.0.2",

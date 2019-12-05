@@ -1,9 +1,31 @@
 const visit = require('unist-util-visit-parents');
+const stripHtmlComments = require('strip-html-comments');
 const propertyCoercers = require('../property-coercers');
 const convertNodeToProblem = require('./convert-node-to-problem');
 const normalizePropertyKey = require('../normalize-property-key');
 const flattenNodeToPlainString = require('../flatten-node-to-plain-string');
 const setPropertyNodeValue = require('./set-property-node-value');
+
+function dropHtmlComment(value) {
+	if (Array.isArray(value)) {
+		return value.map(dropHtmlComment);
+	}
+	if (typeof value === 'string') {
+		return stripHtmlComments(value).trim();
+	}
+	return value;
+}
+
+function omitEmptyPropertyNode(tree) {
+	tree.children = tree.children.reduce((omittedChildren, node) => {
+		// on property node, strip html comments and if its value is empty, omit that node
+		if (node.type === 'property' && node.value === '') {
+			return omittedChildren;
+		}
+		return [...omittedChildren, node];
+	}, []);
+	return tree;
+}
 
 function getCoercer({ isNested, primitiveType, propertyType }) {
 	const subdocumentPropertyTypes = new Set([
@@ -66,7 +88,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 			const coercion = coercer(subdocument, { hasMany });
 
 			if (coercion.valid) {
-				setPropertyNodeValue(node, coercion.value);
+				setPropertyNodeValue(node, dropHtmlComment(coercion.value));
 			} else {
 				convertNodeToProblem({
 					node,
@@ -111,5 +133,6 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 	return function transform(tree) {
 		visit(tree, 'property', mutate);
+		return omitEmptyPropertyNode(tree);
 	};
 };

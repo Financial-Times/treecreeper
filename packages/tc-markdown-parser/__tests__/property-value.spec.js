@@ -264,22 +264,16 @@ test('date fields with bad dates are an error', async () => {
 	expect(message).toContain('Date');
 });
 
-test('empty sections are an error', async () => {
+test('explicit empty section should be an error', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## some string
 
-		## some document
-
 		## another string
-
-		neat
-	`);
-
+		`);
 	expect(data).toEqual({
 		name: 'name',
-		anotherString: 'neat',
 	});
 
 	expect(errors).toEqual([
@@ -289,7 +283,48 @@ test('empty sections are an error', async () => {
 		},
 		{
 			line: 5,
-			message: 'property "someDocument" has no value',
+			message: 'property "anotherString" has no value',
 		},
 	]);
+});
+
+describe('dealing with html comments', () => {
+	it('html comments only in section should not be an error but be omitted in result', async () => {
+		const { data, errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some string
+
+			<!-- here is hidden comment -->
+
+			## some document
+
+			<!-- here is hidden comment, too -->
+
+		`);
+		expect(errors).toHaveLength(0);
+		expect(data).toEqual({
+			name: 'name',
+		});
+	});
+	it('including html comments in section should be trimmed', async () => {
+		const { data, errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some string
+
+			<!-- here is hidden comment --> hello
+
+			## some document
+
+			<!-- here is hidden comment, too --> hello
+
+		`);
+		expect(errors).toHaveLength(0);
+		expect(data).toEqual({
+			name: 'name',
+			someString: 'hello',
+			someDocument: 'hello',
+		});
+	});
 });
