@@ -11,7 +11,7 @@ const parser = getParser(schema, {
 	type: 'MainType',
 });
 
-test('any top level content outside an h2-range is parsed as description', async () => {
+test('any top level content outside an h2-range is parsed as description by default', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# well
 
