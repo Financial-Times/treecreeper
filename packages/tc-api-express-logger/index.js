@@ -65,10 +65,6 @@ const logger = new Proxy(nLogger, {
 
 const collectRequestMetrics = (context, res) => {
 	context = context || getContext();
-	res.nextMetricsName = `${context.endpoint}_`;
-	if (context.type) {
-		res.nextMetricsName = `${res.nextMetricsName}${context.type}_`;
-	}
 	logger.info(
 		`Request to ${context.path} completed with status ${res.statusCode}`,
 		{
