@@ -148,6 +148,9 @@ const queryBuilder = (method, input, body = {}) => {
 			initialContent,
 		).filter(propName => isRelationship(propName));
 
+		// context.willAddRelationships indicates
+		// - creating relationships
+		// - updating relationship props (additons and deletions)
 		context.willAddRelationships = !!Object.keys(addedRelationships).length;
 		context.willCreateRelationships = !_isEmpty(
 			Object.keys(addedRelationships).filter(
