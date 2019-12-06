@@ -2,9 +2,11 @@ const express = require('express');
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
 const { getApp } = require('../packages/tc-api-express');
+const { autocomplete } = require('./controllers/autocomplete');
 
 const PORT = process.env.PORT || 8888;
 const app = express();
+app.get('/autocomplete/:type/:field', autocomplete);
 app.use(
 	'/graphiql',
 	expressPlayground({
