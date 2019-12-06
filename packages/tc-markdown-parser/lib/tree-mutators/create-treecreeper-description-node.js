@@ -3,7 +3,7 @@ const build = require('unist-builder');
 const append = require('../append-node');
 
 module.exports = function createBizopsDescriptionNode({
-	descriptionNodeName = 'description',
+	descriptionFieldName = 'description',
 }) {
 	return function transform(tree) {
 		/*
@@ -17,7 +17,7 @@ module.exports = function createBizopsDescriptionNode({
 			return;
 		}
 
-		const description = build(descriptionNodeName, {
+		const description = build(descriptionFieldName, {
 			children: descriptionChildren,
 		});
 

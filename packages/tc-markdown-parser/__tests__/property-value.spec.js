@@ -7,7 +7,7 @@ schema.init({
 	logger: console,
 });
 
-const parser = getParser(schema, {
+const parser = getParser({
 	type: 'MainType',
 });
 
@@ -144,7 +144,7 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 });
 
 test('thows error if defined property is included with blacklist', async () => {
-	const blacklistedParser = getParser(schema, {
+	const blacklistedParser = getParser({
 		type: 'MainType',
 		blacklistPropertyNames: ['youngerSiblings'],
 	});

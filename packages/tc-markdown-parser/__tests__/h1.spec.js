@@ -7,7 +7,7 @@ schema.init({
 	logger: console,
 });
 
-const parser = getParser(schema, {
+const parser = getParser({
 	type: 'MainType',
 });
 
@@ -20,9 +20,9 @@ test('an h1 is parsed as name by default', async () => {
 });
 
 test('an h1 is parsed as configured name', async () => {
-	const nameParser = getParser(schema, {
+	const nameParser = getParser({
 		type: 'MainType',
-		titleNodeName: 'configured',
+		titleFieldName: 'configured',
 	});
 	const { data, errors } = await nameParser.parseMarkdownString(here`
 		# hello monkey

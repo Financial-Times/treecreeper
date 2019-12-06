@@ -7,18 +7,18 @@ const convertProblemToError = require('../convert-problem-node-to-error');
 const stringifyJson = jsonable => JSON.stringify(jsonable, null, '\t') + os.EOL;
 
 module.exports = function stringifyBoast({
-	titleNodeName = 'name',
-	descriptionNodeName = 'description',
+	titleFieldName = 'name',
+	descriptionFieldName = 'description',
 }) {
 	this.Compiler = function compiler(root) {
 		const data = {};
 
-		visit(root, titleNodeName, node => {
-			data[titleNodeName] = node.value;
+		visit(root, titleFieldName, node => {
+			data[titleFieldName] = node.value;
 		});
 
-		visit(root, descriptionNodeName, node => {
-			data[descriptionNodeName] = renderSubdocument(node.children[0]);
+		visit(root, descriptionFieldName, node => {
+			data[descriptionFieldName] = renderSubdocument(node.children[0]);
 		});
 
 		visit(root, 'property', node => {

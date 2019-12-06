@@ -1,6 +1,7 @@
 const remarkParse = require('remark-parse');
 const createStream = require('unified-stream');
 const unified = require('unified');
+const schema = require('@financial-times/tc-schema-sdk');
 const createTreecreeperTitleNode = require('./tree-mutators/create-treecreeper-title-node');
 const createTreecreeperDescriptionNode = require('./tree-mutators/create-treecreeper-description-node');
 const createTreecreeperPropertyNodes = require('./tree-mutators/create-treecreeper-property-nodes');
@@ -10,15 +11,12 @@ const validateTreecreeperProperties = require('./tree-mutators/validate-treecree
 const stringifyBoast = require('./unist-stringifiers/stringify-boast');
 
 /* @param schema: Treecreeper schema singleton */
-const unifiedProcessor = function(
-	schema,
-	{
-		type,
-		titleNodeName = 'name',
-		descriptionNodeName = 'description',
-		blacklistPropertyNames = [],
-	},
-) {
+const unifiedProcessor = function({
+	type,
+	titleFieldName = 'name',
+	descriptionFieldName = 'description',
+	blacklistPropertyNames = [],
+}) {
 	return async () => {
 		await schema.ready();
 
@@ -33,11 +31,11 @@ const unifiedProcessor = function(
 		return unified()
 			.use(remarkParse)
 			.use(createTreecreeperTitleNode, {
-				titleNodeName,
+				titleFieldName,
 			})
 			.use(createTreecreeperPropertyNodes)
 			.use(createTreecreeperDescriptionNode, {
-				descriptionNodeName,
+				descriptionFieldName,
 			})
 			.use(setTreecreeperPropertyNames, {
 				properties,
@@ -53,25 +51,22 @@ const unifiedProcessor = function(
 				propertyNameBlacklist: blacklistPropertyNames,
 			})
 			.use(stringifyBoast, {
-				titleNodeName,
-				descriptionNodeName,
+				titleFieldName,
+				descriptionFieldName,
 			});
 	};
 };
 
-const getParser = (
-	schema,
-	{
+const getParser = ({
+	type,
+	titleFieldName = 'name',
+	descriptionFieldName = 'description',
+	blacklistPropertyNames = [],
+} = {}) => {
+	const markdownParser = unifiedProcessor({
 		type,
-		titleNodeName = 'name',
-		descriptionNodeName = 'description',
-		blacklistPropertyNames = [],
-	} = {},
-) => {
-	const markdownParser = unifiedProcessor(schema, {
-		type,
-		titleNodeName,
-		descriptionNodeName,
+		titleFieldName,
+		descriptionFieldName,
 		blacklistPropertyNames,
 	});
 

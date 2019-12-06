@@ -7,7 +7,7 @@ schema.init({
 	logger: console,
 });
 
-const parser = getParser(schema, {
+const parser = getParser({
 	type: 'MainType',
 });
 

@@ -4,8 +4,8 @@ const convertNodeToProblem = require('./convert-node-to-problem');
 const createProblem = require('../create-problem');
 const append = require('../append-node');
 
-function convertToNameNode(node, titleNodeName) {
-	node.type = titleNodeName;
+function convertToNameNode(node, titleFieldName) {
+	node.type = titleFieldName;
 	node.value = flattenNodeToPlainString(node);
 	return node;
 }
@@ -34,7 +34,7 @@ function appendNoNameProblem(tree) {
 }
 
 module.exports = function createTreecreeperTitleNode({
-	titleNodeName = 'name',
+	titleFieldName = 'name',
 }) {
 	return function transform(tree) {
 		const headings = selectAll('heading[depth=1]', tree);
@@ -45,7 +45,7 @@ module.exports = function createTreecreeperTitleNode({
 					convertToInlineMarkdownProblem(heading);
 					return;
 				}
-				convertToNameNode(heading, titleNodeName);
+				convertToNameNode(heading, titleFieldName);
 				return;
 			}
 			case 0: {
