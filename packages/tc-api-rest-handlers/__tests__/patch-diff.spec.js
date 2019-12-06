@@ -166,7 +166,7 @@ describe('rest PATCH diff', () => {
 		);
 		await connectNodes(main, 'HAS_CHILD', child, {
 			someString: 'some string',
-			anotherProp: 'another property',
+			anotherString: 'another string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
@@ -175,7 +175,7 @@ describe('rest PATCH diff', () => {
 					{
 						code: childCode,
 						someString: 'some string',
-						anotherProp: 'new another property',
+						anotherString: 'new another string',
 					},
 				],
 			},

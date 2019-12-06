@@ -617,7 +617,7 @@ describe('rest PATCH relationship create', () => {
 
 	describe('rich relationship information', () => {
 		const someString = 'some string';
-		const anotherProp = 'another property';
+		const anotherString = 'another string';
 		const queries = {
 			upsert: true,
 			relationshipAction: 'merge',
@@ -628,13 +628,13 @@ describe('rest PATCH relationship create', () => {
 		const childRelationshipTwoProps = {
 			code: childCode,
 			someString,
-			anotherProp,
+			anotherString,
 		};
 		const child2RelationshipProps = {
 			code: childCode2,
-			anotherProp,
+			anotherString,
 		};
-		const parentRelationshipProps = { code: parentCode, anotherProp };
+		const parentRelationshipProps = { code: parentCode, anotherString };
 
 		it('returns record with rich relationship information if richRelationships query is true', async () => {
 			await createMainNode();
@@ -704,7 +704,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someString, anotherProp, ...meta.create },
+						props: { someString, anotherString, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -752,7 +752,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { anotherProp, ...meta.create },
+						props: { anotherString, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -799,7 +799,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'IS_PARENT_OF',
 						direction: 'incoming',
-						props: { anotherProp, ...meta.create },
+						props: { anotherString, ...meta.create },
 					},
 					{
 						type: 'ParentType',
