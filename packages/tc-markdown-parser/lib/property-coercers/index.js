@@ -25,6 +25,10 @@ function split(subdocument) {
 	return [];
 }
 
+function parseExtraMultilineDefinitions() {
+	return { foo: 'bar' };
+}
+
 /*
   These coercers take a subdocument that should be coerced to their eponymous
   type, and they return an object with a key of `valid` and a key of `value`. if
@@ -40,11 +44,14 @@ module.exports = {
 	String(subdocument, { hasMany = false } = {}) {
 		const items = split(subdocument);
 
+		// now we accept multiline definition as property
+
 		// Expecting a list, got a list
 		if (hasMany && items.length) {
 			return {
 				valid: true,
 				value: items.map(flattenNodeToPlainString),
+				extraProps: items.map(parseExtraMultilineDefinitions),
 			};
 		}
 
@@ -61,6 +68,7 @@ module.exports = {
 			return {
 				valid: true,
 				value: flattenNodeToPlainString(subdocument),
+				extraProps: items.map(parseExtraMultilineDefinitions),
 			};
 		}
 
