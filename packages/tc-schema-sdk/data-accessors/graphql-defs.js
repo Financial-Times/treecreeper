@@ -296,8 +296,7 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		const typeDefinitions = types
-			.map(printTypeDefinition);
+		const typeDefinitions = types.map(printTypeDefinition);
 
 		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
 			this.getRelationshipTypes({
