@@ -11,7 +11,7 @@ const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const {
 	getRemovedRelationships,
-	getAddedRelationships,
+	getChangedRelationships,
 	normaliseRelationshipProps,
 } = require('./lib/relationships/input');
 const { retrieveRelationshipCodes } = require('./lib/relationships/input');
@@ -249,7 +249,7 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		// Merged result always exists at last index
 		result = results.pop();
 
-		const addedRelationships = getAddedRelationships({
+		const changedRelationships = getChangedRelationships({
 			type: nodeType,
 			initialContent: mainNode.toJson({
 				type: nodeType,
@@ -278,11 +278,11 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 				action: 'UPDATE',
 				code,
 				type: nodeType,
-				addedRelationships,
+				changedRelationships,
 				removedRelationships,
 				updatedProperties: [
 					...Object.keys(writeProperties),
-					...Object.keys(addedRelationships),
+					...Object.keys(changedRelationships),
 					...(updatedDocumentProperties || []),
 				],
 				neo4jResult: result,
