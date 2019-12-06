@@ -85,26 +85,16 @@ module.exports = function coerceTreecreeperPropertiesToType({
 				propertyType,
 			});
 
-			const coercion = coercer(subdocument, { hasMany });
+			const coercion = coercer(subdocument, { hasMany, properties });
 
 			if (coercion.valid) {
-				if (coercion.extraProps) {
-					setPropertyNodeValue(node, [
-						{
-							name: dropHtmlComment(coercion.value)[0],
-							properties: coercion.extraProps[0],
-						},
-					]);
-				} else {
-					setPropertyNodeValue(node, dropHtmlComment(coercion.value));
-				}
+				setPropertyNodeValue(node, dropHtmlComment(coercion.value));
 			} else {
 				convertNodeToProblem({
 					node,
 					message: coercion.value,
 				});
 			}
-			console.log(node);
 
 			return;
 		}

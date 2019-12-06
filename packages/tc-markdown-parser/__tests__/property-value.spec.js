@@ -11,7 +11,7 @@ const parser = getParser({
 	type: 'MainType',
 });
 
-describe.skip('boolean types are coerced to boolean', () => {
+describe('boolean types are coerced to boolean', () => {
 	const expects = {
 		yes: true,
 		true: true,
@@ -35,7 +35,7 @@ describe.skip('boolean types are coerced to boolean', () => {
 	});
 });
 
-test.skip('boolean fields with non-boolean contents are errors', async () => {
+test('boolean fields with non-boolean contents are errors', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -51,7 +51,7 @@ test.skip('boolean fields with non-boolean contents are errors', async () => {
 	expect(errors[0].message).toMatch(/\bsure\b/);
 });
 
-test.skip('string types are coerced to string', async () => {
+test('string types are coerced to string', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -68,7 +68,7 @@ test.skip('string types are coerced to string', async () => {
 	expect(typeof data.anotherString).toBe('string');
 });
 
-test.skip('enums types correctly return their value', async () => {
+test('enums types correctly return their value', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -80,7 +80,7 @@ test.skip('enums types correctly return their value', async () => {
 	expect(data.someEnum).toBe('First');
 });
 
-test.skip('enums types with incorrect values produce error', async () => {
+test('enums types with incorrect values produce error', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -97,7 +97,7 @@ test.skip('enums types with incorrect values produce error', async () => {
 });
 
 // Before this test, we had links coming out wrapped in triangle brackets
-test.skip('urls should stay urls', async () => {
+test('urls should stay urls', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -109,7 +109,7 @@ test.skip('urls should stay urls', async () => {
 	expect(typeof data.someUrl).toBe('string');
 });
 
-test.skip('nested fields are coerced to string (the code)', async () => {
+test('nested fields are coerced to string (the code)', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -121,7 +121,7 @@ test.skip('nested fields are coerced to string (the code)', async () => {
 	expect(data.favouriteChild).toBe('cheerabbits');
 });
 
-test.skip('properties with hasMany turn bulleted lists into arrays', async () => {
+test('properties with hasMany turn bulleted lists into arrays', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -143,7 +143,7 @@ test.skip('properties with hasMany turn bulleted lists into arrays', async () =>
 	]);
 });
 
-test.skip('thows error if defined property is included with blacklist', async () => {
+test('thows error if defined property is included with blacklist', async () => {
 	const blacklistedParser = getParser({
 		type: 'MainType',
 		blacklistPropertyNames: ['youngerSiblings'],
@@ -169,7 +169,7 @@ test.skip('thows error if defined property is included with blacklist', async ()
 	);
 });
 
-test.skip('properties with hasMany must be bulleted lists', async () => {
+test('properties with hasMany must be bulleted lists', async () => {
 	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -185,7 +185,7 @@ test.skip('properties with hasMany must be bulleted lists', async () => {
 	expect(message).toContain('bullet');
 });
 
-test.skip('properties without hasMany must not be bulleted lists', async () => {
+test('properties without hasMany must not be bulleted lists', async () => {
 	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -201,7 +201,7 @@ test.skip('properties without hasMany must not be bulleted lists', async () => {
 	expect(message).toContain('bullet');
 });
 
-test.skip('subdocuments have their headers reduced two levels', async () => {
+test('subdocuments have their headers reduced two levels', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -217,7 +217,7 @@ test.skip('subdocuments have their headers reduced two levels', async () => {
 });
 
 // There are currently no date fields permitted in runbook.md; lastServiceReviewDate is reserved for Ops manual entry
-test.skip('date fields are coerced to iso strings', async () => {
+test('date fields are coerced to iso strings', async () => {
 	const naiveJavaScriptIsoStringRegex = /^\d{4}(?:-\d{2}){2}T(?:\d{2}:){2}\d{2}\.\d{3}Z$/;
 	const { data } = await parser.parseMarkdownString(here`
 		# name
@@ -230,7 +230,7 @@ test.skip('date fields are coerced to iso strings', async () => {
 	expect(data.someDate).toMatch(naiveJavaScriptIsoStringRegex);
 });
 
-test.skip('date fields keep the correct date', async () => {
+test('date fields keep the correct date', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
@@ -247,7 +247,7 @@ test.skip('date fields keep the correct date', async () => {
 	expect(date.getDate()).toBe(17);
 });
 
-test.skip('date fields with bad dates are an error', async () => {
+test('date fields with bad dates are an error', async () => {
 	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -264,7 +264,7 @@ test.skip('date fields with bad dates are an error', async () => {
 	expect(message).toContain('Date');
 });
 
-test.skip('explicit empty section should be an error', async () => {
+test('explicit empty section should be an error', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
@@ -294,7 +294,7 @@ test.skip('explicit empty section should be an error', async () => {
 	]);
 });
 
-describe.skip('dealing with html comments', () => {
+describe('dealing with html comments', () => {
 	it('html comments only in section should not be an error but be omitted in result', async () => {
 		const { data, errors } = await parser.parseMarkdownString(here`
 			# name
@@ -335,31 +335,115 @@ describe.skip('dealing with html comments', () => {
 	});
 });
 
-describe('nested property definitions', () => {
-	it('can be parsed as object', async () => {
-		const { data, errors } = await parser.parseMarkdownString(here`
-			# name
+describe.skip('relationship property tests', () => {
+	describe('single relationship case - hasMany: false', () => {
+		it('can be parsed as plain string', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
 
-			## younger siblings
+				## favourite child
 
-			* example-sibling-node:
-				propNameOne: propValueOne
-				propNameTwo: propValueTwo
-		`);
+				example-code
+				`);
 
-		console.log(data);
-		expect(errors).toHaveLength(0);
-		expect(data).toEqual({
-			name: 'name',
-			youngerSiblings: [
-				{
-					name: 'example-sibling-node',
-					properties: {
-						propNameOne: 'propValueOne',
-						propNameTwo: 'propValueTwo',
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				favouriteChild: 'example-code',
+			});
+		});
+
+		it('can be parsed as object which contains property object', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+					some string: i like it
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				favouriteChild: {
+					'example-code': {
+						someString: 'i like it',
 					},
 				},
-			],
+			});
+		});
+	});
+
+	describe('mutiple relationship case - hasMany: true', () => {
+		it('can be parsed as plain string array', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+				* example-sibling-02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: ['example-sibling-01', 'example-sibling-02'],
+			});
+		});
+
+		it('can be parsed as object array which contains property object', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+					some string: prop01
+				* example-sibling-02
+					some string: prop02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: [
+					{
+						'example-sibling-01': {
+							someString: 'prop01',
+						},
+						'example-sibling-02': {
+							someString: 'prop02',
+						},
+					},
+				],
+			});
+		});
+
+		it('mixed case of plain string and object', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+					some string: prop01
+				* example-sibling-02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: [
+					{
+						'example-sibling-01': {
+							someString: 'prop01',
+						},
+					},
+					'example-sibling-02',
+				],
+			});
 		});
 	});
 });
