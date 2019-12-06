@@ -616,7 +616,7 @@ describe('rest PATCH relationship create', () => {
 	});
 
 	describe('rich relationship information', () => {
-		const someProp = 'some property';
+		const someString = 'some string';
 		const anotherProp = 'another property';
 		const queries = {
 			upsert: true,
@@ -624,10 +624,10 @@ describe('rest PATCH relationship create', () => {
 			richRelationships: true,
 		};
 
-		const childRelationshipProps = { code: childCode, someProp };
+		const childRelationshipProps = { code: childCode, someString };
 		const childRelationshipTwoProps = {
 			code: childCode,
-			someProp,
+			someString,
 			anotherProp,
 		};
 		const child2RelationshipProps = {
@@ -675,7 +675,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someProp, ...meta.create },
+						props: { someString, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -704,7 +704,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someProp, anotherProp, ...meta.create },
+						props: { someString, anotherProp, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -741,7 +741,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someProp, ...meta.create },
+						props: { someString, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -788,7 +788,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someProp, ...meta.create },
+						props: { someString, ...meta.create },
 					},
 					{
 						type: 'ChildType',
@@ -835,7 +835,7 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: { someProp, ...meta.create },
+						props: { someString, ...meta.create },
 					},
 					{
 						type: 'ChildType',

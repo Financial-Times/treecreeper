@@ -118,11 +118,11 @@ describe('rest PATCH diff', () => {
 			['ChildType', childCode],
 		);
 		await connectNodes(main, 'HAS_CHILD', child, {
-			someProp: 'some property',
+			someString: 'some string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
-			{ children: [{ code: childCode, someProp: 'some property' }] },
+			{ children: [{ code: childCode, someString: 'some string' }] },
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
@@ -139,14 +139,14 @@ describe('rest PATCH diff', () => {
 			['ChildType', `${childCode}-2`],
 		);
 		await connectNodes(
-			[main, 'HAS_CHILD', child1, { someProp: 'some property' }],
+			[main, 'HAS_CHILD', child1, { someString: 'some string' }],
 			[main, 'HAS_CHILD', child2],
 		);
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
 			{
 				children: [
-					{ code: `${childCode}-1`, someProp: 'some property' },
+					{ code: `${childCode}-1`, someString: 'some string' },
 					`${childCode}-2`,
 				],
 			},
@@ -165,7 +165,7 @@ describe('rest PATCH diff', () => {
 			['ChildType', childCode],
 		);
 		await connectNodes(main, 'HAS_CHILD', child, {
-			someProp: 'some property',
+			someString: 'some string',
 			anotherProp: 'another property',
 		});
 		const dbQuerySpy = spyDbQuery();
@@ -174,7 +174,7 @@ describe('rest PATCH diff', () => {
 				children: [
 					{
 						code: childCode,
-						someProp: 'some property',
+						someString: 'some string',
 						anotherProp: 'new another property',
 					},
 				],
@@ -194,11 +194,11 @@ describe('rest PATCH diff', () => {
 			['ChildType', childCode],
 		);
 		await connectNodes(main, 'HAS_CHILD', child, {
-			someProp: 'some property',
+			someString: 'some string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
-			{ children: [{ code: childCode, someProp: null }] },
+			{ children: [{ code: childCode, someString: null }] },
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);

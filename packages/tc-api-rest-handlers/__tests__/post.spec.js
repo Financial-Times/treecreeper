@@ -315,12 +315,12 @@ describe('rest POST', () => {
 		});
 
 		describe('rich relatioship information', () => {
-			const someProp = 'some property';
+			const someString = 'some string';
 			const anotherProp = 'another property';
-			const childRelationshipProps = { code: childCode, someProp };
+			const childRelationshipProps = { code: childCode, someString };
 			const childRelationshipTwoProps = {
 				code: childCode,
-				someProp,
+				someString,
 				anotherProp,
 			};
 			const child2RelationshipProps = {
@@ -362,7 +362,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: { someProp, ...meta.create },
+							props: { someString, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -392,7 +392,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: { someProp, anotherProp, ...meta.create },
+							props: { someString, anotherProp, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -428,7 +428,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: { someProp, ...meta.create },
+							props: { someString, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -471,7 +471,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: { someProp, ...meta.create },
+							props: { someString, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -514,7 +514,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: { someProp, ...meta.create },
+							props: { someString, ...meta.create },
 						},
 						{
 							type: 'ChildType',

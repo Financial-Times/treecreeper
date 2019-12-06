@@ -50,7 +50,7 @@ WHERE related.code IN $${key}
 };
 
 const addPropsToQueries = (relationshipPropQueries, value) => {
-	// value: { code: 'node code', someProp: 'some property'...}
+	// value: { code: 'node code', someString: 'some string'...}
 	Object.entries(value).forEach(([k, v]) => {
 		if (k !== 'code') {
 			// If no node matches the CASE expression, the expression returns a null.
