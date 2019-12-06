@@ -49,7 +49,7 @@ test:
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
-demo-api:
+run:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 run-db:
@@ -62,5 +62,4 @@ clean-deps:
 	rm -rf packages/*/node_modules
 	rm -rf node_modules
 	rm package-lock.json
-	make install
 	npm install
