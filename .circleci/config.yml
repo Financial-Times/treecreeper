@@ -79,7 +79,7 @@ jobs:
             ./scripts/neo4j-wait-for-start
             make init-db
       - run:
-          name: Run ytests
+          name: Run tests
           command: make test
           environment:
             JEST_JUNIT_OUTPUT: "junit/test-results.xml"
