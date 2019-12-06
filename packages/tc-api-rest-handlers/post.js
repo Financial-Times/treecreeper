@@ -65,13 +65,13 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			updatedProperties: [
 				...new Set([
 					...Object.keys(parameters.properties),
-					...Object.keys(queryContext.addedRelationships || {}),
+					...Object.keys(queryContext.changedRelationships || {}),
 					...Object.keys(documents),
 				]),
 			],
 			neo4jResult,
 			requestId: metadata.requestId,
-			addedRelationships: queryContext.addedRelationships,
+			changedRelationships: queryContext.changedRelationships,
 		});
 		return { status: 200, body: responseData };
 	} catch (err) {

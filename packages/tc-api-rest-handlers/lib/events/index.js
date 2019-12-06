@@ -40,7 +40,7 @@ const makeEvents = ({
 	action,
 	code,
 	type,
-	addedRelationships,
+	changedRelationships,
 	removedRelationships,
 	updatedProperties = [],
 	neo4jResult,
@@ -71,12 +71,12 @@ const makeEvents = ({
 			updatedProperties,
 		});
 	}
-	if (addedRelationships) {
+	if (changedRelationships) {
 		const addedRelationshipEvents = makeAddedRelationshipEvents(
 			type,
 			code,
 			neo4jResult.records,
-			addedRelationships,
+			changedRelationships,
 			requestId,
 		);
 		events.push(...addedRelationshipEvents);
