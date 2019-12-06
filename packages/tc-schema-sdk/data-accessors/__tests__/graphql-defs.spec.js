@@ -145,7 +145,7 @@ hasBudget_rel: CostcentrePaysForGroup
 """
 Internal use only
 """
-type CostcentrePaysForGroup @relation(name: PAYS_FOR) {
+type CostcentrePaysForGroup @relation(name: "PAYS_FOR") {
 from: CostCentre
 to: Group
 """
