@@ -46,7 +46,7 @@ test:
 		then TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*/${spec}.*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=1 --ci --reporters=default --reporters=jest-junit; \
 	fi
 
 run:
