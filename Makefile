@@ -39,17 +39,15 @@ monorepo-publish:
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
-test:
-	# Make sure db constraints are set up to avoid race conditions between the first two test suites
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema node ./packages/tc-api-db-manager/index.js
+test: init-db
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*/${spec}.*.spec.js" --testEnvironment=node --watch; \
 		else TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=2 --ci --reporters=default --reporters=jest-junit; \
+			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=1 --ci --reporters=default --reporters=jest-junit --detectOpenHandles --forceExit; \
 	fi
 
-demo-api:
+run:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 run-db:
@@ -62,5 +60,4 @@ clean-deps:
 	rm -rf packages/*/node_modules
 	rm -rf node_modules
 	rm package-lock.json
-	make install
 	npm install

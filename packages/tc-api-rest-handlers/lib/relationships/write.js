@@ -1,8 +1,13 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
-const { getType } = require('@financial-times/tc-schema-sdk');
-const { metaPropertiesForCreate } = require('../metadata-helpers');
-const { findInversePropertyNames } = require('./properties');
+const {
+	getType,
+	findInversePropertyNames,
+} = require('@financial-times/tc-schema-sdk');
+const {
+	metaPropertiesForCreate,
+	createRelMetaQueryForUpdate,
+} = require('../metadata-helpers');
 
 const relationshipFragment = (
 	type,
@@ -53,8 +58,11 @@ const addPropsToQueries = (relationshipPropQueries, value) => {
 			relationshipPropQueries.push(`
 				SET (CASE
 				WHEN related.code = '${value.code}'
-				THEN relationship END).${k} = '${v}'
+				THEN relationship END).${k} = ${v === null ? null : `'${v}'`}
 				`);
+			relationshipPropQueries.push(
+				createRelMetaQueryForUpdate(value.code),
+			);
 		}
 	});
 };

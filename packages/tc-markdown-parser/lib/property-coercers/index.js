@@ -41,8 +41,6 @@ module.exports = {
 	String(subdocument, { hasMany = false } = {}) {
 		const items = split(subdocument);
 
-		// now we accept multiline definition as property
-
 		// Expecting a list, got a list
 		if (hasMany && items.length) {
 			return {

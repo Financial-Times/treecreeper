@@ -24,6 +24,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			code,
 			body: originalBody,
 			query: { relationshipAction, richRelationships } = {},
+			metadata = {},
 		} = validateInput(input);
 
 		if (containsRelationshipData(type, originalBody)) {
@@ -50,6 +51,7 @@ const patchHandler = ({ documentStore } = {}) => {
 		const {
 			body: newBodyDocuments = {},
 			undo: undoDocstoreWrite,
+			updatedProperties: updatedDocumentProperties,
 		} = !_isEmpty(documents)
 			? await documentStore.patch(type, code, documents)
 			: {};
@@ -59,34 +61,53 @@ const patchHandler = ({ documentStore } = {}) => {
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)
-				.addRelationships(initialContent);
+				.changeRelationships(initialContent);
 
 			let neo4jResultBody;
+			const event = {
+				action: 'UPDATE',
+				type,
+				code,
+				requestId: metadata.requestId,
+			};
+
 			if (builder.isNeo4jUpdateNeeded()) {
-				const { neo4jResult, queryContext } = await builder.execute();
+				const {
+					neo4jResult,
+					queryContext,
+					parameters,
+				} = await builder.execute();
 				neo4jResultBody = neo4jResult.toJson({
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
-
-				const relationships = {
-					added: queryContext.addedRelationships,
-					removed: queryContext.removedRelationships,
-				};
-				broadcast('UPDATE', neo4jResult, { relationships });
+				event.changedRelationships = queryContext.changedRelationships;
+				event.removedRelationships = queryContext.removedRelationships;
+				event.neo4jResult = neo4jResult;
+				event.updatedProperties = [
+					...new Set([
+						...Object.keys(parameters.properties),
+						...Object.keys(queryContext.removedRelationships || {}),
+						...Object.keys(queryContext.changedRelationships || {}),
+						...(updatedDocumentProperties || []),
+					]),
+				];
 			} else {
 				neo4jResultBody = preflightRequest.toJson({
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
+				event.updatedProperties = updatedDocumentProperties || [];
 			}
+			broadcast(event);
+			const responseData = {
+				...neo4jResultBody,
+				...newBodyDocuments,
+			};
 
 			return {
 				status: 200,
-				body: {
-					...neo4jResultBody,
-					...newBodyDocuments,
-				},
+				body: responseData,
 			};
 		} catch (err) {
 			if (undoDocstoreWrite) {

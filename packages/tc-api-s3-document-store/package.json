@@ -8,7 +8,6 @@
   "dependencies": {
     "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
     "aws-sdk": "^2.564.0",
-    "deep-diff": "^1.0.2",
     "lodash.isempty": "^4.4.0"
   },
   "repository": {

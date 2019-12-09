@@ -21,11 +21,11 @@ describe('rest document store integration', () => {
 	const someString = 'some string';
 	const someDocument = 'some document';
 
-	const getInput = body => {
-		return { ...input, body };
+	const getInput = (body, query = {}) => {
+		return { ...input, body, query };
 	};
 
-	const { createNode, createNodes } = setupMocks(namespace);
+	const { createNode, createNodes, connectNodes } = setupMocks(namespace);
 
 	const documentStore = docstore();
 	const documentFromS3 = { someDocument: 'some document from s3' };
@@ -494,6 +494,45 @@ describe('rest document store integration', () => {
 				anotherDocument: 'Another Fake Document',
 			});
 			await neo4jTest('MainType', otherCode).notExists();
+		});
+	});
+
+	describe('regression tests', () => {
+		it('Can still delete specific relationships without erroring', async () => {
+			const [main, child] = await createNodes(
+				[
+					'MainType',
+					{
+						code: mainCode,
+					},
+				],
+				[
+					'ChildType',
+					{
+						code: otherCode,
+					},
+				],
+			);
+
+			await connectNodes(main, 'HAS_CHILD', child);
+			const { status, body } = await patchHandler({ documentStore })(
+				getInput(
+					{ '!children': [otherCode] },
+					{ relationshipAction: 'replace' },
+				),
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+			});
+			expect(body).not.toMatchObject({
+				children: expect.any(Array),
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.hasRels(0);
 		});
 	});
 });
