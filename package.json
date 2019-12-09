@@ -13,7 +13,8 @@
     "express": "^4.17.1",
     "graphql-playground-middleware-express": "^1.7.12",
     "neo4j-driver": "^1.7.6",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "preact": "^10.0.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -25,15 +26,24 @@
     "@financial-times/athloi": "^1.0.0-beta.29",
     "@financial-times/rel-engage": "^7.3.0",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
+    "babel-loader": "^8.0.6",
+    "concurrently": "^5.0.0",
+    "css-loader": "^3.2.1",
     "fetch-mock": "^7.3.9",
     "jest": "^24.8.0",
     "jest-junit": "^7.0.0",
     "lolex": "^4.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "nodemon": "^1.19.1",
     "stylelint": "^12.0.0",
     "stylelint-config-recommended-scss": "^4.1.0",
     "stylelint-scss": "^3.13.0",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0",
+    "webpack-encoding-plugin": "^0.3.1",
+    "webpack-manifest-plugin": "^2.2.0"
   },
   "scripts": {
     "test": "make test",

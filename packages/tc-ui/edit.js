@@ -5,6 +5,7 @@ const { readRecord, writeRestAPIQuery } = require('./lib/biz-ops-client');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
 const response = require('./lib/response');
 const template = require('./templates/edit-page');
+const { handleError } = require('./lib/handle-error');
 
 const displayForm = async (event, apiError) => {
 	const { type, code } = event.params;
@@ -78,16 +79,16 @@ const handleForm = async event => {
 };
 
 const render = async event => {
-	if (event.httpMethod === 'GET') {
+	if (event.method === 'GET') {
 		return displayForm(event);
 	}
-	if (event.httpMethod === 'POST') {
+	if (event.method === 'POST') {
 		return handleForm(event);
 	}
 	throw httpError(405, 'Method Not Allowed');
 };
 
-const handler = render;
+const handler = handleError(render);
 
 module.exports = {
 	handler,

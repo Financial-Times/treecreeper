@@ -17,11 +17,14 @@ app.use(
 	}),
 );
 
-getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
-	app.listen(PORT, () => {
-		console.log(`Listening on ${PORT}`);
-	});
-});
+getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
+	() => {
+		app.listen(PORT, () => {
+			console.log(`Listening on ${PORT}`);
+		});
+	},
+);
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
-app.use('/view/:type/:code', require('./controllers/view'));
+app.use('/:type/:code/edit', require('./controllers/edit'));
+app.use('/:type/:code', require('./controllers/view'));

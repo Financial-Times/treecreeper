@@ -18,7 +18,9 @@
     "http-errors": "^1.7.3",
     "node-fetch": "^2.6.0",
     "preact": "^10.0.5",
+    "preact-render-to-string": "^5.1.2",
     "qs": "^6.9.1",
     "showdown": "^1.9.1"
-  }
+  },
+  "devDependencies": {}
 }

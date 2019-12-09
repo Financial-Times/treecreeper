@@ -1,11 +1,12 @@
-const { view } = require('../../packages/tc-ui');
+const { edit } = require('../../packages/tc-ui');
 
 module.exports = async (req, res) => {
 	try {
-		const { status, body, headers } = await view({
+		const { status, body, headers } = await edit({
 			params: req.params,
 			username: 'rhys.evans',
 			query: req.query || {},
+			method: req.method,
 		});
 		if (headers) {
 			res.set(headers);
@@ -13,6 +14,7 @@ module.exports = async (req, res) => {
 
 		res.status(status).send(body);
 	} catch (e) {
+		console.log(e);
 		res.send(500).end();
 	}
 };

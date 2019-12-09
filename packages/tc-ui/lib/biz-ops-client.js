@@ -6,7 +6,7 @@ const graphqlBuilder = require('./graphql-builder');
 
 const { BIZ_OPS_API_URL, BIZ_OPS_API_KEY, BIZ_OPS_API_KEY_LOCAL } = {
 	...process.env,
-	BIZ_OPS_API_URL: 'http://local.in.ft.com:8888',
+	BIZ_OPS_API_URL: 'http://local.in.ft.com:8888/api',
 };
 
 const extractErrorMessage = async response => {
@@ -100,9 +100,7 @@ const writeRestAPIQuery = async (
 	};
 
 	const response = await fetch(
-		`${BIZ_OPS_API_URL}/v2/node/${type}/${encodeURIComponent(
-			code,
-		)}/${query}`,
+		`${BIZ_OPS_API_URL}/rest/${type}/${encodeURIComponent(code)}/${query}`,
 		options,
 	);
 
