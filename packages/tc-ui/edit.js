@@ -13,7 +13,7 @@ const displayForm = async (event, apiError) => {
 	let formData = {};
 	// Persist any unsaved changes to form data stored in the event.body.
 	if (event.body) {
-		formData = await formDataToGraphQL(type, querystring.parse(event.body));
+		formData = await formDataToGraphQL(type, event.body);
 		// If a code is present then fetch the record data to /edit
 		// otherwise serve a blank /create form
 	} else if (code) {

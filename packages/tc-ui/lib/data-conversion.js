@@ -9,6 +9,7 @@ const parsers = {
 };
 
 const formDataToRest = (type, formData) => {
+	console.log(formData);
 	const data = {};
 	const typeProperties = schema.getType(type);
 

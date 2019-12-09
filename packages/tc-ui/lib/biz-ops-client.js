@@ -98,7 +98,10 @@ const writeRestAPIQuery = async (
 		headers: getHeaders(clientUserId),
 		body: JSON.stringify(formData),
 	};
-
+	console.log(
+		`${BIZ_OPS_API_URL}/rest/${type}/${encodeURIComponent(code)}/${query}`,
+		formData,
+	);
 	const response = await fetch(
 		`${BIZ_OPS_API_URL}/rest/${type}/${encodeURIComponent(code)}/${query}`,
 		options,

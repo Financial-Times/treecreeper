@@ -7,6 +7,7 @@ module.exports = async (req, res) => {
 			username: 'rhys.evans',
 			query: req.query || {},
 			method: req.method,
+			body: req.body,
 		});
 		if (headers) {
 			res.set(headers);
