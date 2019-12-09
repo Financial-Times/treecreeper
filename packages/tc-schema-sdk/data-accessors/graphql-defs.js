@@ -2,6 +2,7 @@ const stripIndent = require('common-tags/lib/stripIndent');
 const uniqBy = require('lodash.uniqby');
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
+	hardCoded = [...hardCoded];
 	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
 	return [...new Array(Math.max(hardCoded.length, vars.length))]
 		.map((val, i) => `${hardCoded[i] || ''}${vars[i] || ''}`)
