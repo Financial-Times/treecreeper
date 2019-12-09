@@ -1,18 +1,18 @@
 class SyntaxError extends Error {}
 
 /*
- This function divides mutipile defnition with code and property.
+ This function divides from mutipile definition to code and property string e.g,
 
- e.g definition
+ The definition:
  - child-code
    propNameOne: propValueOne
 
- then this divides with
+ Divides to:
  {
    code: 'child-code',
    propDef: '  propNameOne: propValueOne\n',
  }
- */
+*/
 const dividePropertyDefinition = subdocument => {
 	const linefeedIndex = subdocument.indexOf('\n');
 	if (linefeedIndex > -1) {
@@ -28,24 +28,25 @@ const dividePropertyDefinition = subdocument => {
 	};
 };
 
-// Token constants of meaningful property descriptor
+// Token characters of meaningful property descriptor
 const TAB = '\t';
 const PROPERTY_NAME_SEPARATOR = ':';
 const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
 /*
- This is tiny lexer/parser for multiple property definition.
+ This is tiny lexer/parser fuction for analyze multiple property definition.
+ See above constant characters and parse into an object with following format e.g,
 
- See above constant characters and parse into an object with following format:
+ Definition
    propNameOne: propValueOne
    propNameTwo: propValueTwo
- parsed as
+ Will be parsed as
    {
      propNameOne: 'propValueOne',
      propNameTwo: 'propValueTwo',
    }
- */
+*/
 const parsePropertyDefinition = (propDefString, line) => {
 	const properties = {};
 	const strlen = propDefString.length;
@@ -56,13 +57,15 @@ const parsePropertyDefinition = (propDefString, line) => {
 	for (let i = 0; i < strlen; i++) {
 		const char = propDefString[i];
 		let isSkip = false;
+
 		switch (char) {
 			// just identing
 			case TAB:
 				// when buffer is empty, it means 'parsing property name', so ignore the tab
 				isSkip = buffer === '';
 				break;
-			// property name divider token
+
+			// property name declaration ends
 			case PROPERTY_NAME_SEPARATOR:
 				if (buffer === '') {
 					throw new SyntaxError(
@@ -77,7 +80,8 @@ const parsePropertyDefinition = (propDefString, line) => {
 				buffer = '';
 				isSkip = true;
 				break;
-			// property value divider token
+
+			// property value declaration ends
 			case LINE_FEED:
 				if (propName === '') {
 					throw new SyntaxError(
@@ -96,10 +100,12 @@ const parsePropertyDefinition = (propDefString, line) => {
 				line++;
 				column = 0;
 				break;
+
 			// (Maybe don't need, but for Windows...) ignore carriage return character
 			case CARRIAGE_RETURN:
 				isSkip = true;
 				break;
+
 			default:
 				break;
 		}
@@ -109,7 +115,7 @@ const parsePropertyDefinition = (propDefString, line) => {
 		column++;
 	}
 
-	// dealing with remining buffers
+	// deal with remain buffers
 	if (buffer !== '') {
 		if (propName === '') {
 			throw new SyntaxError(
@@ -151,6 +157,7 @@ const parseMultilineDefinition = ({ children = [] }) => {
 			if (propDef !== '') {
 				definitions = {
 					...definitions,
+					// add 1 because property definition is the next line of code
 					...parsePropertyDefinition(propDef, line + 1),
 				};
 			}
@@ -167,4 +174,3 @@ const parseMultilineDefinition = ({ children = [] }) => {
 };
 
 module.exports = parseMultilineDefinition;
-module.exports.SyntaxError = SyntaxError;
