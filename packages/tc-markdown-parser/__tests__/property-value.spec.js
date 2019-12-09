@@ -118,7 +118,9 @@ test('nested fields are coerced to string (the code)', async () => {
 		cheerabbits
 	`);
 
-	expect(data.favouriteChild).toBe('cheerabbits');
+	expect(data.favouriteChild).toMatchObject({
+		code: 'cheerabbits',
+	});
 });
 
 test('properties with hasMany turn bulleted lists into arrays', async () => {
@@ -136,10 +138,18 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 	`);
 
 	expect(errors).toHaveLength(0);
-	expect(data.children).toEqual(['chee-rabbits']);
+	expect(data.children).toEqual([
+		{
+			code: 'chee-rabbits',
+		},
+	]);
 	expect(data.youngerSiblings).toEqual([
-		'ft-app-fruitcake',
-		'apple-quicktime',
+		{
+			code: 'ft-app-fruitcake',
+		},
+		{
+			code: 'apple-quicktime',
+		},
 	]);
 });
 
@@ -162,7 +172,11 @@ test('thows error if defined property is included with blacklist', async () => {
 	`);
 
 	expect(errors).toHaveLength(1);
-	expect(data.children).toEqual(['chee-rabbits']);
+	expect(data.children).toEqual([
+		{
+			code: 'chee-rabbits',
+		},
+	]);
 	const [{ message }] = errors;
 	expect(message).toEqual(
 		'youngerSiblings is not permitted within markdown (to allow other people to edit it)',
@@ -335,7 +349,7 @@ describe('dealing with html comments', () => {
 	});
 });
 
-describe.skip('relationship property tests', () => {
+describe('relationship property tests', () => {
 	describe('single relationship case - hasMany: false', () => {
 		it('can be parsed as plain string', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
@@ -349,7 +363,9 @@ describe.skip('relationship property tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				favouriteChild: 'example-code',
+				favouriteChild: {
+					code: 'example-code',
+				},
 			});
 		});
 
@@ -360,18 +376,91 @@ describe.skip('relationship property tests', () => {
 				## favourite child
 
 				example-code
-					some string: i like it
-				`);
+					someString: i like it
+			`);
 
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
 				favouriteChild: {
-					'example-code': {
-						someString: 'i like it',
-					},
+					code: 'example-code',
+					someString: 'i like it',
 				},
 			});
+		});
+	});
+
+	describe('thorws syntax error on mutiline defitniion', () => {
+		it('mutiline property name should be a lower camel case', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+					some string: i like it
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/should be lower camel case/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('unexpected property separater found', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+					: i like it
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/unexpected property name separator/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('linefeed character without property name', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+					i like it
+					someString: i like it, too
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/unexpected linefeed token found/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('property value must not be empty', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+					someString:
+					anotherString: another value
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(
+				/property value for someString must not be empty/,
+			);
+			expect(message).toMatch(/line 6/);
 		});
 	});
 
@@ -389,7 +478,14 @@ describe.skip('relationship property tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				youngerSiblings: ['example-sibling-01', 'example-sibling-02'],
+				youngerSiblings: [
+					{
+						code: 'example-sibling-01',
+					},
+					{
+						code: 'example-sibling-02',
+					},
+				],
 			});
 		});
 
@@ -400,9 +496,9 @@ describe.skip('relationship property tests', () => {
 				## younger siblings
 
 				* example-sibling-01
-					some string: prop01
+					someString: prop01
 				* example-sibling-02
-					some string: prop02
+					someString: prop02
 				`);
 
 			expect(errors).toHaveLength(0);
@@ -410,25 +506,25 @@ describe.skip('relationship property tests', () => {
 				name: 'name',
 				youngerSiblings: [
 					{
-						'example-sibling-01': {
-							someString: 'prop01',
-						},
-						'example-sibling-02': {
-							someString: 'prop02',
-						},
+						code: 'example-sibling-01',
+						someString: 'prop01',
+					},
+					{
+						code: 'example-sibling-02',
+						someString: 'prop02',
 					},
 				],
 			});
 		});
 
-		it('mixed case of plain string and object', async () => {
+		it('mixed case of having properties and not having', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
 				## younger siblings
 
 				* example-sibling-01
-					some string: prop01
+					someString: prop01
 				* example-sibling-02
 				`);
 
@@ -437,11 +533,12 @@ describe.skip('relationship property tests', () => {
 				name: 'name',
 				youngerSiblings: [
 					{
-						'example-sibling-01': {
-							someString: 'prop01',
-						},
+						code: 'example-sibling-01',
+						someString: 'prop01',
 					},
-					'example-sibling-02',
+					{
+						code: 'example-sibling-02',
+					},
 				],
 			});
 		});

@@ -36,8 +36,10 @@ function getCoercer({ isNested, primitiveType, propertyType }) {
 	const isSubdocument = subdocumentPropertyTypes.has(propertyType);
 	const isString = isNested || (primitiveType === 'String' && !isSubdocument);
 
-	if (isNested || isString) {
-		return propertyCoercers.String;
+	if (isString) {
+		return isNested
+			? propertyCoercers.NestedString
+			: propertyCoercers.String;
 	}
 
 	if (isSubdocument) {
@@ -85,7 +87,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 				propertyType,
 			});
 
-			const coercion = coercer(subdocument, { hasMany, properties });
+			const coercion = coercer(subdocument, { hasMany });
 
 			if (coercion.valid) {
 				setPropertyNodeValue(node, dropHtmlComment(coercion.value));

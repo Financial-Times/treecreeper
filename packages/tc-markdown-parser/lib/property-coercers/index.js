@@ -1,7 +1,7 @@
 const { selectAll } = require('unist-util-select');
 const renderSubdocument = require('../render-subdocument');
-const resolvePropertyName = require('../resolve-property-name');
 const flattenNodeToPlainString = require('../flatten-node-to-plain-string');
+const parseMultilineDefinition = require('../parse-multiline-definition');
 
 const checkDateIsValid = date => !Number.isNaN(Number(date));
 /*
@@ -26,90 +26,6 @@ function split(subdocument) {
 	return [];
 }
 
-const parsePropertyDefinition = (propDefString, typeProperties) => {
-	const properties = {};
-	let buffer = '';
-	let propName = '';
-	const size = propDefString.length;
-	for (let i = 0; i < size; i++) {
-		const char = propDefString[i];
-		let isSkip = false;
-		switch (char) {
-			case '\t':
-				isSkip = buffer === '';
-				break;
-			case ':':
-				if (buffer !== '') {
-					const resolved = resolvePropertyName({
-						heading: buffer.trim(),
-						properties: typeProperties,
-					});
-					if (!resolved) {
-						throw new Error(`could not find ${buffer.trim()}`);
-					}
-					[propName] = resolved;
-					buffer = '';
-					isSkip = true;
-				}
-				break;
-			case '\n':
-				properties[propName] = buffer.trim();
-				buffer = '';
-				isSkip = true;
-				break;
-			default:
-				break;
-		}
-		if (!isSkip) {
-			buffer += char;
-		}
-	}
-	if (buffer !== '' && propName) {
-		properties[propName] = buffer.trim();
-	}
-	return properties;
-};
-
-const parseMultilineDefinition = ({ children = [] }, typeProperties) => {
-	const properties = {};
-
-	const content = children.reduce((flattenedContent, node) => {
-		const hasTextValue = typeof node.value === 'string';
-		const hasChildren = Array.isArray(node.children);
-
-		const regex = /(.+?):?\n(.+)$/s;
-		if (hasTextValue) {
-			const [, code, propDef] = node.value.match(regex) || [];
-			if (code) {
-				if (propDef) {
-					Object.assign(
-						properties,
-						parsePropertyDefinition(propDef, typeProperties),
-					);
-				}
-				return flattenedContent + code;
-			}
-			return flattenedContent + node.value;
-		}
-
-		if (hasChildren) {
-			const {
-				value: childValue,
-				properties: childProperties,
-			} = parseMultilineDefinition(node, typeProperties);
-			Object.assign(properties, childProperties);
-			return flattenedContent + childValue;
-		}
-
-		return flattenedContent;
-	}, '');
-
-	return {
-		value: content,
-		properties,
-	};
-};
-
 /*
   These coercers take a subdocument that should be coerced to their eponymous
   type, and they return an object with a key of `valid` and a key of `value`. if
@@ -122,7 +38,7 @@ module.exports = {
 	  about `hasMany` is `String` and `Subdocument` types, which in our case
 	  includes Codes.
 	*/
-	String(subdocument, { hasMany = false, properties = {} } = {}) {
+	String(subdocument, { hasMany = false } = {}) {
 		const items = split(subdocument);
 
 		// now we accept multiline definition as property
@@ -131,13 +47,7 @@ module.exports = {
 		if (hasMany && items.length) {
 			return {
 				valid: true,
-				value: items
-					.map(item => parseMultilineDefinition(item, properties))
-					.map(item =>
-						Object.keys(item.properties).length
-							? { [item.value]: item.properties }
-							: item.value,
-					),
+				value: items.map(flattenNodeToPlainString),
 			};
 		}
 
@@ -151,13 +61,71 @@ module.exports = {
 
 		// Not expecting a list, didn't get a list'
 		if (!hasMany && !items.length) {
-			const item = parseMultilineDefinition(subdocument, properties);
 			return {
 				valid: true,
-				value: Object.keys(item.properties).length
-					? { [item.value]: item.properties }
-					: item.value,
+				value: flattenNodeToPlainString(subdocument),
 			};
+		}
+
+		// Not expecting a list, but got a list
+		if (!hasMany && items.length) {
+			return {
+				valid: false,
+				value: 'expected a single item, but got a bulleted list',
+			};
+		}
+	},
+	/*
+	 NestedString is similar to String coercer, but it has an ability to have
+	 additional properties which is defined as following multilie format by the user:
+
+	 # favourite child
+
+	 - code
+	   propNameOne: propValueOne
+	   propNameTwo: propNameTwo
+	*/
+	NestedString(subdocument, { hasMany = false }) {
+		const items = split(subdocument);
+
+		// Expecting a list, got a list
+		if (hasMany && items.length) {
+			try {
+				const values = items.map(parseMultilineDefinition);
+				return {
+					valid: true,
+					value: values,
+				};
+			} catch (error) {
+				return {
+					valud: false,
+					value: error.message,
+				};
+			}
+		}
+
+		// Expecting a list, didn't get a list'
+		if (hasMany && !items.length) {
+			return {
+				valid: false,
+				value: "expected a list, but didn't get any bulleted items",
+			};
+		}
+
+		// Not expecting a list, didn't get a list'
+		if (!hasMany && !items.length) {
+			try {
+				const value = parseMultilineDefinition(subdocument);
+				return {
+					valid: true,
+					value,
+				};
+			} catch (error) {
+				return {
+					valid: false,
+					value: error.message,
+				};
+			}
 		}
 
 		// Not expecting a list, but got a list
