@@ -3,7 +3,6 @@ const { h } = require('preact');
 const Layout = require('../templates/layout/layout');
 
 module.exports = (Template, props) => {
-	console.log(Template, props);
 	return `
 <!DOCTYPE html>
 ${render(

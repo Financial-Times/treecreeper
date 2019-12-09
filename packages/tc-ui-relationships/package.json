@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
+		"preact": "^10.0.5"
+	}
+}

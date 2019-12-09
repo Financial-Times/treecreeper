@@ -23,5 +23,5 @@ module.exports = {
 	overrides: [{
 		env: {browser: true},
 		files: 'demo/tc-ui/browser/**/*.js'
-		}]
+	}]
 };

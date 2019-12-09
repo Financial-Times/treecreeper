@@ -55,12 +55,9 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 
 const primitiveComponents = require('./primitive-components');
 
-const getPrimitiveComponent = ({ type, isRelationship, hasMany }) => {
+const getPrimitiveComponent = ({ type, isRelationship }) => {
 	if (isRelationship) {
-		if (hasMany) {
-			return primitiveComponents.BizOpsLinks;
-		}
-		return primitiveComponents.BizOpsLink;
+		return primitiveComponents.Relationship;
 	}
 	return primitiveComponents[type] || primitiveComponents.Default;
 };
@@ -90,24 +87,27 @@ const hasValue = (value, { type, isRelationship, hasMany }) => {
 	return !!value;
 };
 
-const LabelledPrimitive = ({
-	label,
-	showInactive,
-	description,
-	value,
-	type,
-	isRelationship,
-	hasMany,
-	useInSummary,
-	id,
-}) => {
+const LabelledPrimitive = props => {
+	const {
+		label,
+		showInactive,
+		description,
+		value,
+		type,
+		isRelationship,
+		hasMany,
+		useInSummary,
+		id,
+	} = props;
 	const PrimitiveComponent = getPrimitiveComponent({
 		type,
 		isRelationship,
 		hasMany,
 	});
-	return useInSummary ||
-		hasValue(value, { type, isRelationship, hasMany }) ? (
+	if (!useInSummary && !hasValue(value, { type, isRelationship, hasMany })) {
+		return null;
+	}
+	return (
 		<Fragment>
 			<dt
 				id={`tooltip-${id}`}
@@ -138,7 +138,7 @@ const LabelledPrimitive = ({
 					showInactive === false ? 'hide-inactive' : ''
 				}`}
 			>
-				<PrimitiveComponent value={value} id={id} type={type} />
+				<PrimitiveComponent {...props} />
 				{showInactive === false ? (
 					<button
 						type="button"
@@ -149,7 +149,7 @@ const LabelledPrimitive = ({
 				) : null}
 			</dd>
 		</Fragment>
-	) : null;
+	);
 };
 
 const lastActorLink = (user, system) =>

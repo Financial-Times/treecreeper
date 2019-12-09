@@ -4,7 +4,6 @@ const { readRecord } = require('./lib/biz-ops-client');
 
 const getSchemaSubset = require('./lib/get-schema-subset');
 const template = require('./templates/view-page');
-
 const { handleError } = require('./lib/handle-error');
 
 const render = async (event, { type, code, error }) => {

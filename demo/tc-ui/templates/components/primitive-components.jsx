@@ -1,5 +1,4 @@
-const { h, Fragment } = require('preact');
-const { getType } = require('@financial-times/tc-schema-sdk');
+const { h } = require('preact');
 const { markdown, autolink, formatDateTime } = require('../helpers');
 
 const Document = ({ value, id }) => (
@@ -48,17 +47,6 @@ const LifecycleStage = getLabelWithFallback('Unknown lifecycle stage');
 
 const ServiceTier = getLabelWithFallback('Unknown service tier');
 
-const IsActiveLabel = ({ isActive }) =>
-	isActive ? null : (
-		<span
-			className={`o-labels o-labels--${
-				oLabelsModifiersMap[isActive === false ? 'inactive' : 'unknown']
-			}`}
-		>
-			{isActive === false ? 'Inactive' : 'May not be active'}
-		</span>
-	);
-
 const TrafficLight = ({ value }) =>
 	value ? (
 		<span className={`o-labels o-labels--${value.toLowerCase()}`}>
@@ -94,73 +82,10 @@ const Email = ({ value, id }) =>
 		</a>
 	) : null;
 
-const Team = ({ value }) =>
-	value ? (
-		<BizOpsLink
-			type="Team"
-			value={value}
-			id={value.code}
-			annotate={false}
-		/>
-	) : null;
+const {
+	Relationship,
+} = require('../../../../packages/tc-ui-relationships/view');
 
-const BizOpsLink = ({ type, value = {}, id, annotate = true }) =>
-	type && value.code ? (
-		<Fragment>
-			<a id={id} href={`/${type}/${encodeURIComponent(value.code)}`}>
-				{value.name || value.code}
-			</a>
-			{annotate ? (
-				<Fragment>
-					{type === 'System' ? (
-						<ServiceTier value={value.serviceTier} />
-					) : null}
-					{type === 'System' ? (
-						<LifecycleStage value={value.lifecycleStage} />
-					) : null}
-					{type === 'Person' ? (
-						<IsActiveLabel isActive={value.isActive} />
-					) : null}
-					{type === 'Team' ? (
-						<IsActiveLabel isActive={value.isActive} />
-					) : null}
-					{type === 'Repository' ? (
-						<IsActiveLabel isActive={!value.isArchived} />
-					) : null}
-				</Fragment>
-			) : null}
-		</Fragment>
-	) : (
-		'Error: unable to construct link'
-	);
-
-const BizOpsLinks = ({ value: items, type, id }) => {
-	const schema = getType(type);
-	const inactiveCheck = value => {
-		if (schema.inactiveRule) {
-			return Object.entries(schema.inactiveRule).every(
-				([prop, expectedValue]) => value[prop] === expectedValue,
-			);
-		}
-		return value.isActive === false;
-	};
-	return Array.isArray(items) ? (
-		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
-			{items.map(value => {
-				const props = { type, value };
-				return (
-					<li
-						className={inactiveCheck(value) ? 'inactive' : 'active'}
-					>
-						<BizOpsLink {...props} />
-					</li>
-				);
-			})}
-		</ul>
-	) : (
-		'Error: unable to construct links'
-	);
-};
 const Temporal = ({ value, id, type }) => (
 	<span id={id}>{formatDateTime(value.formatted, type)}</span>
 );
@@ -178,11 +103,9 @@ module.exports = {
 	linkHasProtocol,
 	Url,
 	Email,
-	BizOpsLink,
-	BizOpsLinks,
+	Relationship,
 	Date: Temporal,
 	DateTime: Temporal,
 	Time: Temporal,
-	Team,
 	Default,
 };

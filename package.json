@@ -70,5 +70,8 @@
   "homepage": "https://github.com/Financial-Times/treecreeper#readme",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "nodemonConfig": {
+    "ext": "js,graphql,yaml"
+  }
 }
