@@ -50,6 +50,10 @@ properties:
     type: DateTime
     description: DateTime description.
     label: DateTime label
+  someUrl:
+    type: Url
+    description: Url description.
+    label: Url label
   children:
     relationship: HAS_CHILD
     type: ChildType
