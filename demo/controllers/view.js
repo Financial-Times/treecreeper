@@ -1,4 +1,4 @@
-const { view } = require('../../packages/tc-ui');
+const { view } = require('../tc-ui');
 
 module.exports = async (req, res) => {
 	try {
