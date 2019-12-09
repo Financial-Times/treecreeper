@@ -1,4 +1,4 @@
-const { getType, getTypes } = require('../packages/schema-sdk');
+const { getType, getTypes } = require('@financial-times/tc-schema-sdk');
 
 const toGraphql = ({ name, properties, sortField }) => {
 	if (!properties) {
@@ -59,10 +59,10 @@ const build = (recordType, subtypes, depth = 1, propName, isSortable) => {
 	// Filter out anything which is not a required subtype - including basic details - leaving just the relationships
 	if (subtypes.length) {
 		Object.entries(validProperties).forEach(
-			([unfilteredPropName, { type, isRelationship, isRecursive }]) => {
+			([unfilteredPropName, { type, isRelationship }]) => {
 				if (
 					!coreProperty(unfilteredPropName) &&
-					(isRecursive || !isRelationship || !subtypes.includes(type))
+					(!isRelationship || !subtypes.includes(type))
 				) {
 					delete validProperties[unfilteredPropName];
 				}

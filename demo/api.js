@@ -23,5 +23,5 @@ getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
 	});
 });
 
-require('@babel/register');
-app.use('/view', require('./view').handler);
+require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
+app.use('/view/:type/:code', require('./controllers/view'));

@@ -16,5 +16,12 @@ module.exports = {
 		"unicorn/prefer-flat-map": "off",
 		"unicorn/consistent-function-scoping": "off",
 		"jest/valid-describe": "off",
-	}
+		// lots of user generated free html, so dangerously set html is normal
+		'react/no-danger': 0,
+		'no-alert': 0
+	},
+	overrides: [{
+		env: {browser: true},
+		files: 'packages/tc-ui/browser/**/*.js'
+		}]
 };

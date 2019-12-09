@@ -1,11 +1,6 @@
-const { h, Fragment } = require('hyperons');
-const { getType } = require('../schema-sdk');
-const { markdown, autolink, formatDateTime } = require('./helpers');
-
-const maybe = func => opts =>
-	opts.value && opts.value.formatted && opts.value.formatted !== null
-		? func(opts)
-		: null;
+const { h, Fragment } = require('preact');
+const { getType } = require('@financial-times/tc-schema-sdk');
+const { markdown, autolink, formatDateTime } = require('../helpers');
 
 const Document = ({ value, id }) => (
 	<section id={id} dangerouslySetInnerHTML={{ __html: markdown(value) }} />
@@ -109,7 +104,7 @@ const Team = ({ value }) =>
 		/>
 	) : null;
 
-const BizOpsLink = maybe(({ type, value = {}, id, annotate = true }) =>
+const BizOpsLink = ({ type, value = {}, id, annotate = true }) =>
 	type && value.code ? (
 		<Fragment>
 			<a id={id} href={`/${type}/${encodeURIComponent(value.code)}`}>
@@ -137,8 +132,7 @@ const BizOpsLink = maybe(({ type, value = {}, id, annotate = true }) =>
 		</Fragment>
 	) : (
 		'Error: unable to construct link'
-	),
-);
+	);
 
 const BizOpsLinks = ({ value: items, type, id }) => {
 	const schema = getType(type);
@@ -167,9 +161,9 @@ const BizOpsLinks = ({ value: items, type, id }) => {
 		'Error: unable to construct links'
 	);
 };
-const Temporal = maybe(({ value, id, type }) => (
+const Temporal = ({ value, id, type }) => (
 	<span id={id}>{formatDateTime(value.formatted, type)}</span>
-));
+);
 
 const Default = ({ value, id }) => <span id={id}>{value}</span>;
 
