@@ -1,0 +1,410 @@
+const schema = require('@financial-times/tc-schema-sdk');
+const { default: here } = require('outdent');
+const getParser = require('..');
+
+schema.init({
+	updateMode: 'poll',
+	logger: console,
+});
+
+const parser = getParser({
+	type: 'MainType',
+});
+
+describe('nested property property definition tests', () => {
+	describe('single relationship case - hasMany: false', () => {
+		it.skip('can be parsed only code definition as an object', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## favourite child
+
+				example-code
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				favouriteChild: {
+					code: 'example-code',
+				},
+			});
+		});
+
+		it.skip('can be parsed as object which additional property definitions', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					someString: i like it
+					someBoolean: yes
+			`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				culiousChild: {
+					code: 'example-code',
+					someString: 'i like it',
+					someBoolean: true,
+				},
+			});
+		});
+		it('can be parsed as Array of object which additional property definitions', async () => {
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data, errors } = await childParser.parseMarkdownString(here`
+				# name
+
+				## is culious child of
+
+				- example-code01
+					someString: i like it
+					someBoolean: yes
+				- example-code02
+					someString: i like it, too
+					someBoolean: no
+			`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				isCuliousChildOf: [
+					{
+						code: 'example-code01',
+						someString: 'i like it',
+						someBoolean: true,
+					},
+					{
+						code: 'example-code02',
+						someString: 'i like it, too',
+						someBoolean: false,
+					},
+				],
+			});
+		});
+	});
+
+	describe.skip('boolean type conversion', () => {
+		const expects = {
+			yes: true,
+			true: true,
+			// the headings for these are using the labels
+			'👍': true,
+			'👎': false,
+		};
+		Object.entries(expects).forEach(([bool, actual]) => {
+			it.skip(`hasMany: false - '${bool}' should be coerced to boolean`, async () => {
+				const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## culious child
+
+					example-code
+						someBoolean: ${bool}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					culiousChild: {
+						code: 'example-code',
+						someBoolean: actual,
+					},
+				});
+			});
+			it(`hasMany: true - '${bool}' should be coerced to boolean`, async () => {
+				const childParser = getParser({
+					type: 'ChildType',
+				});
+				const { data } = await childParser.parseMarkdownString(here`
+					# name
+
+					## is culious child of
+
+					- main-code
+						someBoolean: ${bool}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					isCuliousChildOf: [
+						{
+							code: 'main-code',
+							someBoolean: actual,
+						},
+					],
+				});
+			});
+		});
+	});
+
+	describe.skip('float type conversion', () => {
+		const expects = {
+			'10.5': 10,
+			'-1': -1,
+			'1e7': 10000000,
+		};
+		Object.entries(expects).forEach(([integer, actual]) => {
+			it(`hasMany: false - ${integer} should be coerced to integer`, async () => {
+				const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## culious child
+
+					example-code
+						someInteger: ${integer}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					culiousChild: {
+						code: 'example-code',
+						someInteger: actual,
+					},
+				});
+			});
+			it(`hasMany: true ${integer} should be coerced to integer`, async () => {
+				const childParser = getParser({
+					type: 'ChildType',
+				});
+				const { data } = await childParser.parseMarkdownString(here`
+					# name
+
+					## is culious child of
+
+					- main-code
+						someInteger: ${integer}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					isCuliousChildOf: [
+						{
+							code: 'main-code',
+							someInteger: actual,
+						},
+					],
+				});
+			});
+		});
+	});
+
+	describe.skip('integer type conversion', () => {
+		const expects = {
+			'0.00001': 0.00001,
+			'-1.05': -1.05,
+		};
+		Object.entries(expects).forEach(([float, actual]) => {
+			it(`hasMany: false - ${float} should be coerced to float`, async () => {
+				const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## culious child
+
+					example-code
+						someFloat: ${float}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					culiousChild: {
+						code: 'example-code',
+						someFloat: actual,
+					},
+				});
+			});
+			it(`hasMany: true ${float} should be coerced to float`, async () => {
+				const childParser = getParser({
+					type: 'ChildType',
+				});
+				const { data } = await childParser.parseMarkdownString(here`
+					# name
+
+					## is culious child of
+
+					- main-code
+						someFloat: ${float}
+				`);
+				expect(data).toEqual({
+					name: 'name',
+					isCuliousChildOf: [
+						{
+							code: 'main-code',
+							someFloat: actual,
+						},
+					],
+				});
+			});
+		});
+	});
+
+	describe.skip('throws syntax error on mutiline definition', () => {
+		it('mutiline property name should be a lower camel case', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					some string: i like it
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/should be lower camel case/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('unexpected property separator found', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					: i like it
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/unexpected property name separator/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('linefeed character without property name', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					i like it
+					someString: i like it, too
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(/unexpected linefeed token found/);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('property value must not be empty', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					someString:
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(
+				/property value for someString must not be empty/,
+			);
+			expect(message).toMatch(/line 6/);
+		});
+
+		it('property name must be exist in schema', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					anotherString: another string
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message }] = errors;
+			expect(message).toMatch(
+				/property name anotherString is not defined/,
+			);
+			expect(message).toMatch(/line 6/);
+		});
+	});
+
+	describe.skip('mutiple relationship case - hasMany: true', () => {
+		it('can be parsed as plain string array', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+				* example-sibling-02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: [
+					{
+						code: 'example-sibling-01',
+					},
+					{
+						code: 'example-sibling-02',
+					},
+				],
+			});
+		});
+
+		it('can be parsed as object array which contains property object', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+					someString: prop01
+				* example-sibling-02
+					someString: prop02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: [
+					{
+						code: 'example-sibling-01',
+						someString: 'prop01',
+					},
+					{
+						code: 'example-sibling-02',
+						someString: 'prop02',
+					},
+				],
+			});
+		});
+
+		it('mixed case of having properties and not having', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## younger siblings
+
+				* example-sibling-01
+					someString: prop01
+				* example-sibling-02
+				`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				youngerSiblings: [
+					{
+						code: 'example-sibling-01',
+						someString: 'prop01',
+					},
+					{
+						code: 'example-sibling-02',
+					},
+				],
+			});
+		});
+	});
+});

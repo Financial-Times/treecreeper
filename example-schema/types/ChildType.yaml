@@ -24,3 +24,21 @@ properties:
     description: Is favourite child of description.
     label: Is favourite child of label
     direction: incoming
+  isCuliousChildOf:
+    relationship: CULIOUS_CHILD
+    type: MainType
+    description: Is culious child description.
+    label: Is culious child label
+    direction: incoming
+    hasMany: true
+    properties:
+      someString:
+        type: Word
+      someInteger:
+        type: Int
+      someEnum:
+        type: AnEnum
+      someBoolean:
+        type: Boolean
+      someFloat:
+        type: Float

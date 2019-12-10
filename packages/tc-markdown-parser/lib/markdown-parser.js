@@ -9,6 +9,7 @@ const setTreecreeperPropertyNames = require('./tree-mutators/set-treecreeper-pro
 const coerceTreecreeperPropertiesToType = require('./tree-mutators/coerce-treecreeper-properties-to-type');
 const validateTreecreeperProperties = require('./tree-mutators/validate-treecreeper-properties');
 const stringifyBoast = require('./unist-stringifiers/stringify-boast');
+const parseNestedMutlilineProperties = require('./tree-mutators/parse-nested-multiline-properties');
 
 /* @param schema: Treecreeper schema singleton */
 const unifiedProcessor = function({
@@ -38,6 +39,10 @@ const unifiedProcessor = function({
 				descriptionFieldName,
 			})
 			.use(setTreecreeperPropertyNames, {
+				properties,
+			})
+			.use(parseNestedMutlilineProperties, {
+				typeNames,
 				properties,
 			})
 			.use(coerceTreecreeperPropertiesToType, {

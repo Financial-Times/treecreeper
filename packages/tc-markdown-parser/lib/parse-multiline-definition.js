@@ -1,4 +1,22 @@
+const builder = require('unist-builder');
+
 class SyntaxError extends Error {}
+
+const createNode = (key, value, line, column) =>
+	builder('property', {
+		key,
+		position: {
+			start: {
+				line,
+				column,
+			},
+		},
+		children: [
+			builder('text', {
+				value,
+			}),
+		],
+	});
 
 /*
  This function divides from mutipile definition to code and property string e.g,
@@ -10,7 +28,7 @@ class SyntaxError extends Error {}
  Divides to:
  {
    code: 'child-code',
-   propDef: '  propNameOne: propValueOne\n',
+   propDefs: '  propNameOne: propValueOne\n',
  }
 */
 const dividePropertyDefinition = subdocument => {
@@ -18,13 +36,13 @@ const dividePropertyDefinition = subdocument => {
 	if (linefeedIndex > -1) {
 		return {
 			code: subdocument.slice(0, linefeedIndex),
-			propDef: subdocument.slice(linefeedIndex + 1),
+			propDefs: subdocument.slice(linefeedIndex + 1),
 		};
 	}
 
 	return {
 		code: subdocument,
-		propDef: '',
+		propDefs: '',
 	};
 };
 
@@ -35,7 +53,7 @@ const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
 /*
- This is tiny lexer/parser fuction for analyze multiple property definition.
+ This is tiny lexer/parser function to analyze multiple property definitions.
  See above constant characters and parse into an object with following format e.g,
 
  Definition
@@ -48,14 +66,12 @@ const CARRIAGE_RETURN = '\r';
    }
 */
 const parsePropertyDefinition = (propDefString, line) => {
-	const properties = {};
-	const strlen = propDefString.length;
+	const properties = [];
 	let buffer = '';
 	let propName = '';
 	let column = 0;
 
-	for (let i = 0; i < strlen; i++) {
-		const char = propDefString[i];
+	for (const char of propDefString) {
 		let isSkip = false;
 
 		switch (char) {
@@ -67,32 +83,34 @@ const parsePropertyDefinition = (propDefString, line) => {
 
 			// property name declaration ends
 			case PROPERTY_NAME_SEPARATOR:
+				buffer = buffer.trim();
 				if (buffer === '') {
 					throw new SyntaxError(
 						`unexpected property name separator ':' found at line ${line}, column ${column} `,
 					);
-				} else if (!/^[a-z][a-zA-Z0-9]+$/.test(buffer.trim())) {
+				} else if (!/^[a-z][a-zA-Z0-9]+$/.test(buffer)) {
 					throw new SyntaxError(
-						`nested property name ${buffer.trim()} should be lower camel case at line ${line}, column ${column}`,
+						`nested property name ${buffer} should be lower camel case at line ${line}, column ${column}`,
 					);
 				}
-				propName = buffer.trim();
+				propName = buffer;
 				buffer = '';
 				isSkip = true;
 				break;
 
 			// property value declaration ends
 			case LINE_FEED:
+				buffer = buffer.trim();
 				if (propName === '') {
 					throw new SyntaxError(
 						`unexpected linefeed token found at line ${line}, column ${column}`,
 					);
-				} else if (buffer.trim() === '') {
+				} else if (buffer === '') {
 					throw new SyntaxError(
 						`property value for ${propName} must not be empty at line ${line}, column ${column}`,
 					);
 				}
-				properties[propName] = buffer.trim();
+				properties.push(createNode(propName, buffer, line, column));
 				// reset state and update line and column
 				buffer = '';
 				propName = '';
@@ -117,16 +135,17 @@ const parsePropertyDefinition = (propDefString, line) => {
 
 	// deal with remain buffers
 	if (buffer !== '') {
+		buffer = buffer.trim();
 		if (propName === '') {
 			throw new SyntaxError(
 				`Unexpected character remaining at line ${line}`,
 			);
-		} else if (buffer.trim() === '') {
+		} else if (buffer === '') {
 			throw new SyntaxError(
 				`property value for ${propName} must not be empty at line ${line}, column ${column}`,
 			);
 		}
-		properties[propName] = buffer.trim();
+		properties.push(createNode(propName, buffer, line, column));
 	}
 
 	return properties;
@@ -149,28 +168,27 @@ const parseMultilineDefinition = ({ children = [] }) => {
 			const {
 				value,
 				position: {
-					start: { line },
+					start: { line, column },
 				},
 			} = node;
-			const { code, propDef } = dividePropertyDefinition(value);
-			definitions.code = code;
-			if (propDef !== '') {
-				definitions = {
-					...definitions,
+			const { code, propDefs } = dividePropertyDefinition(value);
+			definitions.push({
+				...createNode('code', code, line, column),
+				propertyType: 'Code',
+			});
+			if (propDefs !== '') {
+				definitions.push(
 					// add 1 because property definition is the next line of code
-					...parsePropertyDefinition(propDef, line + 1),
-				};
+					...parsePropertyDefinition(propDefs, line + 1),
+				);
 			}
 		}
 
 		if (hasChildren) {
-			definitions = {
-				...definitions,
-				...parseMultilineDefinition(node),
-			};
+			definitions = definitions.concat(...parseMultilineDefinition(node));
 		}
 		return definitions;
-	}, {});
+	}, []);
 };
 
 module.exports = parseMultilineDefinition;

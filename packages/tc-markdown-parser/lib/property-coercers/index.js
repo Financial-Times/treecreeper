@@ -1,7 +1,6 @@
 const { selectAll } = require('unist-util-select');
 const renderSubdocument = require('../render-subdocument');
 const flattenNodeToPlainString = require('../flatten-node-to-plain-string');
-const parseMultilineDefinition = require('../parse-multiline-definition');
 
 const checkDateIsValid = date => !Number.isNaN(Number(date));
 /*
@@ -74,65 +73,26 @@ module.exports = {
 		}
 	},
 	/*
-	 NestedString is similar to String coercer, but it has an ability to have
-	 additional properties which is defined as following multilie format by the user:
+	 NestedString is similar to String coercer, but it only has parsed propery values e.g,
 
 	 # favourite child
 
 	 - code
 	   propNameOne: propValueOne
-	   propNameTwo: propNameTwo
+	                ------------
+	                passed this part to subdocument
 	*/
-	NestedString(subdocument, { hasMany = false }) {
-		const items = split(subdocument);
-
-		// Expecting a list, got a list
-		if (hasMany && items.length) {
-			try {
-				const values = items.map(parseMultilineDefinition);
-				return {
-					valid: true,
-					value: values,
-				};
-			} catch (error) {
-				return {
-					valud: false,
-					value: error.message,
-				};
-			}
-		}
-
-		// Expecting a list, didn't get a list'
-		if (hasMany && !items.length) {
+	NestedString({ children = [] }) {
+		if (children.length) {
 			return {
-				valid: false,
-				value: "expected a list, but didn't get any bulleted items",
+				valid: true,
+				value: children.map(doc => doc.value).join(''),
 			};
 		}
-
-		// Not expecting a list, didn't get a list'
-		if (!hasMany && !items.length) {
-			try {
-				const value = parseMultilineDefinition(subdocument);
-				return {
-					valid: true,
-					value,
-				};
-			} catch (error) {
-				return {
-					valid: false,
-					value: error.message,
-				};
-			}
-		}
-
-		// Not expecting a list, but got a list
-		if (!hasMany && items.length) {
-			return {
-				valid: false,
-				value: 'expected a single item, but got a bulleted list',
-			};
-		}
+		return {
+			valid: false,
+			value: 'nested string should not be empty',
+		};
 	},
 	/*
 	  Subdocument is not a real biz-ops type. This is to separate strings (i.e.,
@@ -196,6 +156,36 @@ module.exports = {
 				};
 			}
 		}
+	},
+	Int(subdocument) {
+		const flattenedContent = flattenNodeToPlainString(subdocument);
+		const value = parseInt(flattenedContent, 10);
+
+		if (Number.isNaN(value)) {
+			return {
+				valid: false,
+				value: `i couldnt' resolve ${flattenedContent} to an integer`,
+			};
+		}
+		return {
+			valid: true,
+			value,
+		};
+	},
+	Float(subdocument) {
+		const flattenedContent = flattenNodeToPlainString(subdocument);
+		const value = parseFloat(flattenedContent);
+
+		if (Number.isNaN(value)) {
+			return {
+				valid: false,
+				value: `i couldnt' resolve ${flattenedContent} to a float`,
+			};
+		}
+		return {
+			valid: true,
+			value,
+		};
 	},
 };
 
