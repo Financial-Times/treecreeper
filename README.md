@@ -7,8 +7,6 @@ Sandbox for working on the set of tools and services that make up the Biz Ops ec
 -   rest api
 -   ui components
 
-This _may_ become a monorepo for deploying a suite of packages for reuse by Biz Ops and other projects
-
 ## Run
 
 ### Prerequisities
@@ -39,15 +37,13 @@ _Troubleshooting_
 
 This can be done _without_ docker if desired, by instead installing a neo4j database instance to the `neo4j` directory, the directory structure and scripts to run are the same as the docker configuration.
 
-Note: The database will always need to run in a separate process/terminal to the node application
-
 # Running the application
 
 ```shell
-make env run
+make env && make run
 ```
 
-This will download credentials, save them to an `.env` file, and start the node process on prt 8888. The endpoints are as documented for the production application, except that paths are not prefixed with `/biz-ops`. Copy the `API_KEY` from `.env` into a `API_KEY` header when sending requests. Note: this is not the same as the `X-API-KEY` used to authenticate with api-t.ft.com
+This will download credentials, save them to an `.env` file, and start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
 
 # Testing
 
@@ -56,10 +52,3 @@ make test
 ```
 
 Will start jest in watch mode
-
-# Accessing the application from other local applications
-
-The application runs on `http://localhost:8888`. There are 2 differences in how the api is called compared to production environments:
-
--   the client will need to send an `API_KEY` header (not `x-api-key`). A value for this can be found in the `.env` file of this project after running `make .env`
--   all example urls in the documentation should have the `/biz-ops` stripped out
