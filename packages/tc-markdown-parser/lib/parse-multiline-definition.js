@@ -1,7 +1,7 @@
 class SyntaxError extends Error {}
 
 /*
- This function divides from mutipile definition to code and property string e.g,
+ This function divides from multiple definition to code and property string e.g,
 
  The definition:
  - child-code
