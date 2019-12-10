@@ -19,7 +19,7 @@ const createNode = (key, value, line, column) =>
 	});
 
 /*
- This function divides from mutipile definition to code and property string e.g,
+ This function divides from multiple definition to code and property string e.g,
 
  The definition:
  - child-code
@@ -53,7 +53,7 @@ const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
 /*
- This is tiny lexer/parser function to analyze multiple property definitions.
+ This is tiny lexer/parser function for analyze multiple property definition.
  See above constant characters and parse into an object with following format e.g,
 
  Definition
