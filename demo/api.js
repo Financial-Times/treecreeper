@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser');
 const express = require('express');
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
@@ -17,8 +18,18 @@ app.use(
 	}),
 );
 
-getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
-	app.listen(PORT, () => {
-		console.log(`Listening on ${PORT}`);
-	});
-});
+getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
+	() => {
+		app.listen(PORT, () => {
+			console.log(`Listening on ${PORT}`);
+		});
+	},
+);
+
+require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
+app.use(
+	'/:type/:code/edit',
+	bodyParser.urlencoded({ limit: '8mb', extended: true }),
+	require('./controllers/edit'),
+);
+app.use('/:type/:code', require('./controllers/view'));

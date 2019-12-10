@@ -1,0 +1,8 @@
+{
+	"dependencies": {
+		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
+		"preact": "^10.0.5",
+		"autolinker": "^3.11.1",
+		"awesomplete": "^1.1.5"
+	}
+}

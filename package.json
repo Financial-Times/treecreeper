@@ -5,26 +5,54 @@
   "description": "A set of tools for building adnmin interfaces on top of graph data",
   "main": "index.js",
   "dependencies": {
+    "@financial-times/lambda-logger": "^2.0.4",
     "@financial-times/tc-api-db-manager": "file:./packages/tc-api-db-manager",
     "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
     "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
-    "@financial-times/tc-schema-sdk": "file:./packages/tc-schema-sdk",
+    "@financial-times/tc-schema-sdk": "file:packages/tc-schema-sdk",
+    "autolinker": "^3.11.1",
+    "awesomplete": "^1.1.5",
     "aws-sdk": "^2.504.0",
+    "body-parser": "^1.19.0",
+    "date-fns": "^2.8.1",
     "express": "^4.17.1",
     "graphql-playground-middleware-express": "^1.7.12",
+    "http-errors": "^1.7.3",
     "neo4j-driver": "^1.7.6",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "preact": "^10.0.5",
+    "preact-render-to-string": "^5.1.2",
+    "qs": "^6.9.1",
+    "showdown": "^1.9.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.2",
+    "@babel/plugin-transform-react-jsx": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-react": "^7.7.0",
+    "@babel/register": "^7.7.0",
     "@financial-times/athloi": "^1.0.0-beta.29",
     "@financial-times/rel-engage": "^7.3.0",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
+    "babel-loader": "^8.0.6",
+    "concurrently": "^5.0.0",
+    "css-loader": "^3.2.1",
     "fetch-mock": "^7.3.9",
     "jest": "^24.8.0",
     "jest-junit": "^7.0.0",
     "lolex": "^4.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "nodemon": "^1.19.1",
-    "supertest": "^4.0.2"
+    "stylelint": "^12.0.0",
+    "stylelint-config-recommended-scss": "^4.1.0",
+    "stylelint-scss": "^3.13.0",
+    "supertest": "^4.0.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0",
+    "webpack-encoding-plugin": "^0.3.1",
+    "webpack-manifest-plugin": "^2.2.0"
   },
   "scripts": {
     "test": "make test",
@@ -42,5 +70,8 @@
   "homepage": "https://github.com/Financial-Times/treecreeper#readme",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "nodemonConfig": {
+    "ext": "js,graphql,yaml,jsx"
+  }
 }

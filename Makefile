@@ -47,11 +47,17 @@ test: init-db
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=1 --ci --reporters=default --reporters=jest-junit --detectOpenHandles --forceExit; \
 	fi
 
-run:
+run-app:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
+
+build-statics:
+	webpack-dev-server --mode development
 
 run-db:
 	docker-compose up
+
+run:
+	@concurrently "make run-db" "make build-statics" "make run-app"
 
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
