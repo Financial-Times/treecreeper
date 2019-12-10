@@ -26,6 +26,7 @@ const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
 );
 
 const RelationshipRows = ({ hasMany, value, propertyName, shouldDisable }) => {
+	console.log({ value, hasMany });
 	if (!value) {
 		return null;
 	}
@@ -44,7 +45,38 @@ const RelationshipRows = ({ hasMany, value, propertyName, shouldDisable }) => {
 class RelationshipPicker extends Component {
 	constructor(props) {
 		super();
+		this.state = {
+			searchTerm: '',
+		};
 		this.props = props;
+		this.onChange = this.onChange.bind(this);
+		this.onSuggestionsFetchRequested = this.onSuggestionsFetchRequested.bind(
+			this,
+		);
+		this.onSuggestionsClearRequested = this.onSuggestionsClearRequested.bind(
+			this,
+		);
+	}
+
+	onChange(event, { newValue }) {
+		this.setState({
+			searchTerm: newValue,
+		});
+	}
+
+	// Autosuggest will call this function every time you need to update suggestions.
+	// You already implemented this logic above, so just use it.
+	onSuggestionsFetchRequested({ value }) {
+		this.setState({
+			suggestions: [{code: 'rhys', name: 'hys'}],
+		});
+	}
+
+	// Autosuggest will call this function every time you need to clear suggestions.
+	onSuggestionsClearRequested() {
+		this.setState({
+			suggestions: [],
+		});
 	}
 
 	render() {
@@ -59,6 +91,8 @@ class RelationshipPicker extends Component {
 			AutocompleteComponent,
 		} = props;
 		const shouldDisable = checkIfShouldDisable(lockedBy);
+		const { searchTerm, suggestions } = this.state;
+
 		return (
 			<div
 				data-component="relationship-picker"
@@ -82,7 +116,18 @@ class RelationshipPicker extends Component {
 					{shouldDisable ? null : (
 						<Fragment>
 							{AutocompleteComponent ? (
-								<AutocompleteComponent {...props} />
+								<AutocompleteComponent
+									{...props}
+									searchTerm={searchTerm}
+									suggestions={suggestions}
+									onChange={this.onChange}
+									onSuggestionsFetchRequested={
+										this.onSuggestionsFetchRequested
+									}
+									onSuggestionsClearRequested={
+										this.onSuggestionsClearRequested
+									}
+								/>
 							) : null}
 							<span className="o-forms-input o-forms-input--text">
 								<div className="o-forms-input__error">

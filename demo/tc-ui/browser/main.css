@@ -313,7 +313,7 @@ aside.biz-ops-aside {
 }
 
 .awesomplete [role='listbox'],
-.autocomplete__list {
+.react-autosuggest__suggestions-list {
 	box-shadow: 1px 1px 5px #ccc;
 	background: white;
 	z-index: 2;
@@ -324,7 +324,7 @@ aside.biz-ops-aside {
 
 .editable-relationships,
 .awesomplete [role='listbox'],
-.autocomplete__list {
+.react-autosuggest__suggestions-list {
 	list-style-type: none;
 	margin: 0;
 	padding-left: 0;
@@ -341,23 +341,23 @@ aside.biz-ops-aside {
 
 /* important rules are to clobber o-typography */
 .awesomplete [role='listbox'] li,
-.autocomplete__list li {
+.react-autosuggest__suggestions-list li {
 	padding: 0.5em !important;
 	color: #0d7680;
 	cursor: pointer;
 }
 
 .awesomplete [role='listbox'] li::before,
-.autocomplete__list li::before {
+.react-autosuggest__suggestions-list li::before {
 	display: none !important;
 }
 
 .awesomplete [role='listbox'] li[aria-selected='true'],
 .awesomplete [role='listbox'] li:hover,
 .awesomplete [role='listbox'] mark,
-.autocomplete__list li[aria-selected='true'],
-.autocomplete__list li:hover,
-.autocomplete__list mark {
+.react-autosuggest__suggestions-list li[aria-selected='true'],
+.react-autosuggest__suggestions-list li:hover,
+.react-autosuggest__suggestions-list mark {
 	color: #08474d;
 	background: #cfe4e6;
 }

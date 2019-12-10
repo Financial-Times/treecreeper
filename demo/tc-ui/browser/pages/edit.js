@@ -6,8 +6,6 @@
 // 	el.textContent = converter.convert(el.textContent);
 // }
 
-const { render } = require('preact');
-
 const {
 	attachRelationshipPicker,
 } = require('../../../../packages/tc-ui-relationships/browser.jsx');

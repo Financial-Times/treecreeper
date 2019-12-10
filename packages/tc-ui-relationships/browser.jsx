@@ -9,7 +9,7 @@ module.exports = {
 			...container.dataset,
 			dataType: container.dataset.type,
 			value: JSON.parse(container.dataset.value),
-			hasMany: !!container.dataset.hasMany,
+			hasMany: 'hasMany' in container.dataset,
 			AutocompleteComponent: Autocomplete,
 		};
 		const Picker = <RelationshipPicker {...props} />;

@@ -27,9 +27,17 @@ getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
 );
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
+const editController = require('./controllers/edit');
+const viewController = require('./controllers/view');
+
 app.use(
 	'/:type/:code/edit',
 	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-	require('./controllers/edit'),
+	editController,
 );
-app.use('/:type/:code', require('./controllers/view'));
+app.use(
+	'/:type/create',
+	bodyParser.urlencoded({ limit: '8mb', extended: true }),
+	editController,
+);
+app.use('/:type/:code', viewController);
