@@ -22,6 +22,6 @@ module.exports = {
 	},
 	overrides: [{
 		env: {browser: true},
-		files: ['demo/tc-ui/browser/**/*.js', 'packages/tc-ui-relationships/browser.js']
+		files: ['demo/tc-ui/browser/**/*.js', 'packages/tc-ui-relationships/browser.jsx', 'packages/tc-ui-relationships/olde-browser.jsx']
 	}]
 };

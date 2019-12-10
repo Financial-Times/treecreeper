@@ -9,6 +9,7 @@ const RelationshipButton = ({ propertyName, item = [], shouldDisable }) => (
 	<li
 		id={`${propertyName}-${item.code}`}
 		data-name={item.name}
+		data-code={item.code}
 		className="suggest"
 	>
 		<button
@@ -42,11 +43,10 @@ const generateRelationshipButton = applyToRel(
 		RelationshipButton({ propertyName, item, shouldDisable }),
 );
 
-const EditRelationship = props => {
+const RelationshipPicker = props => {
 	const {
 		propertyName,
 		hasMany,
-		label,
 		dataType,
 		value,
 		lockedBy,
@@ -54,9 +54,18 @@ const EditRelationship = props => {
 	} = props;
 	const shouldDisable = checkIfShouldDisable(lockedBy);
 	return (
-		<label className="o-forms-field" data-biz-ops-type="relationship">
-			<FieldTitle {...props} />
-
+		<div
+			data-component="relationship-picker"
+			name={`${propertyName}`}
+			id={`id-new-${propertyName}`}
+			className="suggest"
+			data-type={dataType}
+			data-has-many={hasMany ? true : null}
+			data-property-name={propertyName}
+			data-parent-type={parentType}
+			data-items={JSON.stringify(value)}
+			type="text"
+		>
 			<input
 				id={`id-${propertyName}`}
 				name={`code-${propertyName}`}
@@ -86,16 +95,7 @@ const EditRelationship = props => {
 				{shouldDisable ? null : (
 					<Fragment>
 						<span className="o-forms-input o-forms-input--text">
-							<input
-								name={`${propertyName}`}
-								id={`id-new-${propertyName}`}
-								className="suggest"
-								data-type={dataType}
-								data-has-many={hasMany ? true : null}
-								data-property-name={propertyName}
-								data-parent-type={parentType}
-								type="text"
-							/>
+							<InputComponent {...props} />
 							<div className="o-forms-input__error">
 								Use the mouse or arrow and enter keys to select
 								from the suggestions
@@ -104,11 +104,19 @@ const EditRelationship = props => {
 					</Fragment>
 				)}
 			</div>
-		</label>
+		</div>
 	);
 };
 
+const EditRelationship = props => (
+	<label className="o-forms-field" data-biz-ops-type="relationship">
+		<FieldTitle {...props} />
+		<RelationshipPicker {...props} />
+	</label>
+);
+
 module.exports = {
+	RelationshipPicker,
 	Component: EditRelationship,
 	parser: value => (value ? value.split(',') : null),
 	getFieldName: fieldName => `code-${fieldName}`,
