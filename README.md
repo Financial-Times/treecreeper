@@ -59,7 +59,7 @@ Will start jest in watch mode
 
 # Accessing the application from other local applications
 
-The application runs on `http://loclhost:8888`. There are 2 differences in how the api is called compared to production environments:
+The application runs on `http://localhost:8888`. There are 2 differences in how the api is called compared to production environments:
 
 -   the client will need to send an `API_KEY` header (not `x-api-key`). A value for this can be found in the `.env` file of this project after running `make .env`
 -   all example urls in the documentation should have the `/biz-ops` stripped out
