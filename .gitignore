@@ -16,3 +16,5 @@ packages/*/node_modules
 packages/**/package-lock.json
 
 package-lock.json
+.styleintcache
+.stylelintcache

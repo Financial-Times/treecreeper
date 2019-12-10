@@ -1,5 +1,7 @@
+require('preact/debug');
 const { render, h } = require('preact');
-const { RelationshipPicker } = require('./lib/relationship-picker');
+const { RelationshipPicker } = require('./lib/relationship-picker.jsx');
+const { Autocomplete } = require('./lib/autocomplete.jsx');
 
 module.exports = {
 	attachRelationshipPicker: container => {
@@ -8,8 +10,9 @@ module.exports = {
 			dataType: container.dataset.type,
 			value: JSON.parse(container.dataset.value),
 			hasMany: !!container.dataset.hasMany,
+			AutocompleteComponent: Autocomplete,
 		};
 		const Picker = <RelationshipPicker {...props} />;
-		render(Picker, container);
+		render(Picker, document, container);
 	},
 };

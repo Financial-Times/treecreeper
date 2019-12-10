@@ -56,6 +56,7 @@ class RelationshipPicker extends Component {
 			value,
 			lockedBy,
 			parentType,
+			AutocompleteComponent,
 		} = props;
 		const shouldDisable = checkIfShouldDisable(lockedBy);
 		return (
@@ -80,16 +81,9 @@ class RelationshipPicker extends Component {
 				<div className="o-layout-typography">
 					{shouldDisable ? null : (
 						<Fragment>
-							<input
-								name={`${propertyName}`}
-								id={`id-new-${propertyName}`}
-								className="suggest"
-								data-type={dataType}
-								data-has-many={hasMany ? true : null}
-								data-property-name={propertyName}
-								data-parent-type={parentType}
-								type="text"
-							/>
+							{AutocompleteComponent ? (
+								<AutocompleteComponent {...props} />
+							) : null}
 							<span className="o-forms-input o-forms-input--text">
 								<div className="o-forms-input__error">
 									Use the mouse or arrow and enter keys to
