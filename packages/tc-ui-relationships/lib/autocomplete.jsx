@@ -5,14 +5,8 @@ const Highlighter = require('react-highlight-words');
 
 const Autocomplete = props => (
 	<ReactAutosuggest
-		suggestions={[
-			{ code: 'apple', name: 'apple' },
-			{ code: 'pear', name: 'pear' },
-			{ code: 'orange', name: 'orange' },
-			{ code: 'grape', name: 'grape' },
-			{ code: 'banana', name: 'banana' },
-		]}
-		onSuggestionsFetchRequested={() => null}
+		suggestions={props.suggestions}
+		onSuggestionsFetchRequested={props.onSuggestionsFetchRequested}
 		onSuggestionsClearRequested={() => null}
 		inputProps={{ value: props.searchTerm, onChange: props.onChange }}
 		getSuggestionValue={item => item.code}
@@ -21,17 +15,19 @@ const Autocomplete = props => (
 				<Highlighter
 					searchWords={query.split(' ')}
 					autoEscape
-					textToHighlight={suggestion.name}
+					textToHighlight={suggestion.name || suggestion.code}
 				/>{' '}
-				<small>
-					(
-					<Highlighter
-						searchWords={query.split(' ')}
-						autoEscape
-						textToHighlight={suggestion.code}
-					/>
-					)
-				</small>
+				{suggestion.name ? (
+					<small>
+						(
+						<Highlighter
+							searchWords={query.split(' ')}
+							autoEscape
+							textToHighlight={suggestion.code}
+						/>
+						)
+					</small>
+				) : null}
 			</Fragment>
 		)}
 		renderInputComponent={inputProps => (

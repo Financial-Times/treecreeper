@@ -86,14 +86,14 @@ properties:
   youngerSiblings:
     relationship: HAS_YOUNGER_SIBLING
     type: MainType
-    description: Parents description.
-    label: Parents label
+    description: Younger siblings description.
+    label: Younger siblings label
     direction: outgoing
     hasMany: true
   olderSiblings:
     relationship: HAS_YOUNGER_SIBLING
     type: MainType
-    description: Parents description.
-    label: Parents label
+    description: Older siblings description.
+    label: Older siblings label
     direction: incoming
     hasMany: true

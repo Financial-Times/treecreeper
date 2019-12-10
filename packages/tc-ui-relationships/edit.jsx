@@ -3,6 +3,7 @@ const { FieldTitle } = require('./edit-helpers');
 const { RelationshipPicker } = require('./lib/relationship-picker');
 
 const EditRelationship = props => (
+	// eslint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for
 	<label className="o-forms-field" data-biz-ops-type="relationship">
 		<FieldTitle {...props} />
 		<RelationshipPicker {...props} />

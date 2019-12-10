@@ -1,3 +1,4 @@
+/* global fetch */
 const { h, Fragment, Component } = require('preact');
 
 const checkIfShouldDisable = (lockedBy, unique = false, isEdit = false) => {
@@ -26,7 +27,6 @@ const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
 );
 
 const RelationshipRows = ({ hasMany, value, propertyName, shouldDisable }) => {
-	console.log({ value, hasMany });
 	if (!value) {
 		return null;
 	}
@@ -47,6 +47,7 @@ class RelationshipPicker extends Component {
 		super();
 		this.state = {
 			searchTerm: '',
+			suggestions: [],
 		};
 		this.props = props;
 		this.onChange = this.onChange.bind(this);
@@ -67,9 +68,25 @@ class RelationshipPicker extends Component {
 	// Autosuggest will call this function every time you need to update suggestions.
 	// You already implemented this logic above, so just use it.
 	onSuggestionsFetchRequested({ value }) {
-		this.setState({
-			suggestions: [{code: 'rhys', name: 'hys'}],
-		});
+		if (!value) {
+			return;
+		}
+		fetch(
+			`/autocomplete/${this.props.type}/name?q=${value}&parentType=${this.props.parentType}&propertyName=${this.props.propertyName}`,
+		)
+			.then(results => results.json())
+			.then(results => {
+				this.setState({
+					suggestions: results
+						// avoid new suggestions including values that have already been selected
+						.filter(
+							suggestion =>
+								!this.props.value.find(
+									({ code }) => code === suggestion.code,
+								),
+						),
+				});
+			});
 	}
 
 	// Autosuggest will call this function every time you need to clear suggestions.
