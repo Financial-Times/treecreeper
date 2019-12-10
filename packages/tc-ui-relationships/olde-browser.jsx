@@ -1,5 +1,4 @@
-const { Component, h } = require('preact');
-const { Component: EditRelationshipView } = require('./edit');
+const { Component } = require('preact');
 
 const ENTER = 13;
 const TAB = 9;
@@ -15,51 +14,16 @@ class RelationshipEditor extends Component {
 		this.list = container.querySelector('.relationship-editor__list');
 		this.propertyName = this.container.dataset.propertyName;
 		this.hasMany = !!this.container.dataset.hasMany;
-		this.setState({ items: this.container.dataset.items });
+		this.setState({});
 		this.propertyName = this.container.dataset.propertyName;
 		this.parentType = this.container.dataset.parentType;
 		this.type = this.container.dataset.type;
 
-		this.input.addEventListener('input', this.getSuggestions.bind(this));
 		this.input.addEventListener('focus', this.clearErrorState.bind(this));
-		this.input.addEventListener('focus', this.getSuggestions.bind(this));
 		this.input.addEventListener(
 			'keydown',
 			this.handleUserMisconceptions.bind(this),
 		);
-		this.input.addEventListener(
-			'awesomplete-selectcomplete',
-			this.addRelationship.bind(this),
-		);
-		this.list.addEventListener('click', this.removeRelationship.bind(this));
-	}
-
-	getSuggestions() {
-		const { value } = document.querySelector(
-			`#id-new-${this.propertyName}`,
-		);
-		if (!value) {
-			return;
-		}
-		fetch(
-			`/autocomplete/${this.type}/name?q=${value}&parentType=${this.parentType}&propertyName=${this.propertyName}`,
-		)
-			.then(results => results.json())
-			.then(results => {
-				const prefixLength = this.propertyName.length + 1;
-				const existingItems = [
-					...this.list.querySelectorAll('li'),
-				].map(item => item.id.substring(prefixLength));
-				// avoid new suggestions including values that have already been selected
-				this.awesomplete.list = results
-					.filter(
-						suggestion => !existingItems.includes(suggestion.code),
-					)
-					.map(item => ({
-						label: item.name,
-						value: item.code,
-					}));
-			});
 	}
 
 	setErrorState() {
@@ -68,11 +32,6 @@ class RelationshipEditor extends Component {
 
 	clearErrorState() {
 		this.container.classList.remove('o-forms--error');
-	}
-
-	select() {
-		this.awesomplete.goto(0);
-		this.awesomplete.select();
 	}
 
 	hasSuggestions() {
@@ -118,38 +77,6 @@ class RelationshipEditor extends Component {
 				return false;
 			}
 		}
-	}
-
-	addRelationship(event) {
-		const { label: name, value: code } = event.text;
-		this.setState(({ items }) => {
-			items = [...items, { name, code }];
-			return { items };
-		});
-	}
-
-	removeRelationship(event) {
-		if (event.target.nodeName === 'BUTTON') {
-			const removedCode = event.target.closest('li').dataset.code;
-			const indexToRemove = this.items.findIndex(
-				({ code }) => code === removedCode,
-			);
-			this.items.splice(indexToRemove, 1);
-			this.render();
-		}
-		event.preventDefault();
-	}
-
-	render() {
-		const props = {
-			propertyName: this.propertyName,
-			hasMany: this.hasMany,
-			label: 'blah blah',
-			dataType: this.type,
-			value: this.items,
-			parentType: this.parentType,
-		};
-		return <EditRelationshipView {...props} />;
 	}
 }
 

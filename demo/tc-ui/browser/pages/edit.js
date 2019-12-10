@@ -52,6 +52,10 @@ const initRelationshipSelectors = () => {
 	].forEach(attachRelationshipPicker);
 };
 
+
+// TODO - the relationship editors should expose their bad state in some way
+// (e.g set teh hidden input as invalid? data-attribute?)
+// That way the form can just, in quite a generic way query for invalid fields
 const preventBadSubmission = () => {
 	const relationshipEditors = [
 		...document.querySelectorAll('[data-biz-ops-type="relationship"]'),

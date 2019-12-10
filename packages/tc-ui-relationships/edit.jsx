@@ -13,23 +13,4 @@ const EditRelationship = props => (
 module.exports = {
 	Component: EditRelationship,
 	parser: value => (value ? JSON.parse(value) : null),
-	// getGraphQLEquivalent: (fieldName, formData, fieldProps) => {
-	// 	const fieldValue = formData[fieldName];
-	// 	const data = {};
-	// 	if (fieldValue) {
-	// 		const fieldLabels = formData[`name-${fieldName}`].split(',');
-	// 		if (fieldProps.hasMany) {
-	// 			data[fieldName] = fieldValue.split(',').map((code, index) => ({
-	// 				code,
-	// 				name: decodeURIComponent(fieldLabels[index]),
-	// 			}));
-	// 		} else {
-	// 			data[fieldName] = {
-	// 				code: fieldValue,
-	// 				name: decodeURIComponent(fieldLabels[0]),
-	// 			};
-	// 		}
-	// 	}
-	// 	return data;
-	// },
 };

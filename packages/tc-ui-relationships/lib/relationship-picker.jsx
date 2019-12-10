@@ -5,7 +5,13 @@ const checkIfShouldDisable = (lockedBy, unique = false, isEdit = false) => {
 	return (unique && isEdit) || !!lockedBy;
 };
 
-const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
+const RelationshipRow = ({
+	propertyName,
+	value,
+	shouldDisable,
+	onRelationshipRemove,
+	index,
+}) => (
 	<li
 		id={`${propertyName}-${value.code}`}
 		data-name={value.name}
@@ -19,6 +25,9 @@ const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
 			className={`o-buttons o-buttons--small ${
 				shouldDisable ? 'disabled' : ''
 			}`}
+			onClick={onRelationshipRemove}
+			data-index={index}
+			key={index}
 		>
 			Remove
 		</button>
@@ -27,24 +36,22 @@ const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
 );
 
 const RelationshipRows = ({
-	hasMany,
 	selectedRelationships,
 	propertyName,
 	shouldDisable,
+	onRelationshipRemove,
 }) => {
-	if (!selectedRelationships) {
+	if (!selectedRelationships.length) {
 		return null;
 	}
 
-	selectedRelationships = hasMany
-		? selectedRelationships
-		: [selectedRelationships];
-
-	return selectedRelationships.map(val => (
+	return selectedRelationships.map((val, i) => (
 		<RelationshipRow
 			propertyName={propertyName}
 			value={val}
 			shouldDisable={shouldDisable}
+			onRelationshipRemove={onRelationshipRemove}
+			index={i}
 		/>
 	));
 };
@@ -55,7 +62,11 @@ class RelationshipPicker extends Component {
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
-			selectedRelationships: props.value,
+			selectedRelationships: Array.isArray(props.value)
+				? props.value
+				: props.value
+				? [props.value]
+				: [],
 		};
 		this.props = props;
 		this.onChange = this.onChange.bind(this);
@@ -66,6 +77,16 @@ class RelationshipPicker extends Component {
 			this,
 		);
 		this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
+		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
+	}
+
+	onRelationshipRemove(event) {
+		this.setState(({ selectedRelationships }) => {
+			selectedRelationships = [...selectedRelationships];
+			selectedRelationships.splice(event.target.dataset.index, 1);
+			return { selectedRelationships };
+		});
+		event.preventDefault();
 	}
 
 	onChange(event, { newValue }) {
@@ -80,21 +101,21 @@ class RelationshipPicker extends Component {
 		if (!value) {
 			return;
 		}
-		fetch(
+		return fetch(
 			`/autocomplete/${this.props.type}/name?q=${value}&parentType=${this.props.parentType}&propertyName=${this.props.propertyName}`,
 		)
 			.then(results => results.json())
 			.then(results => {
-				this.setState({
+				this.setState(({ selectedRelationships }) => ({
 					suggestions: results
 						// avoid new suggestions including values that have already been selected
 						.filter(
 							suggestion =>
-								!this.props.value.find(
+								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
 								),
 						),
-				});
+				}));
 			});
 	}
 
@@ -106,9 +127,13 @@ class RelationshipPicker extends Component {
 			});
 		} else {
 			this.setState({
-				selectedRelationships: suggestion,
+				selectedRelationships: [suggestion],
 			});
 		}
+		// this is needed to prevent the event propagating up  and then
+		// immediately clicking another button. VERY odd behaviour, and
+		// don't fully understand why, but this is the fix
+		event.preventDefault();
 	}
 
 	// Autosuggest will call this function every time you need to clear suggestions.
@@ -147,6 +172,7 @@ class RelationshipPicker extends Component {
 				>
 					<RelationshipRows
 						{...props}
+						onRelationshipRemove={this.onRelationshipRemove}
 						selectedRelationships={selectedRelationships}
 						shouldDisable={shouldDisable}
 					/>
