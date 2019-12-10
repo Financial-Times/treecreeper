@@ -35,7 +35,7 @@ const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
 /*
- This is tiny lexer/parser fuction for analyze multiple property definition.
+ This is tiny lexer/parser function for analyze multiple property definition.
  See above constant characters and parse into an object with following format e.g,
 
  Definition
