@@ -10,6 +10,8 @@ const displayForm = async (event, apiError) => {
 	const { type, code } = event.params;
 	const isCreate = /\/create/.test(event.path);
 	let formData = {};
+
+	console.log(event.body);
 	// Persist any unsaved changes to form data stored in the event.body.
 	if (apiError) {
 		formData = await formDataToGraphQL(type, event.body);

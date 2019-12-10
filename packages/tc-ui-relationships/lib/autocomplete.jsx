@@ -6,6 +6,7 @@ const Highlighter = require('react-highlight-words');
 const Autocomplete = props => (
 	<ReactAutosuggest
 		suggestions={props.suggestions}
+		onSuggestionSelected={props.onSuggestionSelected}
 		onSuggestionsFetchRequested={props.onSuggestionsFetchRequested}
 		onSuggestionsClearRequested={() => null}
 		inputProps={{ value: props.searchTerm, onChange: props.onChange }}
@@ -33,7 +34,7 @@ const Autocomplete = props => (
 		renderInputComponent={inputProps => (
 			<span className="o-forms-input o-forms-input--text">
 				<input
-					name={props.propertyName}
+					name={`autocomplete-${props.propertyName}`}
 					id={`${props.propertyName}-picker`}
 					className="autocomplete__input"
 					type="text"

@@ -22,18 +22,25 @@ const RelationshipRow = ({ propertyName, value, shouldDisable }) => (
 		>
 			Remove
 		</button>
-		<span className="o-layout-typography">{value.name}</span>
+		<span className="o-layout-typography">{value.name || value.code}</span>
 	</li>
 );
 
-const RelationshipRows = ({ hasMany, value, propertyName, shouldDisable }) => {
-	if (!value) {
+const RelationshipRows = ({
+	hasMany,
+	selectedRelationships,
+	propertyName,
+	shouldDisable,
+}) => {
+	if (!selectedRelationships) {
 		return null;
 	}
 
-	value = hasMany ? value : [value];
+	selectedRelationships = hasMany
+		? selectedRelationships
+		: [selectedRelationships];
 
-	return value.map(val => (
+	return selectedRelationships.map(val => (
 		<RelationshipRow
 			propertyName={propertyName}
 			value={val}
@@ -48,6 +55,7 @@ class RelationshipPicker extends Component {
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
+			selectedRelationships: props.value,
 		};
 		this.props = props;
 		this.onChange = this.onChange.bind(this);
@@ -57,6 +65,7 @@ class RelationshipPicker extends Component {
 		this.onSuggestionsClearRequested = this.onSuggestionsClearRequested.bind(
 			this,
 		);
+		this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
 	}
 
 	onChange(event, { newValue }) {
@@ -89,6 +98,19 @@ class RelationshipPicker extends Component {
 			});
 	}
 
+	onSuggestionSelected(event, { suggestion }) {
+		if (this.props.hasMany) {
+			this.setState(({ selectedRelationships }) => {
+				selectedRelationships = [...selectedRelationships, suggestion];
+				return { selectedRelationships };
+			});
+		} else {
+			this.setState({
+				selectedRelationships: suggestion,
+			});
+		}
+	}
+
 	// Autosuggest will call this function every time you need to clear suggestions.
 	onSuggestionsClearRequested() {
 		this.setState({
@@ -102,13 +124,12 @@ class RelationshipPicker extends Component {
 			propertyName,
 			hasMany,
 			dataType,
-			value,
 			lockedBy,
 			parentType,
 			AutocompleteComponent,
 		} = props;
 		const shouldDisable = checkIfShouldDisable(lockedBy);
-		const { searchTerm, suggestions } = this.state;
+		const { searchTerm, suggestions, selectedRelationships } = this.state;
 
 		return (
 			<div
@@ -117,7 +138,7 @@ class RelationshipPicker extends Component {
 				data-has-many={hasMany ? true : null}
 				data-property-name={propertyName}
 				data-parent-type={parentType}
-				data-value={JSON.stringify(value)}
+				data-value={JSON.stringify(selectedRelationships)}
 				data-disabled={shouldDisable}
 			>
 				<ul
@@ -126,9 +147,16 @@ class RelationshipPicker extends Component {
 				>
 					<RelationshipRows
 						{...props}
+						selectedRelationships={selectedRelationships}
 						shouldDisable={shouldDisable}
 					/>
 				</ul>
+				<input
+					type="hidden"
+					id={`id-${propertyName}`}
+					name={propertyName}
+					value={JSON.stringify(selectedRelationships)}
+				/>
 				<div className="o-layout-typography">
 					{shouldDisable ? null : (
 						<Fragment>
@@ -143,6 +171,9 @@ class RelationshipPicker extends Component {
 									}
 									onSuggestionsClearRequested={
 										this.onSuggestionsClearRequested
+									}
+									onSuggestionSelected={
+										this.onSuggestionSelected
 									}
 								/>
 							) : null}
