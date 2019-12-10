@@ -6,9 +6,11 @@
 // 	el.textContent = converter.convert(el.textContent);
 // }
 
+const { render } = require('preact');
+
 const {
-	RelationshipEditor,
-} = require('../../../../packages/tc-ui-relationships/browser');
+	attachRelationshipPicker,
+} = require('../../../../packages/tc-ui-relationships/browser.jsx');
 
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');
@@ -45,10 +47,11 @@ const initDocumentEditors = () => {
 };
 
 const initRelationshipSelectors = () => {
-	[...document.querySelectorAll('[data-biz-ops-type="relationship"]')]
-		// locked fields won't have an input
-		.filter(container => !!container.querySelector('input.suggest'))
-		.map(container => new RelationshipEditor(container));
+	[
+		...document.querySelectorAll(
+			'[data-component="relationship-picker"]:not([data-disabled])',
+		),
+	].forEach(attachRelationshipPicker);
 };
 
 const preventBadSubmission = () => {
