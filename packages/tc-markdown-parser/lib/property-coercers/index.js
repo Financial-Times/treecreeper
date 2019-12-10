@@ -96,7 +96,7 @@ module.exports = {
 				};
 			} catch (error) {
 				return {
-					valud: false,
+					valid: false,
 					value: error.message,
 				};
 			}
