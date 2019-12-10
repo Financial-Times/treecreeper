@@ -94,6 +94,7 @@ const writeRestAPIQuery = async (
 		method === 'POST'
 			? '?relationshipAction=merge' // POST params
 			: '?relationshipAction=replace'; // PATCH params
+
 	const options = {
 		method,
 		headers: getHeaders(clientUserId),

@@ -1,29 +1,62 @@
-/* global fetch */
+/* global fetch, window */
 const { h, Fragment, Component } = require('preact');
+const ReactAutosuggest = require('react-autosuggest');
+const Highlighter = require('react-highlight-words');
 
-const checkIfShouldDisable = (lockedBy, unique = false, isEdit = false) => {
-	return (unique && isEdit) || !!lockedBy;
+const ENTER = 13; // eslint-disable-line no-unused-vars
+const TAB = 9;
+
+const toArray = val => {
+	if (!val) {
+		return [];
+	}
+	return Array.isArray(val) ? val : [val];
 };
 
-const RelationshipRow = ({
-	propertyName,
-	value,
-	shouldDisable,
-	onRelationshipRemove,
-	index,
-}) => (
+const UserInput = inputProps => (
+	<span className="o-forms-input o-forms-input--text">
+		<input
+			id={`${inputProps.propertyName}-picker`}
+			className="autocomplete__input"
+			type="text"
+			autoComplete="off"
+			{...inputProps}
+		/>
+	</span>
+);
+
+const Suggestion = ({ suggestion, searchTerm }) => (
+	<Fragment>
+		<Highlighter
+			searchWords={searchTerm.split(' ')}
+			autoEscape
+			textToHighlight={suggestion.name || suggestion.code}
+		/>{' '}
+		{suggestion.name ? (
+			<small>
+				(
+				<Highlighter
+					searchWords={searchTerm.split(' ')}
+					autoEscape
+					textToHighlight={suggestion.code}
+				/>
+				)
+			</small>
+		) : null}
+	</Fragment>
+);
+
+const Relationship = ({ value, disabled, onRelationshipRemove, index }) => (
 	<li
-		id={`${propertyName}-${value.code}`}
 		data-name={value.name}
 		data-code={value.code}
-		className="suggest"
+		className="selected-relationship"
 	>
 		<button
 			type="button"
-			id={`btn-${propertyName}-${value.code}`}
-			disabled={shouldDisable ? 'disabled' : null}
+			disabled={disabled ? 'disabled' : null}
 			className={`o-buttons o-buttons--small ${
-				shouldDisable ? 'disabled' : ''
+				disabled ? 'disabled' : ''
 			}`}
 			onClick={onRelationshipRemove}
 			data-index={index}
@@ -35,38 +68,15 @@ const RelationshipRow = ({
 	</li>
 );
 
-const RelationshipRows = ({
-	selectedRelationships,
-	propertyName,
-	shouldDisable,
-	onRelationshipRemove,
-}) => {
-	if (!selectedRelationships.length) {
-		return null;
-	}
-
-	return selectedRelationships.map((val, i) => (
-		<RelationshipRow
-			propertyName={propertyName}
-			value={val}
-			shouldDisable={shouldDisable}
-			onRelationshipRemove={onRelationshipRemove}
-			index={i}
-		/>
-	));
-};
-
 class RelationshipPicker extends Component {
 	constructor(props) {
 		super();
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
-			selectedRelationships: Array.isArray(props.value)
-				? props.value
-				: props.value
-				? [props.value]
-				: [],
+			isUserError: false,
+			isUnresolved: false,
+			selectedRelationships: toArray(props.value),
 		};
 		this.props = props;
 		this.onChange = this.onChange.bind(this);
@@ -89,9 +99,50 @@ class RelationshipPicker extends Component {
 		event.preventDefault();
 	}
 
-	onChange(event, { newValue }) {
+	onChange(event, { newValue, method }) {
+		console.log(event, { newValue, method });
+		if (newValue) {
+			// If hitting tab
+			if (event.keyCode === TAB) {
+				// If only one option in the dropdown, which exactly matches
+				// the text entered by the user, go ahead and select it
+				if (
+					this.suggestions.length === 1 &&
+					[
+						this.suggestions[0].name.toLowerCase(),
+						this.suggestions[0].code.toLowerCase(),
+					].includes(newValue.toLowerCase())
+				) {
+					this.onSuggestionSelected(null, this.suggestions[0]);
+					newValue = '';
+				} else {
+					this.setState({
+						isUserError: true,
+					});
+				}
+			}
+
+			// If hitting enter
+			if (method === 'enter' && this.suggestions.length) {
+				// If only one option in the dropdown, go ahead and select it
+				if (this.suggestions.length === 1) {
+					this.onSuggestionSelected(null, this.suggestions[0]);
+				} else {
+					// tell the user how to select an option
+					window.alert(
+						'Use the arrow keys or the mouse to select an item from the list',
+					);
+				}
+				// // prevent the form being submitted
+				// event.stopImmediatePropagation();
+				// event.preventDefault();
+				// return false;
+			}
+		}
+
 		this.setState({
 			searchTerm: newValue,
+			isUnresolved: !!newValue,
 		});
 	}
 
@@ -133,7 +184,9 @@ class RelationshipPicker extends Component {
 		// this is needed to prevent the event propagating up  and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
-		event.preventDefault();
+		if (event) {
+			event.preventDefault();
+		}
 	}
 
 	// Autosuggest will call this function every time you need to clear suggestions.
@@ -143,66 +196,86 @@ class RelationshipPicker extends Component {
 		});
 	}
 
+	shouldDisable(unique = false, isEdit = false) {
+		return (unique && isEdit) || !!this.props.lockedBy;
+	}
+
+	toFormData(relationships) {
+		// TO INVESTIGATE - does an empty array now fail to delete
+		// relationships in replace mode?
+		if (!this.props.hasMany) {
+			relationships = relationships.length ? relationships[0] : null;
+		}
+		return JSON.stringify(relationships);
+	}
+
 	render() {
 		const { props } = this;
+		const { propertyName } = props;
+		const disabled = this.shouldDisable();
 		const {
-			propertyName,
-			hasMany,
-			dataType,
-			lockedBy,
-			parentType,
-			AutocompleteComponent,
-		} = props;
-		const shouldDisable = checkIfShouldDisable(lockedBy);
-		const { searchTerm, suggestions, selectedRelationships } = this.state;
+			searchTerm,
+			suggestions,
+			selectedRelationships,
+			isUserError,
+			isUnresolved,
+		} = this.state;
 
 		return (
 			<div
+				data-props={JSON.stringify(props)}
 				data-component="relationship-picker"
-				data-type={dataType}
-				data-has-many={hasMany ? true : null}
-				data-property-name={propertyName}
-				data-parent-type={parentType}
-				data-value={JSON.stringify(selectedRelationships)}
-				data-disabled={shouldDisable}
+				data-disabled={disabled}
+				data-is-unresolved={isUnresolved}
+				className={isUserError ? 'o-forms--error' : ''}
 			>
 				<ul
 					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
 					id={`ul-${propertyName}`}
 				>
-					<RelationshipRows
-						{...props}
-						onRelationshipRemove={this.onRelationshipRemove}
-						selectedRelationships={selectedRelationships}
-						shouldDisable={shouldDisable}
-					/>
+					{selectedRelationships.map((val, i) => (
+						<Relationship
+							value={val}
+							disabled={disabled}
+							onRelationshipRemove={this.onRelationshipRemove}
+							index={i}
+						/>
+					))}
 				</ul>
 				<input
 					type="hidden"
 					id={`id-${propertyName}`}
 					name={propertyName}
-					value={JSON.stringify(selectedRelationships)}
+					value={this.toFormData(selectedRelationships)}
 				/>
 				<div className="o-layout-typography">
-					{shouldDisable ? null : (
+					{disabled ? null : (
 						<Fragment>
-							{AutocompleteComponent ? (
-								<AutocompleteComponent
-									{...props}
-									searchTerm={searchTerm}
-									suggestions={suggestions}
-									onChange={this.onChange}
-									onSuggestionsFetchRequested={
-										this.onSuggestionsFetchRequested
-									}
-									onSuggestionsClearRequested={
-										this.onSuggestionsClearRequested
-									}
-									onSuggestionSelected={
-										this.onSuggestionSelected
-									}
-								/>
-							) : null}
+							<ReactAutosuggest
+								suggestions={suggestions}
+								onSuggestionsFetchRequested={
+									this.onSuggestionsFetchRequested
+								}
+								onSuggestionsClearRequested={
+									this.onSuggestionsClearRequested
+								}
+								onSuggestionSelected={this.onSuggestionSelected}
+								inputProps={{
+									propertyName: props.propertyName,
+									value: searchTerm,
+									onChange: this.onChange,
+									onKeyUp: console.log,
+									onKeyDown: console.log,
+								}}
+								getSuggestionValue={item => item.code}
+								renderSuggestion={(suggestion, { query }) => (
+									<Suggestion
+										suggestion={suggestion}
+										searchTerm={query}
+									/>
+								)}
+								renderInputComponent={UserInput}
+							/>
 							<span className="o-forms-input o-forms-input--text">
 								<div className="o-forms-input__error">
 									Use the mouse or arrow and enter keys to

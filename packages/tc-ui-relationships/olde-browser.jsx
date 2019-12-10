@@ -1,10 +1,9 @@
 const { Component } = require('preact');
 
-const ENTER = 13;
-const TAB = 9;
-
 // https://www.reddit.com/r/reactjs/comments/8v4h4d/is_it_possible_to_use_this_in_react/
 // https://github.com/reactjs/react-autocomplete
+const ENTER = 13;
+const TAB = 9;
 
 class RelationshipEditor extends Component {
 	constructor(container) {

@@ -52,23 +52,21 @@ const initRelationshipSelectors = () => {
 	].forEach(attachRelationshipPicker);
 };
 
-
 // TODO - the relationship editors should expose their bad state in some way
 // (e.g set teh hidden input as invalid? data-attribute?)
 // That way the form can just, in quite a generic way query for invalid fields
 const preventBadSubmission = () => {
-	const relationshipEditors = [
-		...document.querySelectorAll('[data-biz-ops-type="relationship"]'),
-	];
 	document
 		.querySelector('form.o-layout__main')
 		.addEventListener('submit', ev => {
-			const editorsInUnselectedState = relationshipEditors.filter(
-				el => el.querySelector('.suggest').value,
-			);
+			const editorsInUnselectedState = [
+				...document.querySelectorAll(
+					'[data-component="relationship-picker"][data-is-unresolved]',
+				),
+			];
 			if (editorsInUnselectedState.length) {
 				const badFieldNames = editorsInUnselectedState.map(
-					el => el.querySelector('.o-forms-title__main').textContent,
+					el => el.dataset.propertyName,
 				);
 				window.alert(`\
 One or more relationship fields are in an unselected state.
