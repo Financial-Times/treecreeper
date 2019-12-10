@@ -18,7 +18,8 @@ module.exports = {
 		"jest/valid-describe": "off",
 		// lots of user generated free html, so dangerously set html is normal
 		'react/no-danger': 0,
-		'no-alert': 0
+		'no-alert': 0,
+		'jsx-a11y/control-has-associated-label': 1
 	},
 	overrides: [{
 		env: {browser: true},
