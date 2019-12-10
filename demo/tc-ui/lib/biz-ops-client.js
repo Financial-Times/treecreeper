@@ -62,6 +62,7 @@ const fetchGraphQL = async (body, clientUserId, plain = false) => {
 		if (plain) {
 			return json;
 		}
+
 		if (json.errors) {
 			logger.error(
 				{

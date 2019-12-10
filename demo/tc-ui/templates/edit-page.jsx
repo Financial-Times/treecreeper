@@ -92,6 +92,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 				isEdit,
 				lockedBy,
 			};
+
 			return viewModel.propertyName && viewModel.label ? (
 				<Component {...viewModel} />
 			) : null;

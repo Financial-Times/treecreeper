@@ -6,6 +6,10 @@
 // 	el.textContent = converter.convert(el.textContent);
 // }
 
+const {
+	RelationshipEditor,
+} = require('../../../../packages/tc-ui-relationships/browser');
+
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');
 	const description = container.querySelector('.description-text');
@@ -39,8 +43,6 @@ const initDocumentEditors = () => {
 		);
 	});
 };
-
-const RelationshipEditor = require('../lib/relationship-editor');
 
 const initRelationshipSelectors = () => {
 	[...document.querySelectorAll('[data-biz-ops-type="relationship"]')]

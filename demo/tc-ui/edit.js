@@ -1,5 +1,4 @@
 const httpError = require('http-errors');
-const querystring = require('qs');
 const getSchemaSubset = require('./lib/get-schema-subset');
 const { readRecord, writeRestAPIQuery } = require('./lib/biz-ops-client');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
@@ -12,7 +11,7 @@ const displayForm = async (event, apiError) => {
 	const isCreate = /\/create/.test(event.path);
 	let formData = {};
 	// Persist any unsaved changes to form data stored in the event.body.
-	if (event.body) {
+	if (apiError) {
 		formData = await formDataToGraphQL(type, event.body);
 		// If a code is present then fetch the record data to /edit
 		// otherwise serve a blank /create form
@@ -45,7 +44,7 @@ const handleForm = async event => {
 	const formData = event.body;
 	const clientUserId = event.username;
 	// TODO If the form submit sends JSON rather than a string the parse step will not be needed
-	const jsonFormData = querystring.parse(formData);
+	const jsonFormData = formData;
 	let mode = 'PATCH';
 	// If a code is present then PATCH the existing record
 	// otherwise POST the data to create a new item

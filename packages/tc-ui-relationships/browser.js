@@ -5,6 +5,7 @@ const TAB = 9;
 
 class RelationshipEditor {
 	constructor(container) {
+		console.log(container);
 		this.container = container;
 		this.input = container.querySelector('input.suggest');
 		this.list = container.querySelector('.relationship-editor__list');
@@ -173,4 +174,4 @@ class RelationshipEditor {
 	}
 }
 
-module.exports = RelationshipEditor;
+module.exports = { RelationshipEditor };

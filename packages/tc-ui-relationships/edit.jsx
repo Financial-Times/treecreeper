@@ -14,7 +14,7 @@ const RelationshipButton = ({ propertyName, item = [], shouldDisable }) => (
 		<button
 			type="button"
 			id={`btn-${propertyName}-${item.code}`}
-			disabled={shouldDisable ? 'disabled' : ''}
+			disabled={shouldDisable ? 'disabled' : null}
 			className={`o-buttons o-buttons--small ${
 				shouldDisable ? 'disabled' : ''
 			}`}
