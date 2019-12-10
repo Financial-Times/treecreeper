@@ -46,4 +46,4 @@ const EditDateTime = props => {
 	);
 };
 
-module.exports = EditDateTime;
+module.exports = { Component: EditDateTime };

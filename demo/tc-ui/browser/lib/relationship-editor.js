@@ -106,7 +106,7 @@ class RelationshipEditor {
 					...this.list.querySelectorAll('li'),
 				].map(item => item.id.substring(prefixLength));
 				// avoid new suggestions including values that have already been selected
-				this.suggester.list = results.results
+				this.suggester.list = results
 					.filter(
 						suggestion => !existingItems.includes(suggestion.code),
 					)

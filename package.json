@@ -72,6 +72,6 @@
     "packages/*"
   ],
   "nodemonConfig": {
-    "ext": "js,graphql,yaml"
+    "ext": "js,graphql,yaml,jsx"
   }
 }

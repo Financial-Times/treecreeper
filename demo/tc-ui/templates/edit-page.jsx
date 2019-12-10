@@ -1,37 +1,12 @@
 const { h, Fragment } = require('preact');
-const { getEnums, getTypes } = require('@financial-times/tc-schema-sdk');
+const { getEnums } = require('@financial-times/tc-schema-sdk');
 const logger = require('@financial-times/lambda-logger');
 const { Concept, SectionHeader } = require('./components/structure');
-const Components = require('./components/edit-components');
+
 const { SaveButton, CancelButton } = require('./components/buttons');
 const { FormError } = require('./components/messages');
 
-// TODO use primitiveTypesMap from biz-ops-schema somehow
-const mapTemplate = {
-	Sentence: 'EditTextArea',
-	Paragraph: 'EditTextArea',
-	Document: 'EditTextArea',
-	Boolean: 'EditBoolean',
-	Int: 'EditNumber',
-	Float: 'EditNumber',
-	DateTime: 'EditDateTime',
-	Date: 'EditDateTime',
-	Time: 'EditDateTime',
-};
-
-const assignTemplate = itemType => {
-	const validTypes = getTypes().map(type => type.name);
-	if (itemType && getEnums()[itemType]) {
-		return 'EditDropdown';
-	}
-	if (itemType && mapTemplate[itemType]) {
-		return mapTemplate[itemType];
-	}
-	if (itemType && validTypes.includes(itemType)) {
-		return 'EditRelationships';
-	}
-	return 'EditText';
-};
+const { assignComponent } = require('../lib/assign-component');
 
 const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string
@@ -103,8 +78,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 			if (fieldNamesToLock.includes(name)) {
 				lockedBy = fieldsToLock[name];
 			}
-
-			const Component = Components[assignTemplate(item.type)];
+			const { Component } = assignComponent(item.type);
 			const viewModel = {
 				propertyName: name,
 				value: getValue(item, data[name]),

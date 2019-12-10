@@ -50,4 +50,7 @@ const EditBoolean = props => {
 	);
 };
 
-module.exports = EditBoolean;
+module.exports = {
+	Component: EditBoolean,
+	parser: value => (value === undefined ? undefined : value === 'true'),
+};

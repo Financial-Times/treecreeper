@@ -47,7 +47,7 @@ const autocomplete = async (req, res) => {
 		}
 	}`;
 
-	return fetch('http://local.in.ft.com:8888/graphql', {
+	return fetch('http://local.in.ft.com:8888/api/graphql', {
 		method: 'post',
 		body: JSON.stringify({
 			query: graphQlQuery,

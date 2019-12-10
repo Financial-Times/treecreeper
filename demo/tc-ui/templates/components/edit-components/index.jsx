@@ -1,15 +1,17 @@
-const EditBoolean = require('./edit-boolean');
-const EditDateTime = require('./edit-date-time');
-const EditDropdown = require('./edit-dropdown');
-const EditText = require('./edit-text');
-const EditTextArea = require('./edit-text-area');
-const EditRelationships = require('./edit-relationships');
+const Boolean = require('./edit-boolean');
+const DateTime = require('./edit-date-time');
+const Dropdown = require('./edit-dropdown');
+const Text = require('./edit-text');
+const Number = require('./edit-number');
+const TextArea = require('./edit-text-area');
+const Relationship = require('../../../../../packages/tc-ui-relationships/edit');
 
 module.exports = {
-	EditBoolean,
-	EditDateTime,
-	EditDropdown,
-	EditText,
-	EditTextArea,
-	EditRelationships,
+	Boolean,
+	DateTime,
+	Dropdown,
+	Text,
+	Number,
+	TextArea,
+	Relationship,
 };

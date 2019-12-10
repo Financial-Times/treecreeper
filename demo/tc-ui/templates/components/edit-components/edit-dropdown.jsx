@@ -70,4 +70,4 @@ const EditDropdown = props => {
 	);
 };
 
-module.exports = EditDropdown;
+module.exports = { Component: EditDropdown };
