@@ -78,9 +78,8 @@ const coerceNestedPropertyValue = (
 	{ primitiveTypesMap, hasMany, propertyType },
 ) => {
 	try {
-		const coercedProperties = node.children.map(subdocument => {
-			// console.log(JSON.stringify(subdocument, null, 2));
-			return subdocument.children.reduce((values, nestNode) => {
+		const coercedProperties = node.children.map(subdocument =>
+			subdocument.children.reduce((values, nestNode) => {
 				if (nestNode.type === 'problem') {
 					throw new Error(nestNode.message);
 				}
@@ -96,8 +95,8 @@ const coerceNestedPropertyValue = (
 					return values;
 				}
 				throw new Error(coercion.value);
-			}, {});
-		});
+			}, {}),
+		);
 		setPropertyNodeValue(
 			node,
 			hasMany ? coercedProperties : coercedProperties[0],
