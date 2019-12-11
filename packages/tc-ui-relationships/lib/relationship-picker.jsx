@@ -1,4 +1,4 @@
-/* global fetch, window */
+/* global fetch */
 const { h, Fragment, Component } = require('preact');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
@@ -11,6 +11,14 @@ const toArray = val => {
 		return [];
 	}
 	return Array.isArray(val) ? val : [val];
+};
+
+const suggestionToStringList = suggestion => {
+	const list = [suggestion.code.toLowerCase()];
+	if (suggestion.name) {
+		list.push(suggestion.name.toLowerCase());
+	}
+	return list;
 };
 
 const UserInput = inputProps => (
@@ -77,6 +85,7 @@ class RelationshipPicker extends Component {
 			isUserError: false,
 			isUnresolved: false,
 			selectedRelationships: toArray(props.value),
+			hasHighlightedSelection: false,
 		};
 		this.props = props;
 		this.onChange = this.onChange.bind(this);
@@ -88,6 +97,8 @@ class RelationshipPicker extends Component {
 		);
 		this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
+		this.onUserMisconception = this.onUserMisconception.bind(this);
+		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -99,47 +110,7 @@ class RelationshipPicker extends Component {
 		event.preventDefault();
 	}
 
-	onChange(event, { newValue, method }) {
-		console.log(event, { newValue, method });
-		if (newValue) {
-			// If hitting tab
-			if (event.keyCode === TAB) {
-				// If only one option in the dropdown, which exactly matches
-				// the text entered by the user, go ahead and select it
-				if (
-					this.suggestions.length === 1 &&
-					[
-						this.suggestions[0].name.toLowerCase(),
-						this.suggestions[0].code.toLowerCase(),
-					].includes(newValue.toLowerCase())
-				) {
-					this.onSuggestionSelected(null, this.suggestions[0]);
-					newValue = '';
-				} else {
-					this.setState({
-						isUserError: true,
-					});
-				}
-			}
-
-			// If hitting enter
-			if (method === 'enter' && this.suggestions.length) {
-				// If only one option in the dropdown, go ahead and select it
-				if (this.suggestions.length === 1) {
-					this.onSuggestionSelected(null, this.suggestions[0]);
-				} else {
-					// tell the user how to select an option
-					window.alert(
-						'Use the arrow keys or the mouse to select an item from the list',
-					);
-				}
-				// // prevent the form being submitted
-				// event.stopImmediatePropagation();
-				// event.preventDefault();
-				// return false;
-			}
-		}
-
+	onChange(event, { newValue }) {
 		this.setState({
 			searchTerm: newValue,
 			isUnresolved: !!newValue,
@@ -181,6 +152,7 @@ class RelationshipPicker extends Component {
 				selectedRelationships: [suggestion],
 			});
 		}
+		this.setState({ searchTerm: '', isUserError: false });
 		// this is needed to prevent the event propagating up  and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
@@ -189,11 +161,62 @@ class RelationshipPicker extends Component {
 		}
 	}
 
+	onSuggestionHighlighted({ suggestion }) {
+		this.setState({
+			hasHighlightedSelection: !!suggestion,
+		});
+	}
+
 	// Autosuggest will call this function every time you need to clear suggestions.
 	onSuggestionsClearRequested() {
 		this.setState({
 			suggestions: [],
 		});
+	}
+
+	onUserMisconception(event) {
+		if (event.target.value) {
+			// If hitting tab
+			if (event.keyCode === TAB) {
+				// If only one option in the dropdown, which exactly matches
+				// the text entered by the user, go ahead and select it
+				if (
+					this.state.suggestions.length === 1 &&
+					suggestionToStringList(this.state.suggestions[0]).includes(
+						event.target.value.toLowerCase(),
+					)
+				) {
+					this.syntheticSelect();
+				} else {
+					this.setState({
+						isUserError: true,
+						suggestions: [],
+					});
+				}
+				event.preventDefault();
+			}
+
+			// If hitting enter
+			if (
+				event.keyCode === ENTER &&
+				this.state.suggestions.length &&
+				!this.state.hasHighlightedSelection
+			) {
+				// If only one option in the dropdown, go ahead and select it
+				if (this.state.suggestions.length === 1) {
+					this.syntheticSelect();
+				} else {
+					this.setState({
+						isUserError: true,
+						suggestions: [],
+					});
+				}
+				// prevent the form being submitted
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				return false;
+			}
+		}
 	}
 
 	shouldDisable(unique = false, isEdit = false) {
@@ -207,6 +230,15 @@ class RelationshipPicker extends Component {
 			relationships = relationships.length ? relationships[0] : null;
 		}
 		return JSON.stringify(relationships);
+	}
+
+	syntheticSelect() {
+		this.onSuggestionSelected(null, {
+			suggestion: this.state.suggestions[0],
+		});
+		this.setState({
+			suggestions: [],
+		});
 	}
 
 	render() {
@@ -227,7 +259,7 @@ class RelationshipPicker extends Component {
 				data-component="relationship-picker"
 				data-disabled={disabled}
 				data-is-unresolved={isUnresolved}
-				className={isUserError ? 'o-forms--error' : ''}
+				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
 				<ul
 					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
@@ -260,12 +292,14 @@ class RelationshipPicker extends Component {
 									this.onSuggestionsClearRequested
 								}
 								onSuggestionSelected={this.onSuggestionSelected}
+								onSuggestionHighlighted={
+									this.onSuggestionHighlighted
+								}
 								inputProps={{
 									propertyName: props.propertyName,
 									value: searchTerm,
 									onChange: this.onChange,
-									onKeyUp: console.log,
-									onKeyDown: console.log,
+									onKeyDown: this.onUserMisconception,
 								}}
 								getSuggestionValue={item => item.code}
 								renderSuggestion={(suggestion, { query }) => (

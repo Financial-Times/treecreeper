@@ -339,11 +339,11 @@ aside.biz-ops-aside {
 	color: #0d7680;
 	cursor: pointer;
 }
-
+/* stylelint-disable no-descending-specificity */
 .react-autosuggest__suggestions-list li::before {
 	display: none !important;
 }
-
+/* stylelint-enable no-descending-specificity */
 .react-autosuggest__suggestions-list li[aria-selected='true'],
 .react-autosuggest__suggestions-list li:hover,
 .react-autosuggest__suggestions-list mark {

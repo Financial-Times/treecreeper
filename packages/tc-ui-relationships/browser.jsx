@@ -1,4 +1,3 @@
-require('preact/debug');
 const { render, h } = require('preact');
 const { RelationshipPicker } = require('./lib/relationship-picker.jsx');
 
