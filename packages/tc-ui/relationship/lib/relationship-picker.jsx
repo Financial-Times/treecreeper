@@ -3,7 +3,7 @@ const { h, Fragment, Component } = require('preact');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 
-const ENTER = 13; // eslint-disable-line no-unused-vars
+const ENTER = 13;
 const TAB = 9;
 
 const toArray = val => {
@@ -117,8 +117,6 @@ class RelationshipPicker extends Component {
 		});
 	}
 
-	// Autosuggest will call this function every time you need to update suggestions.
-	// You already implemented this logic above, so just use it.
 	onSuggestionsFetchRequested({ value }) {
 		if (!value) {
 			return;

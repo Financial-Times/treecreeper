@@ -10,6 +10,7 @@
     "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
     "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
     "@financial-times/tc-schema-sdk": "file:packages/tc-schema-sdk",
+    "@financial-times/tc-ui": "file:packages/tc-ui",
     "autolinker": "^3.11.1",
     "aws-sdk": "^2.504.0",
     "body-parser": "^1.19.0",
@@ -23,7 +24,6 @@
     "preact": "^10.0.5",
     "preact-render-to-string": "^5.1.2",
     "qs": "^6.9.1",
-    "react-autosuggest": "^9.4.3",
     "showdown": "^1.9.1"
   },
   "devDependencies": {

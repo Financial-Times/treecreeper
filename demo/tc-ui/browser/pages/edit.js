@@ -8,7 +8,7 @@
 
 const {
 	attachEditComponent: attachRelationshipPicker,
-} = require('../../../../packages/tc-ui/relationship/browser.jsx');
+} = require('@financial-times/tc-ui/relationship/browser.jsx');
 
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');
