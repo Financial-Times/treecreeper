@@ -152,7 +152,11 @@ class RelationshipPicker extends Component {
 				selectedRelationships: [suggestion],
 			});
 		}
-		this.setState({ searchTerm: '', isUserError: false });
+		this.setState({
+			searchTerm: '',
+			isUserError: false,
+			isUnresolved: false,
+		});
 		// this is needed to prevent the event propagating up  and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix

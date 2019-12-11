@@ -67,7 +67,7 @@ describe('rest PATCH relationship delete', () => {
 		});
 	});
 
-	it('deletes all relationships when repalcing with an empty array', async () => {
+	it('deletes all relationships when replacing with an empty array', async () => {
 		const [main, child1, child2] = await createNodes(
 			['MainType', mainCode],
 			['ChildType', childCode1],
@@ -77,16 +77,20 @@ describe('rest PATCH relationship delete', () => {
 			[main, 'HAS_CHILD', child1],
 			[main, 'HAS_CHILD', child2],
 		);
-		const { status, body } = await patchHandler()(getInput({
-			'children': [],
-		}, { relationshipAction: 'replace' }));
+		const { status, body } = await patchHandler()(
+			getInput(
+				{
+					children: [],
+				},
+				{ relationshipAction: 'replace' },
+			),
+		);
 		expect(status).toBe(200);
 		expect(body).not.toMatchObject({
-			children: expect.any(Array),
+			children: [childCode1, childCode2],
 		});
 
-		await neo4jTest('MainType', mainCode)
-			.noRels()
+		await neo4jTest('MainType', mainCode).noRels();
 	});
 
 	['merge', 'replace'].forEach(action =>

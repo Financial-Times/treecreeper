@@ -117,7 +117,7 @@ const writeRestAPIQuery = async (
 			method: 'write',
 		});
 	}
-	return { response: response.json(), status: response.status };
+	return { response: await response.json(), status: response.status };
 };
 
 const deleteRestAPIQuery = async (type, code, clientUserId) => {
