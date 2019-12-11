@@ -300,7 +300,7 @@ aside.biz-ops-aside {
 	padding-top: 5px;
 }
 
-.suggest {
+.selected-relationship {
 	margin-top: 0;
 }
 
@@ -308,11 +308,7 @@ aside.biz-ops-aside {
 	padding-top: 10px;
 }
 
-.awesomplete {
-	position: relative;
-}
-
-.awesomplete [role='listbox'] {
+.react-autosuggest__suggestions-list {
 	box-shadow: 1px 1px 5px #ccc;
 	background: white;
 	z-index: 2;
@@ -322,7 +318,7 @@ aside.biz-ops-aside {
 }
 
 .editable-relationships,
-.awesomplete [role='listbox'] {
+.react-autosuggest__suggestions-list {
 	list-style-type: none;
 	margin: 0;
 	padding-left: 0;
@@ -338,24 +334,24 @@ aside.biz-ops-aside {
 }
 
 /* important rules are to clobber o-typography */
-.awesomplete [role='listbox'] li {
+.react-autosuggest__suggestions-list li {
 	padding: 0.5em !important;
 	color: #0d7680;
 	cursor: pointer;
 }
-
-.awesomplete [role='listbox'] li::before {
+/* stylelint-disable no-descending-specificity */
+.react-autosuggest__suggestions-list li::before {
 	display: none !important;
 }
-
-.awesomplete [role='listbox'] li[aria-selected='true'],
-.awesomplete [role='listbox'] li:hover,
-.awesomplete [role='listbox'] mark {
+/* stylelint-enable no-descending-specificity */
+.react-autosuggest__suggestions-list li[aria-selected='true'],
+.react-autosuggest__suggestions-list li:hover,
+.react-autosuggest__suggestions-list mark {
 	color: #08474d;
 	background: #cfe4e6;
 }
 
-.o-forms-input .suggest:not([disabled]) {
+.autocomplete__input:not([disabled]) {
 	background-image: url('https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:search?source=o-icons&tint=%2333302E,%2333302E&format=svg');
 	background-repeat: no-repeat;
 	background-position-x: right;

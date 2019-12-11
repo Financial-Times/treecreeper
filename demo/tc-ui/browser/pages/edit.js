@@ -7,8 +7,8 @@
 // }
 
 const {
-	RelationshipEditor,
-} = require('../../../../packages/tc-ui-relationships/browser');
+	attachEditComponent: attachRelationshipPicker,
+} = require('@financial-times/tc-ui/relationship/browser.jsx');
 
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');
@@ -45,25 +45,28 @@ const initDocumentEditors = () => {
 };
 
 const initRelationshipSelectors = () => {
-	[...document.querySelectorAll('[data-biz-ops-type="relationship"]')]
-		// locked fields won't have an input
-		.filter(container => !!container.querySelector('input.suggest'))
-		.map(container => new RelationshipEditor(container));
+	[
+		...document.querySelectorAll(
+			'[data-component="relationship-picker"]:not([data-disabled])',
+		),
+	].forEach(attachRelationshipPicker);
 };
 
+// TODO - the relationship editors should expose their bad state in some way
+// (e.g set teh hidden input as invalid? data-attribute?)
+// That way the form can just, in quite a generic way query for invalid fields
 const preventBadSubmission = () => {
-	const relationshipEditors = [
-		...document.querySelectorAll('[data-biz-ops-type="relationship"]'),
-	];
 	document
 		.querySelector('form.o-layout__main')
 		.addEventListener('submit', ev => {
-			const editorsInUnselectedState = relationshipEditors.filter(
-				el => el.querySelector('.suggest').value,
-			);
+			const editorsInUnselectedState = [
+				...document.querySelectorAll(
+					'[data-component="relationship-picker"][data-is-unresolved]',
+				),
+			];
 			if (editorsInUnselectedState.length) {
 				const badFieldNames = editorsInUnselectedState.map(
-					el => el.querySelector('.o-forms-title__main').textContent,
+					el => el.dataset.propertyName,
 				);
 				window.alert(`\
 One or more relationship fields are in an unselected state.

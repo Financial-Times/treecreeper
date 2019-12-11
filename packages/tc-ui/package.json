@@ -1,8 +1,9 @@
 {
 	"dependencies": {
 		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
-		"preact": "^10.0.5",
 		"autolinker": "^3.11.1",
-		"awesomplete": "^1.1.5"
+		"preact": "^10.0.5",
+		"react-autosuggest": "^9.4.3",
+		"react-highlight-words": "^0.16.0"
 	}
 }

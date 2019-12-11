@@ -1,5 +1,8 @@
 const { h, Fragment } = require('preact');
 const { getType } = require('@financial-times/tc-schema-sdk');
+const { FieldTitle } = require('../lib/edit-helpers');
+const { LinkToRecord } = require('../lib/helpers');
+const { RelationshipPicker } = require('./lib/relationship-picker');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -53,9 +56,7 @@ const IsActiveLabel = ({ isActive }) =>
 const OneRelationship = ({ type, value = {}, id, annotate = true }) =>
 	type && value.code ? (
 		<Fragment>
-			<a id={id} href={`/${type}/${encodeURIComponent(value.code)}`}>
-				{value.name || value.code}
-			</a>
+			<LinkToRecord id={id} type={type} value={value} />
 			{annotate ? (
 				<Fragment>
 					{type === 'System' ? (
@@ -80,7 +81,7 @@ const OneRelationship = ({ type, value = {}, id, annotate = true }) =>
 		'Error: unable to construct link'
 	);
 
-const Relationship = ({ value, type, id, hasMany }) => {
+const ViewRelationship = ({ value, type, id, hasMany }) => {
 	if (!hasMany) {
 		const props = { type, value, id };
 		return <OneRelationship {...props} />;
@@ -110,6 +111,16 @@ const Relationship = ({ value, type, id, hasMany }) => {
 	);
 };
 
+const EditRelationship = props => (
+	// eslint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for
+	<label className="o-forms-field" data-biz-ops-type="relationship">
+		<FieldTitle {...props} />
+		<RelationshipPicker {...props} />
+	</label>
+);
+
 module.exports = {
-	Relationship,
+	ViewComponent: ViewRelationship,
+	EditComponent: EditRelationship,
+	parser: value => (value ? JSON.parse(value) : null),
 };

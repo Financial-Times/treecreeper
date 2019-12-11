@@ -78,7 +78,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 			if (fieldNamesToLock.includes(name)) {
 				lockedBy = fieldsToLock[name];
 			}
-			const { Component } = assignComponent(item.type);
+			const { EditComponent } = assignComponent(item.type);
 			const viewModel = {
 				propertyName: name,
 				value: getValue(item, data[name]),
@@ -94,7 +94,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 			};
 
 			return viewModel.propertyName && viewModel.label ? (
-				<Component {...viewModel} />
+				<EditComponent {...viewModel} />
 			) : null;
 		});
 };

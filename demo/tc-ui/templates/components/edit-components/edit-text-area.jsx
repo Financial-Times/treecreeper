@@ -43,4 +43,4 @@ const EditTextArea = props => {
 	);
 };
 
-module.exports = { Component: EditTextArea };
+module.exports = { EditComponent: EditTextArea };

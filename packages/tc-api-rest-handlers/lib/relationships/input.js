@@ -152,7 +152,8 @@ const getRemovedRelationships = ({
 const getWriteRelationships = ({ type, body = {} }, reduce = true) => {
 	const newRelationships = Object.entries(body)
 		.filter(isWriteRelationship(type))
-		.map(([propName, codes]) => [propName, toArray(codes)]);
+		.map(([propName, codes]) => [propName, toArray(codes)])
+		.filter(([, codes]) => codes.length);
 
 	return reduce
 		? newRelationships.reduce(entriesToObject, {})
