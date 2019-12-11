@@ -1,6 +1,16 @@
 const builder = require('unist-builder');
 
-class SyntaxError extends Error {}
+class SyntaxError extends Error {
+	constructor(message, line, column) {
+		super(message);
+		this.position = {
+			start: {
+				line,
+				column,
+			},
+		};
+	}
+}
 
 const createNode = (key, value, line, column) =>
 	builder('property', {
@@ -86,11 +96,15 @@ const parsePropertyDefinition = (propDefString, line) => {
 				buffer = buffer.trim();
 				if (buffer === '') {
 					throw new SyntaxError(
-						`unexpected property name separator ':' found at line ${line}, column ${column} `,
+						`unexpected property name separator ':' found`,
+						line,
+						column,
 					);
 				} else if (!/^[a-z][a-zA-Z0-9]+$/.test(buffer)) {
 					throw new SyntaxError(
-						`nested property name ${buffer} should be lower camel case at line ${line}, column ${column}`,
+						`nested property name ${buffer} should be lower camel case`,
+						line,
+						column,
 					);
 				}
 				propName = buffer;
@@ -103,11 +117,15 @@ const parsePropertyDefinition = (propDefString, line) => {
 				buffer = buffer.trim();
 				if (propName === '') {
 					throw new SyntaxError(
-						`unexpected linefeed token found at line ${line}, column ${column}`,
+						`unexpected linefeed token found`,
+						line,
+						column,
 					);
 				} else if (buffer === '') {
 					throw new SyntaxError(
-						`property value for ${propName} must not be empty at line ${line}, column ${column}`,
+						`property value for ${propName} must not be empty`,
+						line,
+						column,
 					);
 				}
 				properties.push(createNode(propName, buffer, line, column));
@@ -134,15 +152,29 @@ const parsePropertyDefinition = (propDefString, line) => {
 	}
 
 	// deal with remain buffers
-	if (buffer !== '') {
+	if (buffer === '') {
+		// if remain buffer is empty but property name exists,
+		// we should deal with syntax error which missing property value definition
+		if (propName !== '') {
+			throw new SyntaxError(
+				`property value for ${propName} must not be empty`,
+				line,
+				column,
+			);
+		}
+	} else {
 		buffer = buffer.trim();
 		if (propName === '') {
 			throw new SyntaxError(
-				`Unexpected character remaining at line ${line}`,
+				`Unexpected character remains '${buffer}'`,
+				line,
+				column,
 			);
 		} else if (buffer === '') {
 			throw new SyntaxError(
-				`property value for ${propName} must not be empty at line ${line}, column ${column}`,
+				`property value for ${propName} must not be empty`,
+				line,
+				column,
 			);
 		}
 		properties.push(createNode(propName, buffer, line, column));

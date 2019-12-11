@@ -2,8 +2,17 @@ const visit = require('unist-util-visit-parents');
 const resolvePropertyName = require('../resolve-property-name');
 const convertNodeToProblem = require('./convert-node-to-problem');
 
-module.exports = function setTreecreeperPropertyNames({ properties }) {
+module.exports = function setTreecreeperPropertyNames({
+	properties,
+	nestedPrefix = '',
+}) {
 	const uniquePropertyNames = [];
+	const createProblemMessage = message => {
+		if (nestedPrefix !== '') {
+			return `${message} of ${nestedPrefix} type`;
+		}
+		return message;
+	};
 
 	function mutate(node) {
 		const property = resolvePropertyName({
@@ -14,7 +23,9 @@ module.exports = function setTreecreeperPropertyNames({ properties }) {
 		if (!property) {
 			convertNodeToProblem({
 				node,
-				message: `i couldn't resolve ${node.key} to a property name`,
+				message: createProblemMessage(
+					`i couldn't resolve ${node.key} to a property name`,
+				),
 			});
 			return;
 		}
@@ -23,7 +34,9 @@ module.exports = function setTreecreeperPropertyNames({ properties }) {
 		if (uniquePropertyNames.includes(name)) {
 			convertNodeToProblem({
 				node,
-				message: `disallowed to define same property name ${name} in markdown`,
+				message: createProblemMessage(
+					`disallowed to define same property name ${name} in markdown`,
+				),
 			});
 			return;
 		}

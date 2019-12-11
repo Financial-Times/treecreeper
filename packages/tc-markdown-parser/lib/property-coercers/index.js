@@ -39,6 +39,7 @@ module.exports = {
 	*/
 	String(subdocument, { hasMany = false } = {}) {
 		const items = split(subdocument);
+		console.log({ hasMany, items, subdocument });
 
 		// Expecting a list, got a list
 		if (hasMany && items.length) {
@@ -159,7 +160,11 @@ module.exports = {
 	},
 	Int(subdocument) {
 		const flattenedContent = flattenNodeToPlainString(subdocument);
-		const value = parseInt(flattenedContent, 10);
+		// If the value contains exponential character, we should use parseFloat instead
+		// ref: https://tc39.es/ecma262/#sec-parseint-string-radix
+		const value = /^[\de]+$/.test(flattenedContent)
+			? parseFloat(flattenedContent)
+			: parseInt(flattenedContent, 10);
 
 		if (Number.isNaN(value)) {
 			return {

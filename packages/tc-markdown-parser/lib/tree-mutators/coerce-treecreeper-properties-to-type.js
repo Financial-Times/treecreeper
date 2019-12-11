@@ -78,32 +78,31 @@ const coerceNestedPropertyValue = (
 	node,
 	{ primitiveTypesMap, hasMany, propertyType },
 ) => {
-	console.log(JSON.stringify(node.children, null, 2));
-	const [subdocument] = node.children;
-
 	try {
-		const coercedValues = subdocument.children.reduce(
-			(values, nestNode) => {
+		const coercedProperties = node.children.map(subdocument => {
+			// console.log(JSON.stringify(subdocument, null, 2));
+			return subdocument.children.reduce((values, nestNode) => {
+				if (nestNode.type === 'problem') {
+					throw new Error(nestNode.message);
+				}
 				const primitiveType = primitiveTypesMap[nestNode.propertyType];
 				const coercer = getCoercer({
 					isNested: true,
 					primitiveType,
 					propertyType,
 				});
-				// console.log(JSON.stringify(nestNode, null, 2));
-				// console.log(coercer, hasMany);
 				const coercion = coercer(nestNode, { hasMany });
-				// console.log(coercion);
 				if (coercion.valid) {
 					values[nestNode.key] = dropHtmlComment(coercion.value);
 					return values;
 				}
 				throw new Error(coercion.value);
-			},
-			{},
+			}, {});
+		});
+		setPropertyNodeValue(
+			node,
+			hasMany ? coercedProperties : coercedProperties[0],
 		);
-		// console.log(coercedValues);
-		setPropertyNodeValue(node, coercedValues);
 	} catch (error) {
 		convertNodeToProblem({
 			node,
@@ -196,7 +195,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 	}
 
 	return function transform(tree) {
-		selectAll(':root > property:not(problem)', tree).forEach(mutate);
+		selectAll(':root > property', tree).forEach(mutate);
 		// console.log(rootPropertyNodes);
 		// visit(tree, 'property', mutate);
 		return omitEmptyPropertyNode(tree);

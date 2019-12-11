@@ -11,9 +11,9 @@ const parser = getParser({
 	type: 'MainType',
 });
 
-describe('nested property property definition tests', () => {
+describe('nested property definition tests', () => {
 	describe('single relationship case - hasMany: false', () => {
-		it.skip('can be parsed only code definition as an object', async () => {
+		it('can be parsed only code definition as an object', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
@@ -31,7 +31,7 @@ describe('nested property property definition tests', () => {
 			});
 		});
 
-		it.skip('can be parsed as object which additional property definitions', async () => {
+		it('can be parsed as object which additional property definitions', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
@@ -88,7 +88,7 @@ describe('nested property property definition tests', () => {
 		});
 	});
 
-	describe.skip('boolean type conversion', () => {
+	describe('boolean type conversion', () => {
 		const expects = {
 			yes: true,
 			true: true,
@@ -97,7 +97,7 @@ describe('nested property property definition tests', () => {
 			'👎': false,
 		};
 		Object.entries(expects).forEach(([bool, actual]) => {
-			it.skip(`hasMany: false - '${bool}' should be coerced to boolean`, async () => {
+			it(`hasMany: false - '${bool}' should be coerced to boolean`, async () => {
 				const { data } = await parser.parseMarkdownString(here`
 					# name
 
@@ -139,7 +139,7 @@ describe('nested property property definition tests', () => {
 		});
 	});
 
-	describe.skip('float type conversion', () => {
+	describe('integer type conversion', () => {
 		const expects = {
 			'10.5': 10,
 			'-1': -1,
@@ -188,7 +188,7 @@ describe('nested property property definition tests', () => {
 		});
 	});
 
-	describe.skip('integer type conversion', () => {
+	describe('float type conversion', () => {
 		const expects = {
 			'0.00001': 0.00001,
 			'-1.05': -1.05,
@@ -236,7 +236,7 @@ describe('nested property property definition tests', () => {
 		});
 	});
 
-	describe.skip('throws syntax error on mutiline definition', () => {
+	describe('throws syntax error on mutiline definition', () => {
 		it('mutiline property name should be a lower camel case', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
@@ -249,9 +249,9 @@ describe('nested property property definition tests', () => {
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
-			const [{ message }] = errors;
+			const [{ message, line }] = errors;
 			expect(message).toMatch(/should be lower camel case/);
-			expect(message).toMatch(/line 6/);
+			expect(line).toBe(6);
 		});
 
 		it('unexpected property separator found', async () => {
@@ -266,9 +266,9 @@ describe('nested property property definition tests', () => {
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
-			const [{ message }] = errors;
+			const [{ message, line }] = errors;
 			expect(message).toMatch(/unexpected property name separator/);
-			expect(message).toMatch(/line 6/);
+			expect(line).toBe(6);
 		});
 
 		it('linefeed character without property name', async () => {
@@ -284,9 +284,29 @@ describe('nested property property definition tests', () => {
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
-			const [{ message }] = errors;
+			const [{ message, line }] = errors;
 			expect(message).toMatch(/unexpected linefeed token found/);
-			expect(message).toMatch(/line 6/);
+			expect(line).toBe(6);
+		});
+
+		it('unexpected remaining definition', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## culious child
+
+				example-code
+					someString: i like it
+					i like it, too
+			`);
+
+			expect(errors).toHaveLength(1);
+			expect(data.name).toEqual('name');
+			const [{ message, line }] = errors;
+			expect(message).toMatch(
+				/Unexpected character remains 'i like it, too'/,
+			);
+			expect(line).toBe(7);
 		});
 
 		it('property value must not be empty', async () => {
@@ -301,14 +321,14 @@ describe('nested property property definition tests', () => {
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
-			const [{ message }] = errors;
+			const [{ message, line }] = errors;
 			expect(message).toMatch(
 				/property value for someString must not be empty/,
 			);
-			expect(message).toMatch(/line 6/);
+			expect(line).toBe(6);
 		});
 
-		it('property name must be exist in schema', async () => {
+		it('property name must exist in schema', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
@@ -320,15 +340,13 @@ describe('nested property property definition tests', () => {
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
-			const [{ message }] = errors;
-			expect(message).toMatch(
-				/property name anotherString is not defined/,
-			);
-			expect(message).toMatch(/line 6/);
+			const [{ message, line }] = errors;
+			expect(message).toMatch(/i couldn't resolve anotherString/);
+			expect(line).toBe(6);
 		});
 	});
 
-	describe.skip('mutiple relationship case - hasMany: true', () => {
+	describe('mutiple relationship case - hasMany: true', () => {
 		it('can be parsed as plain string array', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
@@ -354,10 +372,13 @@ describe('nested property property definition tests', () => {
 		});
 
 		it('can be parsed as object array which contains property object', async () => {
-			const { data, errors } = await parser.parseMarkdownString(here`
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data, errors } = await childParser.parseMarkdownString(here`
 				# name
 
-				## younger siblings
+				## is culious child of
 
 				* example-sibling-01
 					someString: prop01
@@ -368,7 +389,7 @@ describe('nested property property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				youngerSiblings: [
+				isCuliousChildOf: [
 					{
 						code: 'example-sibling-01',
 						someString: 'prop01',
@@ -382,10 +403,13 @@ describe('nested property property definition tests', () => {
 		});
 
 		it('mixed case of having properties and not having', async () => {
-			const { data, errors } = await parser.parseMarkdownString(here`
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data, errors } = await childParser.parseMarkdownString(here`
 				# name
 
-				## younger siblings
+				## is culious child of
 
 				* example-sibling-01
 					someString: prop01
@@ -395,7 +419,7 @@ describe('nested property property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				youngerSiblings: [
+				isCuliousChildOf: [
 					{
 						code: 'example-sibling-01',
 						someString: 'prop01',
