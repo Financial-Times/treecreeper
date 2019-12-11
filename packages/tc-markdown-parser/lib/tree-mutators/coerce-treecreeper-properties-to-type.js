@@ -1,4 +1,3 @@
-// const visit = require('unist-util-visit-parents');
 const { selectAll } = require('unist-util-select');
 const stripHtmlComments = require('strip-html-comments');
 const propertyCoercers = require('../property-coercers');
@@ -195,8 +194,6 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 	return function transform(tree) {
 		selectAll(':root > property', tree).forEach(mutate);
-		// console.log(rootPropertyNodes);
-		// visit(tree, 'property', mutate);
 		return omitEmptyPropertyNode(tree);
 	};
 };
