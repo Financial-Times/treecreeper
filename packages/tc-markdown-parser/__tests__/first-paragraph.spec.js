@@ -11,7 +11,7 @@ const parser = getParser({
 	type: 'MainType',
 });
 
-test.skip('any top level content outside an h2-range is parsed as description by default', async () => {
+test('any top level content outside an h2-range is parsed as description by default', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# well
 
@@ -25,7 +25,7 @@ test.skip('any top level content outside an h2-range is parsed as description by
 	expect(data).toHaveProperty('description', 'hello monkey');
 });
 
-test.skip('any top level content outside an h2-range is parsed as configured field', async () => {
+test('any top level content outside an h2-range is parsed as configured field', async () => {
 	const paragraphParser = getParser({
 		type: 'MainType',
 		descriptionFieldName: 'configured',
@@ -44,7 +44,7 @@ test.skip('any top level content outside an h2-range is parsed as configured fie
 	expect(data).toHaveProperty('configured', 'hello monkey');
 });
 
-test.skip('top level content in an h2-range is not parsed as description', async () => {
+test('top level content in an h2-range is not parsed as description', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# i have a heading
 		## some string
