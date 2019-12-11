@@ -37,41 +37,21 @@ module.exports = {
 	  about `hasMany` is `String` and `Subdocument` types, which in our case
 	  includes Codes.
 	*/
-	String(subdocument, { hasMany = false } = {}) {
+	String(subdocument) {
 		const items = split(subdocument);
-		console.log({ hasMany, items, subdocument });
-
-		// Expecting a list, got a list
-		if (hasMany && items.length) {
-			return {
-				valid: true,
-				value: items.map(flattenNodeToPlainString),
-			};
-		}
-
-		// Expecting a list, didn't get a list'
-		if (hasMany && !items.length) {
-			return {
-				valid: false,
-				value: "expected a list, but didn't get any bulleted items",
-			};
-		}
-
-		// Not expecting a list, didn't get a list'
-		if (!hasMany && !items.length) {
-			return {
-				valid: true,
-				value: flattenNodeToPlainString(subdocument),
-			};
-		}
 
 		// Not expecting a list, but got a list
-		if (!hasMany && items.length) {
+		if (items.length) {
 			return {
 				valid: false,
 				value: 'expected a single item, but got a bulleted list',
 			};
 		}
+
+		return {
+			valid: true,
+			value: flattenNodeToPlainString(subdocument),
+		};
 	},
 	/*
 	 NestedString is similar to String coercer, but it only has parsed propery values e.g,
@@ -83,11 +63,11 @@ module.exports = {
 	                ------------
 	                passed this part to subdocument
 	*/
-	NestedString({ children = [] }) {
-		if (children.length) {
+	NestedString(subdocument = {}) {
+		if (subdocument.children) {
 			return {
 				valid: true,
-				value: children.map(doc => doc.value).join(''),
+				value: flattenNodeToPlainString(subdocument),
 			};
 		}
 		return {

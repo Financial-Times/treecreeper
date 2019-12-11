@@ -52,7 +52,7 @@ function getCoercer({ isNested, primitiveType, propertyType }) {
 
 const coerceNonNestedPropertyValue = (
 	node,
-	{ primitiveType, propertyType, hasMany },
+	{ primitiveType, propertyType },
 ) => {
 	const [subdocument] = node.children;
 
@@ -62,7 +62,7 @@ const coerceNonNestedPropertyValue = (
 		propertyType,
 	});
 
-	const coercion = coercer(subdocument, { hasMany });
+	const coercion = coercer(subdocument);
 
 	if (coercion.valid) {
 		setPropertyNodeValue(node, dropHtmlComment(coercion.value));
@@ -167,7 +167,6 @@ module.exports = function coerceTreecreeperPropertiesToType({
 				coerceNonNestedPropertyValue(node, {
 					primitiveType: primitiveTypesMap[node.propertyType],
 					propertyType,
-					hasMany,
 				});
 			} else {
 				coerceNestedPropertyValue(node, {
