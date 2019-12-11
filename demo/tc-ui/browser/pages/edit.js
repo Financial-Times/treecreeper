@@ -7,8 +7,8 @@
 // }
 
 const {
-	attachRelationshipPicker,
-} = require('../../../../packages/tc-ui-relationships/browser.jsx');
+	attachEditComponent: attachRelationshipPicker,
+} = require('../../../../packages/tc-ui/relationship/browser.jsx');
 
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');

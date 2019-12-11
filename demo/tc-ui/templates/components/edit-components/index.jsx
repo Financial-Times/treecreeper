@@ -4,7 +4,7 @@ const Dropdown = require('./edit-dropdown');
 const Text = require('./edit-text');
 const Number = require('./edit-number');
 const TextArea = require('./edit-text-area');
-const Relationship = require('../../../../../packages/tc-ui-relationships/edit');
+const Relationship = require('../../../../../packages/tc-ui/relationship/server');
 
 module.exports = {
 	Boolean,

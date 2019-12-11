@@ -83,8 +83,8 @@ const Email = ({ value, id }) =>
 	) : null;
 
 const {
-	Relationship,
-} = require('../../../../packages/tc-ui-relationships/view');
+	ViewComponent: Relationship,
+} = require('../../../../packages/tc-ui/relationship/server');
 
 const Temporal = ({ value, id, type }) => (
 	<span id={id}>{formatDateTime(value.formatted, type)}</span>

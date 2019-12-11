@@ -1,6 +1,6 @@
 const { Component } = require('./edit-text');
 
 module.exports = {
-	Component,
+	EditComponent: Component,
 	parser: value => Number(value),
 };

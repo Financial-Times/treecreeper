@@ -25,4 +25,4 @@ const EditText = props => {
 	);
 };
 
-module.exports = { Component: EditText };
+module.exports = { EditComponent: EditText };

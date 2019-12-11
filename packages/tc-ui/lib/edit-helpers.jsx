@@ -1,6 +1,6 @@
 const { h } = require('preact');
 const autolinker = require('autolinker');
-const { Relationship } = require('./view');
+const { LinkToRecord } = require('./helpers');
 
 const autolink = text => autolinker.link(text || '');
 
@@ -42,12 +42,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 			{lockedBy ? (
 				<div className="o-forms__additional-info">
 					Not editable. Automatically populated by{' '}
-					<Relationship
-						type="System"
-						value={{ code: lockedBy }}
-						annotate={false}
-					/>
-					.
+					<LinkToRecord type="System" value={{ code: lockedBy }} />.
 				</div>
 			) : null}
 		</span>
