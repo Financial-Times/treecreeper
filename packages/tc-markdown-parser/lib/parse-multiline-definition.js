@@ -12,8 +12,59 @@ class SyntaxError extends Error {
 	}
 }
 
-const createNode = (key, value, line, column) =>
-	builder('property', {
+const trim = parsedBuffer => parsedBuffer.replace(/^[\t\s]+|[\t\s]+$/g, '');
+
+const parseMultilineValue = valueDefinitionString => {
+	const listItems = [];
+	let buffer = '';
+	let isListStared = false;
+
+	for (const char of valueDefinitionString) {
+		let isSkip = false;
+		switch (char) {
+			case '\t':
+			case ' ':
+				if (buffer === '') {
+					isSkip = true;
+				}
+				break;
+			case '-':
+			case '*':
+				if (buffer === '') {
+					isSkip = true;
+					isListStared = true;
+				}
+				break;
+			case '\n':
+				listItems.push(trim(buffer));
+				buffer = '';
+				isSkip = true;
+				isListStared = false;
+				break;
+			default:
+				if (!isListStared) {
+					throw new SyntaxError("list must starts with '-' or '*'");
+				}
+				break;
+		}
+		if (!isSkip) {
+			buffer += char;
+		}
+	}
+	if (buffer !== '') {
+		listItems.push(trim(buffer));
+	}
+	return listItems;
+};
+
+const createNode = (key, value, line, column) => {
+	// If value definition does not have any line feed character,
+	// we should deal with single value, not an array
+	if (value.indexOf('\n') > -1) {
+		value = parseMultilineValue(value);
+	}
+
+	return builder('property', {
 		key,
 		position: {
 			start: {
@@ -27,6 +78,7 @@ const createNode = (key, value, line, column) =>
 			}),
 		],
 	});
+};
 
 /*
  This function divides from multiple definition to code and property string e.g,
@@ -59,6 +111,7 @@ const dividePropertyDefinition = subdocument => {
 // Token characters of meaningful property descriptor
 const TAB = '\t';
 const PROPERTY_NAME_SEPARATOR = ':';
+const WHITE_SPACE = ' ';
 const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
@@ -81,12 +134,15 @@ const parsePropertyDefinition = (propDefString, line) => {
 	let propName = '';
 	let column = 0;
 
-	for (const char of propDefString) {
+	for (let char of propDefString) {
 		let isSkip = false;
 
 		switch (char) {
 			// just identing
 			case TAB:
+				char = ' ';
+				break;
+			case WHITE_SPACE:
 				// when buffer is empty, it means 'parsing property name', so ignore the tab
 				isSkip = buffer === '';
 				break;
@@ -94,45 +150,51 @@ const parsePropertyDefinition = (propDefString, line) => {
 			// property name declaration ends
 			case PROPERTY_NAME_SEPARATOR:
 				buffer = buffer.trim();
-				if (buffer === '') {
-					throw new SyntaxError(
-						`unexpected property name separator ':' found`,
-						line,
-						column,
-					);
-				} else if (!/^[a-z][a-zA-Z0-9]+$/.test(buffer)) {
-					throw new SyntaxError(
-						`nested property name ${buffer} should be lower camel case`,
-						line,
-						column,
-					);
+				if (propName !== '') {
+					const index = buffer.lastIndexOf('\n');
+					if (index === -1) {
+						break;
+					}
+					const value = trim(buffer.slice(0, index));
+					const newPropName = trim(buffer.slice(index + 1));
+					if (value === '') {
+						throw new SyntaxError(
+							`unexpected property name separator ':' found`,
+							line,
+							column,
+						);
+					} else if (!/^[a-z][a-zA-Z0-9]+$/.test(newPropName)) {
+						throw new SyntaxError(
+							`nested property name ${newPropName} should be lower camel case`,
+							line,
+							column,
+						);
+					}
+					properties.push(createNode(propName, value, line, column));
+					propName = newPropName;
+				} else {
+					propName = trim(buffer);
+					if (propName === '') {
+						throw new SyntaxError(
+							`unexpected property name separator ':' found`,
+							line,
+							column,
+						);
+					} else if (!/^[a-z][a-zA-Z0-9]+$/.test(propName)) {
+						throw new SyntaxError(
+							`nested property name ${propName} should be lower camel case`,
+							line,
+							column,
+						);
+					}
 				}
-				propName = buffer;
 				buffer = '';
 				isSkip = true;
 				break;
 
 			// property value declaration ends
 			case LINE_FEED:
-				buffer = buffer.trim();
-				if (propName === '') {
-					throw new SyntaxError(
-						`unexpected linefeed token found`,
-						line,
-						column,
-					);
-				} else if (buffer === '') {
-					throw new SyntaxError(
-						`property value for ${propName} must not be empty`,
-						line,
-						column,
-					);
-				}
-				properties.push(createNode(propName, buffer, line, column));
-				// reset state and update line and column
-				buffer = '';
-				propName = '';
-				isSkip = true;
+				isSkip = buffer.trim() === '';
 				line++;
 				column = 0;
 				break;
@@ -163,7 +225,7 @@ const parsePropertyDefinition = (propDefString, line) => {
 			);
 		}
 	} else {
-		buffer = buffer.trim();
+		buffer = trim(buffer);
 		if (propName === '') {
 			throw new SyntaxError(
 				`Unexpected character remains '${buffer}'`,

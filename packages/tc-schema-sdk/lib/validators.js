@@ -72,7 +72,7 @@ const validateProperty = ({ getType, getEnums }) => {
 				} else {
 					Object.keys(value).forEach(() => {
 						// TODO: need to impletment rich relationship schema to run below
-						// recursivelyCallableValidator(type, key, value[key]);
+						// recursivelyCallableValidator(typeName, propertyName, value[key]);
 					});
 				}
 			});
