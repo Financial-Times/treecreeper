@@ -57,7 +57,7 @@ const primitiveComponents = require('./primitive-components');
 
 const getPrimitiveComponent = ({ type, isRelationship }) => {
 	if (isRelationship) {
-		return primitiveComponents.relationship;
+		return primitiveComponents.Relationship;
 	}
 	return primitiveComponents[type] || primitiveComponents.Default;
 };

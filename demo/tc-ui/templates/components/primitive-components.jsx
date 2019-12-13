@@ -101,7 +101,7 @@ module.exports = {
 	linkHasProtocol,
 	Url,
 	Email,
-	relationship: primitives.relationship.ViewComponent,
+	Relationship: primitives.Relationship.ViewComponent,
 	Date: Temporal,
 	DateTime: Temporal,
 	Time: Temporal,
