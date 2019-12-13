@@ -118,7 +118,9 @@ test('nested fields are coerced to string (the code)', async () => {
 		cheerabbits
 	`);
 
-	expect(data.favouriteChild).toBe('cheerabbits');
+	expect(data.favouriteChild).toMatchObject({
+		code: 'cheerabbits',
+	});
 });
 
 test('properties with hasMany turn bulleted lists into arrays', async () => {
@@ -136,10 +138,18 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 	`);
 
 	expect(errors).toHaveLength(0);
-	expect(data.children).toEqual(['chee-rabbits']);
+	expect(data.children).toEqual([
+		{
+			code: 'chee-rabbits',
+		},
+	]);
 	expect(data.youngerSiblings).toEqual([
-		'ft-app-fruitcake',
-		'apple-quicktime',
+		{
+			code: 'ft-app-fruitcake',
+		},
+		{
+			code: 'apple-quicktime',
+		},
 	]);
 });
 
@@ -162,7 +172,11 @@ test('thows error if defined property is included with blacklist', async () => {
 	`);
 
 	expect(errors).toHaveLength(1);
-	expect(data.children).toEqual(['chee-rabbits']);
+	expect(data.children).toEqual([
+		{
+			code: 'chee-rabbits',
+		},
+	]);
 	const [{ message }] = errors;
 	expect(message).toEqual(
 		'youngerSiblings is not permitted within markdown (to allow other people to edit it)',

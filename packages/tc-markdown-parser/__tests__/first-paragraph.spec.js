@@ -53,3 +53,27 @@ test('top level content in an h2-range is not parsed as description', async () =
 	expect(errors.length).toBe(0);
 	expect(data).not.toHaveProperty('description');
 });
+
+test('disallow mutiple description in blocks', async () => {
+	const { data, errors } = await parser.parseMarkdownString(here`
+		# well
+
+		this is first description
+
+		this is second desctiption
+
+		## some string
+
+		how's tricks
+	`);
+	expect(errors.length).toBe(1);
+	const [{ message }] = errors;
+	expect(message).toMatch(
+		/only one description is allowed to define in top level/,
+	);
+	expect(data).toMatchObject({
+		name: 'well',
+		description: 'this is first description',
+		someString: "how's tricks",
+	});
+});

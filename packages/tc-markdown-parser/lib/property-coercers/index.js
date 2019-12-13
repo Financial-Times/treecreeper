@@ -37,40 +37,43 @@ module.exports = {
 	  about `hasMany` is `String` and `Subdocument` types, which in our case
 	  includes Codes.
 	*/
-	String(subdocument, { hasMany = false } = {}) {
+	String(subdocument) {
 		const items = split(subdocument);
 
-		// Expecting a list, got a list
-		if (hasMany && items.length) {
-			return {
-				valid: true,
-				value: items.map(flattenNodeToPlainString),
-			};
-		}
-
-		// Expecting a list, didn't get a list'
-		if (hasMany && !items.length) {
-			return {
-				valid: false,
-				value: "expected a list, but didn't get any bulleted items",
-			};
-		}
-
-		// Not expecting a list, didn't get a list'
-		if (!hasMany && !items.length) {
-			return {
-				valid: true,
-				value: flattenNodeToPlainString(subdocument),
-			};
-		}
-
 		// Not expecting a list, but got a list
-		if (!hasMany && items.length) {
+		if (items.length) {
 			return {
 				valid: false,
 				value: 'expected a single item, but got a bulleted list',
 			};
 		}
+
+		return {
+			valid: true,
+			value: flattenNodeToPlainString(subdocument),
+		};
+	},
+	/*
+	 NestedString is similar to String coercer, but it only has parsed propery values e.g,
+
+	 # favourite child
+
+	 - code
+	   propNameOne: propValueOne
+	                ------------
+	                passed this part to subdocument
+	*/
+	NestedString(subdocument = {}) {
+		if (subdocument.children) {
+			return {
+				valid: true,
+				value: flattenNodeToPlainString(subdocument),
+			};
+		}
+		return {
+			valid: false,
+			value: 'nested string should not be empty',
+		};
 	},
 	/*
 	  Subdocument is not a real biz-ops type. This is to separate strings (i.e.,
@@ -134,6 +137,40 @@ module.exports = {
 				};
 			}
 		}
+	},
+	Int(subdocument) {
+		const flattenedContent = flattenNodeToPlainString(subdocument);
+		// If the value contains exponential character, we should use parseFloat instead
+		// ref: https://tc39.es/ecma262/#sec-parseint-string-radix
+		const value = /^[\de]+$/.test(flattenedContent)
+			? parseFloat(flattenedContent)
+			: parseInt(flattenedContent, 10);
+
+		if (Number.isNaN(value)) {
+			return {
+				valid: false,
+				value: `i couldnt' resolve ${flattenedContent} to an integer`,
+			};
+		}
+		return {
+			valid: true,
+			value,
+		};
+	},
+	Float(subdocument) {
+		const flattenedContent = flattenNodeToPlainString(subdocument);
+		const value = parseFloat(flattenedContent);
+
+		if (Number.isNaN(value)) {
+			return {
+				valid: false,
+				value: `i couldnt' resolve ${flattenedContent} to a float`,
+			};
+		}
+		return {
+			valid: true,
+			value,
+		};
 	},
 };
 

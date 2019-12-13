@@ -97,3 +97,21 @@ properties:
     label: Older siblings label
     direction: incoming
     hasMany: true
+  culiousChild:
+    relationship: CULIOUS_CHILD
+    type: ChildType
+    description: Culious child description.
+    label: Culious child label
+    direction: outgoing
+    hasMany: false
+    properties:
+      someString:
+        type: Word
+      someInteger:
+        type: Int
+      someEnum:
+        type: AnEnum
+      someBoolean:
+        type: Boolean
+      someFloat:
+        type: Float
