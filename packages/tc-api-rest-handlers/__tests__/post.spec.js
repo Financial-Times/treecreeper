@@ -298,6 +298,22 @@ describe('rest POST', () => {
 				);
 		});
 
+		it('creates record with empty relationships array', async () => {
+			const { status, body } = await basicHandler(
+				{
+					children: [],
+				},
+				getMetaPayload(),
+			);
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				children: expect.any(Array),
+			});
+
+			await neo4jTest('MainType', mainCode).noRels();
+		});
+
 		describe('rich relatioship information', () => {
 			const someProp = 'some property';
 			const anotherProp = 'another property';

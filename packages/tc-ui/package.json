@@ -5,5 +5,9 @@
 		"preact": "^10.0.5",
 		"react-autosuggest": "^9.4.3",
 		"react-highlight-words": "^0.16.0"
+	},
+	"devDependencies": {
+		"fetch-mock": "^8.0.0",
+		"isomorphic-fetch": "^2.2.1"
 	}
 }
