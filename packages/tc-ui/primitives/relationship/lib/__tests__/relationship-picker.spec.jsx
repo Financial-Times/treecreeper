@@ -4,7 +4,7 @@ const { h } = require('preact');
 
 const ReactAutosuggest = require('react-autosuggest');
 const fetchMock = require('fetch-mock');
-const { shallow, mount } = require('../../../test-helpers/enzyme-setup');
+const { shallow, mount } = require('../../../../test-helpers/enzyme-setup');
 
 Object.assign(fetchMock.config, {
 	fetch: global.fetch,

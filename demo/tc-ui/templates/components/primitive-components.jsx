@@ -82,9 +82,7 @@ const Email = ({ value, id }) =>
 		</a>
 	) : null;
 
-const {
-	ViewComponent: Relationship,
-} = require('../../../../packages/tc-ui/relationship/server');
+const { primitives } = require('../../../../packages/tc-ui/server');
 
 const Temporal = ({ value, id, type }) => (
 	<span id={id}>{formatDateTime(value.formatted, type)}</span>
@@ -103,7 +101,7 @@ module.exports = {
 	linkHasProtocol,
 	Url,
 	Email,
-	Relationship,
+	Relationship: primitives.Relationship.ViewComponent,
 	Date: Temporal,
 	DateTime: Temporal,
 	Time: Temporal,

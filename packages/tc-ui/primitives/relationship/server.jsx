@@ -1,6 +1,6 @@
 const { h } = require('preact');
 
-const { FieldTitle } = require('../lib/edit-helpers');
+const { FieldTitle } = require('../../lib/edit-helpers');
 
 const { RelationshipPicker } = require('./lib/relationship-picker');
 const { ViewRelationship } = require('./lib/view-relationship');
