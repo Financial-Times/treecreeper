@@ -7,7 +7,6 @@ const setTreecreeperPropertyNames = require('./set-treecreeper-property-names');
 const append = require('../append-node');
 
 function createPropertyNodes(node, nestedProperties) {
-	// console.log(JSON.stringify(node, null, 2));
 	const parsedPropertyNodes = parseMultilineDefinition(node);
 
 	// We should ignore code property because this property is used for relationship implicitly,

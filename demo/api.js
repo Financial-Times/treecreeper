@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser');
 const express = require('express');
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
@@ -17,8 +18,30 @@ app.use(
 	}),
 );
 
-getApp({ app, graphqlMethods: ['post', 'get'] }).then(() => {
-	app.listen(PORT, () => {
-		console.log(`Listening on ${PORT}`);
-	});
+getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
+	() => {
+		app.listen(PORT, () => {
+			console.log(`Listening on ${PORT}`);
+		});
+	},
+);
+
+require('module-alias').addAliases({
+	react: 'preact/compat',
+	'react-dom': 'preact/compat',
 });
+require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
+const editController = require('./controllers/edit');
+const viewController = require('./controllers/view');
+
+app.use(
+	'/:type/:code/edit',
+	bodyParser.urlencoded({ limit: '8mb', extended: true }),
+	editController,
+);
+app.use(
+	'/:type/create',
+	bodyParser.urlencoded({ limit: '8mb', extended: true }),
+	editController,
+);
+app.use('/:type/:code', viewController);
