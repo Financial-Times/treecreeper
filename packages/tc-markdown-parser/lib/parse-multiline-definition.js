@@ -115,6 +115,60 @@ const WHITE_SPACE = ' ';
 const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 
+const readValue = (index, defString, line, column) => {
+	let buffer = '';
+	let point;
+	let i = index;
+
+	const singleLineIndex = defString.indexOf('\n', index);
+	if (singleLineIndex === -1) {
+		return {
+			offset: defString.length - index,
+			value: trim(defString.slice(index)),
+			line,
+			column,
+		};
+	}
+	if (trim(defString.slice(index, singleLineIndex)) !== '') {
+		return {
+			offset: singleLineIndex - index + 1,
+			value: trim(defString.slice(index, singleLineIndex)),
+			line: line + 1,
+			column: column + singleLineIndex,
+		};
+	}
+
+	for (; i < defString.length; i++) {
+		const char = defString[i];
+		switch (char) {
+			case LINE_FEED:
+				line++;
+				column = 0;
+				break;
+			case PROPERTY_NAME_SEPARATOR:
+				point = buffer.lastIndexOf('\n');
+				if (point !== -1) {
+					return {
+						offset: point + 1,
+						value: trim(buffer.slice(0, point)),
+						line,
+						column,
+					};
+				}
+				break;
+			default:
+				break;
+		}
+		buffer += char;
+		column++;
+	}
+	return {
+		offset: i,
+		value: buffer.trim(),
+		line,
+		column,
+	};
+};
 /*
  This is tiny lexer/parser function for analyze multiple property definition.
  See above constant characters and parse into an object with following format e.g,
@@ -134,7 +188,8 @@ const parsePropertyDefinition = (propDefString, line) => {
 	let propName = '';
 	let column = 0;
 
-	for (let char of propDefString) {
+	for (let i = 0; i < propDefString.length; i++) {
+		let char = propDefString[i];
 		let isSkip = false;
 
 		switch (char) {
@@ -149,45 +204,44 @@ const parsePropertyDefinition = (propDefString, line) => {
 
 			// property name declaration ends
 			case PROPERTY_NAME_SEPARATOR:
-				buffer = buffer.trim();
-				if (propName !== '') {
-					const index = buffer.lastIndexOf('\n');
-					if (index === -1) {
-						break;
-					}
-					const value = trim(buffer.slice(0, index));
-					const newPropName = trim(buffer.slice(index + 1));
-					if (value === '') {
-						throw new SyntaxError(
-							`unexpected property name separator ':' found`,
-							line,
-							column,
-						);
-					} else if (!/^[a-z][a-zA-Z0-9]+$/.test(newPropName)) {
-						throw new SyntaxError(
-							`nested property name ${newPropName} should be lower camel case`,
-							line,
-							column,
-						);
-					}
-					properties.push(createNode(propName, value, line, column));
-					propName = newPropName;
-				} else {
-					propName = trim(buffer);
-					if (propName === '') {
-						throw new SyntaxError(
-							`unexpected property name separator ':' found`,
-							line,
-							column,
-						);
-					} else if (!/^[a-z][a-zA-Z0-9]+$/.test(propName)) {
-						throw new SyntaxError(
-							`nested property name ${propName} should be lower camel case`,
-							line,
-							column,
-						);
-					}
+				propName = buffer.trim();
+				if (propName === '') {
+					throw new SyntaxError(
+						`unexpected property name separator ':' found: ${buffer}`,
+						line,
+						column,
+					);
+				} else if (propName.indexOf('\n') > -1) {
+					throw new SyntaxError(
+						`unexpected linefeed token found`,
+						line - 1,
+						column,
+					);
+				} else if (!/^[a-z][a-zA-Z0-9]+$/.test(propName)) {
+					throw new SyntaxError(
+						`nested property name ${propName} should be lower camel case`,
+						line,
+						column,
+					);
 				}
+				// eslint-disable-next-line no-case-declarations
+				const {
+					offset,
+					value,
+					line: newLine,
+					column: newColumn,
+				} = readValue(i + 1, propDefString, line, column);
+				i += offset;
+				line = newLine;
+				column = newColumn;
+				if (value === '') {
+					throw new SyntaxError(
+						`property value for ${propName} must not be empty`,
+						line,
+						column,
+					);
+				}
+				properties.push(createNode(propName, value, line, column));
 				buffer = '';
 				isSkip = true;
 				break;
@@ -214,33 +268,25 @@ const parsePropertyDefinition = (propDefString, line) => {
 	}
 
 	// deal with remain buffers
-	if (buffer === '') {
-		// if remain buffer is empty but property name exists,
-		// we should deal with syntax error which missing property value definition
-		if (propName !== '') {
-			throw new SyntaxError(
-				`property value for ${propName} must not be empty`,
-				line,
-				column,
-			);
-		}
-	} else {
-		buffer = trim(buffer);
-		if (propName === '') {
-			throw new SyntaxError(
-				`Unexpected character remains '${buffer}'`,
-				line,
-				column,
-			);
-		} else if (buffer === '') {
-			throw new SyntaxError(
-				`property value for ${propName} must not be empty`,
-				line,
-				column,
-			);
-		}
-		properties.push(createNode(propName, buffer, line, column));
+	buffer = trim(buffer);
+	if (buffer !== '') {
+		throw new SyntaxError(
+			`Unexpected character remains '${buffer}'`,
+			line,
+			column,
+		);
 	}
+	// if (buffer === '') {
+	// 	// if remain buffers are empty but property name exists,
+	// 	// we should deal with syntax error which missing property value definition
+	// 	if (propName !== '') {
+	// 		properties.push(createNode(propName, buffer.trim(), line, column));
+	// 	}
+	// } else {
+	// 	if (propName === '') {
+	// 	}
+	// 	properties.push(createNode(propName, buffer, line, column));
+	// }
 
 	return properties;
 };
