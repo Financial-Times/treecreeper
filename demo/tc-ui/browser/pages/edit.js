@@ -8,7 +8,7 @@
 
 const {
 	primitives: {
-		Relationship: { withEditComponent: attachRelationshipPicker },
+		relationship: { withEditComponent: attachRelationshipPicker },
 	},
 } = require('@financial-times/tc-ui/browser');
 
