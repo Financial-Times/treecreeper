@@ -54,15 +54,7 @@ const TrafficLight = ({ value }) =>
 		</span>
 	) : null;
 
-const yesNoUnknown = value => {
-	if (value === true) return 'Yes';
-	if (value === false) return 'No';
-	return 'Unknown';
-};
-
 const linkHasProtocol = value => value.match(/^https?:/);
-
-const Boolean = ({ value, id }) => <span id={id}>{yesNoUnknown(value)}</span>;
 
 const Url = ({ value, id }) => {
 	if (!value) return null;
@@ -97,13 +89,13 @@ module.exports = {
 	ProductLifecycle: LifecycleStage,
 	ServiceTier,
 	TrafficLight,
-	Boolean,
 	linkHasProtocol,
 	Url,
 	Email,
-	Relationship: primitives.Relationship.ViewComponent,
 	Date: Temporal,
 	DateTime: Temporal,
 	Time: Temporal,
 	Default,
+	Boolean: primitives.Boolean.ViewComponent,
+	Relationship: primitives.Relationship.ViewComponent,
 };
