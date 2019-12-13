@@ -1,5 +1,5 @@
-const Relationship = require('./relationship/server');
+const relationship = require('./relationship/server');
 
 module.exports = {
-	Relationship,
+	relationship,
 };

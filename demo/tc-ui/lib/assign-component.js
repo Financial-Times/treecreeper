@@ -22,7 +22,7 @@ const assignComponent = itemType => {
 		return Components[mapComponents[itemType]];
 	}
 	if (itemType && validTypes.includes(itemType)) {
-		return Components.Relationship;
+		return Components.relationship;
 	}
 	return Components.Text;
 };
