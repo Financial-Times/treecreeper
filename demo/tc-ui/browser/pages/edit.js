@@ -7,7 +7,7 @@
 // }
 
 const {
-	attachEditComponent: attachRelationshipPicker,
+	withEditComponent: attachRelationshipPicker,
 } = require('@financial-times/tc-ui/relationship/browser.jsx');
 
 const initWysiwyg = container => {
