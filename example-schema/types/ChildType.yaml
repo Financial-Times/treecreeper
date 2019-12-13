@@ -24,11 +24,11 @@ properties:
     description: Is favourite child of description.
     label: Is favourite child of label
     direction: incoming
-  isCuliousChildOf:
-    relationship: CULIOUS_CHILD
+  isCuriousChildOf:
+    relationship: CURIOUS_CHILD
     type: MainType
-    description: Is culious child description.
-    label: Is culious child label
+    description: Is curious child description.
+    label: Is curious child label
     direction: incoming
     hasMany: true
     properties:

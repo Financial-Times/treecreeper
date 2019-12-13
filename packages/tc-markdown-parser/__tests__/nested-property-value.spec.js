@@ -35,7 +35,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					someString: i like it
@@ -45,7 +45,7 @@ describe('nested property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				culiousChild: {
+				curiousChild: {
 					code: 'example-code',
 					someString: 'i like it',
 					someBoolean: true,
@@ -59,7 +59,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await childParser.parseMarkdownString(here`
 				# name
 
-				## is culious child of
+				## is curious child of
 
 				- example-code01
 					someString: i like it
@@ -72,7 +72,7 @@ describe('nested property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				isCuliousChildOf: [
+				isCuriousChildOf: [
 					{
 						code: 'example-code01',
 						someString: 'i like it',
@@ -101,14 +101,14 @@ describe('nested property definition tests', () => {
 				const { data } = await parser.parseMarkdownString(here`
 					# name
 
-					## culious child
+					## curious child
 
 					example-code
 						someBoolean: ${bool}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					culiousChild: {
+					curiousChild: {
 						code: 'example-code',
 						someBoolean: actual,
 					},
@@ -121,14 +121,14 @@ describe('nested property definition tests', () => {
 				const { data } = await childParser.parseMarkdownString(here`
 					# name
 
-					## is culious child of
+					## is curious child of
 
 					- main-code
 						someBoolean: ${bool}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					isCuliousChildOf: [
+					isCuriousChildOf: [
 						{
 							code: 'main-code',
 							someBoolean: actual,
@@ -150,14 +150,14 @@ describe('nested property definition tests', () => {
 				const { data } = await parser.parseMarkdownString(here`
 					# name
 
-					## culious child
+					## curious child
 
 					example-code
 						someInteger: ${integer}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					culiousChild: {
+					curiousChild: {
 						code: 'example-code',
 						someInteger: actual,
 					},
@@ -170,14 +170,14 @@ describe('nested property definition tests', () => {
 				const { data } = await childParser.parseMarkdownString(here`
 					# name
 
-					## is culious child of
+					## is curious child of
 
 					- main-code
 						someInteger: ${integer}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					isCuliousChildOf: [
+					isCuriousChildOf: [
 						{
 							code: 'main-code',
 							someInteger: actual,
@@ -198,14 +198,14 @@ describe('nested property definition tests', () => {
 				const { data } = await parser.parseMarkdownString(here`
 					# name
 
-					## culious child
+					## curious child
 
 					example-code
 						someFloat: ${float}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					culiousChild: {
+					curiousChild: {
 						code: 'example-code',
 						someFloat: actual,
 					},
@@ -218,14 +218,14 @@ describe('nested property definition tests', () => {
 				const { data } = await childParser.parseMarkdownString(here`
 					# name
 
-					## is culious child of
+					## is curious child of
 
 					- main-code
 						someFloat: ${float}
 				`);
 				expect(data).toEqual({
 					name: 'name',
-					isCuliousChildOf: [
+					isCuriousChildOf: [
 						{
 							code: 'main-code',
 							someFloat: actual,
@@ -241,7 +241,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					some string: i like it
@@ -258,7 +258,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					: i like it
@@ -275,7 +275,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					i like it
@@ -293,7 +293,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					someString: i like it
@@ -313,7 +313,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					someString:
@@ -332,7 +332,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 				# name
 
-				## culious child
+				## curious child
 
 				example-code
 					anotherString: another string
@@ -378,7 +378,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await childParser.parseMarkdownString(here`
 				# name
 
-				## is culious child of
+				## is curious child of
 
 				* example-sibling-01
 					someString: prop01
@@ -389,7 +389,7 @@ describe('nested property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				isCuliousChildOf: [
+				isCuriousChildOf: [
 					{
 						code: 'example-sibling-01',
 						someString: 'prop01',
@@ -409,7 +409,7 @@ describe('nested property definition tests', () => {
 			const { data, errors } = await childParser.parseMarkdownString(here`
 				# name
 
-				## is culious child of
+				## is curious child of
 
 				* example-sibling-01
 					someString: prop01
@@ -419,7 +419,7 @@ describe('nested property definition tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
-				isCuliousChildOf: [
+				isCuriousChildOf: [
 					{
 						code: 'example-sibling-01',
 						someString: 'prop01',
