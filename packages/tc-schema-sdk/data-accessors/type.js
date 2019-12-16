@@ -114,26 +114,30 @@ const findCardinality = (direction, relationshipType) =>
 		? relationshipType.to.hasMany
 		: relationshipType.from.hasMany;
 
-const createPropertiesWithRelationships = function(
+const createPropertiesWithRelationships = function({
 	richRelationshipTypes,
 	properties,
 	relationshipGetter,
 	typeName,
-) {
+	withRelationships,
+}) {
 	return Object.entries(properties).reduce(
 		(updatedProps, [propName, propDef]) => {
 			if (propDef.hidden) {
 				return updatedProps;
 			}
-
-			const relationshipType = isRelationship(
+			const propIsRelationship = isRelationship(
 				richRelationshipTypes,
 				propDef,
-			)
+			);
+			if (propIsRelationship && !withRelationships) {
+				return updatedProps;
+			}
+			const relationshipType = propIsRelationship
 				? relationshipGetter(propName)
 				: null;
 
-			if (!relationshipType) {
+			if (!propIsRelationship || !relationshipType) {
 				return {
 					...updatedProps,
 					[propName]: {
@@ -167,28 +171,6 @@ const createPropertiesWithRelationships = function(
 						'showInactive' in propDef ? propDef.showInactive : true,
 					properties: relationshipType.properties,
 				},
-			};
-		},
-		{},
-	);
-};
-
-const createPropertiesWithoutRelationships = function(
-	richRelationshipTypes,
-	properties,
-	relationshipGetter,
-) {
-	return Object.entries(properties).reduce(
-		(updatedProps, [propName, propDef]) => {
-			if (isRelationship(richRelationshipTypes, propDef)) {
-				propDef = relationshipGetter(propName);
-			}
-			if (propDef.relationship) {
-				return updatedProps;
-			}
-			return {
-				...updatedProps,
-				[propName]: propDef,
 			};
 		},
 		{},
@@ -253,20 +235,13 @@ const getType = function(
 			},
 		);
 
-	if (withRelationships) {
-		properties = createPropertiesWithRelationships(
-			richRelationshipTypes,
-			properties,
-			relationshipGetter,
-			typeName,
-		);
-	} else {
-		properties = createPropertiesWithoutRelationships(
-			richRelationshipTypes,
-			properties,
-			relationshipGetter,
-		);
-	}
+	properties = createPropertiesWithRelationships({
+		richRelationshipTypes,
+		properties,
+		relationshipGetter,
+		typeName,
+		withRelationships,
+	});
 
 	if (includeMetaFields) {
 		properties = assignMetaProperties(properties);
