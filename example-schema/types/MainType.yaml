@@ -98,20 +98,6 @@ properties:
     direction: incoming
     hasMany: true
   curiousChild:
-    relationship: CURIOUS_CHILD
-    type: ChildType
+    type: CuriousChild
     description: Curious child description.
     label: Curious child label
-    direction: outgoing
-    hasMany: false
-    properties:
-      someString:
-        type: Word
-      someInteger:
-        type: Int
-      someEnum:
-        type: AnEnum
-      someBoolean:
-        type: Boolean
-      someFloat:
-        type: Float

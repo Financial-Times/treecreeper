@@ -1,0 +1,29 @@
+name: CuriousChild
+from:
+  type: MainType
+  hasMany: false
+to:
+  type: ChildType
+  hasMany: true
+relationship: HAS_CURIOUS_CHILD
+properties:
+  someString:
+    label: Label for some string
+    description: Description for some string.
+    type: Word
+  someInteger:
+    label: Label for some integer
+    description: Description for some integer.
+    type: Int
+  someEnum:
+    label: Label for some enum
+    description: Description for some enum.
+    type: AnEnum
+  someBoolean:
+    label: Label for some boolean
+    description: Description for some boolean.
+    type: Boolean
+  someFloat:
+    label: Label for some float
+    description: Description for some float.
+    type: Float
