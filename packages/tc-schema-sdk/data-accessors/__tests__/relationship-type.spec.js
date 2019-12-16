@@ -29,7 +29,7 @@ describe('get-relationship-type', () => {
 									type: 'Type1',
 									relationship: 'RELATED',
 									direction: 'incoming',
-									hasMany: true,
+									hasMany: false,
 								},
 							},
 						},
@@ -44,12 +44,15 @@ describe('get-relationship-type', () => {
 				'someRelationshipTo',
 			);
 			expect(rel).toMatchObject({
-				type: 'Type2',
-				from: 'Type1',
-				to: 'Type2',
+				from: {
+					type: 'Type1',
+					hasMany: false,
+				},
+				to: {
+					type: 'Type2',
+					hasMany: true,
+				},
 				relationship: 'RELATED',
-				direction: 'outgoing',
-				hasMany: true,
 				properties: {},
 			});
 		});
@@ -70,101 +73,6 @@ describe('get-relationship-type', () => {
 			expect(() =>
 				schema.getRelationshipType('Type1', 'someString'),
 			).toThrow(TreecreeperUserError);
-		});
-	});
-
-	describe('retrieve with realtionship properties', () => {
-		const schema = new SDK({
-			schemaData: {
-				schema: {
-					types: [
-						{
-							name: 'Type1',
-							properties: {
-								someRelationshipTo: {
-									type: 'Type2',
-									relationship: 'RELATED',
-									direction: 'outgoing',
-									hasMany: true,
-								},
-								anotherRelationshipTo: {
-									type: 'Type2',
-									relationship: 'RELATED',
-									direction: 'outgoing',
-									hasMany: true,
-									properties: {
-										someString: {
-											type: 'Word',
-										},
-									},
-								},
-							},
-						},
-						{
-							name: 'Type2',
-							properties: {
-								someRelationshipFrom: {
-									type: 'Type1',
-									relationship: 'RELATED',
-									direction: 'incoming',
-									hasMany: true,
-								},
-							},
-						},
-					],
-				},
-			},
-		});
-
-		it('can retrieve relationship type with empty properties', () => {
-			const rel = schema.getRelationshipType(
-				'Type1',
-				'someRelationshipTo',
-				{
-					includeMetaFields: true,
-				},
-			);
-			expect(rel).toMatchObject({
-				type: 'Type2',
-				from: 'Type1',
-				to: 'Type2',
-				relationship: 'RELATED',
-				direction: 'outgoing',
-				hasMany: true,
-				// because user defined properties are empty
-				properties: {},
-			});
-		});
-
-		it('can retrieve relationship type with expected properties', () => {
-			const rel = schema.getRelationshipType(
-				'Type1',
-				'anotherRelationshipTo',
-				{
-					includeMetaFields: true,
-					primitiveTypes: 'graphql',
-				},
-			);
-			expect(rel).toMatchObject({
-				type: 'Type2',
-				from: 'Type1',
-				to: 'Type2',
-				relationship: 'RELATED',
-				direction: 'outgoing',
-				hasMany: true,
-				properties: expect.any(Object),
-			});
-
-			expect(rel.properties.someString).toMatchObject({
-				type: 'String',
-			});
-
-			// However, relationship properties should not have _lockedFields meta field
-			expect(rel.properties).toEqual(
-				expect.not.objectContaining({
-					_lockedFields: expect.any(String),
-				}),
-			);
 		});
 	});
 
@@ -201,13 +109,12 @@ describe('get-relationship-type', () => {
 							},
 							from: {
 								type: 'Type1',
-								hasMany: true,
+								hasMany: false,
 							},
 							to: {
 								type: 'Type2',
 								hasMany: true,
 							},
-							isMutal: true,
 						},
 					],
 				},
@@ -224,12 +131,15 @@ describe('get-relationship-type', () => {
 				includeMetaFields: true,
 			});
 			expect(from).toMatchObject({
-				type: 'Type2',
-				from: 'Type1',
-				to: 'Type2',
+				from: {
+					type: 'Type1',
+					hasMany: false,
+				},
+				to: {
+					type: 'Type2',
+					hasMany: true,
+				},
 				relationship: 'RELATED',
-				direction: 'outgoing',
-				hasMany: true,
 				properties: expect.any(Object),
 			});
 			expect(from.properties.someString).toMatchObject({
@@ -242,12 +152,15 @@ describe('get-relationship-type', () => {
 			);
 
 			expect(to).toMatchObject({
-				type: 'Type1',
-				from: 'Type1',
-				to: 'Type2',
+				from: {
+					type: 'Type1',
+					hasMany: false,
+				},
+				to: {
+					type: 'Type2',
+					hasMany: true,
+				},
 				relationship: 'RELATED',
-				direction: 'incoming',
-				hasMany: true,
 				properties: expect.any(Object),
 			});
 			expect(to.properties.someString).toMatchObject({

@@ -259,6 +259,12 @@ describe('validateProperty', () => {
 					name: 'EndType',
 					properties: {
 						code: { pattern: 'LOWERCASE', type: 'String' },
+						inverseTestRelationship: {
+							type: 'StartType',
+							direction: 'incoming',
+							relationship: 'HAS',
+							hasMany: false,
+						},
 					},
 				},
 			]);

@@ -24,7 +24,7 @@ describe('get-relationship-types', () => {
 									type: 'Type1',
 									relationship: 'RELATED',
 									direction: 'incoming',
-									hasMany: true,
+									hasMany: false,
 								},
 							},
 						},
@@ -37,20 +37,20 @@ describe('get-relationship-types', () => {
 
 		const [from, to] = relationshipTypes;
 		expect(from).toMatchObject({
-			type: 'Type2',
 			relationship: 'RELATED',
-			direction: 'outgoing',
-			hasMany: true,
-			from: 'Type1',
-			to: 'Type2',
+			from: {
+				type: 'Type1',
+				hasMany: false,
+			},
+			to: { type: 'Type2', hasMany: true },
 		});
 		expect(to).toMatchObject({
-			type: 'Type1',
 			relationship: 'RELATED',
-			direction: 'incoming',
-			hasMany: true,
-			from: 'Type1',
-			to: 'Type2',
+			from: {
+				type: 'Type1',
+				hasMany: false,
+			},
+			to: { type: 'Type2', hasMany: true },
 		});
 	});
 
@@ -82,13 +82,12 @@ describe('get-relationship-types', () => {
 							relationship: 'RELATED',
 							from: {
 								type: 'Type1',
-								hasMany: true,
+								hasMany: false,
 							},
 							to: {
 								type: 'Type2',
 								hasMany: true,
 							},
-							isMutal: true,
 						},
 					],
 				},
@@ -99,20 +98,20 @@ describe('get-relationship-types', () => {
 
 		const [from, to] = relationshipTypes;
 		expect(from).toMatchObject({
-			type: 'Type2',
 			relationship: 'RELATED',
-			direction: 'outgoing',
-			hasMany: true,
-			from: 'Type1',
-			to: 'Type2',
+			from: {
+				type: 'Type1',
+				hasMany: false,
+			},
+			to: { type: 'Type2', hasMany: true },
 		});
 		expect(to).toMatchObject({
-			type: 'Type1',
 			relationship: 'RELATED',
-			direction: 'incoming',
-			hasMany: true,
-			from: 'Type1',
-			to: 'Type2',
+			from: {
+				type: 'Type1',
+				hasMany: false,
+			},
+			to: { type: 'Type2', hasMany: true },
 		});
 	});
 
@@ -142,7 +141,7 @@ describe('get-relationship-types', () => {
 					],
 				},
 			},
-		}).getRelationshipTypes({ excludeCypherRelationships: true });
+		}).getRelationshipTypes();
 
 		expect(relationshipTypes).toHaveLength(0);
 	});

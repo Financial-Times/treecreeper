@@ -622,7 +622,7 @@ describe('graphql def creation', () => {
 							type: 'Fake',
 							hasMany: true,
 						},
-						isMutal: true,
+						isMutual: true,
 					},
 				],
 				enums: {},
