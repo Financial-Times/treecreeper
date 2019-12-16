@@ -89,7 +89,6 @@ module.exports = {
 	ProductLifecycle: LifecycleStage,
 	ServiceTier,
 	TrafficLight,
-	linkHasProtocol,
 	Url,
 	Email,
 	Date: Temporal,
