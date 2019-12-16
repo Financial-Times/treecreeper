@@ -14,7 +14,7 @@ const isUserDefinedRelationship = propDef =>
 	['relationship', 'cypher'].some(name => name in propDef);
 
 const isRichRelationship = (richRelationshipTypes, propDef) =>
-	richRelationshipTypes.find(relType => relType.name === propDef.type);
+	richRelationshipTypes.some(relType => relType.name === propDef.type);
 
 const isRelationship = (richRelationshipTypes, propDef) =>
 	isUserDefinedRelationship(propDef) ||
@@ -100,34 +100,73 @@ const getFromRawData = (typeName, rawData) => {
 	return clone(typeDefinition);
 };
 
-const assignRelationshipInfo = propDef => ({
-	...propDef,
-	hasMany: propDef.hasMany || false,
-	isRelationship: isUserDefinedRelationship(propDef),
-	writeInactive: 'writeInactive' in propDef ? propDef.writeInactive : false,
-	showInactive: 'showInactive' in propDef ? propDef.showInactive : true,
-});
+const findDirection = (rootType, propDef, relationshipType) =>
+	propDef.direction ||
+	(relationshipType.from.type === rootType ? 'outgoing' : 'incoming');
+
+const findEndType = (direction, relationshipType) =>
+	direction === 'outgoing'
+		? relationshipType.to.type
+		: relationshipType.from.type;
+
+const findCardinality = (direction, relationshipType) =>
+	direction === 'outgoing'
+		? relationshipType.to.hasMany
+		: relationshipType.from.hasMany;
 
 const createPropertiesWithRelationships = function(
 	richRelationshipTypes,
 	properties,
 	relationshipGetter,
+	typeName,
 ) {
 	return Object.entries(properties).reduce(
 		(updatedProps, [propName, propDef]) => {
-			if (isRelationship(richRelationshipTypes, propDef)) {
-				propDef = relationshipGetter(propName);
+			if (propDef.hidden) {
+				return updatedProps;
 			}
 
-			if (isUserDefinedRelationship(propDef)) {
-				if (propDef.hidden) {
-					return updatedProps;
-				}
-				propDef = assignRelationshipInfo(propDef);
+			const relationshipType = isRelationship(
+				richRelationshipTypes,
+				propDef,
+			)
+				? relationshipGetter(propName)
+				: null;
+
+			if (!relationshipType) {
+				return {
+					...updatedProps,
+					[propName]: {
+						...propDef,
+						isRelationship: !!propDef.cypher,
+						hasMany: !!propDef.hasMany,
+					},
+				};
 			}
+
+			const direction = findDirection(
+				typeName,
+				propDef,
+				relationshipType,
+			);
+
 			return {
 				...updatedProps,
-				[propName]: propDef,
+				[propName]: {
+					...propDef,
+					direction,
+					type: findEndType(direction, relationshipType),
+					relationship: relationshipType.relationship,
+					hasMany: findCardinality(direction, relationshipType),
+					isRelationship: true,
+					writeInactive:
+						'writeInactive' in propDef
+							? propDef.writeInactive
+							: false,
+					showInactive:
+						'showInactive' in propDef ? propDef.showInactive : true,
+					properties: relationshipType.properties,
+				},
 			};
 		},
 		{},
@@ -202,6 +241,7 @@ const getType = function(
 
 	let properties = { ...typeSchema.properties };
 	const richRelationshipTypes = this.rawData.getRelationshipTypes();
+
 	const relationshipGetter = propName =>
 		this.getRelationshipType(
 			typeSchema.name,
@@ -218,6 +258,7 @@ const getType = function(
 			richRelationshipTypes,
 			properties,
 			relationshipGetter,
+			typeName,
 		);
 	} else {
 		properties = createPropertiesWithoutRelationships(

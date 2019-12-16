@@ -38,18 +38,6 @@ const formatSimpleRelationship = (rootType, property, rawData) => {
 		},
 	);
 
-	// Note the slightly odd seeming inversion of where we read hasMany from.
-	// But looking at the actual yaml it's clear that
-	// from:
-	//		type: A
-	// 		hasMany: false
-	// to:
-	//		type: B
-	// 		hasMany: true
-	// Means the relationship A->B is one to many.
-	// However this means that the property on A which references B has many entries
-	// So the manyness of B is what determines the manyness of the property on A,
-	// and vice versa
 	return {
 		relationship: property.relationship,
 		from,
@@ -74,12 +62,7 @@ const isSimpleRelationship = property => 'relationship' in property;
 const findRichRelationshipDefinition = ({ type }, rawData) =>
 	rawData.getRelationshipTypes().find(({ name }) => name === type);
 
-const getRelationshipTypeFromRawData = (
-	rootType,
-	propertyName,
-	rawData,
-	flatten,
-) => {
+const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 	const property = getTypeProperty(rootType, propertyName, rawData);
 	if (!property) {
 		throw new TreecreeperUserError(
@@ -92,9 +75,7 @@ const getRelationshipTypeFromRawData = (
 	// if relationshipType has cypher field, it cannot have from/to direction and properties
 	// because it can only express relationship via cypher query
 	if (isCypherQueryIncluded(property)) {
-		throw new TreecreeperUserError(
-			'Meaningless to request a relationship type for a user defined cypher query',
-		);
+		return;
 	}
 
 	if (isSimpleRelationship(property)) {
@@ -136,9 +117,12 @@ const getRelationshipType = function(
 		this.rawData,
 	);
 
-	let properties = { ...relationshipType.properties };
+	if (!relationshipType) {
+		return;
+	}
+	let properties = { ...(relationshipType.properties || {}) };
 
-	if (includeMetaFields && Object.keys(properties).length) {
+	if (includeMetaFields) {
 		properties = assignMetaProperties(properties, {
 			ignoreFields: '_lockedFields',
 		});

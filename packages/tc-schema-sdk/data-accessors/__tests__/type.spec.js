@@ -117,7 +117,7 @@ describe('get-type', () => {
 				code: {},
 			},
 		});
-		expect(type.properties.code).toEqual({
+		expect(type.properties.code).toMatchObject({
 			type: 'Code',
 			required: true,
 			unique: true,
@@ -215,9 +215,9 @@ describe('get-type', () => {
 			{ options: { primitiveTypes: 'graphql' } },
 		);
 
-		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
-		expect(type.properties.documentProp).toEqual({ type: 'String' });
-		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
+		expect(type.properties.primitiveProp).toMatchObject({ type: 'String' });
+		expect(type.properties.documentProp).toMatchObject({ type: 'String' });
+		expect(type.properties.enumProp).toMatchObject({ type: 'SomeEnum' });
 	});
 
 	it('groups properties by fieldset', () => {
@@ -648,8 +648,6 @@ describe('get-type', () => {
 				writeInactive: false,
 				description: 'test description',
 				label: 'test label',
-				from: 'Type1',
-				to: 'Type2',
 				properties: {},
 			});
 		});
@@ -689,8 +687,6 @@ describe('get-type', () => {
 				hasMany: false,
 				description: 'test description',
 				label: 'test label',
-				from: 'Type2',
-				to: 'Type1',
 				properties: {},
 			});
 		});
@@ -771,11 +767,9 @@ describe('get-type', () => {
 				},
 			});
 
-			expect(type.properties.testName).toEqual({
+			expect(type.properties.testName).toMatchObject({
 				type: 'Type2',
 				hasMany: false,
-				showInactive: true,
-				writeInactive: false,
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				isRelationship: true,
 				description: 'test description',
@@ -831,14 +825,10 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'outgoing',
 				hasMany: true,
-				from: 'Type1',
-				to: 'Type2',
 				properties: {},
 			});
 			expect(type.properties.cypherMany).toEqual({
 				isRelationship: true,
-				showInactive: true,
-				writeInactive: false,
 				type: 'Type2',
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				hasMany: true,
@@ -851,8 +841,6 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
-				from: 'Type2',
-				to: 'Type1',
 				properties: {},
 			});
 		});
@@ -942,6 +930,82 @@ describe('get-type', () => {
 				},
 			]);
 			expect(type.properties.testName).toBeFalsy();
+		});
+
+		it('rich relationships', () => {
+			const sdk = new SDK({
+				schemaData: {
+					schema: {
+						types: [
+							{
+								name: 'Type1',
+								properties: {
+									testNameOutgoing: {
+										type: 'Join',
+									},
+								},
+							},
+							{
+								name: 'Type2',
+								properties: {
+									testNameIncoming: {
+										type: 'Join',
+									},
+								},
+							},
+						],
+						stringPatterns: {},
+						relationshipTypes: [
+							{
+								name: 'Join',
+								from: {
+									type: 'Type1',
+									hasMany: false,
+								},
+								to: {
+									type: 'Type2',
+									hasMany: true,
+								},
+								relationship: 'HAS',
+								properties: {
+									testProp: {
+										type: Boolean,
+									},
+								},
+							},
+						],
+					},
+				},
+			});
+
+			expect(sdk.getType('Type1').properties.testNameOutgoing).toEqual({
+				type: 'Type2',
+				properties: {
+					testProp: {
+						type: Boolean,
+					},
+				},
+				relationship: 'HAS',
+				direction: 'outgoing',
+				hasMany: true,
+				showInactive: true,
+				writeInactive: false,
+				isRelationship: true,
+			});
+			expect(sdk.getType('Type2').properties.testNameIncoming).toEqual({
+				type: 'Type1',
+				properties: {
+					testProp: {
+						type: Boolean,
+					},
+				},
+				relationship: 'HAS',
+				direction: 'incoming',
+				hasMany: false,
+				showInactive: true,
+				writeInactive: false,
+				isRelationship: true,
+			});
 		});
 
 		it('can group relationship properties by fieldset', () => {

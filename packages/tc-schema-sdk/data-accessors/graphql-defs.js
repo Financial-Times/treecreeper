@@ -106,7 +106,7 @@ const snakeToCamel = str => {
 	return camel;
 };
 
-const getRichRelationshipType = (from, relationship, to) =>
+const getRichRelationshipTypeName = (from, relationship, to) =>
 	snakeToCamel(`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`);
 
 const getRichRelationshipPropertyType = ({
@@ -116,35 +116,62 @@ const getRichRelationshipPropertyType = ({
 	hasMany,
 }) => {
 	return maybePluralType({
-		type: getRichRelationshipType(from, relationship, to),
+		type: getRichRelationshipTypeName(from, relationship, to),
 		hasMany,
 	});
 };
 
+const flattenRelationshipType = ({ from, to, relationship }) => ({
+	relationship,
+	from: from.type,
+	to: to.type,
+});
+
 const buildRelationshipTypeModel = relationshipType => {
-	const { from, relationship, to } = relationshipType;
+	const { from, relationship, to } = flattenRelationshipType(
+		relationshipType,
+	);
 	return {
-		typeName: getRichRelationshipType(from, relationship, to),
+		typeName: getRichRelationshipTypeName(from, relationship, to),
 		...relationshipType,
 	};
 };
 
-const buildRichRelationshipPropertyModel = ([name, def]) => ({
+const buildRichRelationshipPropertyModel = (
+	propName,
+	def,
+	rootType,
+	getRelationshipType,
+) => ({
 	description: stripEmptyFirstLine`
 		${def.description}
 		*NOTE: This gives access to properties on the relationships between records
-		as well as on the records themselves. Use '${name}' instead if you do not need this*`,
-	name: `${name}_rel`,
+		as well as on the records themselves. Use '${propName}' instead if you do not need this*`,
+	name: `${propName}_rel`,
 	pagination: maybePaginate(def),
-	type: getRichRelationshipPropertyType(def),
+	type: getRichRelationshipPropertyType({
+		hasMany: def.hasMany,
+		...flattenRelationshipType(getRelationshipType(rootType, propName)),
+	}),
 	deprecation: maybeDeprecate(def),
 	directive: '',
 });
 
-const printRichRelationshipPropertyDefinitions = properties =>
+const printRichRelationshipPropertyDefinitions = (
+	properties,
+	rootType,
+	getRelationshipType,
+) =>
 	Object.entries(properties)
 		.filter(([, { relationship }]) => relationship)
-		.map(buildRichRelationshipPropertyModel)
+		.map(([propName, def]) =>
+			buildRichRelationshipPropertyModel(
+				propName,
+				def,
+				rootType,
+				getRelationshipType,
+			),
+		)
 		.map(printPropertyDefinition)
 		.join('');
 
@@ -167,8 +194,8 @@ const printRelationshipTypeDefinition = ({
 		'Internal use only',
 		stripIndent`
 	type ${typeName} @relation(name: "${relationship}") {
-		from: ${from}
-		to: ${to}
+		from: ${from.type}
+		to: ${to.type}
 		${propStr}
 	}`,
 	);
@@ -250,14 +277,22 @@ const printQueryDefinitions = types => [
 	Outputting types
 */
 
-const printTypeDefinition = ({ name, description, properties }) =>
+const printTypeDefinition = getRelationshipType => ({
+	name,
+	description,
+	properties,
+}) =>
 	printDescribedBlock(
 		description,
 		stripEmptyFirstLine`
 type ${name} {
 	${indentMultiline(printPropertyDefinitions(properties), 2, true)}
 	${indentMultiline(
-		printRichRelationshipPropertyDefinitions(properties, name),
+		printRichRelationshipPropertyDefinitions(
+			properties,
+			name,
+			getRelationshipType,
+		),
 		2,
 		true,
 	)}
@@ -297,8 +332,9 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		const typeDefinitions = types.map(printTypeDefinition);
-
+		const typeDefinitions = types.map(
+			printTypeDefinition(this.getRelationshipType),
+		);
 		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
 			this.getRelationshipTypes({
 				...retrieveOptions,
