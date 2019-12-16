@@ -6,6 +6,7 @@ const sdk = new SDK();
 const { getStringValidator } = sdk;
 const enums = sdk.rawData.getEnums();
 const stringPatterns = sdk.rawData.getStringPatterns();
+const relationshipTypes = sdk.rawData.getRelationshipTypes();
 const ATTRIBUTE_NAME = getStringValidator('ATTRIBUTE_NAME');
 
 const arrayToRegExp = arr => new RegExp(`^(${arr.join('|')})$`);
@@ -72,7 +73,6 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 									'autoPopulated',
 									'showInactive',
 									'writeInactive',
-									'properties',
 								]),
 							),
 						);
@@ -146,9 +146,10 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 						}
 					});
 					it('can determine relationship direction explicitly', () => {
-						const relType = sdk
-							.getRelationshipTypes()
-							.find(rel => rel.name === config.type);
+						const relType = relationshipTypes.find(
+							rel => rel.name === config.type,
+						);
+
 						expect(relType).toBeDefined();
 						if (relType.from.type === relType.to.type) {
 							expect(config.direction).toBeDefined();
@@ -391,7 +392,7 @@ const relationshipTestSuite = type => {
 						'properties',
 						'from',
 						'to',
-						'isMutal',
+						'isMutual',
 						'relationship',
 					]),
 				);
@@ -412,9 +413,9 @@ const relationshipTestSuite = type => {
 		it('has a name', () => {
 			expect(typeof type.name).toBe('string');
 		});
-		it('may have a isMutal', () => {
-			if ('isMutal' in type) {
-				expect(typeof type.isMutal).toBe('boolean');
+		it('may have a isMutual', () => {
+			if ('isMutual' in type) {
+				expect(typeof type.isMutual).toBe('boolean');
 				expect(type.from.type === type.to.type).toBe(true);
 			}
 		});
