@@ -1,7 +1,7 @@
 const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/meta-properties');
 
-const assignMetaProperties = (properties, ...ignoreFields) => {
+const assignMetaProperties = (properties, { ignoreFields = [] } = {}) => {
 	metaProperties.forEach(metaProperty => {
 		if (ignoreFields.includes(metaProperty.name)) {
 			return;

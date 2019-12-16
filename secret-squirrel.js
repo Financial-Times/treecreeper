@@ -2,7 +2,8 @@ module.exports = {
 	files: {
 		allow: [
 			'scripts/neo4j-plugins',
-			'scripts/neo4j-wait-for-start'
+			'scripts/neo4j-wait-for-start',
+			'packages/tc-schema-sdk/data-accessors/__tests__/fixtures/generated-schema.graphql'
 		],
 		allowOverrides: []
 	},

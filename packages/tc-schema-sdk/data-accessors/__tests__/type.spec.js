@@ -5,7 +5,7 @@ const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) =>
 	new SDK({
 		schemaData: {
 			schema: {
-				types: [{ name: 'DummyType' }, typeData],
+				types: [{ name: 'DummyType' }].concat(typeData),
 				stringPatterns,
 			},
 		},
@@ -117,7 +117,7 @@ describe('get-type', () => {
 				code: {},
 			},
 		});
-		expect(type.properties.code).toEqual({
+		expect(type.properties.code).toMatchObject({
 			type: 'Code',
 			required: true,
 			unique: true,
@@ -215,9 +215,9 @@ describe('get-type', () => {
 			{ options: { primitiveTypes: 'graphql' } },
 		);
 
-		expect(type.properties.primitiveProp).toEqual({ type: 'String' });
-		expect(type.properties.documentProp).toEqual({ type: 'String' });
-		expect(type.properties.enumProp).toEqual({ type: 'SomeEnum' });
+		expect(type.properties.primitiveProp).toMatchObject({ type: 'String' });
+		expect(type.properties.documentProp).toMatchObject({ type: 'String' });
+		expect(type.properties.enumProp).toMatchObject({ type: 'SomeEnum' });
 	});
 
 	it('groups properties by fieldset', () => {
@@ -469,7 +469,6 @@ describe('get-type', () => {
 					properties: {
 						miscProp: {
 							type: 'SomeEnum',
-							relationship: 'HAS',
 						},
 					},
 				},
@@ -485,7 +484,6 @@ describe('get-type', () => {
 					properties: {
 						miscProp: {
 							type: 'SomeEnum',
-							relationship: 'HAS',
 						},
 					},
 				},
@@ -507,12 +505,10 @@ describe('get-type', () => {
 				mainProp: {
 					type: 'Word',
 					fieldset: 'main',
-					relationship: 'HAS',
 					label: 'A word relationship',
 				},
 				miscProp: {
 					type: 'SomeEnum',
-					relationship: 'HAS',
 				},
 			},
 			fieldsets: {
@@ -587,6 +583,38 @@ describe('get-type', () => {
 	describe('relationships', () => {
 		it('it can exclude relationships', async () => {
 			const type = typeFromRawData(
+				[
+					{
+						name: 'Type1',
+						properties: {
+							testName: {
+								type: 'Type2',
+								direction: 'outgoing',
+								relationship: 'HAS',
+								label: 'test label',
+								description: 'test description',
+							},
+						},
+					},
+					{
+						name: 'Type2',
+						properties: {
+							testNameInverse: {
+								type: 'Type1',
+								direction: 'incoming',
+								relationship: 'HAS',
+							},
+						},
+					},
+				],
+				{ options: { withRelationships: false } },
+			);
+
+			expect(type.properties.testName).toBeFalsy();
+		});
+
+		it('retrieve relationships pointing away from the node', () => {
+			const type = typeFromRawData([
 				{
 					name: 'Type1',
 					properties: {
@@ -599,25 +627,17 @@ describe('get-type', () => {
 						},
 					},
 				},
-				{ options: { withRelationships: false } },
-			);
-
-			expect(type.properties.testName).toBeFalsy();
-		});
-
-		it('retrieve relationships pointing away from the node', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName: {
-						type: 'Type2',
-						direction: 'outgoing',
-						relationship: 'HAS',
-						label: 'test label',
-						description: 'test description',
+				{
+					name: 'Type2',
+					properties: {
+						testNameInverse: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
 					},
 				},
-			});
+			]);
 			expect(type.properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'outgoing',
@@ -628,25 +648,35 @@ describe('get-type', () => {
 				writeInactive: false,
 				description: 'test description',
 				label: 'test label',
-				from: 'Type1',
-				to: 'Type2',
 				properties: {},
 			});
 		});
 
 		it('retrieve relationships pointing to the node', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName: {
-						type: 'Type2',
-						direction: 'incoming',
-						relationship: 'HAS',
-						label: 'test label',
-						description: 'test description',
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'incoming',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description',
+						},
 					},
 				},
-			});
+				{
+					name: 'Type2',
+					properties: {
+						testNameInverse: {
+							type: 'Type1',
+							direction: 'outgoing',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
 			expect(type.properties.testName).toEqual({
 				relationship: 'HAS',
 				direction: 'incoming',
@@ -657,28 +687,48 @@ describe('get-type', () => {
 				hasMany: false,
 				description: 'test description',
 				label: 'test label',
-				from: 'Type2',
-				to: 'Type1',
 				properties: {},
 			});
 		});
 
 		it('retrieve multiple relationships with same name', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName1: {
-						type: 'Type2',
-						direction: 'outgoing',
-						relationship: 'HAS',
-					},
-					testName2: {
-						type: 'Type3',
-						direction: 'incoming',
-						relationship: 'HAS',
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						testName1: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+						},
+						testName2: {
+							type: 'Type3',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
 					},
 				},
-			});
+				{
+					name: 'Type2',
+					properties: {
+						testName1: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+					},
+				},
+				{
+					name: 'Type3',
+					properties: {
+						testName1: {
+							type: 'Type1',
+							direction: 'outgoing',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
 			expect(type.properties.testName1.direction).toBe('outgoing');
 			expect(type.properties.testName2.direction).toBe('incoming');
 		});
@@ -717,11 +767,9 @@ describe('get-type', () => {
 				},
 			});
 
-			expect(type.properties.testName).toEqual({
+			expect(type.properties.testName).toMatchObject({
 				type: 'Type2',
 				hasMany: false,
-				showInactive: true,
-				writeInactive: false,
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				isRelationship: true,
 				description: 'test description',
@@ -730,28 +778,45 @@ describe('get-type', () => {
 		});
 
 		it('cardinality', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					many: {
-						type: 'Type2',
-						hasMany: true,
-						direction: 'outgoing',
-						relationship: 'HAS',
-					},
-					singular: {
-						type: 'Type2',
-						direction: 'incoming',
-						relationship: 'HAS',
-					},
-					cypherMany: {
-						type: 'Type2',
-						hasMany: true,
-						cypher:
-							'MATCH (this)-[]->(related) RETURN DISTINCT related',
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						many: {
+							type: 'Type2',
+							hasMany: true,
+							direction: 'outgoing',
+							relationship: 'HAS',
+						},
+						singular: {
+							type: 'Type2',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+						cypherMany: {
+							type: 'Type2',
+							hasMany: true,
+							cypher:
+								'MATCH (this)-[]->(related) RETURN DISTINCT related',
+						},
 					},
 				},
-			});
+				{
+					name: 'Type2',
+					properties: {
+						testName: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+						testName2: {
+							type: 'Type1',
+							direction: 'outgoing',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
 			expect(type.properties.many).toEqual({
 				isRelationship: true,
 				showInactive: true,
@@ -760,14 +825,10 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'outgoing',
 				hasMany: true,
-				from: 'Type1',
-				to: 'Type2',
 				properties: {},
 			});
 			expect(type.properties.cypherMany).toEqual({
 				isRelationship: true,
-				showInactive: true,
-				writeInactive: false,
 				type: 'Type2',
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				hasMany: true,
@@ -780,96 +841,217 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
-				from: 'Type2',
-				to: 'Type1',
 				properties: {},
 			});
 		});
 
 		it('relationships can hide inactive records', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName: {
-						type: 'Type2',
-						direction: 'outgoing',
-						relationship: 'HAS',
-						label: 'test label',
-						showInactive: false,
-						description: 'test description',
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							showInactive: false,
+							description: 'test description',
+						},
 					},
 				},
-			});
+				{
+					name: 'Type2',
+					properties: {
+						testName: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
 			expect(type.properties.testName.showInactive).toBe(false);
 		});
 
 		it('relationships can allow adding inactive records', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName: {
-						type: 'Type2',
-						direction: 'outgoing',
-						relationship: 'HAS',
-						label: 'test label',
-						writeInactive: true,
-						description: 'test description',
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							writeInactive: true,
+							description: 'test description',
+						},
 					},
 				},
-			});
+				{
+					name: 'Type2',
+					properties: {
+						testName: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
 			expect(type.properties.testName.writeInactive).toBe(true);
 		});
 
 		it('hidden relationships', () => {
-			const type = typeFromRawData({
-				name: 'Type1',
-				properties: {
-					testName: {
-						type: 'Type2',
-						direction: 'outgoing',
-						relationship: 'HAS',
-						label: 'test label',
-						description: 'test description',
-						hidden: true,
+			const type = typeFromRawData([
+				{
+					name: 'Type1',
+					properties: {
+						testName: {
+							type: 'Type2',
+							direction: 'outgoing',
+							relationship: 'HAS',
+							label: 'test label',
+							description: 'test description',
+							hidden: true,
+						},
+					},
+				},
+				{
+					name: 'Type2',
+					properties: {
+						testName: {
+							type: 'Type1',
+							direction: 'incoming',
+							relationship: 'HAS',
+						},
+					},
+				},
+			]);
+			expect(type.properties.testName).toBeFalsy();
+		});
+
+		it('rich relationships', () => {
+			const sdk = new SDK({
+				schemaData: {
+					schema: {
+						types: [
+							{
+								name: 'Type1',
+								properties: {
+									testNameOutgoing: {
+										type: 'Join',
+									},
+								},
+							},
+							{
+								name: 'Type2',
+								properties: {
+									testNameIncoming: {
+										type: 'Join',
+									},
+								},
+							},
+						],
+						stringPatterns: {},
+						relationshipTypes: [
+							{
+								name: 'Join',
+								from: {
+									type: 'Type1',
+									hasMany: false,
+								},
+								to: {
+									type: 'Type2',
+									hasMany: true,
+								},
+								relationship: 'HAS',
+								properties: {
+									testProp: {
+										type: Boolean,
+									},
+								},
+							},
+						],
 					},
 				},
 			});
-			expect(type.properties.testName).toBeFalsy();
+
+			expect(sdk.getType('Type1').properties.testNameOutgoing).toEqual({
+				type: 'Type2',
+				properties: {
+					testProp: {
+						type: Boolean,
+					},
+				},
+				relationship: 'HAS',
+				direction: 'outgoing',
+				hasMany: true,
+				showInactive: true,
+				writeInactive: false,
+				isRelationship: true,
+			});
+			expect(sdk.getType('Type2').properties.testNameIncoming).toEqual({
+				type: 'Type1',
+				properties: {
+					testProp: {
+						type: Boolean,
+					},
+				},
+				relationship: 'HAS',
+				direction: 'incoming',
+				hasMany: false,
+				showInactive: true,
+				writeInactive: false,
+				isRelationship: true,
+			});
 		});
 
 		it('can group relationship properties by fieldset', () => {
 			const type = typeFromRawData(
-				{
-					name: 'Type1',
-					properties: {
-						mainProp: {
-							type: 'Word',
-							fieldset: 'main',
-							relationship: 'HAS',
-							label: 'A word relationship',
+				[
+					{
+						name: 'Type1',
+						properties: {
+							mainProp: {
+								type: 'Word',
+								fieldset: 'main',
+								label: 'A word relationship',
+							},
+							secondaryProp: {
+								type: 'Type2',
+								fieldset: 'self',
+								relationship: 'HAS',
+								direction: 'outgoing',
+								label: 'Standalone',
+							},
+							miscProp: {
+								type: 'SomeEnum',
+							},
 						},
-						secondaryProp: {
-							type: 'Document',
-							fieldset: 'self',
-							relationship: 'HAS',
-							label: 'Standalone',
-						},
-						miscProp: {
-							type: 'SomeEnum',
-							relationship: 'HAS',
+						fieldsets: {
+							main: {
+								heading: 'Main properties',
+								description: 'Fill these out please',
+							},
+							secondary: {
+								heading: 'Secondary properties',
+								description: 'Fill these out optionally',
+							},
 						},
 					},
-					fieldsets: {
-						main: {
-							heading: 'Main properties',
-							description: 'Fill these out please',
-						},
-						secondary: {
-							heading: 'Secondary properties',
-							description: 'Fill these out optionally',
+					{
+						name: 'Type2',
+						properties: {
+							secondaryProp: {
+								type: 'Type1',
+								relationship: 'HAS',
+								direction: 'incoming',
+							},
 						},
 					},
-				},
+				],
 				{ options: { groupProperties: true } },
 			);
 

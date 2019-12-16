@@ -4,31 +4,24 @@ module.exports = {
 	// Note that this accessor will return *all* relationship types
 	// which includes user defined one and automatically generated using
 	// root rich relationship types with having the same property definitions
-	accessor({
-		primitiveTypes = BIZ_OPS,
-		includeMetaFields = false,
-		excludeCypherRelationships = false,
-	} = {}) {
-		const types = this.getTypes({
-			withRelationships: true,
-		});
+	accessor({ primitiveTypes = BIZ_OPS, includeMetaFields = false } = {}) {
+		const rawTypes = this.rawData.getTypes();
+		const rawRelationshipTypes = this.rawData
+			.getRelationshipTypes()
+			.map(type => type.name);
 
-		return types.reduce((relationships, { name, properties }) => {
-			let relationshipTypes = Object.entries(properties)
-				.filter(([, { isRelationship }]) => !!isRelationship)
+		return rawTypes.reduce((relationships, { name, properties }) => {
+			const relationshipTypes = Object.entries(properties)
+				.filter(
+					([, { relationship, type }]) =>
+						relationship || rawRelationshipTypes.includes(type),
+				)
 				.map(([propName]) =>
 					this.getRelationshipType(name, propName, {
 						primitiveTypes,
 						includeMetaFields,
 					}),
 				);
-			// If we're accessing for graphql generation.
-			// We should exlcude cypher relationship
-			if (excludeCypherRelationships) {
-				relationshipTypes = relationshipTypes.filter(
-					({ cypher }) => !cypher,
-				);
-			}
 
 			return [...relationships, ...relationshipTypes];
 		}, []);
@@ -36,8 +29,7 @@ module.exports = {
 	cacheKeyGenerator({
 		primitiveTypes = BIZ_OPS,
 		includeMetaFields = false,
-		excludeCypherRelationships = false,
 	} = {}) {
-		return `relationship:all:${primitiveTypes}:${includeMetaFields}:${excludeCypherRelationships}`;
+		return `relationship:all:${primitiveTypes}:${includeMetaFields}`;
 	},
 };

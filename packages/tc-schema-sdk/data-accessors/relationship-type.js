@@ -11,46 +11,38 @@ const getFromTo = (direction, rootType, otherType) =>
 
 const isCypherQueryIncluded = property => 'cypher' in property;
 
-const formatUserDefinedRelationship = (rootType, property) => {
+const formatSimpleRelationship = (rootType, property, rawData) => {
 	if (isCypherQueryIncluded(property)) {
 		return { ...property };
 	}
-	const [from, to] = getFromTo(property.direction, rootType, property.type);
+
+	const oppositeType = rawData
+		.getTypes()
+		.find(typeDef => typeDef.name === property.type);
+	const oppositeProperty = Object.values(oppositeType.properties).find(
+		({ direction, relationship, type }) =>
+			direction !== property.direction &&
+			relationship === property.relationship &&
+			type === rootType,
+	);
+
+	const [from, to] = getFromTo(
+		property.direction,
+		{
+			type: rootType,
+			hasMany: !!oppositeProperty.hasMany,
+		},
+		{
+			type: property.type,
+			hasMany: !!property.hasMany,
+		},
+	);
+
 	return {
-		...property,
+		relationship: property.relationship,
 		from,
 		to,
-	};
-};
-
-const formatRichRelationship = (
-	rootType,
-	property,
-	{ name, from, to, relationship, properties },
-) => {
-	const { direction } = property;
-	let relationshipTo;
-	let hasMany;
-	let dest;
-	if (direction !== 'to' && from.type === rootType) {
-		dest = 'outgoing';
-		relationshipTo = to.type;
-		hasMany = !!to.hasMany;
-	} else {
-		dest = 'incoming';
-		relationshipTo = from.type;
-		hasMany = !!from.hasMany;
-	}
-	return {
-		...property,
-		type: relationshipTo,
-		from: from.type,
-		to: to.type,
-		direction: dest,
-		properties: { ...properties },
-		name,
-		relationship,
-		hasMany,
+		properties: {},
 	};
 };
 
@@ -65,10 +57,9 @@ const getTypeProperty = (rootType, propertyName, rawData) => {
 	return type.properties[propertyName];
 };
 
-const isUserDefinedRelationship = property =>
-	['relationship', 'cypher'].some(propName => propName in property);
+const isSimpleRelationship = property => 'relationship' in property;
 
-const getRichRelationshipDefinition = ({ type }, rawData) =>
+const findRichRelationshipDefinition = ({ type }, rawData) =>
 	rawData.getRelationshipTypes().find(({ name }) => name === type);
 
 const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
@@ -79,19 +70,25 @@ const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 		);
 	}
 
-	if (isUserDefinedRelationship(property)) {
-		return formatUserDefinedRelationship(rootType, property);
+	// TODO add a check to make sure we exit early here if is enum or primitive
+
+	// if relationshipType has cypher field, it cannot have from/to direction and properties
+	// because it can only express relationship via cypher query
+	if (isCypherQueryIncluded(property)) {
+		return;
 	}
-	const richRelationshipDefinition = getRichRelationshipDefinition(
+
+	if (isSimpleRelationship(property)) {
+		return formatSimpleRelationship(rootType, property, rawData);
+	}
+
+	const richRelationshipDefinition = findRichRelationshipDefinition(
 		property,
 		rawData,
 	);
+
 	if (richRelationshipDefinition) {
-		return formatRichRelationship(
-			rootType,
-			property,
-			richRelationshipDefinition,
-		);
+		return richRelationshipDefinition;
 	}
 
 	throw new TreecreeperUserError(
@@ -119,15 +116,16 @@ const getRelationshipType = function(
 		propertyName,
 		this.rawData,
 	);
-	// if relationshipType has cypher field, it cannot have from/to direction and properties
-	// because it can only express relationship via cypher query
-	if (isCypherQueryIncluded(relationshipType)) {
-		return relationshipType;
+
+	if (!relationshipType) {
+		return;
 	}
 	let properties = { ...(relationshipType.properties || {}) };
 
-	if (includeMetaFields && Object.keys(properties).length) {
-		properties = assignMetaProperties(properties, '_lockedFields');
+	if (includeMetaFields) {
+		properties = assignMetaProperties(properties, {
+			ignoreFields: '_lockedFields',
+		});
 	}
 	properties = transformPrimitiveTypes(
 		properties,
