@@ -101,3 +101,7 @@ properties:
     type: CuriousChild
     description: Curious child description.
     label: Curious child label
+  curiousParent:
+    type: CuriousParent
+    description: Curious parent description.
+    label: Curious parent label
