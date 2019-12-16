@@ -1,7 +1,7 @@
 name: CuriousParent
 from:
   type: ParentType
-  hasMany: false
+  hasMany: true
 to:
   type: MainType
   hasMany: true
@@ -15,19 +15,3 @@ properties:
     label: Label for another string
     description: Description for another string.
     type: Word
-  someInteger:
-    label: Label for some integer
-    description: Description for some integer.
-    type: Int
-  someEnum:
-    label: Label for some enum
-    description: Description for some enum.
-    type: AnEnum
-  someBoolean:
-    label: Label for some boolean
-    description: Description for some boolean.
-    type: Boolean
-  someFloat:
-    label: Label for some float
-    description: Description for some float.
-    type: Float

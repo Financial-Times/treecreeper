@@ -391,12 +391,12 @@ describe('rest PATCH update', () => {
 				['MainType', mainCode],
 				['ChildType', childCode],
 			);
-			await connectNodes(main, 'HAS_CHILD', child, {
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
 				someString: 'some string',
 			});
 			const { body, status } = await basicHandler(
 				{
-					children: [
+					curiousChild: [
 						{ code: childCode, someString: 'new some string' },
 					],
 				},
@@ -405,7 +405,7 @@ describe('rest PATCH update', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [{ someString: 'new some string' }],
+				curiousChild: { someString: 'new some string' },
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -413,7 +413,7 @@ describe('rest PATCH update', () => {
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
 						props: {
 							someString: 'new some string',
@@ -435,23 +435,23 @@ describe('rest PATCH update', () => {
 				['MainType', mainCode],
 				['ChildType', childCode],
 			);
-			await connectNodes(main, 'HAS_CHILD', child, {
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
 				someString: 'some string',
 			});
 			const { body, status } = await basicHandler(
-				{ children: [{ code: childCode, someString: null }] },
+				{ curiousChild: [{ code: childCode, someString: null }] },
 				{ relationshipAction: 'merge', richRelationships: true },
 			);
 
 			expect(status).toBe(200);
 			expect(body).not.toMatchObject({
-				children: [{ someString: 'some string' }],
+				curiousChild: { someString: 'some string' },
 			});
 			await neo4jTest('MainType', mainCode)
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
 						props: meta.update,
 						notProps: ['someString'],

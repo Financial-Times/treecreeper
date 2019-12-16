@@ -7,6 +7,7 @@ describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
+	const parentCode = `${namespace}-parent`;
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
@@ -117,12 +118,12 @@ describe('rest PATCH diff', () => {
 			['MainType', mainCode],
 			['ChildType', childCode],
 		);
-		await connectNodes(main, 'HAS_CHILD', child, {
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
 			someString: 'some string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
-			{ children: [{ code: childCode, someString: 'some string' }] },
+			{ curiousChild: [{ code: childCode, someString: 'some string' }] },
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
@@ -133,21 +134,26 @@ describe('rest PATCH diff', () => {
 	});
 
 	it("doesn't write if no real relationship property changes detected (mixed relationships with and without prop)", async () => {
-		const [main, child1, child2] = await createNodes(
+		const [main, parent1, parent2] = await createNodes(
 			['MainType', mainCode],
-			['ChildType', `${childCode}-1`],
-			['ChildType', `${childCode}-2`],
+			['ParentType', `${parentCode}-1`],
+			['ParentType', `${parentCode}-2`],
 		);
 		await connectNodes(
-			[main, 'HAS_CHILD', child1, { someString: 'some string' }],
-			[main, 'HAS_CHILD', child2],
+			[
+				parent1,
+				'IS_CURIOUS_PARENT_OF',
+				main,
+				{ someString: 'some string' },
+			],
+			[parent2, 'IS_CURIOUS_PARENT_OF', main],
 		);
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
 			{
-				children: [
-					{ code: `${childCode}-1`, someString: 'some string' },
-					`${childCode}-2`,
+				curiousParent: [
+					{ code: `${parentCode}-1`, someString: 'some string' },
+					`${parentCode}-2`,
 				],
 			},
 			{ relationshipAction: 'merge' },
@@ -164,14 +170,14 @@ describe('rest PATCH diff', () => {
 			['MainType', mainCode],
 			['ChildType', childCode],
 		);
-		await connectNodes(main, 'HAS_CHILD', child, {
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
 			someString: 'some string',
 			anotherString: 'another string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
 			{
-				children: [
+				curiousChild: [
 					{
 						code: childCode,
 						someString: 'some string',
@@ -193,12 +199,12 @@ describe('rest PATCH diff', () => {
 			['MainType', mainCode],
 			['ChildType', childCode],
 		);
-		await connectNodes(main, 'HAS_CHILD', child, {
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
 			someString: 'some string',
 		});
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
-			{ children: [{ code: childCode, someString: null }] },
+			{ curiousChild: [{ code: childCode, someString: null }] },
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
