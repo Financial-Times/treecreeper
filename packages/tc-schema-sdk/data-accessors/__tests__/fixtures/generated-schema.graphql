@@ -20,15 +20,11 @@ type CostCentre {
 	"""
 	The groups which are costed to the cost centre
 	"""
-	hasGroups(first: Int, offset: Int): [Group]
-		@relation(name: "PAYS_FOR", direction: "OUT")
+	hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
 	"""
 	The recursive groups which are costed to the cost centre
 	"""
-	hasNestedGroups(first: Int, offset: Int): [Group]
-		@cypher(
-			statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related"
-		)
+	hasNestedGroups(first: Int, offset: Int): [Group] @cypher(statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related")
 	"""
 	Group that embezzles description
 	"""

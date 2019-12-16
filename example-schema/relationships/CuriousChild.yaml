@@ -1,10 +1,10 @@
 name: CuriousChild
 from:
   type: MainType
-  hasMany: false
+  hasMany: true
 to:
   type: ChildType
-  hasMany: true
+  hasMany: false
 relationship: HAS_CURIOUS_CHILD
 properties:
   someString:
