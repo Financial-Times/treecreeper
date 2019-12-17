@@ -1,15 +1,15 @@
 const { primitives } = require('@financial-times/tc-ui/server');
-const DateTime = require('./edit-date-time');
+const Temporal = require('./edit-temporal');
 const Dropdown = require('./edit-dropdown');
 const Text = require('./edit-text');
 const Number = require('./edit-number');
-const TextArea = require('./edit-text-area');
+const LargeText = require('./edit-large-text');
 
 module.exports = {
-	DateTime,
+	Temporal,
 	Dropdown,
 	Text,
 	Number,
-	TextArea,
+	LargeText,
 	...primitives,
 };
