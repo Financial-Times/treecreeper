@@ -40,6 +40,10 @@ class SchemaUpdater {
 						schemaDirectory,
 						'string-patterns.yaml',
 					),
+					primitiveTypes: readYaml.file(
+						schemaDirectory,
+						'primitive-types.yaml',
+					),
 					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
 				},
 			};

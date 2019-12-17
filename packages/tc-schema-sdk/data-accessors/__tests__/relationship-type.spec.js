@@ -34,6 +34,12 @@ describe('get-relationship-type', () => {
 							},
 						},
 					],
+					primitiveTypes: {
+						Word: {
+							graphql: 'String',
+							component: 'Text',
+						},
+					},
 				},
 			},
 		});
@@ -117,6 +123,12 @@ describe('get-relationship-type', () => {
 							},
 						},
 					],
+					primitiveTypes: {
+						Word: {
+							graphql: 'String',
+							component: 'Text',
+						},
+					},
 				},
 			},
 		});

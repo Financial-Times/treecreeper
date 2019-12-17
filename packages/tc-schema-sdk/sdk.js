@@ -7,6 +7,7 @@ const graphqlDefs = require('./data-accessors/graphql-defs');
 const stringValidator = require('./data-accessors/string-validator');
 const enums = require('./data-accessors/enums');
 const types = require('./data-accessors/types');
+const primitiveTypes = require('./data-accessors/primitive-types');
 const relationshipTypes = require('./data-accessors/relationship-types');
 const relationshipType = require('./data-accessors/relationship-type');
 const { SchemaUpdater } = require('./lib/updater');
@@ -20,6 +21,7 @@ class SDK {
 		this.subscribers = [];
 
 		this.getEnums = this.createEnrichedAccessor(enums);
+		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);
 		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
 		this.getType = this.createEnrichedAccessor(type);
 		this.getTypes = this.createEnrichedAccessor(types);

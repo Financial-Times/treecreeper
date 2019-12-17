@@ -131,6 +131,7 @@ const getRelationshipType = function(
 		properties,
 		primitiveTypes,
 		this.getStringValidator,
+		this.getPrimitiveTypes({ output: 'graphql' }),
 	);
 
 	return { ...relationshipType, properties };

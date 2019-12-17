@@ -250,6 +250,7 @@ const getType = function(
 		properties,
 		primitiveTypes,
 		this.getStringValidator,
+		this.getPrimitiveTypes({ output: 'graphql' }),
 	);
 
 	if (groupProperties) {

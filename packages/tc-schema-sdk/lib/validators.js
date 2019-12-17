@@ -1,6 +1,5 @@
 const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
 const { stripIndents } = require('common-tags');
-const primitiveTypesMap = require('./primitive-types-map');
 
 // relationship value could be just a String(code), an Object or an Array of strings(codes) / objects(code and properties) / mixed
 // this function is to normalise them into an Array of objects
@@ -39,7 +38,7 @@ const throwInvalidValueError = (
 	);
 };
 
-const validateProperty = ({ getType, getEnums, getRelationshipType }) => {
+const validateProperty = ({ getType, getEnums, getRelationshipType, getPrimitiveTypes }) => {
 	const recursivelyCallableValidator = (
 		typeName,
 		propertyName,
@@ -50,6 +49,7 @@ const validateProperty = ({ getType, getEnums, getRelationshipType }) => {
 		const propertyDefinition = relationshipPropsDef
 			? relationshipPropsDef[propertyName]
 			: getType(typeName).properties[propertyName];
+		const primitiveTypesMap = getPrimitiveTypes();
 
 		if (!propertyDefinition) {
 			throw new TreecreeperUserError(
@@ -170,11 +170,12 @@ const validatePropertyName = name => {
 	}
 };
 
-module.exports = ({ getEnums, getType, getRelationshipType }) => {
+module.exports = ({ getEnums, getType, getRelationshipType, getPrimitiveTypes }) => {
 	const propertyValidator = validateProperty({
 		getEnums,
 		getType,
 		getRelationshipType,
+    getPrimitiveTypes,
 	});
 	return {
 		validateTypeName: validateTypeName(getType),

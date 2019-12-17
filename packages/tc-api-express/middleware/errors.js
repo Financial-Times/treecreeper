@@ -3,7 +3,6 @@ const { logger } = require('@financial-times/tc-api-express-logger');
 // eslint-disable-next-line no-unused-vars
 const errorToErrors = (err, req, res, next) => {
 	logger.error({ event: 'BIZ_OPS_API_ERROR', error: err });
-
 	if (!err.status) {
 		logger.error({ error: err });
 		err = { status: 500, message: err.toString() };

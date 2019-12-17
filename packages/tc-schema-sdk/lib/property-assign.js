@@ -1,4 +1,3 @@
-const primitiveTypesMap = require('../lib/primitive-types-map');
 const metaProperties = require('../lib/meta-properties');
 
 const assignMetaProperties = (properties, { ignoreFields = [] } = {}) => {
@@ -18,6 +17,7 @@ const transformPrimitiveTypes = (
 	properties,
 	primitiveTypes,
 	getStringValidator,
+	primitiveTypesMap,
 ) => {
 	const propertyEntries = Object.entries(properties)
 		.map(([name, def]) => [name, { ...def }])

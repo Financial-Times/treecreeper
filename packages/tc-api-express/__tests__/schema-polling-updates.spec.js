@@ -39,7 +39,7 @@ describe('schema polling updates', () => {
 										canIdentify: true,
 									},
 									testProp: {
-										type: 'Paragraph',
+										type: 'Word',
 										description: 'A test property.',
 									},
 								},
@@ -47,6 +47,9 @@ describe('schema polling updates', () => {
 						],
 						enums: {},
 						stringPatterns: {},
+						primitiveTypes: {
+							Word: { graphql: 'String', component: 'Text' },
+						},
 					},
 				})
 				.getOnce(
@@ -65,7 +68,7 @@ describe('schema polling updates', () => {
 											canIdentify: true,
 										},
 										testProp: {
-											type: 'Paragraph',
+											type: 'Word',
 											description: 'A test property.',
 										},
 									},
@@ -73,6 +76,9 @@ describe('schema polling updates', () => {
 							],
 							enums: {},
 							stringPatterns: {},
+							primitiveTypes: {
+								Word: { graphql: 'String', component: 'Text' },
+							},
 						},
 					},
 					{ overwriteRoutes: false },
@@ -150,7 +156,7 @@ describe('schema polling updates', () => {
 												description: 'The code.',
 											},
 											testProp: {
-												type: 'Paragraph',
+												type: 'Word',
 												description: 'A test property.',
 											},
 										},
@@ -158,6 +164,12 @@ describe('schema polling updates', () => {
 								],
 								enums: {},
 								stringPatterns: {},
+								primitiveTypes: {
+									Word: {
+										graphql: 'String',
+										component: 'Text',
+									},
+								},
 							},
 						},
 						{ overwriteRoutes: false },
