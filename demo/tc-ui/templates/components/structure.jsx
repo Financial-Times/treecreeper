@@ -54,32 +54,12 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 	</Fragment>
 );
 
-const getPrimitiveComponent = ({ type }) => assignComponent(type).ViewComponent;
+const getComponent = ({ type }) => assignComponent(type);
 
 const blockComponents = ['Document'];
-const temporalTypes = ['DateTime', 'Time', 'Date'];
 
 const layoutClass = type =>
 	blockComponents.includes(type) ? 'block' : 'inline';
-
-const hasValue = (value, { type, isRelationship, hasMany }) => {
-	if (['Int', 'Float'].includes(type)) {
-		return value || value === 0;
-	}
-
-	if (temporalTypes.includes(type)) {
-		return !!value.formatted;
-	}
-
-	if (type === 'Boolean') {
-		return typeof value === 'boolean';
-	}
-
-	if (isRelationship && hasMany) {
-		return value && value.length;
-	}
-	return !!value;
-};
 
 const LabelledPrimitive = props => {
 	const {
@@ -93,12 +73,12 @@ const LabelledPrimitive = props => {
 		useInSummary,
 		id,
 	} = props;
-	const PrimitiveComponent = getPrimitiveComponent({
+	const { ViewComponent: PrimitiveComponent, hasValue } = getComponent({
 		type,
 		isRelationship,
 		hasMany,
 	});
-	if (!useInSummary && !hasValue(value, { type, isRelationship, hasMany })) {
+	if (!useInSummary && !hasValue(value, props)) {
 		return null;
 	}
 	return (

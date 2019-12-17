@@ -63,4 +63,5 @@ module.exports = {
 	),
 	EditComponent: EditBoolean,
 	parser: value => (value === undefined ? undefined : value === 'true'),
+	hasValue: value => typeof value === 'boolean',
 };

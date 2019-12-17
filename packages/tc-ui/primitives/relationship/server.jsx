@@ -17,4 +17,6 @@ module.exports = {
 	ViewComponent: ViewRelationship,
 	EditComponent: EditRelationship,
 	parser: value => (value ? JSON.parse(value) : null),
+	hasValue: (value, { hasMany }) =>
+		hasMany ? value && value.length : !!value,
 };

@@ -43,4 +43,5 @@ module.exports = {
 	ViewComponent: ({ value, id, type }) => (
 		<span id={id}>{formatDateTime(value.formatted, type)}</span>
 	),
+	hasValue: value => !!value.formatted,
 };

@@ -1,7 +1,6 @@
 const schema = require('@financial-times/tc-schema-sdk');
 const { assignComponent } = require('./assign-component');
 
-const defaultParser = value => (value === 'null' ? null : value);
 const formDataToRest = (type, formData) => {
 	const data = {};
 	const typeProperties = schema.getType(type);
@@ -21,7 +20,7 @@ const formDataToRest = (type, formData) => {
 			) {
 				return;
 			}
-			const { parser = defaultParser } = assignComponent(fieldProps.type);
+			const { parser } = assignComponent(fieldProps.type);
 
 			const valueHasBeenReceived = fieldName in formData;
 			// need to avoid treating missing data as an instruction to delete
@@ -40,7 +39,7 @@ const formDataToGraphQL = async (type, formData) => {
 	const typeProperties = schema.getType(type);
 	Object.entries(typeProperties.properties).forEach(
 		([fieldName, fieldProps]) => {
-			const { parser = defaultParser } = assignComponent(fieldProps.type);
+			const { parser } = assignComponent(fieldProps.type);
 			if (formData[fieldName] && formData[fieldName] !== "Don't know") {
 				data.fieldName = parser(formData[fieldName]);
 			}

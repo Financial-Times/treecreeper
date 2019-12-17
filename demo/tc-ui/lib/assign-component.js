@@ -4,12 +4,6 @@ const customComponents = require('../templates/components/primitives');
 
 const customComponentMap = {
 	Paragraph: 'LargeText',
-	// SystemLifecycle: 'LifecycleStage',
-	// ProductLifecycle: 'LifecycleStage',
-	// ServiceTier,
-	// TrafficLight,
-	// Url,
-	// Email,
 };
 
 module.exports = {
