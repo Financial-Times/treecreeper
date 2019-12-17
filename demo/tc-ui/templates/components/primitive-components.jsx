@@ -1,5 +1,4 @@
 const { h } = require('preact');
-const { formatDateTime } = require('../helpers');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -68,10 +67,6 @@ const Email = ({ value, id }) =>
 
 const { primitives } = require('../../../../packages/tc-ui/server');
 
-const Temporal = ({ value, id, type }) => (
-	<span id={id}>{formatDateTime(value.formatted, type)}</span>
-);
-
 module.exports = {
 	Document: primitives.LargeText.ViewComponent,
 	Paragraph: primitives.LargeText.ViewComponent,
@@ -81,9 +76,9 @@ module.exports = {
 	TrafficLight,
 	Url,
 	Email,
-	Date: Temporal,
-	DateTime: Temporal,
-	Time: Temporal,
+	Date: primitives.Temporal.ViewComponent,
+	DateTime: primitives.Temporal.ViewComponent,
+	Time: primitives.Temporal.ViewComponent,
 	Default: primitives.Text.ViewComponent,
 	LargeText: primitives.LargeText.ViewComponent,
 	Number: primitives.Number.ViewComponent,

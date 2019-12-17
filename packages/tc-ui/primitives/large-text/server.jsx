@@ -4,7 +4,7 @@ const { markdown } = require('../../lib/helpers');
 
 const outputFreeText = (text = '') => text;
 
-const EditTextArea = props => {
+const EditLargeText = props => {
 	const { propertyName, value, dataType, lockedBy } = props;
 	const disabled = !!lockedBy;
 	return (
@@ -48,7 +48,7 @@ const EditTextArea = props => {
 };
 
 module.exports = {
-	EditComponent: EditTextArea,
+	EditComponent: EditLargeText,
 	ViewComponent: ({ value, id }) => (
 		<section
 			id={id}
