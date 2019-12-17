@@ -1,9 +1,8 @@
 const { getApiClient } = require('./lib/tc-ui-bridge');
-const response = require('./lib/response');
 
 const getSchemaSubset = require('./lib/get-schema-subset');
 const template = require('./templates/view-page');
-const { handleError } = require('./lib/handle-error');
+const { handleError, renderPage } = require('./lib/renderer');
 
 const render = async event => {
 	const { type, code } = event.params;
@@ -12,7 +11,7 @@ const render = async event => {
 	const data = await apiClient.read(type, code);
 
 	const schema = getSchemaSubset(event, type, false);
-	return response.page(
+	return renderPage(
 		template,
 		{
 			schema,
@@ -25,6 +24,6 @@ const render = async event => {
 	);
 };
 
-exports.handler = handleError(event => render(event));
+exports.handler = handleError(render);
 
 exports.render = render;

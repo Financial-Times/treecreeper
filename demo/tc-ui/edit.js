@@ -2,9 +2,8 @@ const httpError = require('http-errors');
 const { getApiClient } = require('./lib/tc-ui-bridge');
 const getSchemaSubset = require('./lib/get-schema-subset');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
-const response = require('./lib/response');
+const { handleError, renderPage } = require('./lib/renderer');
 const template = require('./templates/edit-page');
-const { handleError } = require('./lib/handle-error');
 
 const displayForm = async (event, apiError) => {
 	const apiClient = getApiClient(event);
@@ -37,7 +36,7 @@ const displayForm = async (event, apiError) => {
 		templateData.error = apiError;
 	}
 
-	return response.page(template, templateData, event);
+	return renderPage(template, templateData, event);
 };
 
 const handleForm = async event => {
