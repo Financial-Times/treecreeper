@@ -79,7 +79,7 @@ const Email = ({ value, id }) =>
 const RelationshipAnnotator = ({ type, value }) => (
 	<Fragment>
 		{type === 'System' ? <ServiceTier value={value.serviceTier} /> : null}
-		{type === 'System' ? (
+		{type === 'System' || type === 'Product' ? (
 			<LifecycleStage value={value.lifecycleStage} />
 		) : null}
 		{type === 'Person' ? <IsActiveLabel isActive={value.isActive} /> : null}
