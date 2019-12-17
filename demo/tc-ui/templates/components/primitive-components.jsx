@@ -80,8 +80,6 @@ const Temporal = ({ value, id, type }) => (
 	<span id={id}>{formatDateTime(value.formatted, type)}</span>
 );
 
-const Default = ({ value, id }) => <span id={id}>{value}</span>;
-
 module.exports = {
 	Document,
 	Paragraph,
@@ -94,7 +92,7 @@ module.exports = {
 	Date: Temporal,
 	DateTime: Temporal,
 	Time: Temporal,
-	Default,
+	Default: primitives.Text.ViewComponent,
 	Boolean: primitives.Boolean.ViewComponent,
 	Relationship: primitives.Relationship.ViewComponent,
 };
