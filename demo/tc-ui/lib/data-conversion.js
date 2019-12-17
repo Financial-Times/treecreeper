@@ -1,5 +1,5 @@
 const schema = require('@financial-times/tc-schema-sdk');
-const { assignComponent } = require('./assign-component');
+const { assignComponent } = require('./ui-mappings');
 
 const formDataToRest = (type, formData) => {
 	const data = {};

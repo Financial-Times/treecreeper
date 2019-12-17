@@ -1,7 +1,12 @@
 const { h, Fragment } = require('preact');
 
-const { toKebabCase } = require('../helpers');
-const { assignComponent } = require('../../lib/assign-component');
+const { assignComponent } = require('../../lib/ui-mappings');
+
+const toKebabCase = string =>
+	string
+		.split(' ')
+		.map(str => str.toLowerCase())
+		.join('-');
 
 const Concept = ({ name, description, moreInformation }) => (
 	<aside className="biz-ops-aside" title="Concept">

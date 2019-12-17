@@ -44,7 +44,6 @@ const handleForm = async event => {
 	let { code } = event.params;
 	const formData = event.body;
 	const clientUserId = event.username;
-	// TODO If the form submit sends JSON rather than a string the parse step will not be needed
 	const jsonFormData = formData;
 	let mode = 'PATCH';
 	// If a code is present then PATCH the existing record

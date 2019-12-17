@@ -44,4 +44,5 @@ module.exports = {
 		<span id={id}>{formatDateTime(value.formatted, type)}</span>
 	),
 	hasValue: value => !!value.formatted,
+	graphqlFragment: propName => `${propName} {formatted}`,
 };

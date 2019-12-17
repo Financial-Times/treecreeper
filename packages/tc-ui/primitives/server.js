@@ -9,6 +9,7 @@ const Temporal = require('./temporal/server');
 const addDefaults = obj => ({
 	hasValue: value => !!value,
 	parser: value => (value === 'null' ? null : value),
+	graphqlFragment: propName => propName,
 	...obj,
 });
 
