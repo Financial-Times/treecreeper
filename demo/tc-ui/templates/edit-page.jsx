@@ -6,7 +6,7 @@ const { Concept, SectionHeader } = require('./components/structure');
 const { SaveButton, CancelButton } = require('./components/buttons');
 const { FormError } = require('./components/messages');
 
-const { assignComponent } = require('../lib/assign-component');
+const { assignComponent } = require('../lib/ui-mappings');
 
 const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string

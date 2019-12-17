@@ -1,6 +1,6 @@
 const { h } = require('preact');
-const { FieldTitle } = require('./edit-helpers');
-const { checkIfShouldDisable } = require('../../helpers');
+const { FieldTitle } = require('../../lib/edit-helpers');
+const { formatDateTime } = require('../../lib/helpers');
 
 const convertValueForHTMLInput = (wrappedValue, type) => {
 	if (!(wrappedValue && wrappedValue.formatted)) return null;
@@ -13,18 +13,10 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
-const EditDateTime = props => {
-	const {
-		type,
-		propertyName,
-		value,
-		required,
-		unique,
-		isEdit,
-		lockedBy,
-	} = props;
+const EditTemporal = props => {
+	const { type, propertyName, value, required, lockedBy } = props;
 
-	const shouldDisable = checkIfShouldDisable(lockedBy, unique, isEdit);
+	const shouldDisable = !!lockedBy;
 
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
@@ -46,4 +38,11 @@ const EditDateTime = props => {
 	);
 };
 
-module.exports = { EditComponent: EditDateTime };
+module.exports = {
+	EditComponent: EditTemporal,
+	ViewComponent: ({ value, id, type }) => (
+		<span id={id}>{formatDateTime(value.formatted, type)}</span>
+	),
+	hasValue: value => !!value.formatted,
+	graphqlFragment: propName => `${propName} {formatted}`,
+};

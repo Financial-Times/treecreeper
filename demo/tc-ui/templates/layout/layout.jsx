@@ -1,6 +1,12 @@
 const { h } = require('preact');
-const { toKebabCase } = require('../helpers');
+
 const { getAssetReferences } = require('./asset-references');
+
+const toKebabCase = string =>
+	string
+		.split(' ')
+		.map(str => str.toLowerCase())
+		.join('-');
 
 const SideBar = ({ nav }) => (
 	<nav className="o-layout__navigation">

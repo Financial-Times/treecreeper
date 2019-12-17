@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { shallow } = require('../../test-helpers/enzyme-setup');
+const { shallow } = require('../../../test-helpers/enzyme-setup');
 const {
 	EditComponent,
 	// , ViewComponent,
@@ -7,7 +7,7 @@ const {
 } = require('../server');
 // const { withEditComponent } = require('../browser');
 
-const { FieldTitle } = require('../../lib/edit-helpers');
+const { FieldTitle } = require('../../../lib/edit-helpers');
 const { RelationshipPicker } = require('../lib/relationship-picker');
 
 describe('relationship interfaces', () => {

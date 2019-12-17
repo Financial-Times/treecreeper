@@ -1,13 +1,6 @@
-const { h } = require('preact');
-const { markdown, autolink, formatDateTime } = require('../helpers');
+const { h, Fragment } = require('preact');
 
-const Document = ({ value, id }) => (
-	<section id={id} dangerouslySetInnerHTML={{ __html: markdown(value) }} />
-);
-
-const Paragraph = ({ value, id }) => (
-	<p id={id} dangerouslySetInnerHTML={{ __html: autolink(value) }} />
-);
+const { primitives } = require('@financial-times/tc-ui/server');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -54,19 +47,20 @@ const TrafficLight = ({ value }) =>
 		</span>
 	) : null;
 
-const yesNoUnknown = value => {
-	if (value === true) return 'Yes';
-	if (value === false) return 'No';
-	return 'Unknown';
-};
-
-const linkHasProtocol = value => value.match(/^https?:/);
-
-const Boolean = ({ value, id }) => <span id={id}>{yesNoUnknown(value)}</span>;
+const IsActiveLabel = ({ isActive }) =>
+	isActive ? null : (
+		<span
+			className={`o-labels o-labels--${
+				oLabelsModifiersMap[isActive === false ? 'inactive' : 'unknown']
+			}`}
+		>
+			{isActive === false ? 'Inactive' : 'May not be active'}
+		</span>
+	);
 
 const Url = ({ value, id }) => {
 	if (!value) return null;
-	return linkHasProtocol(value) ? (
+	return value.match(/^https?:/) ? (
 		<a id={id} href={value}>
 			{value}
 		</a>
@@ -82,30 +76,27 @@ const Email = ({ value, id }) =>
 		</a>
 	) : null;
 
-const {
-	ViewComponent: Relationship,
-} = require('../../../../packages/tc-ui/relationship/server');
-
-const Temporal = ({ value, id, type }) => (
-	<span id={id}>{formatDateTime(value.formatted, type)}</span>
+const RelationshipAnnotator = ({ type, value }) => (
+	<Fragment>
+		{type === 'System' ? <ServiceTier value={value.serviceTier} /> : null}
+		{type === 'System' || type === 'Product' ? (
+			<LifecycleStage value={value.lifecycleStage} />
+		) : null}
+		{type === 'Person' ? <IsActiveLabel isActive={value.isActive} /> : null}
+		{type === 'Team' ? <IsActiveLabel isActive={value.isActive} /> : null}
+		{type === 'Repository' ? (
+			<IsActiveLabel isActive={!value.isArchived} />
+		) : null}
+	</Fragment>
 );
 
-const Default = ({ value, id }) => <span id={id}>{value}</span>;
+primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
-	Document,
-	Paragraph,
-	SystemLifecycle: LifecycleStage,
-	ProductLifecycle: LifecycleStage,
-	ServiceTier,
-	TrafficLight,
-	Boolean,
-	linkHasProtocol,
-	Url,
-	Email,
-	Relationship,
-	Date: Temporal,
-	DateTime: Temporal,
-	Time: Temporal,
-	Default,
+	SystemLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
+	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
+	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
+	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },
+	Url: { ...primitives.Text, ViewComponent: Url },
+	Email: { ...primitives.Text, ViewComponent: Email },
 };

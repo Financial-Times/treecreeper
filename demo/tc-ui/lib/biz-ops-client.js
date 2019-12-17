@@ -2,7 +2,7 @@ const logger = require('@financial-times/lambda-logger');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const fetch = require('node-fetch');
 const httpError = require('http-errors');
-const graphqlBuilder = require('./graphql-builder');
+const { graphqlBuilder } = require('./ui-mappings');
 
 const { BIZ_OPS_API_URL, BIZ_OPS_API_KEY, BIZ_OPS_API_KEY_LOCAL } = {
 	...process.env,
