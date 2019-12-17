@@ -3,6 +3,8 @@
 		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
 		"autolinker": "^3.11.1",
 		"date-fns": "^2.8.1",
+		"http-errors": "^1.7.3",
+		"node-fetch": "^2.6.0",
 		"preact": "^10.0.5",
 		"react-autosuggest": "^9.4.3",
 		"react-highlight-words": "^0.16.0",

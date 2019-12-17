@@ -20,6 +20,7 @@ node_modules/@financial-times/rel-engage/index.mk:
 
 PROJECT_NAME=biz-ops-api
 PRODUCT_NAME=biz-ops
+NEO4J_BOLT_URL=bolt://localhost:7687
 
 env:
 	node ./$(PATH_TO_RELENGAGE)/packages/vault/get-env.js $(PROJECT_NAME)/dev $(PROJECT_NAME)/test PRODUCTS/$(PRODUCT_NAME)/test

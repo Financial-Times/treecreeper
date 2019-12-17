@@ -1,12 +1,13 @@
 const httpError = require('http-errors');
+const { getApiClient } = require('./lib/get-api-client');
 const getSchemaSubset = require('./lib/get-schema-subset');
-const { readRecord, writeRestAPIQuery } = require('./lib/biz-ops-client');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
 const response = require('./lib/response');
 const template = require('./templates/edit-page');
 const { handleError } = require('./lib/handle-error');
 
 const displayForm = async (event, apiError) => {
+	const apiClient = getApiClient(event);
 	const { type, code } = event.params;
 	const isCreate = /\/create/.test(event.path);
 	let formData = {};
@@ -17,7 +18,7 @@ const displayForm = async (event, apiError) => {
 		// If a code is present then fetch the record data to /edit
 		// otherwise serve a blank /create form
 	} else if (code) {
-		formData = await readRecord(type, code, event.username);
+		formData = await apiClient.read(type, code);
 	}
 
 	const templateData = {
@@ -40,31 +41,30 @@ const displayForm = async (event, apiError) => {
 };
 
 const handleForm = async event => {
+	const apiClient = getApiClient(event);
 	const { type } = event.params;
 	let { code } = event.params;
 	const formData = event.body;
-	const clientUserId = event.username;
 	const jsonFormData = formData;
-	let mode = 'PATCH';
+	let method = 'PATCH';
 	// If a code is present then PATCH the existing record
 	// otherwise POST the data to create a new item
 	if (!code) {
 		({ code } = jsonFormData);
-		mode = 'POST';
+		method = 'POST';
 	}
 	try {
-		await writeRestAPIQuery(
+		await apiClient.write(
 			type,
 			code,
 			formDataToRest(type, jsonFormData),
-			mode,
-			clientUserId,
+			method,
 		);
 	} catch (err) {
 		const error = {
 			type,
 			code,
-			action: mode === 'POST' ? 'create' : 'update',
+			action: method === 'POST' ? 'create' : 'update',
 			message: err.message,
 		};
 		return displayForm(event, error);
