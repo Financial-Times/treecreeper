@@ -76,12 +76,5 @@ module.exports = {
 	TrafficLight,
 	Url,
 	Email,
-	Date: primitives.Temporal.ViewComponent,
-	DateTime: primitives.Temporal.ViewComponent,
-	Time: primitives.Temporal.ViewComponent,
 	Default: primitives.Text.ViewComponent,
-	LargeText: primitives.LargeText.ViewComponent,
-	Number: primitives.Number.ViewComponent,
-	Boolean: primitives.Boolean.ViewComponent,
-	Relationship: primitives.Relationship.ViewComponent,
 };
