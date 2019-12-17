@@ -1,5 +1,5 @@
 const { SDK } = require('../../sdk');
-const primitiveTypesMap = require('../primitive-types-map');
+const readYaml = require('../read-yaml');
 
 const getValidator = (type, enums = {}) => {
 	const sdk = new SDK({
@@ -12,6 +12,10 @@ const getValidator = (type, enums = {}) => {
 					LOWERCASE: '^[a-z]+$',
 					MAX_LENGTH_4: '^.{2,4}$',
 				},
+				primitiveTypes: readYaml.file(
+					process.env.TREECREEPER_SCHEMA_DIRECTORY,
+					'primitive-types.yaml',
+				),
 			},
 		},
 	});
@@ -33,69 +37,71 @@ describe('validateProperty', () => {
 	});
 
 	describe('validating strings', () => {
-		Object.entries(primitiveTypesMap).forEach(
-			([bizOpsType, graphqlType]) => {
-				let validateProperty;
-				if (graphqlType === 'String') {
-					beforeEach(() => {
-						validateProperty = getValidator({
-							name: 'Thing',
-							properties: {
-								prop: {
-									type: bizOpsType,
-									pattern: 'NO_Z',
-								},
-								shortprop: {
-									type: bizOpsType,
-									pattern: 'MAX_LENGTH_4',
-								},
-							},
-						});
-					});
-					it('accept strings', () => {
-						expect(() =>
-							validateProperty(
-								'Thing',
-								'prop',
-								'I am Tracy Beaker',
-							),
-						).not.toThrow();
-					});
-					it('not accept booleans', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', true),
-						).toThrow(/Must be a string/);
-						expect(() =>
-							validateProperty('Thing', 'prop', false),
-						).toThrow(/Must be a string/);
-					});
-					it('not accept floats', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 1.34),
-						).toThrow(/Must be a string/);
-					});
-					it('not accept integers', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 134),
-						).toThrow(/Must be a string/);
-					});
-					it('apply string patterns', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 'I am zebbedee'),
-						).toThrow('Must match pattern /^[^z]+$/');
-						expect(() =>
-							validateProperty(
-								'Thing',
-								'shortprop',
-								'13 characters',
-							),
-						).toThrow(
-							'Must match pattern /^.{2,4}$/ and be no more than 4 characters',
-						);
-					});
-				}
+		const primitivesSdk = new SDK({
+			schemaData: {
+				schema: {
+					primitiveTypes: readYaml.file(
+						process.env.TREECREEPER_SCHEMA_DIRECTORY,
+						'primitive-types.yaml',
+					),
+				},
 			},
-		);
+		});
+		Object.entries(
+			primitivesSdk.getPrimitiveTypes({ output: 'graphql' }),
+		).forEach(([bizOpsType, graphqlType]) => {
+			let validateProperty;
+			if (graphqlType === 'String') {
+				beforeEach(() => {
+					validateProperty = getValidator({
+						name: 'Thing',
+						properties: {
+							prop: {
+								type: bizOpsType,
+								pattern: 'NO_Z',
+							},
+							shortprop: {
+								type: bizOpsType,
+								pattern: 'MAX_LENGTH_4',
+							},
+						},
+					});
+				});
+				it('accept strings', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 'I am Tracy Beaker'),
+					).not.toThrow();
+				});
+				it('not accept booleans', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', true),
+					).toThrow(/Must be a string/);
+					expect(() =>
+						validateProperty('Thing', 'prop', false),
+					).toThrow(/Must be a string/);
+				});
+				it('not accept floats', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 1.34),
+					).toThrow(/Must be a string/);
+				});
+				it('not accept integers', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 134),
+					).toThrow(/Must be a string/);
+				});
+				it('apply string patterns', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 'I am zebbedee'),
+					).toThrow('Must match pattern /^[^z]+$/');
+					expect(() =>
+						validateProperty('Thing', 'shortprop', '13 characters'),
+					).toThrow(
+						'Must match pattern /^.{2,4}$/ and be no more than 4 characters',
+					);
+				});
+			}
+		});
 	});
 	describe('validating booleans', () => {
 		let validateProperty;

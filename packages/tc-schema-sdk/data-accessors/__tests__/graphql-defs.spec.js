@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const primitiveTypesMap = require('../../lib/primitive-types-map');
 const { SDK } = require('../../sdk');
 const { readYaml } = require('../../lib/updater');
 
@@ -139,6 +138,12 @@ describe('graphql def creation', () => {
 				},
 			},
 			stringPatterns,
+			primitiveTypes: {
+				Word: {
+					graphql: 'String',
+					component: 'Text',
+				},
+			},
 		};
 
 		const generated = [].concat(
@@ -216,34 +221,32 @@ describe('graphql def creation', () => {
 	});
 
 	describe('converting types', () => {
-		Object.entries(primitiveTypesMap).forEach(
-			([bizopsType, graphqlType]) => {
-				it(`Outputs correct type for properties using ${bizopsType}`, () => {
-					const schema = {
-						types: [
-							{
-								name: 'Fake',
-								description: 'Fake type description',
-								properties: {
-									prop: {
-										type: bizopsType,
-										description: 'a description',
-									},
-								},
+		it(`Outputs correct graphQL type for custom types`, () => {
+			const schema = {
+				types: [
+					{
+						name: 'Fake',
+						description: 'Fake type description',
+						properties: {
+							prop: {
+								type: 'SomeCustomType',
+								description: 'a description',
 							},
-						],
-						enums: {},
-						stringPatterns,
-					};
-					const generated = []
-						.concat(...graphqlFromRawData(schema))
-						.join('');
+						},
+					},
+				],
+				enums: {},
+				stringPatterns,
+				primitiveTypes: {
+					SomeCustomType: {
+						graphql: 'String',
+						component: 'Text',
+					},
+				},
+			};
+			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 
-					expect(generated).toMatch(
-						new RegExp(`prop: ${graphqlType}`),
-					);
-				});
-			},
-		);
+			expect(generated).toMatch(new RegExp(`prop: String`));
+		});
 	});
 });

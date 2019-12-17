@@ -31,7 +31,6 @@ const getGraphqlApi = ({
 					});
 			}
 		} catch (error) {
-			console.log(error);
 			schemaDidUpdate = false;
 			logger.error(
 				{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },

@@ -1,12 +1,16 @@
 const metaProperties = require('../../lib/meta-properties');
 const { SDK } = require('../../sdk');
 
-const typeFromRawData = (typeData, { stringPatterns = {}, options } = {}) =>
+const typeFromRawData = (
+	typeData,
+	{ stringPatterns = {}, primitiveTypes = {}, options } = {},
+) =>
 	new SDK({
 		schemaData: {
 			schema: {
 				types: [{ name: 'DummyType' }].concat(typeData),
 				stringPatterns,
+				primitiveTypes,
 			},
 		},
 	}).getType('Type1', options);
@@ -212,7 +216,17 @@ describe('get-type', () => {
 					},
 				},
 			},
-			{ options: { primitiveTypes: 'graphql' } },
+			{
+				options: { primitiveTypes: 'graphql' },
+				primitiveTypes: {
+					Word: {
+						graphql: 'String',
+					},
+					Document: {
+						graphql: 'String',
+					},
+				},
+			},
 		);
 
 		expect(type.properties.primitiveProp).toMatchObject({ type: 'String' });

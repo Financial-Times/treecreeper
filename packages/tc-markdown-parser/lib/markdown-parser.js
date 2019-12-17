@@ -48,7 +48,9 @@ const unifiedProcessor = function({
 			.use(coerceTreecreeperPropertiesToType, {
 				properties,
 				typeNames,
-				primitiveTypesMap: schema.primitiveTypesMap,
+				primitiveTypesMap: schema.getPrimitiveTypes({
+					output: 'graphql',
+				}),
 				enums: schema.getEnums(),
 			})
 			.use(validateTreecreeperProperties, {
