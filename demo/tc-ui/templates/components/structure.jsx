@@ -1,6 +1,7 @@
 const { h, Fragment } = require('preact');
 
 const { toKebabCase } = require('../helpers');
+const { assignComponent } = require('../../lib/assign-component');
 
 const Concept = ({ name, description, moreInformation }) => (
 	<aside className="biz-ops-aside" title="Concept">
@@ -53,14 +54,7 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 	</Fragment>
 );
 
-const primitiveComponents = require('./primitive-components');
-
-const getPrimitiveComponent = ({ type, isRelationship }) => {
-	if (isRelationship) {
-		return primitiveComponents.Relationship;
-	}
-	return primitiveComponents[type] || primitiveComponents.Default;
-};
+const getPrimitiveComponent = ({ type }) => assignComponent(type).ViewComponent;
 
 const blockComponents = ['Document'];
 const temporalTypes = ['DateTime', 'Time', 'Date'];

@@ -1,5 +1,7 @@
 const { h } = require('preact');
 
+const { primitives } = require('@financial-times/tc-ui/server');
+
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
 	gold: 'tier-gold',
@@ -65,16 +67,11 @@ const Email = ({ value, id }) =>
 		</a>
 	) : null;
 
-const { primitives } = require('../../../../packages/tc-ui/server');
-
 module.exports = {
-	Document: primitives.LargeText.ViewComponent,
-	Paragraph: primitives.LargeText.ViewComponent,
-	SystemLifecycle: LifecycleStage,
-	ProductLifecycle: LifecycleStage,
-	ServiceTier,
-	TrafficLight,
-	Url,
-	Email,
-	Default: primitives.Text.ViewComponent,
+	SystemLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
+	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
+	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
+	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },
+	Url: { ...primitives.Text, ViewComponent: Url },
+	Email: { ...primitives.Text, ViewComponent: Email },
 };

@@ -1,6 +1,6 @@
 const { componentAssigner } = require('@financial-times/tc-ui/server');
 
-const customComponents = {};
+const customComponents = require('../templates/components/primitives');
 
 const customComponentMap = {
 	Paragraph: 'LargeText',
