@@ -42,6 +42,11 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 		return this.rawData.schema.enums;
 	}
 
+	getPrimitiveTypes() {
+		this.checkDataExists();
+		return this.rawData.schema.primitiveTypes;
+	}
+
 	getVersion() {
 		return this.rawData.version;
 	}
