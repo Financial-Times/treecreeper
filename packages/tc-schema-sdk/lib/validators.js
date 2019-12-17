@@ -1,6 +1,5 @@
 const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
 const { stripIndents } = require('common-tags');
-const primitiveTypesMap = require('./primitive-types-map');
 
 const toArray = value => (Array.isArray(value) ? value : [value]);
 
@@ -20,7 +19,7 @@ const throwInvalidValueError = (
 	);
 };
 
-const validateProperty = ({ getType, getEnums }) => {
+const validateProperty = ({ getType, getEnums, getPrimitiveTypes }) => {
 	const recursivelyCallableValidator = (
 		typeName,
 		propertyName,
@@ -28,7 +27,7 @@ const validateProperty = ({ getType, getEnums }) => {
 		aliasPropertyName,
 	) => {
 		const propertyDefinition = getType(typeName).properties[propertyName];
-
+		const primitiveTypesMap = getPrimitiveTypes();
 		if (!propertyDefinition) {
 			throw new TreecreeperUserError(
 				`Invalid property \`${propertyName}\` on type \`${typeName}\`.`,
@@ -130,8 +129,12 @@ const validatePropertyName = name => {
 	}
 };
 
-module.exports = ({ getEnums, getType }) => {
-	const propertyValidator = validateProperty({ getEnums, getType });
+module.exports = ({ getEnums, getType, getPrimitiveTypes }) => {
+	const propertyValidator = validateProperty({
+		getEnums,
+		getType,
+		getPrimitiveTypes,
+	});
 	return {
 		validateTypeName: validateTypeName(getType),
 		validateProperty: propertyValidator,

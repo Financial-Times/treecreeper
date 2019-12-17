@@ -1,8 +1,9 @@
 /* global it, describe, expect */
 const validURL = require('valid-url');
-const { SDK, primitiveTypesMap } = require('@financial-times/tc-schema-sdk');
+const { SDK } = require('@financial-times/tc-schema-sdk');
 
 const sdk = new SDK();
+const primitiveTypesMap = sdk.getPrimitiveTypes();
 const { getStringValidator } = sdk;
 const enums = sdk.rawData.getEnums();
 const stringPatterns = sdk.rawData.getStringPatterns();
