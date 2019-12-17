@@ -74,7 +74,6 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 									'autoPopulated',
 									'showInactive',
 									'writeInactive',
-									'properties',
 								]),
 							),
 						);

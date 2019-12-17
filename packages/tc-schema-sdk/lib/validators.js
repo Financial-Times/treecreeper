@@ -38,7 +38,12 @@ const throwInvalidValueError = (
 	);
 };
 
-const validateProperty = ({ getType, getEnums, getRelationshipType, getPrimitiveTypes }) => {
+const validateProperty = ({
+	getType,
+	getEnums,
+	getPrimitiveTypes,
+	getRelationshipType,
+}) => {
 	const recursivelyCallableValidator = (
 		typeName,
 		propertyName,
@@ -170,12 +175,17 @@ const validatePropertyName = name => {
 	}
 };
 
-module.exports = ({ getEnums, getType, getRelationshipType, getPrimitiveTypes }) => {
+module.exports = ({
+	getEnums,
+	getType,
+	getPrimitiveTypes,
+	getRelationshipType,
+}) => {
 	const propertyValidator = validateProperty({
 		getEnums,
 		getType,
+		getPrimitiveTypes,
 		getRelationshipType,
-    getPrimitiveTypes,
 	});
 	return {
 		validateTypeName: validateTypeName(getType),
