@@ -17,7 +17,7 @@ const EditText = props => {
 					type="text"
 					value={value || null}
 					required={required ? 'required' : null}
-					disabled={disabled ? 'disabled' : null}
+					disabled={disabled}
 				/>
 			</span>
 		</label>

@@ -1,13 +1,5 @@
 const { h } = require('preact');
-const { markdown, autolink, formatDateTime } = require('../helpers');
-
-const Document = ({ value, id }) => (
-	<section id={id} dangerouslySetInnerHTML={{ __html: markdown(value) }} />
-);
-
-const Paragraph = ({ value, id }) => (
-	<p id={id} dangerouslySetInnerHTML={{ __html: autolink(value) }} />
-);
+const { formatDateTime } = require('../helpers');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -81,8 +73,8 @@ const Temporal = ({ value, id, type }) => (
 );
 
 module.exports = {
-	Document,
-	Paragraph,
+	Document: primitives.LargeText.ViewComponent,
+	Paragraph: primitives.LargeText.ViewComponent,
 	SystemLifecycle: LifecycleStage,
 	ProductLifecycle: LifecycleStage,
 	ServiceTier,
@@ -93,6 +85,8 @@ module.exports = {
 	DateTime: Temporal,
 	Time: Temporal,
 	Default: primitives.Text.ViewComponent,
+	LargeText: primitives.LargeText.ViewComponent,
+	Number: primitives.Number.ViewComponent,
 	Boolean: primitives.Boolean.ViewComponent,
 	Relationship: primitives.Relationship.ViewComponent,
 };

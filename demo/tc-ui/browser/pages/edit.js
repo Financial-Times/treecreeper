@@ -1,49 +1,14 @@
-/* global tinymce */
-
-// const converter = require('html-to-markdown');
-
-// const convertToMarkdown = el => {
-// 	el.textContent = converter.convert(el.textContent);
-// }
-
 const {
 	primitives: {
 		Relationship: { withEditComponent: attachRelationshipPicker },
+		LargeText: { withEditComponent: attachDocumentEditor },
 	},
 } = require('@financial-times/tc-ui/browser');
 
-const initWysiwyg = container => {
-	const textarea = container.querySelector('textarea');
-	const description = container.querySelector('.description-text');
-	description.innerHTML +=
-		'<br><strong>Press space after entering a url to autocreate a link.</strong>';
-	tinymce.init({
-		selector: `#${textarea.id}`,
-		plugins: 'code codesample table autolink lists advlist',
-		toolbar:
-			'bold italic underline codesample styleselect | bullist numlist | table outdent indent | code',
-	});
-};
-
 const initDocumentEditors = () => {
-	[...document.querySelectorAll('.wysiwyg-toggle')].forEach(el => {
-		const container = el.closest('.o-forms-field');
-		if (!/></.test(container.querySelector('textarea').value)) {
-			el.parentNode.innerHTML = 'Edit using github flavoured markdown';
-			return;
-		}
-		el.addEventListener(
-			'click',
-			ev => {
-				ev.preventDefault();
-				initWysiwyg(container);
-				el.closest('.document-edit-tools').remove();
-			},
-			{
-				once: true,
-			},
-		);
-	});
+	[...document.querySelectorAll('[data-type="Document"]')].forEach(
+		attachDocumentEditor,
+	);
 };
 
 const initRelationshipSelectors = () => {

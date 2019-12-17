@@ -1,12 +1,12 @@
 const { h } = require('preact');
-const { FieldTitle } = require('./edit-helpers');
-const { checkIfShouldDisable } = require('../../helpers');
+const { FieldTitle } = require('../../lib/edit-helpers');
+const { markdown } = require('../../lib/helpers');
 
 const outputFreeText = (text = '') => text;
 
 const EditTextArea = props => {
 	const { propertyName, value, dataType, lockedBy } = props;
-	const shouldDisable = checkIfShouldDisable(lockedBy);
+	const disabled = !!lockedBy;
 	return (
 		<div
 			className={
@@ -15,14 +15,18 @@ const EditTextArea = props => {
 					: ''
 			}
 		>
-			<label className="o-forms-field" data-biz-ops-type="textarea">
+			<label
+				className="o-forms-field"
+				data-type={dataType}
+				data-biz-ops-type="textarea"
+			>
 				<FieldTitle {...props} />
 				<span className="o-forms-input o-forms-input--textarea">
 					<textarea
 						name={propertyName}
 						id={`id-${propertyName}`}
 						rows={dataType === 'Document' ? '40' : '8'}
-						disabled={shouldDisable ? 'disabled' : null}
+						disabled={disabled}
 					>
 						{outputFreeText(value)}
 					</textarea>
@@ -43,4 +47,12 @@ const EditTextArea = props => {
 	);
 };
 
-module.exports = { EditComponent: EditTextArea };
+module.exports = {
+	EditComponent: EditTextArea,
+	ViewComponent: ({ value, id }) => (
+		<section
+			id={id}
+			dangerouslySetInnerHTML={{ __html: markdown(value) }}
+		/>
+	),
+};
