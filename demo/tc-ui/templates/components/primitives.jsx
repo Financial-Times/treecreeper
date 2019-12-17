@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const { h, Fragment } = require('preact');
 
 const { primitives } = require('@financial-times/tc-ui/server');
 
@@ -47,11 +47,20 @@ const TrafficLight = ({ value }) =>
 		</span>
 	) : null;
 
-const linkHasProtocol = value => value.match(/^https?:/);
+const IsActiveLabel = ({ isActive }) =>
+	isActive ? null : (
+		<span
+			className={`o-labels o-labels--${
+				oLabelsModifiersMap[isActive === false ? 'inactive' : 'unknown']
+			}`}
+		>
+			{isActive === false ? 'Inactive' : 'May not be active'}
+		</span>
+	);
 
 const Url = ({ value, id }) => {
 	if (!value) return null;
-	return linkHasProtocol(value) ? (
+	return value.match(/^https?:/) ? (
 		<a id={id} href={value}>
 			{value}
 		</a>
@@ -66,6 +75,22 @@ const Email = ({ value, id }) =>
 			{value}
 		</a>
 	) : null;
+
+const RelationshipAnnotator = ({ type, value }) => (
+	<Fragment>
+		{type === 'System' ? <ServiceTier value={value.serviceTier} /> : null}
+		{type === 'System' ? (
+			<LifecycleStage value={value.lifecycleStage} />
+		) : null}
+		{type === 'Person' ? <IsActiveLabel isActive={value.isActive} /> : null}
+		{type === 'Team' ? <IsActiveLabel isActive={value.isActive} /> : null}
+		{type === 'Repository' ? (
+			<IsActiveLabel isActive={!value.isArchived} />
+		) : null}
+	</Fragment>
+);
+
+primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
 	SystemLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
