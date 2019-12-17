@@ -1,5 +1,5 @@
 const httpError = require('http-errors');
-const { getApiClient } = require('./lib/get-api-client');
+const { getApiClient } = require('./lib/tc-ui-bridge');
 const getSchemaSubset = require('./lib/get-schema-subset');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
 const response = require('./lib/response');
@@ -70,11 +70,15 @@ const handleForm = async event => {
 		return displayForm(event, error);
 	}
 
-	return response.redirect(
-		`/${type}/${encodeURIComponent(
-			code,
-		)}?message=${type} ${code} was successfully updated&messageType=success`,
-	);
+	return {
+		status: 303,
+		headers: {
+			location: `/${type}/${encodeURIComponent(
+				code,
+			)}?message=${type} ${code} was successfully updated&messageType=success`,
+			'Cache-Control': 'max-age=0, private',
+		},
+	};
 };
 
 const render = async event => {

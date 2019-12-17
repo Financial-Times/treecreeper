@@ -1,6 +1,5 @@
 const logger = require('@financial-times/lambda-logger');
-const { getApiClient } = require('./lib/get-api-client');
-const response = require('./lib/response');
+const { getApiClient } = require('./lib/tc-ui-bridge');
 const { render: renderView } = require('./view');
 
 async function deletePage(event) {
@@ -10,9 +9,13 @@ async function deletePage(event) {
 
 	try {
 		await apiClient.delete(type, code);
-		return response.redirect(
-			`/?message=${type} ${code} was successfully deleted&messageType=success`,
-		);
+		return {
+			status: 303,
+			headers: {
+				location: `/?message=${type} ${code} was successfully deleted&messageType=success`,
+				'Cache-Control': 'max-age=0, private',
+			},
+		};
 	} catch (err) {
 		return renderView({
 			...event,

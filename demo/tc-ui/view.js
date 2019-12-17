@@ -1,4 +1,4 @@
-const { getApiClient } = require('./lib/get-api-client');
+const { getApiClient } = require('./lib/tc-ui-bridge');
 const response = require('./lib/response');
 
 const getSchemaSubset = require('./lib/get-schema-subset');

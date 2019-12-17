@@ -1,6 +1,6 @@
 const { h, Fragment } = require('preact');
 
-const { assignComponent } = require('../../lib/ui-mappings');
+const { assignComponent } = require('../../lib/tc-ui-bridge');
 
 const toKebabCase = string =>
 	string
