@@ -13,12 +13,9 @@ const s3Get = async ({ s3Instance, bucketName, type, code, versionMarker }) => {
 		const node = await s3Instance.getObject(params).promise();
 		const body = JSON.parse(node.Body);
 
-		logger.info(
-			{
-				event: 'GET_S3_SUCCESS',
-			},
-			body,
-		);
+		logger.info({
+			event: 'GET_S3_SUCCESS',
+		});
 		return {
 			body,
 		};
