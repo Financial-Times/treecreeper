@@ -33,25 +33,11 @@ require('module-alias').addAliases({
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const { editController, viewController, deleteController } = require('./cms');
 
-app.get(
-	'/:type/:code/edit',
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-	editController,
-);
-app.post(
-	'/:type/:code/edit',
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-	editController,
-);
-app.get(
-	'/:type/create',
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-	editController,
-);
-app.post(
-	'/:type/create',
-	bodyParser.urlencoded({ limit: '8mb', extended: true }),
-	editController,
-);
+const parseBody = bodyParser.urlencoded({ limit: '8mb', extended: true });
+
+app.get('/:type/:code/edit', editController);
+app.post('/:type/:code/edit', parseBody, editController);
+app.get('/:type/create', editController);
+app.post('/:type/create', parseBody, editController);
 app.post('/:type/:code/delete', deleteController);
 app.get('/:type/:code', viewController);
