@@ -1,6 +1,6 @@
 const { h } = require('preact');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { FieldTitle } = require('../../components/edit-helpers');
+const { WrappedEditComponent } = require('../../components/edit-helpers');
 
 const { RelationshipPicker } = require('./lib/relationship-picker');
 const {
@@ -8,17 +8,15 @@ const {
 	setRelationshipAnnotator,
 } = require('./lib/view-relationship');
 
-const EditRelationship = props => (
-	// eslint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for
-	<label className="o-forms-field" data-biz-ops-type="relationship">
-		<FieldTitle {...props} />
-		<RelationshipPicker {...props} />
-	</label>
-);
-
 module.exports = {
 	ViewComponent: ViewRelationship,
-	EditComponent: EditRelationship,
+	EditComponent: props => (
+		<WrappedEditComponent
+			Component={RelationshipPicker}
+			componentType="relationship"
+			{...props}
+		/>
+	),
 	parser: value => (value ? JSON.parse(value) : null),
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
