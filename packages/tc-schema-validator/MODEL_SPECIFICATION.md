@@ -5,6 +5,7 @@ _Note that yaml files are indented with two spaces_
 -   [Types](#types)
 -   [Properties on existing types](#property-definitions)
 -   [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
+-   [RichRelationships](#rich-relationship-definitions) (which are expressed as a special kind of type)
 -   [Enums](#enums) (aka drop down options)
 -   [String validation rules](#string-validation-rules)
 
@@ -77,6 +78,43 @@ All the options for [property definitions](#property-definitions) apply to relat
 | cypher        | no       |                                                                                    | A custom cypher query to find related records based on arbitrary criteria. Must be compatible with the [`@cypher` directive](https://grandstack.io/docs/neo4j-graphql-js.html#cypher-directive)                                                                                                                                                                  |                               |
 | showInactive  | no       | `true`                                                                             | Boolean indicating whether it is preferable to show or hide relationships to inactive records. Can be used as a hint by any UI                                                                                                                                                                                                                                   |
 | writeInactive | no       | `false`                                                                            | Boolean indicating whether it is possible to write relationships to inactive records. Can be used as a hint by any UI or system writing to Biz Ops, but does not, at this stage, prevent writing at the API level                                                                                                                                                |
+
+### Rich Relationship Definitions
+
+Sometimes it's useful to be able to annotate relationships with additional metadata. e.g. in the graph `(Person)-[:LIVES_IN]->(House)` it may be useful to annotate the relationship with a property `movingInDate`. These properties can be expressed by creating a new relationship type. Each of these is a yaml file, stored in the `/relationships`. Names of types should be singular, without punctuation, and with each word/abbreviation capitalised. The names of the file/type are an implementation detail hidden from the user, so pick any name that makes sense to you, e.g. the example above could be called `HabitationDetails`. The file expects the following properties:
+
+| name         | required | default | details                                                                                                                                                                       | examples                                                              |
+| ------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| name         | yes      |         | The name of the type. This should be exactly the same as the name of the file. It must begin with an upper case letter and contain only upper and lower case letters          | `HabitationDetails`, `HousePersonJoin`                                |
+| from         | yes      |         | Details of the starting node of the relationship. An object with two properties, `type` and `hasMany`, specifying the type and cardinality of this end of the relationship    | `{type: 'House', hasMany: false}` , `{type: 'Person', hasMany: true}` |
+| to           | yes      |         | Details of the end node of the relationship. An object with two properties, `type` and `hasMany`, specifying the type and cardinality of this end of the relationship         | `{type: 'House', hasMany: false}` , `{type: 'Person', hasMany: true}` |
+| relationship | yes      |         | The name of the underlying neo4j relationship                                                                                                                                 | `LIVES_IN`                                                            |
+| properties   | no       |         | A map defining the names, types & labels etc. of properties to be stored on the relationship. See the (#property-definitions)[Property definitions section for more details]. |                                                                       |
+
+To apply rich relationship definitions to a type, carry out a substititution similar to that below:
+
+#### Before
+
+```
+properties:
+  livesIn:
+    type: House
+    relationship: LIVES_IN
+    direction: outgoing
+    hasMany: false
+    label: Lives in house
+```
+
+#### After
+
+```
+properties:
+  livesIn:
+    type: HabitationDetails
+    label: Lives in house
+```
+
+For relationships that have the same type at both ends, it's important not to remove the `direction` property
 
 ### Fieldset Definitions
 

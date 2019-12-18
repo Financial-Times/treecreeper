@@ -28,6 +28,10 @@ class SchemaUpdater {
 			schemaData = {
 				schema: {
 					types: readYaml.directory(schemaDirectory, 'types'),
+					relationshipTypes: readYaml.directory(
+						schemaDirectory,
+						'relationships',
+					),
 					typeHierarchy: readYaml.file(
 						schemaDirectory,
 						'type-hierarchy.yaml',
@@ -35,6 +39,10 @@ class SchemaUpdater {
 					stringPatterns: readYaml.file(
 						schemaDirectory,
 						'string-patterns.yaml',
+					),
+					primitiveTypes: readYaml.file(
+						schemaDirectory,
+						'primitive-types.yaml',
 					),
 					enums: readYaml.file(schemaDirectory, 'enums.yaml'),
 				},

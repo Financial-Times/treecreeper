@@ -7,6 +7,7 @@ describe('rest PATCH diff', () => {
 	const namespace = 'api-rest-handlers-patch-diff';
 	const mainCode = `${namespace}-main`;
 	const childCode = `${namespace}-child`;
+	const parentCode = `${namespace}-parent`;
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
@@ -103,6 +104,107 @@ describe('rest PATCH diff', () => {
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler(
 			{ someString: 'someString', children: [`${childCode}-2`] },
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it("doesn't write if no real relationship property changes detected", async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+			someString: 'some string',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{ curiousChild: [{ code: childCode, someString: 'some string' }] },
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it("doesn't write if no real relationship property changes detected (mixed relationships with and without prop)", async () => {
+		const [main, parent1, parent2] = await createNodes(
+			['MainType', mainCode],
+			['ParentType', `${parentCode}-1`],
+			['ParentType', `${parentCode}-2`],
+		);
+		await connectNodes(
+			[
+				parent1,
+				'IS_CURIOUS_PARENT_OF',
+				main,
+				{ someString: 'some string' },
+			],
+			[parent2, 'IS_CURIOUS_PARENT_OF', main],
+		);
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{
+				curiousParent: [
+					{ code: `${parentCode}-1`, someString: 'some string' },
+					`${parentCode}-2`,
+				],
+			},
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it('writes if one of the relationship properties changes detected', async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+			someString: 'some string',
+			anotherString: 'another string',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{
+				curiousChild: [
+					{
+						code: childCode,
+						someString: 'some string',
+						anotherString: 'new another string',
+					},
+				],
+			},
+			{ relationshipAction: 'merge' },
+		);
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
+	it('detects deleted relationship property as a change', async () => {
+		const [main, child] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode],
+		);
+		await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+			someString: 'some string',
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler(
+			{ curiousChild: [{ code: childCode, someString: null }] },
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);

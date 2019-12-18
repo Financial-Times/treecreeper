@@ -22,6 +22,11 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 		return this.rawData.schema.types;
 	}
 
+	getRelationshipTypes() {
+		this.checkDataExists();
+		return this.rawData.schema.relationshipTypes || [];
+	}
+
 	getTypeHierarchy() {
 		this.checkDataExists();
 		return this.rawData.schema.typeHierarchy;
@@ -35,6 +40,11 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 	getEnums() {
 		this.checkDataExists();
 		return this.rawData.schema.enums;
+	}
+
+	getPrimitiveTypes() {
+		this.checkDataExists();
+		return this.rawData.schema.primitiveTypes;
 	}
 
 	getVersion() {

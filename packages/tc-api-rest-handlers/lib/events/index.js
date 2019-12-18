@@ -40,7 +40,7 @@ const makeEvents = ({
 	action,
 	code,
 	type,
-	addedRelationships,
+	changedRelationships,
 	removedRelationships,
 	updatedProperties = [],
 	neo4jResult,
@@ -71,12 +71,12 @@ const makeEvents = ({
 			updatedProperties,
 		});
 	}
-	if (addedRelationships) {
+	if (changedRelationships) {
 		const addedRelationshipEvents = makeAddedRelationshipEvents(
 			type,
 			code,
 			neo4jResult.records,
-			addedRelationships,
+			changedRelationships,
 			requestId,
 		);
 		events.push(...addedRelationshipEvents);
@@ -94,7 +94,11 @@ const broadcast = changeSummaries => {
 	if (!Array.isArray(changeSummaries)) {
 		changeSummaries = [changeSummaries];
 	}
-	combineSimilarEvents(changeSummaries.flatMap(makeEvents)).forEach(event =>
+	const combinedEvents = combineSimilarEvents(
+		changeSummaries.flatMap(makeEvents),
+	);
+
+	combinedEvents.forEach(event =>
 		module.exports.emitter.emit(event.action, {
 			time: Math.floor(Date.now() / 1000),
 			...event,

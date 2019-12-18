@@ -18,3 +18,4 @@ bower.json
 tslint.json
 .vscode
 .idea
+packages/tc-schema-sdk/data-accessors/__tests__/fixtures/generated-schema.graphql
