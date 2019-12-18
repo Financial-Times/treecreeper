@@ -24,3 +24,7 @@ properties:
     description: Is favourite child of description.
     label: Is favourite child of label
     direction: incoming
+  isCuriousChildOf:
+    type: CuriousChild
+    description: Curious child of description.
+    label: Curious child of label

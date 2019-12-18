@@ -11,8 +11,10 @@ const { prepareRelationshipDeletion } = require('./lib/relationships/write');
 const { getNeo4jRecordCypherQuery } = require('./lib/read-helpers');
 const {
 	getRemovedRelationships,
-	getAddedRelationships,
+	getChangedRelationships,
+	normaliseRelationshipProps,
 } = require('./lib/relationships/input');
+const { retrieveRelationshipCodes } = require('./lib/relationships/input');
 const {
 	metaPropertiesForUpdate,
 	prepareMetadataForNeo4jQuery,
@@ -131,9 +133,12 @@ const collectRemovedRelationships = ({
 		if (!(propName in absorbedRecord)) {
 			return;
 		}
+
+		const absorbedRelationshipCodes =
+			retrieveRelationshipCodes(propName, absorbedRecord) || [];
 		// if the absorbedRecord doesn't point at the root record in this relationship
 		// there is nothing to do
-		if (!absorbedRecord[propName].includes(code)) {
+		if (!absorbedRelationshipCodes.includes(code)) {
 			return;
 		}
 		// make sure we tell removed relationships to delete the newly reflective relationship
@@ -180,6 +185,8 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		type: nodeType,
 		excludeMeta: true,
 	});
+	normaliseRelationshipProps(nodeType, mainRecord);
+	normaliseRelationshipProps(nodeType, absorbedRecord);
 
 	const { properties } = getType(nodeType);
 
@@ -242,9 +249,12 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 		// Merged result always exists at last index
 		result = results.pop();
 
-		const addedRelationships = getAddedRelationships({
+		const changedRelationships = getChangedRelationships({
 			type: nodeType,
-			initialContent: mainRecord,
+			initialContent: mainNode.toJson({
+				type: nodeType,
+				excludeMeta: true,
+			}),
 			newContent: result.toJson({ type: nodeType, excludeMeta: true }),
 		});
 
@@ -268,11 +278,11 @@ const absorbHandler = ({ documentStore } = {}) => async input => {
 				action: 'UPDATE',
 				code,
 				type: nodeType,
-				addedRelationships,
+				changedRelationships,
 				removedRelationships,
 				updatedProperties: [
 					...Object.keys(writeProperties),
-					...Object.keys(addedRelationships),
+					...Object.keys(changedRelationships),
 					...(updatedDocumentProperties || []),
 				],
 				neo4jResult: result,

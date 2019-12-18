@@ -9,9 +9,15 @@ describe('rest PATCH update', () => {
 	const namespace = 'api-rest-handlers-patch-update';
 	const mainCode = `${namespace}-main`;
 
-	const { createNode, meta, getMetaPayload } = setupMocks(namespace);
+	const {
+		createNode,
+		createNodes,
+		meta,
+		getMetaPayload,
+		connectNodes,
+	} = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const getInput = (body, query, metadata = getMetaPayload()) => ({
 		type: 'MainType',
 		code: mainCode,
 		body,
@@ -70,6 +76,19 @@ describe('rest PATCH update', () => {
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match(meta.update);
+		});
+		it('deletes a property as an update', async () => {
+			await createMainNode({
+				someString: 'someString',
+			});
+			const { body, status } = await basicHandler({ someString: null });
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				someString: 'someString',
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.notHave('someString');
 		});
 		describe('temporal properties', () => {
 			const neo4jTimePrecision = timestamp =>
@@ -361,6 +380,131 @@ describe('rest PATCH update', () => {
 			await neo4jTest('MainType', mainCode).notMatch({
 				notInSchema: 'a string',
 			});
+		});
+	});
+
+	describe('Relationship properties', () => {
+		const childCode = `${namespace}-child`;
+
+		it("update existing relationship's property", async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
+			});
+			const { body, status } = await basicHandler(
+				{
+					curiousChild: [
+						{ code: childCode, someString: 'new some string' },
+					],
+				},
+				{ relationshipAction: 'merge', richRelationships: true },
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				curiousChild: { someString: 'new some string' },
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.default)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someString: 'new some string',
+							...meta.update,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
+		});
+
+		it('deletes a property as an update', async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
+			});
+			const { body, status } = await basicHandler(
+				{ curiousChild: [{ code: childCode, someString: null }] },
+				{ relationshipAction: 'merge', richRelationships: true },
+			);
+
+			expect(status).toBe(200);
+			expect(body).not.toMatchObject({
+				curiousChild: { someString: 'some string' },
+			});
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: meta.update,
+						notProps: ['someString'],
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
+		});
+
+		it('throws 400 if attempting to write relationship property not in schema', async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
+			});
+			await expect(
+				basicHandler(
+					{
+						curiousChild: [
+							{ code: childCode, notInSchema: 'a string' },
+						],
+					},
+					{ relationshipAction: 'merge', richRelationships: true },
+				),
+			).rejects.httpError({
+				status: 400,
+				message:
+					'Invalid property `notInSchema` on type `CuriousChild`.',
+			});
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: { someString: 'some string', ...meta.default },
+						notProps: ['notInSchema'],
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
 		});
 	});
 

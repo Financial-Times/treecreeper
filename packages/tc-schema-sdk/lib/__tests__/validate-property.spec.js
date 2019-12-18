@@ -1,7 +1,7 @@
 const { SDK } = require('../../sdk');
-const primitiveTypesMap = require('../primitive-types-map');
+const readYaml = require('../read-yaml');
 
-const getValidator = (type, enums = {}) => {
+const getValidator = (type, { enums, relationshipTypes } = {}) => {
 	const sdk = new SDK({
 		schemaData: {
 			schema: {
@@ -12,6 +12,11 @@ const getValidator = (type, enums = {}) => {
 					LOWERCASE: '^[a-z]+$',
 					MAX_LENGTH_4: '^.{2,4}$',
 				},
+				primitiveTypes: readYaml.file(
+					process.env.TREECREEPER_SCHEMA_DIRECTORY,
+					'primitive-types.yaml',
+				),
+				relationshipTypes,
 			},
 		},
 	});
@@ -33,69 +38,71 @@ describe('validateProperty', () => {
 	});
 
 	describe('validating strings', () => {
-		Object.entries(primitiveTypesMap).forEach(
-			([bizOpsType, graphqlType]) => {
-				let validateProperty;
-				if (graphqlType === 'String') {
-					beforeEach(() => {
-						validateProperty = getValidator({
-							name: 'Thing',
-							properties: {
-								prop: {
-									type: bizOpsType,
-									pattern: 'NO_Z',
-								},
-								shortprop: {
-									type: bizOpsType,
-									pattern: 'MAX_LENGTH_4',
-								},
-							},
-						});
-					});
-					it('accept strings', () => {
-						expect(() =>
-							validateProperty(
-								'Thing',
-								'prop',
-								'I am Tracy Beaker',
-							),
-						).not.toThrow();
-					});
-					it('not accept booleans', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', true),
-						).toThrow(/Must be a string/);
-						expect(() =>
-							validateProperty('Thing', 'prop', false),
-						).toThrow(/Must be a string/);
-					});
-					it('not accept floats', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 1.34),
-						).toThrow(/Must be a string/);
-					});
-					it('not accept integers', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 134),
-						).toThrow(/Must be a string/);
-					});
-					it('apply string patterns', () => {
-						expect(() =>
-							validateProperty('Thing', 'prop', 'I am zebbedee'),
-						).toThrow('Must match pattern /^[^z]+$/');
-						expect(() =>
-							validateProperty(
-								'Thing',
-								'shortprop',
-								'13 characters',
-							),
-						).toThrow(
-							'Must match pattern /^.{2,4}$/ and be no more than 4 characters',
-						);
-					});
-				}
+		const primitivesSdk = new SDK({
+			schemaData: {
+				schema: {
+					primitiveTypes: readYaml.file(
+						process.env.TREECREEPER_SCHEMA_DIRECTORY,
+						'primitive-types.yaml',
+					),
+				},
 			},
-		);
+		});
+		Object.entries(
+			primitivesSdk.getPrimitiveTypes({ output: 'graphql' }),
+		).forEach(([bizOpsType, graphqlType]) => {
+			let validateProperty;
+			if (graphqlType === 'String') {
+				beforeEach(() => {
+					validateProperty = getValidator({
+						name: 'Thing',
+						properties: {
+							prop: {
+								type: bizOpsType,
+								pattern: 'NO_Z',
+							},
+							shortprop: {
+								type: bizOpsType,
+								pattern: 'MAX_LENGTH_4',
+							},
+						},
+					});
+				});
+				it('accept strings', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 'I am Tracy Beaker'),
+					).not.toThrow();
+				});
+				it('not accept booleans', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', true),
+					).toThrow(/Must be a string/);
+					expect(() =>
+						validateProperty('Thing', 'prop', false),
+					).toThrow(/Must be a string/);
+				});
+				it('not accept floats', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 1.34),
+					).toThrow(/Must be a string/);
+				});
+				it('not accept integers', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 134),
+					).toThrow(/Must be a string/);
+				});
+				it('apply string patterns', () => {
+					expect(() =>
+						validateProperty('Thing', 'prop', 'I am zebbedee'),
+					).toThrow('Must match pattern /^[^z]+$/');
+					expect(() =>
+						validateProperty('Thing', 'shortprop', '13 characters'),
+					).toThrow(
+						'Must match pattern /^.{2,4}$/ and be no more than 4 characters',
+					);
+				});
+			}
+		});
 	});
 	describe('validating booleans', () => {
 		let validateProperty;
@@ -204,6 +211,11 @@ describe('validateProperty', () => {
 	describe('validating enums', () => {
 		let validateProperty;
 		beforeEach(() => {
+			const enums = {
+				MyEnum: {
+					options: { bear: 'grylls', ray: 'winstone' },
+				},
+			};
 			validateProperty = getValidator(
 				{
 					name: 'Thing',
@@ -213,14 +225,7 @@ describe('validateProperty', () => {
 						},
 					},
 				},
-				{
-					MyEnum: {
-						options: {
-							bear: 'grylls',
-							ray: 'winstone',
-						},
-					},
-				},
+				{ enums },
 			);
 		});
 		it('accept value defined in a mapping enum', () => {
@@ -259,6 +264,12 @@ describe('validateProperty', () => {
 					name: 'EndType',
 					properties: {
 						code: { pattern: 'LOWERCASE', type: 'String' },
+						inverseTestRelationship: {
+							type: 'StartType',
+							direction: 'incoming',
+							relationship: 'HAS',
+							hasMany: false,
+						},
 					},
 				},
 			]);
@@ -292,6 +303,71 @@ describe('validateProperty', () => {
 		it('accept when all is correct', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelationship', 'lowercase'),
+			).not.toThrow();
+		});
+	});
+
+	describe('validating relationship properties', () => {
+		let validateProperty;
+		beforeEach(() => {
+			const types = [
+				{
+					name: 'StartType',
+					properties: {
+						testRelationship: { type: 'RelationshipType' },
+					},
+				},
+				{
+					name: 'EndType',
+					properties: {
+						code: { pattern: 'LOWERCASE', type: 'String' },
+						isTestRelationship: {
+							type: 'RelationshipType',
+						},
+					},
+				},
+			];
+			const relationshipTypes = [
+				{
+					name: 'RelationshipType',
+					relationship: 'HAS',
+					from: { type: 'StartType', hasMany: true },
+					to: { type: 'EndType', hasMany: true },
+					properties: {
+						someString: { type: 'Word' },
+					},
+				},
+			];
+			validateProperty = getValidator(types, { relationshipTypes });
+		});
+
+		it('reject when relationship node code is invalid', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'UPPERCASE',
+				}),
+			).toThrow(
+				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+			);
+		});
+
+		it('not accept if not in schema', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'lowercase',
+					anotherString: 'another string',
+				}),
+			).toThrow(
+				/Invalid property `anotherString` on type `RelationshipType`/,
+			);
+		});
+
+		it('accept when all is correct', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'lowercase',
+					someString: 'some string',
+				}),
 			).not.toThrow();
 		});
 	});

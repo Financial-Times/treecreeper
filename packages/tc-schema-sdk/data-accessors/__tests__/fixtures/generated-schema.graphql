@@ -1,0 +1,370 @@
+directive @deprecated(
+	reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
+
+scalar DateTime
+scalar Date
+scalar Time
+"""
+A cost centre which groups are costed to
+"""
+type CostCentre {
+	"""
+	Unique code/id for this item
+	"""
+	code: String
+	"""
+	The name of the cost centre
+	"""
+	name: String
+	"""
+	The groups which are costed to the cost centre
+	"""
+	hasGroups(first: Int, offset: Int): [Group] @relation(name: "PAYS_FOR", direction: "OUT")
+	"""
+	The recursive groups which are costed to the cost centre
+	"""
+	hasNestedGroups(first: Int, offset: Int): [Group] @cypher(statement: "MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related")
+	"""
+	Group that embezzles description
+	"""
+	embezzledBy: Group @relation(name: "EMBEZZLES", direction: "OUT")
+	"""
+	The client that was used to make the creation
+	"""
+	_createdByClient: String
+	"""
+	The user that made the creation
+	"""
+	_createdByUser: String
+	"""
+	The time and date this record was created
+	"""
+	_createdTimestamp: DateTime
+	"""
+	The client that was used to make the update
+	"""
+	_updatedByClient: String
+	"""
+	The last user to make an update
+	"""
+	_updatedByUser: String
+	"""
+	The time and date this record was last updated
+	"""
+	_updatedTimestamp: DateTime
+	"""
+	Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+	"""
+	_lockedFields: String
+	"""
+	The groups which are costed to the cost centre
+	*NOTE: This gives access to properties on the relationships between records
+	as well as on the records themselves. Use 'hasGroups' instead if you do not need this*
+	"""
+	hasGroups_rel(first: Int, offset: Int): [CostcentrePaysForGroup]
+
+	"""
+	Group that embezzles description
+	*NOTE: This gives access to properties on the relationships between records
+	as well as on the records themselves. Use 'embezzledBy' instead if you do not need this*
+	"""
+	embezzledBy_rel: CostcentreEmbezzlesGroup
+}
+
+"""
+An overarching group which contains teams and is costed separately
+"""
+type Group {
+	"""
+	Unique code/id for this item
+	"""
+	code: String
+	"""
+	The name of the group
+	"""
+	name: String
+	"""
+	Whether or not the group is still in existence
+	"""
+	isActive: Boolean
+
+	"""
+	The Cost Centre associated with the group
+	"""
+	hasBudget: CostCentre @relation(name: "PAYS_FOR", direction: "IN")
+	"""
+	CostCentre to embezzle description
+	"""
+	embezzles: CostCentre @relation(name: "EMBEZZLES", direction: "IN")
+
+	"""
+	The client that was used to make the creation
+	"""
+	_createdByClient: String
+	"""
+	The user that made the creation
+	"""
+	_createdByUser: String
+	"""
+	The time and date this record was created
+	"""
+	_createdTimestamp: DateTime
+	"""
+	The client that was used to make the update
+	"""
+	_updatedByClient: String
+	"""
+	The last user to make an update
+	"""
+	_updatedByUser: String
+	"""
+	The time and date this record was last updated
+	"""
+	_updatedTimestamp: DateTime
+	"""
+	Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+	"""
+	_lockedFields: String
+	"""
+	The Cost Centre associated with the group
+	*NOTE: This gives access to properties on the relationships between records
+	as well as on the records themselves. Use 'hasBudget' instead if you do not need this*
+	"""
+	hasBudget_rel: CostcentrePaysForGroup
+	"""
+	CostCentre to embezzle description
+	*NOTE: This gives access to properties on the relationships between records
+	as well as on the records themselves. Use 'embezzles' instead if you do not need this*
+	"""
+	embezzles_rel: CostcentreEmbezzlesGroup
+}
+"""
+Internal use only
+"""
+type CostcentrePaysForGroup @relation(name: "PAYS_FOR") {
+	from: CostCentre
+	to: Group
+	"""
+	The client that was used to make the creation
+	"""
+	_createdByClient: String
+	"""
+	The user that made the creation
+	"""
+	_createdByUser: String
+	"""
+	The time and date this record was created
+	"""
+	_createdTimestamp: DateTime
+	"""
+	The client that was used to make the update
+	"""
+	_updatedByClient: String
+	"""
+	The last user to make an update
+	"""
+	_updatedByUser: String
+	"""
+	The time and date this record was last updated
+	"""
+	_updatedTimestamp: DateTime
+}
+"""
+Internal use only
+"""
+type CostcentreEmbezzlesGroup @relation(name: "EMBEZZLES") {
+	from: CostCentre
+	to: Group
+	"""
+	Jusrisdiction description
+	"""
+	jurisdiction: String
+	"""
+	The client that was used to make the creation
+	"""
+	_createdByClient: String
+	"""
+	The user that made the creation
+	"""
+	_createdByUser: String
+	"""
+	The time and date this record was created
+	"""
+	_createdTimestamp: DateTime
+	"""
+	The client that was used to make the update
+	"""
+	_updatedByClient: String
+	"""
+	The last user to make an update
+	"""
+	_updatedByUser: String
+	"""
+	The time and date this record was last updated
+	"""
+	_updatedTimestamp: DateTime
+}
+type Query {
+	"""
+	A cost centre which groups are costed to
+	"""
+	CostCentre(
+		"""
+		Unique code/id for this item
+		"""
+		code: String
+		"""
+		The name of the cost centre
+		"""
+		name: String
+	): CostCentre
+
+	"""
+	A cost centre which groups are costed to
+	"""
+	CostCentres(
+		"""
+		The pagination offset to use
+		"""
+		offset: Int = 0
+		"""
+		The number of records to return after the pagination offset. This uses the default neo4j ordering
+		"""
+		first: Int = 20000
+		"""
+		Unique code/id for this item
+		"""
+		code: String
+		"""
+		The name of the cost centre
+		"""
+		name: String
+
+		"""
+		The client that was used to make the creation
+		"""
+		_createdByClient: String
+		"""
+		The user that made the creation
+		"""
+		_createdByUser: String
+		"""
+		The time and date this record was created
+		"""
+		_createdTimestamp: DateTime
+		"""
+		The client that was used to make the update
+		"""
+		_updatedByClient: String
+		"""
+		The last user to make an update
+		"""
+		_updatedByUser: String
+		"""
+		The time and date this record was last updated
+		"""
+		_updatedTimestamp: DateTime
+		"""
+		Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+		"""
+		_lockedFields: String
+	): [CostCentre]
+
+	"""
+	An overarching group which contains teams and is costed separately
+	"""
+	Group(
+		"""
+		Unique code/id for this item
+		"""
+		code: String
+		"""
+		The name of the group
+		"""
+		name: String
+	): Group
+
+	"""
+	An overarching group which contains teams and is costed separately
+	"""
+	Groups(
+		"""
+		The pagination offset to use
+		"""
+		offset: Int = 0
+		"""
+		The number of records to return after the pagination offset. This uses the default neo4j ordering
+		"""
+		first: Int = 20000
+		"""
+		Unique code/id for this item
+		"""
+		code: String
+		"""
+		The name of the group
+		"""
+		name: String
+		"""
+		Whether or not the group is still in existence
+		"""
+		isActive: Boolean
+		"""
+		The client that was used to make the creation
+		"""
+		_createdByClient: String
+		"""
+		The user that made the creation
+		"""
+		_createdByUser: String
+		"""
+		The time and date this record was created
+		"""
+		_createdTimestamp: DateTime
+		"""
+		The client that was used to make the update
+		"""
+		_updatedByClient: String
+		"""
+		The last user to make an update
+		"""
+		_updatedByUser: String
+		"""
+		The time and date this record was last updated
+		"""
+		_updatedTimestamp: DateTime
+		"""
+		Autopopulated fields that are uneditable. This is an experimental feature that can be ignored.
+		"""
+		_lockedFields: String
+	): [Group]
+}
+"""
+The lifecycle stage of a product
+"""
+enum Lifecycle {
+	"""
+	Incubate description
+	"""
+	Incubate
+	"""
+	Sustain description
+	"""
+	Sustain
+	"""
+	Grow description
+	"""
+	Grow
+	"""
+	Sunset description
+	"""
+	Sunset
+}
+"""
+Quality rating based on Red, Amber and Green.
+"""
+enum TrafficLight {
+	Red
+	Amber
+	Green
+}

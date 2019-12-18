@@ -28,8 +28,12 @@ const readDirectory = (rootDirectory, directory) => {
 			.map(fileName =>
 				readFile(rootDirectory, path.join(directory, fileName)),
 			);
-	} catch (e) {
-		console.log(e);
+	} catch (err) {
+		logger.warn(
+			{ event: 'BIZ_OPS_SCHEMA_SCAN_DIRECTORY_ERROR', directory },
+			err,
+		);
+		return [];
 	}
 };
 
