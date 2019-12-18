@@ -1,12 +1,11 @@
 const httpError = require('http-errors');
-const { getApiClient, getSchemaSubset } = require('./lib/tc-ui-bridge');
-const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
-const { Header } = require('./templates/components/header');
-const { Footer } = require('./templates/components/footer');
-const { handleError, renderPage } = require('@financial-times/tc-ui').getPageRenderer({
-	Header,
-	Footer,
-});
+const {
+	getApiClient,
+	getSchemaSubset,
+	handleError,
+	renderPage,
+} = require('./lib/tc-ui-bridge');
+const { formDataToRest, formDataToGraphQL } = require('./lib/tc-ui-bridge');
 const template = require('./templates/edit-page');
 
 const displayForm = async (event, apiError) => {

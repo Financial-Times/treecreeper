@@ -1,10 +1,10 @@
 const { h, Fragment } = require('preact');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const logger = require('@financial-times/lambda-logger');
+const { FormError } = require('@financial-times/tc-ui');
 const { Concept, SectionHeader } = require('./components/structure');
 
 const { SaveButton, CancelButton } = require('./components/buttons');
-const { FormError } = require('@financial-times/tc-ui');
 
 const { assignComponent } = require('../lib/tc-ui-bridge');
 

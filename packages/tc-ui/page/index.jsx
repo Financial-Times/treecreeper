@@ -7,7 +7,7 @@ const messages = require('./messages');
 
 const getPageRenderer = ({ Header, Footer }) => {
 	const renderHtml = (Template, props) => {
-		props = {...props, Header, Footer}
+		props = { ...props, Header, Footer };
 		return `
 	<!DOCTYPE html>
 	${render(
@@ -56,5 +56,6 @@ const getPageRenderer = ({ Header, Footer }) => {
 };
 
 module.exports = {
-	getPageRenderer, ...messages
- };
+	getPageRenderer,
+	...messages,
+};

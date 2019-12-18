@@ -4,6 +4,7 @@ const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const {getPageRenderer, FormError} = require('./page')
+const { getPageRenderer, FormError } = require('./page');
 module.exports = {
 	primitives,
 	componentAssigner,

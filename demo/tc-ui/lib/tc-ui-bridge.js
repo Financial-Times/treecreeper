@@ -6,6 +6,10 @@ const {
 	ApiClient,
 	getSchemaSubset,
 } = require('@financial-times/tc-ui/server');
+	getPageRenderer,
+} = require('@financial-times/tc-ui');
+const { Header } = require('../templates/components/header');
+const { Footer } = require('../templates/components/footer');
 
 const customComponents = require('../templates/components/primitives');
 
@@ -36,4 +40,8 @@ module.exports = {
 				'client-user-id': 'rhys.evans',
 			}),
 		}),
+	...getPageRenderer({
+		Header,
+		Footer,
+	}),
 };

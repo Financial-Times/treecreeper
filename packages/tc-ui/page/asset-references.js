@@ -51,10 +51,20 @@ const defaultOrigamiJsModules = {
 	date: '^2.11.0',
 };
 
-const getAssetReferences = ({isProduction, origamiJsModules = {}, origamiCssModules = {}}) => {
+const getAssetReferences = ({
+	isProduction,
+	origamiJsModules = {},
+	origamiCssModules = {},
+}) => {
 	return {
-		origamiJs: buildOrigamiUrl(isProduction, 'js', {...origamiJsModules, ...defaultOrigamiJsModules}),
-		origamiCss: buildOrigamiUrl(isProduction, 'css', {...origamiCssModules, ...defaultOrigamiCssModules}),
+		origamiJs: buildOrigamiUrl(isProduction, 'js', {
+			...origamiJsModules,
+			...defaultOrigamiJsModules,
+		}),
+		origamiCss: buildOrigamiUrl(isProduction, 'css', {
+			...origamiCssModules,
+			...defaultOrigamiCssModules,
+		}),
 		mainJs: getPathToStaticAsset(isProduction, 'main.js'),
 		mainCss: getPathToStaticAsset(isProduction, 'main.css'),
 	};

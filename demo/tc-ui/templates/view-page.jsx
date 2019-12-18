@@ -1,4 +1,5 @@
 const { h } = require('preact');
+const { FormError } = require('@financial-times/tc-ui');
 const {
 	Concept,
 	LabelledPrimitive,
@@ -10,7 +11,6 @@ const {
 	DeleteButton,
 	VisualiseButton,
 } = require('./components/buttons');
-const { FormError } = require('@financial-times/tc-ui');
 
 const Properties = ({ fields, data }) => {
 	const propertyfields = Object.entries(fields);
