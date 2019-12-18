@@ -1,12 +1,9 @@
 const { h, Fragment } = require('preact');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
-const logger = require('@financial-times/lambda-logger');
-const { FormError } = require('@financial-times/tc-ui');
+const { FormError } = require('../components/messages');
 const { Concept, SectionHeader } = require('./components/structure');
 
 const { SaveButton, CancelButton } = require('./components/buttons');
-
-const { assignComponent } = require('../lib/tc-ui-bridge');
 
 const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string
@@ -38,29 +35,12 @@ const getValue = (itemSchema, itemValue) => {
 	return itemValue;
 };
 
-const PropertyInputs = ({ fields, data, isEdit, type }) => {
-	let fieldsToLock;
-	let lockedBy;
-	const lockedFieldsErrorMessage = 'Failed to parse _lockedFields';
+const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 	const propertyfields = Object.entries(fields);
 
-	try {
-		fieldsToLock = data._lockedFields ? JSON.parse(data._lockedFields) : {};
-	} catch (error) {
-		logger.error(
-			{
-				error,
-				nodeType: type,
-				code: data.code,
-				_lockedFields: data._lockedFields,
-				event: 'LOCKED_FIELDS_PARSE_ERROR',
-			},
-			lockedFieldsErrorMessage,
-		);
-		throw new Error(
-			`${lockedFieldsErrorMessage} ${data._lockedFields}. ${error}`,
-		);
-	}
+	const fieldsToLock = data._lockedFields
+		? JSON.parse(data._lockedFields)
+		: {};
 
 	const fieldNamesToLock = Object.keys(fieldsToLock).filter(
 		fieldName => fieldsToLock[fieldName] !== 'biz-ops-admin',
@@ -74,7 +54,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
-			lockedBy = null;
+			let lockedBy;
 			if (fieldNamesToLock.includes(name)) {
 				lockedBy = fieldsToLock[name];
 			}
@@ -99,7 +79,16 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 		});
 };
 
-const EditForm = ({ schema, data, isEdit, error, type, code, querystring }) => {
+const EditForm = ({
+	schema,
+	data,
+	isEdit,
+	error,
+	type,
+	code,
+	querystring,
+	assignComponent,
+}) => {
 	const getAction = () => {
 		return isEdit
 			? `/${type}/${encodeURIComponent(code)}/edit`
@@ -157,6 +146,7 @@ const EditForm = ({ schema, data, isEdit, error, type, code, querystring }) => {
 									data={data}
 									isEdit={isEdit}
 									type={type}
+									assignComponent={assignComponent}
 								/>
 							</fieldset>
 						),

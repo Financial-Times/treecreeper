@@ -1,10 +1,11 @@
-const template = require('./templates/view-page');
+const template = require('../templates/view-page');
 
 const getViewHandler = ({
 	getApiClient,
 	getSchemaSubset,
 	handleError,
 	renderPage,
+	assignComponent,
 }) => {
 	const render = async event => {
 		const { type, code } = event.params;
@@ -19,6 +20,7 @@ const getViewHandler = ({
 				schema,
 				data,
 				error,
+				assignComponent,
 				pageType: 'view',
 				pageTitle: `View ${type} ${data.name}`,
 			},

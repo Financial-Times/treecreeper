@@ -1,79 +1,12 @@
 const logger = require('@financial-times/lambda-logger');
-const {
-	componentAssigner,
-	graphqlQueryBuilder,
-	ApiClient,
-	getSchemaSubset,
-	getPageRenderer,
-	getDataTransformers,
-} = require('@financial-times/tc-ui');
-const { getViewHandler } = require('./view');
-const { getEditHandler } = require('./edit');
-const { getDeleteHandler } = require('./delete');
+const { getCMS } = require('@financial-times/tc-ui');
 
 const { Header } = require('./lib/components/header');
 const { Footer } = require('./lib/components/footer');
 
 const customComponents = require('./lib/components/primitives');
 
-const getApi = ({
-	logger,
-	apiBaseUrl,
-	apiHeaders,
-	Header,
-	Footer,
-	customComponents,
-	customTypeMappings,
-}) => {
-	const assignComponent = componentAssigner({
-		customComponents,
-		customTypeMappings,
-	});
-
-	const graphqlBuilder = type => graphqlQueryBuilder(type, assignComponent);
-
-	const { handleError, renderPage } = getPageRenderer({
-		Header,
-		Footer,
-	});
-
-	const getApiClient = event =>
-		new ApiClient({
-			event,
-			graphqlBuilder,
-			logger,
-			apiBaseUrl,
-			apiHeaders,
-		});
-
-	const { formDataToRest, formDataToGraphQL } = getDataTransformers(
-		assignComponent,
-	);
-	const { handler: viewHandler, render: viewRender } = getViewHandler({
-		getApiClient,
-		getSchemaSubset,
-		handleError,
-		renderPage,
-	});
-	return {
-		view: viewHandler,
-		edit: getEditHandler({
-			getApiClient,
-			getSchemaSubset,
-			handleError,
-			renderPage,
-			formDataToRest,
-			formDataToGraphQL,
-		}).handler,
-		delete: getDeleteHandler({
-			getApiClient,
-			handleError,
-			viewRender,
-		}).handler,
-	};
-};
-
-module.exports = getApi({
+module.exports = getCMS({
 	logger,
 	apiBaseUrl: 'http://local.in.ft.com:8888/api',
 	apiHeaders: () => ({

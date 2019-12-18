@@ -1,6 +1,9 @@
-const logger = require('@financial-times/lambda-logger');
-
-const getDeleteHandler = ({ getApiClient, handleError, viewRender }) => {
+const getDeleteHandler = ({
+	getApiClient,
+	handleError,
+	viewRender,
+	logger,
+}) => {
 	const deletePage = async event => {
 		const apiClient = getApiClient(event);
 		const { type, code } = event.params;

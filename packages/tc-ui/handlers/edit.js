@@ -1,11 +1,12 @@
 const httpError = require('http-errors');
-const template = require('./templates/edit-page');
+const template = require('../templates/edit-page');
 
 const getEditHandler = ({
 	getApiClient,
 	getSchemaSubset,
 	handleError,
 	renderPage,
+	assignComponent,
 	formDataToRest,
 	formDataToGraphQL,
 }) => {
@@ -29,6 +30,7 @@ const getEditHandler = ({
 			data: formData,
 			type,
 			code,
+			assignComponent,
 			isEdit: !!code,
 			pageType: 'edit',
 			pageTitle: formData.code

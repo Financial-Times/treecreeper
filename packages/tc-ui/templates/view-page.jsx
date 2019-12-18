@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { FormError } = require('@financial-times/tc-ui');
+const { FormError } = require('../components/messages');
 const {
 	Concept,
 	LabelledPrimitive,
@@ -12,7 +12,7 @@ const {
 	VisualiseButton,
 } = require('./components/buttons');
 
-const Properties = ({ fields, data }) => {
+const Properties = ({ fields, data, assignComponent }) => {
 	const propertyfields = Object.entries(fields);
 
 	return propertyfields
@@ -26,6 +26,7 @@ const Properties = ({ fields, data }) => {
 				value: data[name],
 				id: name,
 				...item,
+				...assignComponent(item.type),
 			};
 
 			return viewModel.label ? (
@@ -34,7 +35,7 @@ const Properties = ({ fields, data }) => {
 		});
 };
 
-const View = ({ schema, data, error, querystring }) => (
+const View = ({ schema, data, error, querystring, assignComponent }) => (
 	<main className="o-layout__main">
 		<div className="o-layout__main__full-span">
 			<FormError type={schema.name} code={data.code} error={error} />
@@ -125,7 +126,11 @@ const View = ({ schema, data, error, querystring }) => (
 								includeEditLink
 							/>
 							<dl className="biz-ops-properties-list">
-								<Properties fields={properties} data={data} />
+								<Properties
+									fields={properties}
+									data={data}
+									assignComponent={assignComponent}
+								/>
 							</dl>
 						</section>
 					),

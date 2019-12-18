@@ -1,7 +1,5 @@
 const { h, Fragment } = require('preact');
 
-const { assignComponent } = require('../../lib/tc-ui-bridge');
-
 const toKebabCase = string =>
 	string
 		.split(' ')
@@ -48,8 +46,6 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 	</Fragment>
 );
 
-const getComponent = ({ type }) => assignComponent(type);
-
 const blockComponents = ['Document'];
 
 const layoutClass = type =>
@@ -62,16 +58,12 @@ const LabelledPrimitive = props => {
 		description,
 		value,
 		type,
-		isRelationship,
-		hasMany,
 		useInSummary,
 		id,
+		ViewComponent,
+		hasValue,
 	} = props;
-	const { ViewComponent: PrimitiveComponent, hasValue } = getComponent({
-		type,
-		isRelationship,
-		hasMany,
-	});
+
 	if (!useInSummary && !hasValue(value, props)) {
 		return null;
 	}
@@ -106,7 +98,7 @@ const LabelledPrimitive = props => {
 					showInactive === false ? 'hide-inactive' : ''
 				}`}
 			>
-				<PrimitiveComponent {...props} />
+				<ViewComponent {...props} />
 				{showInactive === false ? (
 					<button
 						type="button"
