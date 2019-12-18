@@ -21,8 +21,6 @@ const Concept = ({ name, description, moreInformation }) => (
 	</aside>
 );
 
-
-
 // Has a title, and there are other ways to edit content
 // TODO: Need to work with origami and design to find a
 // more accessible solution that means we won't need to

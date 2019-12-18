@@ -1,9 +1,77 @@
-const { handler: viewHandler } = require('./view');
+const logger = require('@financial-times/lambda-logger');
+const {
+	componentAssigner,
+	graphqlQueryBuilder,
+	ApiClient,
+	getSchemaSubset,
+	getPageRenderer,
+	getDataTransformers,
+} = require('@financial-times/tc-ui');
+const { getViewHandler } = require('./view');
 const { handler: editHandler } = require('./edit');
 const { handler: deleteHandler } = require('./delete');
 
-module.exports = {
-	view: viewHandler,
-	edit: editHandler,
-	delete: deleteHandler,
+const { Header } = require('./lib/components/header');
+const { Footer } = require('./lib/components/footer');
+
+const customComponents = require('./lib/components/primitives');
+
+const getApi = ({
+	logger,
+	apiBaseUrl,
+	apiHeaders,
+	Header,
+	Footer,
+	customComponents,
+	customTypeMappings,
+}) => {
+	const assignComponent = componentAssigner({
+		customComponents,
+		customTypeMappings,
+	});
+
+	const graphqlBuilder = type => graphqlQueryBuilder(type, assignComponent);
+
+	const { handleError, renderPage } = getPageRenderer({
+		Header,
+		Footer,
+	});
+
+	const getApiClient = event =>
+		new ApiClient({
+			event,
+			graphqlBuilder,
+			logger,
+			apiBaseUrl,
+			apiHeaders,
+		});
+
+	// ...getDataTransformers(assignComponent),
+
+	return {
+		view: getViewHandler({
+			getApiClient,
+			getSchemaSubset,
+			handleError,
+			renderPage,
+		}).handler,
+		edit: editHandler,
+		delete: deleteHandler,
+	};
 };
+
+module.exports = getApi({
+	logger,
+	apiBaseUrl: 'http://local.in.ft.com:8888/api',
+	apiHeaders: () => ({
+		'x-api-key': process.env.BIZ_OPS_API_KEY,
+		'client-id': 'biz-ops-admin',
+		'client-user-id': 'rhys.evans',
+	}),
+	Header,
+	Footer,
+	customComponents,
+	customTypeMappings: {
+		Paragraph: 'LargeText',
+	},
+});

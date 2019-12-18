@@ -5,6 +5,7 @@ const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');
 const { getPageRenderer, FormError } = require('./page');
+const messages = require('./components/messages');
 
 module.exports = {
 	primitives,
@@ -15,6 +16,7 @@ module.exports = {
 	getPageRenderer,
 	FormError,
 	getDataTransformers,
+	components: { ...messages },
 };
 
 /*

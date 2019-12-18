@@ -3,7 +3,6 @@ const { render } = require('preact-render-to-string');
 const { h } = require('preact');
 const Layout = require('./layout');
 const errorTemplate = require('./error-page');
-const messages = require('./messages');
 
 const getPageRenderer = ({ Header, Footer }) => {
 	const renderHtml = (Template, props) => {
@@ -57,5 +56,4 @@ const getPageRenderer = ({ Header, Footer }) => {
 
 module.exports = {
 	getPageRenderer,
-	...messages,
 };
