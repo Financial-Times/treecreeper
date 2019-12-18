@@ -1,6 +1,6 @@
 require('./main.css');
-const edit = require('./pages/edit');
-const view = require('./pages/view');
+const edit = require('./browser/edit');
+const view = require('./browser/view');
 
 const pages = {
 	edit,
@@ -12,4 +12,3 @@ const { pageType } = document.documentElement.dataset;
 if (pageType && pages[pageType]) {
 	pages[pageType].init();
 }
-

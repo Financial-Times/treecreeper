@@ -1,6 +1,6 @@
 const {
-		Relationship: { withEditComponent: attachRelationshipPicker },
-		LargeText: { withEditComponent: attachDocumentEditor },
+	Relationship: { withEditComponent: attachRelationshipPicker },
+	LargeText: { withEditComponent: attachDocumentEditor },
 } = require('../primitives/browser');
 
 const initDocumentEditors = () => {

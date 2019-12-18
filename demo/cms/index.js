@@ -38,6 +38,16 @@ const { viewHandler, deleteHandler, editHandler } = getCMS({
 	Footer,
 	Subheader,
 	customComponents,
+	origamiCssModules: {
+		'header-services': '^3.2.3',
+		table: '^7.0.5',
+		labels: '^4.1.1',
+		'footer-services': '^2.1.0',
+	},
+	origamiJsModules: {
+		table: '^7.0.5',
+		'header-services': '^3.2.3',
+	},
 	customTypeMappings: {
 		Paragraph: 'LargeText',
 	},

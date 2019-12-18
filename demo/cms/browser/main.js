@@ -1,2 +1,2 @@
 require('./main.css');
-require('@financial-times/tc-ui/browser')
+require('@financial-times/tc-ui/browser');
