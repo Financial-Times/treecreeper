@@ -1,6 +1,5 @@
 const httpError = require('http-errors');
-const { getApiClient } = require('./lib/tc-ui-bridge');
-const getSchemaSubset = require('./lib/get-schema-subset');
+const { getApiClient, getSchemaSubset } = require('./lib/tc-ui-bridge');
 const { formDataToRest, formDataToGraphQL } = require('./lib/data-conversion');
 const { handleError, renderPage } = require('./lib/renderer');
 const template = require('./templates/edit-page');

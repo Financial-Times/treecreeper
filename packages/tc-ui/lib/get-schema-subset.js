@@ -38,4 +38,4 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	};
 };
 
-module.exports = getSchemaSubset;
+module.exports = { getSchemaSubset };

@@ -4,6 +4,7 @@ const {
 	componentAssigner,
 	graphqlQueryBuilder,
 	ApiClient,
+	getSchemaSubset,
 } = require('@financial-times/tc-ui/server');
 
 const customComponents = require('../templates/components/primitives');
@@ -22,6 +23,7 @@ const graphqlBuilder = type => graphqlQueryBuilder(type, assignComponent);
 module.exports = {
 	assignComponent,
 	graphqlBuilder,
+	getSchemaSubset,
 	getApiClient: event =>
 		new ApiClient({
 			event,
