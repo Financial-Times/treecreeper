@@ -436,5 +436,20 @@ describe('rest PATCH create', () => {
 					},
 				);
 		});
+
+		it('throws 400 if attempting to write relationship property not in schema', async () => {
+			await expect(
+				basicHandler({
+					curiousChild: [
+						{ code: childCode, notInSchema: 'a string' },
+					],
+				}),
+			).rejects.httpError({
+				status: 400,
+				message:
+					'Invalid property `notInSchema` on type `CuriousChild`.',
+			});
+			await neo4jTest('MainType', mainCode).notExists();
+		});
 	});
 });

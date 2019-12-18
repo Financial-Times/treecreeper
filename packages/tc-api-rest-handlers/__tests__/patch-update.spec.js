@@ -465,6 +465,47 @@ describe('rest PATCH update', () => {
 					},
 				);
 		});
+
+		it('throws 400 if attempting to write relationship property not in schema', async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
+			});
+			await expect(
+				basicHandler(
+					{
+						curiousChild: [
+							{ code: childCode, notInSchema: 'a string' },
+						],
+					},
+					{ relationshipAction: 'merge', richRelationships: true },
+				),
+			).rejects.httpError({
+				status: 400,
+				message:
+					'Invalid property `notInSchema` on type `CuriousChild`.',
+			});
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: { someString: 'some string', ...meta.default },
+						notProps: ['notInSchema'],
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
+		});
 	});
 
 	describe('generic error states', () => {

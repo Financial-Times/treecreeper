@@ -859,5 +859,28 @@ describe('rest PATCH relationship create', () => {
 					},
 				);
 		});
+
+		it('errors if relationship property does not exist in schema', async () => {
+			await createMainNode();
+			await createNodes(['ChildType', childCode]);
+			await expect(
+				basicHandler(
+					{
+						curiousChild: [
+							{ code: childCode, notInSchema: 'a string' },
+						],
+					},
+					queries,
+				),
+			).rejects.httpError({
+				status: 400,
+				message:
+					'Invalid property `notInSchema` on type `CuriousChild`.',
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.default)
+				.noRels();
+		});
 	});
 });
