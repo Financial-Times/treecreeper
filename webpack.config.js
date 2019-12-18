@@ -7,7 +7,7 @@ const filenameTemplate = process.env.CIRCLECI
 	? '[contenthash].[name]'
 	: '[name]';
 module.exports = {
-	entry: ['./demo/tc-ui/browser/main.js'],
+	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
 		extensions: ['.js', '.jsx', '.css'],
 		alias: {

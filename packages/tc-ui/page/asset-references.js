@@ -25,7 +25,7 @@ const buildOrigamiUrl = (isProduction, type, map) =>
 		.map(([key, val]) => `o-${key}@${val}`)
 		.join(',')}${isProduction ? '' : '&minify=none'}`;
 
-const origamiCssModules = {
+const defaultOrigamiCssModules = {
 	layout: '^3.3.1',
 	'header-services': '^3.2.3',
 	table: '^7.0.5',
@@ -42,7 +42,7 @@ const origamiCssModules = {
 	'footer-services': '^2.1.0',
 };
 
-const origamiJsModules = {
+const defaultOrigamiJsModules = {
 	layout: '^3.3.1',
 	table: '^7.0.5',
 	'header-services': '^3.2.3',
@@ -51,10 +51,20 @@ const origamiJsModules = {
 	date: '^2.11.0',
 };
 
-const getAssetReferences = isProduction => {
+const getAssetReferences = ({
+	isProduction,
+	origamiJsModules = {},
+	origamiCssModules = {},
+}) => {
 	return {
-		origamiJs: buildOrigamiUrl(isProduction, 'js', origamiJsModules),
-		origamiCss: buildOrigamiUrl(isProduction, 'css', origamiCssModules),
+		origamiJs: buildOrigamiUrl(isProduction, 'js', {
+			...origamiJsModules,
+			...defaultOrigamiJsModules,
+		}),
+		origamiCss: buildOrigamiUrl(isProduction, 'css', {
+			...origamiCssModules,
+			...defaultOrigamiCssModules,
+		}),
 		mainJs: getPathToStaticAsset(isProduction, 'main.js'),
 		mainCss: getPathToStaticAsset(isProduction, 'main.css'),
 	};

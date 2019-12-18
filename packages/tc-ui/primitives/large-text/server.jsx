@@ -1,6 +1,6 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../lib/edit-helpers');
-const { markdown } = require('../../lib/helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
+const { markdown } = require('../../components/helpers');
 
 const outputFreeText = (text = '') => text;
 

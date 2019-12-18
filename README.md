@@ -12,7 +12,6 @@ Sandbox for working on the set of tools and services that make up the Biz Ops ec
 ### Prerequisities
 
 -   nodejs 8
--   [vault CLI](https://github.com/Financial-Times/vault/wiki/Getting-Started#login-with-the-cli)
 -   member of reliability-engineering github team
 -   [docker](https://www.docker.com/get-docker)
 
@@ -40,10 +39,10 @@ This can be done _without_ docker if desired, by instead installing a neo4j data
 # Running the application
 
 ```shell
-make env && make run
+make run
 ```
 
-This will download credentials, save them to an `.env` file, and start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
+This will start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
 
 # Testing
 

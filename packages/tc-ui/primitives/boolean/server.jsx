@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../lib/edit-helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
 
 const getBooleanLabel = value => {
 	if (value === true) return 'Yes';

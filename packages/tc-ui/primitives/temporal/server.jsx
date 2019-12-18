@@ -1,6 +1,6 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../lib/edit-helpers');
-const { formatDateTime } = require('../../lib/helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
+const { formatDateTime } = require('../../components/helpers');
 
 const convertValueForHTMLInput = (wrappedValue, type) => {
 	if (!(wrappedValue && wrappedValue.formatted)) return null;

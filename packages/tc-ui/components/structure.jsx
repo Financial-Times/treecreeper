@@ -1,7 +1,5 @@
 const { h, Fragment } = require('preact');
 
-const { assignComponent } = require('../../lib/ui-mappings');
-
 const toKebabCase = string =>
 	string
 		.split(' ')
@@ -19,17 +17,6 @@ const Concept = ({ name, description, moreInformation }) => (
 			</div>
 		</div>
 	</aside>
-);
-
-const GraphvizLibrary = () => (
-	<Fragment>
-		<script src="https://d3js.org/d3.v4.min.js" />
-		<script
-			src="https://unpkg.com/viz.js@1.8.1/viz.js"
-			type="javascript/worker"
-		/>
-		<script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js" />
-	</Fragment>
 );
 
 // Has a title, and there are other ways to edit content
@@ -59,8 +46,6 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 	</Fragment>
 );
 
-const getComponent = ({ type }) => assignComponent(type);
-
 const blockComponents = ['Document'];
 
 const layoutClass = type =>
@@ -73,16 +58,12 @@ const LabelledPrimitive = props => {
 		description,
 		value,
 		type,
-		isRelationship,
-		hasMany,
 		useInSummary,
 		id,
+		ViewComponent,
+		hasValue,
 	} = props;
-	const { ViewComponent: PrimitiveComponent, hasValue } = getComponent({
-		type,
-		isRelationship,
-		hasMany,
-	});
+
 	if (!useInSummary && !hasValue(value, props)) {
 		return null;
 	}
@@ -117,7 +98,7 @@ const LabelledPrimitive = props => {
 					showInactive === false ? 'hide-inactive' : ''
 				}`}
 			>
-				<PrimitiveComponent {...props} />
+				<ViewComponent {...props} />
 				{showInactive === false ? (
 					<button
 						type="button"
@@ -160,7 +141,6 @@ const MetaProperties = ({ data, isCreate }) => {
 
 module.exports = {
 	Concept,
-	GraphvizLibrary,
 	SectionHeader,
 	LabelledPrimitive,
 	MetaProperties,

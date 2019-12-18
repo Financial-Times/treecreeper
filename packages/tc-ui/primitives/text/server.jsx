@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../lib/edit-helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
 
 const EditText = props => {
 	const { propertyName, value, required, lockedBy } = props;
