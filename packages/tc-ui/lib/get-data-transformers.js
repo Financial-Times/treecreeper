@@ -44,7 +44,7 @@ const getDataTransformers = assignComponent => {
 					formData[fieldName] &&
 					formData[fieldName] !== "Don't know"
 				) {
-					data.fieldName = parser(formData[fieldName]);
+					data[fieldName] = parser(formData[fieldName]);
 				}
 			},
 		);

@@ -13,7 +13,7 @@ const getEditHandler = ({
 	const displayForm = async (event, apiError) => {
 		const apiClient = getApiClient(event);
 		const { type, code } = event.params;
-		const isCreate = /\/create/.test(event.path);
+		const isCreate = !code;
 		let formData = {};
 
 		// Persist any unsaved changes to form data stored in the event.body.
@@ -66,6 +66,7 @@ const getEditHandler = ({
 				method,
 			);
 		} catch (err) {
+			console.log({ err });
 			const error = {
 				type,
 				code,
