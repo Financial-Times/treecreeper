@@ -1,9 +1,7 @@
 const {
-	primitives: {
 		Relationship: { withEditComponent: attachRelationshipPicker },
 		LargeText: { withEditComponent: attachDocumentEditor },
-	},
-} = require('@financial-times/tc-ui/browser');
+} = require('../primitives/browser');
 
 const initDocumentEditors = () => {
 	[...document.querySelectorAll('[data-type="Document"]')].forEach(
