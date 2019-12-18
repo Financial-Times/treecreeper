@@ -46,7 +46,9 @@ These are the affected fields:
 };
 
 const fieldValueCheckers = {
-	default: field => !!field.querySelector('input').value,
+	text: field => !!field.querySelector('input').value,
+	temporal: field => !!field.querySelector('input').value,
+	number: field => !!field.querySelector('input').value,
 	'large-text': field => !!field.querySelector('textarea').value,
 	enum: field => !!field.querySelector('select').value,
 	boolean: field =>
