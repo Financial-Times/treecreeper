@@ -36,8 +36,11 @@ const deleteHandler = ({
 		broadcast({ action: 'DELETE', code, type, neo4jResult });
 	} catch (error) {
 		logger.error(
-			{ event: 'NEO4J_DELETE_FAILURE', error },
-			'Neo4j Delete unsuccessful. Rolling back S3 delete',
+			{
+				event: 'NEO4J_DELETE_FAILURE',
+				message: 'Neo4j Delete unsuccessful. Rolling back S3 delete',
+			},
+			error,
 		);
 		if (undoDocstoreWrite) {
 			await undoDocstoreWrite();

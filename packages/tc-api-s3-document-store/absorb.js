@@ -74,7 +74,7 @@ const s3Absorb = async ({
 		postDestinationBody(),
 	]);
 
-	const undoAndRaiseEror = async message => {
+	const undoAndRaiseError = async message => {
 		logger.error(
 			{
 				event: 'ABSORB_S3_FAILURE',
@@ -89,17 +89,17 @@ const s3Absorb = async ({
 
 	// Both of delete source version and post destination version fails
 	if (!deletedVersionId && !postedVersionId) {
-		await undoAndRaiseEror('ABSORB FAILED: Write and delete failed in S3');
+		await undoAndRaiseError('ABSORB FAILED: Write and delete failed in S3');
 	}
 
 	// post destination version success, but delete source version fails
 	if (!deletedVersionId) {
-		await undoAndRaiseEror('ABSORB FAILED: Delete failed in S3');
+		await undoAndRaiseError('ABSORB FAILED: Delete failed in S3');
 	}
 
 	// delete source version success, but post destination version fails and should write new body
 	if (!postedVersionId && !noPropertiesToWrite) {
-		await undoAndRaiseEror('ABSORB FAILED: Write failed in S3');
+		await undoAndRaiseError('ABSORB FAILED: Write failed in S3');
 	}
 
 	return {

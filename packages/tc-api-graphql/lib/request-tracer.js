@@ -38,7 +38,7 @@ class Tracer {
 					);
 			});
 		} catch (error) {
-			logger.error({ event: 'GRAPHQL_TRACE_ERROR', error });
+			logger.error({ event: 'GRAPHQL_TRACE_ERROR' }, error);
 		}
 	}
 

@@ -33,10 +33,13 @@ const getApolloMiddleware = ({ documentStore }) => {
 			return response;
 		},
 		formatError: error => {
-			logger.error('GraphQL Error', {
-				event: 'GRAPHQL_ERROR',
+			logger.error(
+				'GraphQL Error',
+				{
+					event: 'GRAPHQL_ERROR',
+				},
 				error,
-			});
+			);
 			return error;
 		},
 	});
