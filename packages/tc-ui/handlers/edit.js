@@ -12,7 +12,7 @@ const getEditHandler = ({
 }) => {
 	const displayForm = async (event, apiError) => {
 		const apiClient = getApiClient(event);
-		const { type, code } = event.params;
+		const { type, code } = event;
 		const isCreate = !code;
 		let formData = {};
 

@@ -9,10 +9,8 @@ const customComponents = require('./components/primitives');
 const wrapCmsHandler = handler => async (req, res) => {
 	try {
 		const { status, body, headers } = await handler({
-			type: req.params.type,
-			code: req.params.code,
-			params: req.params,
-			username: 'rhys.evans',
+			...req.params,
+			metadata: { clientUserId: 'rhys.evans' },
 			query: req.query || {},
 			method: req.method,
 			body: req.body,
@@ -31,10 +29,9 @@ const { viewHandler, deleteHandler, editHandler } = getCMS({
 	logger,
 	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
 	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
-	apiHeaders: () => ({
-		'x-api-key': process.env.BIZ_OPS_API_KEY,
-		'client-id': 'biz-ops-admin',
-		'client-user-id': 'rhys.evans',
+	apiHeaders: ({ metadata: { clientUserId } }) => ({
+		'client-id': 'treecreeper-demo',
+		'client-user-id': clientUserId,
 	}),
 	Header,
 	Footer,

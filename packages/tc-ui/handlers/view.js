@@ -8,8 +8,7 @@ const getViewHandler = ({
 	assignComponent,
 }) => {
 	const render = async event => {
-		const { type, code } = event.params;
-		const { error } = event;
+		const { type, code, error } = event;
 		const apiClient = getApiClient(event);
 		const data = await apiClient.read(type, code);
 

@@ -6,9 +6,8 @@ const getDeleteHandler = ({
 }) => {
 	const deletePage = async event => {
 		const apiClient = getApiClient(event);
-		const { type, code } = event.params;
+		const { type, code } = event;
 		logger.debug(type, code, 'Delete Request');
-		console.log({ type, code });
 		try {
 			await apiClient.delete(type, code);
 			return {
