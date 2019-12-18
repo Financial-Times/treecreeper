@@ -8,7 +8,7 @@ const getDeleteHandler = ({
 		const apiClient = getApiClient(event);
 		const { type, code } = event.params;
 		logger.debug(type, code, 'Delete Request');
-
+		console.log({ type, code });
 		try {
 			await apiClient.delete(type, code);
 			return {

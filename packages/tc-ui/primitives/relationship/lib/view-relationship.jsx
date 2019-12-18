@@ -1,6 +1,6 @@
 const { h, Fragment } = require('preact');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { LinkToRecord } = require('../../../lib/helpers');
+const { LinkToRecord } = require('../../../components/helpers');
 
 let RelationshipAnnotator;
 

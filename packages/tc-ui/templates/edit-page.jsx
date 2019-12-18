@@ -1,9 +1,9 @@
 const { h, Fragment } = require('preact');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../components/messages');
-const { Concept, SectionHeader } = require('./components/structure');
+const { Concept, SectionHeader } = require('../components/structure');
 
-const { SaveButton, CancelButton } = require('./components/buttons');
+const { SaveButton, CancelButton } = require('../components/buttons');
 
 const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string

@@ -4,17 +4,17 @@ const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');
-const { getPageRenderer, FormError } = require('./page');
+const { getPageRenderer } = require('./page');
 const {
 	getViewHandler,
 	getEditHandler,
 	getDeleteHandler,
 } = require('./handlers');
-const messages = require('./components/messages');
 
 const getCMS = ({
 	logger,
-	apiBaseUrl,
+	restApiUrl,
+	graphqlApiUrl,
 	apiHeaders,
 	Header,
 	Footer,
@@ -38,7 +38,8 @@ const getCMS = ({
 			event,
 			graphqlBuilder,
 			logger,
-			apiBaseUrl,
+			restApiUrl,
+			graphqlApiUrl,
 			apiHeaders,
 		});
 
@@ -53,8 +54,8 @@ const getCMS = ({
 		renderPage,
 	});
 	return {
-		view: viewHandler,
-		edit: getEditHandler({
+		viewHandler,
+		editHandler: getEditHandler({
 			getApiClient,
 			getSchemaSubset,
 			handleError,
@@ -63,7 +64,7 @@ const getCMS = ({
 			formDataToRest,
 			formDataToGraphQL,
 		}).handler,
-		delete: getDeleteHandler({
+		deleteHandler: getDeleteHandler({
 			getApiClient,
 			handleError,
 			viewRender,
@@ -74,25 +75,5 @@ const getCMS = ({
 
 module.exports = {
 	primitives,
-	componentAssigner,
-	graphqlQueryBuilder,
-	ApiClient,
-	getSchemaSubset,
-	getPageRenderer,
-	FormError,
-	getDataTransformers,
-	components: { ...messages },
 	getCMS,
 };
-
-/*
-init ({
-	apiBaseUrl,
-	apiHeaders,
-	customComponents = {},
-	customTypeMappings = {},
-})
-
-
-
-*/

@@ -5,12 +5,12 @@ const {
 	LabelledPrimitive,
 	SectionHeader,
 	MetaProperties,
-} = require('./components/structure');
+} = require('../components/structure');
 const {
 	EditButton,
 	DeleteButton,
 	VisualiseButton,
-} = require('./components/buttons');
+} = require('../components/buttons');
 
 const Properties = ({ fields, data, assignComponent }) => {
 	const propertyfields = Object.entries(fields);

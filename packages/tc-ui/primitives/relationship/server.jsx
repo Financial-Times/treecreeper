@@ -1,6 +1,6 @@
 const { h } = require('preact');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { FieldTitle } = require('../../lib/edit-helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
 
 const { RelationshipPicker } = require('./lib/relationship-picker');
 const {

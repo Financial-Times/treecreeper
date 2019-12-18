@@ -1,7 +1,7 @@
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { h, Fragment } = require('preact');
-const { FieldTitle } = require('../../lib/edit-helpers');
-const { autolink } = require('../../lib/helpers');
+const { FieldTitle } = require('../../components/edit-helpers');
+const { autolink } = require('../../components/helpers');
 const text = require('../text/server');
 
 const Option = ({ option, selected }) => (

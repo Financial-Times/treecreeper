@@ -47,7 +47,7 @@ class ApiClient {
 
 	async fetchGraphQL(body) {
 		try {
-			const response = await fetch(`${this.apiBaseUrl}/graphql`, {
+			const response = await fetch(`${this.graphqlApiUrl}`, {
 				method: 'POST',
 				body: JSON.stringify(body),
 				headers: this.getHeaders(),
@@ -81,7 +81,7 @@ class ApiClient {
 
 	async write(type, code, formData, method) {
 		const response = await fetch(
-			`${this.apiBaseUrl}/rest/${type}/${encodeURIComponent(
+			`${this.restApiUrl}/${type}/${encodeURIComponent(
 				code,
 			)}?relationshipAction=replace`,
 			{
@@ -104,7 +104,7 @@ class ApiClient {
 
 	async delete(type, code) {
 		const response = await fetch(
-			`${this.apiBaseUrl}/v2/node/${type}/${encodeURIComponent(code)}`,
+			`${this.restApiUrl}/${type}/${encodeURIComponent(code)}`,
 			{
 				method: 'DELETE',
 				headers: this.getHeaders(),
