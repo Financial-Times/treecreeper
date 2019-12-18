@@ -10,7 +10,7 @@ const {
 	DeleteButton,
 	VisualiseButton,
 } = require('./components/buttons');
-const { FormError } = require('./components/messages');
+const { FormError } = require('@financial-times/tc-ui');
 
 const Properties = ({ fields, data }) => {
 	const propertyfields = Object.entries(fields);

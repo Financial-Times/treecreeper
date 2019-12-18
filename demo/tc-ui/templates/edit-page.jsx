@@ -4,7 +4,7 @@ const logger = require('@financial-times/lambda-logger');
 const { Concept, SectionHeader } = require('./components/structure');
 
 const { SaveButton, CancelButton } = require('./components/buttons');
-const { FormError } = require('./components/messages');
+const { FormError } = require('@financial-times/tc-ui');
 
 const { assignComponent } = require('../lib/tc-ui-bridge');
 

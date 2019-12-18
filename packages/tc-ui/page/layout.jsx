@@ -21,13 +21,11 @@ const SideBar = ({ nav }) => (
 );
 
 const { HeadAssets, TailAssets } = require('./asset-loading');
-const { Header } = require('./header');
-const { Message } = require('../components/messages');
-const { Footer } = require('./footer');
+const { Message } = require('./messages');
 
 const Layout = props => {
-	const assetPaths = getAssetReferences(props.isProduction);
-	const { includeFooter = true } = props;
+	const assetPaths = getAssetReferences(props);
+	const { includeFooter = true, Header, Footer } = props;
 	return (
 		<html className="core" lang="en" data-page-type={props.pageType}>
 			<head>

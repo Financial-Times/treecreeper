@@ -1,9 +1,11 @@
-const { getApiClient } = require('./lib/tc-ui-bridge');
-
-const getSchemaSubset = require('./lib/get-schema-subset');
 const { getApiClient, getSchemaSubset } = require('./lib/tc-ui-bridge');
 const template = require('./templates/view-page');
-const { handleError, renderPage } = require('./lib/renderer');
+const { Header } = require('./templates/components/header');
+const { Footer } = require('./templates/components/footer');
+const { handleError, renderPage } = require('@financial-times/tc-ui').getPageRenderer({
+	Header,
+	Footer,
+});
 
 const render = async event => {
 	const { type, code } = event.params;
