@@ -5,6 +5,7 @@ const getViewHandler = ({
 	getSchemaSubset,
 	handleError,
 	renderPage,
+	Subheader,
 	assignComponent,
 }) => {
 	const render = async event => {
@@ -17,6 +18,7 @@ const getViewHandler = ({
 			{
 				...getSchemaSubset(event, type),
 				data,
+				Subheader,
 				error,
 				assignComponent,
 				pageType: 'view',

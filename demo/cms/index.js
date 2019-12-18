@@ -3,6 +3,7 @@ const { getCMS } = require('@financial-times/tc-ui');
 
 const { Header } = require('./components/header');
 const { Footer } = require('./components/footer');
+const { Subheader } = require('./components/subheader');
 
 const customComponents = require('./components/primitives');
 
@@ -35,6 +36,7 @@ const { viewHandler, deleteHandler, editHandler } = getCMS({
 	}),
 	Header,
 	Footer,
+	Subheader,
 	customComponents,
 	customTypeMappings: {
 		Paragraph: 'LargeText',

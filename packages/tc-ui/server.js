@@ -18,6 +18,7 @@ const getCMS = ({
 	apiHeaders,
 	Header,
 	Footer,
+	Subheader,
 	customComponents,
 	customTypeMappings,
 }) => {
@@ -49,6 +50,7 @@ const getCMS = ({
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,
 		getSchemaSubset,
+		Subheader,
 		handleError,
 		assignComponent,
 		renderPage,

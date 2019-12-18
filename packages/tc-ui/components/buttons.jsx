@@ -65,30 +65,9 @@ const DeleteButton = props =>
 		</form>
 	);
 
-const VisualiseButton = props =>
-	props.isSubset ? null : (
-		<form
-			action={`/${props.type}/${encodeURIComponent(
-				props.code,
-			)}/visualise`}
-			className="biz-ops-cta"
-			method="GET"
-		>
-			<button
-				className={getButtonClasses(
-					'o-buttons--mono biz-ops-cta--visualise',
-				)}
-				type="submit"
-			>
-				Visualise
-			</button>
-		</form>
-	);
-
 module.exports = {
 	EditButton,
 	SaveButton,
 	CancelButton,
 	DeleteButton,
-	VisualiseButton,
 };

@@ -15,7 +15,7 @@ const getEditHandler = ({
 		const { type, code } = event;
 		const isCreate = !code;
 
-		let formData
+		let formData;
 
 		if (apiError) {
 			// Persist any unsaved changes to form data stored in the event.body.
