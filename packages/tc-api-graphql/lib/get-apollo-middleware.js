@@ -1,6 +1,9 @@
 const { ApolloServer } = require('apollo-server-express');
 const DataLoader = require('dataloader');
-const { logger } = require('@financial-times/tc-api-express-logger');
+const {
+	logger,
+	getContextByRequestId,
+} = require('@financial-times/tc-api-express-logger');
 const { driver } = require('@financial-times/tc-api-db-manager');
 const { getAugmentedSchema } = require('./get-augmented-schema');
 const { Tracer } = require('./request-tracer');
@@ -9,11 +12,16 @@ const getApolloMiddleware = ({ documentStore }) => {
 	const apollo = new ApolloServer({
 		subscriptions: false,
 		schema: getAugmentedSchema({ documentStore }),
-		context: ({ req: { headers } }) => {
+		context: ({
+			req: { headers },
+			res: {
+				locals: { requestId },
+			},
+		}) => {
 			const context = {
 				driver,
 				headers,
-				trace: new Tracer(),
+				trace: new Tracer(getContextByRequestId(requestId)),
 			};
 
 			if (documentStore) {
