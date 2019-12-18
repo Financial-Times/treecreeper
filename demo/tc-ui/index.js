@@ -9,7 +9,7 @@ const {
 } = require('@financial-times/tc-ui');
 const { getViewHandler } = require('./view');
 const { handler: editHandler } = require('./edit');
-const { handler: deleteHandler } = require('./delete');
+const { getDeleteHandler } = require('./delete');
 
 const { Header } = require('./lib/components/header');
 const { Footer } = require('./lib/components/footer');
@@ -47,16 +47,20 @@ const getApi = ({
 		});
 
 	// ...getDataTransformers(assignComponent),
-
+	const { handler: viewHandler, render: viewRender } = getViewHandler({
+		getApiClient,
+		getSchemaSubset,
+		handleError,
+		renderPage,
+	});
 	return {
-		view: getViewHandler({
-			getApiClient,
-			getSchemaSubset,
-			handleError,
-			renderPage,
-		}).handler,
+		view: viewHandler,
 		edit: editHandler,
-		delete: deleteHandler,
+		delete: getDeleteHandler({
+			getApiClient,
+			handleError,
+			viewRender,
+		}).handler,
 	};
 };
 
