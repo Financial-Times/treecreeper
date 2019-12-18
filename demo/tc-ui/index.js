@@ -8,7 +8,7 @@ const {
 	getDataTransformers,
 } = require('@financial-times/tc-ui');
 const { getViewHandler } = require('./view');
-const { handler: editHandler } = require('./edit');
+const { getEditHandler } = require('./edit');
 const { getDeleteHandler } = require('./delete');
 
 const { Header } = require('./lib/components/header');
@@ -46,7 +46,9 @@ const getApi = ({
 			apiHeaders,
 		});
 
-	// ...getDataTransformers(assignComponent),
+	const { formDataToRest, formDataToGraphQL } = getDataTransformers(
+		assignComponent,
+	);
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,
 		getSchemaSubset,
@@ -55,7 +57,14 @@ const getApi = ({
 	});
 	return {
 		view: viewHandler,
-		edit: editHandler,
+		edit: getEditHandler({
+			getApiClient,
+			getSchemaSubset,
+			handleError,
+			renderPage,
+			formDataToRest,
+			formDataToGraphQL,
+		}).handler,
 		delete: getDeleteHandler({
 			getApiClient,
 			handleError,
