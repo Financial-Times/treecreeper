@@ -9,17 +9,17 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	const properties = event.query && event.query.properties;
 
 	if (!properties) {
-		return getType(type, {
+		return {schema: getType(type, {
 			...getTypeOptions,
 			useMinimumViableRecord: isCreate,
-		});
+		}), isSubset: false};
 	}
 
 	const title = event.query && event.query.title;
 	const fullSchema = getType(type, getTypeOptions);
 	const propertyKeys = properties.split(',');
 
-	return {
+	return {schema: {
 		...fullSchema,
 		fieldsets: {
 			[title]: {
@@ -35,7 +35,7 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 					),
 			},
 		},
-	};
+	}, isSubset: true};
 };
 
 module.exports = { getSchemaSubset };

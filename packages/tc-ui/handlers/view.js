@@ -12,11 +12,10 @@ const getViewHandler = ({
 		const apiClient = getApiClient(event);
 		const data = await apiClient.read(type, code);
 
-		const schema = getSchemaSubset(event, type);
 		return renderPage(
 			template,
 			{
-				schema,
+				...getSchemaSubset(event, type),
 				data,
 				error,
 				assignComponent,

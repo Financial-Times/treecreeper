@@ -48,7 +48,7 @@ const CancelButton = props => {
 };
 
 const DeleteButton = props =>
-	props.querystring ? null : (
+	props.isSubset ? null : (
 		<form
 			action={`/${props.type}/${encodeURIComponent(props.code)}/delete`}
 			className="biz-ops-cta"
@@ -66,7 +66,7 @@ const DeleteButton = props =>
 	);
 
 const VisualiseButton = props =>
-	props.querystring ? null : (
+	props.isSubset ? null : (
 		<form
 			action={`/${props.type}/${encodeURIComponent(
 				props.code,
