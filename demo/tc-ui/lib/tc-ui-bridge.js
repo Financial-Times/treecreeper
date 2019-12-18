@@ -7,10 +7,10 @@ const {
 	getPageRenderer,
 	getDataTransformers,
 } = require('@financial-times/tc-ui');
-const { Header } = require('../templates/components/header');
-const { Footer } = require('../templates/components/footer');
+const { Header } = require('./components/header');
+const { Footer } = require('./components/footer');
 
-const customComponents = require('../templates/components/primitives');
+const customComponents = require('./components/primitives');
 
 const customComponentMap = {
 	Paragraph: 'LargeText',
