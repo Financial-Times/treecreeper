@@ -1,0 +1,17 @@
+name: CuriousParent
+from:
+  type: ParentType
+  hasMany: true
+to:
+  type: MainType
+  hasMany: true
+relationship: IS_CURIOUS_PARENT_OF
+properties:
+  someString:
+    label: Label for some string
+    description: Description for some string.
+    type: Word
+  anotherString:
+    label: Label for another string
+    description: Description for another string.
+    type: Word

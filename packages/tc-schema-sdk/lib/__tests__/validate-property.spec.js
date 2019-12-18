@@ -1,7 +1,7 @@
 const { SDK } = require('../../sdk');
 const readYaml = require('../read-yaml');
 
-const getValidator = (type, enums = {}) => {
+const getValidator = (type, { enums, relationshipTypes } = {}) => {
 	const sdk = new SDK({
 		schemaData: {
 			schema: {
@@ -16,6 +16,7 @@ const getValidator = (type, enums = {}) => {
 					process.env.TREECREEPER_SCHEMA_DIRECTORY,
 					'primitive-types.yaml',
 				),
+				relationshipTypes,
 			},
 		},
 	});
@@ -210,6 +211,11 @@ describe('validateProperty', () => {
 	describe('validating enums', () => {
 		let validateProperty;
 		beforeEach(() => {
+			const enums = {
+				MyEnum: {
+					options: { bear: 'grylls', ray: 'winstone' },
+				},
+			};
 			validateProperty = getValidator(
 				{
 					name: 'Thing',
@@ -219,14 +225,7 @@ describe('validateProperty', () => {
 						},
 					},
 				},
-				{
-					MyEnum: {
-						options: {
-							bear: 'grylls',
-							ray: 'winstone',
-						},
-					},
-				},
+				{ enums },
 			);
 		});
 		it('accept value defined in a mapping enum', () => {
@@ -304,6 +303,71 @@ describe('validateProperty', () => {
 		it('accept when all is correct', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelationship', 'lowercase'),
+			).not.toThrow();
+		});
+	});
+
+	describe('validating relationship properties', () => {
+		let validateProperty;
+		beforeEach(() => {
+			const types = [
+				{
+					name: 'StartType',
+					properties: {
+						testRelationship: { type: 'RelationshipType' },
+					},
+				},
+				{
+					name: 'EndType',
+					properties: {
+						code: { pattern: 'LOWERCASE', type: 'String' },
+						isTestRelationship: {
+							type: 'RelationshipType',
+						},
+					},
+				},
+			];
+			const relationshipTypes = [
+				{
+					name: 'RelationshipType',
+					relationship: 'HAS',
+					from: { type: 'StartType', hasMany: true },
+					to: { type: 'EndType', hasMany: true },
+					properties: {
+						someString: { type: 'Word' },
+					},
+				},
+			];
+			validateProperty = getValidator(types, { relationshipTypes });
+		});
+
+		it('reject when relationship node code is invalid', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'UPPERCASE',
+				}),
+			).toThrow(
+				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+			);
+		});
+
+		it('not accept if not in schema', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'lowercase',
+					anotherString: 'another string',
+				}),
+			).toThrow(
+				/Invalid property `anotherString` on type `RelationshipType`/,
+			);
+		});
+
+		it('accept when all is correct', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelationship', {
+					code: 'lowercase',
+					someString: 'some string',
+				}),
 			).not.toThrow();
 		});
 	});

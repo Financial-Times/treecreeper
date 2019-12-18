@@ -1,7 +1,26 @@
 const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
 const { stripIndents } = require('common-tags');
 
-const toArray = value => (Array.isArray(value) ? value : [value]);
+// relationship value could be just a String(code), an Object or an Array of strings(codes) / objects(code and properties) / mixed
+// this function is to normalise them into an Array of objects
+const normaliseRelationshipProps = relValues => {
+	if (relValues !== null) {
+		if (typeof relValues === 'string') {
+			return [{ code: relValues }];
+		}
+		if (Array.isArray(relValues)) {
+			const normalisedRelValues = [];
+			relValues.forEach(relValue =>
+				typeof relValue === 'string'
+					? normalisedRelValues.push({ code: relValue })
+					: normalisedRelValues.push(relValue),
+			);
+			return normalisedRelValues;
+		}
+		// when value is an object
+		return [relValues];
+	}
+};
 
 const TreecreeperUserError = require('./biz-ops-error');
 
@@ -19,15 +38,24 @@ const throwInvalidValueError = (
 	);
 };
 
-const validateProperty = ({ getType, getEnums, getPrimitiveTypes }) => {
+const validateProperty = ({
+	getType,
+	getEnums,
+	getPrimitiveTypes,
+	getRelationshipType,
+}) => {
 	const recursivelyCallableValidator = (
 		typeName,
 		propertyName,
 		propertyValue,
 		aliasPropertyName,
+		relationshipPropsDef = undefined,
 	) => {
-		const propertyDefinition = getType(typeName).properties[propertyName];
+		const propertyDefinition = relationshipPropsDef
+			? relationshipPropsDef[propertyName]
+			: getType(typeName).properties[propertyName];
 		const primitiveTypesMap = getPrimitiveTypes();
+
 		if (!propertyDefinition) {
 			throw new TreecreeperUserError(
 				`Invalid property \`${propertyName}\` on type \`${typeName}\`.`,
@@ -55,25 +83,43 @@ const validateProperty = ({ getType, getEnums, getPrimitiveTypes }) => {
 			propertyValue,
 			aliasPropertyName,
 		);
-		if (isRelationship) {
+
+		if (isRelationship && !relationshipPropsDef) {
 			if (cypher) {
 				exit(
 					`Cannot write relationship \`${propertyName}\` - it is defined using a custom, read-only query`,
 				);
 			}
-			const codesList = toArray(propertyValue);
-			if (!hasMany && codesList.length > 1) {
+			const relPropsList = normaliseRelationshipProps(propertyValue);
+			if (!hasMany && relPropsList.length > 1) {
 				exit(`Can only have one ${propertyName}`);
 			}
-			codesList.map(value => {
-				if (typeof value === 'string') {
-					recursivelyCallableValidator(type, 'code', value);
-				} else {
-					Object.keys(value).forEach(() => {
-						// TODO: need to impletment rich relationship schema to run below
-						// recursivelyCallableValidator(type, key, value[key]);
-					});
-				}
+
+			const {
+				name: relType,
+				properties: relPropsDef,
+			} = getRelationshipType(typeName, propertyName);
+
+			relPropsList.map(relProps => {
+				Object.entries(relProps).forEach(
+					([relPropName, relPropValue]) => {
+						if (relPropName === 'code') {
+							recursivelyCallableValidator(
+								type,
+								'code',
+								relPropValue,
+							);
+						} else {
+							recursivelyCallableValidator(
+								relType,
+								relPropName,
+								relPropValue,
+								false,
+								relPropsDef,
+							);
+						}
+					},
+				);
 			});
 		} else if (type === 'Boolean') {
 			if (typeof propertyValue !== 'boolean') {
@@ -129,11 +175,17 @@ const validatePropertyName = name => {
 	}
 };
 
-module.exports = ({ getEnums, getType, getPrimitiveTypes }) => {
+module.exports = ({
+	getEnums,
+	getType,
+	getPrimitiveTypes,
+	getRelationshipType,
+}) => {
 	const propertyValidator = validateProperty({
 		getEnums,
 		getType,
 		getPrimitiveTypes,
+		getRelationshipType,
 	});
 	return {
 		validateTypeName: validateTypeName(getType),

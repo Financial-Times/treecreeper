@@ -391,13 +391,13 @@ describe('rest PATCH update', () => {
 				['MainType', mainCode],
 				['ChildType', childCode],
 			);
-			await connectNodes(main, 'HAS_CHILD', child, {
-				someProp: 'some property',
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
 			});
 			const { body, status } = await basicHandler(
 				{
-					children: [
-						{ code: childCode, someProp: 'new some property' },
+					curiousChild: [
+						{ code: childCode, someString: 'new some string' },
 					],
 				},
 				{ relationshipAction: 'merge', richRelationships: true },
@@ -405,7 +405,7 @@ describe('rest PATCH update', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [{ someProp: 'new some property' }],
+				curiousChild: { someString: 'new some string' },
 			});
 
 			await neo4jTest('MainType', mainCode)
@@ -413,10 +413,10 @@ describe('rest PATCH update', () => {
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
 						props: {
-							someProp: 'new some property',
+							someString: 'new some string',
 							...meta.update,
 						},
 					},
@@ -435,26 +435,67 @@ describe('rest PATCH update', () => {
 				['MainType', mainCode],
 				['ChildType', childCode],
 			);
-			await connectNodes(main, 'HAS_CHILD', child, {
-				someProp: 'some property',
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
 			});
 			const { body, status } = await basicHandler(
-				{ children: [{ code: childCode, someProp: null }] },
+				{ curiousChild: [{ code: childCode, someString: null }] },
 				{ relationshipAction: 'merge', richRelationships: true },
 			);
 
 			expect(status).toBe(200);
 			expect(body).not.toMatchObject({
-				children: [{ someProp: 'some property' }],
+				curiousChild: { someString: 'some string' },
 			});
 			await neo4jTest('MainType', mainCode)
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
 						props: meta.update,
-						notProps: ['someProp'],
+						notProps: ['someString'],
+					},
+					{
+						type: 'ChildType',
+						props: {
+							code: childCode,
+							...meta.default,
+						},
+					},
+				);
+		});
+
+		it('throws 400 if attempting to write relationship property not in schema', async () => {
+			const [main, child] = await createNodes(
+				['MainType', mainCode],
+				['ChildType', childCode],
+			);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child, {
+				someString: 'some string',
+			});
+			await expect(
+				basicHandler(
+					{
+						curiousChild: [
+							{ code: childCode, notInSchema: 'a string' },
+						],
+					},
+					{ relationshipAction: 'merge', richRelationships: true },
+				),
+			).rejects.httpError({
+				status: 400,
+				message:
+					'Invalid property `notInSchema` on type `CuriousChild`.',
+			});
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: { someString: 'some string', ...meta.default },
+						notProps: ['notInSchema'],
 					},
 					{
 						type: 'ChildType',

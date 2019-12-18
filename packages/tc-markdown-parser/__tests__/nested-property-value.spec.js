@@ -335,13 +335,13 @@ describe('nested property definition tests', () => {
 				## curious child
 
 				example-code
-					anotherString: another string
+					notInSchema: not in schema
 			`);
 
 			expect(errors).toHaveLength(1);
 			expect(data.name).toEqual('name');
 			const [{ message, line }] = errors;
-			expect(message).toMatch(/i couldn't resolve anotherString/);
+			expect(message).toMatch(/i couldn't resolve notInSchema/);
 			expect(line).toBe(6);
 		});
 	});
