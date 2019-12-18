@@ -1,12 +1,11 @@
 const logger = require('@financial-times/lambda-logger');
-
 const {
 	componentAssigner,
 	graphqlQueryBuilder,
 	ApiClient,
 	getSchemaSubset,
-} = require('@financial-times/tc-ui/server');
 	getPageRenderer,
+	getDataTransformers,
 } = require('@financial-times/tc-ui');
 const { Header } = require('../templates/components/header');
 const { Footer } = require('../templates/components/footer');
@@ -44,4 +43,5 @@ module.exports = {
 		Header,
 		Footer,
 	}),
+	...getDataTransformers(assignComponent),
 };

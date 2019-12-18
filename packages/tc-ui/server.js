@@ -3,8 +3,9 @@ const primitives = require('./primitives/server');
 const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
-const {getPageRenderer, FormError} = require('./page')
+const { getDataTransformers } = require('./lib/get-data-transformers');
 const { getPageRenderer, FormError } = require('./page');
+
 module.exports = {
 	primitives,
 	componentAssigner,
@@ -12,7 +13,8 @@ module.exports = {
 	ApiClient,
 	getSchemaSubset,
 	getPageRenderer,
-	FormError
+	FormError,
+	getDataTransformers,
 };
 
 /*
