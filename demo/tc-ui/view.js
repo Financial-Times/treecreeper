@@ -10,7 +10,7 @@ const render = async event => {
 	const apiClient = getApiClient(event);
 	const data = await apiClient.read(type, code);
 
-	const schema = getSchemaSubset(event, type, false);
+	const schema = getSchemaSubset(event, type);
 	return renderPage(
 		template,
 		{

@@ -1,9 +1,10 @@
+const querystring = require('querystring');
 const { render } = require('preact-render-to-string');
 const { h } = require('preact');
 const Layout = require('../templates/layout/layout');
 const errorTemplate = require('../templates/error-page');
 
-const renderPage = (Template, props) => {
+const renderHtml = (Template, props) => {
 	return `
 <!DOCTYPE html>
 ${render(
@@ -18,19 +19,25 @@ const handleError = func => (...args) =>
 		const status = error.status || 500;
 		return {
 			status,
-			body: renderPage(errorTemplate, { status, error }),
+			body: renderHtml(errorTemplate, { status, error }),
 		};
 	});
 
-const page = (template, data, event, status = 200) => {
+const renderPage = (template, data, event, status = 200) => {
 	const user = event.isSignedIn && event.username;
 	const fromDewey = !!(event.query || {})['from-dewey'];
 	const { message, messageType } = event.query || {};
 	return {
 		status,
-		body: renderPage(
+		body: renderHtml(
 			template,
-			Object.assign(data, { user, fromDewey, message, messageType }),
+			Object.assign(data, {
+				user,
+				fromDewey,
+				message,
+				messageType,
+				querystring: querystring.stringify(event.query),
+			}),
 		),
 		headers: {
 			'Content-Type': 'text/html',
@@ -41,5 +48,5 @@ const page = (template, data, event, status = 200) => {
 
 module.exports = {
 	handleError,
-	page,
+	renderPage,
 };

@@ -21,7 +21,7 @@ const displayForm = async (event, apiError) => {
 	}
 
 	const templateData = {
-		schema: getSchemaSubset(event, type, false, isCreate),
+		schema: getSchemaSubset(event, type, isCreate),
 		data: formData,
 		type,
 		code,

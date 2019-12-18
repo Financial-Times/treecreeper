@@ -99,7 +99,7 @@ const PropertyInputs = ({ fields, data, isEdit, type }) => {
 		});
 };
 
-const EditForm = ({ schema, data, isEdit, error, type, code }) => {
+const EditForm = ({ schema, data, isEdit, error, type, code, querystring }) => {
 	const getAction = () => {
 		return isEdit
 			? `/${type}/${encodeURIComponent(code)}/edit`
@@ -134,12 +134,12 @@ const EditForm = ({ schema, data, isEdit, error, type, code }) => {
 					/>
 					<div className="biz-ops-cta-container--sticky o-layout__unstyled-element">
 						<SaveButton
-							querystring={schema.referralQs || ''}
+							querystring={querystring || ''}
 							type={type}
 							code={code}
 						/>
 						<CancelButton
-							querystring={schema.referralQs || ''}
+							querystring={querystring || ''}
 							type={type}
 							code={code}
 						/>

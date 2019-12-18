@@ -34,7 +34,7 @@ const Properties = ({ fields, data }) => {
 		});
 };
 
-const View = ({ schema, data, error }) => (
+const View = ({ schema, data, error, querystring }) => (
 	<main className="o-layout__main">
 		<div className="o-layout__main__full-span">
 			<FormError type={schema.name} code={data.code} error={error} />
@@ -99,17 +99,17 @@ const View = ({ schema, data, error }) => (
 				<EditButton
 					type={schema.type}
 					code={data.code}
-					querystring={schema.referralQs || ''}
+					querystring={querystring || ''}
 				/>
 				<DeleteButton
 					type={schema.type}
 					code={data.code}
-					querystring={schema.referralQs || ''}
+					querystring={querystring || ''}
 				/>
 				<VisualiseButton
 					type={schema.type}
 					code={data.code}
-					querystring={schema.referralQs || ''}
+					querystring={querystring || ''}
 				/>
 			</div>
 			<div className="o-layout-typography">

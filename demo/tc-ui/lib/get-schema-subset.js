@@ -1,51 +1,40 @@
-const querystring = require('querystring');
-
 const { getType } = require('@financial-times/tc-schema-sdk');
 
-/* meta fields should not be included in the forms (view) as they fail the
-propertyName validation due to the underscore. They must be set to false
-otherwise it will default to true.
-*/
-const getSchemaSubset = (
-	event,
-	type,
-	includeMetaFields = true,
-	isCreate = false,
-) => {
+const getTypeOptions = {
+	groupProperties: true,
+	includeMetaFields: false,
+};
+
+const getSchemaSubset = (event, type, isCreate = false) => {
 	const properties = event.query && event.query.properties;
 
 	if (!properties) {
 		return getType(type, {
-			groupProperties: true,
-			includeMetaFields,
+			...getTypeOptions,
 			useMinimumViableRecord: isCreate,
 		});
 	}
 
 	const title = event.query && event.query.title;
-	const fullSchema = getType(type);
+	const fullSchema = getType(type, getTypeOptions);
 	const propertyKeys = properties.split(',');
 
 	return {
-		type: fullSchema.name,
-		name: fullSchema.name,
-		description: fullSchema.description,
+		...fullSchema,
 		fieldsets: {
 			[title]: {
 				heading: title || 'Properties',
-				properties: Object.keys(fullSchema.properties)
-					.filter(key => propertyKeys.includes(key))
+				properties: Object.entries(fullSchema.properties)
+					.filter(([propName]) => propertyKeys.includes(propName))
 					.reduce(
-						(obj, key) =>
-							Object.assign(obj, {
-								[key]: fullSchema.properties[key],
-							}),
+						(fieldset, [propName, propDef]) => ({
+							...fieldset,
+							[propName]: propDef,
+						}),
 						{},
 					),
 			},
 		},
-		pluralName: fullSchema.pluralName,
-		referralQs: querystring.stringify(event.query),
 	};
 };
 
