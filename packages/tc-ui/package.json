@@ -1,4 +1,12 @@
 {
+  "name": "@financial-times/tc-schema-sdk",
+  "version": "0.0.0",
+  "description": "A CMS-like UI for treecreeper",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Financial-Times/treecreeper.git"
+  },
 	"dependencies": {
 		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
 		"autolinker": "^3.11.1",
