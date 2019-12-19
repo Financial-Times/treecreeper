@@ -49,6 +49,23 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 	</span>
 );
 
+const WrappedEditComponent = props => {
+	props = { ...props, disabled: !!props.lockedBy };
+	const { Component } = props;
+	const WrapperTag = props.wrapperTag || 'label';
+	return (
+		<WrapperTag
+			className="o-forms-field"
+			data-biz-ops-type={props.componentType}
+			data-type={props.dataType}
+			{...(props.wrapperProps || {})}
+		>
+			<FieldTitle {...props} />
+			<Component {...props} />
+		</WrapperTag>
+	);
+};
+
 module.exports = {
-	FieldTitle,
+	WrappedEditComponent,
 };

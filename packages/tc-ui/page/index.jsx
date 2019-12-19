@@ -4,9 +4,20 @@ const { h } = require('preact');
 const Layout = require('./layout');
 const errorTemplate = require('./error-page');
 
-const getPageRenderer = ({ Header, Footer }) => {
+const getPageRenderer = ({
+	Header,
+	Footer,
+	origamiCssModules,
+	origamiJsModules,
+}) => {
 	const renderHtml = (Template, props) => {
-		props = { ...props, Header, Footer };
+		props = {
+			...props,
+			Header,
+			Footer,
+			origamiCssModules,
+			origamiJsModules,
+		};
 		return `
 	<!DOCTYPE html>
 	${render(

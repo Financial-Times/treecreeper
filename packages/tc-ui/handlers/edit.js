@@ -12,21 +12,24 @@ const getEditHandler = ({
 }) => {
 	const displayForm = async (event, apiError) => {
 		const apiClient = getApiClient(event);
-		const { type, code } = event.params;
+		const { type, code } = event;
 		const isCreate = !code;
-		let formData = {};
 
-		// Persist any unsaved changes to form data stored in the event.body.
+		let formData;
+
 		if (apiError) {
+			// Persist any unsaved changes to form data stored in the event.body.
 			formData = await formDataToGraphQL(type, event.body);
-			// If a code is present then fetch the record data to /edit
-			// otherwise serve a blank /create form
 		} else if (code) {
+			// If a code is present then fetch the record data to /edit
 			formData = await apiClient.read(type, code);
+		} else {
+			// otherwise serve a blank /create form
+			formData = {};
 		}
 
 		const templateData = {
-			schema: getSchemaSubset(event, type, isCreate),
+			...getSchemaSubset(event, type, isCreate),
 			data: formData,
 			type,
 			code,
@@ -47,26 +50,24 @@ const getEditHandler = ({
 
 	const handleForm = async event => {
 		const apiClient = getApiClient(event);
-		const { type } = event.params;
-		let { code } = event.params;
+		const { type } = event;
+		let { code } = event;
 		const formData = event.body;
-		const jsonFormData = formData;
 		let method = 'PATCH';
 		// If a code is present then PATCH the existing record
 		// otherwise POST the data to create a new item
 		if (!code) {
-			({ code } = jsonFormData);
+			({ code } = formData);
 			method = 'POST';
 		}
 		try {
 			await apiClient.write(
 				type,
 				code,
-				formDataToRest(type, jsonFormData),
+				formDataToRest(type, formData),
 				method,
 			);
 		} catch (err) {
-			console.log({ err });
 			const error = {
 				type,
 				code,

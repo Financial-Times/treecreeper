@@ -9,10 +9,13 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	const properties = event.query && event.query.properties;
 
 	if (!properties) {
-		return getType(type, {
-			...getTypeOptions,
-			useMinimumViableRecord: isCreate,
-		});
+		return {
+			schema: getType(type, {
+				...getTypeOptions,
+				useMinimumViableRecord: isCreate,
+			}),
+			isSubset: false,
+		};
 	}
 
 	const title = event.query && event.query.title;
@@ -20,21 +23,24 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	const propertyKeys = properties.split(',');
 
 	return {
-		...fullSchema,
-		fieldsets: {
-			[title]: {
-				heading: title || 'Properties',
-				properties: Object.entries(fullSchema.properties)
-					.filter(([propName]) => propertyKeys.includes(propName))
-					.reduce(
-						(fieldset, [propName, propDef]) => ({
-							...fieldset,
-							[propName]: propDef,
-						}),
-						{},
-					),
+		schema: {
+			...fullSchema,
+			fieldsets: {
+				[title]: {
+					heading: title || 'Properties',
+					properties: Object.entries(fullSchema.properties)
+						.filter(([propName]) => propertyKeys.includes(propName))
+						.reduce(
+							(fieldset, [propName, propDef]) => ({
+								...fieldset,
+								[propName]: propDef,
+							}),
+							{},
+						),
+				},
 			},
 		},
+		isSubset: true,
 	};
 };
 

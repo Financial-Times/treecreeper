@@ -1,3 +1,4 @@
+require('./main.css');
 /* global tinymce */
 const initWysiwyg = container => {
 	const textarea = container.querySelector('textarea');

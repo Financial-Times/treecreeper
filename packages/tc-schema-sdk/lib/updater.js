@@ -113,7 +113,7 @@ class SchemaUpdater {
 				});
 			})
 			.catch(error =>
-				this.logger.error({ event: 'SCHEMA_UPDATE_FAILED', error }),
+				this.logger.error({ event: 'SCHEMA_UPDATE_FAILED' }, error),
 			);
 	}
 

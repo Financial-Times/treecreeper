@@ -5,20 +5,20 @@ const getViewHandler = ({
 	getSchemaSubset,
 	handleError,
 	renderPage,
+	Subheader,
 	assignComponent,
 }) => {
 	const render = async event => {
-		const { type, code } = event.params;
-		const { error } = event;
+		const { type, code, error } = event;
 		const apiClient = getApiClient(event);
 		const data = await apiClient.read(type, code);
 
-		const schema = getSchemaSubset(event, type);
 		return renderPage(
 			template,
 			{
-				schema,
+				...getSchemaSubset(event, type),
 				data,
+				Subheader,
 				error,
 				assignComponent,
 				pageType: 'view',

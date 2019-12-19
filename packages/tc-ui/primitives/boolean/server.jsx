@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../components/edit-helpers');
+const { WrappedEditComponent } = require('../../components/edit-helpers');
 
 const getBooleanLabel = value => {
 	if (value === true) return 'Yes';
@@ -29,31 +29,22 @@ const Checkbox = ({ name, checkboxValue, disabled, userValue }) => {
 };
 
 const EditBoolean = props => {
-	const { propertyName, value, lockedBy } = props;
-	const disabled = !!lockedBy;
+	const { propertyName, value, disabled } = props;
 	return (
-		<div
-			className="o-forms-field"
-			data-biz-ops-type="boolean"
-			role="group"
-			aria-labelledby="inline-radio-round-group-title"
-		>
-			<FieldTitle {...props} />
-			<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
-				<Checkbox
-					name={propertyName}
-					checkboxValue
-					disabled={disabled}
-					userValue={value}
-				/>
-				<Checkbox
-					name={propertyName}
-					checkboxValue={false}
-					disabled={disabled}
-					userValue={value}
-				/>
-			</span>
-		</div>
+		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
+			<Checkbox
+				name={propertyName}
+				checkboxValue
+				disabled={disabled}
+				userValue={value}
+			/>
+			<Checkbox
+				name={propertyName}
+				checkboxValue={false}
+				disabled={disabled}
+				userValue={value}
+			/>
+		</span>
 	);
 };
 
@@ -61,7 +52,18 @@ module.exports = {
 	ViewComponent: ({ value, id }) => (
 		<span id={id}>{getBooleanLabel(value)}</span>
 	),
-	EditComponent: EditBoolean,
+	EditComponent: props => (
+		<WrappedEditComponent
+			Component={EditBoolean}
+			componentType="boolean"
+			wrapperTag="div"
+			wrapperProps={{
+				role: 'group',
+				'aria-labelledby': 'inline-radio-round-group-title',
+			}}
+			{...props}
+		/>
+	),
 	parser: value => (value === undefined ? undefined : value === 'true'),
 	hasValue: value => typeof value === 'boolean',
 };

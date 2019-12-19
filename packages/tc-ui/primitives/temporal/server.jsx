@@ -1,5 +1,5 @@
 const { h } = require('preact');
-const { FieldTitle } = require('../../components/edit-helpers');
+const { WrappedEditComponent } = require('../../components/edit-helpers');
 const { formatDateTime } = require('../../components/helpers');
 
 const convertValueForHTMLInput = (wrappedValue, type) => {
@@ -13,33 +13,32 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
-const EditTemporal = props => {
-	const { type, propertyName, value, required, lockedBy } = props;
-
-	const shouldDisable = !!lockedBy;
-
+const EditTemporal = ({ type, propertyName, value, required, disabled }) => {
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
 
 	return (
-		<label className="o-forms-field" data-biz-ops-type="temporal">
-			<FieldTitle {...props} />
-			<span className="o-forms-input o-forms-input--text">
-				<input
-					name={`${propertyName}${shouldDisable ? '-disabled' : ''}`}
-					id={`id-${propertyName}`}
-					type={`${inputType}`}
-					value={convertValueForHTMLInput(value, type)}
-					required={required ? 'required' : null}
-					disabled={shouldDisable ? 'disabled' : null}
-				/>
-			</span>
-		</label>
+		<span className="o-forms-input o-forms-input--text">
+			<input
+				name={`${propertyName}${disabled ? '-disabled' : ''}`}
+				id={`id-${propertyName}`}
+				type={`${inputType}`}
+				value={convertValueForHTMLInput(value, type)}
+				required={required ? 'required' : null}
+				disabled={disabled ? 'disabled' : null}
+			/>
+		</span>
 	);
 };
 
 module.exports = {
-	EditComponent: EditTemporal,
+	EditComponent: props => (
+		<WrappedEditComponent
+			Component={EditTemporal}
+			componentType="temporal"
+			{...props}
+		/>
+	),
 	ViewComponent: ({ value, id, type }) => (
 		<span id={id}>{formatDateTime(value.formatted, type)}</span>
 	),

@@ -1,5 +1,14 @@
-const primitives = require('./primitives/browser');
+require('./main.css');
+const edit = require('./browser/edit');
+const view = require('./browser/view');
 
-module.exports = {
-	primitives,
+const pages = {
+	edit,
+	view,
 };
+
+const { pageType } = document.documentElement.dataset;
+
+if (pageType && pages[pageType]) {
+	pages[pageType].init();
+}

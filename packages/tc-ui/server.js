@@ -18,6 +18,9 @@ const getCMS = ({
 	apiHeaders,
 	Header,
 	Footer,
+	Subheader,
+	origamiCssModules,
+	origamiJsModules,
 	customComponents,
 	customTypeMappings,
 }) => {
@@ -31,6 +34,8 @@ const getCMS = ({
 	const { handleError, renderPage } = getPageRenderer({
 		Header,
 		Footer,
+		origamiCssModules,
+		origamiJsModules,
 	});
 
 	const getApiClient = event =>
@@ -49,6 +54,7 @@ const getCMS = ({
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,
 		getSchemaSubset,
+		Subheader,
 		handleError,
 		assignComponent,
 		renderPage,

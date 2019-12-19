@@ -2,8 +2,9 @@ const { getType } = require('@financial-times/tc-schema-sdk');
 const { logger } = require('@financial-times/tc-api-express-logger');
 
 class Tracer {
-	constructor() {
+	constructor(context) {
 		this.map = {};
+		this.context = { ...context };
 	}
 
 	collect(type, field) {
@@ -21,6 +22,7 @@ class Tracer {
 					success: logType !== 'error',
 					type,
 					fields,
+					...this.context,
 				});
 
 				fields
@@ -29,16 +31,20 @@ class Tracer {
 							properties[name] &&
 							properties[name].deprecationReason,
 					)
-					.map(field =>
+					.forEach(field =>
 						logger.warn({
 							event: 'GRAPHQL_TRACE_DEPRECATION',
 							type,
 							field,
+							...this.context,
 						}),
 					);
 			});
 		} catch (error) {
-			logger.error({ event: 'GRAPHQL_TRACE_ERROR', error });
+			logger.error(
+				{ event: 'GRAPHQL_TRACE_ERROR', ...this.context },
+				error,
+			);
 		}
 	}
 

@@ -1,54 +1,51 @@
-const { h } = require('preact');
-const { FieldTitle } = require('../../components/edit-helpers');
+const { h, Fragment } = require('preact');
+const { WrappedEditComponent } = require('../../components/edit-helpers');
 const { markdown } = require('../../components/helpers');
 
 const outputFreeText = (text = '') => text;
 
 const EditLargeText = props => {
-	const { propertyName, value, dataType, lockedBy } = props;
-	const disabled = !!lockedBy;
+	const { propertyName, value, dataType, disabled } = props;
 	return (
-		<div
-			className={
-				dataType === 'Document'
-					? 'o-layout__main__full-span document-field'
-					: ''
-			}
-		>
-			<label
-				className="o-forms-field"
-				data-type={dataType}
-				data-biz-ops-type="textarea"
-			>
-				<FieldTitle {...props} />
-				<span className="o-forms-input o-forms-input--textarea">
-					<textarea
-						name={propertyName}
-						id={`id-${propertyName}`}
-						rows={dataType === 'Document' ? '40' : '8'}
-						disabled={disabled}
-					>
-						{outputFreeText(value)}
-					</textarea>
-				</span>
-				{dataType === 'Document' ? (
-					<div className="document-edit-tools">
-						Edit using github flavoured markdown or use the&nbsp;
-						<button
-							className="o-buttons wysiwyg-toggle"
-							type="button"
-						>
-							wysiwyg HTML editor
-						</button>
-					</div>
-				) : null}
-			</label>
-		</div>
+		<Fragment>
+			<span className="o-forms-input o-forms-input--textarea">
+				<textarea
+					name={propertyName}
+					id={`id-${propertyName}`}
+					rows={dataType === 'Document' ? '40' : '8'}
+					disabled={disabled}
+				>
+					{outputFreeText(value)}
+				</textarea>
+			</span>
+			{dataType === 'Document' ? (
+				<div className="document-edit-tools">
+					Edit using github flavoured markdown or use the&nbsp;
+					<button className="o-buttons wysiwyg-toggle" type="button">
+						wysiwyg HTML editor
+					</button>
+				</div>
+			) : null}
+		</Fragment>
 	);
 };
 
 module.exports = {
-	EditComponent: EditLargeText,
+	EditComponent: props => (
+		<div
+			className={
+				props.dataType === 'Document'
+					? 'o-layout__main__full-span document-field'
+					: ''
+			}
+		>
+			<WrappedEditComponent
+				Component={EditLargeText}
+				componentType="large-text"
+				{...props}
+			/>
+		</div>
+	),
 	ViewComponent: ({ value, id }) => (
 		<section
 			id={id}

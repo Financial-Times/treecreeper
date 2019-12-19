@@ -1,9 +1,7 @@
 const {
-	primitives: {
-		Relationship: { withEditComponent: attachRelationshipPicker },
-		LargeText: { withEditComponent: attachDocumentEditor },
-	},
-} = require('@financial-times/tc-ui/browser');
+	Relationship: { withEditComponent: attachRelationshipPicker },
+	LargeText: { withEditComponent: attachDocumentEditor },
+} = require('../primitives/browser');
 
 const initDocumentEditors = () => {
 	[...document.querySelectorAll('[data-type="Document"]')].forEach(
@@ -48,8 +46,10 @@ These are the affected fields:
 };
 
 const fieldValueCheckers = {
-	default: field => !!field.querySelector('input').value,
-	textarea: field => !!field.querySelector('textarea').value,
+	text: field => !!field.querySelector('input').value,
+	temporal: field => !!field.querySelector('input').value,
+	number: field => !!field.querySelector('input').value,
+	'large-text': field => !!field.querySelector('textarea').value,
 	enum: field => !!field.querySelector('select').value,
 	boolean: field =>
 		!![...field.querySelectorAll('input')].some(input => input.checked),

@@ -27,8 +27,6 @@ const buildOrigamiUrl = (isProduction, type, map) =>
 
 const defaultOrigamiCssModules = {
 	layout: '^3.3.1',
-	'header-services': '^3.2.3',
-	table: '^7.0.5',
 	message: '^3.0.0',
 	forms: '^7.0.0',
 	normalise: '^1.6.2',
@@ -36,16 +34,12 @@ const defaultOrigamiCssModules = {
 	colors: '^4.7.8',
 	icons: '^5.9.0',
 	fonts: '^3.1.1',
-	labels: '^4.1.1',
 	expander: '^4.4.4',
 	tooltip: '^3.4.0',
-	'footer-services': '^2.1.0',
 };
 
 const defaultOrigamiJsModules = {
 	layout: '^3.3.1',
-	table: '^7.0.5',
-	'header-services': '^3.2.3',
 	expander: '^4.4.4',
 	tooltip: '^3.4.0',
 	date: '^2.11.0',
