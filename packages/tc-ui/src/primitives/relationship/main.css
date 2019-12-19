@@ -1,0 +1,60 @@
+.selected-relationship {
+	margin-top: 0;
+}
+
+.editable-relationships {
+	padding-top: 10px;
+}
+
+.react-autosuggest__suggestions-list {
+	box-shadow: 1px 1px 5px #ccc;
+	background: white;
+	z-index: 2;
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+.editable-relationships,
+.react-autosuggest__suggestions-list {
+	list-style-type: none;
+	margin: 0;
+	padding-left: 0;
+	margin-bottom: 0;
+}
+
+.editable-relationships li {
+	margin-bottom: 0.5em;
+}
+
+.editable-relationships button {
+	margin-right: 10px;
+}
+
+/* important rules are to clobber o-typography */
+.react-autosuggest__suggestions-list li {
+	padding: 0.5em !important;
+	color: #0d7680;
+	cursor: pointer;
+}
+/* stylelint-disable no-descending-specificity */
+.react-autosuggest__suggestions-list li::before {
+	display: none !important;
+}
+/* stylelint-enable no-descending-specificity */
+.react-autosuggest__suggestions-list li[aria-selected='true'],
+.react-autosuggest__suggestions-list li:hover,
+.react-autosuggest__suggestions-list mark {
+	color: #08474d;
+	background: #cfe4e6;
+}
+
+.autocomplete__input:not([disabled]) {
+	background-image: url('https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:search?source=o-icons&tint=%2333302E,%2333302E&format=svg');
+	background-repeat: no-repeat;
+	background-position-x: right;
+}
+
+.o-forms-input__error {
+	position: static !important;
+}
