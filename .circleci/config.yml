@@ -23,11 +23,11 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - cache-v3-{{ .Branch }}-{{ checksum "./package.json" }}
+        - cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: cache-v3-{{ .Branch }}-{{ checksum "./package.json" }}
+      key: cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
       paths:
         - ./node_modules/
 
@@ -79,7 +79,7 @@ jobs:
             ./scripts/neo4j-wait-for-start
             make init-db
       - run:
-          name: Run v2 tests
+          name: Run tests
           command: make test
           environment:
             JEST_JUNIT_OUTPUT: "junit/test-results.xml"

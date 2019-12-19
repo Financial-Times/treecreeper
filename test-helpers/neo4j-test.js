@@ -48,6 +48,18 @@ const neo4jTest = (type, code) => {
 			);
 			return this;
 		},
+		notHave(props) {
+			test(records => {
+				const neo4jNodeProps = convertNeo4jToJson(
+					records[0].get('node').properties,
+				);
+				const notExistentProps = Array.isArray(props) ? props : [props];
+				notExistentProps.forEach(prop =>
+					expect(neo4jNodeProps[prop]).not.toBeTruthy(),
+				);
+			});
+			return this;
+		},
 		noRels() {
 			test(records =>
 				expect(
@@ -70,7 +82,12 @@ const neo4jTest = (type, code) => {
 			return this;
 		},
 		hasRel(
-			{ type: relType, props: relationshipProps, direction },
+			{
+				type: relType,
+				props: relationshipProps,
+				direction,
+				notProps: nonExistentRelProps,
+			},
 			{ type: relatedType, props: relatedNodeProps },
 		) {
 			test(records => {
@@ -87,15 +104,25 @@ const neo4jTest = (type, code) => {
 							(rel.end === relatedNode.identity)
 					);
 				});
+
 				expect(record).not.toBeUndefined();
+				const neo4jRelProps = convertNeo4jToJson(
+					record.get('rel').properties,
+				);
 				relationshipProps = Array.isArray(relationshipProps)
 					? relationshipProps
 					: [relationshipProps];
 				relationshipProps.forEach(rp =>
-					expect(
-						convertNeo4jToJson(record.get('rel').properties),
-					).toMatchObject(rp),
+					expect(neo4jRelProps).toMatchObject(rp),
 				);
+				if (nonExistentRelProps) {
+					nonExistentRelProps = Array.isArray(nonExistentRelProps)
+						? nonExistentRelProps
+						: [nonExistentRelProps];
+					nonExistentRelProps.forEach(nrp =>
+						expect(neo4jRelProps[nrp]).not.toBeTruthy(),
+					);
+				}
 				relatedNodeProps = Array.isArray(relatedNodeProps)
 					? relatedNodeProps
 					: [relatedNodeProps];

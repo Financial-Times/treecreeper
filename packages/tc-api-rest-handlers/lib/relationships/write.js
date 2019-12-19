@@ -4,7 +4,10 @@ const {
 	getType,
 	findInversePropertyNames,
 } = require('@financial-times/tc-schema-sdk');
-const { metaPropertiesForCreate } = require('../metadata-helpers');
+const {
+	metaPropertiesForCreate,
+	createRelMetaQueryForUpdate,
+} = require('../metadata-helpers');
 
 const relationshipFragment = (
 	type,
@@ -47,7 +50,7 @@ WHERE related.code IN $${key}
 };
 
 const addPropsToQueries = (relationshipPropQueries, value) => {
-	// value: { code: 'node code', someProp: 'some property'...}
+	// value: { code: 'node code', someString: 'some string'...}
 	Object.entries(value).forEach(([k, v]) => {
 		if (k !== 'code') {
 			// If no node matches the CASE expression, the expression returns a null.
@@ -55,8 +58,11 @@ const addPropsToQueries = (relationshipPropQueries, value) => {
 			relationshipPropQueries.push(`
 				SET (CASE
 				WHEN related.code = '${value.code}'
-				THEN relationship END).${k} = '${v}'
+				THEN relationship END).${k} = ${v === null ? null : `'${v}'`}
 				`);
+			relationshipPropQueries.push(
+				createRelMetaQueryForUpdate(value.code),
+			);
 		}
 	});
 };
@@ -65,39 +71,24 @@ const prepareToWriteRelationships = (
 	nodeType,
 	relationshipsToCreate,
 	upsert,
-	parameters = {},
 ) => {
 	const { properties: validProperties } = getType(nodeType);
 
 	const relationshipParameters = {};
 	const relationshipQueries = [];
-	const replaceObjects = {};
 
-	Object.entries(relationshipsToCreate).forEach(([propName, values]) => {
-		const propDef = validProperties[propName];
-		const { type: relatedType, direction, relationship } = propDef;
+	Object.entries(relationshipsToCreate).forEach(([relType, relProps]) => {
+		const relDef = validProperties[relType];
+		const { type: relatedType, direction, relationship } = relDef;
 		const key = `${relationship}${direction}${relatedType}`;
 
 		const retrievedCodes = [];
 		const relationshipPropQueries = [];
-		let propValueType;
 
-		// values could be just an array of strings(codes), objects(code and properties) or mixed
-		values.forEach(value => {
-			propValueType = typeof value;
-			if (propValueType === 'string') {
-				retrievedCodes.push(value);
-			} else {
-				retrievedCodes.push(value.code);
-				addPropsToQueries(relationshipPropQueries, value);
-			}
+		relProps.forEach(relProp => {
+			retrievedCodes.push(relProp.code);
+			addPropsToQueries(relationshipPropQueries, relProp);
 		});
-
-		// neo4j driver only accept primitive types or arrays thereof
-		// store an array of codes here to replace relationship values in parameters later
-		if (propValueType === 'object') {
-			replaceObjects[propName] = retrievedCodes;
-		}
 
 		// make sure the parameter referenced in the query exists on the
 		// globalParameters object passed to the db driver
@@ -111,19 +102,19 @@ const prepareToWriteRelationships = (
 		relationshipQueries.push(
 			stripIndents`
 			WITH node
-			${locateRelatedNodes(propDef, key, upsert)}
+			${locateRelatedNodes(relDef, key, upsert)}
 			WITH node, related
-			MERGE ${relationshipFragmentWithEndNodes('node', propDef, 'related')}
+			MERGE ${relationshipFragmentWithEndNodes('node', relDef, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate('relationship')}
 			${relationshipPropQueries.join('')}
 		`,
 		);
 
-		if (propDef.hasMany) {
+		if (relDef.hasMany) {
 			const { properties: relatedProperties } = getType(relatedType);
 			const inverseProperties = findInversePropertyNames(
 				nodeType,
-				propName,
+				relType,
 			);
 			if (
 				inverseProperties.some(
@@ -137,7 +128,7 @@ const prepareToWriteRelationships = (
 				WITH node, related
 				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
 					'otherNode',
-					propDef,
+					relDef,
 					'related',
 					{
 						label: 'conflictingRelationship',
@@ -150,14 +141,6 @@ const prepareToWriteRelationships = (
 			}
 		}
 	});
-
-	// neo4j driver only accept primitive types or arrays thereof
-	// need to replace objects in parameters to an array of codes
-	if (parameters.properties && Object.keys(replaceObjects).length) {
-		Object.assign(relationshipParameters, {
-			properties: { ...parameters.properties, ...replaceObjects },
-		});
-	}
 
 	return { relationshipParameters, relationshipQueries };
 };

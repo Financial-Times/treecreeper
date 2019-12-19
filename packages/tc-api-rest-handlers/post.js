@@ -5,6 +5,7 @@ const { validateInput } = require('./lib/validation');
 const { handleUpsertError } = require('./lib/relationships/write');
 const { separateDocsFromBody } = require('./lib/separate-documents-from-body');
 const { queryBuilder } = require('./lib/neo4j-query-builder');
+const { normaliseRelationshipProps } = require('./lib/relationships/input');
 const { broadcast } = require('./lib/events');
 
 const postHandler = ({ documentStore } = {}) => async input => {
@@ -16,6 +17,8 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		query: { richRelationships } = {},
 	} = validateInput(input);
 	const { clientId } = metadata;
+
+	normaliseRelationshipProps(type, originalBody);
 
 	const { documents = {}, body } = documentStore
 		? separateDocsFromBody(type, originalBody)
@@ -62,13 +65,13 @@ const postHandler = ({ documentStore } = {}) => async input => {
 			updatedProperties: [
 				...new Set([
 					...Object.keys(parameters.properties),
-					...Object.keys(queryContext.addedRelationships || {}),
+					...Object.keys(queryContext.changedRelationships || {}),
 					...Object.keys(documents),
 				]),
 			],
 			neo4jResult,
 			requestId: metadata.requestId,
-			addedRelationships: queryContext.addedRelationships,
+			changedRelationships: queryContext.changedRelationships,
 		});
 		return { status: 200, body: responseData };
 	} catch (err) {

@@ -17,3 +17,7 @@ properties:
     label: Is parent of label
     direction: outgoing
     hasMany: true
+  isCuriousParentOf:
+    type: CuriousParent
+    description: Curious parent of description.
+    label: Curious parent of label

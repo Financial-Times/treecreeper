@@ -66,6 +66,33 @@ describe('rest PATCH relationship delete', () => {
 			});
 		});
 	});
+
+	it('deletes all relationships when replacing with an empty array', async () => {
+		const [main, child1, child2] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', childCode1],
+			['ChildType', childCode2],
+		);
+		await connectNodes(
+			[main, 'HAS_CHILD', child1],
+			[main, 'HAS_CHILD', child2],
+		);
+		const { status, body } = await patchHandler()(
+			getInput(
+				{
+					children: [],
+				},
+				{ relationshipAction: 'replace' },
+			),
+		);
+		expect(status).toBe(200);
+		expect(body).not.toMatchObject({
+			children: [childCode1, childCode2],
+		});
+
+		await neo4jTest('MainType', mainCode).noRels();
+	});
+
 	['merge', 'replace'].forEach(action =>
 		describe(`with ${action} action`, () => {
 			const handler = body =>
