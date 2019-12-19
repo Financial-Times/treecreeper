@@ -1,6 +1,6 @@
 const { h, Fragment } = require('preact');
 
-const { primitives } = require('@financial-times/tc-ui/server');
+const { primitives } = require('@financial-times/tc-ui');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
