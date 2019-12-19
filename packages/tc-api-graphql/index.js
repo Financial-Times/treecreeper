@@ -24,17 +24,20 @@ const getGraphqlApi = ({
 						logger.info({ event: 'GRAPHQL_SCHEMA_SENT_TO_S3' });
 					})
 					.catch(error => {
-						logger.error({
-							event: 'SENDING_SCHEMA_TO_S3_FAILED',
+						logger.error(
+							{
+								event: 'SENDING_SCHEMA_TO_S3_FAILED',
+							},
 							error,
-						});
+						);
 					});
 			}
 		} catch (error) {
 			schemaDidUpdate = false;
 			logger.error(
-				{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED', error },
 				'Graphql schema update failed',
+				{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED' },
+				error,
 			);
 		}
 	};

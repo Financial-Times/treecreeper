@@ -16,11 +16,16 @@ const asyncHooks = require('async_hooks');
 const nLogger = require('@financial-times/n-logger').default;
 
 const contextStore = {};
+const requestIdStore = {};
 
 const getContext = key => {
 	const eid = asyncHooks.executionAsyncId();
 	const store = contextStore[eid] || {};
 	return key ? store[key] : store;
+};
+
+const getContextByRequestId = requestId => {
+	return requestIdStore[requestId];
 };
 
 const asyncHook = asyncHooks.createHook({
@@ -29,7 +34,13 @@ const asyncHook = asyncHooks.createHook({
 			contextStore[asyncId] = contextStore[triggerId];
 		}
 	},
-	destroy: asyncId => delete contextStore[asyncId],
+	destroy: asyncId => {
+		const record = contextStore[asyncId];
+		if (record && record.requestId) {
+			delete requestIdStore[record.requestId];
+		}
+		delete contextStore[asyncId];
+	},
 	promiseResolve: () => {},
 });
 
@@ -91,16 +102,19 @@ const middleware = (req, res, next) => {
 
 const setContext = (key, val) => {
 	const eid = asyncHooks.executionAsyncId();
-	if (typeof key === 'object') {
-		Object.assign(contextStore[eid], key);
-	} else {
-		contextStore[eid][key] = val;
+	if (typeof key !== 'object') {
+		key = { [key]: val };
 	}
+	if (key.requestId) {
+		requestIdStore[key.requestId] = contextStore[eid];
+	}
+	Object.assign(contextStore[eid], key);
 };
 
 module.exports = {
 	setContext,
 	getContext,
+	getContextByRequestId,
 	middleware,
 	logger,
 };

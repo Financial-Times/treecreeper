@@ -81,7 +81,7 @@ if (process.argv[1] === __filename) {
 			process.exit(0);
 		})
 		.catch(error => {
-			logger.error('Init failed, ', error);
+			logger.error('DB init failed', error);
 			process.exit(1);
 		});
 }
