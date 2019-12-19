@@ -1,0 +1,17 @@
+.document-field,
+.document-field .o-forms-field {
+	max-width: 600px;
+}
+
+.document-field .o-forms-title {
+	max-width: 450px;
+}
+
+.document-field textarea {
+	height: 400px;
+	max-width: 100%;
+}
+
+.document-edit-tools {
+	padding-top: 5px;
+}
