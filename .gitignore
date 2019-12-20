@@ -14,6 +14,7 @@ yarn-error.log
 junit.xml
 packages/*/node_modules
 packages/**/package-lock.json
+packages/*/dist
 
 package-lock.json
 .stylelintcache

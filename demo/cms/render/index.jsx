@@ -1,26 +1,34 @@
 const querystring = require('querystring');
-const { render } = require('preact-render-to-string');
-const { h } = require('preact');
+const { renderToStaticMarkup } = require('react-dom/server');
+const React = require('react');
 const Layout = require('./layout');
 const errorTemplate = require('./error-page');
+const { getAssetReferences } = require('./asset-references');
 
 const getPageRenderer = ({
 	Header,
 	Footer,
-	origamiCssModules,
-	origamiJsModules,
+	tcUiJsModules,
+	tcUiCssModules,
+	assetManifest,
+	assetRoot,
 }) => {
+	const assetReferences = getAssetReferences({
+		tcUiJsModules,
+		tcUiCssModules,
+		assetManifest,
+		assetRoot,
+	});
 	const renderHtml = (Template, props) => {
 		props = {
 			...props,
 			Header,
 			Footer,
-			origamiCssModules,
-			origamiJsModules,
+			...assetReferences,
 		};
 		return `
 	<!DOCTYPE html>
-	${render(
+	${renderToStaticMarkup(
 		<Layout {...props}>
 			<Template {...props} />
 		</Layout>,
@@ -39,7 +47,7 @@ const getPageRenderer = ({
 		}
 	};
 
-	const renderPage = (template, data, event = {}, status = 200) => {
+	const renderPage = ({ template, data, event = {}, status = 200 }) => {
 		const user = event.isSignedIn && event.username;
 		const fromDewey = !!(event.query || {})['from-dewey'];
 		const { message, messageType } = event.query || {};

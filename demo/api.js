@@ -31,10 +31,15 @@ require('module-alias').addAliases({
 	'react-dom': 'preact/compat',
 });
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
-const { editController, viewController, deleteController } = require('./cms');
+const {
+	editController,
+	viewController,
+	deleteController,
+	anotherController,
+} = require('./cms');
 
 const parseBody = bodyParser.urlencoded({ limit: '8mb', extended: true });
-
+app.get('/lalala', anotherController);
 app.get('/:type/:code/edit', editController);
 app.post('/:type/:code/edit', parseBody, editController);
 app.get('/:type/create', editController);
