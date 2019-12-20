@@ -314,8 +314,8 @@ describe('validateProperty', () => {
 				{
 					name: 'StartType',
 					properties: {
-						testRelWithProps: { type: 'RelationshipType' },
-						testRelWithoutProps: {
+						relAcceptProps: { type: 'RelationshipType' },
+						relNotAcceptProps: {
 							type: 'EndType',
 							direction: 'outgoing',
 							relationship: 'HAS_ENDTYPE',
@@ -327,10 +327,10 @@ describe('validateProperty', () => {
 					name: 'EndType',
 					properties: {
 						code: { pattern: 'LOWERCASE', type: 'String' },
-						isTestRelWithProps: {
+						isRelAcceptProps: {
 							type: 'RelationshipType',
 						},
-						isTestRelWithoutProps: {
+						isRelNotAcceptProps: {
 							relationship: 'HAS_ENDTYPE',
 							type: 'StartType',
 							direction: 'incoming',
@@ -355,7 +355,7 @@ describe('validateProperty', () => {
 
 		it('reject when relationship node code is invalid', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelWithProps', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'UPPERCASE',
 				}),
 			).toThrow(
@@ -365,7 +365,7 @@ describe('validateProperty', () => {
 
 		it('reject when relationship property is invalid', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelWithProps', {
+				validateProperty('StartType', 'relAcceptProps', {
 					someString: 1234,
 				}),
 			).toThrow(
@@ -375,7 +375,7 @@ describe('validateProperty', () => {
 
 		it('not accept if not in schema', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelWithProps', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'lowercase',
 					notInSchema: 'a string',
 				}),
@@ -386,23 +386,23 @@ describe('validateProperty', () => {
 
 		it('not accept property but code if the type does not accept relationship properties', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelWithoutProps', {
+				validateProperty('StartType', 'relNotAcceptProps', {
 					code: 'lowercase',
 				}),
 			).not.toThrow();
 
 			expect(() =>
-				validateProperty('StartType', 'testRelWithoutProps', {
+				validateProperty('StartType', 'relNotAcceptProps', {
 					someString: 'some string',
 				}),
 			).toThrow(
-				/`testRelWithoutProps` does not accept relationship properties/,
+				/`relNotAcceptProps` does not accept relationship properties/,
 			);
 		});
 
 		it('accept when all is correct', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelWithProps', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'lowercase',
 					someString: 'some string',
 				}),
