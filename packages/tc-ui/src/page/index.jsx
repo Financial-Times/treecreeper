@@ -27,16 +27,19 @@ const getPageRenderer = ({
 	)}`;
 	};
 
-	const handleError = func => (...args) =>
-		func(...args).catch(error => {
+	const handleError = func => async (...args) => {
+		try {
+			return func(...args);
+		} catch (error) {
 			const status = error.status || 500;
 			return {
 				status,
 				body: renderHtml(errorTemplate, { status, error }),
 			};
-		});
+		}
+	};
 
-	const renderPage = (template, data, event, status = 200) => {
+	const renderPage = (template, data, event = {}, status = 200) => {
 		const user = event.isSignedIn && event.username;
 		const fromDewey = !!(event.query || {})['from-dewey'];
 		const { message, messageType } = event.query || {};
