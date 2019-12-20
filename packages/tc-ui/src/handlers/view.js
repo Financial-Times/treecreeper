@@ -13,9 +13,9 @@ const getViewHandler = ({
 		const apiClient = getApiClient(event);
 		const data = await apiClient.read(type, code);
 
-		return renderPage(
+		return renderPage({
 			template,
-			{
+			data: {
 				...getSchemaSubset(event, type),
 				data,
 				Subheader,
@@ -25,7 +25,7 @@ const getViewHandler = ({
 				pageTitle: `View ${type} ${data.name}`,
 			},
 			event,
-		);
+		});
 	};
 
 	return { handler: handleError(render), render };
