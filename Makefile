@@ -34,7 +34,7 @@ unprepublish:
 install: unprepublish
 
 prepublish:
-	babel packages/tc-ui/src -D --out-dir packages/tc-ui/dist
+	webpack --config packages/tc-ui/webpack.config.js
 	sed s/"src\/"/"dist\/"/ packages/tc-ui/package.json > tmp && mv tmp packages/tc-ui/package.json
 
 monorepo-publish: prepublish
