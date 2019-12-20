@@ -76,6 +76,8 @@ const getCMS = ({
 			viewRender,
 			logger,
 		}).handler,
+		handleError,
+		renderPage,
 	};
 };
 

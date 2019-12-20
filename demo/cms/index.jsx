@@ -1,3 +1,4 @@
+const { h } = require('preact');
 const logger = require('@financial-times/lambda-logger');
 const { getCMS } = require('@financial-times/tc-ui');
 
@@ -26,7 +27,13 @@ const wrapCmsHandler = handler => async (req, res) => {
 	}
 };
 
-const { viewHandler, deleteHandler, editHandler } = getCMS({
+const {
+	viewHandler,
+	deleteHandler,
+	editHandler,
+	handleError,
+	renderPage,
+} = getCMS({
 	logger,
 	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
 	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
@@ -57,4 +64,9 @@ module.exports = {
 	viewController: wrapCmsHandler(viewHandler),
 	editController: wrapCmsHandler(editHandler),
 	deleteController: wrapCmsHandler(deleteHandler),
+	anotherController: wrapCmsHandler(
+		handleError(() =>
+			renderPage(({ str }) => <div>{str}</div>, { str: 'lalalala' }),
+		),
+	),
 };
