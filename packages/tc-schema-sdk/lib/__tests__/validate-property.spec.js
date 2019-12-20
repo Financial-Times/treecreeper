@@ -363,6 +363,16 @@ describe('validateProperty', () => {
 			);
 		});
 
+		it('reject when relationship property is invalid', () => {
+			expect(() =>
+				validateProperty('StartType', 'testRelWithProps', {
+					someString: 1234,
+				}),
+			).toThrow(
+				'Invalid value `1234` for property `someString` on type `RelationshipType`: Must be a string',
+			);
+		});
+
 		it('not accept if not in schema', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelWithProps', {
