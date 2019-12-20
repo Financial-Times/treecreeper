@@ -27,29 +27,26 @@ const Message = ({
 	return isBanner ? <div className="o-message--success">{inner}</div> : inner;
 };
 
-const FormError = props => {
-	if (props.error) {
-		return (
-			<div
-				className="o-message o-message--inner o-message--alert o-message--error biz-ops-alert"
-				data-o-component="o-message"
-			>
-				<div className="o-message__container">
-					<div className="o-message__content">
-						<p className="o-message__content-main">
-							<span className="o-message__content-highlight">
-								Oops.
-							</span>
-							<span className="o-message__content-detail">
-								{` Could not ${props.error.action} ${props.type} record for ${props.code}.`}
-							</span>
-						</p>
-						<p className="o-message__content-additional">{`${props.error.message}`}</p>
-					</div>
+const FormError = props =>
+	props.error ? (
+		<div
+			className="o-message o-message--inner o-message--alert o-message--error biz-ops-alert"
+			data-o-component="o-message"
+		>
+			<div className="o-message__container">
+				<div className="o-message__content">
+					<p className="o-message__content-main">
+						<span className="o-message__content-highlight">
+							Oops.
+						</span>
+						<span className="o-message__content-detail">
+							{` Could not ${props.error.action} ${props.type} record for ${props.code}.`}
+						</span>
+					</p>
+					<p className="o-message__content-additional">{`${props.error.message}`}</p>
 				</div>
 			</div>
-		);
-	}
-};
+		</div>
+	) : null;
 
 module.exports = { Message, FormError };

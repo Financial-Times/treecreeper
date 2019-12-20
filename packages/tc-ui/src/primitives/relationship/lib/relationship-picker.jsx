@@ -16,12 +16,7 @@ const toArray = val => {
 
 const UserInput = inputProps => (
 	<span className="o-forms-input o-forms-input--text">
-		<input
-			id={`${inputProps.propertyName}-picker`}
-			type="text"
-			autoComplete="off"
-			{...inputProps}
-		/>
+		<input {...inputProps} />
 	</span>
 );
 
@@ -254,7 +249,9 @@ class RelationshipPicker extends React.Component {
 								this.onSuggestionHighlighted
 							}
 							inputProps={{
-								propertyName: props.propertyName,
+								id: `${propertyName}-picker`,
+								type: 'text',
+								autoComplete: 'off',
 								value: searchTerm,
 								onChange: this.onSearchTermChange,
 								onKeyDown: this.onUserMisconception,
