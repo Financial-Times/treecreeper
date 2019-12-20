@@ -1,6 +1,6 @@
 const ManifestPlugin = require('webpack-manifest-plugin'); // eslint-disable-line import/no-extraneous-dependencies
 const EncodingPlugin = require('webpack-encoding-plugin'); // eslint-disable-line import/no-extraneous-dependencies
-// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // eslint-disable-line import/no-extraneous-dependencies
 
 module.exports = {
 	resolve: {
@@ -26,14 +26,7 @@ module.exports = {
 			},
 			{
 				test: /\.css$/,
-				use: [
-					{
-						loader: 'raw-loader',
-						options: {
-							esModule: false,
-						},
-					},
-				],
+				use: [MiniCssExtractPlugin.loader, 'css-loader'],
 			},
 		],
 	},
