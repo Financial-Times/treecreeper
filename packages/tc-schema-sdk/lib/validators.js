@@ -1,5 +1,69 @@
 const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
 const { stripIndents } = require('common-tags');
+const TreecreeperUserError = require('./biz-ops-error');
+
+const throwInvalidValueError = (
+	typeName,
+	propertyName,
+	propertyValue,
+	aliasPropertyName,
+) => reason => {
+	const propName = aliasPropertyName || propertyName;
+	throw new TreecreeperUserError(
+		stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
+	);
+};
+
+const validateBoolean = (type, value, exit) => {
+	if (type === 'Boolean') {
+		if (typeof value !== 'boolean') {
+			exit('Must be a Boolean');
+		}
+	}
+};
+
+const validateFloat = (type, value, exit) => {
+	if (type === 'Float') {
+		if (!Number.isFinite(value)) {
+			exit('Must be a finite floating point number');
+		}
+	}
+};
+
+const validateInt = (type, value, exit) => {
+	if (type === 'Int') {
+		if (!Number.isFinite(value) || Math.round(value) !== value) {
+			exit('Must be a finite integer');
+		}
+	}
+};
+
+const validateString = (type, value, exit, validator) => {
+	if (type === 'String') {
+		if (typeof value !== 'string') {
+			exit('Must be a string');
+		}
+
+		if (validator && !validator.test(value)) {
+			const maxlength = validator.toString().match(/\.\{\d+,(\d+)\}\$/);
+			if (maxlength) {
+				exit(
+					`Must match pattern ${validator} and be no more than ${maxlength[1]} characters`,
+				);
+			}
+			exit(`Must match pattern ${validator}`);
+		}
+	}
+};
+
+const validateEnums = (type, value, exit, getEnums) => {
+	if (type in getEnums()) {
+		const validVals = Object.values(getEnums()[type]);
+		if (!validVals.includes(value)) {
+			exit(`Must be a valid enum: ${validVals.join(', ')}`);
+		}
+	}
+};
 
 // relationship value could be just a String(code), an Object or an Array of strings(codes) / objects(code and properties) / mixed
 // this function is to normalise them into an Array of objects
@@ -22,20 +86,50 @@ const normaliseRelationshipProps = relValues => {
 	}
 };
 
-const TreecreeperUserError = require('./biz-ops-error');
-
 const validateTypeName = getType => type => getType(type);
 
-const throwInvalidValueError = (
+const validateNodeCode = ({ getType, type, propValue, primitiveTypesMap }) => {
+	const { validator } = getType(type).properties.code;
+	const exit = throwInvalidValueError(type, 'code', propValue);
+	validateString(primitiveTypesMap.Code, propValue, exit, validator);
+};
+
+const validateRelationshipProps = ({
+	getRelationshipType,
+	getEnums,
 	typeName,
 	propertyName,
-	propertyValue,
-	aliasPropertyName,
-) => reason => {
-	const propName = aliasPropertyName || propertyName;
-	throw new TreecreeperUserError(
-		stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
-	);
+	relPropName,
+	relPropValue,
+	primitiveTypesMap,
+}) => {
+	const {
+		name: relType,
+		properties: relPropsDef,
+		validator: relValidator,
+	} = getRelationshipType(typeName, propertyName);
+
+	if (!relType) {
+		throw new TreecreeperUserError(
+			`\`${propertyName}\` does not accept relationship properties.`,
+		);
+	}
+
+	const relPropDef = relPropsDef[relPropName];
+	if (!relPropDef) {
+		throw new TreecreeperUserError(
+			`Invalid property \`${relPropName}\` on type \`${relType}\`.`,
+		);
+	}
+
+	const relPropType = primitiveTypesMap[relPropDef.type] || relPropDef.type;
+	const exit = throwInvalidValueError(relType, relPropName, relPropValue);
+
+	validateBoolean(relPropType, relPropValue, exit);
+	validateFloat(relPropType, relPropValue, exit);
+	validateInt(relPropType, relPropValue, exit);
+	validateString(relPropType, relPropValue, exit, relValidator);
+	validateEnums(relPropType, relPropValue, exit, getEnums);
 };
 
 const validateProperty = ({
@@ -44,26 +138,21 @@ const validateProperty = ({
 	getPrimitiveTypes,
 	getRelationshipType,
 }) => {
-	const recursivelyCallableValidator = (
+	const propertyValidator = (
 		typeName,
 		propertyName,
 		propertyValue,
 		aliasPropertyName,
-		relationshipPropsDef = undefined,
 	) => {
-		const propertyDefinition = relationshipPropsDef
-			? relationshipPropsDef[propertyName]
-			: getType(typeName).properties[propertyName];
-		const primitiveTypesMap = getPrimitiveTypes();
+		if (propertyValue === null) {
+			return;
+		}
 
+		const propertyDefinition = getType(typeName).properties[propertyName];
 		if (!propertyDefinition) {
 			throw new TreecreeperUserError(
 				`Invalid property \`${propertyName}\` on type \`${typeName}\`.`,
 			);
-		}
-
-		if (propertyValue === null) {
-			return;
 		}
 
 		const {
@@ -72,6 +161,8 @@ const validateProperty = ({
 			hasMany,
 			cypher,
 		} = propertyDefinition;
+
+		const primitiveTypesMap = getPrimitiveTypes();
 
 		const type =
 			primitiveTypesMap[propertyDefinition.type] ||
@@ -84,7 +175,7 @@ const validateProperty = ({
 			aliasPropertyName,
 		);
 
-		if (isRelationship && !relationshipPropsDef) {
+		if (isRelationship) {
 			if (cypher) {
 				exit(
 					`Cannot write relationship \`${propertyName}\` - it is defined using a custom, read-only query`,
@@ -95,72 +186,43 @@ const validateProperty = ({
 				exit(`Can only have one ${propertyName}`);
 			}
 
-			const {
-				name: relType,
-				properties: relPropsDef,
-			} = getRelationshipType(typeName, propertyName);
-
 			relPropsList.map(relProps => {
 				Object.entries(relProps).forEach(
 					([relPropName, relPropValue]) => {
+						if (relPropValue === null) {
+							return;
+						}
 						if (relPropName === 'code') {
-							recursivelyCallableValidator(
+							validateNodeCode({
+								getType,
 								type,
-								'code',
-								relPropValue,
-							);
+								propValue: relPropValue,
+								primitiveTypesMap,
+							});
 						} else {
-							recursivelyCallableValidator(
-								relType,
+							validateRelationshipProps({
+								getRelationshipType,
+								getEnums,
+								typeName,
+								propertyName,
 								relPropName,
 								relPropValue,
-								false,
-								relPropsDef,
-							);
+								primitiveTypesMap,
+							});
 						}
 					},
 				);
 			});
-		} else if (type === 'Boolean') {
-			if (typeof propertyValue !== 'boolean') {
-				exit('Must be a Boolean');
-			}
-		} else if (type === 'Float') {
-			if (!Number.isFinite(propertyValue)) {
-				exit('Must be a finite floating point number');
-			}
-		} else if (type === 'Int') {
-			if (
-				!Number.isFinite(propertyValue) ||
-				Math.round(propertyValue) !== propertyValue
-			) {
-				exit('Must be a finite integer');
-			}
-		} else if (type === 'String') {
-			if (typeof propertyValue !== 'string') {
-				exit('Must be a string');
-			}
-
-			if (validator && !validator.test(propertyValue)) {
-				const maxlength = validator
-					.toString()
-					.match(/\.\{\d+,(\d+)\}\$/);
-				if (maxlength) {
-					exit(
-						`Must match pattern ${validator} and be no more than ${maxlength[1]} characters`,
-					);
-				}
-				exit(`Must match pattern ${validator}`);
-			}
-		} else if (type in getEnums()) {
-			const validVals = Object.values(getEnums()[type]);
-			if (!validVals.includes(propertyValue)) {
-				exit(`Must be a valid enum: ${validVals.join(', ')}`);
-			}
 		}
+
+		validateBoolean(type, propertyValue, exit);
+		validateFloat(type, propertyValue, exit);
+		validateInt(type, propertyValue, exit);
+		validateString(type, propertyValue, exit, validator);
+		validateEnums(type, propertyValue, exit, getEnums);
 	};
 
-	return recursivelyCallableValidator;
+	return propertyValidator;
 };
 
 const validatePropertyName = name => {

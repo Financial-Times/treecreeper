@@ -279,7 +279,7 @@ describe('validateProperty', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelationship', 'UPPERCASE'),
 			).toThrow(
-				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+				'Invalid value `UPPERCASE` for property `code` on type `EndType`: Must match pattern /^[a-z]+$/',
 			);
 		});
 
@@ -314,15 +314,27 @@ describe('validateProperty', () => {
 				{
 					name: 'StartType',
 					properties: {
-						testRelationship: { type: 'RelationshipType' },
+						relAcceptProps: { type: 'RelationshipType' },
+						relNotAcceptProps: {
+							type: 'EndType',
+							direction: 'outgoing',
+							relationship: 'HAS_ENDTYPE',
+							hasMany: true,
+						},
 					},
 				},
 				{
 					name: 'EndType',
 					properties: {
 						code: { pattern: 'LOWERCASE', type: 'String' },
-						isTestRelationship: {
+						isRelAcceptProps: {
 							type: 'RelationshipType',
+						},
+						isRelNotAcceptProps: {
+							relationship: 'HAS_ENDTYPE',
+							type: 'StartType',
+							direction: 'incoming',
+							hasMany: true,
 						},
 					},
 				},
@@ -343,28 +355,54 @@ describe('validateProperty', () => {
 
 		it('reject when relationship node code is invalid', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelationship', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'UPPERCASE',
 				}),
 			).toThrow(
-				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+				'Invalid value `UPPERCASE` for property `code` on type `EndType`: Must match pattern /^[a-z]+$/',
+			);
+		});
+
+		it('reject when relationship property is invalid', () => {
+			expect(() =>
+				validateProperty('StartType', 'relAcceptProps', {
+					someString: 1234,
+				}),
+			).toThrow(
+				'Invalid value `1234` for property `someString` on type `RelationshipType`: Must be a string',
 			);
 		});
 
 		it('not accept if not in schema', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelationship', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'lowercase',
-					anotherString: 'another string',
+					notInSchema: 'a string',
 				}),
 			).toThrow(
-				/Invalid property `anotherString` on type `RelationshipType`/,
+				/Invalid property `notInSchema` on type `RelationshipType`/,
+			);
+		});
+
+		it('not accept property but code if the type does not accept relationship properties', () => {
+			expect(() =>
+				validateProperty('StartType', 'relNotAcceptProps', {
+					code: 'lowercase',
+				}),
+			).not.toThrow();
+
+			expect(() =>
+				validateProperty('StartType', 'relNotAcceptProps', {
+					someString: 'some string',
+				}),
+			).toThrow(
+				/`relNotAcceptProps` does not accept relationship properties/,
 			);
 		});
 
 		it('accept when all is correct', () => {
 			expect(() =>
-				validateProperty('StartType', 'testRelationship', {
+				validateProperty('StartType', 'relAcceptProps', {
 					code: 'lowercase',
 					someString: 'some string',
 				}),
