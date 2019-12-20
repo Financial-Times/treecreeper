@@ -1,6 +1,6 @@
 const querystring = require('querystring');
-const { render } = require('preact-render-to-string');
-const { h } = require('preact');
+const { renderToStaticMarkup } = require('react-dom/server');
+const React = require('react');
 const Layout = require('./layout');
 const errorTemplate = require('./error-page');
 
@@ -20,7 +20,7 @@ const getPageRenderer = ({
 		};
 		return `
 	<!DOCTYPE html>
-	${render(
+	${renderToStaticMarkup(
 		<Layout {...props}>
 			<Template {...props} />
 		</Layout>,

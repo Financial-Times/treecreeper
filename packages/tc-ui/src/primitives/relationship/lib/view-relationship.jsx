@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { LinkToRecord } = require('../../../components/helpers');
 
@@ -6,12 +6,12 @@ let RelationshipAnnotator;
 
 const OneRelationship = ({ type, value = {}, id }) =>
 	type && value.code ? (
-		<Fragment>
+		<>
 			<LinkToRecord id={id} type={type} value={value} />
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value} type={type} />
 			) : null}
-		</Fragment>
+		</>
 	) : (
 		'Error: unable to construct link'
 	);

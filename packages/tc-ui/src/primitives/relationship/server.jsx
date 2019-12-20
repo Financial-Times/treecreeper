@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../components/edit-helpers');
 

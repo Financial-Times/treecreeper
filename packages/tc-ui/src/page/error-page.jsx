@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 
 const ErrorPage = ({ error, status } = {}) => (
 	<main className="o-layout__main">

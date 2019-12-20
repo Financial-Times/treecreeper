@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
 const toKebabCase = string =>
 	string
@@ -24,12 +24,12 @@ const Concept = ({ name, description, moreInformation }) => (
 // more accessible solution that means we won't need to
 // disable the linting
 const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
-	<Fragment>
+	<>
 		{title ? (
 			<h2 id={toKebabCase(title)} className="section-heading">
 				{title}
 				{includeEditLink && code && type ? (
-					<Fragment>
+					<>
 						<a // eslint-disable-line jsx-a11y/anchor-has-content
 							className="o-icons-icon o-icons-icon--edit biz-ops-section-header__edit-link o-layout__unstyled-element"
 							href={`/${type}/${code}/edit?#${toKebabCase(
@@ -37,13 +37,13 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 							)}`}
 							title="Edit this section"
 						/>
-					</Fragment>
+					</>
 				) : null}
 			</h2>
 		) : (
 			<h2>no title provided</h2>
 		)}
-	</Fragment>
+	</>
 );
 
 const blockComponents = ['Document'];
@@ -68,7 +68,7 @@ const LabelledPrimitive = props => {
 		return null;
 	}
 	return (
-		<Fragment>
+		<>
 			<dt
 				id={`tooltip-${id}`}
 				className={`${layoutClass(type)} tooltip-container`}
@@ -108,7 +108,7 @@ const LabelledPrimitive = props => {
 					</button>
 				) : null}
 			</dd>
-		</Fragment>
+		</>
 	);
 };
 
@@ -127,7 +127,7 @@ const MetaProperties = ({ data, isCreate }) => {
 	const client = isCreate ? data._createdByClient : data._updatedByClient;
 
 	return (
-		<Fragment>
+		<>
 			{isCreate ? 'Created by ' : 'Last updated by '}
 			{lastActorLink(user, client)},{' '}
 			<time
@@ -135,7 +135,7 @@ const MetaProperties = ({ data, isCreate }) => {
 				className="o-date meta-timestamp"
 				dateTime={timestamp}
 			/>
-		</Fragment>
+		</>
 	);
 };
 

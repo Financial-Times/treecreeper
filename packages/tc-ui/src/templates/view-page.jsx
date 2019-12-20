@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 const { FormError } = require('../components/messages');
 const {
 	Concept,

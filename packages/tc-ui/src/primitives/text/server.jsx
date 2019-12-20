@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 const { WrappedEditComponent } = require('../../components/edit-helpers');
 
 const EditText = ({ propertyName, value, required, lockedBy, disabled }) => (

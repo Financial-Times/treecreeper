@@ -1,5 +1,5 @@
 /* global fetch */
-const { h, Fragment, Component } = require('preact');
+const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
@@ -26,7 +26,7 @@ const UserInput = inputProps => (
 );
 
 const Suggestion = ({ suggestion, searchTerm }) => (
-	<Fragment>
+	<>
 		<Highlighter
 			searchWords={searchTerm.split(' ')}
 			autoEscape
@@ -43,10 +43,10 @@ const Suggestion = ({ suggestion, searchTerm }) => (
 				)
 			</small>
 		) : null}
-	</Fragment>
+	</>
 );
 
-class RelationshipPicker extends Component {
+class RelationshipPicker extends React.Component {
 	constructor(props) {
 		super();
 		const selectedRelationships = toArray(props.value);

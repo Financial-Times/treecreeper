@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 const { WrappedEditComponent } = require('../../components/edit-helpers');
 const { markdown } = require('../../components/helpers');
 
@@ -7,7 +7,7 @@ const outputFreeText = (text = '') => text;
 const EditLargeText = props => {
 	const { propertyName, value, dataType, disabled } = props;
 	return (
-		<Fragment>
+		<>
 			<span className="o-forms-input o-forms-input--textarea">
 				<textarea
 					name={propertyName}
@@ -26,7 +26,7 @@ const EditLargeText = props => {
 					</button>
 				</div>
 			) : null}
-		</Fragment>
+		</>
 	);
 };
 

@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
 const siteTitle = 'Biz Ops';
 
@@ -46,7 +46,7 @@ const PrimaryNavItem = ({ isActive, text, url, items }) => (
 			{items ? text : <div>{text}</div>}
 		</a>
 		{items ? (
-			<Fragment>
+			<>
 				<button
 					className="o-header-services__drop-down-button"
 					type="button"
@@ -63,7 +63,7 @@ const PrimaryNavItem = ({ isActive, text, url, items }) => (
 						Close dropdown menu
 					</button>
 				</ul>
-			</Fragment>
+			</>
 		) : null}
 	</li>
 );
