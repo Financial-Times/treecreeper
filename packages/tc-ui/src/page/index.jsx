@@ -39,7 +39,7 @@ const getPageRenderer = ({
 		}
 	};
 
-	const renderPage = (template, data, event = {}, status = 200) => {
+	const renderPage = ({ template, data, event = {}, status = 200 }) => {
 		const user = event.isSignedIn && event.username;
 		const fromDewey = !!(event.query || {})['from-dewey'];
 		const { message, messageType } = event.query || {};
