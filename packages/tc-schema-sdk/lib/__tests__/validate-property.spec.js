@@ -279,7 +279,7 @@ describe('validateProperty', () => {
 			expect(() =>
 				validateProperty('StartType', 'testRelationship', 'UPPERCASE'),
 			).toThrow(
-				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+				'Invalid value `UPPERCASE` for property `code` on type `EndType`: Must match pattern /^[a-z]+$/',
 			);
 		});
 
@@ -359,7 +359,7 @@ describe('validateProperty', () => {
 					code: 'UPPERCASE',
 				}),
 			).toThrow(
-				/Invalid value `UPPERCASE` for property `code` on type `EndType`/,
+				'Invalid value `UPPERCASE` for property `code` on type `EndType`: Must match pattern /^[a-z]+$/',
 			);
 		});
 
