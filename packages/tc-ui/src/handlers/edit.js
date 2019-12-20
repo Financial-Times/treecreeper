@@ -45,7 +45,7 @@ const getEditHandler = ({
 			templateData.error = apiError;
 		}
 
-		return renderPage(template, templateData, event);
+		return renderPage({ template, data: templateData, event });
 	};
 
 	const handleForm = async event => {
