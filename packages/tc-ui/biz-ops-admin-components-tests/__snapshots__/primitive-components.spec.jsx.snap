@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Boolean /> Display of full details 1`] = `<span>Yes</span>`;
+
+exports[`<Boolean /> Display of full details 2`] = `<span>No</span>`;
+
+exports[`<Boolean /> Display with no properties 1`] = `<span>Unknown</span>`;
+
+exports[`<Boolean /> Display with no properties 2`] = `<span>Unknown</span>`;
+
+exports[`<Boolean /> Display with no value 1`] = `<span>Unknown</span>`;
+
+exports[`<Boolean /> Display with no value 2`] = `<span>Unknown</span>`;
+
+exports[`<Default /> Display of full details 1`] = `<span>some text</span>`;
+
+exports[`<Default /> Display with no properties 1`] = `<span></span>`;
+
+exports[`<Default /> Display with no value 1`] = `<span></span>`;
+
+exports[`<Document /> Display of full details 1`] = `
+<section>
+  <p>#heading</p>
+  <p>paragraph
+    <a href="https://biz-ops.com">https://biz-ops.com</a>
+  </p>
+</section>
+`;
+
+exports[`<Document /> Display with no properties 1`] = `<section></section>`;
+
+exports[`<Document /> Display with no value 1`] = `<section></section>`;
+
+exports[`<Email /> Display of full details 1`] = `<a href="mailto:biz@ops.com">biz@ops.com</a>`;
+
+exports[`<Email /> Display with no properties 1`] = `null`;
+
+exports[`<Email /> Display with no value 1`] = `null`;
+
+exports[`<Paragraph /> Display of full details 1`] = `
+<p>some text
+  <a href="https://biz-ops.com" target="_blank" rel="noopener noreferrer">biz-ops.com</a>
+</p>
+`;
+
+exports[`<Paragraph /> Display with no properties 1`] = `<p></p>`;
+
+exports[`<Paragraph /> Display with no value 1`] = `<p></p>`;
+
+exports[`<ProductLifecycle /> Display of full details 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--support-experimental">Incubate</span>`;
+
+exports[`<ProductLifecycle /> Display with no properties 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown lifecycle stage</span>`;
+
+exports[`<ProductLifecycle /> Display with no value 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown lifecycle stage</span>`;
+
+exports[`<ServiceTier /> Display of full details 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--tier-bronze">Bronze</span>`;
+
+exports[`<ServiceTier /> Display with no properties 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown service tier</span>`;
+
+exports[`<ServiceTier /> Display with no value 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown service tier</span>`;
+
+exports[`<SystemLifecycle /> Display of full details 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--support-active">Production</span>`;
+
+exports[`<SystemLifecycle /> Display with no properties 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown lifecycle stage</span>`;
+
+exports[`<SystemLifecycle /> Display with no value 1`] = `<span class="o-layout--unstyled-element o-labels o-labels--unknown">Unknown lifecycle stage</span>`;
+
+exports[`<Url /> Display of full details 1`] = `<a href="https://biz-ops.com">https://biz-ops.com</a>`;
+
+exports[`<Url /> Display with no properties 1`] = `null`;
+
+exports[`<Url /> Display with no value 1`] = `null`;

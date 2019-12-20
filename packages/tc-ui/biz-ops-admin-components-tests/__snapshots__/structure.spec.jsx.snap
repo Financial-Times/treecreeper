@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SectionHeader /> Display of just title 1`] = `<h2 id="just-a-nice-title" class="section-heading">Just A Nice Title</h2>`;
+
+exports[`<SectionHeader /> Display of title and edit button 1`] = `<h2 id="a-nice-title-wth-edit" class="section-heading">A Nice Title Wth Edit</h2>`;
+
+exports[`<SectionHeader /> Display with no details 1`] = `<h2>no title provided</h2>`;
