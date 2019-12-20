@@ -19,8 +19,8 @@
 		"react-highlight-words": "^0.16.0",
 		"showdown": "^1.9.1"
 	},
-	"main": "dist/server.js",
-	"browser": "dist/browser.js",
+	"main": "src/server.js",
+	"browser": "src/browser.js",
 	"devDependencies": {
 		"fetch-mock": "^8.0.0",
 		"isomorphic-fetch": "^2.2.1"
