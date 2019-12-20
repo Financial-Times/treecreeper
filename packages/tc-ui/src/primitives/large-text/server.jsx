@@ -14,9 +14,8 @@ const EditLargeText = props => {
 					id={`id-${propertyName}`}
 					rows={dataType === 'Document' ? '40' : '8'}
 					disabled={disabled}
-				>
-					{outputFreeText(value)}
-				</textarea>
+					value={outputFreeText(value)}
+				/>
 			</span>
 			{dataType === 'Document' ? (
 				<div className="document-edit-tools">
