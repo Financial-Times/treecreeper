@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 // bizarely we get a fetch not found error unless this require is included
 // Something odd with mocking of fetch
 

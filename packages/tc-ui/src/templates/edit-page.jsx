@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../components/messages');
 const { Concept, SectionHeader } = require('../components/structure');
@@ -96,7 +96,7 @@ const EditForm = ({
 	};
 
 	return (
-		<Fragment>
+		<>
 			<form
 				className="o-layout__main o-forms"
 				action={getAction()}
@@ -159,7 +159,7 @@ const EditForm = ({
 				</div>
 			</form>
 			<script src="https://cloud.tinymce.com/stable/tinymce.js" defer />
-		</Fragment>
+		</>
 	);
 };
 

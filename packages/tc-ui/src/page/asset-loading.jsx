@@ -1,7 +1,7 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
 const HeadAssets = ({ mainCss, origamiCss }) => (
-	<Fragment>
+	<>
 		<link
 			rel="icon"
 			type="image/png"
@@ -21,10 +21,10 @@ const HeadAssets = ({ mainCss, origamiCss }) => (
 		/>
 		<link rel="stylesheet" href={origamiCss} />
 		<link href={mainCss} rel="stylesheet" />
-	</Fragment>
+	</>
 );
 const TailAssets = ({ mainJs, origamiJs }) => (
-	<Fragment>
+	<>
 		<script src={mainJs} defer />
 
 		<script defer src={origamiJs} />
@@ -34,6 +34,6 @@ const TailAssets = ({ mainJs, origamiJs }) => (
 					"document.documentElement.classList.replace('core', 'enhanced')",
 			}}
 		/>
-	</Fragment>
+	</>
 );
 module.exports = { HeadAssets, TailAssets };

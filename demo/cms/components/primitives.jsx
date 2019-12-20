@@ -1,4 +1,4 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
 const { primitives } = require('@financial-times/tc-ui');
 
@@ -77,7 +77,7 @@ const Email = ({ value, id }) =>
 	) : null;
 
 const RelationshipAnnotator = ({ type, value }) => (
-	<Fragment>
+	<>
 		{type === 'System' ? <ServiceTier value={value.serviceTier} /> : null}
 		{type === 'System' || type === 'Product' ? (
 			<LifecycleStage value={value.lifecycleStage} />
@@ -87,7 +87,7 @@ const RelationshipAnnotator = ({ type, value }) => (
 		{type === 'Repository' ? (
 			<IsActiveLabel isActive={!value.isArchived} />
 		) : null}
-	</Fragment>
+	</>
 );
 
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);

@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 const { shallow } = require('../../../test-helpers/enzyme-setup');
 const {
 	EditComponent,

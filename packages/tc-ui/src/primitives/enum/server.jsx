@@ -1,5 +1,5 @@
 const { getEnums } = require('@financial-times/tc-schema-sdk');
-const { h, Fragment } = require('preact');
+const React = require('react');
 const { WrappedEditComponent } = require('../../components/edit-helpers');
 const { autolink } = require('../../components/helpers');
 const text = require('../text/server');
@@ -21,7 +21,7 @@ const OptionsInfo = ({ type }) => {
 		return null;
 	}
 	return (
-		<Fragment>
+		<>
 			<p
 				dangerouslySetInnerHTML={{
 					__html: autolink(enumWithMeta.description),
@@ -29,13 +29,13 @@ const OptionsInfo = ({ type }) => {
 			/>
 			<dl>
 				{optionDefs.map(({ value, description }) => (
-					<Fragment>
+					<>
 						<dt>{value}</dt>
 						<dd>{description}</dd>
-					</Fragment>
+					</>
 				))}
 			</dl>
-		</Fragment>
+		</>
 	);
 };
 

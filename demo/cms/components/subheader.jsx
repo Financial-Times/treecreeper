@@ -1,9 +1,9 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
 const Subheader = ({ type, code, data }) => (
 	<div className="o-buttons__group">
 		{type === 'System' && data.lifecycleStage !== 'Decommissioned' ? (
-			<Fragment>
+			<>
 				<a
 					className="o-buttons o-layout__unstyled-element"
 					href={`https://runbooks.in.ft.com/${encodeURIComponent(
@@ -36,7 +36,7 @@ const Subheader = ({ type, code, data }) => (
 				>
 					View SOS rating
 				</a>
-			</Fragment>
+			</>
 		) : null}
 		<a
 			className="o-buttons o-layout__unstyled-element biz-ops-cta--visualise"

@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 
 const InnerMessage = ({ message, type, isInner = false }) => (
 	<section
