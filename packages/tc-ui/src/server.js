@@ -23,6 +23,8 @@ const getCMS = ({
 	origamiJsModules,
 	customComponents,
 	customTypeMappings,
+	assetManifest,
+	assetRoot,
 }) => {
 	const assignComponent = componentAssigner({
 		customComponents,
@@ -36,6 +38,8 @@ const getCMS = ({
 		Footer,
 		origamiCssModules,
 		origamiJsModules,
+		assetManifest,
+		assetRoot,
 	});
 
 	const getApiClient = event =>

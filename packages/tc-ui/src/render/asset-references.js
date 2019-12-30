@@ -1,29 +1,12 @@
-// locally webpack manifest is not created
-const getWebpackManifest = isProduction =>
-	isProduction
-		? // built resource, so doesn't exist in local dev
-		  // eslint-disable-next-line import/no-unresolved
-		  require('../../browser/manifest.json') // eslint-disable-line global-require
-		: {
-				'main.css': 'main.css',
-				'main.js': 'main.js',
-		  };
-
-// TODO serve as /statics in prod
-const getPathToStaticAsset = (isProduction, fileName) =>
-	`${
-		isProduction
-			? `https://s3-eu-west-1.amazonaws.com/biz-ops-statics.${process.env.AWS_ACCOUNT_ID}/biz-ops-admin`
-			: 'http://local.in.ft.com:8080/statics'
-	}/${getWebpackManifest(isProduction)[fileName]}`;
-
 const buildServiceBaseUrl =
 	'https://www.ft.com/__origami/service/build/v2/bundles';
 
-const buildOrigamiUrl = (isProduction, type, map) =>
-	`${buildServiceBaseUrl}/${type}?brand=internal&modules=${Object.entries(map)
+const buildOrigamiUrl = (type, componentsMap) =>
+	`${buildServiceBaseUrl}/${type}?brand=internal&modules=${Object.entries(
+		componentsMap,
+	)
 		.map(([key, val]) => `o-${key}@${val}`)
-		.join(',')}${isProduction ? '' : '&minify=none'}`;
+		.join(',')}`;
 
 const defaultOrigamiCssModules = {
 	layout: '^3.3.1',
@@ -46,24 +29,24 @@ const defaultOrigamiJsModules = {
 };
 
 const getAssetReferences = ({
-	isProduction,
 	origamiJsModules = {},
 	origamiCssModules = {},
+	assetManifest,
+	assetRoot,
 }) => {
 	return {
-		origamiJs: buildOrigamiUrl(isProduction, 'js', {
+		origamiJs: buildOrigamiUrl('js', {
 			...origamiJsModules,
 			...defaultOrigamiJsModules,
 		}),
-		origamiCss: buildOrigamiUrl(isProduction, 'css', {
+		origamiCss: buildOrigamiUrl('css', {
 			...origamiCssModules,
 			...defaultOrigamiCssModules,
 		}),
-		mainJs: getPathToStaticAsset(isProduction, 'main.js'),
-		mainCss: getPathToStaticAsset(isProduction, 'main.css'),
+		mainJs: `${assetRoot}${assetManifest['main.js']}`,
+		mainCss: `${assetRoot}${assetManifest['main.css']}`,
 	};
 };
-
 module.exports = {
 	getAssetReferences,
 };

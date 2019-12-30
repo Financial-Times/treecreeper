@@ -9,6 +9,8 @@ const getPageRenderer = ({
 	Footer,
 	origamiCssModules,
 	origamiJsModules,
+	assetManifest,
+	assetRoot,
 }) => {
 	const renderHtml = (Template, props) => {
 		props = {
@@ -17,6 +19,8 @@ const getPageRenderer = ({
 			Footer,
 			origamiCssModules,
 			origamiJsModules,
+			assetManifest,
+			assetRoot,
 		};
 		return `
 	<!DOCTYPE html>

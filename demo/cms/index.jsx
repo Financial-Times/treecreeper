@@ -59,6 +59,11 @@ const {
 	customTypeMappings: {
 		Paragraph: 'LargeText',
 	},
+	assetManifest: {
+		'main.css': 'main.css',
+		'main.js': 'main.js',
+	},
+	assetRoot: 'http://local.in.ft.com:8080/statics/',
 });
 
 module.exports = {
