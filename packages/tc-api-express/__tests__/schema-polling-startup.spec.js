@@ -1,14 +1,9 @@
-const fetch = require('node-fetch');
 const { getApp } = require('..');
 
-describe('schema polling startup', () => {
-	beforeAll(() => {
-		fetch.config.fallbackToNetwork = false;
-	});
-	afterAll(() => {
-		fetch.config.fallbackToNetwork = 'always';
-	});
+jest.mock('node-fetch', () => require('fetch-mock-jest').sandbox());
+const fetch = require('node-fetch');
 
+describe('schema polling startup', () => {
 	it('does not resolve promise for app until schema is hydrated when polling', async () => {
 		delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
 		process.env.TEST_STARTUP = true;

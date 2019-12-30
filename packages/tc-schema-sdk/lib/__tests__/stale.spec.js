@@ -1,3 +1,4 @@
+jest.mock('node-fetch', () => require('fetch-mock-jest').sandbox());
 const fetch = require('node-fetch');
 
 const { SchemaUpdater } = require('../updater');
@@ -15,11 +16,9 @@ describe('refreshing schema when stale', () => {
 	const schemaDir = process.env.TREECREEPER_SCHEMA_DIRECTORY;
 	beforeAll(() => {
 		delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
-		fetch.config.fallbackToNetwork = false;
 	});
 	afterAll(() => {
 		process.env.TREECREEPER_SCHEMA_DIRECTORY = schemaDir;
-		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on create', async () => {

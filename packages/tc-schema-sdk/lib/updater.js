@@ -1,5 +1,9 @@
 const EventEmitter = require('events');
+
+console.log('requireeding fethc');
 const fetch = require('node-fetch');
+
+console.log('requireed fethc', fetch);
 const readYaml = require('./read-yaml');
 
 class SchemaUpdater {
@@ -89,9 +93,11 @@ class SchemaUpdater {
 			event: 'FETCHING_SCHEMA',
 			url: this.url,
 		});
+		console.log({ fetch });
 		return fetch(this.url)
 			.then(res => res.json())
 			.then(schemaData => {
+				console.log('yoyoyo');
 				const oldVersion = this.getVersion();
 				if (schemaData.version === oldVersion) {
 					this.logger.debug({ event: 'SCHEMA_NOT_CHANGED' });

@@ -3,15 +3,8 @@ const { h } = require('preact');
 // Something odd with mocking of fetch
 
 const ReactAutosuggest = require('react-autosuggest');
-const fetchMock = require('fetch-mock');
+const fetchMock = require('fetch-mock-jest');
 const { shallow, mount } = require('../../../../test-helpers/enzyme-setup');
-
-Object.assign(fetchMock.config, {
-	fetch: global.fetch,
-	Request: global.Request,
-	Response: global.Response,
-	Headers: global.Headers,
-});
 
 const { RelationshipPicker } = require('../relationship-picker');
 const { Relationship } = require('../relationship');
@@ -279,7 +272,7 @@ describe('relationship picker', () => {
 			wrapper.instance().fetchSuggestions({
 				value: 'a',
 			});
-			expect(fetchMock.lastUrl()).toEqual(
+			expect(fetchMock).toHaveBeenLastCalledWith(
 				'/autocomplete/MainType/name?q=a&parentType=ParentType&propertyName=testProperty',
 			);
 			await fetchMock.flush();
@@ -304,7 +297,7 @@ describe('relationship picker', () => {
 			wrapper.instance().fetchSuggestions({
 				value: 'a',
 			});
-			expect(fetchMock.lastUrl()).toEqual(
+			expect(fetchMock).toHaveBeenLastCalledWith(
 				'/autocomplete/MainType/name?q=a&parentType=ParentType&propertyName=testProperty',
 			);
 			await fetchMock.flush();

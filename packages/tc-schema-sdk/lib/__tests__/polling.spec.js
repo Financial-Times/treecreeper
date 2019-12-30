@@ -1,3 +1,4 @@
+jest.mock('node-fetch', () => require('fetch-mock-jest').sandbox());
 const fetch = require('node-fetch');
 
 jest.useFakeTimers();
@@ -16,11 +17,9 @@ describe('refreshing schema when stale', () => {
 	const schemaDir = process.env.TREECREEPER_SCHEMA_DIRECTORY;
 	beforeAll(() => {
 		delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
-		fetch.config.fallbackToNetwork = false;
 	});
 	afterAll(() => {
 		process.env.TREECREEPER_SCHEMA_DIRECTORY = schemaDir;
-		fetch.config.fallbackToNetwork = 'always';
 	});
 	afterEach(() => fetch.reset());
 	it('does not fetch on init', async () => {
@@ -30,7 +29,7 @@ describe('refreshing schema when stale', () => {
 			updateMode: 'poll',
 		});
 		fetch.mock('https://base.url/schema.json', { result: true });
-		expect(fetch.called()).toBe(false);
+		expect(fetch).not.toHaveBeenCalled();
 	});
 	it('fetches when startPolling method called', async () => {
 		const schema = create({
@@ -43,7 +42,7 @@ describe('refreshing schema when stale', () => {
 		schema.startPolling().then(() => {
 			isPending = false;
 		});
-		expect(fetch.called()).toBe(true);
+		expect(fetch).toHaveBeenCalled();
 		expect(isPending).toEqual(true);
 		await fetch.flush();
 		await nextTick();
@@ -62,7 +61,7 @@ describe('refreshing schema when stale', () => {
 		await fetch.flush();
 		fetch.resetHistory();
 		jest.advanceTimersByTime(101);
-		expect(fetch.called()).toBe(true);
+		expect(fetch).toHaveBeenCalled();
 		schema.stopPolling();
 	});
 

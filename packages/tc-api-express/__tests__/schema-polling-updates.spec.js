@@ -1,8 +1,14 @@
-const fetch = require('node-fetch');
+jest.mock(
+	'node-fetch',
+	() => console.log('moooooking') || require('fetch-mock-jest').sandbox(),
+);
+const fetchMock = require('node-fetch');
+require('../../tc-schema-sdk');
 const schemaPublisher = require('@financial-times/tc-schema-publisher');
 const request = require('supertest');
 const { getApp } = require('..');
 
+console.log({ fetchMock });
 jest.useFakeTimers();
 jest.mock('@financial-times/tc-schema-publisher', () => ({
 	sendSchemaToS3: jest.fn(),
@@ -10,12 +16,6 @@ jest.mock('@financial-times/tc-schema-publisher', () => ({
 delete process.env.TREECREEPER_TEST;
 
 describe('schema polling updates', () => {
-	// beforeAll(() => {
-
-	// });
-	// afterAll(() => {
-	// 	process.env.TREECREEPER_TEST = 'true';
-	// });
 	describe('api updates', () => {
 		let app;
 		beforeAll(async () => {
@@ -23,8 +23,7 @@ describe('schema polling updates', () => {
 			delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
 			process.env.TREECREEPER_SCHEMA_URL = 'http://example.com';
 			schemaPublisher.sendSchemaToS3.mockResolvedValue(true);
-			fetch.config.fallbackToNetwork = false;
-			fetch
+			fetchMock
 				.getOnce(`${process.env.TREECREEPER_SCHEMA_URL}/schema.json`, {
 					version: 'not-null',
 					schema: {
@@ -89,14 +88,13 @@ describe('schema polling updates', () => {
 				republishSchema: true,
 				schemaOptions: { updateMode: 'poll', ttl: 100 },
 			});
-			await fetch.flush(true);
+			await fetchMock.flush(true);
 			jest.advanceTimersByTime(101);
-			await fetch.flush(true);
+			await fetchMock.flush(true);
 		});
 		afterAll(() => {
 			process.env.NODE_ENV = 'test';
-			fetch.config.fallbackToNetwork = 'always';
-			fetch.reset();
+			fetchMock.reset();
 			jest.resetModules();
 		});
 
@@ -139,7 +137,7 @@ describe('schema polling updates', () => {
 				process.env.NODE_ENV = 'production';
 				schemaPublisher.sendSchemaToS3.mockClear();
 
-				fetch
+				fetchMock
 					.getOnce(
 						`${process.env.TREECREEPER_SCHEMA_URL}/schema.json`,
 						{
@@ -176,7 +174,7 @@ describe('schema polling updates', () => {
 					)
 					.catch(200);
 				jest.advanceTimersByTime(101);
-				await fetch.flush(true);
+				await fetchMock.flush(true);
 			});
 			afterAll(() => {
 				process.env.NODE_ENV = 'test';
