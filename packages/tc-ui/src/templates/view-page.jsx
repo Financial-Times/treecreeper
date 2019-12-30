@@ -41,77 +41,84 @@ const View = props => {
 		Subheader = () => null,
 	} = props;
 	return (
-		<main className="o-layout__main">
-			<div className="o-layout__main__full-span">
-				<FormError type={schema.name} code={data.code} error={error} />
-				<div className="o-layout-typography">
-					<h1 id="record-title" className="record-title">
-						{schema.name}: {data.name || data.code}
-					</h1>
+		<>
+			<div className="o-layout__sidebar" />
+			<main className="o-layout__main">
+				<div className="o-layout__main__full-span">
+					<FormError
+						type={schema.name}
+						code={data.code}
+						error={error}
+					/>
+					<div className="o-layout-typography">
+						<h1 id="record-title" className="record-title">
+							{schema.name}: {data.name || data.code}
+						</h1>
 
-					<div
-						data-o-component="o-expander"
-						className="o-expander"
-						data-o-expander-shrink-to="hidden"
-						data-o-expander-collapsed-toggle-text={`Show the definition of "${schema.name}"`}
-						data-o-expander-expanded-toggle-text="Hide definition"
-					>
-						<button
-							className="o-expander__toggle o--if-js"
-							type="button"
-						/>
-						<div className="o-expander__content">
-							<Concept
-								name={schema.type}
-								description={schema.description}
-								moreInformation={schema.moreInformation}
+						<div
+							data-o-component="o-expander"
+							className="o-expander"
+							data-o-expander-shrink-to="hidden"
+							data-o-expander-collapsed-toggle-text={`Show the definition of "${schema.name}"`}
+							data-o-expander-expanded-toggle-text="Hide definition"
+						>
+							<button
+								className="o-expander__toggle o--if-js"
+								type="button"
 							/>
-						</div>
-					</div>
-					<Subheader {...props} />
-				</div>
-				<div className="biz-ops-cta-container--sticky">
-					<EditButton
-						type={schema.type}
-						code={data.code}
-						querystring={querystring || ''}
-					/>
-					<DeleteButton
-						type={schema.type}
-						code={data.code}
-						querystring={querystring || ''}
-					/>
-				</div>
-				<div className="o-layout-typography">
-					{Object.entries(schema.fieldsets).map(
-						([name, { heading, properties }]) => (
-							<section
-								className={`fieldset-biz-ops fieldset-${name}`}
-							>
-								<SectionHeader
-									type={schema.type}
-									code={data.code}
-									title={heading}
-									includeEditLink
+							<div className="o-expander__content">
+								<Concept
+									name={schema.type}
+									description={schema.description}
+									moreInformation={schema.moreInformation}
 								/>
-								<dl className="biz-ops-properties-list">
-									<Properties
-										fields={properties}
-										data={data}
-										assignComponent={assignComponent}
+							</div>
+						</div>
+						<Subheader {...props} />
+					</div>
+					<div className="biz-ops-cta-container--sticky">
+						<EditButton
+							type={schema.type}
+							code={data.code}
+							querystring={querystring || ''}
+						/>
+						<DeleteButton
+							type={schema.type}
+							code={data.code}
+							querystring={querystring || ''}
+						/>
+					</div>
+					<div className="o-layout-typography">
+						{Object.entries(schema.fieldsets).map(
+							([name, { heading, properties }]) => (
+								<section
+									className={`fieldset-biz-ops fieldset-${name}`}
+								>
+									<SectionHeader
+										type={schema.type}
+										code={data.code}
+										title={heading}
+										includeEditLink
 									/>
-								</dl>
-							</section>
-						),
-					)}
-					<p>
-						<MetaProperties data={data} isCreate />
-						.
-						<MetaProperties data={data} isCreate={false} />
-					</p>
+									<dl className="biz-ops-properties-list">
+										<Properties
+											fields={properties}
+											data={data}
+											assignComponent={assignComponent}
+										/>
+									</dl>
+								</section>
+							),
+						)}
+						<p>
+							<MetaProperties data={data} isCreate />
+							.
+							<MetaProperties data={data} isCreate={false} />
+						</p>
+					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</>
 	);
 };
 

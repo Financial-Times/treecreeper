@@ -7,7 +7,7 @@ const text = require('../text/server');
 const Option = ({ option, selected }) => (
 	<option
 		value={option === `Don't know` ? 'null' : option}
-		selected={option === selected ? 'true' : null}
+		selected={option === selected ? true : null}
 	>
 		{option}
 	</option>
@@ -28,11 +28,11 @@ const OptionsInfo = ({ type }) => {
 				}}
 			/>
 			<dl>
-				{optionDefs.map(({ value, description }) => (
-					<>
-						<dt>{value}</dt>
-						<dd>{description}</dd>
-					</>
+				{optionDefs.map(({ value, description }, index) => (
+					<React.Fragment key={index}>
+						<dt key={index}>{value}</dt>
+						<dd key={index}>{description}</dd>
+					</React.Fragment>
 				))}
 			</dl>
 		</>
@@ -49,8 +49,12 @@ const EditEnum = props => {
 				id={`id-${propertyName}`}
 				name={propertyName}
 			>
-				{optionsWithDefault.map(option => (
-					<Option option={option} selected={value || "Don't know"} />
+				{optionsWithDefault.map((option, index) => (
+					<Option
+						option={option}
+						selected={value || "Don't know"}
+						key={index}
+					/>
 				))}
 			</select>
 		</span>

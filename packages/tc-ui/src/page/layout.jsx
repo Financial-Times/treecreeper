@@ -8,18 +8,6 @@ const toKebabCase = string =>
 		.map(str => str.toLowerCase())
 		.join('-');
 
-const SideBar = ({ nav }) => (
-	<nav className="o-layout__navigation">
-		<ol>
-			{nav.map(({ title, linkText }) => (
-				<li>
-					<a href={`#${toKebabCase(title)}`}>{linkText || title}</a>
-				</li>
-			))}
-		</ol>
-	</nav>
-);
-
 const { HeadAssets, TailAssets } = require('./asset-loading');
 const { Message } = require('../components/messages');
 
@@ -49,14 +37,6 @@ const Layout = props => {
 					data-o-layout-nav-heading-selector=".section-heading, .record-title"
 				>
 					<Header {...props} />
-
-					{props.noSidebar ? null : (
-						<div className="o-layout__sidebar">
-							{props.sideBarNav ? (
-								<SideBar nav={props.sideBarNav} />
-							) : null}
-						</div>
-					)}
 					{props.children}
 					{includeFooter ? <Footer {...props} /> : null}
 				</div>

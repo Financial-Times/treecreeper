@@ -97,6 +97,7 @@ const EditForm = ({
 
 	return (
 		<>
+			<div className="o-layout__sidebar" />
 			<form
 				className="o-layout__main o-forms"
 				action={getAction()}
@@ -134,9 +135,10 @@ const EditForm = ({
 						/>
 					</div>
 					{Object.entries(schema.fieldsets).map(
-						([name, { heading, properties }]) => (
+						([name, { heading, properties }], index) => (
 							<fieldset
 								className={`fieldset-biz-ops fieldset-${name}`}
+								key={index}
 							>
 								<div className="o-layout-typography">
 									<SectionHeader title={heading} />

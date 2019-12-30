@@ -22,7 +22,7 @@ const testComponentProperties = (Component, props) => {
 
 	Object.keys(props).forEach(key => {
 		it(`Display with no ${key}`, () => {
-			const propsWithoutKey = Object.assign({}, props);
+			const propsWithoutKey = { ...props };
 			delete propsWithoutKey[key];
 			const renderedComponent = render(
 				<Component {...propsWithoutKey} />,
