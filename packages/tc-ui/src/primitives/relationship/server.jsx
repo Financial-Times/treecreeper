@@ -25,6 +25,9 @@ module.exports = {
 		/>
 	),
 	parser: value => {
+		if (!value) {
+			return null;
+		}
 		value = JSON.parse(value);
 		// TODO use hasValue
 		if (!value) {
