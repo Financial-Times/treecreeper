@@ -8,7 +8,7 @@ const buildOrigamiUrl = (type, componentsMap) =>
 		.map(([key, val]) => `o-${key}@${val}`)
 		.join(',')}`;
 
-const defaultOrigamiCssModules = {
+const tcUiOrigamiCssModules = {
 	layout: '^3.3.1',
 	message: '^3.0.0',
 	forms: '^7.0.0',
@@ -21,7 +21,7 @@ const defaultOrigamiCssModules = {
 	tooltip: '^3.4.0',
 };
 
-const defaultOrigamiJsModules = {
+const tcUiOrigamiJsModules = {
 	layout: '^3.3.1',
 	expander: '^4.4.4',
 	tooltip: '^3.4.0',
@@ -37,11 +37,11 @@ const getAssetReferences = ({
 	return {
 		origamiJs: buildOrigamiUrl('js', {
 			...origamiJsModules,
-			...defaultOrigamiJsModules,
+			...tcUiOrigamiJsModules,
 		}),
 		origamiCss: buildOrigamiUrl('css', {
 			...origamiCssModules,
-			...defaultOrigamiCssModules,
+			...tcUiOrigamiCssModules,
 		}),
 		mainJs: `${assetRoot}${assetManifest['main.js']}`,
 		mainCss: `${assetRoot}${assetManifest['main.css']}`,

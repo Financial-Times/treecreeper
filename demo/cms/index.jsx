@@ -5,7 +5,7 @@ const { getCMS } = require('@financial-times/tc-ui');
 const { Header } = require('./components/header');
 const { Footer } = require('./components/footer');
 const { Subheader } = require('./components/subheader');
-
+const { getPageRenderer } = require('./render');
 const customComponents = require('./components/primitives');
 
 const wrapCmsHandler = handler => async (req, res) => {
@@ -23,29 +23,13 @@ const wrapCmsHandler = handler => async (req, res) => {
 
 		res.status(status).send(body);
 	} catch (e) {
-		console.log(e);
 		res.send(500).end();
 	}
 };
 
-const {
-	viewHandler,
-	deleteHandler,
-	editHandler,
-	handleError,
-	renderPage,
-} = getCMS({
-	logger,
-	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
-	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
-	apiHeaders: ({ metadata: { clientUserId } }) => ({
-		'client-id': 'treecreeper-demo',
-		'client-user-id': clientUserId,
-	}),
+const { handleError, renderPage } = getPageRenderer({
 	Header,
 	Footer,
-	Subheader,
-	customComponents,
 	origamiCssModules: {
 		'header-services': '^3.2.3',
 		table: '^7.0.5',
@@ -56,14 +40,28 @@ const {
 		table: '^7.0.5',
 		'header-services': '^3.2.3',
 	},
-	customTypeMappings: {
-		Paragraph: 'LargeText',
-	},
 	assetManifest: {
 		'main.css': 'main.css',
 		'main.js': 'main.js',
 	},
 	assetRoot: 'http://local.in.ft.com:8080/statics/',
+});
+
+const { viewHandler, deleteHandler, editHandler } = getCMS({
+	logger,
+	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
+	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
+	apiHeaders: ({ metadata: { clientUserId } }) => ({
+		'client-id': 'treecreeper-demo',
+		'client-user-id': clientUserId,
+	}),
+	Subheader,
+	customComponents,
+	handleError,
+	renderPage,
+	customTypeMappings: {
+		Paragraph: 'LargeText',
+	},
 });
 
 module.exports = {

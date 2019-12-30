@@ -4,7 +4,6 @@ const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');
-const { getPageRenderer } = require('./lib/render');
 const {
 	getViewHandler,
 	getEditHandler,
@@ -16,15 +15,11 @@ const getCMS = ({
 	restApiUrl,
 	graphqlApiUrl,
 	apiHeaders,
-	Header,
-	Footer,
 	Subheader,
-	origamiCssModules,
-	origamiJsModules,
 	customComponents,
 	customTypeMappings,
-	assetManifest,
-	assetRoot,
+	handleError,
+	renderPage,
 }) => {
 	const assignComponent = componentAssigner({
 		customComponents,
@@ -32,15 +27,6 @@ const getCMS = ({
 	});
 
 	const graphqlBuilder = type => graphqlQueryBuilder(type, assignComponent);
-
-	const { handleError, renderPage } = getPageRenderer({
-		Header,
-		Footer,
-		origamiCssModules,
-		origamiJsModules,
-		assetManifest,
-		assetRoot,
-	});
 
 	const getApiClient = event =>
 		new ApiClient({
@@ -80,8 +66,6 @@ const getCMS = ({
 			viewRender,
 			logger,
 		}).handler,
-		handleError,
-		renderPage,
 	};
 };
 
