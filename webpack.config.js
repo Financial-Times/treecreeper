@@ -9,7 +9,7 @@ const filenameTemplate = process.env.CIRCLECI
 module.exports = {
 	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
-		extensions: ['.js', '.jsx', '.css'],
+		extensions: ['.js', '.jsx', '.css', '.scss'],
 	},
 	output: {
 		path: path.resolve(__dirname, 'dist/browser'),
@@ -28,6 +28,18 @@ module.exports = {
 			{
 				test: /\.css$/,
 				use: [MiniCssExtractPlugin.loader, 'css-loader'],
+			},
+			{
+				test: /\.scss$/i,
+				use: [
+					MiniCssExtractPlugin.loader,
+					// // Creates `style` nodes from JS strings
+					// 'style-loader',
+					// Translates CSS into CommonJS
+					'css-loader',
+					// Compiles Sass to CSS
+					'sass-loader',
+				],
 			},
 		],
 	},

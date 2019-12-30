@@ -1,4 +1,4 @@
-require('./main.css');
+require('./main.scss');
 const pages = require('./pages/browser');
 
 const { pageType } = document.documentElement.dataset;

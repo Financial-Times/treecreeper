@@ -10,6 +10,7 @@ const {
 	getEditHandler,
 	getDeleteHandler,
 } = require('./pages/server');
+const { LinkToRecord } = require('./lib/components/structure');
 
 const getCMS = ({
 	logger,
@@ -88,5 +89,6 @@ const getCMS = ({
 module.exports = {
 	primitives,
 	getCMS,
+	LinkToRecord,
 	getComponentAssigner: componentAssigner,
 };
