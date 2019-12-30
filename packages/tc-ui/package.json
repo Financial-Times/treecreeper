@@ -8,7 +8,7 @@
 		"url": "https://github.com/Financial-Times/treecreeper.git"
 	},
 	"dependencies": {
-		"@financial-times/o-tooltip": "^4.0.1",
+		"@financial-times/o-tooltip": "^3.5.1",
 		"@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
 		"autolinker": "^3.11.1",
 		"date-fns": "^2.8.1",

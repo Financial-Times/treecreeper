@@ -1,4 +1,5 @@
 @import '@financial-times/o-tooltip/main';
+@include oTooltip();
 /* headings */
 .biz-ops-section-header__edit-link {
 	width: 32px;

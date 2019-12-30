@@ -18,7 +18,6 @@ const defaultOrigamiCssModules = {
 	icons: '^5.9.0',
 	fonts: '^3.1.1',
 	expander: '^4.4.4',
-	tooltip: '^3.4.0',
 };
 
 const defaultOrigamiJsModules = {

@@ -10,6 +10,11 @@ module.exports = {
 	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
 		extensions: ['.js', '.jsx', '.css', '.scss'],
+		modules: ['node_modules', 'node_modules/@financial-times'],
+		alias: {
+			'sass-mq/mq': 'sass-mq/_mq',
+			'mathsass/dist/math': 'mathsass/dist/_math',
+		},
 	},
 	output: {
 		path: path.resolve(__dirname, 'dist/browser'),
