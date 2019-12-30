@@ -20,7 +20,10 @@ module.exports = {
 		'react/no-danger': 0,
 		'no-alert': 0,
 		'jsx-a11y/control-has-associated-label': 1,
-		'react/prop-types': 0
+		'react/prop-types': 0,
+		// Nothing in the UI allows reordering of lists, so the concern of
+		// unecessary rerenders does not - at present - apply
+		'react/no-array-index-key': 0
 	},
 	overrides: [{
 		env: {browser: true},
