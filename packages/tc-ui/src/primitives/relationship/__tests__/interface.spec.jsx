@@ -65,6 +65,7 @@ describe('relationship interfaces', () => {
 		it('fetches code by default', () => {});
 
 		it('fetches code and name if name defined', () => {});
+		it('fetches code and isActive if isActive defined', () => {});
 
 		it('fetches any useInSummary fields', () => {});
 	});

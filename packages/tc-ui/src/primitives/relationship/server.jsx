@@ -46,6 +46,9 @@ module.exports = {
 		if (typeDef.properties.name) {
 			props.add('name');
 		}
+		if (typeDef.properties.isActive) {
+			props.add('isActive');
+		}
 
 		Object.entries(typeDef.properties)
 			.filter(([, { useInSummary }]) => useInSummary)
