@@ -139,7 +139,14 @@ const MetaProperties = ({ data, isCreate }) => {
 	);
 };
 
+const LinkToRecord = ({ id, type, value: { name, code } }) => (
+	<a id={id} href={`/${type}/${encodeURIComponent(code)}`}>
+		{name || code}
+	</a>
+);
+
 module.exports = {
+	LinkToRecord,
 	Concept,
 	SectionHeader,
 	LabelledPrimitive,

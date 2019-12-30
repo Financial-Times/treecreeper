@@ -1,7 +1,7 @@
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const React = require('react');
+const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-const { autolink } = require('../../lib/components/helpers');
 const text = require('../text/server');
 
 const Option = ({ option, selected }) => (
@@ -24,7 +24,7 @@ const OptionsInfo = ({ type }) => {
 		<>
 			<p
 				dangerouslySetInnerHTML={{
-					__html: autolink(enumWithMeta.description),
+					__html: autolinker.link(enumWithMeta.description || ''),
 				}}
 			/>
 			<dl>

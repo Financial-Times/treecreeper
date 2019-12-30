@@ -4,7 +4,7 @@ const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');
-const { getPageRenderer } = require('./render');
+const { getPageRenderer } = require('./lib/render');
 const {
 	getViewHandler,
 	getEditHandler,
@@ -88,4 +88,5 @@ const getCMS = ({
 module.exports = {
 	primitives,
 	getCMS,
+	getComponentAssigner: componentAssigner,
 };

@@ -1,8 +1,6 @@
 const React = require('react');
 const autolinker = require('autolinker');
-const { LinkToRecord } = require('./helpers');
-
-const autolink = text => autolinker.link(text || '');
+const { LinkToRecord } = require('./structure');
 
 const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 	<span className="o-forms-title">
@@ -16,7 +14,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 		<span className="o-forms-title__prompt description-text">
 			<span
 				dangerouslySetInnerHTML={{
-					__html: autolink(description),
+					__html: autolinker.link(description),
 				}}
 			/>
 			{expandableContent ? (

@@ -2,7 +2,7 @@ const React = require('react');
 
 const { getAssetReferences } = require('./asset-references');
 const { HeadAssets, TailAssets } = require('./asset-loading');
-const { Message } = require('../lib/components/messages');
+const { Message } = require('../components/messages');
 
 const Layout = props => {
 	const assetPaths = getAssetReferences(props);

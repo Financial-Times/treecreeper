@@ -1,6 +1,15 @@
 const React = require('react');
+const showdown = require('showdown');
+const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-const { markdown } = require('../../lib/components/helpers');
+
+showdown.setFlavor('github');
+
+const markdownParser = new showdown.Converter({
+	simplifiedAutoLink: true,
+});
+
+const markdown = text => autolinker.link(markdownParser.makeHtml(text || ''));
 
 const outputFreeText = (text = '') => text;
 
