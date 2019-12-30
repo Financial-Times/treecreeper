@@ -1,13 +1,6 @@
 const React = require('react');
 
 const { getAssetReferences } = require('./asset-references');
-
-const toKebabCase = string =>
-	string
-		.split(' ')
-		.map(str => str.toLowerCase())
-		.join('-');
-
 const { HeadAssets, TailAssets } = require('./asset-loading');
 const { Message } = require('../components/messages');
 
