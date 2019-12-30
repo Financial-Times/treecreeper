@@ -1,7 +1,7 @@
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const React = require('react');
-const { WrappedEditComponent } = require('../../components/edit-helpers');
-const { autolink } = require('../../components/helpers');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
+const { autolink } = require('../../lib/components/helpers');
 const text = require('../text/server');
 
 const Option = ({ option, selected }) => (

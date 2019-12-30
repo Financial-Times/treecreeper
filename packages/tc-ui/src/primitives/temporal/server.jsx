@@ -1,7 +1,7 @@
 const React = require('react');
 const { format, parseISO } = require('date-fns');
 
-const { WrappedEditComponent } = require('../../components/edit-helpers');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
 const formatValue = (value, formatString) =>
 	value ? format(parseISO(value), formatString) : null;

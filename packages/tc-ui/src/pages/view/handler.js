@@ -1,4 +1,4 @@
-const template = require('../templates/view-page');
+const template = require('./template');
 
 const getViewHandler = ({
 	getApiClient,

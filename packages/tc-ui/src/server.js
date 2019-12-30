@@ -4,12 +4,12 @@ const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');
-const { getPageRenderer } = require('./page');
+const { getPageRenderer } = require('./render');
 const {
 	getViewHandler,
 	getEditHandler,
 	getDeleteHandler,
-} = require('./handlers');
+} = require('./pages/server');
 
 const getCMS = ({
 	logger,

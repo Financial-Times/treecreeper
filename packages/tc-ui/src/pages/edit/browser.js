@@ -1,7 +1,8 @@
+require('./main.css');
 const {
 	Relationship: { withEditComponent: attachRelationshipPicker },
 	LargeText: { withEditComponent: attachDocumentEditor },
-} = require('../primitives/browser');
+} = require('../../primitives/browser');
 
 const initDocumentEditors = () => {
 	[...document.querySelectorAll('[data-type="Document"]')].forEach(

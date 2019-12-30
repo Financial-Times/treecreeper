@@ -1,9 +1,9 @@
 const React = require('react');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
-const { FormError } = require('../components/messages');
-const { Concept, SectionHeader } = require('../components/structure');
+const { FormError } = require('../../lib/components/messages');
+const { Concept, SectionHeader } = require('../../lib/components/structure');
 
-const { SaveButton, CancelButton } = require('../components/buttons');
+const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
 const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string

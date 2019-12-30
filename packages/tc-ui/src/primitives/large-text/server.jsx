@@ -1,6 +1,6 @@
 const React = require('react');
-const { WrappedEditComponent } = require('../../components/edit-helpers');
-const { markdown } = require('../../components/helpers');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
+const { markdown } = require('../../lib/components/helpers');
 
 const outputFreeText = (text = '') => text;
 

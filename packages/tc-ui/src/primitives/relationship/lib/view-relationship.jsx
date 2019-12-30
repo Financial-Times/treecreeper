@@ -1,6 +1,6 @@
 const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { LinkToRecord } = require('../../../components/helpers');
+const { LinkToRecord } = require('../../../lib/components/helpers');
 
 let RelationshipAnnotator;
 

@@ -7,7 +7,7 @@ const {
 } = require('../server');
 // const { withEditComponent } = require('../browser');
 
-const { FieldTitle } = require('../../../components/edit-helpers');
+const { FieldTitle } = require('../../../lib/components/input-wrapper');
 const { RelationshipPicker } = require('../lib/relationship-picker');
 
 describe('relationship interfaces', () => {

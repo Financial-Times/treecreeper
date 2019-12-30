@@ -1,5 +1,5 @@
 const httpError = require('http-errors');
-const template = require('../templates/edit-page');
+const template = require('./template');
 
 const getEditHandler = ({
 	getApiClient,

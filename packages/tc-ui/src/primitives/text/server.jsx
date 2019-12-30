@@ -1,5 +1,5 @@
 const React = require('react');
-const { WrappedEditComponent } = require('../../components/edit-helpers');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
 const EditText = ({ propertyName, value, required, lockedBy, disabled }) => (
 	<span className="o-forms-input o-forms-input--text">

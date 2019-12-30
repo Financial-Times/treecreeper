@@ -1,12 +1,12 @@
 const React = require('react');
-const { FormError } = require('../components/messages');
+const { FormError } = require('../../lib/components/messages');
 const {
 	Concept,
 	LabelledPrimitive,
 	SectionHeader,
 	MetaProperties,
-} = require('../components/structure');
-const { EditButton, DeleteButton } = require('../components/buttons');
+} = require('../../lib/components/structure');
+const { EditButton, DeleteButton } = require('../../lib/components/buttons');
 
 const Properties = ({ fields, data, assignComponent }) => {
 	const propertyfields = Object.entries(fields);
