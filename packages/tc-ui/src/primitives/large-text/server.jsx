@@ -14,7 +14,7 @@ const EditLargeText = props => {
 					id={`id-${propertyName}`}
 					rows={dataType === 'Document' ? '40' : '8'}
 					disabled={disabled}
-					value={outputFreeText(value)}
+					defaultValue={outputFreeText(value)}
 				/>
 			</span>
 			{dataType === 'Document' ? (

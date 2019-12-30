@@ -32,10 +32,13 @@ const ViewRelationship = ({ value, type, id, hasMany }) => {
 	};
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
-			{value.map(item => {
+			{value.map((item, index) => {
 				const props = { type, value: item };
 				return (
-					<li className={inactiveCheck(item) ? 'inactive' : 'active'}>
+					<li
+						key={index}
+						className={inactiveCheck(item) ? 'inactive' : 'active'}
+					>
 						<OneRelationship {...props} />
 					</li>
 				);
