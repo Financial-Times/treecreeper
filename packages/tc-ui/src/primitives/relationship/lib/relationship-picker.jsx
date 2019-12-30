@@ -214,8 +214,8 @@ class RelationshipPicker extends React.Component {
 			<div
 				data-props={JSON.stringify(props)}
 				data-component="relationship-picker"
-				data-disabled={disabled}
-				data-is-unresolved={isUnresolved}
+				data-disabled={disabled ? true : null}
+				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
 				<ul
