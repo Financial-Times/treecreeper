@@ -3,6 +3,13 @@ const { getType } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../components/edit-helpers');
 
 const { RelationshipPicker } = require('./lib/relationship-picker');
+
+const RelationshipPickerContainer = props => (
+	<div>
+		<RelationshipPicker {...props} />
+	</div>
+);
+
 const {
 	ViewRelationship,
 	setRelationshipAnnotator,
@@ -12,12 +19,21 @@ module.exports = {
 	ViewComponent: ViewRelationship,
 	EditComponent: props => (
 		<WrappedEditComponent
-			Component={RelationshipPicker}
+			Component={RelationshipPickerContainer}
 			componentType="relationship"
 			{...props}
 		/>
 	),
-	parser: value => (value ? JSON.parse(value) : null),
+	parser: value => {
+		value = JSON.parse(value);
+		// TODO use hasValue
+		if (!value) {
+			return null;
+		}
+		return Array.isArray(value)
+			? value.map(({ code }) => code)
+			: value.code;
+	},
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
 	setRelationshipAnnotator,
@@ -28,11 +44,9 @@ module.exports = {
 			props.add('name');
 		}
 
-		props.add(
-			...Object.entries(typeDef.properties)
-				.filter(([, { useInSummary }]) => useInSummary)
-				.map(([name]) => name),
-		);
+		Object.entries(typeDef.properties)
+			.filter(([, { useInSummary }]) => useInSummary)
+			.forEach(([name]) => props.add(name));
 
 		return `${propName} {${[...props].join(' ')}}`;
 	},

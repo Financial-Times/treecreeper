@@ -16,7 +16,6 @@ const getValue = (itemSchema, itemValue) => {
 		if (itemSchema.hasMany) {
 			return itemValue
 				? itemValue.map(item => ({
-						type: itemSchema.type,
 						code: item.code,
 						name: item.name || item.code,
 				  }))
@@ -24,7 +23,6 @@ const getValue = (itemSchema, itemValue) => {
 		}
 		return itemValue
 			? {
-					type: itemSchema.type,
 					code: itemValue.code,
 					name: itemValue.name || itemValue.code,
 			  }
