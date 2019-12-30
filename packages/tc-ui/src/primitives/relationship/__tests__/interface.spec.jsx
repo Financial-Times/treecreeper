@@ -46,7 +46,26 @@ describe('relationship interfaces', () => {
 			expect(parser('null')).toEqual(null);
 		});
 		it('parses as JSON if exists', () => {
-			expect(parser('{"test": true}')).toEqual({ test: true });
+			expect(parser('{"code": "a-code"}')).toEqual('a-code');
 		});
+		it('parses as JSON array if exists', () => {
+			expect(parser('[{"code": "a-code"}]')).toEqual(['a-code']);
+		});
+		it('excludes non-code props', () => {
+			expect(parser('{"code": "a-code", "other": 1}')).toEqual('a-code');
+		});
+		it('excludes non-code props in JSON array', () => {
+			expect(parser('[{"code": "a-code", "other": 1}]')).toEqual([
+				'a-code',
+			]);
+		});
+	});
+
+	describe.skip('graphqlFragment', () => {
+		it('fetches code by default', () => {});
+
+		it('fetches code and name if name defined', () => {});
+
+		it('fetches any useInSummary fields', () => {});
 	});
 });
