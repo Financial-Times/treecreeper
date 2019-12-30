@@ -1,6 +1,33 @@
 const React = require('react');
+const { format, parseISO } = require('date-fns');
+
 const { WrappedEditComponent } = require('../../components/edit-helpers');
-const { formatDateTime } = require('../../components/helpers');
+
+const formatValue = (value, formatString) =>
+	value ? format(parseISO(value), formatString) : null;
+
+// TODO this probably errors - need to write comprehensive tests
+// If date and time are given, time can be formatted but if not,
+// time will be returned as it was inputted. This allows for manual time inputs
+const formatTime = timeInput =>
+	format(timeInput, 'h:mm:ss a') !== 'Invalid Date'
+		? format(timeInput, 'h:mm:ss a')
+		: timeInput;
+
+const formatDateTime = (value, type) => {
+	if (type === 'DateTime') {
+		return formatValue(value, 'd MMMM yyyy, h:mm:ss a');
+	}
+
+	if (type === 'Date') {
+		return formatValue(value, 'd MMMM yyyy');
+	}
+
+	if (type === 'Time') {
+		const timeInput = value;
+		return formatTime(timeInput);
+	}
+};
 
 const convertValueForHTMLInput = (wrappedValue, type) => {
 	if (!(wrappedValue && wrappedValue.formatted)) return null;
