@@ -59,7 +59,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - treecreeper
+            - .
 
   test:
     <<: *default_container_config
