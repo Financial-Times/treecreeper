@@ -14,6 +14,7 @@ const getDataTransformers = assignComponent => {
 				if (fieldProps.deprecationReason) {
 					return;
 				}
+
 				if (
 					lockedFields[fieldName] &&
 					lockedFields[fieldName] !== 'biz-ops-admin'
@@ -28,7 +29,12 @@ const getDataTransformers = assignComponent => {
 				if (!valueHasBeenReceived) {
 					return;
 				}
-				data[fieldName] = parser(formData[fieldName]);
+				try {
+					data[fieldName] = parser(formData[fieldName]);
+				} catch (e) {
+					console.log(e);
+					throw e;
+				}
 			},
 		);
 		return data;
