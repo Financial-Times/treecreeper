@@ -43,7 +43,7 @@ const View = props => {
 	return (
 		<>
 			<div className="o-layout__sidebar" />
-			<main className="o-layout__main">
+			<main className="o-layout__main" data-tc-page-type={props.pageType}>
 				<div className="o-layout__main__full-span">
 					<FormError
 						type={schema.name}

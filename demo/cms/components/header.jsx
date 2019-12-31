@@ -1,4 +1,5 @@
 const React = require('react');
+const { Message } = require('./messages');
 
 const siteTitle = 'Biz Ops';
 
@@ -199,46 +200,51 @@ const getPrimaryNavItems = ({ activeNavItem }) =>
 const Header = props => {
 	const primaryNav = getPrimaryNavItems(props);
 	return (
-		<div className="o-layout__header">
-			<header
-				className="o-header-services"
-				data-o-component="o-header-services"
-			>
-				<div className="o-header-services__top">
-					<div className="o-header-services__hamburger">
-						<a
-							className="o-header-services__hamburger-icon"
-							href="#o-header-drawer"
-							role="button"
-						>
-							<span className="o-header-services__visually-hidden">
-								Menu
-							</span>
-						</a>
-					</div>
-					<div className="o-header-services__logo" />
-					<div className="o-header-services__title">
-						<div className="o-header-services__product-name">
-							{/* <h1 class='o-header-services__product-name'><a href=''>Tool or Service name</a></h1> */}
-							<a href="/">{siteTitle}</a>
+		<>
+			<div className="o-layout__header">
+				<header
+					className="o-header-services"
+					data-o-component="o-header-services"
+				>
+					<div className="o-header-services__top">
+						<div className="o-header-services__hamburger">
+							<a
+								className="o-header-services__hamburger-icon"
+								href="#o-header-drawer"
+								role="button"
+							>
+								<span className="o-header-services__visually-hidden">
+									Menu
+								</span>
+							</a>
 						</div>
+						<div className="o-header-services__logo" />
+						<div className="o-header-services__title">
+							<div className="o-header-services__product-name">
+								{/* <h1 class='o-header-services__product-name'><a href=''>Tool or Service name</a></h1> */}
+								<a href="/">{siteTitle}</a>
+							</div>
+						</div>
+
+						<ul className="o-header-services__related-content">
+							{userLinks.map(UserLink)}
+							<SearchBar />
+						</ul>
 					</div>
 
-					<ul className="o-header-services__related-content">
-						{userLinks.map(UserLink)}
-						<SearchBar />
-					</ul>
-				</div>
-
-				<nav className="o-header-services__primary-nav">
-					<ul className="o-header-services__primary-nav-list">
-						{primaryNav.map(navProps => (
-							<PrimaryNavItem {...navProps} />
-						))}
-					</ul>
-				</nav>
-			</header>
-		</div>
+					<nav className="o-header-services__primary-nav">
+						<ul className="o-header-services__primary-nav-list">
+							{primaryNav.map(navProps => (
+								<PrimaryNavItem {...navProps} />
+							))}
+						</ul>
+					</nav>
+				</header>
+			</div>
+			<div className="o-layout__header">
+				{props.message ? <Message {...props} isBanner /> : null}
+			</div>
+		</>
 	);
 };
 module.exports = { Header };

@@ -2,7 +2,6 @@ const React = require('react');
 
 const { getAssetReferences } = require('./asset-references');
 const { HeadAssets, TailAssets } = require('./asset-loading');
-const { Message } = require('../components/messages');
 
 const Layout = props => {
 	const assetPaths = getAssetReferences(props);
@@ -23,7 +22,6 @@ const Layout = props => {
 				<HeadAssets {...assetPaths} />
 			</head>
 			<body>
-				{props.message ? <Message {...props} isBanner /> : null}
 				<div
 					className={`o-layout o-layout--${props.layout || 'docs'}`}
 					data-o-component="o-layout"

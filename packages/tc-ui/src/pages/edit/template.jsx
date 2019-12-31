@@ -77,30 +77,31 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 		});
 };
 
-const EditForm = ({
-	schema,
-	data,
-	isEdit,
-	error,
-	type,
-	code,
-	querystring,
-	assignComponent,
-}) => {
-	const getAction = () => {
-		return isEdit
-			? `/${type}/${encodeURIComponent(code)}/edit`
-			: `/${type}/create`;
-	};
+const EditForm = props => {
+	const {
+		schema,
+		data,
+		isEdit,
+		error,
+		type,
+		code,
+		querystring,
+		assignComponent,
+	} = props;
 
 	return (
 		<>
 			<div className="o-layout__sidebar" />
 			<form
 				className="o-layout__main o-forms"
-				action={getAction()}
+				action={
+					isEdit
+						? `/${type}/${encodeURIComponent(code)}/edit`
+						: `/${type}/create`
+				}
 				method="POST"
 				autoComplete="off"
+				data-tc-page-type={props.pageType}
 			>
 				<div className="o-layout__main__full-span">
 					{/* note we use code || data.code so that, when creating and there is no
