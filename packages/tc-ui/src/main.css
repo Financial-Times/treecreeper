@@ -1,0 +1,55 @@
+/* headings */
+.biz-ops-section-header__edit-link {
+	width: 32px;
+	height: 32px;
+	vertical-align: top;
+}
+
+/* messages */
+
+.o-message--alert-inner {
+	margin-bottom: 20px;
+}
+
+aside.biz-ops-aside {
+	border-left: none;
+}
+
+.o-tooltip {
+	font-weight: normal;
+	width: 100%;
+	max-width: 50%;
+}
+
+.biz-ops-help {
+	display: inline-block;
+	margin-left: 5px;
+}
+
+.biz-ops-help-icon {
+	vertical-align: sub;
+	width: 30px !important;
+	height: 30px !important;
+}
+
+/* buttons */
+
+.biz-ops-cta {
+	float: right;
+	margin-left: 8px;
+}
+
+.biz-ops-cta--link-style-override {
+	border: 1px solid black !important;
+}
+
+.biz-ops-cta-container--sticky {
+	position: sticky;
+	top: 10px;
+	z-index: 1;
+	background: white;
+	height: auto;
+	float: right;
+	box-shadow: 0px 0px 10px 0px white;
+	margin-top: 20px;
+}

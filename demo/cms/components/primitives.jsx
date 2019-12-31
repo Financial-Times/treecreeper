@@ -1,6 +1,6 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 
-const { primitives } = require('@financial-times/tc-ui/server');
+const { primitives } = require('@financial-times/tc-ui');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -77,8 +77,8 @@ const Email = ({ value, id }) =>
 	) : null;
 
 const RelationshipAnnotator = ({ type, value }) => (
-	<Fragment>
-		{type === 'System' ? <ServiceTier value={value.serviceTier} /> : null}
+	<>
+		{type === 'MainType' ? <span>hydrogen: {value.someString}</span> : null}
 		{type === 'System' || type === 'Product' ? (
 			<LifecycleStage value={value.lifecycleStage} />
 		) : null}
@@ -87,13 +87,13 @@ const RelationshipAnnotator = ({ type, value }) => (
 		{type === 'Repository' ? (
 			<IsActiveLabel isActive={!value.isArchived} />
 		) : null}
-	</Fragment>
+	</>
 );
 
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
-	SystemLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
+	AnEnum: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
 	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },

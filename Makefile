@@ -25,11 +25,19 @@ env:
 
 verify:
 
+unprepublish:
+	sed s/"dist\/"/"src\/"/ packages/tc-ui/package.json > tmp && mv tmp packages/tc-ui/package.json
+
+
 # note that this invokes npm install, and in package.json there is a postinstall script
 # defined too, which installs all the node_modules for the packages
-install:
+install: unprepublish
 
-monorepo-publish:
+prepublish:
+	babel packages/tc-ui/src -D --out-dir packages/tc-ui/dist
+	sed s/"src\/"/"dist\/"/ packages/tc-ui/package.json > tmp && mv tmp packages/tc-ui/package.json
+
+monorepo-publish: prepublish
 	npx athloi version --concurrency 10 $(CIRCLE_TAG)
 	npx athloi publish --concurrency 10 -- --access public
 
@@ -61,7 +69,7 @@ run:
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
 
-clean-deps:
+clean-deps: unprepublish
 	rm -rf packages/*/node_modules
 	rm -rf node_modules
 	rm package-lock.json

@@ -1,0 +1,31 @@
+/* edit page */
+.fieldset-biz-ops {
+	margin: 0;
+	padding: 0;
+	border: none;
+	margin-top: 20px;
+}
+
+.fieldset-minimumViableRecord {
+	background: var(--o-colors-black-10);
+	padding: 10px;
+}
+
+.fieldset-biz-ops .o-forms-field {
+	max-width: 450px;
+}
+/* stylelint-disable */
+.o-forms-title__prompt .o-expander__toggle {
+	margin-top: 3px;
+}
+/* stylelint-enable */
+
+.o-forms-title__prompt dt {
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+
+.o-forms-title__prompt dd {
+	margin-left: 0;
+	margin-bottom: 0.5rem;
+}
