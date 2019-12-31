@@ -3,24 +3,28 @@ const { renderToStaticMarkup } = require('react-dom/server');
 const React = require('react');
 const Layout = require('./layout');
 const errorTemplate = require('./error-page');
+const { getAssetReferences } = require('./asset-references');
 
 const getPageRenderer = ({
 	Header,
 	Footer,
-	origamiCssModules,
-	origamiJsModules,
+	tcUiJsModules,
+	tcUiCssModules,
 	assetManifest,
 	assetRoot,
 }) => {
+	const assetReferences = getAssetReferences({
+		tcUiJsModules,
+		tcUiCssModules,
+		assetManifest,
+		assetRoot,
+	});
 	const renderHtml = (Template, props) => {
 		props = {
 			...props,
 			Header,
 			Footer,
-			origamiCssModules,
-			origamiJsModules,
-			assetManifest,
-			assetRoot,
+			...assetReferences,
 		};
 		return `
 	<!DOCTYPE html>

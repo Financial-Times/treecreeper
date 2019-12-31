@@ -5,43 +5,36 @@ const buildOrigamiUrl = (type, componentsMap) =>
 	`${buildServiceBaseUrl}/${type}?brand=internal&modules=${Object.entries(
 		componentsMap,
 	)
-		.map(([key, val]) => `o-${key}@${val}`)
+		.map(([key, val]) => `${key}@${val}`)
 		.join(',')}`;
 
-const tcUiOrigamiCssModules = {
-	layout: '^3.3.1',
-	message: '^3.0.0',
-	forms: '^7.0.0',
-	normalise: '^1.6.2',
-	buttons: '^5.15.1',
-	colors: '^4.7.8',
-	icons: '^5.9.0',
-	fonts: '^3.1.1',
-	expander: '^4.4.4',
-	tooltip: '^3.4.0',
+const customOrigamiCssModules = {
+	'o-header-services': '^3.2.3',
+	'o-table': '^7.0.5',
+	'o-labels': '^4.1.1',
+	'o-footer-services': '^2.1.0',
 };
 
-const tcUiOrigamiJsModules = {
-	layout: '^3.3.1',
-	expander: '^4.4.4',
-	tooltip: '^3.4.0',
-	date: '^2.11.0',
+const customOrigamiJsModules = {
+	'o-table': '^7.0.5',
+	'o-header-services': '^3.2.3',
 };
 
 const getAssetReferences = ({
-	origamiJsModules = {},
-	origamiCssModules = {},
+	tcUiJsModules,
+	tcUiCssModules,
 	assetManifest,
 	assetRoot,
 }) => {
+	console.log({ tcUiCssModules });
 	return {
 		origamiJs: buildOrigamiUrl('js', {
-			...origamiJsModules,
-			...tcUiOrigamiJsModules,
+			...tcUiJsModules,
+			...customOrigamiJsModules,
 		}),
 		origamiCss: buildOrigamiUrl('css', {
-			...origamiCssModules,
-			...tcUiOrigamiCssModules,
+			...tcUiCssModules,
+			...customOrigamiCssModules,
 		}),
 		mainJs: `${assetRoot}${assetManifest['main.js']}`,
 		mainCss: `${assetRoot}${assetManifest['main.css']}`,

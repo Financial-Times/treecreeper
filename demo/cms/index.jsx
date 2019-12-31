@@ -1,6 +1,9 @@
 const React = require('react');
 const logger = require('@financial-times/lambda-logger');
-const { getCMS } = require('@financial-times/tc-ui');
+const {
+	getCMS,
+	origamiModules: { js: tcUiJsModules, css: tcUiCssModules },
+} = require('@financial-times/tc-ui');
 
 const { Header } = require('./components/header');
 const { Footer } = require('./components/footer');
@@ -30,16 +33,8 @@ const wrapCmsHandler = handler => async (req, res) => {
 const { handleError, renderPage } = getPageRenderer({
 	Header,
 	Footer,
-	origamiCssModules: {
-		'header-services': '^3.2.3',
-		table: '^7.0.5',
-		labels: '^4.1.1',
-		'footer-services': '^2.1.0',
-	},
-	origamiJsModules: {
-		table: '^7.0.5',
-		'header-services': '^3.2.3',
-	},
+	tcUiJsModules,
+	tcUiCssModules,
 	assetManifest: {
 		'main.css': 'main.css',
 		'main.js': 'main.js',

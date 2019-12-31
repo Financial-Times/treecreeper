@@ -72,5 +72,25 @@ const getCMS = ({
 module.exports = {
 	primitives,
 	getCMS,
+	origamiModules: {
+		css: {
+			'o-layout': '^3.3.1',
+			'o-message': '^3.0.0',
+			'o-forms': '^7.0.0',
+			'o-normalise': '^1.6.2',
+			'o-buttons': '^5.15.1',
+			'o-colors': '^4.7.8',
+			'o-icons': '^5.9.0',
+			'o-fonts': '^3.1.1',
+			'o-expander': '^4.4.4',
+			'o-tooltip': '^3.4.0',
+		},
+		js: {
+			'o-layout': '^3.3.1',
+			'o-expander': '^4.4.4',
+			'o-tooltip': '^3.4.0',
+			'o-date': '^2.11.0',
+		},
+	},
 	getComponentAssigner: componentAssigner,
 };

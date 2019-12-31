@@ -1,10 +1,8 @@
 const React = require('react');
 
-const { getAssetReferences } = require('./asset-references');
 const { HeadAssets, TailAssets } = require('./asset-loading');
 
 const Layout = props => {
-	const assetPaths = getAssetReferences(props);
 	const { includeFooter = true, Header, Footer } = props;
 	return (
 		<html className="core" lang="en" data-page-type={props.pageType}>
@@ -19,7 +17,7 @@ const Layout = props => {
 					content="width=device-width, initial-scale=1.0"
 					charSet="UTF-8"
 				/>
-				<HeadAssets {...assetPaths} />
+				<HeadAssets {...props} />
 			</head>
 			<body>
 				<div
@@ -31,7 +29,7 @@ const Layout = props => {
 					{props.children}
 					{includeFooter ? <Footer {...props} /> : null}
 				</div>
-				<TailAssets {...assetPaths} />
+				<TailAssets {...props} />
 			</body>
 		</html>
 	);
