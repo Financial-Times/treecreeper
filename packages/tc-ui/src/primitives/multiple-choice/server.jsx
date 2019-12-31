@@ -35,6 +35,9 @@ const EditMultipleChoice = props => {
 					key={index}
 				/>
 			))}
+			{/* We need to send a dummy value every time otherwise there will be no value
+			in the form data when we uncheck them all, and it will therefore be impossible
+			to unset the values */}
 			<input
 				type="hidden"
 				value="treecreeper-fake-value"
