@@ -124,12 +124,13 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
-      #Scan package.json for vulnerable dependencies while developing
-      # - ft-snyk-orb/scan-js-packages:
-      #     context: rel-eng-creds
-      #     requires:
-      #     - install
-      #     filters: *only_version_tags
+      Scan package.json for vulnerable dependencies while developing
+      - ft-snyk-orb/scan-js-packages:
+          context: rel-eng-creds
+          requires:
+          - install
+          filters: *only_version_tags
+          workspace-path: *workspace_root
       - publish:
           context: rel-eng-creds
           requires:
@@ -151,3 +152,4 @@ workflows:
             <<: *only_version_tags
             branches:
               ignore: /.*/
+          workspace-path: *workspace_root
