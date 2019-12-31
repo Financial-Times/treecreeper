@@ -1,34 +1,6 @@
-const { getEnums } = require('@financial-times/tc-schema-sdk');
 const React = require('react');
-const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-const text = require('../text/server');
-
-const OptionsInfo = ({ type }) => {
-	const enumWithMeta = getEnums({ withMeta: true })[type];
-	const optionDefs = Object.values(enumWithMeta.options);
-	const hasOptionDescriptions = !!optionDefs[0].description;
-	if (!hasOptionDescriptions) {
-		return null;
-	}
-	return (
-		<>
-			<p
-				dangerouslySetInnerHTML={{
-					__html: autolinker.link(enumWithMeta.description || ''),
-				}}
-			/>
-			<dl>
-				{optionDefs.map(({ value, description }, index) => (
-					<React.Fragment key={index}>
-						<dt key={index}>{value}</dt>
-						<dd key={index}>{description}</dd>
-					</React.Fragment>
-				))}
-			</dl>
-		</>
-	);
-};
+const { OptionsInfo } = require('../enum/server');
 
 const Checkbox = ({ name, checkboxValue, disabled, checked }) => {
 	return (
@@ -63,12 +35,33 @@ const EditMultipleChoice = props => {
 					key={index}
 				/>
 			))}
+			<input
+				type="hidden"
+				value="treecreeper-fake-value"
+				name={propertyName}
+			/>
 		</span>
 	);
 };
 
 module.exports = {
-	ViewComponent: text.ViewComponent,
+	ViewComponent: ({ value, id }) => (
+		<span id={id}>
+			{value.map((val, i) => (
+				<>
+					{i > 0 ? ', ' : ''}
+					<span>{val}</span>
+				</>
+			))}
+		</span>
+	),
+	parser: value => {
+		if (!Array.isArray(value)) {
+			value = [value];
+		}
+		return value.filter(v => v !== 'treecreeper-fake-value');
+	},
+	hasValue: value => value && value.length,
 	EditComponent: props => (
 		<WrappedEditComponent
 			Component={EditMultipleChoice}
