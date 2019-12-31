@@ -52,11 +52,12 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
+			// console.log({item})
 			let lockedBy;
 			if (fieldNamesToLock.includes(name)) {
 				lockedBy = fieldsToLock[name];
 			}
-			const { EditComponent } = assignComponent(item.type);
+			const { EditComponent } = assignComponent(item);
 			const viewModel = {
 				propertyName: name,
 				value: getValue(item, data[name]),

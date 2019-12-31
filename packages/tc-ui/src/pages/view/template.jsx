@@ -22,7 +22,7 @@ const Properties = ({ fields, data, assignComponent }) => {
 				value: data[name],
 				id: name,
 				...item,
-				...assignComponent(item.type),
+				...assignComponent(item),
 			};
 
 			return viewModel.label ? (

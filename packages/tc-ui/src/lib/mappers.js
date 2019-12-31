@@ -9,7 +9,7 @@ const primitives = require('../primitives/server');
 const componentAssigner = ({
 	customComponents = {},
 	customTypeMappings = {},
-} = {}) => propType => {
+} = {}) => ({ type, hasMany }) => {
 	const components = { ...primitives, ...customComponents };
 
 	const typeToComponentMap = {
@@ -21,15 +21,16 @@ const componentAssigner = ({
 		...customTypeMappings,
 	};
 
-	const objectTypes = getTypes().map(type => type.name);
-	if (propType) {
-		if (typeToComponentMap[propType]) {
-			return components[typeToComponentMap[propType]];
+	const objectTypes = getTypes().map(objectType => objectType.name);
+
+	if (type) {
+		if (typeToComponentMap[type]) {
+			return components[typeToComponentMap[type]];
 		}
-		if (getEnums()[propType]) {
-			return components.Enum;
+		if (getEnums()[type]) {
+			return hasMany ? components.MultipleChoice : components.Enum;
 		}
-		if (objectTypes.includes(propType)) {
+		if (objectTypes.includes(type)) {
 			return components.Relationship;
 		}
 	}
@@ -38,7 +39,7 @@ const componentAssigner = ({
 };
 
 const toGraphql = (propName, propDef, assignComponent) =>
-	assignComponent(propDef.type).graphqlFragment(propName, propDef);
+	assignComponent(propDef).graphqlFragment(propName, propDef);
 
 const graphqlQueryBuilder = (type, assignComponent) => {
 	return `
