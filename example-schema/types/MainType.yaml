@@ -43,7 +43,7 @@ properties:
   someMultipleChoice:
     type: AnEnum
     hasMany: true
-    description: Multiple choice description
+    description: Multiple choice description.
     label: Multiple choice label
   someInteger:
     type: Int

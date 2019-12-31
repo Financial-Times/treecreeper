@@ -67,19 +67,19 @@ describe('rest PATCH create', () => {
 		});
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({
-				someStringList: ['one', 'two'],
+				// someStringList: ['one', 'two'],
 				someMultipleChoice: ['First', 'Second'],
 			});
 
 			expect(status).toBe(201);
 			expect(body).toMatchObject({
-				someStringList: ['one', 'two'],
+				// someStringList: ['one', 'two'],
 				someMultipleChoice: ['First', 'Second'],
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
-					someStringList: ['one', 'two'],
+					// someStringList: ['one', 'two'],
 					someMultipleChoice: ['First', 'Second'],
 				});
 		});
