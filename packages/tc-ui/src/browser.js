@@ -1,8 +1,8 @@
 require('./main.css');
 const pages = require('./pages/browser');
 
-const { pageType } = document.querySelector('[data-tc-page-type]').dataset;
+const tcPageContainer = document.querySelector('[data-tc-page-type]');
 
-if (pageType && pages[pageType]) {
-	pages[pageType].init();
+if (tcPageContainer) {
+	pages[tcPageContainer.dataset.tcPageType].init();
 }
