@@ -130,8 +130,7 @@ workflows:
           requires:
           - install
           filters: *only_version_tags
-          parameters:
-            workspace-path: *workspace_root
+          workspace-path: *workspace_root
       - publish:
           context: rel-eng-creds
           requires:
@@ -153,5 +152,3 @@ workflows:
             <<: *only_version_tags
             branches:
               ignore: /.*/
-          parameters:
-            workspace-path: *workspace_root
