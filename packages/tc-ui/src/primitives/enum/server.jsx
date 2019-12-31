@@ -2,7 +2,6 @@ const { getEnums } = require('@financial-times/tc-schema-sdk');
 const React = require('react');
 const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-const text = require('../text/server');
 
 const Option = ({ option, selected }) => (
 	<option
@@ -63,7 +62,11 @@ const EditEnum = props => {
 
 module.exports = {
 	name: 'Enum',
-	ViewComponent: text.ViewComponent,
+	ViewComponent: ({ value, id }) => (
+		<span id={id} className="o-labels">
+			{value}
+		</span>
+	),
 	EditComponent: props => (
 		<WrappedEditComponent
 			Component={EditEnum}
