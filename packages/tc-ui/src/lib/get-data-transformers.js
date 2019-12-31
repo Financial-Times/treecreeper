@@ -20,7 +20,7 @@ const getDataTransformers = assignComponent => {
 				) {
 					return;
 				}
-				const { parser } = assignComponent(fieldProps.type);
+				const { parser } = assignComponent(fieldProps);
 
 				const valueHasBeenReceived = fieldName in formData;
 				// need to avoid treating missing data as an instruction to delete
@@ -39,7 +39,7 @@ const getDataTransformers = assignComponent => {
 		const typeProperties = schema.getType(type);
 		Object.entries(typeProperties.properties).forEach(
 			([fieldName, fieldProps]) => {
-				const { parser } = assignComponent(fieldProps.type);
+				const { parser } = assignComponent(fieldProps);
 				if (
 					formData[fieldName] &&
 					formData[fieldName] !== "Don't know"
