@@ -1,17 +1,17 @@
-const { h, Fragment } = require('preact');
+const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { LinkToRecord } = require('../../../components/helpers');
+const { LinkToRecord } = require('../../../lib/components/structure');
 
 let RelationshipAnnotator;
 
 const OneRelationship = ({ type, value = {}, id }) =>
 	type && value.code ? (
-		<Fragment>
+		<>
 			<LinkToRecord id={id} type={type} value={value} />
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value} type={type} />
 			) : null}
-		</Fragment>
+		</>
 	) : (
 		'Error: unable to construct link'
 	);
@@ -32,10 +32,13 @@ const ViewRelationship = ({ value, type, id, hasMany }) => {
 	};
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
-			{value.map(item => {
+			{value.map((item, index) => {
 				const props = { type, value: item };
 				return (
-					<li className={inactiveCheck(item) ? 'inactive' : 'active'}>
+					<li
+						key={index}
+						className={inactiveCheck(item) ? 'inactive' : 'active'}
+					>
 						<OneRelationship {...props} />
 					</li>
 				);

@@ -22,6 +22,7 @@ properties:
     type: Word
     description: Word description.
     label: Word label
+    useInSummary: true
   someBoolean:
     type: Boolean
     description: Boolean description.

@@ -26,10 +26,6 @@ getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
 	},
 );
 
-require('module-alias').addAliases({
-	react: 'preact/compat',
-	'react-dom': 'preact/compat',
-});
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const {
 	editController,

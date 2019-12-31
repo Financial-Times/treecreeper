@@ -1,22 +1,30 @@
-const { h, Fragment } = require('preact');
-const { WrappedEditComponent } = require('../../components/edit-helpers');
-const { markdown } = require('../../components/helpers');
+const React = require('react');
+const showdown = require('showdown');
+const autolinker = require('autolinker');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
+
+showdown.setFlavor('github');
+
+const markdownParser = new showdown.Converter({
+	simplifiedAutoLink: true,
+});
+
+const markdown = text => autolinker.link(markdownParser.makeHtml(text || ''));
 
 const outputFreeText = (text = '') => text;
 
 const EditLargeText = props => {
 	const { propertyName, value, dataType, disabled } = props;
 	return (
-		<Fragment>
+		<>
 			<span className="o-forms-input o-forms-input--textarea">
 				<textarea
 					name={propertyName}
 					id={`id-${propertyName}`}
 					rows={dataType === 'Document' ? '40' : '8'}
 					disabled={disabled}
-				>
-					{outputFreeText(value)}
-				</textarea>
+					defaultValue={outputFreeText(value)}
+				/>
 			</span>
 			{dataType === 'Document' ? (
 				<div className="document-edit-tools">
@@ -26,7 +34,7 @@ const EditLargeText = props => {
 					</button>
 				</div>
 			) : null}
-		</Fragment>
+		</>
 	);
 };
 

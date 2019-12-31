@@ -1,5 +1,5 @@
-const { h } = require('preact');
-const { WrappedEditComponent } = require('../../components/edit-helpers');
+const React = require('react');
+const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
 const getBooleanLabel = value => {
 	if (value === true) return 'Yes';

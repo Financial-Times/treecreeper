@@ -1,5 +1,5 @@
 /* global fetch */
-const { h, Fragment, Component } = require('preact');
+const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
@@ -16,17 +16,12 @@ const toArray = val => {
 
 const UserInput = inputProps => (
 	<span className="o-forms-input o-forms-input--text">
-		<input
-			id={`${inputProps.propertyName}-picker`}
-			type="text"
-			autoComplete="off"
-			{...inputProps}
-		/>
+		<input {...inputProps} />
 	</span>
 );
 
 const Suggestion = ({ suggestion, searchTerm }) => (
-	<Fragment>
+	<>
 		<Highlighter
 			searchWords={searchTerm.split(' ')}
 			autoEscape
@@ -43,10 +38,10 @@ const Suggestion = ({ suggestion, searchTerm }) => (
 				)
 			</small>
 		) : null}
-	</Fragment>
+	</>
 );
 
-class RelationshipPicker extends Component {
+class RelationshipPicker extends React.Component {
 	constructor(props) {
 		super();
 		const selectedRelationships = toArray(props.value);
@@ -219,8 +214,8 @@ class RelationshipPicker extends Component {
 			<div
 				data-props={JSON.stringify(props)}
 				data-component="relationship-picker"
-				data-disabled={disabled}
-				data-is-unresolved={isUnresolved}
+				data-disabled={disabled ? true : null}
+				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
 				<ul
@@ -254,7 +249,9 @@ class RelationshipPicker extends Component {
 								this.onSuggestionHighlighted
 							}
 							inputProps={{
-								propertyName: props.propertyName,
+								id: `${propertyName}-picker`,
+								type: 'text',
+								autoComplete: 'off',
 								value: searchTerm,
 								onChange: this.onSearchTermChange,
 								onKeyDown: this.onUserMisconception,

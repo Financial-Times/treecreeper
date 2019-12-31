@@ -1,11 +1,8 @@
-const { h } = require('preact');
+const React = require('react');
 const logger = require('@financial-times/lambda-logger');
 const { getCMS } = require('@financial-times/tc-ui');
 
-const { Header } = require('./components/header');
-const { Footer } = require('./components/footer');
 const { Subheader } = require('./components/subheader');
-
 const customComponents = require('./components/primitives');
 
 const wrapCmsHandler = handler => async (req, res) => {
@@ -27,13 +24,9 @@ const wrapCmsHandler = handler => async (req, res) => {
 	}
 };
 
-const {
-	viewHandler,
-	deleteHandler,
-	editHandler,
-	handleError,
-	renderPage,
-} = getCMS({
+const { handleError, renderPage } = require('./render');
+
+const { viewHandler, deleteHandler, editHandler } = getCMS({
 	logger,
 	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
 	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
@@ -41,20 +34,10 @@ const {
 		'client-id': 'treecreeper-demo',
 		'client-user-id': clientUserId,
 	}),
-	Header,
-	Footer,
 	Subheader,
 	customComponents,
-	origamiCssModules: {
-		'header-services': '^3.2.3',
-		table: '^7.0.5',
-		labels: '^4.1.1',
-		'footer-services': '^2.1.0',
-	},
-	origamiJsModules: {
-		table: '^7.0.5',
-		'header-services': '^3.2.3',
-	},
+	handleError,
+	renderPage,
 	customTypeMappings: {
 		Paragraph: 'LargeText',
 	},

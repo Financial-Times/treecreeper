@@ -18,8 +18,8 @@
     "module-alias": "^2.2.2",
     "neo4j-driver": "^1.7.6",
     "node-fetch": "^2.6.0",
-    "preact": "^10.1.1",
-    "preact-compat": "^3.19.0"
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -36,7 +36,7 @@
     "concurrently": "^5.0.0",
     "css-loader": "^3.2.1",
     "enzyme": "^3.10.0",
-    "enzyme-adapter-preact-pure": "^2.2.0",
+    "enzyme-adapter-react-16": "^1.15.2",
     "fetch-mock": "^8.0.0",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^24.8.0",

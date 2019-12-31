@@ -12,17 +12,22 @@ const componentAssigner = ({
 } = {}) => propType => {
 	const components = { ...primitives, ...customComponents };
 
-	const primitiveTypes = {
+	const typeToComponentMap = {
 		...getPrimitiveTypes({ output: 'component' }),
+		...Object.keys(customComponents).reduce(
+			(map, name) => ({ ...map, [name]: name }),
+			{},
+		),
 		...customTypeMappings,
 	};
+
 	const objectTypes = getTypes().map(type => type.name);
 	if (propType) {
+		if (typeToComponentMap[propType]) {
+			return components[typeToComponentMap[propType]];
+		}
 		if (getEnums()[propType]) {
 			return components.Enum;
-		}
-		if (primitiveTypes[propType]) {
-			return components[primitiveTypes[propType]];
 		}
 		if (objectTypes.includes(propType)) {
 			return components.Relationship;

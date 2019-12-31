@@ -1,13 +1,7 @@
 require('./main.css');
-const edit = require('./browser/edit');
-const view = require('./browser/view');
+const pages = require('./pages/browser');
 
-const pages = {
-	edit,
-	view,
-};
-
-const { pageType } = document.documentElement.dataset;
+const { pageType } = document.querySelector('[data-tc-page-type]').dataset;
 
 if (pageType && pages[pageType]) {
 	pages[pageType].init();

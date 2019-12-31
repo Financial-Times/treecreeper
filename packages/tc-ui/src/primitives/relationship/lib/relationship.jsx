@@ -1,10 +1,11 @@
-const { h } = require('preact');
+const React = require('react');
 
 const Relationship = ({ value, disabled, onRelationshipRemove, index }) => (
 	<li
 		data-name={value.name}
 		data-code={value.code}
 		className="selected-relationship"
+		key={index}
 	>
 		<button
 			type="button"
@@ -14,7 +15,6 @@ const Relationship = ({ value, disabled, onRelationshipRemove, index }) => (
 			}`}
 			onClick={onRelationshipRemove}
 			data-index={index}
-			key={index}
 		>
 			Remove
 		</button>

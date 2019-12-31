@@ -1,4 +1,4 @@
-const { h } = require('preact');
+const React = require('react');
 
 const Footer = () => (
 	<div className="o-layout__footer">
