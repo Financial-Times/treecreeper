@@ -47,11 +47,8 @@ const EditMultipleChoice = props => {
 module.exports = {
 	ViewComponent: ({ value, id }) => (
 		<span id={id}>
-			{value.map((val, i) => (
-				<>
-					{i > 0 ? ', ' : ''}
-					<span>{val}</span>
-				</>
+			{value.map(val => (
+				<span className="o-labels">{val}</span>
 			))}
 		</span>
 	),
