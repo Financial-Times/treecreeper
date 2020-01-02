@@ -14,14 +14,20 @@ Returns an express instance with the GraphQL and REST apis set up according to t
 
 A `treecreeper` object is attached to the express instance with the following properties
 
-```js
-app.treecreeper = {
-	logger, // a reference to treecreeper's internal logger, which decorates each log with useful application/request metadata
-	isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines its data types up to date
-	emitter, // an event emitter, that fires when any changes to the underlying data are made
-	availableEvents, // a list of the event types available, currently UPDATE, DELETE, CREATE
-};
-```
+#### response
+
+##### `logger`
+
+A reference to treecreeper's internal logger, which decorates each log with useful application/request metadata
+
+##### `isSchemaUpdating`
+
+A function that returns a boolean indicating whether the application is successfully keeping the schema
+that defines its data types up to date
+
+##### `emitter` and `availableEvents`
+
+See `tc-api-rest-handlers` for details
 
 #### Options
 
@@ -31,7 +37,7 @@ An express app. If none it provided, one will be created
 
 ##### `schemaOptions`
 
-Options to pass to `tc-schema-sdk`
+Options to pass to `tc-schema-sdk`. Note that some options may be provided via environment variables
 
 ##### `treecreeperPath = '/'`
 

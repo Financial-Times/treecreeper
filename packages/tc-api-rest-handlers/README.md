@@ -1,39 +1,25 @@
 # @financial-times/tc-api-rest-handlers
 
-Treecreeper&tm; functions for handling CRUD actions via a RESTful interface.
+Treecreeper library for handling CRUD actions via a RESTful interface.
+
+## API
+
+### Handlers
+
+The library exports the following functions: `headHandler`, `getHandler`, `deleteHandler`, `postHandler`, `patchHandler`, `absorbHandler`,
 
 The functions do not implement any handling of requests and responses, but work on a more event driven model - receiving and returning objects - for ease of reuse in various environments. Therefore the RESTful url scheme is implied rather than implemented. This design is both to improve testability and to make it possible, in future, to deploy treecreeper to event driven architectures such as AWS Lambda.
 
-It exports the following functions
+All of these functions are factories that return the actual handlers. Each of the factories accepts an options object with a single property, `documentStore`, which shodul be an instance of `tc-api-s3-document-store` or similar
 
-```
-{
-    headHandler,
-    getHandler,
-    deleteHandler,
-    postHandler,
-    patchHandler,
-    absorbHandler,
-}
-```
-
-All of these functions are factories that return the actual handlers. Each of the factories accepts the following options
-
-```
-{
-    documentStore, // [optional] reference to a documentStore object, used to store large properties outside the neo4j instance
-    logger, // [optional] logger that implements debug, info, warning and error methods
-}
-```
-
-## URL scheme
+#### URL scheme
 
 Although not implemented, the handlers are intended to be used to handle RESTful urls similar to the following:
 
 -   `/:type/:code` - all handlers apart from absorb
 -   `/:type/:code/absorb/:absorbedCode` - absorb
 
-## Input
+#### Input
 
 With the exception of `absorbHandler` they all return handlers which accept the following input:
 
@@ -51,7 +37,7 @@ With the exception of `absorbHandler` they all return handlers which accept the 
 
 The input can be generated from a http request (or equivalent object) by setting the url parameters as top level properties, and setting the request body and query string as nested objects within the input. Metadata is an object containing contextual information about the request.
 
-## Output
+#### Output
 
 Each handler returns objects of the following structure
 
@@ -64,11 +50,11 @@ Each handler returns objects of the following structure
 
 `headHandler` does not return `body`
 
-### Error output
+##### Error output
 
 With the exception of internal server errors, all errors thrown are instances of `HttpErrors` and have a `status` and `message` property. `status` is a http status.
 
-## Body structure
+#### Body structure
 
 Both input and output body has structure similar to that below. The treecreeper schema powering the application defines exactly which properties are allowed
 
@@ -88,7 +74,7 @@ Both input and output body has structure similar to that below. The treecreeper 
     -   Use `null` as the value to remove the property or to delete all relationships of the given type
     -   Use a `!` before the property name of a relationship to target individual relationships for deletion e.g. `"!children": ["child1"]`
 
-### Metadata
+#### Metadata
 
 The `metadata` object is typically constructed from information sent to the application in headers. Three properties are recognised:
 
@@ -98,7 +84,7 @@ The `metadata` object is typically constructed from information sent to the appl
 
 `requestId` is required and must be unique per handler call. To use Treecreeper's field-locking capability a `clientId` must be sent.
 
-### Query options
+#### Query options
 
 | name               | relevant handlers | value              | meaning                                                                                                                                                                 |
 | ------------------ | ----------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -109,7 +95,7 @@ The `metadata` object is typically constructed from information sent to the appl
 |                    |                   | `replace`          | Existing relationships will be replaced by those specified in the body                                                                                                  |
 | richRelationship   | get               | `true`             | If the body has any relationships, it provides more information about the relationships than just their `code`                                                          |
 
-#### Field locking
+##### Field locking
 
 When writing using the post or patch handlers, it is possible, by means of the `lockFields` query option, to prevent fields from being modified by other clients. The `clientId` specified in `metadata` is used to specify which client the field is locked by. The `unlockFields` option can be used to unlock any field, regardless of which client locked it.
 
@@ -120,7 +106,7 @@ When writing using the post or patch handlers, it is possible, by means of the `
 | unlockFields | patch             | `propertyName1,propertyName2,...` | Will unlock all properties listed                                                                                               |
 |              |                   | `all`                             | Will remove all property locking settings from the record                                                                       |
 
-### absorbHandler
+#### absorbHandler
 
 This is used to merge one record, B, into another, A, using the following merge logic.
 
@@ -128,6 +114,32 @@ This is used to merge one record, B, into another, A, using the following merge 
 -   Any relationships between B and a third record, C, will become relationships between A and C
 -   Any relationships between A and B will be removed
 -   Finally A will still exist, but B will not
+
+### Events
+
+The library also exports an event emitter, `emitter`, which fires events when any changes to the underlying data are made
+
+Each event has the following structure:
+
+```js
+{
+	action, // see availableEvents, below, for the full list
+		code, // code of the record updated
+		type, // type opf the updated record
+		updatedProperties, // list of properties - in cluding relationship properties - updated
+		timestamp; // timestamp of the event
+}
+```
+
+The event fired will also have the same name as `action` e.g.
+
+```js
+emitter.on('UPDATE', ({ action }) => {
+	console.log(action); /// 'UPDATE'
+});
+```
+
+A list of all the event types available, currently `UPDATE`, `DELETE`, `CREATE`, is exported as `availableEvents`
 
 ## Example
 
