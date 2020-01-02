@@ -1,5 +1,6 @@
-# Treecreeper
+<img align="right" src=https://user-images.githubusercontent.com/447559/71667873-c7c56680-2d5e-11ea-9e44-a0947997e18c.png />
 
+# Treecreeper
 Sandbox for working on the set of tools and services that make up the Biz Ops ecosystem at the FT
 
 -   neo4j database
