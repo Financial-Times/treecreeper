@@ -147,6 +147,7 @@ workflows:
           context: rel-eng-creds
           requires:
             - publish
+          workspace-path: *workspace_root
           filters:
             <<: *only_version_tags
             branches:
