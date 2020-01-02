@@ -24,8 +24,8 @@ From the developer's point of view, it provides a number of packages that can be
 
 ## Concepts
 
+-   Schema and graphs data
 -   Architecture
--   Schema
 -   GraphQL
 
 ## Examples
