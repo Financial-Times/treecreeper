@@ -6,7 +6,6 @@ orbs:
 references:
 
   default_container_config: &default_container_config
-    working_directory: ~/treecreeper
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
       - image: circleci/node:12.9.1-browsers
