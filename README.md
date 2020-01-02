@@ -22,6 +22,12 @@ From the developer's point of view, it provides a number of packages that can be
 -   tc-ui - A user interface that allows editing and viewing data. this also exports React components and some other tools to allow building custom user interfaces
 -   tc-markdown-parser - A tool for parsing structured markdown content into a payload for the REST API
 
+## Concepts
+
+-   Architecture
+-   Schema
+-   GraphQL
+
 ## Examples
 
 -   Express API
