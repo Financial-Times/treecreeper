@@ -70,6 +70,14 @@ related-code
 ## Some multi relationship
 - related-code1
 - related-code2
+
+## Some rich relationship
+related-code
+prop: val
+
+## Some rich multi relationship
+- related-code1
+  prop: value
 ```
 
 When parsed using the following parser:
@@ -91,8 +99,10 @@ will be parsed as
   preamble: 'This is what it is',
   someProperty: 'The string value',
   someBooleanProperty: true,
-  someRelationship: 'related-code',
-  someMultiRelationship: ['related-code1', 'related-code2']
+  someRelationship: {code: 'related-code'},
+  someMultiRelationship: [{code: 'related-code1'}, {code: 'related-code2'}]
+  someRichRelationship: {code: 'related-code', prop: 'value'},
+  someRichMultiRelationship: [{code: 'related-code1', prop: 'value'}]
 }
 
 ```

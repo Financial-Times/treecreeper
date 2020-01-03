@@ -10,7 +10,7 @@
     "graphql": "^14.5.8",
     "valid-url": "^1.0.9"
   },
-  "peerrDependencies": {
+  "peerDependencies": {
     "jest": "*"
   },
   "repository": {
