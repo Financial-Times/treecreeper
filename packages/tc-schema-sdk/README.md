@@ -1,6 +1,6 @@
 # @financial-times/tc-schema-sdk
 
-In many ways, this is the beating heart of Treecreeper&TM;. It consumes the schema files that define what sort of records can be stored in the neo4j instance, and what relationships can exist between them. These schema files may exist locally or be hosted somewhere remote. Once these files are consumed, schema-sdk then takes care of:
+In many ways, this is the beating heart of Treecreeper. It consumes the schema files that define what sort of records can be stored in the neo4j instance, and what relationships can exist between them. These schema files may exist locally or be hosted somewhere remote. Once these files are consumed, schema-sdk then takes care of:
 
 -   Updating the schema held locally when the remote copy changes, and making sure the change to the schema is propagated everywhere within the application
     Generating the GraphQl SDL schema that underlies the graphql API

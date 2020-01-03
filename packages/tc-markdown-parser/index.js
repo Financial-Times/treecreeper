@@ -1,3 +1,3 @@
 const getParser = require('./lib/markdown-parser');
 
-module.exports = getParser;
+module.exports = { getParser };

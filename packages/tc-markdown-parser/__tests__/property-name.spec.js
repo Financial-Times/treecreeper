@@ -1,6 +1,6 @@
 const schema = require('@financial-times/tc-schema-sdk');
 const { default: here } = require('outdent');
-const getParser = require('..');
+const { getParser } = require('..');
 
 schema.init({
 	updateMode: 'poll',
