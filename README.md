@@ -32,6 +32,8 @@ From the developer's point of view, it provides a number of packages that can be
 
 ## Examples
 
+TODO. In the meantime, see /demo directory in this repository for inspiration
+
 -   Express API
 -   Express UI
 -   Markdown ingester
