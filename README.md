@@ -94,4 +94,4 @@ A treecreeper is a small, woodland bird which climbs up tree trunks in search of
 
 A tree is a type of Graph (the only type of graph that GraphQL can represent well)
 
-It seems apt to name this project after a creature that climbs around in trees.
+It seems apt to name this project after a creature that spends it life scampering around trees.
