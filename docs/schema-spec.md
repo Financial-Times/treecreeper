@@ -6,7 +6,7 @@ _Note that yaml files are indented with two spaces_
 -   [Properties on existing types](#property-definitions)
 -   [Primitive Types](#primitive-types)
 -   [Relationships](#relationship-property-definitions) (which are expressed as a special kind of property)
--   [Custom cypher properties](#custom cypher properties)
+-   [Custom cypher properties](#custom-cypher-properties)
 -   [Enums](#enums) (aka drop down options)
 -   [String validation rules](#string-validation-rules)
 -   [Type Hierarchy](#type-hierarchy)
