@@ -10,25 +10,25 @@ Treecreeper is a set of modular nodejs libraries for managing Graph data. It is 
 
 From the developer's point of view, it provides a number of packages that can be composed to provide the features listed above:
 
--   A specification for a yaml schema which is used to power the rest of treecreeper
--   tc-schema-validator - A schema validator for ensuring the schema provided to the treecreeper application(s) by the developer is valid
--   tc-schema-publisher - A schema publisher to enable 'Hot reloading' of the schema by the treecreeper application(s)
--   tc-schema-sdk - An SDK for consuming the schema, allowing applications to build user interfaces
--   tc-api-db-manager - A database manager for ensuring the underlying neo4j database is indexed appropriately
--   tc-api-graphql - A GraphQL API implementation
--   tc-api-rest-handlers - A set of REST handlers that enable editing of the data, and which broadcast events when data changes
--   tc-api-express - An express wrapper around the database manager, GraphQL and REST handlers
--   tc-api-s3-document-store - An optional document store utilty, which allows storing large pieces of data in S3 instead of neo4j (which does not handle large files very well). The interface provided by this store is documented, and developers may want to write alternatives that store documents in other locations
--   tc-ui - A user interface that allows editing and viewing data. this also exports React components and some other tools to allow building custom user interfaces
--   tc-markdown-parser - A tool for parsing structured markdown content into a payload for the REST API
+-   A [specification for a yaml schema](/docs/schema-spec.md) which is used to power the rest of treecreeper
+-   [tc-schema-validator](/packages/tc-schema-validator/README.md) - A schema validator for ensuring the schema provided to the treecreeper application(s) by the developer is valid
+-   [tc-schema-publisher](/packages/tc-schema-publisher/README.md) - A schema publisher to enable 'Hot reloading' of the schema by the treecreeper application(s)
+-   [tc-schema-sdk](/packages/tc-schema-sdk/README.md) - An SDK for consuming the schema, allowing applications to build user interfaces
+-   [tc-api-db-manager](/packages/tc-api-db-manager/README.md) - A database manager for ensuring the underlying neo4j database is indexed appropriately
+-   [tc-api-graphql](/packages/tc-api-graphql/README.md) - A GraphQL API implementation
+-   [tc-api-rest-handlers](/packages/tc-api-rest-handlers/README.md) - A set of REST handlers that enable editing of the data, and which broadcast events when data changes
+-   [tc-api-express](/packages/tc-api-express/README.md) - An express wrapper around the database manager, GraphQL and REST handlers
+-   [tc-api-s3-document-store](/packages/tc-api-s3-document-store/README.md) - An optional document store utilty, which allows storing large pieces of data in S3 instead of neo4j (which does not handle large files very well). The interface provided by this store is documented, and developers may want to write alternatives that store documents in other locations
+-   [tc-ui](/packages/tc-ui/README.md) - A user interface that allows editing and viewing data. this also exports React components and some other tools to allow building custom user interfaces
+-   [tc-markdown-parser](/packages/tc-markdown-parser/README.md) - A tool for parsing structured markdown content into a payload for the REST API
 
 ## Concepts
 
--   Schema and graphs data
--   Architecture
--   Schema authoring quickstart
--   Schema specification
--   GraphQL
+-   [Schema and graph data](/docs/schema-and-graph-data.md)
+-   [Architecture](/docs/architecture.md)
+-   [Schema authoring quickstart](/docs/schema-authoring-quickstart.md)
+-   [Schema specification](/docs/schema-spec.md)
+-   [GraphQL](/docs/treecreeeper-graphql.md)
 
 ## Examples
 
