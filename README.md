@@ -85,3 +85,11 @@ Will start jest in watch mode
 To run tests for a single package use an environment variable: `pkg=tc-schema-sdk make test`
 
 For many tests to execute successfully you will also need to run `make run-db` in a separate terminal
+
+## Etymology
+
+A treecreeper is a small, woodland bird which climbs up tree trunks in search of invertebrates to eat.
+
+A tree is a type of Graph (the only type of graph that GraphQL can represent well)
+
+It seems apt to name this project after a creature that climbs around in trees.
