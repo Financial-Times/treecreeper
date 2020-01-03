@@ -26,6 +26,8 @@ From the developer's point of view, it provides a number of packages that can be
 
 -   Schema and graphs data
 -   Architecture
+-   Schema authoring quickstart
+-   Schema specification
 -   GraphQL
 
 ## Examples
