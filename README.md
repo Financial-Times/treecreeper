@@ -28,7 +28,7 @@ From the developer's point of view, it provides a number of packages that can be
 -   [Architecture](/docs/architecture.md)
 -   [Schema authoring quickstart](/docs/schema-authoring-quickstart.md)
 -   [Schema specification](/docs/schema-spec.md)
--   [GraphQL](/docs/treecreeeper-graphql.md)
+-   [GraphQL](/docs/treecreeper-graphql.md)
 
 ## Examples
 
