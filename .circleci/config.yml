@@ -6,7 +6,6 @@ orbs:
 references:
 
   default_container_config: &default_container_config
-    working_directory: ~/treecreeper
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
       - image: circleci/node:12.9.1-browsers
@@ -59,7 +58,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - treecreeper
+            - .
 
   test:
     <<: *default_container_config
@@ -124,7 +123,7 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
-      Scan package.json for vulnerable dependencies while developing
+      # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
           requires:
@@ -142,12 +141,13 @@ workflows:
             <<: *only_version_tags
             branches:
               ignore: /.*/
-    #Scan and monitor vulnerabilities once in production
+      # Scan and monitor vulnerabilities once in production
       - ft-snyk-orb/scan-and-monitor-js-packages:
           name: snyk-scan-and-monitor
           context: rel-eng-creds
           requires:
             - publish
+          workspace-path: *workspace_root
           filters:
             <<: *only_version_tags
             branches:

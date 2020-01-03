@@ -4,24 +4,34 @@ Treecreeper&tm; graphql express middleware to sit in front of a neo4j database i
 
 It exports `{getGraphqlApi}`. `getGraphqlApi` accepts the following configuration object (defaults are as specified below):
 
-```js
-getApp({
-	documentStore, // an [optional] reference to a documentStore object, used to store large properties outside the neo4j instance
-    republishSchema, // a boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi
-    republishSchemaPrefix = 'api', // If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicaytes the prefix to use
-	logger, // an [optional] logger that implements debug, info, warning and error methods
-});
-```
+## API
 
-It returns either express application provided, or the new one it creates. Attached to this app is a `treecreeper` object with the following properties:
+### `getGraphqlApi(options)`
+
+Sets up a GraphQL api which (if `tc-schema-sdk` is configured to update on demand) hot reloads the GraphQL schema to match changes to the underlying treecreeper schema. It retyurns an obnject with 3 properties
 
 ```js
 {
-  graphqlHandler, // a function implementing the express/connect middleware interface
+  graphqlHandler, // express middleware that implements the GraphQL API
   isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines it data types up to date
-  listenForSchemaChanges, // a function that, when called, starts teh api polling for changes to a treecreeper schema published to some url
+  listenForSchemaChanges, // a function that, when called, starts the api polling for changes to a treecreeper schema published to some url
 };
 ```
+
+#### Options
+
+##### `documentStore`
+
+An [optional] reference to a tc-api-s3-document-store instance (or a library implementing the same API), used to store large properties outside the neo4j instance
+
+##### `republishSchema`
+
+A boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi. Note that republishing depends on a `TREECREEPER_SCHEMA_BUCKET` envioronment variable, which should be the name of an s3 bucket.
+
+##### `republishSchemaPrefix = 'api'`
+
+If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicates the
+prefix to use
 
 ## Example
 

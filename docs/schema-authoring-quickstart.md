@@ -1,25 +1,28 @@
-# Contributing to the biz-ops-schema
+# Schema authoring quickstart
 
-biz-ops-schema controls what can be stored in the biz-ops-api. You can add 5 different types of thing to the schema:
+You can add 8 different types of thing to the treecreeper schema:
 
 -   Types - Each record stored in biz-ops must conform to a predefined type
 -   Properties on types - If a record is an instance of a given type, the schema for that type determines which properties the record may have
 -   Relationships between types - Different types can be connected to other types with different types of relationship
 -   Enums - Some properties, e.g. serviceTier, may only take one value from a set. Enums define these sets of permissible values
 -   String validation rules - Regular expressions for checking values
+-   Primitive Types - Names for new primitive types, and mappings to the underlying GraphQL types and UI Components
+-   Type Hierarchy - Defines grouping and ordering of types
+-   Relationship Types - when you need to define properties on a relationship between types, you will need to define a relationship type to hold them
 
 These define what can/cannot exist in the underlying neo4j database and the graphQL API.
 
-This document will take you through the process of adding a new type, and along the way we'll cover how to add each of the other things too; if all you want to do is add one of those it'll probably help to skim this whole document, but skip ahead as you please.
+This document will take you through the process of adding a new type, and along the way we'll cover how to add most of the other things too; if all you want to do is add one of those it'll probably help to skim this whole document, but skip ahead as you please.
 
-The example we'll work through is adding the ability for the biz-ops-api to represent [**Birds of paradise**](https://en.wikipedia.org/wiki/Bird-of-paradise)
+The example we'll work through is adding the ability for a treecreeper schema to represent [**Birds of paradise**](https://en.wikipedia.org/wiki/Bird-of-paradise)
 
 ## Creating a basic type
 
 1. Pick a name for your type. This must be a _singular_, capital case, string i.e. each word begins with a capital letter, no spaces, only letters. So for our example the name will be `BirdOfParadise` (not `BirdsOfParadise`)
-1. Create a yaml file in `./schema/types` whose name is your type name, lower case and hyphenated e.g. `bird-of-paradise.yaml`.
-1. Start filling your file with some basic, required information. Each type must have a name (the one you picked above) and a description, which should be a reasonably descriptive sentence describing _in the singular_ what an instance of this type is.  
-   The schema client library will automatically generate a `pluralName` property by appending `s` to the name, but if (as in our example) this doesn't work (BirdOfParadises :rofl: ), add one explicitly. Other top level fields also exist and may optionally be set. Refer to the [model spec](MODEL_SPECIFICATION.md#types).  
+1. Create a yaml file in `./schema/types` whose file name is the same as your type name e.g. `BirdOfParadise.yaml`.
+1. Start filling your file with some basic, required information. Each type must have a name (the one you picked above) and a description, which should be a reasonably descriptive sentence describing _in the singular_ what an instance of this type is.
+   The schema client library will automatically generate a `pluralName` property by appending `s` to the name, but if (as in our example) this doesn't work (BirdOfParadises :rofl: ), add one explicitly. Other top level fields also exist and may optionally be set. Refer to the [model spec](MODEL_SPECIFICATION.md#types).
    You will end up with something like the following:
 
 ```yaml
@@ -28,7 +31,15 @@ pluralName: BirdsOfParadise
 description: A bird of the family Paradisaeidae of the order Passeriformes.
 ```
 
-1. Add your type name to one of the categories in `./schema/type-hierarchy.yaml`. If it doens't really fit well in any of the existing ones, speak to the reliability engineering team about creating a new category
+1. Add your type name to one of the categories in `./schema/type-hierarchy.yaml`. If it doesn't really fit well in any of the existing ones, or create a new type-hierarchy file which will look something like this:
+
+```yaml
+birdFamilies:
+    label: Bird families
+    description: Each family of birds has its own type
+    types:
+        - BirdOfParadise
+```
 
 ## Thinking about properties
 
@@ -81,7 +92,7 @@ properties:
 
 Adding relationships is very similar to adding normal properties, with a few important differences:
 
--   The `type` must refer to the name of another type defined in the biz-ops-schema files, not a primitive type
+-   The `type` must refer to the name of another type defined in the schema files, not a primitive type
 -   Additional information - `relationship`, `direction` and `hasMany` - must be set in order to define how neo4j should store the data, and how graphQL should represent it (see [the spec](<(MODEL_SPECIFICATION.md#relationship-property-definitions)>))
 -   The relationship must be defined at both ends, so you will need to modify more than one type file!
 
@@ -118,4 +129,4 @@ Note that we don't need to specify `hasMany` for any relationship that can only 
 
 ## You're probably not finished yet
 
-Please have a read through the [model specification](MODEL_SPECIFICATION.md), which will tell you how to define enums, create validation rules for strings, group properties into fieldsets and add further configuration to properties and types. If you find anything confusing please don't hesitate to raise it in the #biz-ops slack channel, or submit a pull request with a `work in progress` label and ask for comment.
+Please have a read through the [schema specification](schema-spec.md), which will tell you how to define enums, create validation rules for strings, group properties into fieldsets and add further configuration to properties and types. If you find anything confusing please an issue, or submit a pull request with a `work in progress` label and ask for comment.

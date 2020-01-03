@@ -1,38 +1,85 @@
 # @financial-times/tc-api-rest-express
 
-Treecreeper&tm; api to sit in front of a neo4j database instance. It provides
+Adds a treecreeper api to an express app. It provides
 
--   a graphql api
+-   a GraphQL api
 -   RESTful CRUD endpoints
 -   Takes care of initialising a schema-sdk and api-db-manager, so that data structures automatically update
 
-It exports `{ getApp }`. `getApp` accepts the following configuration object (defaults are as specified below):
+## API
 
-```js
-getApp({
-	app = express(), // an express app. If none provided, one will be created
-	treecreeperPath = '/', // the path at which the treecreeper api is served
-	graphqlPath = '/graphql', // the path, relative to treecreeperPath, where the graphql api is served
-	graphqlMethods = ['post'], // methods accepted by the graphql api
-	graphqlMiddlewares = [], // array of middlewares to call before the graphql handler executes
-	restPath = '/rest', // the path, relative to treecreeperPath, where the REST api is served
-	restMiddlewares = [], // array of middlewares to call before the relevant REST handler executes
-	documentStore, // an [optional] reference to a documentStore object, used to store large properties outside the neo4j instance
-	republishSchema, // a boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi
-	republishSchemaPrefix = 'api', // If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicaytes the prefix to use
-	logger, // an [optional] logger that implements debug, info, warning and error methods
-	timeout // optional integer to set maximum time DB will be queried for adn, by association, maximum time a request can stay alive for before being rejected and erroring
-})
-```
+### `getApp(options)`
 
-It returns an object with the following structure
+Returns an express instance with the GraphQL and REST apis set up according to the options provided
 
-```js
-app.treecreeper = {
-	logger, // a reference to treecreeper's internal logger, which decorates each log with useful application/request metadata
-	isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines its data types up to date
-};
-```
+A `treecreeper` object is attached to the express instance with the following properties
+
+#### response
+
+##### `logger`
+
+A reference to treecreeper's internal logger, which decorates each log with useful application/request metadata
+
+##### `isSchemaUpdating`
+
+A function that returns a boolean indicating whether the application is successfully keeping the schema
+that defines its data types up to date
+
+##### `emitter` and `availableEvents`
+
+See `tc-api-rest-handlers` for details
+
+#### Options
+
+##### `app`
+
+An express app. If none it provided, one will be created
+
+##### `schemaOptions`
+
+Options to pass to `tc-schema-sdk`. Note that some options may be provided via environment variables
+
+##### `treecreeperPath = '/'`
+
+The path at which the treecreeper api is served
+
+##### `graphqlPath = '/graphql'`
+
+The path, relative to treecreeperPath, where the graphql api is served
+
+##### `graphqlMethods = ['post']`
+
+Methods accepted by the graphql api
+
+##### `graphqlMiddlewares = []`
+
+Array of middlewares to call before the graphql handler executes
+
+##### `restPath = '/rest'`
+
+The path, relative to treecreeperPath, where the REST api is served
+
+##### `restMiddlewares = []`
+
+Array of middlewares to call before the relevant REST handler executes
+
+##### `documentStore`
+
+An [optional] reference to a tc-api-s3-document-store instance (or a library implementing the same API), used to store large properties outside the neo4j instance
+
+##### `republishSchema`
+
+A boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi. Note that republishing depends on a `TREECREEPER_SCHEMA_BUCKET` envioronment variable, which should be the name of an s3 bucket.
+
+##### `republishSchemaPrefix = 'api'`
+
+If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicates the
+prefix to use
+
+##### `timeout`
+
+Optional integer to set maximum time DB will be queried for and, by association, maximum time a request can stay alive for
+before being rejected and erroring
 
 ## Example
 

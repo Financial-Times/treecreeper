@@ -100,7 +100,7 @@ const broadcast = changeSummaries => {
 
 	combinedEvents.forEach(event =>
 		module.exports.emitter.emit(event.action, {
-			time: Math.floor(Date.now() / 1000),
+			timestamp: Math.floor(Date.now() / 1000),
 			...event,
 		}),
 	);

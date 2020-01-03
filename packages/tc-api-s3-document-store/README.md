@@ -1,6 +1,6 @@
 # @financial-times/tc-api-s3-document-store
 
-Module for connecting a Treecreeper&tm; api to an s3 bucket to use as an additional data store for storing properties that are too large to allow efficient querying in neo4j.
+Module for connecting a Treecreeper api to an s3 bucket to use as an additional data store for storing properties that are too large to allow efficient querying in neo4j.
 
 Any module implementing the same interface can also be passed to other treecreeper packages in order to use alternative choices of store.
 
@@ -15,15 +15,29 @@ This package exports two methods:
 
 ## API
 
-Every instance implements the following CRUD methods:
+Every instance implements the following methods:
 
--   `get(nodeType, code)`
--   `post(nodeType, code, body)`
--   `patch(nodeType, code, body)`
--   `delete(nodeType, code)`
--   `absorb(nodeType, code, absorbedCode)`
+### `get(nodeType, code)`
 
-All are self explanatory (yes, yes, I know... will document in full later. For now just need basic README's in place) with the exception of `absorb`, which takes the record for `absorbedCode`, copies any properties it has that don't already exist on `code` over, and then deletes the record for `absorbedCode`
+Retrieves a record from s3
+
+### `post(nodeType, code, body)`
+
+Writes a record to s3 (if it doesn not already exist)
+
+### `patch(nodeType, code, body)`
+
+Writes a record to s3, updating it if it already exists
+
+### `delete(nodeType, code)`
+
+Deletes a record from s3
+
+### `absorb(nodeType, code, absorbedCode)`
+
+Merges a record (absorbedCode) into another (code) in s3
+
+#### Output
 
 Each method returns an object containing a `body` property, which itself contains an object that contains all the properties stored in the docstore for that record
 
