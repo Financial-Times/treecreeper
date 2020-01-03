@@ -152,4 +152,3 @@ workflows:
             <<: *only_version_tags
             branches:
               ignore: /.*/
-          workspace-path: *workspace_root
