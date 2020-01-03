@@ -21,7 +21,8 @@ module.exports = {
 			'd5deb97d-5fa2-45f2-99fa-cd155328320d', // doc/db-upgrade.md:67
 			'tech@lt\\.com', // scripts/load-testing/lib/generate/team.js:29
 			'email@example.com', // test/v2/node-patch.spec.js:1812|1839
-			'447559/71667873-c7c56680-2d5e-11ea-9e44-a0947997e18c' // treecreeper logo
+			'447559/71667873-c7c56680-2d5e-11ea-9e44-a0947997e18c', // treecreeper logo
+			'me@here.com' // example email address
 		]
 	}
 };
