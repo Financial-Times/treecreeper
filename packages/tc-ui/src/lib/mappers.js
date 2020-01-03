@@ -45,6 +45,7 @@ const graphqlQueryBuilder = (type, assignComponent) => {
 	query getStuff($itemId: String!) {
     ${type} (code: $itemId) {
     ${Object.entries(getType(type, { includeMetaFields: true }).properties)
+		.filter(([, { deprecationReason }]) => !deprecationReason)
 		.map(([propName, propDef]) =>
 			toGraphql(propName, propDef, assignComponent),
 		)
