@@ -1,44 +1,70 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { logger } = require('@financial-times/tc-api-express-logger');
 
+
+
 class Tracer {
 	constructor(context) {
-		this.map = {};
+		this.typesMap = {};
 		this.context = { ...context };
 	}
 
-	collect(type, field) {
-		this.map[type] = this.map[type] || new Set();
-		this.map[type].add(field);
+	getContainer(type) {
+		this.typesMap[type] = this.typesMap[type] || {fields: new Set(), args: new Set()};
+		return this.typesMap[type]
 	}
 
-	_log(logType) {
-		try {
-			Object.entries(this.map).forEach(([type, fields]) => {
-				const { properties } = getType(type);
-				fields = [...fields];
-				logger[logType]({
-					event: 'GRAPHQL_TRACE',
-					success: logType !== 'error',
-					type,
-					fields,
-					...this.context,
-				});
+	collectField(type, field) {
+		console.log('asdsalkjd ask.jd ')
+		const {fields} = this.getContainer(type)
+		fields.add(field);
+	}
 
-				fields
+	collectArgs(type, args) {
+		console.log('asdsalkjd ask.jd safsfsefsdf')
+		const {args: argsSet} = this.getContainer(type)
+		Object.keys(args)
+			.filter((key) => !['offset', 'first', 'filter'].includes(key))
+			.forEach((key) =>
+				argsSet.add(key)
+			)
+		()
+	}
+
+	logDeprecated (propDefs, fields, usageType) {
+		fields
 					.filter(
 						name =>
-							properties[name] &&
-							properties[name].deprecationReason,
+							propDefs[name] &&
+							propDefs[name].deprecationReason,
 					)
 					.forEach(field =>
 						logger.warn({
 							event: 'GRAPHQL_TRACE_DEPRECATION',
 							type,
 							field,
+							usageType,
 							...this.context,
 						}),
 					);
+	}
+
+	_log(logType) {
+		console.log('ASRHDGRASDGH SADJASGD ASHD', this.typesMap)
+		try {
+			Object.entries(this.typesMap).forEach(([type, {fields, args}]) => {
+				const { properties: prodDefs } = getType(type);
+				fields = [...fields];
+				logger[logType]({
+					event: 'GRAPHQL_TRACE',
+					success: logType !== 'error',
+					type,
+					fields,
+					args,
+					...this.context,
+				});
+				this.logDeprecated(propDefs, fields, 'field')
+				this.logDeprecated(propDefs, args, 'arg')
 			});
 		} catch (error) {
 			logger.error(
@@ -58,8 +84,14 @@ class Tracer {
 }
 
 const middleware = (resolve, parent, args, context, info) => {
+		console.log(
+info
+
+			)
 	if (info.parentType.name !== 'Query') {
-		context.trace.collect(info.parentType.name, info.fieldName);
+
+		context.trace.collectField(info.parentType.name, info.fieldName);
+		context.trace.collectArgs(info.parentType.name, args);
 	}
 	return resolve(parent, args, context, info);
 };
