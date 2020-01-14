@@ -21,7 +21,7 @@ Types are defined in individual files in a `types` subdirectory. Add a `.yaml` f
 | name                | yes      |         | The name of the type. This should be exactly the same as the name of the file. It must begin with an upper case letter and contain only upper and lower case letters                                                                                                                                            | `CostCentre`, `FastlyInstance`                    |
 | pluralName          | no       |         | The pluralised version of the type name. If not specified, defaults to the type name with an `s` appended                                                                                                                                                                                                       | `People`                                          |
 | description         | yes      |         | Description of what kind of entity the type is. This can be spread over multiple lines and supports markdown. It is used to describe types in the graphql schema (and UIs powered by this such as graphiql) and in tc-ui                                                                                        |                                                   |
-| moreInformation     | no       |         | An optional extension to the description to allow an extended description for the type. This can be spread over multiple lines andsupports markdown. It is used to provide additional information in the UI                                                                                                     |                                                   |
+| moreInformation     | no       |         | An optional extension to the description to allow an extended description for the type. This can be spread over multiple lines and supports markdown. It is used to provide additional information in the UI                                                                                                    |                                                   |
 | properties          | yes      |         | An object containing one or more [Property Definintion](#property-definitions). Each key in this object defines the property name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word | property names: `officeLocation`, `supportsHttp2` |
 | fieldsets           | no       |         | An object containing one or more [Fieldset Definition](#fieldset-definitions). Each key in this object defines the fieldset name, and must be a camel-cased string, i.e. only letters and numbers, beginning with a lower case letter, with capital letters typically used to mark the beginning of a new word  | fieldset names: `general`, `contactDetails`       |
 | createPermissions   | no       |         | An array listing the codes of clients that are allowed to create instances of this type. If not specified, any client is allowed to                                                                                                                                                                             | `- my-type-importer`                              |
@@ -78,7 +78,7 @@ By default, tc-schema-sdk will include the following primitive types:
 
 All the options for [property definitions](#property-definitions) apply to relationship property definitions unless a rule below explicitly says otherwise.
 
-For relationships which shoudl be annotated with their own properties, see the section on [rich relationships](#rich-relationships)
+For relationships which shoud be annotated with their own properties, see the section on [rich relationships](#rich-relationships)
 
 | name          | required | default                                                                            | details                                                                                                                                                                                                                                                                                                                                                          | examples                      |
 | ------------- | -------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -101,7 +101,7 @@ Note that, in most cases, you will want to 'anchor' your cypher query at the cur
 
 ### Fieldset Definitions
 
-Fieldsets group properties with other properties that are related to them e.g. all the properties defining relationships between systems might be grouped in a `relatedSystems` fieldset. This structure is not used in the underlying data store, but is rather applied at a later stage by anything using the data. Fieldsets are defined using ibjects with the following properties
+Fieldsets group properties with other properties that are related to them e.g. all the properties defining relationships between systems might be grouped in a `relatedSystems` fieldset. This structure is not used in the underlying data store, but is rather applied at a later stage by anything using the data. Fieldsets are defined using objects with the following properties
 
 | name        | required | default details | examples                                                     |
 | ----------- | -------- | --------------- | ------------------------------------------------------------ |
@@ -138,7 +138,7 @@ fieldsets:
 
 ## String validation rules
 
-These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `string-patterns.yaml` by adding a property to the yaml file abserving the following rules:
+These are expressed as regular expressions and are used to (optionally) validate values. Define a pattern in `string-patterns.yaml` by adding a property to the yaml file observing the following rules:
 
 -   The property name must be in CONSTANT_CASE
 -   The value must be either

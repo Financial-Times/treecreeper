@@ -14,9 +14,9 @@ The schema is used to generate three things
 2. A GraphQL SDL schema to define the behaviour of the GraphQL API.
 3. Metadata to power a CMS style user interface for the data, and - potentially - other representations of the data.
 
-While GraphQL does define its own schema format, it is neither easy to extend with the custom properties we ned for requirements 1. and 3., and is also a format that is less familiar to the average developer and harder to perform automated validation on. In addition, there are many opportunities to avoid repetition by automation the construction of the GraphQL schema from a simpler, custom format.
+While GraphQL does define its own schema format, it is neither easy to extend with the custom properties we need for requirements 1. and 3., and is also a format that is less familiar to the average developer and harder to perform automated validation on. In addition, there are many opportunities to avoid repetition by automation the construction of the GraphQL schema from a simpler, custom format.
 
-This is not to say that the treecreeper schema is _simple_ - it helps us model some complex data structures, and as such there is some mecessary complexity involved.
+This is not to say that the treecreeper schema is _simple_ - it helps us model some complex data structures, and as such there is some necessary complexity involved.
 
 ## Types
 
