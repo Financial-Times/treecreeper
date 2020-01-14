@@ -43,6 +43,10 @@ monorepo-publish: prepublish
 
 .PHONY: test
 
+.PHONY: cypress-open
+cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
+	./node_modules/.bin/cypress open
+
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
