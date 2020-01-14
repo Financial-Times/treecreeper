@@ -1,0 +1,57 @@
+{
+	"data": {
+		"System": {
+			"code": "biz-ops-admin",
+			"name": "Biz Ops Admin",
+			"serviceTier": "Bronze",
+			"primaryURL": "https://biz-ops.in.ft.com",
+			"supportedBy": {
+				"name": "Reliability Engineering",
+				"isThirdParty": false,
+				"slack": "reliability-eng",
+				"email": "reliability.engineering@ft.com"
+			},
+			"deliveredBy": {
+				"name": "Reliability Engineering",
+				"isThirdParty": false,
+				"slack": "reliability-eng",
+				"email": "reliability.engineering@ft.com",
+				"techLeads": [
+					{
+						"name": "John Doe",
+						"email": "John.doe@ft.com"
+					},
+					{
+						"name": "Jane Doe",
+						"email": "jane.doe@ft.com"
+					}
+				],
+				"productOwners": [
+					{
+						"name": "Alex Doe",
+						"email": "alex.doe@ft.com"
+					}
+				]
+			},
+			"knownAboutBy": [
+				{
+					"name": "Jane Doe"
+				},
+				{
+					"name": "John Doe"
+				}
+			],
+			"technicalOwner": {
+				"name": "John Doe",
+				"email": "john.doe@ft.com"
+			},
+			"containsSensitiveData": false,
+			"repositories": [
+				{
+					"url": "https://github.com/Financial-Times/biz-ops-admin",
+					"versionControlSystem": "github"
+				}
+			]
+		}
+	}
+}

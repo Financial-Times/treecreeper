@@ -7,6 +7,7 @@ const customComponents = require('./components/primitives');
 
 const wrapCmsHandler = handler => async (req, res) => {
 	try {
+		console.log('here', req.params);
 		const { status, body, headers } = await handler({
 			...req.params,
 			metadata: { clientUserId: 'rhys.evans' },
@@ -20,7 +21,7 @@ const wrapCmsHandler = handler => async (req, res) => {
 
 		res.status(status).send(body);
 	} catch (e) {
-		logger.err(e);
+		console.log(e);
 		res.send(500).end();
 	}
 };
