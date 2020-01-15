@@ -44,7 +44,8 @@ monorepo-publish: prepublish
 .PHONY: test
 
 .PHONY: cypress-open
-cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
+cypress-open: init-db## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
+	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
 	./node_modules/.bin/cypress open
 
 deploy-aws:
