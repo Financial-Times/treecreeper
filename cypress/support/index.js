@@ -13,30 +13,10 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-//  import './commands'
-
-// Alternatively you can use CommonJS syntax:
 require('./commands');
-
-const polyfills = require('./polyfills');
-
-const isWebpackPollingRequest = xhr => /\/sockjs-node/.test(xhr.url);
-const isStaticAssetsRequest = xhr =>
-	xhr.method === 'GET' && /\.(jsx?|html|css)(\?.*)?$/.test(xhr.url);
-
-before(() => {
-	polyfills.getPolyfills();
-});
 
 beforeEach(() => {
 	cy.server({
 		force404: true,
-		whitelist: xhr =>
-			isWebpackPollingRequest(xhr) || isStaticAssetsRequest(xhr),
 	});
-});
-
-Cypress.on('window:before:load', win => {
-	polyfills.applyPolyfills(win);
 });

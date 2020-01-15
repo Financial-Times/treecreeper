@@ -20,6 +20,7 @@ const EditButton = props => (
 
 const SaveButton = () => (
 	<button
+		data-testid="submit"
 		className={getButtonClasses('o-buttons--primary o-buttons--mono')}
 		type="submit"
 	>
