@@ -1,4 +1,3 @@
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
 const {
 	code,
 	someDocument,
@@ -12,11 +11,7 @@ const {
 	someUrl,
 } = require('../fixtures/mainTypeData.json');
 
-describe('End-to-end Journey', () => {
-	const resetDb = async () => {
-		await dropFixtures(code);
-	};
-
+describe('View End-to-end Journey', () => {
 	const populateMainTypeFields = () => {
 		cy.visit(`/MainType/create`);
 
@@ -66,10 +61,6 @@ describe('End-to-end Journey', () => {
 			.type('e2e')
 			.type('{downarrow}{enter}');
 	};
-
-	before(() => {
-		resetDb();
-	});
 
 	it('Navigates through MainType/create and creates MainType', () => {
 		cy.visit(`/MainType/create`);
