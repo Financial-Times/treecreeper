@@ -136,9 +136,26 @@ describe('End-to-end Journey', () => {
 	it('creates relationships between MainType, ParentType and ChildType', () => {
 		cy.visit(`/MainType/e2e-demo`);
 
-		cy.get('#children').should('have.text', `${code}-child`);
-		cy.get('#parents').should('have.text', `${code}-parent`);
-		cy.get('#curiousChild').should('have.text', `${code}-child`);
-		cy.get('#curiousParent').should('have.text', `${code}-parent`);
+		cy.get('#children')
+			.find('a')
+			.should('have.text', `${code}-child`)
+			.url(`/ChildType/${code}-child`);
+		cy.get('#parents')
+			.find('a')
+			.should('have.text', `${code}-parent`)
+			.url(`/ParentType/${code}-parent`);
+		cy.get('#curiousChild')
+			.should('have.text', `${code}-child`)
+			.url(`/ChildType/${code}-child`);
+		cy.get('#curiousParent')
+			.find('a')
+			.should('have.text', `${code}-parent`)
+			.url(`/ParentType/${code}-parent`);
+
+		cy.get('#curiousParent')
+			.find('a')
+			.click({ force: true });
+
+		cy.location('pathname').should('eq', `/ParentType/${code}-parent`);
 	});
 });
