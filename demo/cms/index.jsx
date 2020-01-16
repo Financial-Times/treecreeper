@@ -20,7 +20,7 @@ const wrapCmsHandler = handler => async (req, res) => {
 
 		res.status(status).send(body);
 	} catch (e) {
-		logger.err(e);
+		logger.error(e);
 		res.send(500).end();
 	}
 };
