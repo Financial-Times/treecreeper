@@ -218,6 +218,7 @@ class RelationshipPicker extends React.Component {
 		return (
 			<div
 				data-props={JSON.stringify(props)}
+				data-property-name={props.propertyName}
 				data-component="relationship-picker"
 				data-disabled={disabled ? true : null}
 				data-is-unresolved={isUnresolved ? true : null}
