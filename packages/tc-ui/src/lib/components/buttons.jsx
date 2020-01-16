@@ -7,6 +7,7 @@ const getButtonClasses = extraClasses =>
 
 const EditButton = props => (
 	<a
+		data-testid="edit"
 		href={`/${props.type}/${encodeURIComponent(props.code)}/edit?${
 			props.querystring
 		}`}
@@ -38,6 +39,7 @@ const CancelButton = props => {
 
 	return (
 		<a
+			data-testid="cancel"
 			href={redirectLocation}
 			className={getButtonClasses(
 				'o-buttons--mono biz-ops-cta--link-style-override',
@@ -56,6 +58,7 @@ const DeleteButton = props =>
 			method="POST"
 		>
 			<button
+				data-testid="delete"
 				className={getButtonClasses(
 					'o-buttons--mono biz-ops-cta--delete',
 				)}

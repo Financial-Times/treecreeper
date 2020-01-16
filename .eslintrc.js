@@ -10,8 +10,7 @@ module.exports = {
 	extends: [
 		// Cannot use `@financial-times/rel-engage/packages/dotfiles/eslint`
 		// as this is translated to `eslint-config-@financial-times/rel-engage/packages/dotfiles/eslint
-		'./node_modules/@financial-times/rel-engage/packages/dotfiles/eslint.js',
-		'plugin:cypress/recommended'
+		'./node_modules/@financial-times/rel-engage/packages/dotfiles/eslint.js'
 	],
 	rules: {
 		"unicorn/prefer-flat-map": "off",
