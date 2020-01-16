@@ -1,7 +1,6 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
 
 const getSchemaSubset = (event, type, isCreate = false) => {
-	console.log({ event, type, isCreate });
 	const properties = event.query && event.query.properties;
 
 	if (!properties) {
@@ -21,7 +20,6 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 		includeMetaFields: false,
 	});
 	const propertyKeys = properties.split(',');
-	console.log(fullSchema);
 	return {
 		schema: {
 			...fullSchema,
