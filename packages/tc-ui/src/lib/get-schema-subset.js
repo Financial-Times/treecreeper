@@ -1,17 +1,13 @@
 const { getType } = require('@financial-times/tc-schema-sdk');
 
-const getTypeOptions = {
-	groupProperties: true,
-	includeMetaFields: false,
-};
-
 const getSchemaSubset = (event, type, isCreate = false) => {
 	const properties = event.query && event.query.properties;
 
 	if (!properties) {
 		return {
 			schema: getType(type, {
-				...getTypeOptions,
+				groupProperties: true,
+				includeMetaFields: false,
 				useMinimumViableRecord: isCreate,
 			}),
 			isSubset: false,
@@ -19,9 +15,11 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	}
 
 	const title = event.query && event.query.title;
-	const fullSchema = getType(type, getTypeOptions);
+	const fullSchema = getType(type, {
+		groupProperties: false,
+		includeMetaFields: false,
+	});
 	const propertyKeys = properties.split(',');
-
 	return {
 		schema: {
 			...fullSchema,

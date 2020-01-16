@@ -56,7 +56,7 @@ const fieldValueCheckers = {
 		!![...field.querySelectorAll('input')].some(input => input.checked),
 	relationship: field =>
 		!![...field.querySelectorAll('input[type="hidden"]')].every(
-			input => !!input.value,
+			input => !!input.value && input.value !== '[]',
 		),
 };
 
