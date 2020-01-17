@@ -44,14 +44,9 @@ monorepo-publish: prepublish
 .PHONY: test
 
 .PHONY: cypress-open
-cypress-open: run ## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
+cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
 	TREECREEPER_TEST=true \
 	cypress open
-
-.PHONY: cypress-run
-cypress-run: ## cypress-run: Runs the Cypress.io integration tests headlessly. Expects a local application server to be running concurrently.
-	TREECREEPER_TEST=true \
-	./node_modules/.bin/cypress run
 
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
@@ -67,11 +62,12 @@ test: init-db
 run-app:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
-build-statics:
+build-statics: .env
+	rm -rf ./dist/static-assets/*
 	@if [ -z $(CI) ]; \
-		then webpack --mode=production;
-		else webpack-dev-server --mode development;
-	fi
+		then ./node_modules/.bin/webpack --mode=production; \
+		else webpack-dev-server --mode development;\
+   fi
 
 run-db:
 	docker-compose up
