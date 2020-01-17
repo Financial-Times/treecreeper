@@ -10,6 +10,7 @@ references:
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
       - image: circleci/node:12.9.1-browsers
+      - image: cypress/base:10
     environment:
       NEO4J_VERSION: "3.5.0"
 
@@ -130,7 +131,8 @@ workflows:
       - cypress/run:
           yarn: true
           cache-key: *cache_key
-          start: make env && make run
+          start: make env && make run-db && make run-app
+          build: make build-statics
           wait-on: 'http://localhost:8888'
           store_artifacts: true
           filters:
