@@ -63,7 +63,10 @@ run-app:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 build-statics:
-	webpack-dev-server --mode development
+	@if [ -z $(CI) ]; \
+		then webpack;
+		else webpack-dev-server --mode development;
+	fi
 
 run-db:
 	docker-compose up
