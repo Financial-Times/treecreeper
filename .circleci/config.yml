@@ -127,12 +127,14 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
-      - cypress/install:
-          cache-key: *cache_key
       - cypress/run:
           yarn: true
           cache-key: *cache_key
+          start: make env && make run
+          wait-on: 'http://localhost:8888'
           store_artifacts: true
+          filters:
+            <<: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
