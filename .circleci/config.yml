@@ -130,6 +130,7 @@ workflows:
       - cypress/install:
           cache-key: *cache_key
       - cypress/run:
+          yarn: true
           cache-key: *cache_key
           store_artifacts: true
       # Scan package.json for vulnerable dependencies while developing
@@ -145,6 +146,7 @@ workflows:
             - install
             - test
             - verify
+            - cypress/run
             # - ft-snyk-orb/scan-js-packages
           filters:
             <<: *only_version_tags
