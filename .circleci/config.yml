@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   ft-snyk-orb: financial-times/ft-snyk-orb@0
+  cypress: cypress-io/cypress@1
 
 references:
 
@@ -87,6 +88,10 @@ jobs:
 
       - store_artifacts:
           path: junit
+
+      - run:
+          name: Run e2e tests
+          command: cypress/run
 
   verify:
     <<: *default_container_config
