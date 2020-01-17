@@ -64,7 +64,7 @@ run-app:
 
 build-statics:
 	@if [ -z $(CI) ]; \
-		then webpack;
+		then ./node_modules/.bin/webpack-dev-server --mode=production;
 		else webpack-dev-server --mode development;
 	fi
 
