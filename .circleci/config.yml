@@ -16,6 +16,9 @@ references:
   workspace_root: &workspace_root
     ~/
 
+  cache_key: &cache_key
+    cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
@@ -23,11 +26,11 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+        - *cache_key
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+      key: *cache_key
       paths:
         - ./node_modules/
 
@@ -89,10 +92,6 @@ jobs:
       - store_artifacts:
           path: junit
 
-      - run:
-          name: Run e2e tests
-          command: cypress/run
-
   verify:
     <<: *default_container_config
     steps:
@@ -128,6 +127,11 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
+      - cypress/install:
+          cache-key: *cache_key
+      - cypress/run:
+          cache-key: *cache_key
+          store_artifacts: true
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
