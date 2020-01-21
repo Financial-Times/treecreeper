@@ -135,7 +135,7 @@ describe('End-to-end Journey', () => {
 		cy.location('pathname').should('eq', `/ParentType/${code}-parent`);
 	});
 
-	it.only('Navigates through ChildType/create and creates ChildType', () => {
+	it('Navigates through ChildType/create and creates ChildType', () => {
 		cy.visit(`/ChildType/create`);
 		cy.url().should('contain', '/ChildType/create');
 
