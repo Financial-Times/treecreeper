@@ -62,18 +62,20 @@ test: init-db
 run-app:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
-build-statics: .env
-	rm -rf ./dist/static-assets/*
-	@if [ -z $(CI) ]; \
-		then ./node_modules/.bin/webpack --mode=production; \
-		else webpack-dev-server --mode development;\
-   fi
+build-statics-ci:
+	./node_modules/.bin/webpack --mode=production
+
+build-statics:
+	webpack-dev-server --mode=development
 
 run-db:
 	docker-compose up
 
 run:
 	@concurrently "make run-db" "make build-statics" "make run-app"
+
+run-ci:
+	@concurrently "make build-statics-ci" "make run-app"
 
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js

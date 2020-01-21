@@ -47,6 +47,7 @@
     "lolex": "^4.2.0",
     "mini-css-extract-plugin": "^0.8.0",
     "nodemon": "^1.19.1",
+    "start-server-and-test": "^1.10.6",
     "stylelint": "^12.0.0",
     "stylelint-config-recommended-scss": "^4.1.0",
     "stylelint-scss": "^3.13.0",
@@ -59,7 +60,11 @@
   },
   "scripts": {
     "test": "make test",
-    "postinstall": "athloi exec npm i -- --no-package-lock"
+    "postinstall": "athloi exec npm i -- --no-package-lock",
+    "cy:verify": "cypress verify",
+    "cy:run": "./node_modules/.bin/cypress run",
+    "start-server": "make run-ci",
+    "e2e:test": "start-server-and-test start-server http-get://localhost:8888/MainType/create cy:run"
   },
   "repository": {
     "type": "git",
