@@ -99,7 +99,6 @@ run-test-db:
   ./scripts/neo4j-plugins; \
 	dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start;\
   ./scripts/neo4j-wait-for-start; \
-  "make init-db"; 
 
 clean-deps: unprepublish
 	rm -rf packages/*/node_modules
