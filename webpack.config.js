@@ -3,9 +3,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const EncodingPlugin = require('webpack-encoding-plugin');
 const path = require('path');
 
-const filenameTemplate = process.env.CIRCLECI
-	? '[contenthash].[name]'
-	: '[name]';
+const filenameTemplate = '[name]';
 module.exports = {
 	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
