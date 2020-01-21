@@ -11,64 +11,76 @@ const {
 	someUrl,
 } = require('../fixtures/mainTypeData.json');
 
-describe('View End-to-end Journey', () => {
-	const populateMainTypeFields = () => {
+const populateMainTypeFields = () => {
+	cy.visit(`/MainType/create`);
+
+	cy.get('input[name=code]').type(code);
+	cy.get('textarea[name=someDocument]').type(someDocument);
+	cy.get('textarea[name=anotherDocument]').type(anotherDocument);
+	cy.get('input[name=someString]').type(someString);
+	cy.get('[type="radio"]')
+		.first()
+		.check({ force: true });
+	cy.get('select[name=someEnum]').select(someEnum);
+	cy.get('input[name=someInteger]').type(someInteger);
+	cy.get('input[name=anotherString]').type(anotherString);
+	cy.get('input[name=someDate]')
+		.click()
+		.then(input => {
+			input[0].dispatchEvent(new Event('input', { bubbles: true }));
+			input.val(someDate);
+		})
+		.click();
+	cy.get('input[name=someDatetime]')
+		.click()
+		.then(input => {
+			input[0].dispatchEvent(new Event('input', { bubbles: true }));
+			input.val(someDatetime);
+		})
+		.click();
+	cy.get('input[name=someUrl]').type(someUrl);
+};
+
+const populateParentTypeFields = () => {
+	cy.get('#id-code').type('e2e-demo-parent');
+	cy.get('#isParentOf-picker')
+		.type('e2e')
+		.wait(500)
+		.type('{downarrow}{enter}');
+	cy.get('#isCuriousParentOf-picker')
+		.type('e2e')
+		.wait(500)
+		.type('{downarrow}{enter}');
+
+	cy.get('[data-testid="submit"]').click();
+};
+
+const populateChildTypeFields = () => {
+	cy.get('#id-code').type('e2e-demo-child');
+	cy.get('#isChildOf-picker')
+		.type('e2e')
+		.wait(500)
+		.type('{downarrow}{enter}');
+	cy.get('#isCuriousChildOf-picker')
+		.type('e2e')
+		.wait(500)
+		.type('{downarrow}{enter}');
+	cy.get('[data-testid="submit"]').click();
+};
+
+describe('End-to-end Journey', () => {
+	before(() => {
 		cy.visit(`/MainType/create`);
+		cy.url().should('contain', '/MainType/create');
 
-		cy.get('input[name=code]').type(code);
-		cy.get('textarea[name=someDocument]').type(someDocument);
-		cy.get('textarea[name=anotherDocument]').type(anotherDocument);
-		cy.get('input[name=someString]').type(someString);
-		cy.get('[type="radio"]')
-			.first()
-			.check({ force: true });
-		cy.get('select[name=someEnum]').select(someEnum);
-		cy.get('input[name=someInteger]').type(someInteger);
-		cy.get('input[name=anotherString]').type(anotherString);
-		cy.get('input[name=someDate]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDate);
-			})
-			.click();
-		cy.get('input[name=someDatetime]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDatetime);
-			})
-			.click();
-		cy.get('input[name=someUrl]').type(someUrl);
-	};
-
-	const populateParentTypeFields = () => {
-		cy.get('#id-code').type('e2e-demo-parent');
-		cy.get('#isParentOf-picker')
-			.type('e2e')
-			.type('{downarrow}{enter}');
-		cy.get('#isCuriousParentOf-picker')
-			.type('e2e')
-			.type('{downarrow}{enter}');
-	};
-
-	const populateChildTypeFields = () => {
-		cy.get('#id-code').type('e2e-demo-child');
-		cy.get('#isChildOf-picker')
-			.type('e2e')
-			.type('{downarrow}{enter}');
-		cy.get('#isCuriousChildOf-picker')
-			.type('e2e')
-			.type('{downarrow}{enter}');
-	};
-
-	it('Navigates through MainType/create and creates MainType', () => {
-		cy.visit(`/MainType/create`);
 		populateMainTypeFields();
 
 		cy.get('[data-testid="submit"]').click();
+	});
 
+	it('Navigates through MainType/create', () => {
 		cy.visit(`/MainType/e2e-demo`);
+		cy.url().should('contain', '/MainType/e2e-demo');
 
 		cy.get('#code').should('have.text', code);
 		cy.get('#someDocument').should('have.text', someDocument);
@@ -88,11 +100,12 @@ describe('View End-to-end Journey', () => {
 
 	it('Navigates through ParentType/create and creates ParentType', () => {
 		cy.visit(`/ParentType/create`);
+		cy.url().should('contain', '/ParentType/create');
+
 		populateParentTypeFields();
 
-		cy.get('[data-testid="submit"]').click();
-
 		cy.visit(`/ParentType/e2e-demo-parent`);
+		cy.url().should('contain', '/ParentType/e2e-demo-parent');
 
 		cy.get('#code').should('have.text', `${code}-parent`);
 		cy.get('#isParentOf')
@@ -103,15 +116,33 @@ describe('View End-to-end Journey', () => {
 			.find('a')
 			.should('have.text', code)
 			.url(`/MainType/${code}`);
+
+		cy.visit(`/MainType/e2e-demo`);
+		cy.url().should('contain', '/MainType/e2e-demo');
+
+		cy.get('#parents')
+			.find('a')
+			.should('have.text', `${code}-parent`)
+			.url(`/ParentType/${code}-parent`);
+		cy.get('#curiousParent')
+			.find('a')
+			.should('have.text', `${code}-parent`)
+			.url(`/ParentType/${code}-parent`);
+		cy.get('#curiousParent')
+			.find('a')
+			.click({ force: true });
+
+		cy.location('pathname').should('eq', `/ParentType/${code}-parent`);
 	});
 
-	it('Navigates through ChildType/create and creates ChildType', () => {
+	it.only('Navigates through ChildType/create and creates ChildType', () => {
 		cy.visit(`/ChildType/create`);
+		cy.url().should('contain', '/ChildType/create');
+
 		populateChildTypeFields();
 
-		cy.get('[data-testid="submit"]').click();
-
 		cy.visit(`/ChildType/e2e-demo-child`);
+		cy.url().should('contain', '/ChildType/e2e-demo-child');
 
 		cy.get('#code').should('have.text', `${code}-child`);
 		cy.get('#isChildOf')
@@ -122,31 +153,19 @@ describe('View End-to-end Journey', () => {
 			.find('a')
 			.should('have.text', code)
 			.url(`/MainType/${code}`);
-	});
 
-	it('creates relationships between MainType, ParentType and ChildType', () => {
 		cy.visit(`/MainType/e2e-demo`);
+		cy.url().should('contain', '/MainType/e2e-demo');
 
 		cy.get('#children')
 			.find('a')
 			.should('have.text', `${code}-child`)
 			.url(`/ChildType/${code}-child`);
-		cy.get('#parents')
-			.find('a')
-			.should('have.text', `${code}-parent`)
-			.url(`/ParentType/${code}-parent`);
 		cy.get('#curiousChild')
 			.should('have.text', `${code}-child`)
 			.url(`/ChildType/${code}-child`);
-		cy.get('#curiousParent')
-			.find('a')
-			.should('have.text', `${code}-parent`)
-			.url(`/ParentType/${code}-parent`);
+		cy.get('#curiousChild').click({ force: true });
 
-		cy.get('#curiousParent')
-			.find('a')
-			.click({ force: true });
-
-		cy.location('pathname').should('eq', `/ParentType/${code}-parent`);
+		cy.location('pathname').should('eq', `/ChildType/${code}-child`);
 	});
 });
