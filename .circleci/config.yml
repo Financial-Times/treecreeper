@@ -80,7 +80,7 @@ jobs:
           command: npm ci
       # run verify and then save cache.
       # this ensures that the Cypress verified status is cached too
-      - run: npm run cy:verify
+      - run: make cypress-verify
       # save new cache folder if needed
       - save_cache:
           key: *cache_key
@@ -100,16 +100,7 @@ jobs:
 
       - run:
           name: Prepare neo4j database
-          command: |
-            java -version
-            mkdir -p neo4j
-            wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
-            tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
-            sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf
-            ./scripts/neo4j-plugins
-            dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start
-            ./scripts/neo4j-wait-for-start
-            make init-db
+          command: make run-test-db
       - run:
           name: Run tests
           command: make test
@@ -130,19 +121,10 @@ jobs:
       - run: sudo sh -c 'echo "127.0.0.1 local.in.ft.com" >> /etc/hosts'
       - run:
           name: Prepare neo4j database
-          command: |
-            java -version
-            mkdir -p neo4j
-            wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
-            tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
-            sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf
-            ./scripts/neo4j-plugins
-            dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start
-            ./scripts/neo4j-wait-for-start
-            make init-db
+          command: make run-test-db
       - run:
           name: Run End-to-End Tests
-          command: npm run e2e:test
+          command: make e2e-test
       - store_artifacts:
           path: cypress/videos
       - store_artifacts:
@@ -175,7 +157,6 @@ workflows:
           context: rel-eng-creds
           filters: *only_version_tags
       - build:
-          context: rel-eng-creds
           requires:
             - install
       - test:
@@ -188,7 +169,6 @@ workflows:
             - install
           filters: *only_version_tags
       - end-to-end-test:
-          context: rel-eng-creds
           requires:
             - build
           filters:

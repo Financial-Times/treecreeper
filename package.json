@@ -60,11 +60,7 @@
   },
   "scripts": {
     "test": "make test",
-    "postinstall": "athloi exec npm i -- --no-package-lock",
-    "cy:verify": "cypress verify",
-    "cy:run": "./node_modules/.bin/cypress run",
-    "start-server": "make run-ci",
-    "e2e:test": "start-server-and-test start-server http-get://localhost:8888/MainType/create cy:run"
+    "postinstall": "athloi exec npm i -- --no-package-lock"
   },
   "repository": {
     "type": "git",

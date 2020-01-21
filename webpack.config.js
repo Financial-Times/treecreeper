@@ -29,13 +29,6 @@ module.exports = {
 			},
 		],
 	},
-
-	devServer: {
-		contentBase: './dist/browser',
-		inline: false,
-		publicPath: '/statics/',
-		host: 'local.in.ft.com',
-	},
 	plugins: [
 		new MiniCssExtractPlugin({
 			filename: `${filenameTemplate}.css`,
