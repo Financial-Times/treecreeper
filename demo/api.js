@@ -11,7 +11,7 @@ app.get('/autocomplete/:type/:field', autocomplete);
 app.use(
 	'/graphiql',
 	expressPlayground({
-		endpoint: '/graphql',
+		endpoint: '/api/graphql',
 		settings: {
 			'request.credentials': 'same-origin',
 		},
