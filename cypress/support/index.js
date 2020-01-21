@@ -14,16 +14,9 @@
 // ***********************************************************
 
 require('./commands');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
-
-const namespace = `e2e-demo`;
-const resetDb = async () => {
-	await dropFixtures(namespace);
-};
 
 before(() => {
 	cy.server({
 		force404: true,
 	});
-	resetDb();
 });
