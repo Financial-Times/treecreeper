@@ -75,8 +75,8 @@ run-app: build-statics
 
 build-statics:
 	@if [ -z $(CI) ]; \
-		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=production; \
-		else $(info Webpack bundling modules ...) webpack --mode=development; \
+		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=development; \
+		else $(info Webpack bundling modules ...) webpack --mode=production; \
 	fi
 
 run-db:
