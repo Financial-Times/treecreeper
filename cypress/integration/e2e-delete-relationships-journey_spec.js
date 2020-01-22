@@ -1,7 +1,5 @@
 const { code } = require('../fixtures/mainTypeData.json');
 const {
-	populateMainTypeFields,
-	populateParentTypeFields,
 	populateChildTypeFields,
 	pickChild,
 	pickFavouriteChild,
@@ -19,9 +17,8 @@ describe('End-to-end journey for deleting relationships', () => {
 	beforeEach(() => {
 		resetDb();
 
-		populateMainTypeFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent`);
+		cy.visit(`/MainType/create`);
+		cy.get('input[name=code]').type(code);
 		save();
 		populateChildTypeFields(`${code}-first-child`);
 		save();
@@ -40,7 +37,7 @@ describe('End-to-end journey for deleting relationships', () => {
 
 		cy.get('#favouriteChild')
 			.should('have.text', `${code}-first-child`)
-			.url(`/ChildType/${code}-favourite-child`);
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 
 		visitEditPage();
 
@@ -72,12 +69,14 @@ describe('End-to-end journey for deleting relationships', () => {
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-first-child`)
-			.url(`/ChildType/${code}-first-child`);
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 
 		cy.get('#children>li')
 			.eq(1)
 			.should('have.text', `${code}-second-child`)
-			.url(`/ChildType/${code}-second-child`);
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
 
 		visitEditPage();
 		cy.get('#ul-children>li')
@@ -92,7 +91,8 @@ describe('End-to-end journey for deleting relationships', () => {
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-second-child`)
-			.url(`/ChildType/${code}-second-child`);
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
 	});
 
 	it('can remove all relationships from 1-to-many relationship', () => {
@@ -110,12 +110,14 @@ describe('End-to-end journey for deleting relationships', () => {
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-first-child`)
-			.url(`/ChildType/${code}-first-child`);
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 
 		cy.get('#children>li')
 			.eq(1)
 			.should('have.text', `${code}-second-child`)
-			.url(`/ChildType/${code}-second-child`);
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
 
 		visitEditPage();
 		// remove first child
@@ -134,6 +136,78 @@ describe('End-to-end journey for deleting relationships', () => {
 
 		visitMainTypePage();
 
+		cy.get('#children').should('not.exist');
+	});
+
+	it('can remove both 1-to-1 and 1-to-many relationships', () => {
+		visitMainTypePage();
+
+		visitEditPage();
+
+		// pick first child
+		pickChild();
+		// pick second child
+		pickChild();
+		pickFavouriteChild();
+		save();
+
+		visitMainTypePage();
+
+		cy.get('#children')
+			.children()
+			.should('have.length', 2);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+		cy.get('#children>li')
+			.eq(1)
+			.should('have.text', `${code}-second-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+
+		cy.get('#favouriteChild')
+			.should('have.text', `${code}-first-child`)
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+		visitEditPage();
+		// remove first child
+		cy.get('#ul-children>li')
+			.eq(0)
+			.find('button')
+			.should('have.text', 'Remove')
+			.click();
+		save();
+
+		cy.visit(`/MainType/${code}`);
+		cy.url().should('contain', `/MainType/${code}`);
+
+		cy.get('#favouriteChild')
+			.should('have.text', `${code}-first-child`)
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+		cy.get('#children')
+			.children()
+			.should('have.length', 1);
+
+		visitEditPage();
+		// remove remaining child
+		cy.get('#ul-children>li')
+			.eq(0)
+			.find('button')
+			.should('have.text', 'Remove')
+			.click();
+		cy.get('#ul-favouriteChild>li')
+			.find('button')
+			.should('have.text', 'Remove')
+			.click();
+		save();
+		cy.visit(`/MainType/${code}`);
+		cy.url().should('contain', `/MainType/${code}`);
+
+		cy.get('#favouriteChild').should('not.exist');
 		cy.get('#children').should('not.exist');
 	});
 });

@@ -46,6 +46,8 @@ describe('End-to-end Journey', () => {
 			'have.text',
 			'15 January 2020, 1:00:00 PM',
 		);
-		cy.get('#someUrl').should('have.text', someUrl);
+		cy.get('#someUrl')
+			.should('have.text', someUrl)
+			.should('have.attr', 'href', someUrl);
 	});
 });
