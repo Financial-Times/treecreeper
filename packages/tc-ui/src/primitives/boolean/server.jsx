@@ -49,6 +49,7 @@ const EditBoolean = props => {
 };
 
 module.exports = {
+	name: 'Boolean',
 	ViewComponent: ({ value, id }) => (
 		<span id={id}>{getBooleanLabel(value)}</span>
 	),

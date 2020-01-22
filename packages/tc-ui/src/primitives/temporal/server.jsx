@@ -59,6 +59,7 @@ const EditTemporal = ({ type, propertyName, value, required, disabled }) => {
 };
 
 module.exports = {
+	name: 'Temporal',
 	EditComponent: props => (
 		<WrappedEditComponent
 			Component={EditTemporal}

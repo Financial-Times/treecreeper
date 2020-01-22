@@ -39,6 +39,7 @@ const EditLargeText = props => {
 };
 
 module.exports = {
+	name: 'LargeText',
 	EditComponent: props => (
 		<div
 			className={

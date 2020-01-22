@@ -24,6 +24,7 @@ const maybeSort = (hasMany, props) => {
 };
 
 module.exports = {
+	name: 'Relationship',
 	ViewComponent: ViewRelationship,
 	EditComponent: props => (
 		<WrappedEditComponent
