@@ -15,7 +15,7 @@ const resetDb = async () => {
 	await dropFixtures(code);
 };
 
-describe('End-to-end journey for creating relationships', () => {
+describe('End-to-end - relationship creation', () => {
 	beforeEach(() => {
 		resetDb();
 

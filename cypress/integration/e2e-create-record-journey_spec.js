@@ -19,7 +19,7 @@ const resetDb = async () => {
 	await dropFixtures(code);
 };
 
-describe('End-to-end Journey', () => {
+describe('End-to-end - record creation', () => {
 	before(() => {
 		resetDb();
 
