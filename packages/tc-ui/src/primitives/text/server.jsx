@@ -16,6 +16,7 @@ const EditText = ({ propertyName, value, required, lockedBy, disabled }) => (
 );
 
 module.exports = {
+	name: 'Text',
 	ViewComponent: ({ value, id }) => <span id={id}>{value}</span>,
 	EditComponent: props => (
 		<WrappedEditComponent
