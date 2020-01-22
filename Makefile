@@ -19,6 +19,7 @@ node_modules/@financial-times/rel-engage/index.mk:
 # ---------------------------
 
 NEO4J_BOLT_URL=bolt://localhost:7687
+NEO4J_VERSION=3.5.0
 
 env:
 	echo "No secret environment variables needed in test"
@@ -74,8 +75,8 @@ run-app: build-statics
 
 build-statics:
 	@if [ -z $(CI) ]; \
-		then ./node_modules/.bin/webpack --mode=production; \
-		else webpack --mode=development; \
+		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=production; \
+		else $(info Webpack bundling modules ...) webpack --mode=development; \
 	fi
 
 run-db:
@@ -93,12 +94,13 @@ e2e-test:
 run-test-db:
 	java -version; \
   mkdir -p neo4j; \
-  wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz; \
-  tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1; \
-  sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf; \
+  wget -q dist.neo4j.org/neo4j-community-$(NEO4J_VERSION)-unix.tar.gz; \
+  tar -xzf neo4j-community-$(NEO4J_VERSION)-unix.tar.gz -C neo4j --strip-components 1; \
+  sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf;\
   ./scripts/neo4j-plugins; \
-	dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start;\
-  ./scripts/neo4j-wait-for-start; \
+	dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start; \
+  ./scripts/neo4j-wait-for-start;
+	make init-db
 
 clean-deps: unprepublish
 	rm -rf packages/*/node_modules
