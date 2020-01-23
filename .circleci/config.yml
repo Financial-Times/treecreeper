@@ -57,6 +57,12 @@ jobs:
           name: Install monorepo node modules
           command: npm install
 
+      # save new cache folder if needed
+      - save_cache:
+          key: *cache_key
+          paths:
+            - ~/.npm
+            - ~/.cache
       # run verify and then save cache.
       # this ensures that the Cypress verified status is cached too
       - run: make cypress-verify
@@ -70,6 +76,7 @@ jobs:
           root: *workspace_root
           paths:
             - .
+            - .cache/Cypress
 
   test:
     <<: *default_container_config
