@@ -57,6 +57,9 @@ jobs:
           name: Install monorepo node modules
           command: npm install
 
+      # run verify and then save cache.
+      # this ensures that the Cypress verified status is cached too
+      - run: make cypress-verify
       - run:
           name: Get test env vars
           command: make env
@@ -67,32 +70,7 @@ jobs:
           root: *workspace_root
           paths:
             - .
-  build:
-    <<: *default_container_config
 
-    steps:
-      - *attach_workspace
-      - restore_cache:
-          keys:
-            - *cache_key
-      - run:
-          name: Install Dependencies
-          command: npm ci
-      # run verify and then save cache.
-      # this ensures that the Cypress verified status is cached too
-      - run: make cypress-verify
-      # save new cache folder if needed
-      - save_cache:
-          key: *cache_key
-          paths:
-            - ~/.npm
-            - ~/.cache
-      # all other test jobs will run AFTER this build job finishes
-      # to avoid reinstalling dependencies, we persist the Cypress binary to workspace
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .cache/Cypress
   test:
     <<: *default_container_config
     steps:
@@ -156,9 +134,6 @@ workflows:
       - install:
           context: rel-eng-creds
           filters: *only_version_tags
-      - build:
-          requires:
-            - install
       - test:
           requires:
             - install
@@ -170,7 +145,7 @@ workflows:
           filters: *only_version_tags
       - end-to-end-test:
           requires:
-            - build
+            - install
           filters:
             <<: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
