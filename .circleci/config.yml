@@ -9,11 +9,19 @@ references:
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
       - image: circleci/node:12.9.1-browsers
+      - image: cypress/base:12.0.0
+        environment:
+          ## this enables colors in the output
+          TERM: xterm
+
     environment:
       NEO4J_VERSION: "3.5.0"
 
   workspace_root: &workspace_root
     ~/
+
+  cache_key: &cache_key
+    cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -22,11 +30,11 @@ references:
   restore_node_modules: &restore_node_modules
     restore_cache:
       keys:
-        - cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+        - *cache_key
 
   cache_node_modules: &cache_node_modules
     save_cache:
-      key: cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+      key: *cache_key
       paths:
         - ./node_modules/
 
@@ -59,7 +67,32 @@ jobs:
           root: *workspace_root
           paths:
             - .
+  build:
+    <<: *default_container_config
 
+    steps:
+      - *attach_workspace
+      - restore_cache:
+          keys:
+            - *cache_key
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      # run verify and then save cache.
+      # this ensures that the Cypress verified status is cached too
+      - run: make cypress-verify
+      # save new cache folder if needed
+      - save_cache:
+          key: *cache_key
+          paths:
+            - ~/.npm
+            - ~/.cache
+      # all other test jobs will run AFTER this build job finishes
+      # to avoid reinstalling dependencies, we persist the Cypress binary to workspace
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .cache/Cypress
   test:
     <<: *default_container_config
     steps:
@@ -67,16 +100,7 @@ jobs:
 
       - run:
           name: Prepare neo4j database
-          command: |
-            java -version
-            mkdir -p neo4j
-            wget -q dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
-            tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz -C neo4j --strip-components 1
-            sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf
-            ./scripts/neo4j-plugins
-            dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start
-            ./scripts/neo4j-wait-for-start
-            make init-db
+          command: make run-test-db
       - run:
           name: Run tests
           command: make test
@@ -87,6 +111,24 @@ jobs:
 
       - store_artifacts:
           path: junit
+
+  end-to-end-test:
+    <<: *default_container_config
+
+    steps:
+      - *attach_workspace
+
+      - run: sudo sh -c 'echo "127.0.0.1 local.in.ft.com" >> /etc/hosts'
+      - run:
+          name: Prepare neo4j database
+          command: make run-test-db
+      - run:
+          name: Run End-to-End Tests
+          command: make e2e-test
+      - store_artifacts:
+          path: cypress/videos
+      - store_artifacts:
+          path: cypress/screenshots
 
   verify:
     <<: *default_container_config
@@ -114,6 +156,9 @@ workflows:
       - install:
           context: rel-eng-creds
           filters: *only_version_tags
+      - build:
+          requires:
+            - install
       - test:
           requires:
             - install
@@ -123,11 +168,16 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
+      - end-to-end-test:
+          requires:
+            - build
+          filters:
+            <<: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
           requires:
-          - install
+            - install
           filters: *only_version_tags
           workspace-path: *workspace_root
       - publish:
@@ -136,6 +186,7 @@ workflows:
             - install
             - test
             - verify
+            - end-to-end-test
             # - ft-snyk-orb/scan-js-packages
           filters:
             <<: *only_version_tags

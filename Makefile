@@ -19,6 +19,7 @@ node_modules/@financial-times/rel-engage/index.mk:
 # ---------------------------
 
 NEO4J_BOLT_URL=bolt://localhost:7687
+NEO4J_VERSION=3.5.0
 
 env:
 	echo "No secret environment variables needed in test"
@@ -43,6 +44,21 @@ monorepo-publish: prepublish
 
 .PHONY: test
 
+.PHONY: cypress-open
+cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expects a local application server to be running concurrently.
+	TREECREEPER_TEST=true \
+	cypress open
+
+.PHONY: cypress-run
+cypress-run:
+	TREECREEPER_TEST=true \
+	cypress run
+
+.PHONY: cypress-verify
+cypress-verify:
+	TREECREEPER_TEST=true \
+	cypress verify
+
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
@@ -54,20 +70,37 @@ test: init-db
 			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=1 --ci --reporters=default --reporters=jest-junit --detectOpenHandles --forceExit; \
 	fi
 
-run-app:
+run-app: build-statics
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema nodemon --inspect demo/api.js
 
 build-statics:
-	webpack-dev-server --mode development
+	@if [ -z $(CI) ]; \
+		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=development; \
+		else $(info Webpack bundling modules ...) webpack --mode=production; \
+	fi
 
 run-db:
 	docker-compose up
 
 run:
-	@concurrently "make run-db" "make build-statics" "make run-app"
+	@concurrently "make run-db" "make run-app"
 
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
+
+e2e-test:
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run"
+
+run-test-db:
+	java -version; \
+  mkdir -p neo4j; \
+  wget -q dist.neo4j.org/neo4j-community-$(NEO4J_VERSION)-unix.tar.gz; \
+  tar -xzf neo4j-community-$(NEO4J_VERSION)-unix.tar.gz -C neo4j --strip-components 1; \
+  sed -i "s|#dbms.security.auth_enabled=false|dbms.security.auth_enabled=false|g" neo4j/conf/neo4j.conf;\
+  ./scripts/neo4j-plugins; \
+	dbms_memory_heap_initial_size="1024m" dbms_memory_heap_max_size="1024m" neo4j/bin/neo4j start; \
+  ./scripts/neo4j-wait-for-start;
+	make init-db
 
 clean-deps: unprepublish
 	rm -rf packages/*/node_modules
