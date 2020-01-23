@@ -1,5 +1,6 @@
 const { code } = require('../fixtures/mainTypeData.json');
 const {
+	populateMinimumViableFields,
 	populateParentTypeFields,
 	populateChildTypeFields,
 	pickChild,
@@ -18,13 +19,9 @@ const resetDb = async () => {
 describe('End-to-end - relationship creation', () => {
 	beforeEach(() => {
 		resetDb();
-
-		cy.visit(`/MainType/create`);
-		cy.get('input[name=code]').type(code);
+		populateMinimumViableFields(code);
 		save();
 		populateParentTypeFields(`${code}-parent`);
-		save();
-		populateChildTypeFields(`${code}-first-child`);
 		save();
 		populateChildTypeFields(`${code}-second-child`);
 		save();
@@ -37,8 +34,7 @@ describe('End-to-end - relationship creation', () => {
 		pickParent();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#parents')
 			.find('a')
 			.should('have.text', `${code}-parent`)
@@ -50,14 +46,11 @@ describe('End-to-end - relationship creation', () => {
 
 		visitEditPage();
 
-		// pick first child
-		pickChild();
 		// pick second child
 		pickChild();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-first-child`)
@@ -78,8 +71,7 @@ describe('End-to-end - relationship creation', () => {
 		pickFavouriteChild();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#favouriteChild')
 			.should('have.text', `${code}-first-child`)
 			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
@@ -90,15 +82,12 @@ describe('End-to-end - relationship creation', () => {
 
 		visitEditPage();
 
-		// pick first child
-		pickChild();
 		// pick second child
 		pickChild();
 		pickFavouriteChild();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-first-child`)

@@ -10,7 +10,8 @@ const {
 } = require('../fixtures/mainTypeData.json');
 const { dropFixtures } = require('../../test-helpers/test-fixtures');
 const {
-	populateMainTypeFields,
+	populateMinimumViableFields,
+	populateNonMinimumViableFields,
 	visitMainTypePage,
 	save,
 } = require('../test-helpers');
@@ -22,21 +23,24 @@ const resetDb = async () => {
 describe('End-to-end - record creation', () => {
 	before(() => {
 		resetDb();
-
-		cy.visit(`/MainType/create`);
-		cy.url().should('contain', '/MainType/create');
-
-		populateMainTypeFields(code);
+		populateMinimumViableFields(code);
+		save();
+		populateNonMinimumViableFields(code);
 		save();
 	});
 
-	it('Navigates through MainType', () => {
+	it('can create MainType record', () => {
 		visitMainTypePage();
 
 		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		cy.get('#someDocument').should('have.text', someDocument);
 		cy.get('#anotherDocument').should('have.text', anotherDocument);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someBoolean').should('have.text', 'Yes');
 		cy.get('#someEnum').should('have.text', someEnum);
 		cy.get('#someInteger').should('have.text', String(someInteger));

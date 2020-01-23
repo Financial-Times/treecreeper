@@ -1,5 +1,6 @@
 const { code } = require('../fixtures/mainTypeData.json');
 const {
+	populateMinimumViableFields,
 	populateChildTypeFields,
 	pickChild,
 	pickFavouriteChild,
@@ -17,8 +18,7 @@ describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
 		resetDb();
 
-		cy.visit(`/MainType/create`);
-		cy.get('input[name=code]').type(code);
+		populateMinimumViableFields(code);
 		save();
 		populateChildTypeFields(`${code}-first-child`);
 		save();
@@ -33,8 +33,6 @@ describe('End-to-end - relationship deletion', () => {
 		pickFavouriteChild();
 		save();
 
-		visitMainTypePage();
-
 		cy.get('#favouriteChild')
 			.should('have.text', `${code}-first-child`)
 			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
@@ -45,26 +43,21 @@ describe('End-to-end - relationship deletion', () => {
 			.find('button')
 			.should('have.text', 'Remove')
 			.click();
-
 		save();
 
-		cy.visit(`/MainType/${code}`);
 		cy.url().should('contain', `/MainType/${code}`);
-
 		cy.get('#favouriteChild').should('not.exist');
 	});
 
 	it('can remove a relationship from 1-to-many relationship', () => {
 		visitMainTypePage();
 		visitEditPage();
-		// pick first child
-		pickChild();
+
 		// pick second child
 		pickChild();
 
 		save();
-
-		visitMainTypePage();
+		cy.url().should('contain', `/MainType/${code}`);
 
 		cy.get('#children>li')
 			.eq(0)
@@ -86,8 +79,7 @@ describe('End-to-end - relationship deletion', () => {
 			.click();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-second-child`)
@@ -98,15 +90,13 @@ describe('End-to-end - relationship deletion', () => {
 	it('can remove all relationships from 1-to-many relationship', () => {
 		visitMainTypePage();
 		visitEditPage();
-		// pick first child
-		pickChild();
+
 		// pick second child
 		pickChild();
 
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-first-child`)
@@ -134,8 +124,7 @@ describe('End-to-end - relationship deletion', () => {
 			.click();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children').should('not.exist');
 	});
 
@@ -144,15 +133,12 @@ describe('End-to-end - relationship deletion', () => {
 
 		visitEditPage();
 
-		// pick first child
-		pickChild();
 		// pick second child
 		pickChild();
 		pickFavouriteChild();
 		save();
 
-		visitMainTypePage();
-
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#children')
 			.children()
 			.should('have.length', 2);
@@ -180,8 +166,6 @@ describe('End-to-end - relationship deletion', () => {
 			.should('have.text', 'Remove')
 			.click();
 		save();
-
-		cy.visit(`/MainType/${code}`);
 		cy.url().should('contain', `/MainType/${code}`);
 
 		cy.get('#favouriteChild')
@@ -204,7 +188,6 @@ describe('End-to-end - relationship deletion', () => {
 			.should('have.text', 'Remove')
 			.click();
 		save();
-		cy.visit(`/MainType/${code}`);
 		cy.url().should('contain', `/MainType/${code}`);
 
 		cy.get('#favouriteChild').should('not.exist');

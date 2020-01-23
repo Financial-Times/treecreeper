@@ -11,37 +11,6 @@ const {
 	someUrl,
 } = require('./fixtures/mainTypeData.json');
 
-const populateMainTypeFields = codeLabel => {
-	cy.visit(`/MainType/create`);
-
-	cy.get('input[name=code]').type(codeLabel);
-	cy.get('textarea[name=someDocument]').type(someDocument);
-	cy.get('textarea[name=anotherDocument]').type(anotherDocument);
-	cy.get('input[name=someString]').type(someString);
-	cy.get('[type="radio"]')
-		.first()
-		.check({ force: true });
-	cy.get('select[name=someEnum]').select(someEnum);
-	cy.get('input[name=someInteger]').type(someInteger);
-	cy.get('input[name=anotherString]').type(anotherString);
-	cy.get('input[name=someDate]')
-		.click()
-		.then(input => {
-			input[0].dispatchEvent(new Event('input', { bubbles: true }));
-			input.val(someDate);
-		})
-		.click();
-	cy.get('input[name=someDatetime]')
-		.click()
-		.then(input => {
-			input[0].dispatchEvent(new Event('input', { bubbles: true }));
-			input.val(someDatetime);
-		})
-		.click();
-
-	cy.get('input[name=someUrl]').type(someUrl);
-};
-
 const populateParentTypeFields = codeLabel => {
 	cy.visit(`/ParentType/create`);
 	cy.url().should('contain', '/ParentType/create');
@@ -93,8 +62,48 @@ const pickParent = () => {
 		.type('{downarrow}{enter}');
 };
 
+const populateMinimumViableFields = codeLabel => {
+	// create child recored
+	populateChildTypeFields(`${codeLabel}-first-child`);
+	save();
+	// create main recored
+	cy.visit(`/MainType/create`);
+	cy.get('input[name=code]').type(codeLabel);
+	cy.get('input[name=someString]').type(someString);
+	pickChild();
+};
+
+const populateNonMinimumViableFields = () => {
+	visitEditPage();
+
+	cy.get('textarea[name=someDocument]').type(someDocument);
+	cy.get('textarea[name=anotherDocument]').type(anotherDocument);
+	cy.get('[type="radio"]')
+		.first()
+		.check({ force: true });
+	cy.get('select[name=someEnum]').select(someEnum);
+	cy.get('input[name=someInteger]').type(someInteger);
+	cy.get('input[name=anotherString]').type(anotherString);
+	cy.get('input[name=someDate]')
+		.click()
+		.then(input => {
+			input[0].dispatchEvent(new Event('input', { bubbles: true }));
+			input.val(someDate);
+		})
+		.click();
+	cy.get('input[name=someDatetime]')
+		.click()
+		.then(input => {
+			input[0].dispatchEvent(new Event('input', { bubbles: true }));
+			input.val(someDatetime);
+		})
+		.click();
+
+	cy.get('input[name=someUrl]').type(someUrl);
+};
+
 module.exports = {
-	populateMainTypeFields,
+	populateNonMinimumViableFields,
 	populateParentTypeFields,
 	populateChildTypeFields,
 	pickChild,
@@ -103,4 +112,5 @@ module.exports = {
 	visitEditPage,
 	visitMainTypePage,
 	save,
+	populateMinimumViableFields,
 };
