@@ -134,7 +134,6 @@ class ApiClient {
 			throw err;
 		}
 		const query = this.graphqlBuilder(type);
-		console.log(query);
 
 		return this.fetchGraphQL({
 			query,

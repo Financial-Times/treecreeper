@@ -289,7 +289,6 @@ describe('Rest events module integration', () => {
 			});
 
 			expect(status).toBe(200);
-			console.log(JSON.stringify(emitSpy.mock.calls, null, 2));
 			expect(emitSpy).toHaveBeenCalledTimes(3);
 			expectDeleteEvent(mainType, absorbedCode);
 			expectUpdateEvent(mainType, mainCode, [
