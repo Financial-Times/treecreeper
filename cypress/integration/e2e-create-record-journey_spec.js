@@ -7,12 +7,12 @@ const {
 	someInteger,
 	anotherString,
 	someUrl,
+	promptText,
 } = require('../fixtures/mainTypeData.json');
 const { dropFixtures } = require('../../test-helpers/test-fixtures');
 const {
 	populateMinimumViableFields,
 	populateNonMinimumViableFields,
-	visitMainTypePage,
 	save,
 } = require('../test-helpers');
 
@@ -21,16 +21,15 @@ const resetDb = async () => {
 };
 
 describe('End-to-end - record creation', () => {
-	before(() => {
+	beforeEach(() => {
 		resetDb();
+	});
+
+	it('can create MainType record', () => {
 		populateMinimumViableFields(code);
 		save();
 		populateNonMinimumViableFields(code);
 		save();
-	});
-
-	it('can create MainType record', () => {
-		visitMainTypePage();
 
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
@@ -53,5 +52,68 @@ describe('End-to-end - record creation', () => {
 		cy.get('#someUrl')
 			.should('have.text', someUrl)
 			.should('have.attr', 'href', someUrl);
+	});
+
+	it('can not create record if no code(label) is given', () => {
+		cy.visit(`/MainType/create`, {
+			onBeforeLoad(win) {
+				cy.stub(win, 'prompt');
+			},
+		});
+		save();
+		// required field
+		cy.get('input:invalid').should('have.length', 1);
+	});
+
+	it('can not create record if description is not given', () => {
+		cy.visit(`/MainType/create`, {
+			onBeforeLoad(win) {
+				cy.stub(win, 'prompt');
+			},
+		});
+
+		cy.get('#id-code').type(code);
+		save();
+
+		cy.window()
+			.its('prompt')
+			.should('called', 1);
+		cy.window()
+			.its('prompt.args.0')
+			.should('deep.eq', [promptText]);
+	});
+
+	it('can not create record if child record is not selected', () => {
+		cy.visit(`/MainType/create`, {
+			onBeforeLoad(win) {
+				cy.stub(win, 'prompt');
+			},
+		});
+
+		cy.get('#id-code').type(code);
+		cy.get('#id-someString').type(someString);
+		save();
+
+		cy.window()
+			.its('prompt')
+			.should('called', 1);
+		cy.window()
+			.its('prompt.args.0')
+			.should('deep.eq', [promptText]);
+	});
+
+	it('can create record with incomplete fields with "SAVE INCOMPLETE RECORD" option', () => {
+		cy.visit(`/MainType/create`, {
+			onBeforeLoad(win) {
+				cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
+			},
+		});
+
+		cy.get('#id-code').type(code);
+		save();
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('be.empty');
+		cy.get('#children').should('not.exist');
 	});
 });

@@ -63,10 +63,10 @@ const pickParent = () => {
 };
 
 const populateMinimumViableFields = codeLabel => {
-	// create child recored
+	// create child record
 	populateChildTypeFields(`${codeLabel}-first-child`);
 	save();
-	// create main recored
+	// create main record
 	cy.visit(`/MainType/create`);
 	cy.get('input[name=code]').type(codeLabel);
 	cy.get('input[name=someString]').type(someString);
