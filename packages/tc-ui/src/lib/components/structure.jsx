@@ -30,7 +30,7 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 				{title}
 				{includeEditLink && code && type ? (
 					<>
-						<a // eslint-disable-line jsx-a11y/anchor-has-content
+						<a // eslint-disable-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
 							className="o-icons-icon o-icons-icon--edit biz-ops-section-header__edit-link o-layout__unstyled-element"
 							href={`/${type}/${code}/edit?#${toKebabCase(
 								title,

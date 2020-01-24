@@ -65,6 +65,7 @@ const View = props => {
 							<button
 								className="o-expander__toggle o--if-js"
 								type="button"
+								aria-label="toggle"
 							/>
 							<div className="o-expander__content">
 								<Concept
