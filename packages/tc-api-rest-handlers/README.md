@@ -10,7 +10,7 @@ The library exports the following functions: `headHandler`, `getHandler`, `delet
 
 The functions do not implement any handling of requests and responses, but work on a more event driven model - receiving and returning objects - for ease of reuse in various environments. Therefore the RESTful url scheme is implied rather than implemented. This design is both to improve testability and to make it possible, in future, to deploy treecreeper to event driven architectures such as AWS Lambda.
 
-All of these functions are factories that return the actual handlers. Each of the factories accepts an options object with a single property, `documentStore`, which shodul be an instance of `tc-api-s3-document-store` or similar
+All of these functions are factories that return the actual handlers. Each of the factories accepts an options object with a single property, `documentStore`, which should be an instance of `tc-api-s3-document-store` or similar
 
 #### URL scheme
 
@@ -125,8 +125,8 @@ Each event has the following structure:
 {
 	action, // see availableEvents, below, for the full list
 		code, // code of the record updated
-		type, // type opf the updated record
-		updatedProperties, // list of properties - in cluding relationship properties - updated
+		type, // type of the updated record
+		updatedProperties, // list of properties - including relationship properties - updated
 		timestamp; // timestamp of the event
 }
 ```
