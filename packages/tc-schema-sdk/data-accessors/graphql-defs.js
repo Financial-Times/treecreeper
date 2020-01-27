@@ -60,36 +60,17 @@ const maybeDeprecate = ({ deprecationReason }) => {
 };
 
 const printPropertyDefinition = ({
-	description,
-	name,
-	pagination,
-	type,
-	directive,
-	deprecation,
+	description = '',
+	name = '',
+	pagination = '',
+	type = '',
+	directive = '',
+	deprecation = '',
 }) =>
 	printDescribedBlock(
 		description,
 		`${name}${pagination}: ${type} ${directive} ${deprecation}`,
 	);
-
-const buildPropertyModel = ([name, def]) => ({
-	description: def.description,
-	name,
-	pagination: maybePaginate(def),
-	type: maybePluralType(def),
-	directive: maybeDirective(def),
-	deprecation: maybeDeprecate(def),
-});
-
-const printPropertyDefinitions = properties => {
-	if (!Array.isArray(properties)) {
-		properties = Object.entries(properties);
-	}
-	return properties
-		.map(buildPropertyModel)
-		.map(printPropertyDefinition)
-		.join('\n');
-};
 
 /*
 	Outputting rich relationships
@@ -137,80 +118,6 @@ const buildRelationshipTypeModel = relationshipType => {
 	};
 };
 
-const buildRichRelationshipPropertyModel = (
-	propName,
-	def,
-	rootType,
-	getRelationshipType,
-) => ({
-	description: stripEmptyFirstLine`
-		${def.description}
-		*NOTE: This gives access to properties on the relationships between records
-		as well as on the records themselves. Use '${propName}' instead if you do not need this*`,
-	name: `${propName}_rel`,
-	pagination: maybePaginate(def),
-	type: getRichRelationshipPropertyType({
-		hasMany: def.hasMany,
-		...flattenRelationshipType(getRelationshipType(rootType, propName)),
-	}),
-	deprecation: maybeDeprecate(def),
-	directive:
-		rootType === def.type
-			? `@relation(direction: "${
-					def.direction === 'outgoing' ? 'OUT' : 'IN'
-			  }")`
-			: '',
-});
-
-const printRichRelationshipPropertyDefinitions = (
-	properties,
-	rootType,
-	getRelationshipType,
-) =>
-	Object.entries(properties)
-		.filter(([, { relationship }]) => relationship)
-		.map(([propName, def]) =>
-			buildRichRelationshipPropertyModel(
-				propName,
-				def,
-				rootType,
-				getRelationshipType,
-			),
-		)
-		.map(printPropertyDefinition)
-		.join('');
-
-const printRelationshipTypeDefinition = ({
-	from,
-	to,
-	typeName,
-	relationship,
-	properties,
-}) => {
-	let propStr = '';
-	if (Object.keys(properties).length) {
-		propStr = indentMultiline(
-			printPropertyDefinitions(properties),
-			4,
-			true,
-		);
-	}
-	return printDescribedBlock(
-		'Internal use only',
-		stripIndent`
-	type ${typeName} @relation(name: "${relationship}") {
-		from: ${from.type}
-		to: ${to.type}
-		${propStr}
-	}`,
-	);
-};
-
-const printRelationshipTypeDefinitions = relationships =>
-	uniqBy(
-		[].concat(...relationships.map(buildRelationshipTypeModel)),
-		({ typeName }) => typeName,
-	).map(printRelationshipTypeDefinition);
 /*
 	Outputting Query definitions
 */
@@ -223,86 +130,28 @@ const getFilteringFields = config =>
 		([, { relationship, cypher }]) => !relationship && !cypher,
 	);
 
-const paginationConfig = {
-	offset: {
+const paginationConfig = [
+	{
+		name: 'offset',
 		type: 'Int = 0',
 		description: 'The pagination offset to use',
 	},
-	first: {
+	{
+		name: 'first',
 		type: 'Int = 20000',
 		description:
 			'The number of records to return after the pagination offset. This uses the default neo4j ordering',
 	},
-};
+];
 
 const printPaginationDefinition = paginate =>
 	paginate
-		? indentMultiline(printPropertyDefinitions(paginationConfig), 4, true)
+		? indentMultiline(
+				paginationConfig.map(printPropertyDefinition).join('\n'),
+				4,
+				true,
+		  )
 		: '';
-
-const printQueryDefinition = ({
-	name,
-	type,
-	description,
-	properties,
-	paginate,
-}) => {
-	return printDescribedBlock(
-		description,
-		`${name}(
-		${printPaginationDefinition(paginate)}
-		${indentMultiline(printPropertyDefinitions(properties), 4, true)}
-	): ${type}`,
-	);
-};
-
-const printQueryDefinitions = types => [
-	'type Query {\n',
-	...types.map(config =>
-		[
-			printQueryDefinition({
-				name: config.name,
-				type: config.name,
-				description: config.description,
-				properties: getIdentifyingFields(config),
-			}),
-			printQueryDefinition({
-				name: config.pluralName,
-				type: `[${config.name}]`,
-				description: config.description,
-				properties: getFilteringFields(config),
-				paginate: true,
-			}),
-		].join('\n'),
-	),
-	'}',
-];
-
-/*
-	Outputting types
-*/
-
-const printTypeDefinition = getRelationshipType => ({
-	name,
-	description,
-	properties,
-}) =>
-	printDescribedBlock(
-		description,
-		stripEmptyFirstLine`
-type ${name} {
-	${indentMultiline(printPropertyDefinitions(properties), 2, true)}
-	${indentMultiline(
-		printRichRelationshipPropertyDefinitions(
-			properties,
-			name,
-			getRelationshipType,
-		),
-		2,
-		true,
-	)}
-}`,
-	);
 
 const printEnumOptionDefinition = ({ value, description }) =>
 	description ? printDescribedBlock(description, value) : value;
@@ -318,17 +167,7 @@ ${indentMultiline(enums.join('\n'), 2)}
 	);
 };
 
-module.exports = {
-	accessor() {
-		const retrieveOptions = {
-			primitiveTypes: 'graphql',
-			includeMetaFields: true,
-		};
-
-		const types = this.getTypes(retrieveOptions);
-		const enums = this.getEnums({ withMeta: true });
-
-		const staticTypeDefinitions = stripIndent`
+const STATIC_DEFINITIONS = stripIndent`
 		directive @deprecated(
 		  reason: String = "No longer supported"
 		) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
@@ -337,28 +176,207 @@ module.exports = {
 		scalar Date
 		scalar Time
 	`;
-		const typeDefinitions = types.map(
-			printTypeDefinition(this.getRelationshipType),
-		);
-		const relationshipTypeDefinitions = printRelationshipTypeDefinitions(
-			this.getRelationshipTypes({
-				...retrieveOptions,
-				excludeCypherRelationships: true,
-			}),
-		);
 
-		const enumDefinitions = Object.entries(enums).map(printEnumDefinition);
-
-		const queryDefinition = printQueryDefinitions(
-			types.filter(({ from, to }) => !from && !to),
+class GraphqlDefGenerator {
+	constructor(sdk) {
+		this.sdk = sdk;
+		this.printTypeDefinition = this.printTypeDefinition.bind(this);
+		this.printRichRelationshipPropertyDefinitions = this.printRichRelationshipPropertyDefinitions.bind(
+			this,
 		);
+		this.buildRichRelationshipPropertyModel = this.buildRichRelationshipPropertyModel.bind(
+			this,
+		);
+		this.printRelationshipTypeDefinition = this.printRelationshipTypeDefinition.bind(
+			this,
+		);
+	}
 
+	generate() {
 		return [].concat(
-			staticTypeDefinitions,
-			typeDefinitions,
-			relationshipTypeDefinitions,
-			queryDefinition,
-			enumDefinitions,
+			STATIC_DEFINITIONS,
+			this.getTypeDefinitions(),
+			this.getRelationshipTypeDefinitions(),
+			this.getQueryDefinition(),
+			this.getEnumDefinitions(),
 		);
+	}
+
+	getTypeDefinitions() {
+		return this.sdk
+			.getTypes({
+				includeMetaFields: true,
+			})
+			.map(this.printTypeDefinition);
+	}
+
+	getRelationshipTypeDefinitions() {
+		const relationshipTypes = this.sdk
+			.getRelationshipTypes({
+				includeMetaFields: true,
+				excludeCypherRelationships: true,
+			})
+			.flatMap(buildRelationshipTypeModel);
+
+		return uniqBy(relationshipTypes, ({ typeName }) => typeName).map(
+			this.printRelationshipTypeDefinition,
+		);
+	}
+
+	printRelationshipTypeDefinition({
+		from,
+		to,
+		typeName,
+		relationship,
+		properties,
+	}) {
+		let propStr = '';
+		if (Object.keys(properties).length) {
+			propStr = indentMultiline(
+				this.printPropertyDefinitions(properties),
+				4,
+				true,
+			);
+		}
+		return printDescribedBlock(
+			'Internal use only',
+			stripIndent`
+	type ${typeName} @relation(name: "${relationship}") {
+		from: ${from.type}
+		to: ${to.type}
+		${propStr}
+	}`,
+		);
+	}
+
+	getQueryDefinition() {
+		const types = this.sdk.getTypes({
+			includeMetaFields: true,
+		});
+		return [
+			'type Query {\n',
+			...types.map(config =>
+				[
+					this.printQueryDefinition({
+						name: config.name,
+						type: config.name,
+						description: config.description,
+						properties: getIdentifyingFields(config),
+					}),
+					this.printQueryDefinition({
+						name: config.pluralName,
+						type: `[${config.name}]`,
+						description: config.description,
+						properties: getFilteringFields(config),
+						paginate: true,
+					}),
+				].join('\n'),
+			),
+			'}',
+		];
+	}
+
+	printQueryDefinition({ name, type, description, properties, paginate }) {
+		return printDescribedBlock(
+			description,
+			`${name}(
+		${printPaginationDefinition(paginate)}
+		${indentMultiline(this.printPropertyDefinitions(properties), 4, true)}
+	): ${type}`,
+		);
+	}
+
+	getEnumDefinitions() {
+		return Object.entries(this.sdk.getEnums({ withMeta: true })).map(
+			printEnumDefinition,
+		);
+	}
+
+	/*
+		Outputting types
+	*/
+	printTypeDefinition({ name, description, properties }) {
+		return printDescribedBlock(
+			description,
+			stripEmptyFirstLine`
+
+type ${name} {
+	${indentMultiline(this.printPropertyDefinitions(properties), 2, true)}
+	${indentMultiline(
+		this.printRichRelationshipPropertyDefinitions(properties, name),
+		2,
+		true,
+	)}
+}`,
+		);
+	}
+
+	printRichRelationshipPropertyDefinitions(properties, rootType) {
+		return Object.entries(properties)
+			.filter(([, { relationship }]) => relationship)
+			.map(([propName, def]) =>
+				this.buildRichRelationshipPropertyModel(
+					propName,
+					def,
+					rootType,
+				),
+			)
+			.map(printPropertyDefinition)
+			.join('');
+	}
+
+	buildRichRelationshipPropertyModel(propName, def, rootType) {
+		return {
+			description: stripEmptyFirstLine`
+		${def.description}
+		*NOTE: This gives access to properties on the relationships between records
+		as well as on the records themselves. Use '${propName}' instead if you do not need this*`,
+			name: `${propName}_rel`,
+			pagination: maybePaginate(def),
+			type: getRichRelationshipPropertyType({
+				hasMany: def.hasMany,
+				...flattenRelationshipType(
+					this.sdk.getRelationshipType(rootType, propName),
+				),
+			}),
+			deprecation: maybeDeprecate(def),
+			directive:
+				rootType === def.type
+					? `@relation(direction: "${
+							def.direction === 'outgoing' ? 'OUT' : 'IN'
+					  }")`
+					: '',
+		};
+	}
+
+	printPropertyDefinitions(properties) {
+		if (!Array.isArray(properties)) {
+			properties = Object.entries(properties);
+		}
+
+		return properties
+			.map(([name, def]) => ({
+				description: def.description,
+				name,
+				pagination: maybePaginate(def),
+				type: maybePluralType({
+					...def,
+					type: this.getGraphqlType(def.type),
+				}),
+				directive: maybeDirective(def),
+				deprecation: maybeDeprecate(def),
+			}))
+			.map(printPropertyDefinition)
+			.join('\n');
+	}
+
+	getGraphqlType(type) {
+		return this.sdk.getPrimitiveTypes()[type] || type;
+	}
+}
+
+module.exports = {
+	accessor() {
+		return new GraphqlDefGenerator(this).generate();
 	},
 };

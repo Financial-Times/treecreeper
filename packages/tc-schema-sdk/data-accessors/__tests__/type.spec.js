@@ -200,40 +200,6 @@ describe('get-type', () => {
 		expect(type.properties.enumProp.autoPopulated).toBeFalsy();
 	});
 
-	it('it maps types to graphql properties', async () => {
-		const type = typeFromRawData(
-			{
-				name: 'Type1',
-				properties: {
-					primitiveProp: {
-						type: 'Word',
-					},
-					documentProp: {
-						type: 'Document',
-					},
-					enumProp: {
-						type: 'SomeEnum',
-					},
-				},
-			},
-			{
-				options: { primitiveTypes: 'graphql' },
-				primitiveTypes: {
-					Word: {
-						graphql: 'String',
-					},
-					Document: {
-						graphql: 'String',
-					},
-				},
-			},
-		);
-
-		expect(type.properties.primitiveProp).toMatchObject({ type: 'String' });
-		expect(type.properties.documentProp).toMatchObject({ type: 'String' });
-		expect(type.properties.enumProp).toMatchObject({ type: 'SomeEnum' });
-	});
-
 	it('groups properties by fieldset', () => {
 		const type = typeFromRawData(
 			{
