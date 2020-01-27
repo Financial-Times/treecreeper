@@ -23,9 +23,9 @@ The package exports an `init(options)` function, that takes the following option
 -   `ttl` (default 60000) - when fetching the schema from a url, the time in milliseconds to cache the schema locally for before checking for updates
 -   `updateMode` - 'poll' or 'stale'. 'poll' will start polling on an interval for schema updates, whereas 'stale' will fetch whenever a user calls the sdk's `refresh()` method and the schema is older than the `ttl`
 -   `logger` (default `console`) - choice of logger to use in the sdk
--   `version` - used to specify the version of he schema being used. Only used in tests
+-   `version` - used to specify the version of the schema being used. Only used in tests
 
-One of `schemaDirectory`, `schemaData` or `schemaBaseUrl` must be defined. If `chemaBaseUrl` is defined, then `updateMode` must also be defined.
+One of `schemaDirectory`, `schemaData` or `schemaBaseUrl` must be defined. If `schemaBaseUrl` is defined, then `updateMode` must also be defined.
 
 ### Update APIs
 
@@ -76,7 +76,7 @@ When working with local schema files, set the environment variable `TREECREEPER_
 
 ### Schema access APIs
 
-All methods use an internal caching mechanism, whih is flushed whenever the schema updates. For this reason
+All methods use an internal caching mechanism, which is flushed whenever the schema updates. For this reason
 
 -   it is safe to call these methods many times because the complex transformation of values is only executed on the first invocation
 -   it is an antipattern to store the result of any invocation in a variable for any _non synchronous_ period of time - this may result in incorrect reading or writing of data
