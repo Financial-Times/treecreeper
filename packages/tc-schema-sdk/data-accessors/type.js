@@ -5,8 +5,6 @@ const {
 	transformPrimitiveTypes,
 } = require('../lib/property-assign');
 
-const BIZ_OPS = 'biz-ops';
-
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
@@ -180,19 +178,17 @@ const createPropertiesWithRelationships = function({
 const cacheKeyGenerator = (
 	typeName,
 	{
-		primitiveTypes = BIZ_OPS,
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
 		useMinimumViableRecord = false,
 	} = {},
 ) =>
-	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${primitiveTypes}:${useMinimumViableRecord}`;
+	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${useMinimumViableRecord}`;
 
 const getType = function(
 	typeName,
 	{
-		primitiveTypes = BIZ_OPS, // graphql
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
@@ -230,7 +226,6 @@ const getType = function(
 			propName,
 			richRelationshipTypes,
 			{
-				primitiveTypes,
 				includeMetaFields,
 			},
 		);
@@ -246,12 +241,7 @@ const getType = function(
 	if (includeMetaFields) {
 		properties = assignMetaProperties(properties);
 	}
-	properties = transformPrimitiveTypes(
-		properties,
-		primitiveTypes,
-		this.getStringValidator,
-		this.getPrimitiveTypes({ output: 'graphql' }),
-	);
+	properties = transformPrimitiveTypes(properties, this.getStringValidator);
 
 	if (groupProperties) {
 		typeSchema.fieldsets = hydrateFieldsets({

@@ -4,8 +4,6 @@ const {
 	transformPrimitiveTypes,
 } = require('../lib/property-assign');
 
-const BIZ_OPS = 'biz-ops';
-
 const getFromTo = (direction, rootType, otherType) =>
 	direction === 'outgoing' ? [rootType, otherType] : [otherType, rootType];
 
@@ -99,17 +97,13 @@ const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 const cacheKeyGenerator = (
 	rootType,
 	propertyName,
-	{ primitiveTypes = BIZ_OPS, includeMetaFields = false } = {},
-) =>
-	`relationships:${rootType}:${propertyName}:${primitiveTypes}:${includeMetaFields}`;
+	{ includeMetaFields = false } = {},
+) => `relationships:${rootType}:${propertyName}:${includeMetaFields}`;
 
 const getRelationshipType = function(
 	rootType,
 	propertyName,
-	{
-		primitiveTypes = BIZ_OPS, // graphql
-		includeMetaFields = false,
-	} = {},
+	{ includeMetaFields = false } = {},
 ) {
 	const relationshipType = getRelationshipTypeFromRawData(
 		rootType,
@@ -127,12 +121,7 @@ const getRelationshipType = function(
 			ignoreFields: '_lockedFields',
 		});
 	}
-	properties = transformPrimitiveTypes(
-		properties,
-		primitiveTypes,
-		this.getStringValidator,
-		this.getPrimitiveTypes({ output: 'graphql' }),
-	);
+	properties = transformPrimitiveTypes(properties, this.getStringValidator);
 
 	return { ...relationshipType, properties };
 };
