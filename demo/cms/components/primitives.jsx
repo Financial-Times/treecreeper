@@ -78,7 +78,9 @@ const Email = ({ value, id }) =>
 
 const RelationshipAnnotator = ({ type, value }) => (
 	<>
-		{type === 'MainType' ? <span>hydrogen: {value.someString}</span> : null}
+		{type === 'MainType' ? (
+			<span> hydrogen: {value.someString}</span>
+		) : null}
 		{type === 'System' || type === 'Product' ? (
 			<LifecycleStage value={value.lifecycleStage} />
 		) : null}

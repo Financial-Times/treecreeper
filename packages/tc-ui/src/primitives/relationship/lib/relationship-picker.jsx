@@ -234,6 +234,7 @@ class RelationshipPicker extends React.Component {
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}
 							index={i}
+							key={i}
 						/>
 					))}
 				</ul>
