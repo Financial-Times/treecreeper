@@ -154,7 +154,12 @@ const buildRichRelationshipPropertyModel = (
 		...flattenRelationshipType(getRelationshipType(rootType, propName)),
 	}),
 	deprecation: maybeDeprecate(def),
-	directive: '',
+	directive:
+		rootType === def.type
+			? `@relation(direction: "${
+					def.direction === 'outgoing' ? 'OUT' : 'IN'
+			  }")`
+			: '',
 });
 
 const printRichRelationshipPropertyDefinitions = (

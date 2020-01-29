@@ -13,7 +13,7 @@
     "dataloader": "^1.4.0",
     "graphql": "^14.5.8",
     "graphql-middleware": "^4.0.2",
-    "neo4j-graphql-js": "^2.8.0"
+    "neo4j-graphql-js": "financial-times/neo4j-graphql-js#non-leaky-reflexive-relationships"
   },
   "devDependencies": {
     "express": "^4.17.1",

@@ -1,15 +1,16 @@
 const React = require('react');
+const sortBy = require('lodash.sortby');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { LinkToRecord } = require('../../../lib/components/structure');
 
 let RelationshipAnnotator;
 
 const OneRelationship = ({ type, value = {}, id }) =>
-	type && value.code ? (
+	type && value[type] ? (
 		<>
-			<LinkToRecord id={id} type={type} value={value} />
+			<LinkToRecord id={id} type={type} value={value[type]} />
 			{RelationshipAnnotator ? (
-				<RelationshipAnnotator value={value} type={type} />
+				<RelationshipAnnotator value={value[type]} type={type} />
 			) : null}
 		</>
 	) : (
@@ -32,7 +33,7 @@ const ViewRelationship = ({ value, type, id, hasMany }) => {
 	};
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
-			{value.map((item, index) => {
+			{sortBy(value, [`${type}.code`]).map((item, index) => {
 				const props = { type, value: item };
 				return (
 					<li
