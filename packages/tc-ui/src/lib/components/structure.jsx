@@ -128,7 +128,7 @@ const MetaProperties = ({ data, isCreate }) => {
 
 	return (
 		<>
-			{isCreate ? 'Created by ' : 'Last updated by '}
+			{isCreate ? 'Created by ' : ' Last updated by '}
 			{lastActorLink(user, client)},{' '}
 			<time
 				data-o-component="o-date"
