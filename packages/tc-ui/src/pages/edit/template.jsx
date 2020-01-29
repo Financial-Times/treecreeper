@@ -1,4 +1,5 @@
 const React = require('react');
+const { sortBy } = require('lodash');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
 const { Concept, SectionHeader } = require('../../lib/components/structure');
@@ -15,16 +16,24 @@ const getValue = (itemSchema, itemValue) => {
 	if (itemSchema.relationship) {
 		if (itemSchema.hasMany) {
 			return itemValue
-				? itemValue.map(item => ({
-						code: item.code,
-						name: item.name || item.code,
+				? sortBy(itemValue, `${itemSchema.type}.code`).map(item => ({
+						code: item.code || item[itemSchema.type].code,
+						name:
+							item.name ||
+							item.code ||
+							item[itemSchema.type].name ||
+							item[itemSchema.type].code,
 				  }))
 				: [];
 		}
 		return itemValue
 			? {
-					code: itemValue.code,
-					name: itemValue.name || itemValue.code,
+					code: itemValue.code || itemValue[itemSchema.type].code,
+					name:
+						itemValue.name ||
+						itemValue.code ||
+						itemValue[itemSchema.type].name ||
+						itemValue[itemSchema.type].code,
 			  }
 			: null;
 	}
@@ -60,7 +69,7 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 			const { EditComponent } = assignComponent(item);
 			const viewModel = {
 				propertyName: name,
-				value: getValue(item, data[name]),
+				value: getValue(item, data[name] || data[`${name}_rel`]),
 				dataType: item.type,
 				parentType: type,
 				options: getEnums()[item.type]
