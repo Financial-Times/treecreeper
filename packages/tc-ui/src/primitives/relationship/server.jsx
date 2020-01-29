@@ -35,8 +35,8 @@ module.exports = {
 			return null;
 		}
 		return Array.isArray(value)
-			? value.map(({ code }) => code)
-			: value.code;
+			? value.map(({ code }) => ({ code }))
+			: { code: value.code };
 	},
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
