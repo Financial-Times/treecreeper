@@ -19,7 +19,7 @@ const Properties = ({ fields, data, assignComponent }) => {
 		)
 		.map(([name, item]) => {
 			const viewModel = {
-				value: data[name],
+				value: data[name] || data[`${name}_rel`],
 				id: name,
 				...item,
 				...assignComponent(item),
