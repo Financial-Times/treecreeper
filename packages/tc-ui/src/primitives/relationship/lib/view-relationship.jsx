@@ -1,5 +1,5 @@
 const React = require('react');
-const { sortBy } = require('lodash');
+const sortBy = require('lodash.sortby');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { LinkToRecord } = require('../../../lib/components/structure');
 
