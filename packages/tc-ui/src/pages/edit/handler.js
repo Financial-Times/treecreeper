@@ -54,7 +54,7 @@ const getEditHandler = ({
 		let { code } = event;
 		const formData = event.body;
 		let method = 'PATCH';
-		// If a code is present then PATCH the existing record
+		// If a code is present in the url/event then PATCH the existing record
 		// otherwise POST the data to create a new item
 		if (!code) {
 			({ code } = formData);
