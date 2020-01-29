@@ -62,6 +62,7 @@ const EditEnum = props => {
 };
 
 module.exports = {
+	name: 'Enum',
 	ViewComponent: text.ViewComponent,
 	EditComponent: props => (
 		<WrappedEditComponent

@@ -12,7 +12,7 @@ const assetManifest = {
 	'main.js': 'main.js',
 };
 
-const ASSET_ROOT = 'http://local.in.ft.com:8080/statics/';
+const ASSET_ROOT = '/';
 const BUILD_SERVICE_BASE_URL =
 	'https://www.ft.com/__origami/service/build/v2/bundles';
 

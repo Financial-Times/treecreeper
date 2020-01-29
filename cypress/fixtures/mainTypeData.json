@@ -1,0 +1,13 @@
+{
+	"code": "e2e-demo",
+	"someDocument": "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
+	"anotherDocument": "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+	"someString": "Lorem ipsum dolor sit amet",
+	"someEnum": "Second",
+	"someInteger": 2020,
+	"anotherString": "There are many variations of passages of Lorem Ipsum",
+	"someDate": "2020-01-15",
+	"someDatetime": "2020-01-15T13:00",
+	"someUrl": "https://google.com",
+	"promptText": "Please fill out all fields required for the minimum viable record before creating a new record.\nType SAVE INCOMPLETE RECORD below to proceed, or click cancel to return to the form"
+}

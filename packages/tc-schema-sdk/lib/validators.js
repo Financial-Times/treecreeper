@@ -186,6 +186,7 @@ const validateProperty = ({
 				exit(`Can only have one ${propertyName}`);
 			}
 
+			// eslint-disable-next-line array-callback-return
 			relPropsList.map(relProps => {
 				Object.entries(relProps).forEach(
 					([relPropName, relPropValue]) => {

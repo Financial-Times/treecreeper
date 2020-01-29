@@ -7,4 +7,9 @@
 
 'use strict';
 
-module.exports = require('@financial-times/rel-engage/packages/dotfiles/husky');
+module.exports = {
+	hooks : {
+		...require('@financial-times/rel-engage/packages/dotfiles/husky'),
+		'pre-push': ''
+	}
+};
