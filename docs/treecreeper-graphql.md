@@ -46,7 +46,7 @@ All relationships defined in the schema can be traversed by referencing the name
 
 ### Accessing properties on relationships
 
-These can be accessed by using the special `_rel` suffic on relationship names. Note that the related record must be accessed using its type name, and also that temporal types (dates, times and datetimes) return objects which can have individual parts returned.
+These can be accessed by using the special `_rel` suffix on relationship names. Note that the related record must be accessed using its type name, and also that temporal types (dates, times and datetimes) return objects which can have individual parts returned.
 
 ```graphql
 {
@@ -67,7 +67,7 @@ These can be accessed by using the special `_rel` suffic on relationship names. 
 
 ## Filtering
 
-Fiters can be used to select records tha satisfy certain criteria
+Filters can be used to select records that satisfy certain criteria
 
 ### Simple filter example
 
@@ -81,7 +81,7 @@ Fiters can be used to select records tha satisfy certain criteria
 
 ### Complex filter example
 
-The following will find peopel who are Female adn are either unemployed or work for the two companies specified. Queries can be built up with any level of nesting, and using a wide variety of comparison operators
+The following will find people who are Female and are either unemployed or work for the two companies specified. Queries can be built up with any level of nesting, and using a wide variety of comparison operators
 
 ```graphql
 {

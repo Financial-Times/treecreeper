@@ -33,7 +33,7 @@ See `tc-api-rest-handlers` for details
 
 ##### `app`
 
-An express app. If none it provided, one will be created
+An express app. If none is provided, one will be created
 
 ##### `schemaOptions`
 
