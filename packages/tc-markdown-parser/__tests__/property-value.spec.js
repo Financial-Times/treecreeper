@@ -68,32 +68,93 @@ test('string types are coerced to string', async () => {
 	expect(typeof data.anotherString).toBe('string');
 });
 
-test('enums types correctly return their value', async () => {
-	const { data } = await parser.parseMarkdownString(here`
-		# name
+describe('enums', () => {
+	test('enums types correctly return their value', async () => {
+		const { data } = await parser.parseMarkdownString(here`
+			# name
 
-		## some enum
-		first
+			## some enum
+			first
 
-	`);
+		`);
 
-	expect(data.someEnum).toBe('First');
-});
+		expect(data.someEnum).toBe('First');
+	});
 
-test('enums types with incorrect values produce error', async () => {
-	const { data, errors } = await parser.parseMarkdownString(here`
-		# name
+	test('multiple choice types correctly return their value', async () => {
+		const { data } = await parser.parseMarkdownString(here`
+			# name
 
-		## some enum
+			## some multiple choice
+			- first
+			- second
 
-		Fourth
-	`);
+		`);
 
-	expect(data.someEnum).toBe(undefined);
-	expect(errors.length).toBe(1);
-	const [{ message }] = errors;
-	expect(message).toMatch(/\bfourth\b/);
-	expect(message).toContain('AnEnum');
+		expect(data.someMultipleChoice).toEqual(['First', 'Second']);
+	});
+
+	test('enums must not be a list', async () => {
+		const { errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some enum
+			- first
+
+		`);
+
+		expect(errors).toHaveLength(1);
+
+		const [{ message }] = errors;
+		expect(message).toBe('Must provide a single enum, not a nested list');
+	});
+
+	test('multiple choice must be a list', async () => {
+		const { errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some multiple choice
+			first
+
+		`);
+
+		expect(errors).toHaveLength(1);
+
+		const [{ message }] = errors;
+		expect(message).toBe('Must provide a list of enums');
+	});
+
+	test('enums types with incorrect values produce error', async () => {
+		const { data, errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some enum
+
+			Fourth
+		`);
+
+		expect(data.someEnum).toBe(undefined);
+		expect(errors.length).toBe(1);
+		const [{ message }] = errors;
+		expect(message).toMatch(/\bfourth\b/);
+		expect(message).toContain('AnEnum');
+	});
+
+	test('multiple choice types with incorrect values produce error', async () => {
+		const { data, errors } = await parser.parseMarkdownString(here`
+			# name
+
+			## some multiple choice
+
+			- Fourth
+		`);
+
+		expect(data.someMultipleChoice).toBe(undefined);
+		expect(errors.length).toBe(1);
+		const [{ message }] = errors;
+		expect(message).toMatch(/\bfourth\b/);
+		expect(message).toContain('AnEnum');
+	});
 });
 
 // Before this test, we had links coming out wrapped in triangle brackets
@@ -109,8 +170,9 @@ test('urls should stay urls', async () => {
 	expect(typeof data.someUrl).toBe('string');
 });
 
-test('nested fields are coerced to string (the code)', async () => {
-	const { data } = await parser.parseMarkdownString(here`
+describe('relationship properties', () => {
+	test('nested fields are coerced to string (the code)', async () => {
+		const { data } = await parser.parseMarkdownString(here`
 		# name
 
 		## favourite child
@@ -118,13 +180,13 @@ test('nested fields are coerced to string (the code)', async () => {
 		cheerabbits
 	`);
 
-	expect(data.favouriteChild).toMatchObject({
-		code: 'cheerabbits',
+		expect(data.favouriteChild).toMatchObject({
+			code: 'cheerabbits',
+		});
 	});
-});
 
-test('properties with hasMany turn bulleted lists into arrays', async () => {
-	const { data, errors } = await parser.parseMarkdownString(here`
+	test('properties with hasMany turn bulleted lists into arrays', async () => {
+		const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
 		## children
@@ -137,20 +199,53 @@ test('properties with hasMany turn bulleted lists into arrays', async () => {
 		* apple-quicktime
 	`);
 
-	expect(errors).toHaveLength(0);
-	expect(data.children).toEqual([
-		{
-			code: 'chee-rabbits',
-		},
-	]);
-	expect(data.youngerSiblings).toEqual([
-		{
-			code: 'ft-app-fruitcake',
-		},
-		{
-			code: 'apple-quicktime',
-		},
-	]);
+		expect(errors).toHaveLength(0);
+		expect(data.children).toEqual([
+			{
+				code: 'chee-rabbits',
+			},
+		]);
+		expect(data.youngerSiblings).toEqual([
+			{
+				code: 'ft-app-fruitcake',
+			},
+			{
+				code: 'apple-quicktime',
+			},
+		]);
+	});
+
+	test('properties with hasMany must be bulleted lists', async () => {
+		const { errors } = await parser.parseMarkdownString(here`
+		# name
+
+		## children
+
+		chee-rabbits
+	`);
+
+		expect(errors).toHaveLength(1);
+
+		const [{ message }] = errors;
+		expect(message).toContain('list');
+		expect(message).toContain('bullet');
+	});
+
+	test('properties without hasMany must not be bulleted lists', async () => {
+		const { errors } = await parser.parseMarkdownString(here`
+		# name
+
+		## some url
+
+		* https://ft.com
+	`);
+
+		expect(errors).toHaveLength(1);
+
+		const [{ message }] = errors;
+		expect(message).toContain('list');
+		expect(message).toContain('bullet');
+	});
 });
 
 test('thows error if defined property is included with blacklist', async () => {
@@ -181,38 +276,6 @@ test('thows error if defined property is included with blacklist', async () => {
 	expect(message).toEqual(
 		'youngerSiblings is not permitted within markdown (to allow other people to edit it)',
 	);
-});
-
-test('properties with hasMany must be bulleted lists', async () => {
-	const { errors } = await parser.parseMarkdownString(here`
-		# name
-
-		## children
-
-		chee-rabbits
-	`);
-
-	expect(errors).toHaveLength(1);
-
-	const [{ message }] = errors;
-	expect(message).toContain('list');
-	expect(message).toContain('bullet');
-});
-
-test('properties without hasMany must not be bulleted lists', async () => {
-	const { errors } = await parser.parseMarkdownString(here`
-		# name
-
-		## some url
-
-		* https://ft.com
-	`);
-
-	expect(errors).toHaveLength(1);
-
-	const [{ message }] = errors;
-	expect(message).toContain('list');
-	expect(message).toContain('bullet');
 });
 
 test('subdocuments have their headers reduced two levels', async () => {
