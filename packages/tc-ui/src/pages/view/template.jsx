@@ -26,7 +26,7 @@ const Properties = ({ fields, data, assignComponent }) => {
 				value,
 				id: name,
 				...item,
-				...assignComponent(item.type),
+				...assignComponent(item),
 			};
 			return viewModel.label ? (
 				<LabelledPrimitive {...viewModel} />

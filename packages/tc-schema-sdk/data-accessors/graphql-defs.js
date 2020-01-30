@@ -33,8 +33,8 @@ ${content}
 
 const maybePluralType = ({ type, hasMany }) => (hasMany ? `[${type}]` : type);
 
-const maybePaginate = ({ hasMany }) =>
-	hasMany ? '(first: Int, offset: Int)' : '';
+const maybePaginate = ({ hasMany, isRelationship }) =>
+	hasMany && isRelationship ? '(first: Int, offset: Int)' : '';
 
 const maybeDirective = def => {
 	if (def.cypher) {

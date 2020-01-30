@@ -2,6 +2,7 @@ const sortBy = require('lodash.sortby');
 const Text = require('./text/server');
 const Boolean = require('./boolean/server');
 const Enum = require('./enum/server');
+const MultipleChoice = require('./multiple-choice/server');
 const Number = require('./number/server');
 const LargeText = require('./large-text/server');
 const Relationship = require('./relationship/server');
@@ -58,5 +59,6 @@ module.exports = {
 	LargeText: addDefaults(LargeText),
 	Temporal: addDefaults(Temporal),
 	Relationship: addDefaults(Relationship),
+	MultipleChoice: addDefaults(MultipleChoice),
 	getValue,
 };

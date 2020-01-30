@@ -90,6 +90,24 @@ describe('rest PATCH update', () => {
 				.exists()
 				.notHave('someString');
 		});
+		it('sets array data', async () => {
+			const { body, status } = await basicHandler({
+				// // someStringList: ['one', 'two'],
+				someMultipleChoice: ['First', 'Second'],
+			});
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				// // someStringList: ['one', 'two'],
+				someMultipleChoice: ['First', 'Second'],
+			});
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					// // someStringList: ['one', 'two'],
+					someMultipleChoice: ['First', 'Second'],
+				});
+		});
 		describe('temporal properties', () => {
 			const neo4jTimePrecision = timestamp =>
 				timestamp.replace('Z', '000000Z');

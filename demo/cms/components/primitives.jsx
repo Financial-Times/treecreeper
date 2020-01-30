@@ -95,7 +95,6 @@ const RelationshipAnnotator = ({ type, value }) => (
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
-	AnEnum: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
 	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },

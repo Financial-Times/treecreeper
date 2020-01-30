@@ -56,6 +56,7 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 						'description',
 						'label',
 						'deprecationReason',
+						'hasMany',
 					];
 					if (fieldsets) {
 						commonKeys.push('fieldset');
@@ -67,7 +68,6 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 								commonKeys.concat([
 									'direction',
 									'relationship',
-									'hasMany',
 									'useInSummary',
 									'hidden',
 									'cypher',
@@ -240,21 +240,12 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 							expect(Array.isArray(config.examples)).toBe(true);
 						}
 					});
-					it('has valid direction', () => {
-						if (config.direction) {
-							expect(config.direction).toMatch(
-								arrayToRegExp(['incoming', 'outgoing']),
-							);
-						}
-					});
-					it('has valid relationship', () => {
-						if (config.relationship) {
-							expect(config.relationship).toMatch(/^[A-Z_]+$/);
-						}
-					});
-					it('has valid hasMany', () => {
+					it('may allow many enums', () => {
 						if (config.hasMany) {
-							expect(typeof config.hasMany).toBe('boolean');
+							expect(
+								[...validEnums],
+								// .concat('Word')
+							).toContain(config.type);
 						}
 					});
 				});
