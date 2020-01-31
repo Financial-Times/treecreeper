@@ -109,7 +109,10 @@ const coerceNestedPropertyValue = (
 	}
 };
 
-const coerceEnumPropertyValue = (node, { propertyType: enumName, hasMany, enums }) => {
+const coerceEnumPropertyValue = (
+	node,
+	{ propertyType: enumName, hasMany, enums },
+) => {
 	let [subdocument] = node.children;
 
 	if (hasMany) {
