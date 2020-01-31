@@ -109,7 +109,7 @@ const coerceNestedPropertyValue = (
 	}
 };
 
-const coerceEnumPropertyValue = (node, { propertyType, hasMany, enums }) => {
+const coerceEnumPropertyValue = (node, { propertyType: enumName, hasMany, enums }) => {
 	let [subdocument] = node.children;
 
 	if (hasMany) {
@@ -126,8 +126,6 @@ const coerceEnumPropertyValue = (node, { propertyType, hasMany, enums }) => {
 			message: 'Must provide a single enum, not a nested list',
 		});
 	}
-
-	const enumName = propertyType;
 
 	const validValues = Object.values(enums[enumName]);
 
