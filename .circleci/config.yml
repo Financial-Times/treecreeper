@@ -103,7 +103,7 @@ jobs:
           command: make run-test-db
       - run:
           name: Run tests
-          command: make test
+          command: make init-db test
           environment:
             JEST_JUNIT_OUTPUT: "junit/test-results.xml"
       - store_test_results:
