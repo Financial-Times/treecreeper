@@ -22,7 +22,7 @@ const unifiedProcessor = function({
 		await schema.ready();
 
 		const types = schema.getTypes();
-		const { properties } = types.find(({ name }) => name === type);
+		const { properties } = schema.getType(type);
 		const typeNames = new Set(types.map(({ name }) => name));
 
 		const validateProperty = (key, value) => {
@@ -44,6 +44,7 @@ const unifiedProcessor = function({
 			.use(setNestedMultilineProperties, {
 				typeNames,
 				properties,
+				rootType: type
 			})
 			.use(coerceTreecreeperPropertiesToType, {
 				properties,

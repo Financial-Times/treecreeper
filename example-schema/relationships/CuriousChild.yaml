@@ -23,6 +23,11 @@ properties:
     label: Label for some enum
     description: Description for some enum.
     type: AnEnum
+  someMultipleChoice:
+    label: Label for some multiple choice
+    description: Description for some multiple choice.
+    type: AnEnum
+    hasMany: true
   someBoolean:
     label: Label for some boolean
     description: Description for some boolean.
