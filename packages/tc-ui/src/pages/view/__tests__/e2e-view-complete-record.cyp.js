@@ -21,7 +21,7 @@ describe('End-to-end - record creation', () => {
 		resetDb();
 	});
 
-	it.only('can create MainType record', () => {
+	it('can create MainType record', () => {
 		populateMinimumViableFields(code);
 		save();
 
