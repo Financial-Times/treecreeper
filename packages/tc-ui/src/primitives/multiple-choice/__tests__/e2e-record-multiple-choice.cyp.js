@@ -1,13 +1,13 @@
 const {
 	code,
 	someString,
-} = require('../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../../../../cypress/fixtures/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	visitEditPage,
 	save,
 	resetDb,
-} = require('../../test-helpers');
+} = require('../../../../../../cypress/test-helpers');
 
 describe('End-to-end - record multiple choice value', () => {
 	beforeEach(() => {

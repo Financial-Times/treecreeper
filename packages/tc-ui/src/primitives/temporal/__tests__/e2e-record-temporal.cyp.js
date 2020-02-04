@@ -1,14 +1,15 @@
+/* eslint-disable jest/valid-expect-in-promise */
 const {
 	code,
 	someString,
 	someDatetime,
 	someDate,
-} = require('../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../../../../cypress/fixtures/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../test-helpers');
+} = require('../../../../../../cypress/test-helpers');
 
 describe('End-to-end - record Temporal type', () => {
 	beforeEach(() => {

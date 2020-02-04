@@ -9,8 +9,8 @@ const {
 	someDate,
 	someDatetime,
 	someUrl,
-} = require('../../../../cypress/fixtures/mainTypeData.json');
-const { dropFixtures } = require('../../../../test-helpers/test-fixtures');
+} = require('../fixtures/mainTypeData.json');
+const { dropFixtures } = require('../../test-helpers/test-fixtures');
 
 const populateParentTypeFields = codeLabel => {
 	cy.visit(`/ParentType/create`);
