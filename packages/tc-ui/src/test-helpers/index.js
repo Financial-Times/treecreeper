@@ -9,7 +9,8 @@ const {
 	someDate,
 	someDatetime,
 	someUrl,
-} = require('./fixtures/mainTypeData.json');
+} = require('../../../../cypress/fixtures/mainTypeData.json');
+const { dropFixtures } = require('../../../../test-helpers/test-fixtures');
 
 const populateParentTypeFields = codeLabel => {
 	cy.visit(`/ParentType/create`);
@@ -82,6 +83,17 @@ const populateNonMinimumViableFields = () => {
 		.first()
 		.check({ force: true });
 	cy.get('select[name=someEnum]').select(someEnum);
+	cy.get('#checkbox-someMultipleChoice-First').check({ force: true });
+	cy.get('#checkbox-someMultipleChoice-Third').check({ force: true });
+	cy.get('#checkbox-someMultipleChoice-First')
+		.should('have.value', 'First')
+		.should('be.checked');
+	cy.get('#checkbox-someMultipleChoice-Second')
+		.should('have.value', 'Second')
+		.should('not.be.checked');
+	cy.get('#checkbox-someMultipleChoice-Third')
+		.should('have.value', 'Third')
+		.should('be.checked');
 	cy.get('input[name=someInteger]').type(someInteger);
 	cy.get('input[name=anotherString]').type(anotherString);
 	cy.get('input[name=someDate]')
@@ -102,6 +114,10 @@ const populateNonMinimumViableFields = () => {
 	cy.get('input[name=someUrl]').type(someUrl);
 };
 
+const resetDb = async () => { console.log('called', code)
+	await dropFixtures(code);
+};
+
 module.exports = {
 	populateNonMinimumViableFields,
 	populateParentTypeFields,
@@ -113,4 +129,5 @@ module.exports = {
 	visitMainTypePage,
 	save,
 	populateMinimumViableFields,
+	resetDb,
 };

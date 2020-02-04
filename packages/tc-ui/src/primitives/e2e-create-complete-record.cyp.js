@@ -8,17 +8,14 @@ const {
 	anotherString,
 	someUrl,
 	promptText,
-} = require('../fixtures/mainTypeData.json');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
+} = require('../../../../cypress/fixtures/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateNonMinimumViableFields,
+	visitMainTypePage,
 	save,
+	resetDb,
 } = require('../test-helpers');
-
-const resetDb = async () => {
-	await dropFixtures(code);
-};
 
 describe('End-to-end - record creation', () => {
 	beforeEach(() => {
@@ -30,7 +27,7 @@ describe('End-to-end - record creation', () => {
 		save();
 		populateNonMinimumViableFields(code);
 		save();
-
+		visitMainTypePage();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
 		cy.get('#children>li')
@@ -42,6 +39,14 @@ describe('End-to-end - record creation', () => {
 		cy.get('#anotherDocument').should('have.text', anotherDocument);
 		cy.get('#someBoolean').should('have.text', 'Yes');
 		cy.get('#someEnum').should('have.text', someEnum);
+		cy.get('#someMultipleChoice span:first-child').should(
+			'have.text',
+			'First',
+		);
+		cy.get('#someMultipleChoice span:last-child').should(
+			'have.text',
+			'Third',
+		);
 		cy.get('#someInteger').should('have.text', String(someInteger));
 		cy.get('#anotherString').should('have.text', anotherString);
 		cy.get('#someDate').should('have.text', '15 January 2020');
