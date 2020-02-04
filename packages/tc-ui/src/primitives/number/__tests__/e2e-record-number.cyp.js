@@ -2,12 +2,12 @@ const {
 	code,
 	someString,
 	someInteger,
-} = require('../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../../../../cypress/fixtures/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../test-helpers');
+} = require('../../../../../../cypress/test-helpers');
 
 describe('End-to-end - record Number type', () => {
 	beforeEach(() => {

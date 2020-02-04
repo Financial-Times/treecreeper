@@ -1,4 +1,6 @@
-const { code } = require('../../../../../cypress/fixtures/mainTypeData.json');
+const {
+	code,
+} = require('../../../../../../cypress/fixtures/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateChildTypeFields,
@@ -8,7 +10,7 @@ const {
 	visitMainTypePage,
 	save,
 	resetDb,
-} = require('../../test-helpers');
+} = require('../../../../../../cypress/test-helpers');
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
