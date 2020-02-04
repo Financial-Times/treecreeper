@@ -12,7 +12,6 @@ const {
 const {
 	populateMinimumViableFields,
 	populateNonMinimumViableFields,
-	visitMainTypePage,
 	save,
 	resetDb,
 } = require('../test-helpers');
@@ -27,7 +26,8 @@ describe('End-to-end - record creation', () => {
 		save();
 		populateNonMinimumViableFields(code);
 		save();
-		visitMainTypePage();
+
+		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
 		cy.get('#children>li')
