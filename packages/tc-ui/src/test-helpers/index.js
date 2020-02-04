@@ -114,7 +114,7 @@ const populateNonMinimumViableFields = () => {
 	cy.get('input[name=someUrl]').type(someUrl);
 };
 
-const resetDb = async () => { console.log('called', code)
+const resetDb = async () => {
 	await dropFixtures(code);
 };
 
