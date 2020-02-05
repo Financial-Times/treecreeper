@@ -2,12 +2,12 @@ const {
 	code,
 	someString,
 	anotherString,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers');
 
 describe('End-to-end - record Text type', () => {
 	it('can record a text', () => {

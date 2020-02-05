@@ -4,12 +4,12 @@ const {
 	someString,
 	someDatetime,
 	someDate,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers');
 
 describe('End-to-end - record Temporal type', () => {
 	beforeEach(() => {

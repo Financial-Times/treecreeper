@@ -2,7 +2,7 @@ const {
 	code,
 	someString,
 	deleteConfirmText,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateChildTypeFields,
 	visitEditPage,
@@ -10,7 +10,7 @@ const {
 	pickChild,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers');
 
 describe('End-to-end - delete record', () => {
 	beforeEach(() => {
