@@ -23,7 +23,9 @@ module.exports = {
 		'react/prop-types': 0,
 		// Nothing in the UI allows reordering of lists, so the concern of
 		// unecessary rerenders does not - at present - apply
-		'react/no-array-index-key': 0
+		'react/no-array-index-key': 0,
+		"jest/no-export": "off",
+		"jest/expect-expect": "off"
 	},
 	overrides: [{
 		env: {browser: true},
