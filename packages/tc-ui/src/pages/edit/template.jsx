@@ -2,36 +2,8 @@ const React = require('react');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
 const { Concept, SectionHeader } = require('../../lib/components/structure');
-
+const { getValue } = require('../../primitives/server');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
-
-const getValue = (itemSchema, itemValue) => {
-	// preserves boolean values to prevent false being coerced to empty string
-	if (itemSchema.type === 'Boolean') {
-		return typeof itemValue === 'boolean' ? itemValue : '';
-	}
-
-	// return relationships as type, code and name object
-	if (itemSchema.relationship) {
-		if (itemSchema.hasMany) {
-			return itemValue
-				? itemValue.map(item => ({
-						code: item.code,
-						name: item.name || item.code,
-				  }))
-				: [];
-		}
-		return itemValue
-			? {
-					code: itemValue.code,
-					name: itemValue.name || itemValue.code,
-			  }
-			: null;
-	}
-
-	// everything else is just text
-	return itemValue;
-};
 
 const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 	const propertyfields = Object.entries(fields);
@@ -52,14 +24,19 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
+			// console.log({item})
 			let lockedBy;
 			if (fieldNamesToLock.includes(name)) {
 				lockedBy = fieldsToLock[name];
 			}
-			const { EditComponent } = assignComponent(item.type);
+			const { EditComponent } = assignComponent(item);
+			const itemValue = item.isRelationship
+				? data[`${name}_rel`]
+				: data[name];
+
 			const viewModel = {
 				propertyName: name,
-				value: getValue(item, data[name]),
+				value: getValue(item, itemValue),
 				dataType: item.type,
 				parentType: type,
 				options: getEnums()[item.type]

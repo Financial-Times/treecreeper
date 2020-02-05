@@ -9,5 +9,6 @@
 	"someDate": "2020-01-15",
 	"someDatetime": "2020-01-15T13:00",
 	"someUrl": "https://google.com",
-	"promptText": "Please fill out all fields required for the minimum viable record before creating a new record.\nType SAVE INCOMPLETE RECORD below to proceed, or click cancel to return to the form"
+	"promptText": "Please fill out all fields required for the minimum viable record before creating a new record.\nType SAVE INCOMPLETE RECORD below to proceed, or click cancel to return to the form",
+	"deleteConfirmText": "Are you sure you wish to delete?\n\nUnless you created something by accident, a more appropriate action is usually to mark the record as inactive, either in the Is Active or Lifecycle Stage fields,"
 }

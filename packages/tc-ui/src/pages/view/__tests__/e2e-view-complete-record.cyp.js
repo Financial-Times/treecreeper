@@ -8,17 +8,13 @@ const {
 	anotherString,
 	someUrl,
 	promptText,
-} = require('../fixtures/mainTypeData.json');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateNonMinimumViableFields,
 	save,
-} = require('../test-helpers');
-
-const resetDb = async () => {
-	await dropFixtures(code);
-};
+	resetDb,
+} = require('../../../test-helpers');
 
 describe('End-to-end - record creation', () => {
 	beforeEach(() => {
@@ -28,30 +24,12 @@ describe('End-to-end - record creation', () => {
 	it('can create MainType record', () => {
 		populateMinimumViableFields(code);
 		save();
-		populateNonMinimumViableFields(code);
-		save();
 
-		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
-		cy.get('#children>li')
-			.eq(0)
-			.should('have.text', `${code}-first-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
-		cy.get('#someDocument').should('have.text', someDocument);
-		cy.get('#anotherDocument').should('have.text', anotherDocument);
-		cy.get('#someBoolean').should('have.text', 'Yes');
-		cy.get('#someEnum').should('have.text', someEnum);
-		cy.get('#someInteger').should('have.text', String(someInteger));
-		cy.get('#anotherString').should('have.text', anotherString);
-		cy.get('#someDate').should('have.text', '15 January 2020');
-		cy.get('#someDatetime').should(
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#record-title a span:first-child').should(
 			'have.text',
-			'15 January 2020, 1:00:00 PM',
+			'MainType: e2e-demo',
 		);
-		cy.get('#someUrl')
-			.should('have.text', someUrl)
-			.should('have.attr', 'href', someUrl);
 	});
 
 	it('can not create record if no code(label) is given', () => {
@@ -115,5 +93,43 @@ describe('End-to-end - record creation', () => {
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('be.empty');
 		cy.get('#children').should('not.exist');
+	});
+
+	it('can display record', () => {
+		populateMinimumViableFields(code);
+		save();
+		populateNonMinimumViableFields(code);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+		cy.get('#someDocument').should('have.text', someDocument);
+		cy.get('#anotherDocument').should('have.text', anotherDocument);
+		cy.get('#someBoolean').should('have.text', 'Yes');
+		cy.get('#someEnum').should('have.text', someEnum);
+		cy.get('#someMultipleChoice span:first-child').should(
+			'have.text',
+			'First',
+		);
+		cy.get('#someMultipleChoice span:last-child').should(
+			'have.text',
+			'Third',
+		);
+		cy.get('#someInteger').should('have.text', String(someInteger));
+		cy.get('#anotherString').should('have.text', anotherString);
+		cy.get('#someDate').should('have.text', '15 January 2020');
+		cy.get('#someDatetime').should(
+			'have.text',
+			'15 January 2020, 1:00:00 PM',
+		);
+		cy.get('#someUrl')
+			.should('have.text', someUrl)
+			.should('have.attr', 'href', someUrl);
 	});
 });

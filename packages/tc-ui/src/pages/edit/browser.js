@@ -19,7 +19,7 @@ const initRelationshipSelectors = () => {
 };
 
 // TODO - the relationship editors should expose their bad state in some way
-// (e.g set teh hidden input as invalid? data-attribute?)
+// (e.g set the hidden input as invalid? data-attribute?)
 // That way the form can just, in quite a generic way query for invalid fields
 const preventBadSubmission = () => {
 	document

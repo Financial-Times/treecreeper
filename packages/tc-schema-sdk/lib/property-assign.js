@@ -13,19 +13,10 @@ const assignMetaProperties = (properties, { ignoreFields = [] } = {}) => {
 const entriesArrayToObject = arr =>
 	arr.reduce((obj, [name, val]) => Object.assign(obj, { [name]: val }), {});
 
-const transformPrimitiveTypes = (
-	properties,
-	primitiveTypes,
-	getStringValidator,
-	primitiveTypesMap,
-) => {
+const transformPrimitiveTypes = (properties, getStringValidator) => {
 	const propertyEntries = Object.entries(properties)
 		.map(([name, def]) => [name, { ...def }])
 		.map(([name, def]) => {
-			if (primitiveTypes === 'graphql') {
-				// If not a primitive type we assume it's an enum and leave it unaltered
-				def.type = primitiveTypesMap[def.type] || def.type;
-			}
 			if (def.pattern) {
 				def.validator = getStringValidator(def.pattern);
 			}

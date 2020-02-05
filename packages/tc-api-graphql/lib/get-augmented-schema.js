@@ -38,6 +38,7 @@ const getAugmentedSchema = ({ documentStore }) => {
 	const typeDefs = getGraphqlDefs();
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
+
 	const schema = makeAugmentedSchema({
 		typeDefs: typeDefs.join('\n'),
 		logger: {

@@ -39,6 +39,23 @@ describe('rest PATCH diff', () => {
 		);
 	});
 
+	it("doesn't write if no real array property changes detected", async () => {
+		await createMainNode({
+			// someStringList: ['one', 'two'],
+			someMultipleChoice: ['First', 'Second'],
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await basicHandler({
+			// someStringList: ['two', 'one'],
+			someMultipleChoice: ['Second', 'First'],
+		});
+		expect(status).toBe(200);
+		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect.stringMatching(/MERGE|CREATE/),
+			expect.any(Object),
+		);
+	});
+
 	it("doesn't write if no real relationship changes detected in REPLACE mode", async () => {
 		const [main, child] = await createNodes(
 			['MainType', mainCode],

@@ -62,7 +62,7 @@ cypress-verify:
 deploy-aws:
 	aws cloudformation deploy --stack-name biz-ops-kinesis --template-body file://$(shell pwd)/aws/cloudformation/biz-ops-kinesis.yaml
 
-test: init-db
+test:
 	@if [ -z $(CI) ]; \
 		then TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*/${spec}.*.spec.js" --testEnvironment=node --watch; \

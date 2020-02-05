@@ -240,8 +240,6 @@ const Header = props => {
 						</ul>
 					</nav>
 				</header>
-			</div>
-			<div className="o-layout__header">
 				{props.message ? <Message {...props} isBanner /> : null}
 			</div>
 		</>
