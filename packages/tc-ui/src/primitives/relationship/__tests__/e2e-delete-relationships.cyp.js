@@ -1,4 +1,4 @@
-const { code } = require('../fixtures/mainTypeData.json');
+const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateChildTypeFields,
@@ -7,17 +7,12 @@ const {
 	visitEditPage,
 	visitMainTypePage,
 	save,
-} = require('../test-helpers');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
-
-const resetDb = async () => {
-	await dropFixtures(code);
-};
+	resetDb,
+} = require('../../../test-helpers');
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
 		resetDb();
-
 		populateMinimumViableFields(code);
 		save();
 		populateChildTypeFields(`${code}-first-child`);
