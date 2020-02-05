@@ -61,7 +61,7 @@ describe('End-to-end - edit record', () => {
 		cy.get('[data-name=e2e-demo-first-child] button').click({
 			force: true,
 		});
-		cy.get('#children-picker')
+		cy.get('#children-picker') // eslint-disable-line cypress/no-unnecessary-waiting
 			.type('e2e-demo-sec')
 			.wait(500)
 			.type('{downarrow}{enter}');
