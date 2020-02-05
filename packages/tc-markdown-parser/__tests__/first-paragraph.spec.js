@@ -68,9 +68,7 @@ test('disallow mutiple description in blocks', async () => {
 	`);
 	expect(errors.length).toBe(1);
 	const [{ message }] = errors;
-	expect(message).toMatch(
-		/only one description is allowed to define in top level/,
-	);
+	expect(message).toMatch(/Description must be a single paragraph/);
 	expect(data).toMatchObject({
 		name: 'well',
 		description: 'this is first description',

@@ -20,8 +20,7 @@ module.exports = function createBizopsDescriptionNode({
 		if (descriptionChildren.length > 1) {
 			convertNodeToProblem({
 				node: descriptionChildren.pop(),
-				message:
-					'only one description is allowed to define in top level',
+				message: 'Description must be a single paragraph',
 			});
 		}
 
