@@ -44,7 +44,7 @@ const unifiedProcessor = function({
 			.use(setNestedMultilineProperties, {
 				typeNames,
 				properties,
-				rootType: type
+				rootType: type,
 			})
 			.use(coerceTreecreeperPropertiesToType, {
 				properties,

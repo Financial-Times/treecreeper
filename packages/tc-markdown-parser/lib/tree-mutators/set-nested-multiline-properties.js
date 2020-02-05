@@ -1,9 +1,11 @@
 const visit = require('unist-util-visit-parents');
 const { select, selectAll } = require('unist-util-select');
 const builder = require('unist-builder');
+const schema = require('@financial-times/tc-schema-sdk');
 const convertNodeToProblem = require('./convert-node-to-problem');
 const parseMultilineDefinition = require('../parse-multiline-definition');
 const setTreecreeperPropertyNames = require('./set-treecreeper-property-names');
+const coerceTreecreeperPropertiesToType = require('./coerce-treecreeper-properties-to-type');
 const append = require('../append-node');
 
 function createPropertyNodes(node, nestedProperties) {
@@ -21,6 +23,19 @@ function createPropertyNodes(node, nestedProperties) {
 	setTreecreeperPropertyNames({
 		properties: nestedProperties,
 		nestedPrefix: node.propertyType,
+	})(propertyNodes);
+
+	propertyNodes.children.forEach(node => {
+		node.isRelationshipProperty = true;
+	});
+
+	coerceTreecreeperPropertiesToType({
+		properties: nestedProperties,
+		typeNames: new Set(),
+		primitiveTypesMap: schema.getPrimitiveTypes({
+			output: 'graphql',
+		}),
+		enums: schema.getEnums(),
 	})(propertyNodes);
 
 	// If problem found on parsing properties, throw error with that position

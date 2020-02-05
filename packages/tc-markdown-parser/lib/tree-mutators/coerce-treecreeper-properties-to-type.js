@@ -1,5 +1,6 @@
 const { selectAll } = require('unist-util-select');
 const stripHtmlComments = require('strip-html-comments');
+const schema = require('@financial-times/tc-schema-sdk');
 const propertyCoercers = require('../property-coercers');
 const convertNodeToProblem = require('./convert-node-to-problem');
 const normalizePropertyKey = require('../normalize-property-key');
@@ -83,7 +84,13 @@ const coerceNestedPropertyValue = (
 				if (nestNode.type === 'problem') {
 					throw new Error(nestNode.message);
 				}
+
+				if (schema.getEnums()[nestNode.propertyType]) {
+					values[nestNode.key] = nestNode.value;
+					return values;
+				}
 				const primitiveType = primitiveTypesMap[nestNode.propertyType];
+
 				const coercer = getCoercer({
 					isNested: true,
 					primitiveType,
@@ -114,29 +121,52 @@ const coerceEnumPropertyValue = (
 	{ propertyType: enumName, hasMany, enums },
 ) => {
 	let [subdocument] = node.children;
-
-	if (hasMany) {
-		if (subdocument.children[0].type !== 'list') {
-			return convertNodeToProblem({
-				node,
-				message: 'Must provide a list of enums',
-			});
-		}
-		[subdocument] = subdocument.children;
-	} else if (subdocument.children[0].type !== 'paragraph') {
-		return convertNodeToProblem({
-			node,
-			message: 'Must provide a single enum, not a nested list',
-		});
-	}
-
 	const validValues = Object.values(enums[enumName]);
 
-	const values = subdocument.children.map(child => {
-		const flattenedContent = normalizePropertyKey(
-			flattenNodeToPlainString(child),
-		);
+	let values;
 
+	if (node.isRelationshipProperty) {
+		if (node.children[0].type !== 'text') {
+			return convertNodeToProblem({
+				node,
+				message: 'Enum property on relationship missing',
+			});
+		}
+		const rawValue = node.children[0].value.toLowerCase();
+		if (hasMany) {
+			values = rawValue.split(',').map(str => str.trim());
+		} else {
+			if (rawValue.indexOf(',') > -1) {
+				return convertNodeToProblem({
+					node,
+					message:
+						'Passed in a list of enums when only a single one expected',
+				});
+			}
+			values = [rawValue];
+		}
+	} else {
+		if (hasMany) {
+			if (subdocument.children[0].type !== 'list') {
+				return convertNodeToProblem({
+					node,
+					message: 'Must provide a list of enums',
+				});
+			}
+			[subdocument] = subdocument.children;
+		} else if (subdocument.children[0].type !== 'paragraph') {
+			return convertNodeToProblem({
+				node,
+				message: 'Must provide a single enum, not a nested list',
+			});
+		}
+
+		values = subdocument.children.map(child =>
+			normalizePropertyKey(flattenNodeToPlainString(child)),
+		);
+	}
+
+	values = values.map(flattenedContent => {
 		const validValue = validValues.find(value => {
 			return flattenedContent === normalizePropertyKey(value);
 		});
