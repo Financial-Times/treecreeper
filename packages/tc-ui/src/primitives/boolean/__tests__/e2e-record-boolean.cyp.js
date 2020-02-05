@@ -4,7 +4,7 @@ const {
 	visitEditPage,
 	save,
 	resetDb,
-} = require('../../../test-helpers/mainTypeData.json');
+} = require('../../../test-helpers');
 
 describe('End-to-end - record Boolean type', () => {
 	beforeEach(() => {
