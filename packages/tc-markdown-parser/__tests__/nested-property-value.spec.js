@@ -155,7 +155,7 @@ describe('nested property definition tests', () => {
 	});
 
 	describe('enum type conversion', () => {
-		it('enum on single relationshipp', async () => {
+		it('enum on single relationship', async () => {
 			const { data, errors } = await parser.parseMarkdownString(here`
 					# name
 
@@ -164,15 +164,15 @@ describe('nested property definition tests', () => {
 					child-code
 						someEnum: first
 				`);
-			console.log({ data, errors });
+
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild: [
+				curiousChild:
 					{
 						code: 'child-code',
 						someEnum: 'First',
 					},
-				],
+
 			});
 		});
 		it('enum on many relationships', async () => {
@@ -190,14 +190,14 @@ describe('nested property definition tests', () => {
 
 			expect(data).toEqual({
 				name: 'name',
-				isCuriousChildOf: {
+				isCuriousChildOf: [{
 					code: 'main-code',
 					someEnum: 'First',
-				},
+				}],
 			});
 		});
 		it('multiple choice enum on single relationship', async () => {
-			const { data } = await parser.parseMarkdownString(here`
+			const { data, errors } = await parser.parseMarkdownString(here`
 					# name
 
 					## curious child
@@ -205,14 +205,15 @@ describe('nested property definition tests', () => {
 					child-code
 						someMultipleChoice: first,second
 				`);
+			console.log({ data, errors });
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild: [
+				curiousChild:
 					{
 						code: 'child-code',
 						someMultipleChoice: ['First', 'Second'],
 					},
-				],
+
 			});
 		});
 		it('multiple choice enum on many relationships', async () => {
@@ -229,10 +230,10 @@ describe('nested property definition tests', () => {
 				`);
 			expect(data).toEqual({
 				name: 'name',
-				isCuriousChildOf: {
+				isCuriousChildOf: [{
 					code: 'main-code',
 					someMultipleChoice: ['First', 'Second'],
-				},
+				}],
 			});
 		});
 
@@ -247,12 +248,12 @@ describe('nested property definition tests', () => {
 				`);
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild: [
+				curiousChild:
 					{
 						code: 'child-code',
 						someMultipleChoice: ['First', 'Second'],
 					},
-				],
+
 			});
 		});
 	});

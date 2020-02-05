@@ -28,11 +28,13 @@ function createPropertyNodes(node, nestedProperties) {
 	propertyNodes.children.forEach(node => {
 		node.isRelationshipProperty = true;
 		if (node.hasMany) {
-			node.children = node.value.split(',').map(str => str.trim())
+			console.log(node)
+			node.children = node.children[0].value.split(',').map(str => str.trim())
 				.map(value => builder('root', value))
-		} else {
-			node.children = [builder('root', node.value)]
 		}
+		// else {
+		// 	node.children = [builder('root', node.value)]
+		// }
 	});
 
 	// coerceTreecreeperPropertiesToType({
