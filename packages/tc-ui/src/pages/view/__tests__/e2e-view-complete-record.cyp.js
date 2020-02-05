@@ -8,13 +8,13 @@ const {
 	anotherString,
 	someUrl,
 	promptText,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateNonMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers');
 
 describe('End-to-end - record creation', () => {
 	beforeEach(() => {

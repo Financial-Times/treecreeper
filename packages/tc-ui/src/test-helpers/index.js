@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const {
 	code,
 	someDocument,
@@ -9,8 +10,8 @@ const {
 	someDate,
 	someDatetime,
 	someUrl,
-} = require('../fixtures/mainTypeData.json');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
+} = require('./mainTypeData.json');
+const { dropFixtures } = require('../../../../test-helpers/test-fixtures');
 
 const populateParentTypeFields = codeLabel => {
 	cy.visit(`/ParentType/create`);

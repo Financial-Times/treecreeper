@@ -1,13 +1,10 @@
-const {
-	code,
-	someString,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+const { code, someString } = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	visitEditPage,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers/mainTypeData.json');
 
 describe('End-to-end - record Boolean type', () => {
 	beforeEach(() => {

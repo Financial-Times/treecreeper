@@ -3,7 +3,7 @@ const {
 	anotherDocument,
 	someString,
 	someEnum,
-} = require('../../../../../../cypress/fixtures/mainTypeData.json');
+} = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateChildTypeFields,
@@ -11,7 +11,7 @@ const {
 	visitEditPage,
 	save,
 	resetDb,
-} = require('../../../../../../cypress/test-helpers');
+} = require('../../../test-helpers');
 
 describe('End-to-end - edit record', () => {
 	beforeEach(() => {
