@@ -85,10 +85,10 @@ const coerceNestedPropertyValue = (
 					throw new Error(nestNode.message);
 				}
 
-				if (schema.getEnums()[nestNode.propertyType]) {
-					values[nestNode.key] = nestNode.value;
-					return values;
-				}
+				// if (schema.getEnums()[nestNode.propertyType]) {
+				// 	values[nestNode.key] = nestNode.value;
+				// 	return values;
+				// }
 				const primitiveType = primitiveTypesMap[nestNode.propertyType];
 
 				const coercer = getCoercer({
@@ -125,27 +125,27 @@ const coerceEnumPropertyValue = (
 
 	let values;
 
-	if (node.isRelationshipProperty) {
-		if (node.children[0].type !== 'text') {
-			return convertNodeToProblem({
-				node,
-				message: 'Enum property on relationship missing',
-			});
-		}
-		const rawValue = node.children[0].value.toLowerCase();
-		if (hasMany) {
-			values = rawValue.split(',').map(str => str.trim());
-		} else {
-			if (rawValue.indexOf(',') > -1) {
-				return convertNodeToProblem({
-					node,
-					message:
-						'Passed in a list of enums when only a single one expected',
-				});
-			}
-			values = [rawValue];
-		}
-	} else {
+	// if (node.isRelationshipProperty) {
+	// 	if (node.children[0].type !== 'text') {
+	// 		return convertNodeToProblem({
+	// 			node,
+	// 			message: 'Enum property on relationship missing',
+	// 		});
+	// 	}
+	// 	const rawValue = node.children[0].value.toLowerCase();
+	// 	if (hasMany) {
+	// 		values = rawValue.split(',').map(str => str.trim());
+	// 	} else {
+	// 		if (rawValue.indexOf(',') > -1) {
+	// 			return convertNodeToProblem({
+	// 				node,
+	// 				message:
+	// 					'Passed in a list of enums when only a single one expected',
+	// 			});
+	// 		}
+	// 		values = [rawValue];
+	// 	}
+	// } else {
 		if (hasMany) {
 			if (subdocument.children[0].type !== 'list') {
 				return convertNodeToProblem({
@@ -164,7 +164,7 @@ const coerceEnumPropertyValue = (
 		values = subdocument.children.map(child =>
 			normalizePropertyKey(flattenNodeToPlainString(child)),
 		);
-	}
+	// }
 
 	values = values.map(flattenedContent => {
 		const validValue = validValues.find(value => {

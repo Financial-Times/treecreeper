@@ -27,16 +27,22 @@ function createPropertyNodes(node, nestedProperties) {
 
 	propertyNodes.children.forEach(node => {
 		node.isRelationshipProperty = true;
+		if (node.hasMany) {
+			node.children = node.value.split(',').map(str => str.trim())
+				.map(value => builder('root', value))
+		} else {
+			node.children = [builder('root', node.value)]
+		}
 	});
 
-	coerceTreecreeperPropertiesToType({
-		properties: nestedProperties,
-		typeNames: new Set(),
-		primitiveTypesMap: schema.getPrimitiveTypes({
-			output: 'graphql',
-		}),
-		enums: schema.getEnums(),
-	})(propertyNodes);
+	// coerceTreecreeperPropertiesToType({
+	// 	properties: nestedProperties,
+	// 	typeNames: new Set(),
+	// 	primitiveTypesMap: schema.getPrimitiveTypes({
+	// 		output: 'graphql',
+	// 	}),
+	// 	enums: schema.getEnums(),
+	// })(propertyNodes);
 
 	// If problem found on parsing properties, throw error with that position
 	const foundProblemNode = select('problem', propertyNodes);
