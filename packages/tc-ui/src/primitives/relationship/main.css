@@ -72,17 +72,16 @@
 }
 
 .biz-ops-relationship-props-list dt {
-
 	font-weight: 500 !important;
 }
 
 .biz-ops-relationship-props-list dt:after {
-	content: ":";
-  }
+	content: ':';
+}
 
 .biz-ops-relationship-props-list dd:not(:last-child):after {
-	content: ",";
-  }
+	content: ',';
+}
 
 .biz-ops-relationship-props-list .biz-ops-help-icon {
 	display: none;
