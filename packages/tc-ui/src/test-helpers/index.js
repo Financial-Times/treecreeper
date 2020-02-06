@@ -48,6 +48,7 @@ const pickFavouriteChild = () => {
 const pickCuriousChild = () => {
 	cy.get('#curiousChild-picker')
 		.type('e2e-demo')
+		.wait(500)
 		.type('{downarrow}{enter}');
 };
 
