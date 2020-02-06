@@ -18,6 +18,10 @@ const createNode = (key, value, line, column) =>
 		position: {
 			start: {
 				line,
+				column: 0,
+			},
+			end: {
+				line,
 				column,
 			},
 		},

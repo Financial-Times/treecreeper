@@ -25,9 +25,8 @@ const unifiedProcessor = function({
 		const { properties } = schema.getType(type);
 		const typeNames = new Set(types.map(({ name }) => name));
 
-		const validateProperty = (key, value) => {
-			return schema.validators.validateProperty(type, key, value);
-		};
+		const validateProperty = (key, value) =>
+			schema.validators.validateProperty(type, key, value);
 
 		return unified()
 			.use(remarkParse)

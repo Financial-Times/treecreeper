@@ -156,7 +156,7 @@ describe('nested property definition tests', () => {
 
 	describe('enum type conversion', () => {
 		it('enum on single relationship', async () => {
-			const { data, errors } = await parser.parseMarkdownString(here`
+			const { data } = await parser.parseMarkdownString(here`
 					# name
 
 					## curious child
@@ -167,19 +167,17 @@ describe('nested property definition tests', () => {
 
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild:
-					{
-						code: 'child-code',
-						someEnum: 'First',
-					},
-
+				curiousChild: {
+					code: 'child-code',
+					someEnum: 'First',
+				},
 			});
 		});
 		it('enum on many relationships', async () => {
 			const childParser = getParser({
 				type: 'ChildType',
 			});
-			const { data, errors } = await childParser.parseMarkdownString(here`
+			const { data } = await childParser.parseMarkdownString(here`
 					# name
 
 					## is curious child of
@@ -190,14 +188,16 @@ describe('nested property definition tests', () => {
 
 			expect(data).toEqual({
 				name: 'name',
-				isCuriousChildOf: [{
-					code: 'main-code',
-					someEnum: 'First',
-				}],
+				isCuriousChildOf: [
+					{
+						code: 'main-code',
+						someEnum: 'First',
+					},
+				],
 			});
 		});
 		it('multiple choice enum on single relationship', async () => {
-			const { data, errors } = await parser.parseMarkdownString(here`
+			const { data } = await parser.parseMarkdownString(here`
 					# name
 
 					## curious child
@@ -205,15 +205,12 @@ describe('nested property definition tests', () => {
 					child-code
 						someMultipleChoice: first,second
 				`);
-			console.log({ data, errors });
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild:
-					{
-						code: 'child-code',
-						someMultipleChoice: ['First', 'Second'],
-					},
-
+				curiousChild: {
+					code: 'child-code',
+					someMultipleChoice: ['First', 'Second'],
+				},
 			});
 		});
 		it('multiple choice enum on many relationships', async () => {
@@ -230,10 +227,12 @@ describe('nested property definition tests', () => {
 				`);
 			expect(data).toEqual({
 				name: 'name',
-				isCuriousChildOf: [{
-					code: 'main-code',
-					someMultipleChoice: ['First', 'Second'],
-				}],
+				isCuriousChildOf: [
+					{
+						code: 'main-code',
+						someMultipleChoice: ['First', 'Second'],
+					},
+				],
 			});
 		});
 
@@ -248,12 +247,10 @@ describe('nested property definition tests', () => {
 				`);
 			expect(data).toEqual({
 				name: 'name',
-				curiousChild:
-					{
-						code: 'child-code',
-						someMultipleChoice: ['First', 'Second'],
-					},
-
+				curiousChild: {
+					code: 'child-code',
+					someMultipleChoice: ['First', 'Second'],
+				},
 			});
 		});
 	});
