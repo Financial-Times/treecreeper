@@ -37,19 +37,22 @@ describe('End-to-end - relationship creation', () => {
 				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		});
 
-		it('can not select another selection for one-to-one relationship', async () => {
+		it('can not select another selection for one-to-one relationship', () => {
 			visitMainTypePage();
 			visitEditPage();
 
 			pickFavouriteChild();
+			cy.get('#ul-favouriteChild span').should(
+				'have.text',
+				'e2e-demo-first-child',
+			);
+			cy.get('#favouriteChild-picker').should('be.disabled');
 			save();
 
 			cy.url().should('contain', `/MainType/${code}`);
 			cy.get('#favouriteChild')
 				.should('have.text', `${code}-first-child`)
 				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
-
-			cy.get('#favouriteChild-picker').should('be.disabled');
 		});
 	});
 
@@ -149,7 +152,7 @@ describe('End-to-end - relationship creation', () => {
 			.should('have.attr', 'href', `/ParentType/${code}-parent`);
 	});
 
-	it('fetches suggestions from the autocomplete api', async () => {
+	it('fetches suggestions from the autocomplete api', () => {
 		const selector = '[data-property-name="children"]';
 		visitMainTypePage();
 		visitEditPage();
@@ -184,7 +187,7 @@ describe('End-to-end - relationship creation', () => {
 		);
 	});
 
-	it('does not suggest previously selected records', async () => {
+	it('does not suggest previously selected records', () => {
 		const selector = '[data-property-name="children"]';
 		visitMainTypePage();
 		visitEditPage();

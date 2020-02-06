@@ -27,7 +27,7 @@ describe('End-to-end - display relationship properties', () => {
 		visitMainTypePage();
 	});
 
-	it('can display/hide relationship properties', async () => {
+	it('can display/hide relationship properties', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -62,15 +62,13 @@ describe('End-to-end - display relationship properties', () => {
 					.find('.biz-ops-relationship-props-list #someEnum')
 					.should('have.text', 'First');
 				cy.wrap(parent)
-					.find()
 					.find(
-						'.biz-ops-relationship-props-list #someMultipleChoice:first-child',
+						'.biz-ops-relationship-props-list #someMultipleChoice span:first-of-type',
 					)
 					.should('have.text', 'First');
 				cy.wrap(parent)
-					.find()
 					.find(
-						'.biz-ops-relationship-props-list #someMultipleChoice:last-child',
+						'.biz-ops-relationship-props-list #someMultipleChoice span:last-of-type',
 					)
 					.should('have.text', 'Third');
 			});
@@ -93,7 +91,7 @@ describe('End-to-end - display relationship properties', () => {
 			});
 	});
 
-	it('can display properties on a 1-to-1 relationship', async () => {
+	it('can display properties on a 1-to-1 relationship', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -122,7 +120,7 @@ describe('End-to-end - display relationship properties', () => {
 			});
 	});
 
-	it('can display properties on a 1-to-m relationship', async () => {
+	it('can display properties on a 1-to-m relationship', () => {
 		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
@@ -163,7 +161,7 @@ describe('End-to-end - display relationship properties', () => {
 		});
 	});
 
-	it('can display properties on each relationship in a 1-to-m relationship', async () => {
+	it('can display properties on each relationship in a 1-to-m relationship', () => {
 		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
