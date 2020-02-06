@@ -94,4 +94,5 @@ const dropFixtures = namespace =>
 module.exports = {
 	fixtureBuilder,
 	dropFixtures,
+	executeQuery,
 };
