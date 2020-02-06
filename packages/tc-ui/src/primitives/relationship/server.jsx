@@ -41,7 +41,7 @@ module.exports = {
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
 	setRelationshipAnnotator,
-	graphqlFragment: (propName, { type }) => {
+	graphqlFragment: (propName, { type, properties }) => {
 		const typeDef = getType(type);
 		const props = new Set(['code']);
 		if (typeDef.properties.name) {
@@ -54,6 +54,11 @@ module.exports = {
 		Object.entries(typeDef.properties)
 			.filter(([, { useInSummary }]) => useInSummary)
 			.forEach(([name]) => props.add(name));
-		return `${propName}_rel {${type} {${[...props].join(' ')}}}`;
+		const relationshipProps = [...new Set(Object.keys(properties))].join(
+			' ',
+		);
+		return `${propName}_rel {${type} {${[...props].join(
+			' ',
+		)}} ${relationshipProps}}`;
 	},
 };
