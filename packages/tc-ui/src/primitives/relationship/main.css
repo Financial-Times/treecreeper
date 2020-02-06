@@ -58,3 +58,32 @@
 .o-forms-input__error {
 	position: static !important;
 }
+
+.biz-ops-relationship-props-list {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0;
+}
+
+.biz-ops-relationship-props-list dt,
+.biz-ops-relationship-props-list dd {
+	padding-left: 0.5em;
+	margin-bottom: 0.1em !important;
+}
+
+.biz-ops-relationship-props-list dt {
+
+	font-weight: 500 !important;
+}
+
+.biz-ops-relationship-props-list dt:after {
+	content: ":";
+  }
+
+.biz-ops-relationship-props-list dd:not(:last-child):after {
+	content: ",";
+  }
+
+.biz-ops-relationship-props-list .biz-ops-help-icon {
+	display: none;
+}

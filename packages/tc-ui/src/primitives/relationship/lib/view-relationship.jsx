@@ -1,25 +1,76 @@
+/* eslint-disable no-sequences, no-return-assign */
 const React = require('react');
 const sortBy = require('lodash.sortby');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const { LinkToRecord } = require('../../../lib/components/structure');
+const {
+	LinkToRecord,
+	LabelledPrimitive,
+} = require('../../../lib/components/structure');
 
 let RelationshipAnnotator;
 
-const OneRelationship = ({ type, value = {}, id }) =>
-	type && value[type] ? (
+const OneRelationship = props => {
+	const {
+		assignComponent,
+		properties,
+		type,
+		value = {},
+		id,
+		hasValue,
+	} = props;
+	let RelationshipProperties = null;
+	const validValues = Object.keys(value)
+		.filter(key => value[key] && key !== type)
+		.reduce((res, key) => ((res[key] = properties[key]), res), {});
+
+	if (Object.keys(validValues).length && hasValue) {
+		RelationshipProperties = (
+			<div
+				data-o-component="o-expander"
+				className="o-expander"
+				data-o-expander-shrink-to="hidden"
+				data-o-expander-collapsed-toggle-text="more info"
+				data-o-expander-expanded-toggle-text="less"
+			>
+				{' '}
+				<button className="o-expander__toggle o--if-js" type="button">
+					more info
+				</button>
+				<div className="o-expander__content">
+					<dl className="biz-ops-relationship-props-list">
+						{Object.entries(validValues).map(([name, item]) => {
+							const viewModel = {
+								value: value[name],
+								id: name,
+								...item,
+								...assignComponent(item),
+							};
+							return viewModel.label ? (
+								<LabelledPrimitive {...viewModel} />
+							) : null;
+						})}
+					</dl>
+				</div>
+			</div>
+		);
+	}
+
+	return type && value[type] ? (
 		<>
 			<LinkToRecord id={id} type={type} value={value[type]} />
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value[type]} type={type} />
 			) : null}
+			{RelationshipProperties}
 		</>
 	) : (
 		'Error: unable to construct link'
 	);
+};
 
-const ViewRelationship = ({ value, type, id, hasMany }) => {
+const ViewRelationship = props => {
+	const { value, type, id, hasMany } = props;
 	if (!hasMany) {
-		const props = { type, value, id };
 		return <OneRelationship {...props} />;
 	}
 	const schema = getType(type);
@@ -34,13 +85,13 @@ const ViewRelationship = ({ value, type, id, hasMany }) => {
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
 			{sortBy(value, [`${type}.code`]).map((item, index) => {
-				const props = { type, value: item };
+				const modifiedProps = { ...props, value: item };
 				return (
 					<li
 						key={index}
 						className={inactiveCheck(item) ? 'inactive' : 'active'}
 					>
-						<OneRelationship {...props} />
+						<OneRelationship {...modifiedProps} />
 					</li>
 				);
 			})}
