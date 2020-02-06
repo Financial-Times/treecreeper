@@ -1,4 +1,3 @@
-/* eslint-disable jest/valid-expect-in-promise */
 const {
 	code,
 	someString,

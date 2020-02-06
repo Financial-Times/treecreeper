@@ -25,7 +25,8 @@ module.exports = {
 		// unecessary rerenders does not - at present - apply
 		'react/no-array-index-key': 0,
 		"jest/no-export": "off",
-		"jest/expect-expect": "off"
+		"jest/expect-expect": "off",
+		"jest/valid-expect-in-promise": "off"
 	},
 	overrides: [{
 		env: {browser: true},

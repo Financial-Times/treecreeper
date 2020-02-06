@@ -23,6 +23,118 @@ describe('End-to-end - relationship creation', () => {
 		save();
 	});
 
+	describe('one-to-one relationship', () => {
+		it('can select a selection for one-to-one relationship', () => {
+			visitMainTypePage();
+			visitEditPage();
+
+			pickFavouriteChild();
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#favouriteChild')
+				.should('have.text', `${code}-first-child`)
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+		});
+
+		it('can not select another selection for one-to-one relationship', async () => {
+			visitMainTypePage();
+			visitEditPage();
+
+			pickFavouriteChild();
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#favouriteChild')
+				.should('have.text', `${code}-first-child`)
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+			cy.get('#favouriteChild-picker').should('be.disabled');
+		});
+	});
+
+	describe('one-to-many relationship', () => {
+		it('can create one-to-many relationship', () => {
+			visitMainTypePage();
+
+			visitEditPage();
+
+			// pick second child
+			pickChild();
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#children>li')
+				.eq(0)
+				.should('have.text', `${code}-first-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+			cy.get('#children>li')
+				.eq(1)
+				.should('have.text', `${code}-second-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+		});
+
+		it('can select a selection for one-to-many relationship', () => {
+			visitMainTypePage();
+
+			visitEditPage();
+
+			// pick second child
+			pickChild();
+
+			cy.get('#ul-children')
+				.children()
+				.then(children => {
+					cy.wrap(children).should('have.length', 2);
+					cy.wrap(children)
+						.eq(0)
+						.find('span')
+						.should('have.text', 'e2e-demo-first-child');
+					cy.wrap(children)
+						.eq(1)
+						.find('span')
+						.should('have.text', 'e2e-demo-second-child');
+				});
+
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#children>li').then(children => {
+				cy.wrap(children)
+					.eq(0)
+					.should('have.text', `${code}-first-child`)
+					.find('a')
+					.should(
+						'have.attr',
+						'href',
+						`/ChildType/${code}-first-child`,
+					);
+				cy.wrap(children)
+					.eq(1)
+					.should('have.text', `${code}-second-child`)
+					.find('a')
+					.should(
+						'have.attr',
+						'href',
+						`/ChildType/${code}-second-child`,
+					);
+			});
+		});
+
+		it('can select another selection for one-to-many relationship', () => {
+			visitMainTypePage();
+
+			visitEditPage();
+
+			// pick second child
+			pickChild();
+			cy.get('#children-picker').should('not.be.disabled');
+		});
+	});
+
 	it('can create main -> parent relationship', () => {
 		visitMainTypePage();
 		visitEditPage();
@@ -37,67 +149,53 @@ describe('End-to-end - relationship creation', () => {
 			.should('have.attr', 'href', `/ParentType/${code}-parent`);
 	});
 
-	it('can create 1-to-many relationship', () => {
+	it('fetches suggestions from the autocomplete api', async () => {
+		const selector = '[data-property-name="children"]';
 		visitMainTypePage();
-
 		visitEditPage();
 
-		// pick second child
-		pickChild();
-		save();
+		cy.get('#children-picker')
+			.type('e2e')
+			.get(`${selector} .react-autosuggest__suggestions-list`)
+			.children()
+			.should('have.length', 1)
+			.first()
+			.should('contain', 'e2e-demo-second-child');
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#children>li')
+		cy.get('#ul-children>li')
 			.eq(0)
-			.should('have.text', `${code}-first-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+			.find('button')
+			.should('have.text', 'Remove')
+			.click();
 
-		cy.get('#children>li')
-			.eq(1)
-			.should('have.text', `${code}-second-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+		cy.get('#children-picker').clear();
+		cy.get('#children-picker').type('e2e');
+
+		cy.get(`${selector} .react-autosuggest__suggestions-list`)
+			.children()
+			.should('have.length', 2);
+		cy.get(`${selector} li#react-autowhatever-1--item-0`).should(
+			'contain',
+			'e2e-demo-first-child',
+		);
+		cy.get(`${selector} li#react-autowhatever-1--item-1`).should(
+			'contain',
+			'e2e-demo-second-child',
+		);
 	});
 
-	it('can create 1-to-1 relationship', () => {
+	it('does not suggest previously selected records', async () => {
+		const selector = '[data-property-name="children"]';
 		visitMainTypePage();
 		visitEditPage();
 
-		pickFavouriteChild();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#favouriteChild')
-			.should('have.text', `${code}-first-child`)
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
-	});
-
-	it('can create both 1-to-1 and 1-to-many relationships', () => {
-		visitMainTypePage();
-
-		visitEditPage();
-
-		// pick second child
-		pickChild();
-		pickFavouriteChild();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#children>li')
-			.eq(0)
-			.should('have.text', `${code}-first-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
-
-		cy.get('#children>li')
-			.eq(1)
-			.should('have.text', `${code}-second-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
-
-		cy.get('#favouriteChild')
-			.should('have.text', `${code}-first-child`)
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+		// e2e-demo-first-child is already selected
+		cy.get('#children-picker')
+			.type('e2e')
+			.get(`${selector} .react-autosuggest__suggestions-list`)
+			.children()
+			.should('have.length', 1)
+			.first()
+			.should('contain', 'e2e-demo-second-child');
 	});
 });

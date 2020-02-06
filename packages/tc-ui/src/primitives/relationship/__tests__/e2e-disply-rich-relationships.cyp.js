@@ -27,7 +27,7 @@ describe('End-to-end - display relationship properties', () => {
 		visitMainTypePage();
 	});
 
-	it.only('can display/hide relationship properties', async () => {
+	it('can display/hide relationship properties', async () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -93,7 +93,7 @@ describe('End-to-end - display relationship properties', () => {
 			});
 	});
 
-	it.only('can display properties on a 1-to-1 relationship', async () => {
+	it('can display properties on a 1-to-1 relationship', async () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
