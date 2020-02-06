@@ -31,3 +31,8 @@ properties:
     label: Label for some float
     description: Description for some float.
     type: Float
+  someMultipleChoice:
+    type: AnEnum
+    hasMany: true
+    description: Multiple choice description.
+    label: Multiple choice label
