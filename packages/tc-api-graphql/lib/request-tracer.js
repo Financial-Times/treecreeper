@@ -15,20 +15,22 @@ class Tracer {
 	}
 
 	collectField(type, field) {
-		console.log('asdsalkjd ask.jd ')
+		console.log({type, field})
 		const {fields} = this.getContainer(type)
 		fields.add(field);
 	}
 
 	collectArgs(type, args) {
-		console.log('asdsalkjd ask.jd safsfsefsdf')
+		console.log({type, args})
+		// type = type.replace(/(^\[|\]$)/g, '');
 		const {args: argsSet} = this.getContainer(type)
 		Object.keys(args)
 			.filter((key) => !['offset', 'first', 'filter'].includes(key))
 			.forEach((key) =>
 				argsSet.add(key)
 			)
-		()
+		// ()
+
 	}
 
 	logDeprecated (propDefs, fields, usageType) {
@@ -84,15 +86,17 @@ class Tracer {
 }
 
 const middleware = (resolve, parent, args, context, info) => {
-		console.log(
-info
+	console.log('asmdhgasdjhgsadasdnhagsdasdmsadasdmnabs')
+		// console.log(
+		// 	info
 
-			)
-	if (info.parentType.name !== 'Query') {
+		// )
+	// if (info.parentType.name !== 'Query') {
 
 		context.trace.collectField(info.parentType.name, info.fieldName);
-		context.trace.collectArgs(info.parentType.name, args);
-	}
+	// }
+
+	context.trace.collectArgs(info.returnType, args);
 	return resolve(parent, args, context, info);
 };
 
