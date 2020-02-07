@@ -438,7 +438,7 @@ describe('nested property definition tests', () => {
 			});
 		});
 
-		it('can be parsed as Array of object which additional property definitions', async () => {
+		it('can be parsed as Array of objects with additional property definitions', async () => {
 			const childParser = getParser({
 				type: 'ChildType',
 			});
