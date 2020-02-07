@@ -54,11 +54,11 @@ module.exports = {
 		Object.entries(typeDef.properties)
 			.filter(([, { useInSummary }]) => useInSummary)
 			.forEach(([name]) => props.add(name));
+		const nodeProps = [...props].join(' ');
 		const relationshipProps = [...new Set(Object.keys(properties))].join(
 			' ',
 		);
-		return `${propName}_rel {${type} {${[...props].join(
-			' ',
-		)}} ${relationshipProps}}`;
+
+		return `${propName}_rel {${type} {${nodeProps}} ${relationshipProps}}`;
 	},
 };

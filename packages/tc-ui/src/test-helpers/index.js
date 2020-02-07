@@ -38,9 +38,9 @@ const pickChild = () => {
 		.should('not.be.disabled');
 };
 
-const pickFavouriteChild = () => {
+const pickFavouriteChild = (childCode = 'e2e-demo-fir') => {
 	cy.get('#favouriteChild-picker')
-		.type('e2e-demo-fir')
+		.type(childCode)
 		.wait(500)
 		.type('{downarrow}{enter}');
 };

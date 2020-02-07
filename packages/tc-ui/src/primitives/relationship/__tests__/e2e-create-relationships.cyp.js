@@ -21,10 +21,15 @@ describe('End-to-end - relationship creation', () => {
 		save();
 		populateChildTypeFields(`${code}-second-child`);
 		save();
+		visitMainTypePage();
+		visitEditPage();
 	});
 
 	describe('one-to-one relationship', () => {
-		it('can select a selection for one-to-one relationship', () => {
+		const placeholderText =
+			'Click "Remove" to replace the existing unique relationship';
+
+		it('can select a selection', () => {
 			visitMainTypePage();
 			visitEditPage();
 
@@ -37,7 +42,7 @@ describe('End-to-end - relationship creation', () => {
 				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		});
 
-		it('can not select another selection for one-to-one relationship', () => {
+		it('disables selection on page load if there is a selection already', () => {
 			visitMainTypePage();
 			visitEditPage();
 
@@ -46,7 +51,34 @@ describe('End-to-end - relationship creation', () => {
 				'have.text',
 				'e2e-demo-first-child',
 			);
-			cy.get('#favouriteChild-picker').should('be.disabled');
+			cy.get('#favouriteChild-picker')
+				.should('be.disabled')
+				.should('have.attr', 'placeholder', placeholderText);
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#favouriteChild')
+				.should('have.text', `${code}-first-child`)
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+			visitEditPage();
+			cy.get('#favouriteChild-picker')
+				.should('be.disabled')
+				.should('have.attr', 'placeholder', placeholderText);
+		});
+
+		it('can not select another selection', () => {
+			visitMainTypePage();
+			visitEditPage();
+
+			pickFavouriteChild();
+			cy.get('#ul-favouriteChild span').should(
+				'have.text',
+				'e2e-demo-first-child',
+			);
+			cy.get('#favouriteChild-picker')
+				.should('be.disabled')
+				.should('have.attr', 'placeholder', placeholderText);
 			save();
 
 			cy.url().should('contain', `/MainType/${code}`);
@@ -54,14 +86,37 @@ describe('End-to-end - relationship creation', () => {
 				.should('have.text', `${code}-first-child`)
 				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		});
+
+		it('can select another selection on removing the existing one', () => {
+			visitMainTypePage();
+			visitEditPage();
+
+			pickFavouriteChild();
+			cy.get('#ul-favouriteChild span').should(
+				'have.text',
+				'e2e-demo-first-child',
+			);
+			cy.get('#favouriteChild-picker')
+				.should('be.disabled')
+				.should('have.attr', 'placeholder', placeholderText);
+			cy.get('#ul-favouriteChild li')
+				.find('button.relationship-remove-button')
+				.click();
+			cy.get('#favouriteChild-picker')
+				.should('not.be.disabled')
+				.should('have.attr', 'placeholder', '');
+			pickFavouriteChild(`${code}-second`);
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#favouriteChild')
+				.should('have.text', `${code}-second-child`)
+				.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+		});
 	});
 
 	describe('one-to-many relationship', () => {
-		it('can create one-to-many relationship', () => {
-			visitMainTypePage();
-
-			visitEditPage();
-
+		it('can create', () => {
 			// pick second child
 			pickChild();
 			save();
@@ -80,11 +135,42 @@ describe('End-to-end - relationship creation', () => {
 				.should('have.attr', 'href', `/ChildType/${code}-second-child`);
 		});
 
-		it('can select a selection for one-to-many relationship', () => {
+		it('does not disable selection on page load if there is a selection already', () => {
+			// e2e-demo-first-child is already picked during populateMinimumViableFields();
+			cy.get('#ul-children span').should(
+				'have.text',
+				'e2e-demo-first-child',
+			);
+			cy.get('#children-picker')
+				.should('not.be.disabled')
+				.should('have.attr', 'placeholder', '');
+			save();
+		});
+
+		it('does not disable if there is a selection already', () => {
+			// pick second child
+			pickChild();
+			cy.get('#children-picker').should('not.be.disabled');
+			save();
+
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#children>li')
+				.eq(0)
+				.should('have.text', `${code}-first-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+			cy.get('#children>li')
+				.eq(1)
+				.should('have.text', `${code}-second-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+
 			visitMainTypePage();
+			cy.get('#children-picker').should('not.be.disabled');
+		});
 
-			visitEditPage();
-
+		it('can select multiple selections', () => {
 			// pick second child
 			pickChild();
 
@@ -126,21 +212,9 @@ describe('End-to-end - relationship creation', () => {
 					);
 			});
 		});
-
-		it('can select another selection for one-to-many relationship', () => {
-			visitMainTypePage();
-
-			visitEditPage();
-
-			// pick second child
-			pickChild();
-			cy.get('#children-picker').should('not.be.disabled');
-		});
 	});
 
 	it('can create main -> parent relationship', () => {
-		visitMainTypePage();
-		visitEditPage();
 
 		pickParent();
 		save();
@@ -154,8 +228,6 @@ describe('End-to-end - relationship creation', () => {
 
 	it('fetches suggestions from the autocomplete api', () => {
 		const selector = '[data-property-name="children"]';
-		visitMainTypePage();
-		visitEditPage();
 
 		cy.get('#children-picker')
 			.type('e2e')
@@ -189,8 +261,6 @@ describe('End-to-end - relationship creation', () => {
 
 	it('does not suggest previously selected records', () => {
 		const selector = '[data-property-name="children"]';
-		visitMainTypePage();
-		visitEditPage();
 
 		// e2e-demo-first-child is already selected
 		cy.get('#children-picker')
