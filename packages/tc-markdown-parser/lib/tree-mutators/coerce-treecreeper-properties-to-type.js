@@ -73,42 +73,6 @@ const coerceNonNestedPropertyValue = (
 	}
 };
 
-const coerceNestedPropertyValue = (
-	node,
-	{ primitiveTypesMap, hasMany, propertyType },
-) => {
-	try {
-		const coercedProperties = node.children.map(subdocument =>
-			subdocument.children.reduce((values, nestNode) => {
-				if (nestNode.type === 'problem') {
-					throw new Error(nestNode.message);
-				}
-				const primitiveType = primitiveTypesMap[nestNode.propertyType];
-				const coercer = getCoercer({
-					isNested: true,
-					primitiveType,
-					propertyType,
-				});
-				const coercion = coercer(nestNode, { hasMany });
-				if (coercion.valid) {
-					values[nestNode.key] = dropHtmlComment(coercion.value);
-					return values;
-				}
-				throw new Error(coercion.value);
-			}, {}),
-		);
-		setPropertyNodeValue(
-			node,
-			hasMany ? coercedProperties : coercedProperties[0],
-		);
-	} catch (error) {
-		convertNodeToProblem({
-			node,
-			message: error.message,
-		});
-	}
-};
-
 const coerceEnumPropertyValue = (
 	node,
 	{ propertyType: enumName, hasMany, enums },
@@ -136,7 +100,6 @@ const coerceEnumPropertyValue = (
 		const flattenedContent = normalizePropertyKey(
 			flattenNodeToPlainString(child),
 		);
-
 		const validValue = validValues.find(value => {
 			return flattenedContent === normalizePropertyKey(value);
 		});
@@ -162,6 +125,51 @@ const coerceEnumPropertyValue = (
 	}
 };
 
+const coerceNestedPropertyValue = (
+	node,
+	{ primitiveTypesMap, hasMany, propertyType, enums },
+) => {
+	try {
+		const coercedProperties = node.children.map(subdocument =>
+			subdocument.children.reduce((values, nestNode) => {
+				if (nestNode.type === 'problem') {
+					throw new Error(nestNode.message);
+				}
+
+				const primitiveType = primitiveTypesMap[nestNode.propertyType];
+				if (primitiveType) {
+					const coercer = getCoercer({
+						isNested: true,
+						primitiveType,
+						propertyType,
+					});
+					const coercion = coercer(nestNode, { hasMany });
+					if (coercion.valid) {
+						values[nestNode.key] = dropHtmlComment(coercion.value);
+						return values;
+					}
+					throw new Error(coercion.value);
+				}
+
+				if (enums[nestNode.propertyType]) {
+					coerceEnumPropertyValue(nestNode, { ...nestNode, enums });
+					values[nestNode.key] = nestNode.value;
+					return values;
+				}
+			}, {}),
+		);
+		setPropertyNodeValue(
+			node,
+			hasMany ? coercedProperties : coercedProperties[0],
+		);
+	} catch (error) {
+		convertNodeToProblem({
+			node,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = function coerceTreecreeperPropertiesToType({
 	typeNames,
 	properties,
@@ -177,31 +185,30 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 		const { hasMany } = properties[node.key];
 		// If the propertyType is nested, or one of the primitive types, coerce it
-		if (propertyType in primitiveTypesMap || isNested) {
-			if (!isNested) {
-				const isEmpty = !flattenNodeToPlainString(node);
 
-				if (isEmpty) {
-					convertNodeToProblem({
-						node,
-						message: `property "${node.key}" has no value`,
-					});
+		if (isNested) {
+			return coerceNestedPropertyValue(node, {
+				primitiveTypesMap,
+				hasMany,
+				propertyType,
+				enums,
+			});
+		}
 
-					return;
-				}
+		if (propertyType in primitiveTypesMap) {
+			const isEmpty = !flattenNodeToPlainString(node);
 
-				coerceNonNestedPropertyValue(node, {
-					primitiveType: primitiveTypesMap[node.propertyType],
-					propertyType,
-				});
-			} else {
-				coerceNestedPropertyValue(node, {
-					primitiveTypesMap,
-					hasMany,
-					propertyType,
+			if (isEmpty) {
+				return convertNodeToProblem({
+					node,
+					message: `property "${node.key}" has no value`,
 				});
 			}
-			return;
+
+			return coerceNonNestedPropertyValue(node, {
+				primitiveType: primitiveTypesMap[node.propertyType],
+				propertyType,
+			});
 		}
 
 		// If it's an enum, make sure it's a valid value for that enum
@@ -216,7 +223,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 		convertNodeToProblem({
 			node,
-			message: `i couldn't resolve ${node.propertyType} to a valid biz-ops property type or enum`,
+			message: `Could not resolve ${node.propertyType} to a valid biz-ops property type or enum`,
 		});
 	}
 

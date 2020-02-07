@@ -132,9 +132,7 @@ const validateRelationshipProp = ({
 	validateFloat(relPropType, relPropValue, exit);
 	validateInt(relPropType, relPropValue, exit);
 	validateString(relPropType, relPropValue, exit, relValidator);
-
-	// TODO support hasMany
-	validateEnum(relPropType, relPropValue, exit, getEnums);
+	validateEnum(relPropType, relPropValue, exit, getEnums, relPropDef.hasMany);
 };
 
 const validateProperty = ({

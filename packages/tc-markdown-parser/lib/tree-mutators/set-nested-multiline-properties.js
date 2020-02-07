@@ -6,6 +6,32 @@ const parseMultilineDefinition = require('../parse-multiline-definition');
 const setTreecreeperPropertyNames = require('./set-treecreeper-property-names');
 const append = require('../append-node');
 
+const splitValueIntoChildren = (valueList, valuePosition) => {
+	const values = valueList.split(',');
+	const starts = values.map(value => valueList.indexOf(`,${value}`) + 1);
+	const ends = starts.map((position, i) =>
+		starts[i + 1] ? starts[i + 1] - 2 : Infinity,
+	);
+
+	return values
+		.map(str => str.trim())
+		.map((value, i) =>
+			builder('text', {
+				value,
+				position: {
+					start: {
+						line: valuePosition.start.line,
+						column: starts[i],
+					},
+					end: {
+						line: valuePosition.start.line,
+						column: ends[i],
+					},
+				},
+			}),
+		);
+};
+
 function createPropertyNodes(node, nestedProperties) {
 	const parsedPropertyNodes = parseMultilineDefinition(node);
 
@@ -22,6 +48,43 @@ function createPropertyNodes(node, nestedProperties) {
 		properties: nestedProperties,
 		nestedPrefix: node.propertyType,
 	})(propertyNodes);
+
+	// converts the nested property to the same node structure as if it was top level
+	// in order to facilitate recursive calling of property coercers
+	// TO CONSIDER - should both the top level properties and the nested ones
+	// be normalised to a more generic structure, rather than the nested seeking to emulate
+	// the top level? Probably yes, but baby steps to get this working first
+	propertyNodes.children.forEach(propertyNode => {
+		propertyNode.isRelationshipProperty = true;
+
+		if (propertyNode.hasMany) {
+			const { position } = propertyNode;
+			const valueNodes = splitValueIntoChildren(
+				propertyNode.children[0].value,
+				position,
+			);
+			propertyNode.children = [
+				builder('root', { position }, [
+					builder(
+						'list',
+						{ position },
+						valueNodes.map(valueNode =>
+							builder('listItem', { position }, [
+								builder('paragraph', { position }, [valueNode]),
+							]),
+						),
+					),
+				]),
+			];
+		} else {
+			const { position } = propertyNode;
+			propertyNode.children = [
+				builder('root', { position }, [
+					builder('paragraph', { position }, propertyNode.children),
+				]),
+			];
+		}
+	});
 
 	// If problem found on parsing properties, throw error with that position
 	const foundProblemNode = select('problem', propertyNodes);

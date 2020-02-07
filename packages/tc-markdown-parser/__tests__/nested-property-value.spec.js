@@ -52,40 +52,6 @@ describe('nested property definition tests', () => {
 				},
 			});
 		});
-		it('can be parsed as Array of object which additional property definitions', async () => {
-			const childParser = getParser({
-				type: 'ChildType',
-			});
-			const { data, errors } = await childParser.parseMarkdownString(here`
-				# name
-
-				## is curious child of
-
-				- example-code01
-					someString: i like it
-					someBoolean: yes
-				- example-code02
-					someString: i like it, too
-					someBoolean: no
-			`);
-
-			expect(errors).toHaveLength(0);
-			expect(data).toEqual({
-				name: 'name',
-				isCuriousChildOf: [
-					{
-						code: 'example-code01',
-						someString: 'i like it',
-						someBoolean: true,
-					},
-					{
-						code: 'example-code02',
-						someString: 'i like it, too',
-						someBoolean: false,
-					},
-				],
-			});
-		});
 	});
 
 	describe('boolean type conversion', () => {
@@ -184,6 +150,107 @@ describe('nested property definition tests', () => {
 						},
 					],
 				});
+			});
+		});
+	});
+
+	describe('enum type conversion', () => {
+		it('enum on single relationship', async () => {
+			const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## curious child
+
+					child-code
+						someEnum: first
+				`);
+
+			expect(data).toEqual({
+				name: 'name',
+				curiousChild: {
+					code: 'child-code',
+					someEnum: 'First',
+				},
+			});
+		});
+		it('enum on many relationships', async () => {
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data } = await childParser.parseMarkdownString(here`
+					# name
+
+					## is curious child of
+
+					- main-code
+						someEnum: first
+				`);
+
+			expect(data).toEqual({
+				name: 'name',
+				isCuriousChildOf: [
+					{
+						code: 'main-code',
+						someEnum: 'First',
+					},
+				],
+			});
+		});
+		it('multiple choice enum on single relationship', async () => {
+			const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## curious child
+
+					child-code
+						someMultipleChoice: first,second
+				`);
+			expect(data).toEqual({
+				name: 'name',
+				curiousChild: {
+					code: 'child-code',
+					someMultipleChoice: ['First', 'Second'],
+				},
+			});
+		});
+		it('multiple choice enum on many relationships', async () => {
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data } = await childParser.parseMarkdownString(here`
+					# name
+
+					## is curious child of
+
+					- main-code
+						someMultipleChoice: first,second
+				`);
+			expect(data).toEqual({
+				name: 'name',
+				isCuriousChildOf: [
+					{
+						code: 'main-code',
+						someMultipleChoice: ['First', 'Second'],
+					},
+				],
+			});
+		});
+
+		it('multiple choice enum trims whitespace', async () => {
+			const { data } = await parser.parseMarkdownString(here`
+					# name
+
+					## curious child
+
+					child-code
+						someMultipleChoice:   	  first,	  second
+				`);
+			expect(data).toEqual({
+				name: 'name',
+				curiousChild: {
+					code: 'child-code',
+					someMultipleChoice: ['First', 'Second'],
+				},
 			});
 		});
 	});
@@ -371,7 +438,7 @@ describe('nested property definition tests', () => {
 			});
 		});
 
-		it('can be parsed as object array which contains property object', async () => {
+		it('can be parsed as Array of objects with additional property definitions', async () => {
 			const childParser = getParser({
 				type: 'ChildType',
 			});
@@ -380,23 +447,27 @@ describe('nested property definition tests', () => {
 
 				## is curious child of
 
-				* example-sibling-01
-					someString: prop01
-				* example-sibling-02
-					someString: prop02
-				`);
+				- example-code01
+					someString: i like it
+					someBoolean: yes
+				- example-code02
+					someString: i like it, too
+					someBoolean: no
+			`);
 
 			expect(errors).toHaveLength(0);
 			expect(data).toEqual({
 				name: 'name',
 				isCuriousChildOf: [
 					{
-						code: 'example-sibling-01',
-						someString: 'prop01',
+						code: 'example-code01',
+						someString: 'i like it',
+						someBoolean: true,
 					},
 					{
-						code: 'example-sibling-02',
-						someString: 'prop02',
+						code: 'example-code02',
+						someString: 'i like it, too',
+						someBoolean: false,
 					},
 				],
 			});
