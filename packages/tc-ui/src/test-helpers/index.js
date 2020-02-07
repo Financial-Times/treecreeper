@@ -11,7 +11,10 @@ const {
 	someDatetime,
 	someUrl,
 } = require('./mainTypeData.json');
-const { dropFixtures } = require('../../../../test-helpers/test-fixtures');
+const {
+	dropFixtures,
+	executeQuery,
+} = require('../../../../test-helpers/test-fixtures');
 
 const populateParentTypeFields = codeLabel => {
 	cy.visit(`/ParentType/create`);
@@ -35,12 +38,25 @@ const pickChild = () => {
 		.should('not.be.disabled');
 };
 
-const pickFavouriteChild = () => {
+const pickFavouriteChild = (childCode = 'e2e-demo-fir') => {
 	cy.get('#favouriteChild-picker')
-		.type('e2e-demo-fir')
+		.type(childCode)
 		.wait(500)
-		.type('{downarrow}{enter}')
-		.should('be.disabled');
+		.type('{downarrow}{enter}');
+};
+
+const pickCuriousChild = () => {
+	cy.get('#curiousChild-picker')
+		.type('e2e-demo')
+		.wait(500)
+		.type('{downarrow}{enter}');
+};
+
+const pickCuriousParent = () => {
+	cy.get('#curiousParent-picker')
+		.type('e2e-demo')
+		.wait(500)
+		.type('{downarrow}{enter}');
 };
 
 const visitEditPage = () => {
@@ -115,6 +131,33 @@ const populateNonMinimumViableFields = () => {
 	cy.get('input[name=someUrl]').type(someUrl);
 };
 
+const setPropsOnCuriousChildRel = async codeLabel => {
+	const query = `Match(m:MainType)-[r:HAS_CURIOUS_CHILD]->(c:ChildType) where c.code=$code set r.someBoolean =true, r.someString = "lorem ipsum", r.someEnum="First", r.someMultipleChoice = ["First","Third"]`;
+	return new Promise((resolve, reject) => {
+		try {
+			const result = executeQuery(query, {
+				code: codeLabel,
+			});
+			resolve(result);
+		} catch (error) {
+			reject(error);
+		}
+	});
+};
+
+const setPropsOnCuriousParentRel = async codeLabel => {
+	const query = `Match(m:MainType)<-[r:IS_CURIOUS_PARENT_OF]-(c:ParentType) where c.code=$code set r.someString = "lorem ipsum", r.anotherString="another lorem ipsum"`;
+	return new Promise((resolve, reject) => {
+		try {
+			const result = executeQuery(query, {
+				code: codeLabel,
+			});
+			resolve(result);
+		} catch (error) {
+			reject(error);
+		}
+	});
+};
 const resetDb = async () => {
 	await dropFixtures(code);
 };
@@ -126,9 +169,13 @@ module.exports = {
 	pickChild,
 	pickParent,
 	pickFavouriteChild,
+	pickCuriousChild,
+	pickCuriousParent,
 	visitEditPage,
 	visitMainTypePage,
 	save,
 	populateMinimumViableFields,
 	resetDb,
+	setPropsOnCuriousChildRel,
+	setPropsOnCuriousParentRel,
 };
