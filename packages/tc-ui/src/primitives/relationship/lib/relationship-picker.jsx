@@ -1,5 +1,6 @@
 /* global fetch */
 const React = require('react');
+
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
@@ -53,6 +54,7 @@ class RelationshipPicker extends React.Component {
 			selectedRelationships,
 			hasHighlightedSelection: false,
 			isFull: !props.hasMany && !!selectedRelationships.length,
+			isExpanded: false,
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
@@ -62,6 +64,7 @@ class RelationshipPicker extends React.Component {
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
+		this.onRelationshipAnnotate = this.onRelationshipAnnotate.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -79,6 +82,12 @@ class RelationshipPicker extends React.Component {
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
 		event.preventDefault();
+	}
+
+	onRelationshipAnnotate() {
+		this.setState(prevState => ({
+			isExpanded: !prevState.isExpanded,
+		}));
 	}
 
 	onSearchTermChange(event, { newValue }) {
@@ -213,6 +222,7 @@ class RelationshipPicker extends React.Component {
 			isUserError,
 			isUnresolved,
 			isFull,
+			isExpanded,
 		} = this.state;
 
 		return (
@@ -230,11 +240,13 @@ class RelationshipPicker extends React.Component {
 				>
 					{selectedRelationships.map((val, i) => (
 						<Relationship
-							value={val}
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}
+							onRelationshipAnnotate={this.onRelationshipAnnotate}
 							index={i}
 							key={i}
+							isExpanded={isExpanded}
+							{...{ ...props, value: val }}
 						/>
 					))}
 				</ul>

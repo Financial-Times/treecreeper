@@ -25,14 +25,20 @@ const getValue = (itemSchema, itemValue) => {
 	if (itemSchema.relationship) {
 		if (itemSchema.hasMany) {
 			return itemValue
-				? sortBy(itemValue, `${itemSchema.type}.code`).map(item => ({
-						code: item.code || item[itemSchema.type].code,
-						name:
-							item.name ||
-							item.code ||
-							item[itemSchema.type].name ||
-							item[itemSchema.type].code,
-				  }))
+				? sortBy(itemValue, `${itemSchema.type}.code`).map(item =>
+						Object.assign(
+							{},
+							{
+								code: item.code || item[itemSchema.type].code,
+								name:
+									item.name ||
+									item.code ||
+									item[itemSchema.type].name ||
+									item[itemSchema.type].code,
+							},
+							...itemValue,
+						),
+				  )
 				: [];
 		}
 		return itemValue
@@ -43,6 +49,7 @@ const getValue = (itemSchema, itemValue) => {
 						itemValue.code ||
 						itemValue[itemSchema.type].name ||
 						itemValue[itemSchema.type].code,
+					...itemValue,
 			  }
 			: null;
 	}

@@ -2,6 +2,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const EncodingPlugin = require('webpack-encoding-plugin');
 const path = require('path');
+const webpack = require('webpack');
 
 const filenameTemplate = '[name]';
 module.exports = {
@@ -38,6 +39,10 @@ module.exports = {
 			encoding: 'utf8',
 		}),
 	],
+	node: {
+		fs: 'empty',
+	},
+	devtool: 'source-map',
 };
 
 if (process.env.CIRCLECI) {
