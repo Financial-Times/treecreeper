@@ -12,7 +12,6 @@ module.exports = function stringifyBoast({
 }) {
 	this.Compiler = function compiler(root) {
 		const data = {};
-		// console.log(JSON.stringify(root, null, 2))
 		visit(root, titleFieldName, node => {
 			data[titleFieldName] = node.value;
 		});
