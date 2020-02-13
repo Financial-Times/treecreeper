@@ -62,7 +62,7 @@ test('cannot set same property name in the definition', async () => {
 	expect(errors).toHaveProperty('length', 1);
 	const [{ message }] = errors;
 	expect(message).toEqual(
-		'disallowed to define same property name someString in markdown',
+		'Duplicate headings for \"someString\" field. Only one of each heading allowed in the markdown file.',
 	);
 	expect(data).toEqual({
 		name: 'name',
