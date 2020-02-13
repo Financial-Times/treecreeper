@@ -80,12 +80,12 @@ test('disallow mutiple description in blocks', async () => {
 
 test('capture markdown within the paragraph', async () => {
 	const complexDescription = `this is a \`code sample\`.
-this is [a link](http://biz-ops.com).`
+this is [a link](http://biz-ops.com).`;
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# well
 
 		${complexDescription}
 	`);
 	expect(errors.length).toBe(0);
-	expect(data.description).toEqual(complexDescription)
+	expect(data.description).toEqual(complexDescription);
 });

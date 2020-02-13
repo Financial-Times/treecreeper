@@ -83,7 +83,10 @@ module.exports = {
 		if (hasMany) {
 			return {
 				valid: true,
-				value: split(subdocument).map(renderSubdocument),
+				// avod passing index as second parameter
+				value: split(subdocument).map(subdoc =>
+					renderSubdocument(subdoc),
+				),
 			};
 		}
 		return {
