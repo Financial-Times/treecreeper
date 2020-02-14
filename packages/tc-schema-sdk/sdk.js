@@ -35,6 +35,7 @@ class SDK {
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);
 		this.onChange = this.onChange.bind(this);
+		this.init = this.init.bind(this);
 
 		Object.entries(utils).forEach(([name, method]) => {
 			this[name] = method.bind(this);
