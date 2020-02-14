@@ -14,7 +14,11 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 		<span className="o-forms-title__prompt description-text">
 			<span
 				dangerouslySetInnerHTML={{
-					__html: autolinker.link(description),
+					__html:
+						typeof window === 'undefined'
+							? autolinker.link(description)
+							: // eslint-disable-next-line no-undef
+							  Autolinker.link(description),
 				}}
 			/>
 			{expandableContent ? (
@@ -50,7 +54,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 const WrappedEditComponent = props => {
 	props = { ...props, disabled: !!props.lockedBy };
 	const { Component } = props;
-	const WrapperTag = props.wrapperTag || 'label';
+	const WrapperTag = props.wrapperTag || 'div';
 	return (
 		<WrapperTag
 			className="o-forms-field"

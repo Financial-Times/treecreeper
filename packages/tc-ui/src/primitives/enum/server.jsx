@@ -12,7 +12,7 @@ const Option = ({ option, selected }) => (
 	</option>
 );
 
-const OptionsInfo = ({ type }) => {
+const OptionsInfo = ({ type, parentType }) => {
 	const enumWithMeta = getEnums({ withMeta: true })[type];
 	const optionDefs = Object.values(enumWithMeta.options);
 	const hasOptionDescriptions = !!optionDefs[0].description;
@@ -23,14 +23,18 @@ const OptionsInfo = ({ type }) => {
 		<>
 			<p
 				dangerouslySetInnerHTML={{
-					__html: autolinker.link(enumWithMeta.description || ''),
+					__html:
+						typeof window === 'undefined'
+							? autolinker.link(enumWithMeta.description || '')
+							: // eslint-disable-next-line no-undef
+							  Autolinker.link(enumWithMeta.description || ''),
 				}}
 			/>
 			<dl>
 				{optionDefs.map(({ value, description }, index) => (
-					<React.Fragment key={index}>
-						<dt key={index}>{value}</dt>
-						<dd key={index}>{description}</dd>
+					<React.Fragment key={`${parentType}-${index}`}>
+						<dt key={`${parentType}-${index}`}>{value}</dt>
+						<dd key={`${parentType}-${index}`}>{description}</dd>
 					</React.Fragment>
 				))}
 			</dl>
