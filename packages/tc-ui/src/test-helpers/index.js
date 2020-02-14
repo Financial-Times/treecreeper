@@ -132,7 +132,7 @@ const populateNonMinimumViableFields = () => {
 };
 
 const setPropsOnCuriousChildRel = async codeLabel => {
-	const query = `Match(m:MainType)-[r:HAS_CURIOUS_CHILD]->(c:ChildType) where c.code=$code set r.someBoolean =true, r.someString = "lorem ipsum", r.someEnum="First", r.someMultipleChoice = ["First","Third"]`;
+	const query = `Match(m:MainType)-[r:HAS_CURIOUS_CHILD]->(c:ChildType) where c.code=$code set r.someBoolean =true, r.someString = "lorem ipsum", r.anotherString = "another lorem ipsum", r.someInteger=2020, r.someEnum="First", r.someMultipleChoice = ["First","Third"], r.someFloat = 12.53`;
 	return new Promise((resolve, reject) => {
 		try {
 			const result = executeQuery(query, {
@@ -146,7 +146,7 @@ const setPropsOnCuriousChildRel = async codeLabel => {
 };
 
 const setPropsOnCuriousParentRel = async codeLabel => {
-	const query = `Match(m:MainType)<-[r:IS_CURIOUS_PARENT_OF]-(c:ParentType) where c.code=$code set r.someString = "lorem ipsum", r.anotherString="another lorem ipsum"`;
+	const query = `Match(m:MainType)<-[r:IS_CURIOUS_PARENT_OF]-(c:ParentType) where c.code=$code set r.someString = "parent lorem ipsum", r.anotherString="parent another lorem ipsum"`;
 	return new Promise((resolve, reject) => {
 		try {
 			const result = executeQuery(query, {
