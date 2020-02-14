@@ -44,4 +44,4 @@ const componentAssigner = ({
 	return components.Text;
 };
 
-module.exports = { componentAssigner }
+module.exports = { componentAssigner };
