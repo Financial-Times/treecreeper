@@ -23,8 +23,7 @@ module.exports = function createBizopsDescriptionNode({
 		if (descriptionChildren.length > 1) {
 			convertNodeToProblem({
 				node: descriptionChildren.pop(),
-				message:
-					'Description must be a single paragraph',
+				message: 'Description must be a single paragraph',
 			});
 		}
 
