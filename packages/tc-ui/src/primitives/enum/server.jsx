@@ -7,7 +7,7 @@ const Option = ({ option }) => (
 	<option value={option === `Don't know` ? 'null' : option}>{option}</option>
 );
 
-const OptionsInfo = ({ type, parentType }) => {
+const OptionsInfo = ({ type }) => {
 	const enumWithMeta = getEnums({ withMeta: true })[type];
 	const optionDefs = Object.values(enumWithMeta.options);
 	const hasOptionDescriptions = !!optionDefs[0].description;
