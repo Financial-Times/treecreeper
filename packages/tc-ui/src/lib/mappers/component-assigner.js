@@ -4,10 +4,10 @@ const {
 	getPrimitiveTypes,
 } = require('@financial-times/tc-schema-sdk');
 
-module.exports = ({ customComponents = {}, customTypeMappings = {} } = {}) => ({
-	type,
-	hasMany,
-}) => {
+const componentAssigner = ({
+	customComponents = {},
+	customTypeMappings = {},
+} = {}) => ({ type, hasMany }) => {
 	// TO Do - find a better solution
 	/*
 		currently if this require is done at top level we get {} the reason for this is due to
@@ -43,3 +43,5 @@ module.exports = ({ customComponents = {}, customTypeMappings = {} } = {}) => ({
 
 	return components.Text;
 };
+
+module.exports = { componentAssigner }

@@ -1,7 +1,6 @@
 const primitives = require('./primitives/server');
-const componentAssigner = require('./lib/mappers/component-assigner');
-const graphqlQueryBuilder = require('./lib/mappers/graphql-query-builder');
-// const { componentAssigner, graphqlQueryBuilder } = require('./lib/mappers.js');
+const { componentAssigner } = require('./lib/mappers/component-assigner');
+const { graphqlQueryBuilder } = require('./lib/mappers/graphql-query-builder');
 const { ApiClient } = require('./lib/api-client');
 const { getSchemaSubset } = require('./lib/get-schema-subset');
 const { getDataTransformers } = require('./lib/get-data-transformers');

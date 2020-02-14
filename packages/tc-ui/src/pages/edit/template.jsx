@@ -2,7 +2,7 @@ const React = require('react');
 const { getEnums, rawData } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
 const { Concept, SectionHeader } = require('../../lib/components/structure');
-const getValue = require('../../lib/mappers/get-value');
+const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
 const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {

@@ -1,6 +1,6 @@
 const sortBy = require('lodash.sortby');
 
-module.exports = (itemSchema, itemValue) => {
+const getValue = (itemSchema, itemValue) => {
 	// preserves boolean values to prevent false being coerced to empty string
 	if (itemSchema.type === 'Boolean') {
 		return typeof itemValue === 'boolean' ? itemValue : '';
@@ -37,3 +37,5 @@ module.exports = (itemSchema, itemValue) => {
 	// everything else is just text
 	return itemValue;
 };
+
+module.exports = { getValue };

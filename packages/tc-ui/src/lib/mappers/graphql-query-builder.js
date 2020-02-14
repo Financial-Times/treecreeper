@@ -3,7 +3,7 @@ const schema = require('@financial-times/tc-schema-sdk');
 const toGraphql = (propName, propDef, assignComponent) =>
 	assignComponent(propDef).graphqlFragment(propName, propDef);
 
-module.exports = (type, assignComponent) => `
+const graphqlQueryBuilder = (type, assignComponent) => `
 	query getStuff($itemId: String!) {
     ${type} (code: $itemId) {
     ${Object.entries(
@@ -17,3 +17,5 @@ module.exports = (type, assignComponent) => `
   }
 }
 `;
+
+module.exports = { graphqlQueryBuilder };

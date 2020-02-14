@@ -1,8 +1,9 @@
 const React = require('react');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
-
-const componentAssigner = require('../../../lib/mappers/component-assigner');
-const getValue = require('../../../lib/mappers/get-value.js');
+const {
+	componentAssigner,
+} = require('../../../lib/mappers/component-assigner');
+const { getValue } = require('../../../lib/mappers/get-value.js');
 
 class RichRelationships extends React.Component {
 	constructor(props) {
