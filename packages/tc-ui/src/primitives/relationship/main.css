@@ -1,5 +1,8 @@
 .selected-relationship {
 	margin-top: 0;
+	display: grid;
+    grid-auto-flow: row;
+    grid-row-gap: .5em;
 }
 
 .editable-relationships {
@@ -86,3 +89,20 @@
 .biz-ops-relationship-props-list .biz-ops-help-icon {
 	display: none;
 }
+
+.biz-ops-relationship-annotate {
+	padding-left: 0.5em ;
+}
+
+.relationship-remove-button,
+.relationship-annotate-button {
+	margin: auto 0.5em;
+}
+
+.relationship-remove-button {
+	margin-left: 0;
+}
+.relationship-props {
+	margin-left: 3%;
+}
+
