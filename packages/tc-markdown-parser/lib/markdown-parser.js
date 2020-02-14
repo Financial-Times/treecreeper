@@ -9,7 +9,7 @@ const setTreecreeperPropertyNames = require('./tree-mutators/set-treecreeper-pro
 const coerceTreecreeperPropertiesToType = require('./tree-mutators/coerce-treecreeper-properties-to-type');
 const validateTreecreeperProperties = require('./tree-mutators/validate-treecreeper-properties');
 const stringifyBoast = require('./unist-stringifiers/stringify-boast');
-const setNestedMutlilineProperties = require('./tree-mutators/set-nested-multiline-properties');
+const setNestedMultilineProperties = require('./tree-mutators/set-nested-multiline-properties');
 
 /* @param schema: Treecreeper schema singleton */
 const unifiedProcessor = function({
@@ -22,12 +22,11 @@ const unifiedProcessor = function({
 		await schema.ready();
 
 		const types = schema.getTypes();
-		const { properties } = types.find(({ name }) => name === type);
+		const { properties } = schema.getType(type);
 		const typeNames = new Set(types.map(({ name }) => name));
 
-		const validateProperty = (key, value) => {
-			return schema.validators.validateProperty(type, key, value);
-		};
+		const validateProperty = (key, value) =>
+			schema.validators.validateProperty(type, key, value);
 
 		return unified()
 			.use(remarkParse)
@@ -42,9 +41,10 @@ const unifiedProcessor = function({
 			.use(setTreecreeperPropertyNames, {
 				properties,
 			})
-			.use(setNestedMutlilineProperties, {
+			.use(setNestedMultilineProperties, {
 				typeNames,
 				properties,
+				rootType: type,
 			})
 			.use(coerceTreecreeperPropertiesToType, {
 				properties,

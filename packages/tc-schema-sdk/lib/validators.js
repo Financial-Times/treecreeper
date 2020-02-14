@@ -56,12 +56,15 @@ const validateString = (type, value, exit, validator) => {
 	}
 };
 
-const validateEnums = (type, value, exit, getEnums) => {
+const validateEnum = (type, propertyValue, exit, getEnums, hasMany) => {
 	if (type in getEnums()) {
+		const values = hasMany ? propertyValue : [propertyValue];
 		const validVals = Object.values(getEnums()[type]);
-		if (!validVals.includes(value)) {
-			exit(`Must be a valid enum: ${validVals.join(', ')}`);
-		}
+		values.forEach(value => {
+			if (!validVals.includes(value)) {
+				exit(`Must be a valid enum: ${validVals.join(', ')}`);
+			}
+		});
 	}
 };
 
@@ -94,7 +97,7 @@ const validateNodeCode = ({ getType, type, propValue, primitiveTypesMap }) => {
 	validateString(primitiveTypesMap.Code, propValue, exit, validator);
 };
 
-const validateRelationshipProps = ({
+const validateRelationshipProp = ({
 	getRelationshipType,
 	getEnums,
 	typeName,
@@ -129,7 +132,7 @@ const validateRelationshipProps = ({
 	validateFloat(relPropType, relPropValue, exit);
 	validateInt(relPropType, relPropValue, exit);
 	validateString(relPropType, relPropValue, exit, relValidator);
-	validateEnums(relPropType, relPropValue, exit, getEnums);
+	validateEnum(relPropType, relPropValue, exit, getEnums, relPropDef.hasMany);
 };
 
 const validateProperty = ({
@@ -201,7 +204,7 @@ const validateProperty = ({
 								primitiveTypesMap,
 							});
 						} else {
-							validateRelationshipProps({
+							validateRelationshipProp({
 								getRelationshipType,
 								getEnums,
 								typeName,
@@ -220,7 +223,13 @@ const validateProperty = ({
 		validateFloat(type, propertyValue, exit);
 		validateInt(type, propertyValue, exit);
 		validateString(type, propertyValue, exit, validator);
-		validateEnums(type, propertyValue, exit, getEnums);
+		validateEnum(
+			type,
+			propertyValue,
+			exit,
+			getEnums,
+			propertyDefinition.hasMany,
+		);
 	};
 
 	return propertyValidator;

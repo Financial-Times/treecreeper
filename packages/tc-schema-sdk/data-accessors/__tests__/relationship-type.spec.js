@@ -135,11 +135,9 @@ describe('get-relationship-type', () => {
 
 		it('can retrieve relationship type with expected properties', () => {
 			const from = schema.getRelationshipType('Type1', 'relationshipTo', {
-				primitiveTypes: 'graphql',
 				includeMetaFields: true,
 			});
 			const to = schema.getRelationshipType('Type2', 'relationshipFrom', {
-				primitiveTypes: 'graphql',
 				includeMetaFields: true,
 			});
 			expect(from).toMatchObject({
@@ -155,7 +153,7 @@ describe('get-relationship-type', () => {
 				properties: expect.any(Object),
 			});
 			expect(from.properties.someString).toMatchObject({
-				type: 'String',
+				type: 'Word',
 			});
 			expect(from.properties).toEqual(
 				expect.not.objectContaining({
@@ -176,7 +174,7 @@ describe('get-relationship-type', () => {
 				properties: expect.any(Object),
 			});
 			expect(to.properties.someString).toMatchObject({
-				type: 'String',
+				type: 'Word',
 			});
 			expect(to.properties).toEqual(
 				expect.not.objectContaining({

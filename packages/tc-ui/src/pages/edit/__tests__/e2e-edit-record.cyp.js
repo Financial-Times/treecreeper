@@ -1,0 +1,278 @@
+const {
+	code,
+	anotherDocument,
+	someString,
+	anotherString,
+	someEnum,
+	someDate,
+	someDatetime,
+} = require('../../../test-helpers/mainTypeData.json');
+const {
+	populateMinimumViableFields,
+	populateChildTypeFields,
+	visitMainTypePage,
+	visitEditPage,
+	save,
+	resetDb,
+} = require('../../../test-helpers');
+
+describe('End-to-end - edit record', () => {
+	beforeEach(() => {
+		resetDb();
+		populateMinimumViableFields(code);
+		save();
+	});
+
+	it('can not edit code of record', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+		visitEditPage();
+		cy.get('input[name=code]').type('-test');
+		save();
+
+		cy.url().should('contain', `/MainType/${code}/edit`);
+		cy.get('.o-message__content-main').should(
+			'contain',
+			'Oops. Could not update MainType record for e2e-demo.',
+		);
+		cy.get('.o-message__content-additional').should(
+			'contain',
+			`Conflicting code property \`e2e-demo-test\` in payload for MainType e2e-demo`,
+		);
+	});
+
+	it('can edit other minimum viable fields of a record', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		populateChildTypeFields(`${code}-second-child`);
+		save();
+
+		cy.url().should('contain', `/ChildType/${code}-second-child`);
+		visitMainTypePage();
+		visitEditPage();
+
+		cy.get('input[name=someString]').type(` - updated`);
+		cy.get('[data-name=e2e-demo-first-child] button').click({
+			force: true,
+		});
+		cy.get('#children-picker') // eslint-disable-line cypress/no-unnecessary-waiting
+			.type('e2e-demo-sec')
+			.wait(500)
+			.type('{downarrow}{enter}');
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', `${someString} - updated`);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-second-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+	});
+
+	it('can edit document type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('textarea[name=anotherDocument]').type(anotherDocument);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#anotherDocument').should('have.text', anotherDocument);
+
+		visitEditPage();
+		cy.get('textarea[name=anotherDocument]').type(` ${anotherString}`);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#anotherDocument').should(
+			'have.text',
+			`${anotherDocument} ${anotherString}`,
+		);
+	});
+
+	it('can edit boolean type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('[type="radio"]')
+			.first()
+			.check({ force: true });
+		save();
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#someBoolean').should('have.text', 'Yes');
+
+		visitEditPage();
+		cy.get('[type="radio"]')
+			.eq(1)
+			.check({ force: true });
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someBoolean').should('have.text', 'No');
+	});
+
+	it('can edit enum type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('select[name=someEnum]').select(someEnum);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#someEnum').should('have.text', someEnum);
+
+		visitEditPage();
+		cy.get('select[name=someEnum]').select(`Third`);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someEnum').should('have.text', 'Third');
+	});
+
+	it('can edit multiple choice type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('#checkbox-someMultipleChoice-First').check({ force: true });
+		cy.get('#checkbox-someMultipleChoice-Third').check({ force: true });
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#someMultipleChoice span:first-child').should(
+			'have.text',
+			'First',
+		);
+		cy.get('#someMultipleChoice span:last-child').should(
+			'have.text',
+			'Third',
+		);
+		cy.get('#someMultipleChoice')
+			.children()
+			.should('have.length', 2);
+
+		visitEditPage();
+		cy.get('#checkbox-someMultipleChoice-Third').uncheck({ force: true });
+		cy.get('#checkbox-someMultipleChoice-Second').check({ force: true });
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someMultipleChoice span:first-child').should(
+			'have.text',
+			'First',
+		);
+		cy.get('#someMultipleChoice span:last-child').should(
+			'have.text',
+			'Second',
+		);
+		cy.get('#someMultipleChoice')
+			.children()
+			.should('have.length', 2);
+	});
+
+	it('can edit date type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('input[name=someDate]')
+			.click()
+			.then(input => {
+				input[0].dispatchEvent(new Event('input', { bubbles: true }));
+				input.val(someDate);
+			})
+			.click();
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someDate').should('have.text', '15 January 2020');
+
+		visitEditPage();
+
+		cy.get('input[name=someDate]')
+			.click()
+			.then(input => {
+				input[0].dispatchEvent(new Event('input', { bubbles: true }));
+				input.val('2022-09-12');
+			})
+			.click();
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someDate').should('have.text', '12 September 2022');
+	});
+
+	it('can edit date-time type fields', () => {
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+
+		visitEditPage();
+		cy.get('input[name=someDatetime]')
+			.click()
+			.then(input => {
+				input[0].dispatchEvent(new Event('input', { bubbles: true }));
+				input.val(someDatetime);
+			})
+			.click();
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someDatetime').should(
+			'have.text',
+			'15 January 2020, 1:00:00 PM',
+		);
+
+		visitEditPage();
+
+		cy.get('input[name=someDatetime]')
+			.click()
+			.then(input => {
+				input[0].dispatchEvent(new Event('input', { bubbles: true }));
+				input.val('2022-11-12T19:00');
+			})
+			.click();
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#someString').should('have.text', someString);
+		cy.get('#someDatetime').should(
+			'have.text',
+			'12 November 2022, 7:00:00 PM',
+		);
+	});
+});

@@ -18,3 +18,7 @@ packages/**/package-lock.json
 package-lock.json
 .stylelintcache
 packages/tc-ui/dist
+
+cypress/screenshots/
+cypress/videos/
+dist/

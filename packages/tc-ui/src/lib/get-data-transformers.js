@@ -14,13 +14,14 @@ const getDataTransformers = assignComponent => {
 				if (fieldProps.deprecationReason) {
 					return;
 				}
+
 				if (
 					lockedFields[fieldName] &&
 					lockedFields[fieldName] !== 'biz-ops-admin'
 				) {
 					return;
 				}
-				const { parser } = assignComponent(fieldProps.type);
+				const { parser } = assignComponent(fieldProps);
 
 				const valueHasBeenReceived = fieldName in formData;
 				// need to avoid treating missing data as an instruction to delete
@@ -28,7 +29,12 @@ const getDataTransformers = assignComponent => {
 				if (!valueHasBeenReceived) {
 					return;
 				}
-				data[fieldName] = parser(formData[fieldName]);
+				try {
+					data[fieldName] = parser(formData[fieldName]);
+				} catch (e) {
+					console.log(e);
+					throw e;
+				}
 			},
 		);
 		return data;
@@ -39,7 +45,7 @@ const getDataTransformers = assignComponent => {
 		const typeProperties = schema.getType(type);
 		Object.entries(typeProperties.properties).forEach(
 			([fieldName, fieldProps]) => {
-				const { parser } = assignComponent(fieldProps.type);
+				const { parser } = assignComponent(fieldProps);
 				if (
 					formData[fieldName] &&
 					formData[fieldName] !== "Don't know"

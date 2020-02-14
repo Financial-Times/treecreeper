@@ -45,6 +45,8 @@ module.exports = function setTreecreeperPropertyNames({
 		node.key = name;
 
 		node.propertyType = type.type;
+
+		node.hasMany = !!properties[name].hasMany;
 	}
 
 	return function transform(tree) {

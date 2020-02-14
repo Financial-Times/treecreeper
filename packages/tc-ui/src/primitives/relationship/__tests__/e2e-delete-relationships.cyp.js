@@ -1,4 +1,4 @@
-const { code } = require('../fixtures/mainTypeData.json');
+const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
 	populateMinimumViableFields,
 	populateChildTypeFields,
@@ -7,17 +7,12 @@ const {
 	visitEditPage,
 	visitMainTypePage,
 	save,
-} = require('../test-helpers');
-const { dropFixtures } = require('../../test-helpers/test-fixtures');
-
-const resetDb = async () => {
-	await dropFixtures(code);
-};
+	resetDb,
+} = require('../../../test-helpers');
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
 		resetDb();
-
 		populateMinimumViableFields(code);
 		save();
 		populateChildTypeFields(`${code}-first-child`);
@@ -142,17 +137,18 @@ describe('End-to-end - relationship deletion', () => {
 		cy.get('#children')
 			.children()
 			.should('have.length', 2);
-		cy.get('#children>li')
-			.eq(0)
-			.should('have.text', `${code}-first-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
-
-		cy.get('#children>li')
-			.eq(1)
-			.should('have.text', `${code}-second-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+		cy.get('#children>li').then(children => {
+			cy.wrap(children)
+				.eq(0)
+				.should('have.text', `${code}-first-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+			cy.wrap(children)
+				.eq(1)
+				.should('have.text', `${code}-second-child`)
+				.find('a')
+				.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+		});
 
 		cy.get('#favouriteChild')
 			.should('have.text', `${code}-first-child`)

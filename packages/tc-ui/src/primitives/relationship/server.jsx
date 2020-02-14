@@ -15,14 +15,6 @@ const {
 	setRelationshipAnnotator,
 } = require('./lib/view-relationship');
 
-const maybeSort = (hasMany, props) => {
-	if (!hasMany) {
-		return '';
-	}
-	const sortField = props.has('name') ? 'name' : 'code';
-	return `(orderBy: ${sortField}_asc)`;
-};
-
 module.exports = {
 	name: 'Relationship',
 	ViewComponent: ViewRelationship,
@@ -43,13 +35,13 @@ module.exports = {
 			return null;
 		}
 		return Array.isArray(value)
-			? value.map(({ code }) => code)
-			: value.code;
+			? value.map(({ code }) => ({ code }))
+			: { code: value.code };
 	},
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
 	setRelationshipAnnotator,
-	graphqlFragment: (propName, { type, hasMany }) => {
+	graphqlFragment: (propName, { type, properties }) => {
 		const typeDef = getType(type);
 		const props = new Set(['code']);
 		if (typeDef.properties.name) {
@@ -62,9 +54,11 @@ module.exports = {
 		Object.entries(typeDef.properties)
 			.filter(([, { useInSummary }]) => useInSummary)
 			.forEach(([name]) => props.add(name));
-
-		return `${propName} ${maybeSort(hasMany, props)} {${[...props].join(
+		const nodeProps = [...props].join(' ');
+		const relationshipProps = [...new Set(Object.keys(properties))].join(
 			' ',
-		)}}`;
+		);
+
+		return `${propName}_rel {${type} {${nodeProps}} ${relationshipProps}}`;
 	},
 };

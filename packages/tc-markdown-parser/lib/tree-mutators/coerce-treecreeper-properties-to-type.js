@@ -73,9 +73,61 @@ const coerceNonNestedPropertyValue = (
 	}
 };
 
+const coerceEnumPropertyValue = (
+	node,
+	{ propertyType: enumName, hasMany, enums },
+) => {
+	let [subdocument] = node.children;
+
+	if (hasMany) {
+		if (subdocument.children[0].type !== 'list') {
+			return convertNodeToProblem({
+				node,
+				message: 'Must provide a list of enums',
+			});
+		}
+		[subdocument] = subdocument.children;
+	} else if (subdocument.children[0].type !== 'paragraph') {
+		return convertNodeToProblem({
+			node,
+			message: 'Must provide a single enum, not a nested list',
+		});
+	}
+
+	const validValues = Object.values(enums[enumName]);
+
+	const values = subdocument.children.map(child => {
+		const flattenedContent = normalizePropertyKey(
+			flattenNodeToPlainString(child),
+		);
+		const validValue = validValues.find(value => {
+			return flattenedContent === normalizePropertyKey(value);
+		});
+
+		return { validValue, flattenedContent, isValid: !!validValue };
+	});
+
+	if (values.every(({ isValid }) => isValid)) {
+		if (hasMany) {
+			setPropertyNodeValue(
+				node,
+				values.map(({ validValue }) => validValue),
+			);
+		} else {
+			setPropertyNodeValue(node, values[0].validValue);
+		}
+	} else {
+		const { flattenedContent } = values.find(({ isValid }) => !isValid);
+		convertNodeToProblem({
+			node,
+			message: `${flattenedContent} is not a valid value for the enum ${enumName}. Valid values: ${validValues.toString()}`,
+		});
+	}
+};
+
 const coerceNestedPropertyValue = (
 	node,
-	{ primitiveTypesMap, hasMany, propertyType },
+	{ primitiveTypesMap, hasMany, propertyType, enums },
 ) => {
 	try {
 		const coercedProperties = node.children.map(subdocument =>
@@ -83,18 +135,27 @@ const coerceNestedPropertyValue = (
 				if (nestNode.type === 'problem') {
 					throw new Error(nestNode.message);
 				}
+
 				const primitiveType = primitiveTypesMap[nestNode.propertyType];
-				const coercer = getCoercer({
-					isNested: true,
-					primitiveType,
-					propertyType,
-				});
-				const coercion = coercer(nestNode, { hasMany });
-				if (coercion.valid) {
-					values[nestNode.key] = dropHtmlComment(coercion.value);
+				if (primitiveType) {
+					const coercer = getCoercer({
+						isNested: true,
+						primitiveType,
+						propertyType,
+					});
+					const coercion = coercer(nestNode, { hasMany });
+					if (coercion.valid) {
+						values[nestNode.key] = dropHtmlComment(coercion.value);
+						return values;
+					}
+					throw new Error(coercion.value);
+				}
+
+				if (enums[nestNode.propertyType]) {
+					coerceEnumPropertyValue(nestNode, { ...nestNode, enums });
+					values[nestNode.key] = nestNode.value;
 					return values;
 				}
-				throw new Error(coercion.value);
 			}, {}),
 		);
 		setPropertyNodeValue(
@@ -105,30 +166,6 @@ const coerceNestedPropertyValue = (
 		convertNodeToProblem({
 			node,
 			message: error.message,
-		});
-	}
-};
-
-const coerceEnumPropertyValue = (node, { propertyType, enums }) => {
-	const [subdocument] = node.children;
-	const flattenedContent = normalizePropertyKey(
-		flattenNodeToPlainString(subdocument),
-	);
-
-	const enumName = propertyType;
-
-	const validValues = Object.values(enums[enumName]);
-
-	const validValue = validValues.find(value => {
-		return flattenedContent === normalizePropertyKey(value);
-	});
-
-	if (validValue) {
-		setPropertyNodeValue(node, validValue);
-	} else {
-		convertNodeToProblem({
-			node,
-			message: `${flattenedContent} is not a valid value for the enum ${enumName}. Valid values: ${validValues.toString()}`,
 		});
 	}
 };
@@ -147,39 +184,38 @@ module.exports = function coerceTreecreeperPropertiesToType({
 		const isNested = typeNames.has(node.propertyType);
 
 		const { hasMany } = properties[node.key];
-
 		// If the propertyType is nested, or one of the primitive types, coerce it
-		if (propertyType in primitiveTypesMap || isNested) {
-			if (!isNested) {
-				const isEmpty = !flattenNodeToPlainString(node);
 
-				if (isEmpty) {
-					convertNodeToProblem({
-						node,
-						message: `property "${node.key}" has no value`,
-					});
+		if (isNested) {
+			return coerceNestedPropertyValue(node, {
+				primitiveTypesMap,
+				hasMany,
+				propertyType,
+				enums,
+			});
+		}
 
-					return;
-				}
+		if (propertyType in primitiveTypesMap) {
+			const isEmpty = !flattenNodeToPlainString(node);
 
-				coerceNonNestedPropertyValue(node, {
-					primitiveType: primitiveTypesMap[node.propertyType],
-					propertyType,
-				});
-			} else {
-				coerceNestedPropertyValue(node, {
-					primitiveTypesMap,
-					hasMany,
-					propertyType,
+			if (isEmpty) {
+				return convertNodeToProblem({
+					node,
+					message: `property "${node.key}" has no value`,
 				});
 			}
-			return;
+
+			return coerceNonNestedPropertyValue(node, {
+				primitiveType: primitiveTypesMap[node.propertyType],
+				propertyType,
+			});
 		}
 
 		// If it's an enum, make sure it's a valid value for that enum
 		if (propertyType in enums) {
 			coerceEnumPropertyValue(node, {
 				propertyType,
+				hasMany,
 				enums,
 			});
 			return;
@@ -187,7 +223,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 		convertNodeToProblem({
 			node,
-			message: `i couldn't resolve ${node.propertyType} to a valid biz-ops property type or enum`,
+			message: `Could not resolve ${node.propertyType} to a valid biz-ops property type or enum`,
 		});
 	}
 

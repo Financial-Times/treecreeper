@@ -18,13 +18,18 @@ const Properties = ({ fields, data, assignComponent }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
+			const value = item.isRelationship
+				? data[`${name}_rel`]
+				: data[name];
+
 			const viewModel = {
-				value: data[name],
+				value,
 				id: name,
 				...item,
-				...assignComponent(item.type),
+				...assignComponent(item),
+				// TODO - find a better way (to not pass assignComponent)
+				assignComponent,
 			};
-
 			return viewModel.label ? (
 				<LabelledPrimitive {...viewModel} />
 			) : null;
