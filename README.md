@@ -18,7 +18,7 @@ From the developer's point of view, it provides a number of packages that can be
 -   [tc-api-graphql](/packages/tc-api-graphql/README.md) - A GraphQL API implementation
 -   [tc-api-rest-handlers](/packages/tc-api-rest-handlers/README.md) - A set of REST handlers that enable editing of the data, and which broadcast events when data changes
 -   [tc-api-express](/packages/tc-api-express/README.md) - An express wrapper around the database manager, GraphQL and REST handlers
--   [tc-api-s3-document-store](/packages/tc-api-s3-document-store/README.md) - An optional document store utility, which allows storing large pieces of data in S3 instead of neo4j (which does not handle large files very well). The interface provided by this store is documented, and developers may want to write alternatives that store documents in other locations
+-   [tc-api-s3-document-store](/packages/tc-api-s3-document-store/README.md) - An optional document store utilty, which allows storing large pieces of data in S3 instead of neo4j (which does not handle large files very well). The interface provided by this store is documented, and developers may want to write alternatives that store documents in other locations
 -   [tc-ui](/packages/tc-ui/README.md) - A user interface that allows editing and viewing data. this also exports React components and some other tools to allow building custom user interfaces
 -   [tc-markdown-parser](/packages/tc-markdown-parser/README.md) - A tool for parsing structured markdown content into a payload for the REST API
 
@@ -94,4 +94,4 @@ A treecreeper is a small, woodland bird which climbs up tree trunks in search of
 
 A tree is a type of Graph (the only type of graph that GraphQL can represent well)
 
-It seems apt to name this project after a creature that spends its life scampering around trees.
+It seems apt to name this project after a creature that spends it life scampering around trees.

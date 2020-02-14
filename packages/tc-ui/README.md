@@ -7,7 +7,7 @@ User interface for administering Treecreeper data. It provides:
 
 ## Limitations
 
-At present the UI is tightly coupled to the FT's origami build service. The plan is to move towards a self-contained implementation, but for the time being it's not possible
+At present the UI is tightly coupled to teh FT's origami buiold service. The plan is to move towards a self-contained implementation, but for the time being it's not possible
 
 ## API
 
@@ -15,7 +15,7 @@ At present the UI is tightly coupled to the FT's origami build service. The plan
 
 This returns an object containing 3 handlers: `{ viewHandler, deleteHandler, editHandler }`
 
-Each handler accepts input, and returns output, of similar structure to `tc-api-rest-handlers`:
+Each handler accepts input, and returns output, of similar structure to `tc-api-trest-handlers`:
 
 #### input
 
@@ -52,11 +52,11 @@ Base url for the treecreeper GraphQL api
 
 ##### apiHeaders
 
-Function that is passed the object received as input, and should return an object containing the headers to use when calling the treecreeper endpoints
+Function that is passed the object received as input, and should return an object containig the headers to use when calling the treecreeper endpoints
 
 ##### Subheader
 
-Optional React component for rendering a subheader when viewing records. It is passed all the props used to render the page, and is useful for e.g. rendering links to related resources
+Optional React component for rendering a subheader when viewing records. It is passedf all the props used to render the page, and is useful for e.g. rendering links to related resources
 
 ##### customComponents
 
@@ -93,7 +93,7 @@ Function for handling any errors. Should ideally return a `{status, body, header
 Styling and client side interactivity are dependent on a few things:
 
 -   If using webpack or a similar build tool that respects the `browser` field of package.json, `import @financial-times/tc-ui` in your client side bundle
--   On the server side, `origamiModules: { css, js }` retrieves lists of components you will need to include. Currently no mechanism is provided to automate including them - sorry
+-   On the server side, `origamiModules: { css, js }` retrieves lists of components uyou will need to include. Currently no mechanism is provided to automate including them - sorry
 
 #### Example
 
@@ -103,7 +103,7 @@ See the demo directory of this repository.
 
 At the heart of the CMS are a set of primitive components. These allow any property of any record to be displayed and edited in a consistent way.
 
-tc-ui provides 6 of these by default, but the user may provide more that implement the same interface in order to provide custom views and edit tools. Those bundled in tc-ui are:
+tc-ui provides 6 of these by default, but the user may provide more that implement the same interface in order to provide custom views and edit tools. Those bundled intc-ui are:
 
 -   Boolean
 -   Text

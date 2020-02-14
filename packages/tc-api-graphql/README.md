@@ -8,12 +8,12 @@ It exports `{getGraphqlApi}`. `getGraphqlApi` accepts the following configuratio
 
 ### `getGraphqlApi(options)`
 
-Sets up a GraphQL api which (if `tc-schema-sdk` is configured to update on demand) hot reloads the GraphQL schema to match changes to the underlying treecreeper schema. It returns an object with 3 properties
+Sets up a GraphQL api which (if `tc-schema-sdk` is configured to update on demand) hot reloads the GraphQL schema to match changes to the underlying treecreeper schema. It retyurns an obnject with 3 properties
 
 ```js
 {
   graphqlHandler, // express middleware that implements the GraphQL API
-  isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines its data types up to date
+  isSchemaUpdating, // a function that returns a boolean indicating whether the application is successfully keeping the schema that defines it data types up to date
   listenForSchemaChanges, // a function that, when called, starts the api polling for changes to a treecreeper schema published to some url
 };
 ```

@@ -16,21 +16,21 @@ The type of record to parse the markdown as
 
 ##### titleFieldName
 
-The `h1` title at the top of the document will be set as this property in the payload. Defaults to `name`.
+The `h1` title at the top pf the document will be set as this property in the payload. Defaults to `name`.
 
 ##### descriptionFieldName
 
-The first paragraph below the `h1` title at the top of the document will be set as this property in the payload. Defaults to `description`.
+The first paragraph below the `h1` title at the top pf the document will be set as this property in the payload. Defaults to `description`.
 
 ##### blacklistPropertyNames
 
-A list of property names which should not be allowed in the markdown file
+Ab list pf property names which should not be allowed in the markdown file
 
 #### Coercion
 
 -   The first `h1` and paragraph are parsed into special fields defined in the parser options (see above)
 -   `h2`'s are parsed as property names for the payload. They will be converted to camel case in a forgiving way: lower-cased, then concatenated with the first character after any space being upppercased
--   For boolean properties 'Yes' & 'No' are permissable in addition to 'true' and 'false'
+-   For boolean properties 'Yes' & 'No' are permissable in addition ato 'true' and 'false'
 
 #### Output
 
@@ -51,7 +51,7 @@ If the document is not parsed successfully, `errors` will contain an array of ob
 
 #### Example
 
-Assuming the properties below correspond to those defined in a treecreeper schema, the following markdown document:
+Assuming the properties belwo correspond to those defined in a treecreeper schema, the following markdown document:
 
 ```
 # My record
