@@ -36,6 +36,7 @@ const unifiedProcessor = function({
 			.use(createTreecreeperPropertyNodes)
 			.use(createTreecreeperDescriptionNode, {
 				descriptionFieldName,
+				titleFieldName,
 			})
 			.use(setTreecreeperPropertyNames, {
 				properties,

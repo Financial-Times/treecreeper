@@ -35,7 +35,7 @@ module.exports = function setTreecreeperPropertyNames({
 			convertNodeToProblem({
 				node,
 				message: createProblemMessage(
-					`disallowed to define same property name ${name} in markdown`,
+					`Duplicate headings for "${name}" field. Only one of each heading allowed in the markdown file.`,
 				),
 			});
 			return;

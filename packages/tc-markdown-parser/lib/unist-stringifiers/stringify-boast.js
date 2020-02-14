@@ -12,13 +12,15 @@ module.exports = function stringifyBoast({
 }) {
 	this.Compiler = function compiler(root) {
 		const data = {};
-
 		visit(root, titleFieldName, node => {
 			data[titleFieldName] = node.value;
 		});
 
 		visit(root, descriptionFieldName, node => {
-			data[descriptionFieldName] = renderSubdocument(node.children[0]);
+			data[descriptionFieldName] = renderSubdocument(
+				node.children[0],
+				false,
+			);
 		});
 
 		visit(root, 'property', node => {

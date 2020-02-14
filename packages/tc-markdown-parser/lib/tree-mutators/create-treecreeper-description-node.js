@@ -5,14 +5,17 @@ const convertNodeToProblem = require('./convert-node-to-problem');
 
 module.exports = function createBizopsDescriptionNode({
 	descriptionFieldName = 'description',
+	titleFieldName = 'name',
 }) {
 	return function transform(tree) {
 		/*
 		 anything at the top level that's not a name, or in a property is part
 		 of the description
 		 */
-		const descriptionTest = ':root > :not(name, property)';
+
+		const descriptionTest = `:root > :not(${titleFieldName}, property, problem)`;
 		const descriptionChildren = selectAll(descriptionTest, tree);
+
 		if (!descriptionChildren || !descriptionChildren.length) {
 			// if we have no children there's no point in carrying on
 			return;
