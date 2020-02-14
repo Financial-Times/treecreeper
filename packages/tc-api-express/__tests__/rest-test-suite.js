@@ -178,4 +178,4 @@ const testSuite = (method, goodStatus) => {
 	});
 };
 
-module.exports = { testSuite };
+module.exports = { testSuite }; // eslint-disable-line jest/no-export

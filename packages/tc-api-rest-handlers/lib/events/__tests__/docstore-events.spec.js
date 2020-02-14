@@ -38,8 +38,6 @@ const s3Client = new AWS.S3({
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
-module.exports = { s3Client };
-
 describe('docstore events', () => {
 	const namespace = 'api-rest-handlers-broadcast';
 	const mainCode = `${namespace}-main`;

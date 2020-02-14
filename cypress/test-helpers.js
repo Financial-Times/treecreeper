@@ -28,7 +28,7 @@ const populateChildTypeFields = async codeLabel => {
 const pickChild = () => {
 	cy.get('#children-picker')
 		.type('e2e')
-		.wait(500)
+		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('{downarrow}{enter}')
 		.should('not.be.disabled');
 };
@@ -36,7 +36,7 @@ const pickChild = () => {
 const pickFavouriteChild = () => {
 	cy.get('#favouriteChild-picker')
 		.type('e2e-demo-fir')
-		.wait(500)
+		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('{downarrow}{enter}')
 		.should('be.disabled');
 };
@@ -58,7 +58,7 @@ const save = () => {
 const pickParent = () => {
 	cy.get('#parents-picker')
 		.type('e2e')
-		.wait(500)
+		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('{downarrow}{enter}');
 };
 
