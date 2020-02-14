@@ -1,19 +1,23 @@
 const React = require('react');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
-const EditText = ({ propertyName, value, required, lockedBy, disabled }) => (
-	<span className="o-forms-input o-forms-input--text">
-		<input
-			name={`${propertyName}${lockedBy || disabled ? '-disabled' : ''}`}
-			id={`id-${propertyName}`}
-			className="o-forms__text"
-			type="text"
-			value={value || null}
-			required={required ? 'required' : null}
-			disabled={disabled}
-		/>
-	</span>
-);
+const EditText = ({ propertyName, value, required, lockedBy, disabled }) => {
+	const name =
+		propertyName === 'code' ? `${propertyName}` : `${propertyName}`;
+	return (
+		<span className="o-forms-input o-forms-input--text">
+			<input
+				name={`${name}${lockedBy || disabled ? '-disabled' : ''}`}
+				id={`id-${propertyName}`}
+				className="o-forms__text"
+				type="text"
+				defaultValue={value || null}
+				required={required ? 'required' : null}
+				disabled={disabled}
+			/>
+		</span>
+	);
+};
 
 module.exports = {
 	name: 'Text',

@@ -11,7 +11,7 @@ const Checkbox = ({ name, checkboxValue, disabled, checked }) => {
 				value={checkboxValue}
 				aria-label={checkboxValue}
 				id={`checkbox-${name}-${checkboxValue}`}
-				checked={checked}
+				defaultChecked={checked}
 				disabled={disabled}
 			/>
 

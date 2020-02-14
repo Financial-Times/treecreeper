@@ -1,6 +1,5 @@
 /* global fetch */
 const React = require('react');
-
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
@@ -64,7 +63,6 @@ class RelationshipPicker extends React.Component {
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
-		this.onRelationshipAnnotate = this.onRelationshipAnnotate.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -81,13 +79,7 @@ class RelationshipPicker extends React.Component {
 		// this is needed to prevent the event propagating up and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
-		event.preventDefault();
-	}
-
-	onRelationshipAnnotate() {
-		this.setState(prevState => ({
-			isExpanded: !prevState.isExpanded,
-		}));
+		event.stopPropagation();
 	}
 
 	onSearchTermChange(event, { newValue }) {
@@ -242,7 +234,6 @@ class RelationshipPicker extends React.Component {
 						<Relationship
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}
-							onRelationshipAnnotate={this.onRelationshipAnnotate}
 							index={i}
 							key={i}
 							isExpanded={isExpanded}

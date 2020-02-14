@@ -1,5 +1,4 @@
 const React = require('react');
-const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 const { RelationshipPicker } = require('./lib/relationship-picker');
@@ -18,27 +17,13 @@ const {
 module.exports = {
 	name: 'Relationship',
 	ViewComponent: ViewRelationship,
-	EditComponent: props => {
-		const componentMappings = Object.keys(props.properties).length
-			? Object.entries(props.properties).reduce(
-					(obj, [propertyName, item]) => {
-						const { assignComponent } = props;
-						const { name: componentName } = assignComponent(item);
-						obj[propertyName] = componentName;
-						return obj;
-					},
-					{},
-			  )
-			: null;
-		return (
-			<WrappedEditComponent
-				Component={RelationshipPickerContainer}
-				componentMappings={componentMappings}
-				componentType="relationship"
-				{...props}
-			/>
-		);
-	},
+	EditComponent: props => (
+		<WrappedEditComponent
+			Component={RelationshipPickerContainer}
+			componentType="relationship"
+			{...props}
+		/>
+	),
 	parser: value => {
 		if (!value) {
 			return null;
