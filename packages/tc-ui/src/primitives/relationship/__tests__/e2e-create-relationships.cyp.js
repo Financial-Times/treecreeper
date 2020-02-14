@@ -236,6 +236,8 @@ describe('End-to-end - relationship creation', () => {
 			.first()
 			.should('contain', 'e2e-demo-second-child');
 
+		cy.get('#children-picker').clear();
+
 		cy.get('#ul-children>li')
 			.eq(0)
 			.find('button.relationship-remove-button')
