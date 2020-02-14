@@ -54,7 +54,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 const WrappedEditComponent = props => {
 	props = { ...props, disabled: !!props.lockedBy };
 	const { Component } = props;
-	const WrapperTag = props.wrapperTag || 'div';
+	const WrapperTag = props.wrapperTag || 'label';
 	return (
 		<WrapperTag
 			className="o-forms-field"

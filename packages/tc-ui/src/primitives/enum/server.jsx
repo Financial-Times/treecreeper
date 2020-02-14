@@ -3,13 +3,8 @@ const React = require('react');
 const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
-const Option = ({ option, selected }) => (
-	<option
-		value={option === `Don't know` ? 'null' : option}
-		selected={option === selected ? true : null}
-	>
-		{option}
-	</option>
+const Option = ({ option }) => (
+	<option value={option === `Don't know` ? 'null' : option}>{option}</option>
 );
 
 const OptionsInfo = ({ type, parentType }) => {
@@ -32,9 +27,9 @@ const OptionsInfo = ({ type, parentType }) => {
 			/>
 			<dl>
 				{optionDefs.map(({ value, description }, index) => (
-					<React.Fragment key={`${parentType}-${index}`}>
-						<dt key={`${parentType}-${index}`}>{value}</dt>
-						<dd key={`${parentType}-${index}`}>{description}</dd>
+					<React.Fragment key={index}>
+						<dt>{value}</dt>
+						<dd>{description}</dd>
 					</React.Fragment>
 				))}
 			</dl>
@@ -51,13 +46,10 @@ const EditEnum = props => {
 				disabled={disabled}
 				id={`id-${propertyName}`}
 				name={propertyName}
+				defaultValue={value || "Don't know"}
 			>
 				{optionsWithDefault.map((option, index) => (
-					<Option
-						option={option}
-						selected={value || "Don't know"}
-						key={index}
-					/>
+					<Option option={option} key={index} />
 				))}
 			</select>
 		</span>

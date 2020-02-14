@@ -8,7 +8,13 @@ module.exports = ({ customComponents = {}, customTypeMappings = {} } = {}) => ({
 	type,
 	hasMany,
 }) => {
-	// TO Do - don't require in here
+	// TO Do - find a better solution
+	/*
+		currently if this require is done at top level we get {} the reason for this is due to
+		circular dependence
+		componentAssigner -> primitives -> relationship/server ->
+		relationship-picker -> relationship -> rich-relationship -> componentAssigner
+	*/
 	// eslint-disable-next-line global-require
 	const primitives = require('../../primitives/server');
 	const components = { ...primitives, ...customComponents };

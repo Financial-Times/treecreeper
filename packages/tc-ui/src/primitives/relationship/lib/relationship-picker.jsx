@@ -226,21 +226,6 @@ class RelationshipPicker extends React.Component {
 				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
-				<ul
-					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
-					id={`ul-${propertyName}`}
-				>
-					{selectedRelationships.map((val, i) => (
-						<Relationship
-							disabled={disabled}
-							onRelationshipRemove={this.onRelationshipRemove}
-							index={i}
-							key={i}
-							isExpanded={isExpanded}
-							{...{ ...props, value: val }}
-						/>
-					))}
-				</ul>
 				<input
 					type="hidden"
 					id={`id-${propertyName}`}
@@ -288,6 +273,21 @@ class RelationshipPicker extends React.Component {
 						</span>
 					</div>
 				)}
+				<ul
+					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
+					id={`ul-${propertyName}`}
+				>
+					{selectedRelationships.map((val, i) => (
+						<Relationship
+							disabled={disabled}
+							onRelationshipRemove={this.onRelationshipRemove}
+							index={i}
+							key={i}
+							isExpanded={isExpanded}
+							{...{ ...props, value: val }}
+						/>
+					))}
+				</ul>
 			</div>
 		);
 	}
