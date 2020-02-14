@@ -26,17 +26,17 @@ const populateChildTypeFields = async codeLabel => {
 };
 
 const pickChild = () => {
-	cy.get('#children-picker')
+	cy.get('#children-picker') // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('e2e')
-		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
+		.wait(500)
 		.type('{downarrow}{enter}')
 		.should('not.be.disabled');
 };
 
 const pickFavouriteChild = () => {
-	cy.get('#favouriteChild-picker')
+	cy.get('#favouriteChild-picker') // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('e2e-demo-fir')
-		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
+		.wait(500)
 		.type('{downarrow}{enter}')
 		.should('be.disabled');
 };
@@ -56,9 +56,9 @@ const save = () => {
 };
 
 const pickParent = () => {
-	cy.get('#parents-picker')
+	cy.get('#parents-picker') // eslint-disable-line cypress/no-unnecessary-waiting
 		.type('e2e')
-		.wait(500) // eslint-disable-line cypress/no-unnecessary-waiting
+		.wait(500)
 		.type('{downarrow}{enter}');
 };
 
