@@ -1,8 +1,8 @@
 .selected-relationship {
 	margin-top: 0;
 	display: grid;
-    grid-auto-flow: row;
-    grid-row-gap: .5em;
+	grid-auto-flow: row;
+	grid-row-gap: 0.5em;
 }
 
 .editable-relationships {
@@ -91,7 +91,7 @@
 }
 
 .biz-ops-relationship-annotate {
-	padding-left: 0.5em ;
+	padding-left: 0.5em;
 }
 
 .relationship-remove-button,
@@ -105,4 +105,3 @@
 .relationship-props {
 	margin-left: 3%;
 }
-
