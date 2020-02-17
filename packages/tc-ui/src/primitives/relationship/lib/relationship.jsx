@@ -91,12 +91,10 @@ class Relationship extends React.Component {
 						</button>
 					</span>
 					{isMounted && annotate ? (
-						<span className="biz-ops-relationship-annotate">
-							<RichRelationships
-								key={`${index}-${propertyName}`}
-								{...this.props}
-							/>
-						</span>
+						<RichRelationships
+							key={`${index}-${propertyName}`}
+							{...this.props}
+						/>
 					) : null}
 				</li>
 			</>

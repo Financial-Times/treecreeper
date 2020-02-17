@@ -118,10 +118,10 @@ describe('End-to-end - edit relationship properties', () => {
 					.find('#id-someEnum')
 					.should('be.visible');
 				cy.wrap(parent)
-					.find('input[name=someMultipleChoice]')
+					.find('input[name=curiousChild-someMultipleChoice]')
 					.should('be.visible');
 				cy.wrap(parent)
-					.find('input[name=someBoolean]')
+					.find('input[name=curiousChild-someBoolean]')
 					.should('be.visible');
 				cy.wrap(parent)
 					.find('#id-someFloat')
@@ -185,13 +185,13 @@ describe('End-to-end - edit relationship properties', () => {
 					.should('have.value', 'First')
 					.should('be.selected');
 				cy.wrap(parent)
-					.find('#checkbox-someMultipleChoice-First')
+					.find('#checkbox-curiousChild-someMultipleChoice-First')
 					.should('be.checked');
 				cy.wrap(parent)
-					.find('#checkbox-someMultipleChoice-Third')
+					.find('#checkbox-curiousChild-someMultipleChoice-Third')
 					.should('be.checked');
 				cy.wrap(parent)
-					.find('#radio-someBoolean-Yes')
+					.find('#radio-curiousChild-someBoolean-Yes')
 					.should('be.checked');
 				cy.wrap(parent)
 					.find('#id-someFloat')

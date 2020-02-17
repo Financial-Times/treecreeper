@@ -41,10 +41,12 @@ class RichRelationships extends React.Component {
 				};
 
 				return viewModel.propertyName && viewModel.label ? (
-					<EditComponent
-						key={`${propertyName}-${index}`}
-						{...viewModel}
-					/>
+					<span className="biz-ops-relationship-annotate">
+						<EditComponent
+							key={`${propertyName}-${index}`}
+							{...viewModel}
+						/>
+					</span>
 				) : null;
 			});
 	}
