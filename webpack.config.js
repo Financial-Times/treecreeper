@@ -38,10 +38,6 @@ module.exports = {
 			encoding: 'utf8',
 		}),
 	],
-	node: {
-		// this is to silence "Module not found: Error: Can't resolve 'fs'" which resulted from using tc-schema-sdk on client side
-		fs: 'empty',
-	},
 	devtool: 'source-map',
 };
 

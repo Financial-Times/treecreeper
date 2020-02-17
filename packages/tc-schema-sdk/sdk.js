@@ -15,6 +15,7 @@ const utils = require('./lib/utils');
 
 class SDK {
 	constructor(options = {}) {
+		this.readYaml = options.readYaml;
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
 		this.TreecreeperUserError = TreecreeperUserError;
@@ -58,6 +59,7 @@ class SDK {
 			options,
 			this.rawData,
 			this.cache,
+			this.readYaml,
 		);
 
 		// hook up schema updater to this.cache then
