@@ -46,13 +46,8 @@ class Relationship extends React.Component {
 	}
 
 	render() {
-		const {
-			value,
-			disabled,
-			onRelationshipRemove,
-			index,
-			propertyName,
-		} = this.props;
+		const { value, disabled, onRelationshipRemove, index } = this.props;
+
 		const { isMounted, annotate } = this.state;
 
 		return (
@@ -91,10 +86,7 @@ class Relationship extends React.Component {
 						</button>
 					</span>
 					{isMounted && annotate ? (
-						<RichRelationships
-							key={`${index}-${propertyName}`}
-							{...this.props}
-						/>
+						<RichRelationships key={index} {...this.props} />
 					) : null}
 				</li>
 			</>

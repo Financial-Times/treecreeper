@@ -1,5 +1,6 @@
 const React = require('react');
-const { format, parseISO } = require('date-fns');
+const parseISO = require('date-fns/parseISO');
+const format = require('date-fns/format');
 
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
@@ -47,11 +48,10 @@ const EditTemporal = ({
 	required,
 	disabled,
 	isNested,
-	nestedIn,
 }) => {
 	const name = !isNested
 		? `${propertyName}${disabled ? '-disabled' : ''}`
-		: `${nestedIn}-${propertyName}`;
+		: '';
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
 

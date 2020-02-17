@@ -8,11 +8,10 @@ const EditText = ({
 	lockedBy,
 	disabled,
 	isNested,
-	nestedIn,
 }) => {
 	const name = !isNested
 		? `${propertyName}${lockedBy || disabled ? '-disabled' : ''}`
-		: `${nestedIn}-${propertyName}`;
+		: '';
 
 	return (
 		<span className="o-forms-input o-forms-input--text">

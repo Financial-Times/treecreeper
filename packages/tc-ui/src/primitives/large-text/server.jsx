@@ -18,15 +18,8 @@ const markdown = text =>
 const outputFreeText = (text = '') => text;
 
 const EditLargeText = props => {
-	const {
-		propertyName,
-		value,
-		dataType,
-		disabled,
-		isNested,
-		nestedIn,
-	} = props;
-	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
+	const { propertyName, value, dataType, disabled, isNested } = props;
+	const name = !isNested ? propertyName : '';
 	return (
 		<>
 			<span className="o-forms-input o-forms-input--textarea">

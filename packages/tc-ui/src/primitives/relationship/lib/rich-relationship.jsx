@@ -12,7 +12,7 @@ class RichRelationships extends React.Component {
 	}
 
 	render() {
-		const { value, type, properties, propertyName } = this.props;
+		const { value, type, properties } = this.props;
 		const propertyfields = Object.entries(properties);
 
 		return propertyfields
@@ -28,7 +28,6 @@ class RichRelationships extends React.Component {
 
 				const viewModel = {
 					isNested: true,
-					nestedIn: propertyName,
 					propertyName: name,
 					value: getValue(item, value[name]),
 					dataType: item.type,
@@ -41,11 +40,8 @@ class RichRelationships extends React.Component {
 				};
 
 				return viewModel.propertyName && viewModel.label ? (
-					<span className="biz-ops-relationship-annotate">
-						<EditComponent
-							key={`${propertyName}-${index}`}
-							{...viewModel}
-						/>
+					<span className="biz-ops-relationship-annotate" key={index}>
+						<EditComponent key={index} {...viewModel} />
 					</span>
 				) : null;
 			});

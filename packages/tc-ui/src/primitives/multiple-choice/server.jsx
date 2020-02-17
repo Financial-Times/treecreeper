@@ -8,9 +8,8 @@ const Checkbox = ({
 	disabled,
 	checked,
 	isNested,
-	nestedIn,
 }) => {
-	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
+	const name = !isNested ? propertyName : '';
 	return (
 		<label>
 			<input
@@ -31,15 +30,8 @@ const Checkbox = ({
 };
 
 const EditMultipleChoice = props => {
-	const {
-		propertyName,
-		value,
-		options,
-		disabled,
-		isNested,
-		nestedIn,
-	} = props;
-	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
+	const { propertyName, value, options, disabled, isNested } = props;
+	const name = !isNested ? propertyName : '';
 	return (
 		<span className="o-forms-input o-forms-input--checkbox o-forms-input--inline">
 			{options.map((option, index) => (
@@ -50,7 +42,6 @@ const EditMultipleChoice = props => {
 					checked={value && value.includes(option)}
 					key={index}
 					isNested={isNested}
-					nestedIn={nestedIn}
 				/>
 			))}
 			{/* We need to send a dummy value every time otherwise there will be no value

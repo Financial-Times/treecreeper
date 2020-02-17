@@ -13,9 +13,8 @@ const Checkbox = ({
 	disabled,
 	userValue,
 	isNested,
-	nestedIn,
 }) => {
-	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
+	const name = !isNested ? propertyName : '';
 	const label = getBooleanLabel(checkboxValue);
 	return (
 		<label>
@@ -37,14 +36,7 @@ const Checkbox = ({
 };
 
 const EditBoolean = props => {
-	const {
-		propertyName,
-		value,
-		disabled,
-		isNested,
-		parentType,
-		nestedIn,
-	} = props;
+	const { propertyName, value, disabled, isNested, parentType } = props;
 	return (
 		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
 			<Checkbox
@@ -54,7 +46,6 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
-				nestedIn={nestedIn}
 			/>
 			<Checkbox
 				propertyName={propertyName}
@@ -63,7 +54,6 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
-				nestedIn={nestedIn}
 			/>
 		</span>
 	);

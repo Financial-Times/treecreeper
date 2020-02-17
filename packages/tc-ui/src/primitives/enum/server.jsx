@@ -38,16 +38,9 @@ const OptionsInfo = ({ type }) => {
 };
 
 const EditEnum = props => {
-	const {
-		propertyName,
-		value,
-		options,
-		disabled,
-		isNested,
-		nestedIn,
-	} = props;
+	const { propertyName, value, options, disabled, isNested } = props;
 	const optionsWithDefault = ["Don't know"].concat(options);
-	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
+	const name = !isNested ? propertyName : '';
 	return (
 		<span className="o-forms-input o-forms-input--select">
 			<select
