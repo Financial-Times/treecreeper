@@ -2,7 +2,15 @@ const React = require('react');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 const { OptionsInfo } = require('../enum/server');
 
-const Checkbox = ({ name, checkboxValue, disabled, checked }) => {
+const Checkbox = ({
+	propertyName,
+	checkboxValue,
+	disabled,
+	checked,
+	isNested,
+	nestedIn,
+}) => {
+	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
 	return (
 		<label>
 			<input
@@ -23,26 +31,32 @@ const Checkbox = ({ name, checkboxValue, disabled, checked }) => {
 };
 
 const EditMultipleChoice = props => {
-	const { propertyName, value, options, disabled } = props;
+	const {
+		propertyName,
+		value,
+		options,
+		disabled,
+		isNested,
+		nestedIn,
+	} = props;
+	const name = !isNested ? propertyName : `${nestedIn}-${propertyName}`;
 	return (
 		<span className="o-forms-input o-forms-input--checkbox o-forms-input--inline">
 			{options.map((option, index) => (
 				<Checkbox
-					name={propertyName}
+					propertyName={propertyName}
 					checkboxValue={option}
 					disabled={disabled}
 					checked={value && value.includes(option)}
 					key={index}
+					isNested={isNested}
+					nestedIn={nestedIn}
 				/>
 			))}
 			{/* We need to send a dummy value every time otherwise there will be no value
 			in the form data when we uncheck them all, and it will therefore be impossible
 			to unset the values */}
-			<input
-				type="hidden"
-				value="treecreeper-fake-value"
-				name={propertyName}
-			/>
+			<input type="hidden" value="treecreeper-fake-value" name={name} />
 		</span>
 	);
 };

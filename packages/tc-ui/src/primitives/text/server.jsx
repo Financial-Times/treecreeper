@@ -1,13 +1,23 @@
 const React = require('react');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
-const EditText = ({ propertyName, value, required, lockedBy, disabled }) => {
+const EditText = ({
+	propertyName,
+	value,
+	required,
+	lockedBy,
+	disabled,
+	isNested,
+	nestedIn,
+}) => {
+	const name = !isNested
+		? `${propertyName}${lockedBy || disabled ? '-disabled' : ''}`
+		: `${nestedIn}-${propertyName}`;
+
 	return (
 		<span className="o-forms-input o-forms-input--text">
 			<input
-				name={`${propertyName}${
-					lockedBy || disabled ? '-disabled' : ''
-				}`}
+				name={name}
 				id={`id-${propertyName}`}
 				className="o-forms__text"
 				type="text"

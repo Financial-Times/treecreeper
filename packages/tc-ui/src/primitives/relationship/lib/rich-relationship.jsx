@@ -23,11 +23,12 @@ class RichRelationships extends React.Component {
 					!schema.deprecationReason,
 			)
 			.map(([name, item], index) => {
-				// eslint-disable-next-line no-undef
 				const assignComponent = componentAssigner();
 				const { EditComponent } = assignComponent(item);
 
 				const viewModel = {
+					isNested: true,
+					nestedIn: propertyName,
 					propertyName: name,
 					value: getValue(item, value[name]),
 					dataType: item.type,
