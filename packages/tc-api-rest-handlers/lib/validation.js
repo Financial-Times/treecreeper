@@ -46,8 +46,7 @@ const validateBody = ({
 		module.exports.validatePropertyName(realPropName);
 		module.exports.validateProperty(type, realPropName, value);
 		const globalLock = properties[realPropName].lockedBy;
-		console.log({ globalLock, clientId });
-		if (globalLock && !globalLock.includes(clientId)) {
+		if (globalLock && (!clientId || !globalLock.includes(clientId))) {
 			throw httpErrors(
 				400,
 				`Cannot write ${realPropName} on ${type} ${code} - property can only be edited by client ${globalLock}`,
