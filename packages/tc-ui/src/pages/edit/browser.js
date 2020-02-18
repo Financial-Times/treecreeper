@@ -7,8 +7,8 @@ const {
 
 const initSchema = async () => {
 	const jsonNode = document.querySelector("[data-json='schema-data']");
-	const jsonRaw = jsonNode && jsonNode.textContent;
-	const jsonData = jsonRaw && jsonRaw.length > 4 ? JSON.parse(jsonRaw) : {};
+	const jsonRaw = jsonNode.innerHTML.trim();
+	const jsonData = jsonRaw.length ? JSON.parse(jsonRaw) : {};
 	init({ schemaData: jsonData });
 };
 

@@ -23,7 +23,7 @@ const Checkbox = ({
 				name={name}
 				value={checkboxValue.toString()}
 				aria-label={label}
-				id={`radio-${name}-${label}`}
+				id={`radio-${propertyName}-${label}`}
 				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
 			/>
