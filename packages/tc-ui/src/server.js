@@ -14,6 +14,7 @@ const getCMS = ({
 	logger,
 	restApiUrl,
 	graphqlApiUrl,
+	clientId,
 	apiHeaders,
 	Subheader,
 	customComponents,
@@ -40,6 +41,7 @@ const getCMS = ({
 
 	const { formDataToRest, formDataToGraphQL } = getDataTransformers(
 		assignComponent,
+		clientId
 	);
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,

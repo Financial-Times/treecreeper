@@ -50,9 +50,15 @@ Base url for the treecreeper REST api
 
 Base url for the treecreeper GraphQL api
 
+##### clientId
+
+String to send to the API as the `Client-Id` header
+
 ##### apiHeaders
 
-Function that is passed the object received as input, and should return an object containing the headers to use when calling the treecreeper endpoints
+Either:
+- Function that is passed the object received as input, and should return an object containing additional headers to use when calling the treecreeper endpoints e.g. `api-key`, `client-user-id`.
+- An object to be use directly as the headers
 
 ##### Subheader
 
