@@ -5,7 +5,7 @@ const {
 } = require('../../../lib/mappers/component-assigner');
 const { getValue } = require('../../../lib/mappers/get-value.js');
 
-class RichRelationships extends React.Component {
+class RelationshipProperties extends React.Component {
 	constructor(props) {
 		super(props);
 		this.props = props;
@@ -47,4 +47,4 @@ class RichRelationships extends React.Component {
 			});
 	}
 }
-module.exports = { RichRelationships };
+module.exports = { RelationshipProperties };

@@ -1,7 +1,6 @@
 /* global it, describe, expect */
 const validURL = require('valid-url');
-const { SDK } = require('@financial-times/tc-schema-sdk');
-const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
+const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
 
 const sdk = new SDK({ readYaml });
 const primitiveTypesMap = sdk.getPrimitiveTypes();

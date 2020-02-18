@@ -1,6 +1,6 @@
 /* global window */
 const React = require('react');
-const { RichRelationships } = require('./rich-relationship');
+const { RelationshipProperties } = require('./rich-relationship-properties');
 
 class Relationship extends React.Component {
 	constructor(props) {
@@ -86,7 +86,7 @@ class Relationship extends React.Component {
 						</button>
 					</span>
 					{isMounted && annotate ? (
-						<RichRelationships key={index} {...this.props} />
+						<RelationshipProperties key={index} {...this.props} />
 					) : null}
 				</li>
 			</>

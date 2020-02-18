@@ -1,6 +1,5 @@
 /* global it, describe, expect */
-const { SDK } = require('@financial-times/tc-schema-sdk');
-const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
+const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
 
 const enums = new SDK({ readYaml }).rawData.getEnums();
 

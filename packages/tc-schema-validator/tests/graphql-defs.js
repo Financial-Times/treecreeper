@@ -1,7 +1,6 @@
 /* global it, describe, expect */
 const { parse } = require('graphql');
-const { SDK } = require('@financial-times/tc-schema-sdk/sdk');
-const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
+const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
 
 describe('graphql defs', () => {
 	it('should be syntactically correct (can be parsed by graphql parser)', () => {
