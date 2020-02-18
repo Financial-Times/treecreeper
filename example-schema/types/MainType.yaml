@@ -27,8 +27,6 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
-    lockedBy:
-      - blah-bler
   # someStringList:
   #   type: Word
   #   hasMany: true
@@ -122,3 +120,9 @@ properties:
     type: CuriousParent
     description: Curious parent description.
     label: Curious parent label
+  lockedField:
+    type: String
+    description: Locked field description
+    label: Locked field label
+    lockedBy:
+      - global-lock-client
