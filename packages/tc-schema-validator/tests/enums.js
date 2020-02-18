@@ -1,7 +1,8 @@
 /* global it, describe, expect */
 const { SDK } = require('@financial-times/tc-schema-sdk');
+const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
 
-const enums = new SDK().rawData.getEnums();
+const enums = new SDK({ readYaml }).rawData.getEnums();
 
 describe('enums', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {

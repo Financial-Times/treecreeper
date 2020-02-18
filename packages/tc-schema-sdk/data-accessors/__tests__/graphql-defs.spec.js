@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { SDK } = require('../../sdk');
-const { readYaml } = require('../../lib/updater');
+const readYaml = require('../../lib/read-yaml');
 
 const stringPatterns = readYaml.file(
 	process.env.TREECREEPER_SCHEMA_DIRECTORY,

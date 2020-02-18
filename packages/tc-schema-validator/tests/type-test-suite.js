@@ -1,8 +1,9 @@
 /* global it, describe, expect */
 const validURL = require('valid-url');
 const { SDK } = require('@financial-times/tc-schema-sdk');
+const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
 
-const sdk = new SDK();
+const sdk = new SDK({ readYaml });
 const primitiveTypesMap = sdk.getPrimitiveTypes();
 const { getStringValidator } = sdk;
 const enums = sdk.rawData.getEnums();

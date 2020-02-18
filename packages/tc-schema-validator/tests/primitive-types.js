@@ -1,7 +1,8 @@
 /* global it, describe, expect */
 const { SDK } = require('@financial-times/tc-schema-sdk');
+const readYaml = require('@financial-times/tc-schema-sdk/lib/read-yaml');
 
-const primitiveTypes = new SDK().rawData.getPrimitiveTypes();
+const primitiveTypes = new SDK({ readYaml }).rawData.getPrimitiveTypes();
 
 describe('primitive types', () => {
 	Object.entries(primitiveTypes).forEach(([name, { component, graphql }]) => {
