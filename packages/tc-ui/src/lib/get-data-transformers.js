@@ -21,6 +21,13 @@ const getDataTransformers = assignComponent => {
 				) {
 					return;
 				}
+
+				if (
+					fieldProps.lockedBy &&
+					!fieldProps.lockedBy.includes('biz-ops-admin')
+				) {
+					return;
+				}
 				const { parser } = assignComponent(fieldProps);
 
 				const valueHasBeenReceived = fieldName in formData;
