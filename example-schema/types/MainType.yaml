@@ -27,6 +27,8 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
+    lockedBy:
+      - blah-bler
   # someStringList:
   #   type: Word
   #   hasMany: true

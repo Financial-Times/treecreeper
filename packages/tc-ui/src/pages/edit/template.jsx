@@ -46,7 +46,7 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 				label: name.toUpperCase(),
 				...item,
 				isEdit,
-				lockedBy,
+				lockedBy: item.lockedBy || lockedBy,
 			};
 
 			return viewModel.propertyName && viewModel.label ? (
