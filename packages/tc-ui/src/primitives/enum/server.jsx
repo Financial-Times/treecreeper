@@ -3,13 +3,8 @@ const React = require('react');
 const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
-const Option = ({ option, selected }) => (
-	<option
-		value={option === `Don't know` ? 'null' : option}
-		selected={option === selected ? true : null}
-	>
-		{option}
-	</option>
+const Option = ({ option }) => (
+	<option value={option === `Don't know` ? 'null' : option}>{option}</option>
 );
 
 const OptionsInfo = ({ type }) => {
@@ -23,14 +18,18 @@ const OptionsInfo = ({ type }) => {
 		<>
 			<p
 				dangerouslySetInnerHTML={{
-					__html: autolinker.link(enumWithMeta.description || ''),
+					__html:
+						typeof window === 'undefined'
+							? autolinker.link(enumWithMeta.description || '')
+							: // eslint-disable-next-line no-undef
+							  Autolinker.link(enumWithMeta.description || ''),
 				}}
 			/>
 			<dl>
 				{optionDefs.map(({ value, description }, index) => (
 					<React.Fragment key={index}>
-						<dt key={index}>{value}</dt>
-						<dd key={index}>{description}</dd>
+						<dt>{value}</dt>
+						<dd>{description}</dd>
 					</React.Fragment>
 				))}
 			</dl>
@@ -39,21 +38,19 @@ const OptionsInfo = ({ type }) => {
 };
 
 const EditEnum = props => {
-	const { propertyName, value, options, disabled } = props;
+	const { propertyName, value, options, disabled, isNested } = props;
 	const optionsWithDefault = ["Don't know"].concat(options);
+	const name = !isNested ? propertyName : '';
 	return (
 		<span className="o-forms-input o-forms-input--select">
 			<select
 				disabled={disabled}
 				id={`id-${propertyName}`}
-				name={propertyName}
+				name={name}
+				defaultValue={value || "Don't know"}
 			>
 				{optionsWithDefault.map((option, index) => (
-					<Option
-						option={option}
-						selected={value || "Don't know"}
-						key={index}
-					/>
+					<Option option={option} key={index} />
 				))}
 			</select>
 		</span>

@@ -53,6 +53,7 @@ class RelationshipPicker extends React.Component {
 			selectedRelationships,
 			hasHighlightedSelection: false,
 			isFull: !props.hasMany && !!selectedRelationships.length,
+			isExpanded: false,
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
@@ -78,7 +79,7 @@ class RelationshipPicker extends React.Component {
 		// this is needed to prevent the event propagating up and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
-		event.preventDefault();
+		event.stopPropagation();
 	}
 
 	onSearchTermChange(event, { newValue }) {
@@ -213,6 +214,7 @@ class RelationshipPicker extends React.Component {
 			isUserError,
 			isUnresolved,
 			isFull,
+			isExpanded,
 		} = this.state;
 
 		return (
@@ -224,20 +226,6 @@ class RelationshipPicker extends React.Component {
 				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
-				<ul
-					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
-					id={`ul-${propertyName}`}
-				>
-					{selectedRelationships.map((val, i) => (
-						<Relationship
-							value={val}
-							disabled={disabled}
-							onRelationshipRemove={this.onRelationshipRemove}
-							index={i}
-							key={i}
-						/>
-					))}
-				</ul>
 				<input
 					type="hidden"
 					id={`id-${propertyName}`}
@@ -285,6 +273,21 @@ class RelationshipPicker extends React.Component {
 						</span>
 					</div>
 				)}
+				<ul
+					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
+					id={`ul-${propertyName}`}
+				>
+					{selectedRelationships.map((val, i) => (
+						<Relationship
+							disabled={disabled}
+							onRelationshipRemove={this.onRelationshipRemove}
+							index={i}
+							key={i}
+							isExpanded={isExpanded}
+							{...{ ...props, value: val }}
+						/>
+					))}
+				</ul>
 			</div>
 		);
 	}

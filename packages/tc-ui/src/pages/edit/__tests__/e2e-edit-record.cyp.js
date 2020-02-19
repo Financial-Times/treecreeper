@@ -61,7 +61,9 @@ describe('End-to-end - edit record', () => {
 		visitEditPage();
 
 		cy.get('input[name=someString]').type(` - updated`);
-		cy.get('[data-name=e2e-demo-first-child] button').click({
+		cy.get(
+			'[data-name=e2e-demo-first-child] button.relationship-remove-button',
+		).click({
 			force: true,
 		});
 		cy.get('#children-picker') // eslint-disable-line cypress/no-unnecessary-waiting

@@ -2,7 +2,8 @@
   "name": "@financial-times/tc-schema-sdk",
   "version": "0.0.0",
   "description": "In many ways, this is the beating heart of Treecreeper&TM;. It consumes the schema files that define what sort of records can be stored in the neo4j instance, and what relationships can exist between them. These schema files may exist locally or be hosted somewhere remote. Once these files are consumed, schema-sdk then takes care of:",
-  "main": "index.js",
+  "main": "server.js",
+  "browser":"browser.js",
   "author": "",
   "license": "ISC",
   "dependencies": {

@@ -1,8 +1,16 @@
 require('./main.css');
+const { init } = require('@financial-times/tc-schema-sdk');
 const {
 	Relationship: { withEditComponent: attachRelationshipPicker },
 	LargeText: { withEditComponent: attachDocumentEditor },
 } = require('../../primitives/browser');
+
+const initSchema = async () => {
+	const jsonNode = document.querySelector("[data-json='schema-data']");
+	const jsonRaw = jsonNode.innerHTML.trim();
+	const jsonData = jsonRaw.length ? JSON.parse(jsonRaw) : {};
+	init({ schemaData: jsonData });
+};
 
 const initDocumentEditors = () => {
 	[...document.querySelectorAll('[data-type="Document"]')].forEach(
@@ -95,7 +103,8 @@ Type SAVE INCOMPLETE RECORD below to proceed, or click cancel to return to the f
 	}
 };
 
-module.exports.init = () => {
+module.exports.init = async () => {
+	await initSchema();
 	initDocumentEditors();
 	initRelationshipSelectors();
 	preventBadSubmission();

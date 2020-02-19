@@ -1,5 +1,6 @@
 const React = require('react');
-const { format, parseISO } = require('date-fns');
+const parseISO = require('date-fns/parseISO');
+const format = require('date-fns/format');
 
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
@@ -40,14 +41,24 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
-const EditTemporal = ({ type, propertyName, value, required, disabled }) => {
+const EditTemporal = ({
+	type,
+	propertyName,
+	value,
+	required,
+	disabled,
+	isNested,
+}) => {
+	const name = !isNested
+		? `${propertyName}${disabled ? '-disabled' : ''}`
+		: '';
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
 			<input
-				name={`${propertyName}${disabled ? '-disabled' : ''}`}
+				name={name}
 				id={`id-${propertyName}`}
 				type={`${inputType}`}
 				value={convertValueForHTMLInput(value, type)}

@@ -36,20 +36,20 @@ describe('relationship picker', () => {
 			expect(wrapper.children().length).toEqual(3);
 			expect(
 				wrapper
-					.childAt(0)
+					.childAt(2)
 					.is(
 						'ul.relationship-editor__list.editable-relationships.o-layout__unstyled-element#ul-testProperty',
 					),
 			).toBe(true);
 			expect(
 				wrapper
-					.childAt(1)
+					.childAt(0)
 					.is(
 						'input[type="hidden"]#id-testProperty[name="testProperty"]',
 					),
 			).toBe(true);
-			expect(wrapper.childAt(1).prop('value')).toEqual('null');
-			expect(wrapper.childAt(2).is('div.o-layout-typography')).toBe(true);
+			expect(wrapper.childAt(0).prop('value')).toEqual('null');
+			expect(wrapper.childAt(1).is('div.o-layout-typography')).toBe(true);
 			expect(getAutoSuggest(wrapper).is(ReactAutosuggest)).toBe(true);
 		});
 
@@ -97,7 +97,7 @@ describe('relationship picker', () => {
 				};
 				const wrapper = shallow(<RelationshipPicker {...props} />);
 				expect(
-					wrapper.childAt(0).is('ul.relationship-editor__list'),
+					wrapper.childAt(2).is('ul.relationship-editor__list'),
 				).toBe(true);
 				expect(
 					getRelationshipList(wrapper)

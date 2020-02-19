@@ -7,7 +7,14 @@ const getBooleanLabel = value => {
 	return 'Unknown';
 };
 
-const Checkbox = ({ name, checkboxValue, disabled, userValue }) => {
+const Checkbox = ({
+	propertyName,
+	checkboxValue,
+	disabled,
+	userValue,
+	isNested,
+}) => {
+	const name = !isNested ? propertyName : '';
 	const label = getBooleanLabel(checkboxValue);
 	return (
 		<label>
@@ -16,8 +23,8 @@ const Checkbox = ({ name, checkboxValue, disabled, userValue }) => {
 				name={name}
 				value={checkboxValue.toString()}
 				aria-label={label}
-				id={`radio-${name}-${label}`}
-				checked={userValue === checkboxValue ? 'true' : null}
+				id={`radio-${propertyName}-${label}`}
+				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
 			/>
 
@@ -29,20 +36,24 @@ const Checkbox = ({ name, checkboxValue, disabled, userValue }) => {
 };
 
 const EditBoolean = props => {
-	const { propertyName, value, disabled } = props;
+	const { propertyName, value, disabled, isNested, parentType } = props;
 	return (
 		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
 			<Checkbox
-				name={propertyName}
+				propertyName={propertyName}
 				checkboxValue
 				disabled={disabled}
 				userValue={value}
+				isNested={isNested}
+				parentType={parentType}
 			/>
 			<Checkbox
-				name={propertyName}
+				propertyName={propertyName}
 				checkboxValue={false}
 				disabled={disabled}
 				userValue={value}
+				isNested={isNested}
+				parentType={parentType}
 			/>
 		</span>
 	);

@@ -2,7 +2,6 @@
 const { SDK } = require('@financial-times/tc-schema-sdk');
 
 const stringPatterns = new SDK().rawData.getStringPatterns();
-
 const longString = 'x'.repeat(257);
 
 describe('string patterns', () => {
