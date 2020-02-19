@@ -1,10 +1,11 @@
 /* global it, describe, expect */
 const fs = require('fs');
 const path = require('path');
-const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
+const { SDK } = require('@financial-times/tc-schema-sdk');
 const { typeTestSuite, relationshipTestSuite } = require('./type-test-suite');
 
 const sdk = new SDK();
+const { readYaml } = sdk;
 
 const makePath = dir =>
 	path.join(process.cwd(), process.env.TREECREEPER_SCHEMA_DIRECTORY, dir);

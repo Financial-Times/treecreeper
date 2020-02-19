@@ -1,13 +1,13 @@
 const EventEmitter = require('events');
 const fetch = require('node-fetch');
-const readYaml = require('./read-yaml');
 
 class SchemaUpdater {
-	constructor(options, rawData, cache) {
+	constructor(options, rawData, cache, readYaml) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
 		this.rawData = rawData;
 		this.cache = cache;
+		this.readYaml = readYaml;
 		this.configure(options);
 	}
 
@@ -24,6 +24,7 @@ class SchemaUpdater {
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
+		const { readYaml } = this;
 		if (schemaDirectory && !schemaData) {
 			schemaData = {
 				schema: {
@@ -150,4 +151,4 @@ class SchemaUpdater {
 	}
 }
 
-module.exports = { SchemaUpdater, readYaml };
+module.exports = { SchemaUpdater };

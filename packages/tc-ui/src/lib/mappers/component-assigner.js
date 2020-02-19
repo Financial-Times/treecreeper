@@ -1,17 +1,23 @@
 const {
 	getEnums,
 	getTypes,
-	getType,
 	getPrimitiveTypes,
 } = require('@financial-times/tc-schema-sdk');
-const primitives = require('../primitives/server');
 
 const componentAssigner = ({
 	customComponents = {},
 	customTypeMappings = {},
 } = {}) => ({ type, hasMany }) => {
+	// TO Do - find a better solution
+	/*
+		currently if this require is done at top level we get {} the reason for this is due to
+		circular dependence
+		componentAssigner -> primitives -> relationship/server ->
+		relationship-picker -> relationship -> rich-relationship -> componentAssigner
+	*/
+	// eslint-disable-next-line global-require
+	const primitives = require('../../primitives/server');
 	const components = { ...primitives, ...customComponents };
-
 	const typeToComponentMap = {
 		...getPrimitiveTypes({ output: 'component' }),
 		...Object.keys(customComponents).reduce(
@@ -38,22 +44,4 @@ const componentAssigner = ({
 	return components.Text;
 };
 
-const toGraphql = (propName, propDef, assignComponent) =>
-	assignComponent(propDef).graphqlFragment(propName, propDef);
-
-const graphqlQueryBuilder = (type, assignComponent) => {
-	return `
-	query getStuff($itemId: String!) {
-    ${type} (code: $itemId) {
-    ${Object.entries(getType(type, { includeMetaFields: true }).properties)
-		.filter(([, { deprecationReason }]) => !deprecationReason)
-		.map(([propName, propDef]) =>
-			toGraphql(propName, propDef, assignComponent),
-		)
-		.join('\n')}
-  }
-}
-`;
-};
-
-module.exports = { componentAssigner, graphqlQueryBuilder };
+module.exports = { componentAssigner };

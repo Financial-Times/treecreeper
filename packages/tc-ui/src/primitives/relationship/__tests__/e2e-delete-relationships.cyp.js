@@ -35,7 +35,7 @@ describe('End-to-end - relationship deletion', () => {
 		visitEditPage();
 
 		cy.get('#ul-favouriteChild>li')
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		save();
@@ -69,7 +69,7 @@ describe('End-to-end - relationship deletion', () => {
 		visitEditPage();
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		save();
@@ -108,13 +108,13 @@ describe('End-to-end - relationship deletion', () => {
 		// remove first child
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		// remove second child
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		save();
@@ -158,7 +158,7 @@ describe('End-to-end - relationship deletion', () => {
 		// remove first child
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		save();
@@ -176,11 +176,11 @@ describe('End-to-end - relationship deletion', () => {
 		// remove remaining child
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		cy.get('#ul-favouriteChild>li')
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 		save();

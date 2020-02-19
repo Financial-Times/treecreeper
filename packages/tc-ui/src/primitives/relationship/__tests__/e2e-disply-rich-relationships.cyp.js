@@ -18,9 +18,9 @@ describe('End-to-end - display relationship properties', () => {
 		resetDb();
 		populateMinimumViableFields(code);
 		save();
-		populateParentTypeFields(`${code}-first-parent`);
+		populateParentTypeFields(`${code}-parent-one`);
 		save();
-		populateParentTypeFields(`${code}-second-parent`);
+		populateParentTypeFields(`${code}-parent-two`);
 		save();
 		populateChildTypeFields(`${code}-second-child`);
 		save();
@@ -126,9 +126,7 @@ describe('End-to-end - display relationship properties', () => {
 		pickCuriousParent();
 		save();
 
-		cy.wrap().then(() =>
-			setPropsOnCuriousParentRel(`${code}-first-parent`),
-		);
+		cy.wrap().then(() => setPropsOnCuriousParentRel(`${code}-parent-one`));
 		// to refresh the page after updating neo4j
 		visitMainTypePage();
 
@@ -137,20 +135,20 @@ describe('End-to-end - display relationship properties', () => {
 		const secondCuriousParentSelector = 'ul#curiousParent li:last-of-type';
 
 		cy.get(`${firstCuriousParentSelector} a`)
-			.should('have.text', `${code}-first-parent`)
-			.should('have.attr', 'href', `/ParentType/${code}-first-parent`);
+			.should('have.text', `${code}-parent-one`)
+			.should('have.attr', 'href', `/ParentType/${code}-parent-one`);
 		cy.get(`${firstCuriousParentSelector}`).then(parent => {
 			cy.wrap(parent)
 				.find('#someString')
-				.should('have.text', 'lorem ipsum');
+				.should('have.text', 'parent lorem ipsum');
 			cy.wrap(parent)
 				.find('#anotherString')
-				.should('have.text', 'another lorem ipsum');
+				.should('have.text', 'parent another lorem ipsum');
 		});
 
 		cy.get(`${secondCuriousParentSelector} a`)
-			.should('have.text', `${code}-second-parent`)
-			.should('have.attr', 'href', `/ParentType/${code}-second-parent`);
+			.should('have.text', `${code}-parent-two`)
+			.should('have.attr', 'href', `/ParentType/${code}-parent-two`);
 		cy.get(`${secondCuriousParentSelector}`).then(parent => {
 			cy.wrap(parent)
 				.find('#someString')
@@ -167,12 +165,8 @@ describe('End-to-end - display relationship properties', () => {
 		pickCuriousParent();
 		save();
 
-		cy.wrap().then(() =>
-			setPropsOnCuriousParentRel(`${code}-first-parent`),
-		);
-		cy.wrap().then(() =>
-			setPropsOnCuriousParentRel(`${code}-second-parent`),
-		);
+		cy.wrap().then(() => setPropsOnCuriousParentRel(`${code}-parent-one`));
+		cy.wrap().then(() => setPropsOnCuriousParentRel(`${code}-parent-two`));
 		// to refresh the page after updating neo4j
 		visitMainTypePage();
 
@@ -181,28 +175,28 @@ describe('End-to-end - display relationship properties', () => {
 		const secondCuriousParentSelector = 'ul#curiousParent li:last-of-type';
 
 		cy.get(`${firstCuriousParentSelector} a`)
-			.should('have.text', `${code}-first-parent`)
-			.should('have.attr', 'href', `/ParentType/${code}-first-parent`);
+			.should('have.text', `${code}-parent-one`)
+			.should('have.attr', 'href', `/ParentType/${code}-parent-one`);
 
 		cy.get(`${firstCuriousParentSelector}`).then(parent => {
 			cy.wrap(parent)
 				.find('#someString')
-				.should('have.text', 'lorem ipsum');
+				.should('have.text', 'parent lorem ipsum');
 			cy.wrap(parent)
 				.find('#anotherString')
-				.should('have.text', 'another lorem ipsum');
+				.should('have.text', 'parent another lorem ipsum');
 		});
 
 		cy.get(`${secondCuriousParentSelector} a`)
-			.should('have.text', `${code}-second-parent`)
-			.should('have.attr', 'href', `/ParentType/${code}-second-parent`);
+			.should('have.text', `${code}-parent-two`)
+			.should('have.attr', 'href', `/ParentType/${code}-parent-two`);
 		cy.get(`${secondCuriousParentSelector}`).then(parent => {
 			cy.wrap(parent)
 				.find('#someString')
-				.should('have.text', 'lorem ipsum');
+				.should('have.text', 'parent lorem ipsum');
 			cy.wrap(parent)
 				.find('#anotherString')
-				.should('have.text', 'another lorem ipsum');
+				.should('have.text', 'parent another lorem ipsum');
 		});
 	});
 });

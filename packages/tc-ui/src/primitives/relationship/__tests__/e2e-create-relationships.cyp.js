@@ -47,7 +47,7 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span').should(
+			cy.get('#ul-favouriteChild span:first-of-type span').should(
 				'have.text',
 				'e2e-demo-first-child',
 			);
@@ -72,7 +72,7 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span').should(
+			cy.get('#ul-favouriteChild span:first-of-type span').should(
 				'have.text',
 				'e2e-demo-first-child',
 			);
@@ -92,7 +92,7 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span').should(
+			cy.get('#ul-favouriteChild span:first-of-type span').should(
 				'have.text',
 				'e2e-demo-first-child',
 			);
@@ -137,7 +137,7 @@ describe('End-to-end - relationship creation', () => {
 
 		it('does not disable selection on page load if there is a selection already', () => {
 			// e2e-demo-first-child is already picked during populateMinimumViableFields();
-			cy.get('#ul-children span').should(
+			cy.get('#ul-children span:first-of-type span').should(
 				'have.text',
 				'e2e-demo-first-child',
 			);
@@ -180,11 +180,11 @@ describe('End-to-end - relationship creation', () => {
 					cy.wrap(children).should('have.length', 2);
 					cy.wrap(children)
 						.eq(0)
-						.find('span')
+						.find('span:first-of-type span')
 						.should('have.text', 'e2e-demo-first-child');
 					cy.wrap(children)
 						.eq(1)
-						.find('span')
+						.find('span:first-of-type span')
 						.should('have.text', 'e2e-demo-second-child');
 				});
 
@@ -236,9 +236,11 @@ describe('End-to-end - relationship creation', () => {
 			.first()
 			.should('contain', 'e2e-demo-second-child');
 
+		cy.get('#children-picker').clear();
+
 		cy.get('#ul-children>li')
 			.eq(0)
-			.find('button')
+			.find('button.relationship-remove-button')
 			.should('have.text', 'Remove')
 			.click();
 

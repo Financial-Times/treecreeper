@@ -38,6 +38,7 @@ module.exports = {
 			encoding: 'utf8',
 		}),
 	],
+	devtool: 'source-map',
 };
 
 if (process.env.CIRCLECI) {

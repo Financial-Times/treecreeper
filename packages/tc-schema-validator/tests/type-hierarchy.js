@@ -1,7 +1,8 @@
 /* global it, describe, expect */
-const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
+const { SDK } = require('@financial-times/tc-schema-sdk');
 
-const { rawData } = new SDK();
+const sdk = new SDK();
+const { readYaml, rawData } = sdk;
 
 const typeHierarchy = rawData.getTypeHierarchy();
 
