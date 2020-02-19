@@ -143,7 +143,9 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 					});
 					it('may have direction', () => {
 						if (config.direction) {
-							expect(config.direction).toMatch(/^incoming|outgoing$/);
+							expect(config.direction).toMatch(
+								/^incoming|outgoing$/,
+							);
 						}
 					});
 					it('can determine relationship direction explicitly', () => {
@@ -420,7 +422,6 @@ const relationshipTestSuite = type => {
 			properties,
 		});
 
-
 		describe('relationship endpoints', () => {
 			it('uses existing record type fro from', () => {
 				const fromType = types.find(t => t.name === from.type);
@@ -439,24 +440,24 @@ const relationshipTestSuite = type => {
 			if (from.type !== to.type) {
 				it('from type makes use of this relationship type', () => {
 					const endType = types.find(t => t.name === to.type);
-					const propertiesUsingRelationshipType = Object.values(endType.properties).filter(
-						prop => prop.type === type.name,
-					);
+					const propertiesUsingRelationshipType = Object.values(
+						endType.properties,
+					).filter(prop => prop.type === type.name);
 					expect(propertiesUsingRelationshipType.length).toBe(1);
 				});
 				it('to type makes use of this relationship type', () => {
 					const endType = types.find(t => t.name === from.type);
-					const propertiesUsingRelationshipType = Object.values(endType.properties).filter(
-						prop => prop.type === type.name,
-					);
+					const propertiesUsingRelationshipType = Object.values(
+						endType.properties,
+					).filter(prop => prop.type === type.name);
 					expect(propertiesUsingRelationshipType.length).toBe(1);
 				});
 			} else {
 				it('has deterministic direction', () => {
 					const typeDef = types.find(t => t.name === from.type);
-					const propertiesUsingRelationshipType = Object.values(typeDef.properties).filter(
-						prop => prop.type === type.name,
-					);
+					const propertiesUsingRelationshipType = Object.values(
+						typeDef.properties,
+					).filter(prop => prop.type === type.name);
 
 					expect(propertiesUsingRelationshipType.length).toBe(2);
 					const startRel = propertiesUsingRelationshipType.find(
@@ -467,9 +468,9 @@ const relationshipTestSuite = type => {
 						prop => prop.direction === 'incoming',
 					);
 					expect(endRel).toBeDefined();
-				})
+				});
 			}
-		})
+		});
 	});
 };
 
