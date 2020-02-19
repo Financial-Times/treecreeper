@@ -1,7 +1,7 @@
 /* global it, describe, expect */
-const { SDK, readYaml } = require('@financial-times/tc-schema-sdk');
+const { SDK } = require('@financial-times/tc-schema-sdk');
 
-const stringPatterns = new SDK({ readYaml }).rawData.getStringPatterns();
+const stringPatterns = new SDK().rawData.getStringPatterns();
 const longString = 'x'.repeat(257);
 
 describe('string patterns', () => {

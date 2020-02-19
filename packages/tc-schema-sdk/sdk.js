@@ -15,7 +15,6 @@ const utils = require('./lib/utils');
 
 class SDK {
 	constructor(options = {}) {
-		this.readYaml = options.readYaml;
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
 		this.TreecreeperUserError = TreecreeperUserError;
