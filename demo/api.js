@@ -20,7 +20,17 @@ app.use(
 	}),
 );
 
-getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
+getApp({
+	treecreeperPath: '/api',
+	app,
+	graphqlMethods: ['post', 'get'] ,
+	schemaOptions: {
+		updateMode: 'poll',
+		schemaBaseUrl: process.env.SCHEMA_BASE_URL
+	}
+
+
+}).then(
 	() => {
 		app.listen(PORT, () => {
 			// eslint-disable-next-line no-console
