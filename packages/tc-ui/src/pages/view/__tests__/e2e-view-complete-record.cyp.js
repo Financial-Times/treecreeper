@@ -14,7 +14,7 @@ const {
 	populateNonMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record creation', () => {
 	beforeEach(() => {

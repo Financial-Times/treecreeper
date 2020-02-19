@@ -14,7 +14,8 @@ const {
 	visitEditPage,
 	save,
 	resetDb,
-} = require('../../../test-helpers');
+	setLockedRecord,
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - edit record', () => {
 	beforeEach(() => {
@@ -276,5 +277,19 @@ describe('End-to-end - edit record', () => {
 			'have.text',
 			'12 November 2022, 7:00:00 PM',
 		);
+	});
+
+	it('can save record with locked fields', () => {
+		setLockedRecord(code);
+		visitEditPage();
+		cy.get('#id-lockedField').should('have.value', 'locked value 1');
+		cy.get('#id-someString').should('have.value', 'locked value 2');
+		cy.get('#radio-someBoolean-Yes').should('be.checked');
+		save();
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#code').should('have.text', code);
+		cy.get('#lockedField').should('have.text', 'locked value 1');
+		cy.get('#someString').should('have.text', 'locked value 2');
+		cy.get('#someBoolean').should('have.text', 'Yes');
 	});
 });

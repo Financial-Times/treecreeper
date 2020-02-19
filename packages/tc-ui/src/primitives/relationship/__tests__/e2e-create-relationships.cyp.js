@@ -10,7 +10,7 @@ const {
 	visitMainTypePage,
 	save,
 	resetDb,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - relationship creation', () => {
 	beforeEach(() => {
