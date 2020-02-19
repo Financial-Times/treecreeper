@@ -14,7 +14,7 @@ class ApiClient {
 				? this.apiHeaders(this.event)
 				: this.apiHeaders;
 
-		headers['client-id'] = this.clientId,
+		headers['client-id'] = this.clientId;
 		return {
 			'content-type': 'application/json',
 			...headers,

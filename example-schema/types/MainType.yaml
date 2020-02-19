@@ -122,7 +122,7 @@ properties:
     label: Curious parent label
   lockedField:
     type: String
-    description: Locked field description
+    description: Locked field description.
     label: Locked field label
     lockedBy:
       - global-lock-client

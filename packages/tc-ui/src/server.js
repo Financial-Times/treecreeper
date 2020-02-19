@@ -41,7 +41,7 @@ const getCMS = ({
 
 	const { formDataToRest, formDataToGraphQL } = getDataTransformers(
 		assignComponent,
-		clientId
+		clientId,
 	);
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,

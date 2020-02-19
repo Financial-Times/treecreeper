@@ -44,7 +44,7 @@ Each property definition is an object with the following properties
 | useInSummary | no       | `true` on properties named `'code'`, otherwise `false`     | Boolean indicating if the property is considered an essential property to use when constructing a summary of the record. At present, this is used when presenting search results                                                                                                    |                            |
 | pattern      | no       |                                                            | String which is the name of a [string matching pattern]string validation rule](#string-validation-rules).                                                                                                                                                                           | `CODE`, `MAX_LENGTH_64`    |
 
-| lockedBy      | no       |                                                            | Array of strings listing the client-ids that are allowed to edit this field globally                                                                                                                                                                           |     |
+| lockedBy | no | | Array of strings listing the client-ids that are allowed to edit the values stored in this property | |
 
 Note: All existing and any new properties, except for relationships, will automatically have the functionality to be filtered.
 
