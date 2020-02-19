@@ -143,7 +143,7 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 					});
 					it('may have direction', () => {
 						if (config.direction) {
-							expect(config.direction).toMatch(/^from|to$/);
+							expect(config.direction).toMatch(/^incoming|outgoing$/);
 						}
 					});
 					it('can determine relationship direction explicitly', () => {
@@ -420,51 +420,56 @@ const relationshipTestSuite = type => {
 			properties,
 		});
 
-		describe('from', () => {
-			it('has existing from type', () => {
+
+		describe('relationship endpoints', () => {
+			it('uses existing record type fro from', () => {
 				const fromType = types.find(t => t.name === from.type);
 				expect(fromType).toBeDefined();
 				// assert the relationship node doesn't have more relationship
 				expect(isRichRelationshipType(fromType)).toBe(false);
 			});
-			it('relationship must be closed', () => {
-				const endType = types.find(t => t.name === to.type);
-				const propExists = Object.values(endType.properties).filter(
-					prop => prop.type === type.name,
-				);
-				expect(propExists.length).toBeGreaterThan(0);
-				// If from and to type are the same, we should validate direction
-				if (from.type === to.type) {
-					const closeRel = propExists.find(
-						prop => prop.direction === 'to',
-					);
-					expect(closeRel).toBeDefined();
-				}
-			});
-		});
 
-		describe('to', () => {
-			it('has existing to type', () => {
+			it('uses existing record type for to', () => {
 				const toType = types.find(t => t.name === to.type);
 				expect(toType).toBeDefined();
 				// assert the relationship node doesn't have more relationship
 				expect(isRichRelationshipType(toType)).toBe(false);
 			});
-			it('relationship must be closed', () => {
-				const endType = types.find(t => t.name === from.type);
-				const propExists = Object.values(endType.properties).filter(
-					prop => prop.type === type.name,
-				);
-				expect(propExists.length).toBeGreaterThan(0);
-				// If from and to type are the same, we should validate direction
-				if (from.type === to.type) {
-					const closeRel = propExists.find(
-						prop => prop.direction === 'from',
+
+			if (from.type !== to.type) {
+				it('from type makes use of this relationship type', () => {
+					const endType = types.find(t => t.name === to.type);
+					const propertiesUsingRelationshipType = Object.values(endType.properties).filter(
+						prop => prop.type === type.name,
 					);
-					expect(closeRel).toBeDefined();
-				}
-			});
-		});
+					expect(propertiesUsingRelationshipType.length).toBe(1);
+				});
+				it('to type makes use of this relationship type', () => {
+					const endType = types.find(t => t.name === from.type);
+					const propertiesUsingRelationshipType = Object.values(endType.properties).filter(
+						prop => prop.type === type.name,
+					);
+					expect(propertiesUsingRelationshipType.length).toBe(1);
+				});
+			} else {
+				it('has deterministic direction', () => {
+					const typeDef = types.find(t => t.name === from.type);
+					const propertiesUsingRelationshipType = Object.values(typeDef.properties).filter(
+						prop => prop.type === type.name,
+					);
+
+					expect(propertiesUsingRelationshipType.length).toBe(2);
+					const startRel = propertiesUsingRelationshipType.find(
+						prop => prop.direction === 'outgoing',
+					);
+					expect(startRel).toBeDefined();
+					const endRel = propertiesUsingRelationshipType.find(
+						prop => prop.direction === 'incoming',
+					);
+					expect(endRel).toBeDefined();
+				})
+			}
+		})
 	});
 };
 
