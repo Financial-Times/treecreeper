@@ -10,7 +10,7 @@ const {
 	pickChild,
 	save,
 	resetDb,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - delete record', () => {
 	beforeEach(() => {
