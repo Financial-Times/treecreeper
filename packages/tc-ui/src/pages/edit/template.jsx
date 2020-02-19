@@ -5,7 +5,7 @@ const { Concept, SectionHeader } = require('../../lib/components/structure');
 const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
-const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
+const PropertyInputs = ({ fields, data, type, assignComponent }) => {
 	const propertyfields = Object.entries(fields);
 
 	const fieldsToLock = data._lockedFields
@@ -17,40 +17,31 @@ const PropertyInputs = ({ fields, data, isEdit, type, assignComponent }) => {
 	);
 
 	return propertyfields
-		.filter(
-			([, schema]) =>
-				// HACK: need to get rid of fields that are doing this
-				!schema.label.includes('deprecated') &&
-				!schema.deprecationReason,
-		)
-		.map(([name, item]) => {
+		.filter(([, { deprecationReason }]) => !deprecationReason)
+		.map(([propertyName, propDef]) => {
 			let lockedBy;
-			if (fieldNamesToLock.includes(name)) {
-				lockedBy = fieldsToLock[name];
+			if (fieldNamesToLock.includes(propertyName)) {
+				lockedBy = fieldsToLock[propertyName];
 			}
 
-			const { EditComponent } = assignComponent(item);
-			const itemValue = item.isRelationship
-				? data[`${name}_rel`]
-				: data[name];
+			const { EditComponent } = assignComponent(propDef);
+			const itemValue = propDef.isRelationship
+				? data[`${propertyName}_rel`]
+				: data[propertyName];
 
 			const viewModel = {
-				propertyName: name,
-				value: getValue(item, itemValue),
-				dataType: item.type,
+				propertyName,
+				value: getValue(propDef, itemValue),
+				dataType: propDef.type,
 				parentType: type,
-				options: getEnums()[item.type]
-					? Object.keys(getEnums()[item.type])
+				options: getEnums()[propDef.type]
+					? Object.keys(getEnums()[propDef.type])
 					: [],
-				label: name.toUpperCase(),
-				...item,
-				isEdit,
-				lockedBy: item.lockedBy || lockedBy,
+				...propDef,
+				lockedBy: propDef.lockedBy || lockedBy,
 			};
 
-			return viewModel.propertyName && viewModel.label ? (
-				<EditComponent {...viewModel} />
-			) : null;
+			return <EditComponent {...viewModel} />;
 		});
 };
 
@@ -122,7 +113,6 @@ const EditForm = props => {
 								<PropertyInputs
 									fields={properties}
 									data={data}
-									isEdit={isEdit}
 									type={type}
 									assignComponent={assignComponent}
 								/>

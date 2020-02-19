@@ -163,7 +163,6 @@ const setPropsOnCuriousParentRel = async codeLabel => {
 	});
 };
 
-
 const setLockedRecord = codeLabel => {
 	const query = `MERGE (m:MainType {code: $code})
 		SET m.lockedField = "locked value 1"
@@ -196,5 +195,5 @@ module.exports = {
 	resetDb,
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
-	setLockedRecord
+	setLockedRecord,
 };
