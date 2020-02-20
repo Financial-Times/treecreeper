@@ -1,6 +1,6 @@
 const schema = require('@financial-times/tc-schema-sdk');
 
-const getDataTransformers = assignComponent => {
+const getDataTransformers = (assignComponent, clientId) => {
 	const formDataToRest = (type, formData) => {
 		const data = {};
 		const typeProperties = schema.getType(type);
@@ -17,7 +17,14 @@ const getDataTransformers = assignComponent => {
 
 				if (
 					lockedFields[fieldName] &&
-					lockedFields[fieldName] !== 'biz-ops-admin'
+					lockedFields[fieldName] !== clientId
+				) {
+					return;
+				}
+
+				if (
+					fieldProps.lockedBy &&
+					!fieldProps.lockedBy.includes(clientId)
 				) {
 					return;
 				}

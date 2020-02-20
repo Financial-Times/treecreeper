@@ -31,8 +31,8 @@ const { viewHandler, deleteHandler, editHandler } = getCMS({
 	logger,
 	restApiUrl: 'http://local.in.ft.com:8888/api/rest',
 	graphqlApiUrl: 'http://local.in.ft.com:8888/api/graphql',
+	clientId: 'treecreeper-demo',
 	apiHeaders: ({ metadata: { clientUserId } }) => ({
-		'client-id': 'treecreeper-demo',
 		'client-user-id': clientUserId,
 	}),
 	Subheader,

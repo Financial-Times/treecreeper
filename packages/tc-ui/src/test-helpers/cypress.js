@@ -132,7 +132,9 @@ const populateNonMinimumViableFields = () => {
 };
 
 const setPropsOnCuriousChildRel = async codeLabel => {
-	const query = `Match(m:MainType)-[r:HAS_CURIOUS_CHILD]->(c:ChildType) where c.code=$code set r.someBoolean =true, r.someString = "lorem ipsum", r.anotherString = "another lorem ipsum", r.someInteger=2020, r.someEnum="First", r.someMultipleChoice = ["First","Third"], r.someFloat = 12.53`;
+	const query = `MATCH (m:MainType)-[r:HAS_CURIOUS_CHILD]->(c:ChildType)
+		WHERE c.code=$code
+		SET r.someBoolean =true, r.someString = "lorem ipsum", r.anotherString = "another lorem ipsum", r.someInteger=2020, r.someEnum="First", r.someMultipleChoice = ["First","Third"], r.someFloat = 12.53`;
 	return new Promise((resolve, reject) => {
 		try {
 			const result = executeQuery(query, {
@@ -146,7 +148,9 @@ const setPropsOnCuriousChildRel = async codeLabel => {
 };
 
 const setPropsOnCuriousParentRel = async codeLabel => {
-	const query = `Match(m:MainType)<-[r:IS_CURIOUS_PARENT_OF]-(c:ParentType) where c.code=$code set r.someString = "parent lorem ipsum", r.anotherString="parent another lorem ipsum"`;
+	const query = `MATCH (m:MainType)<-[r:IS_CURIOUS_PARENT_OF]-(c:ParentType)
+	WHERE c.code=$code
+	SET r.someString = "parent lorem ipsum", r.anotherString="parent another lorem ipsum"`;
 	return new Promise((resolve, reject) => {
 		try {
 			const result = executeQuery(query, {
@@ -158,6 +162,19 @@ const setPropsOnCuriousParentRel = async codeLabel => {
 		}
 	});
 };
+
+const setLockedRecord = codeLabel => {
+	const query = `MERGE (m:MainType {code: $code})
+		SET m.lockedField = "locked value 1"
+		SET m.someString = "locked value 2"
+		SET m.someBoolean = true
+		SET m._lockedFields = '{"someString": "lock-client-1", "someBoolean": "lock-client-2"}'
+	RETURN m`;
+	return executeQuery(query, {
+		code: codeLabel,
+	});
+};
+
 const resetDb = async () => {
 	await dropFixtures(code);
 };
@@ -178,4 +195,5 @@ module.exports = {
 	resetDb,
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
+	setLockedRecord,
 };

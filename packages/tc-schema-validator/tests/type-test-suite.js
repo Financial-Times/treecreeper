@@ -57,6 +57,7 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 						'label',
 						'deprecationReason',
 						'hasMany',
+						'lockedBy',
 					];
 					if (fieldsets) {
 						commonKeys.push('fieldset');
@@ -130,6 +131,15 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 				if (config.deprecationReason) {
 					expect(typeof config.deprecationReason).toBe('string');
 					expect(config.deprecationReason).not.toMatch(/\n/);
+				}
+			});
+
+			it('has valid lockedBy entry', () => {
+				if (config.lockedBy) {
+					expect(Array.isArray(config.lockedBy)).toBe(true);
+					config.lockedBy.forEach(clientId =>
+						expect(typeof clientId).toBe('string'),
+					);
 				}
 			});
 

@@ -10,7 +10,7 @@ const {
 	resetDb,
 	setPropsOnCuriousParentRel,
 	setPropsOnCuriousChildRel,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - edit relationship properties', () => {
 	beforeEach(() => {

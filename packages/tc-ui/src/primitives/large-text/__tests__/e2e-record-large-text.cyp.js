@@ -7,7 +7,7 @@ const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record LargeText type', () => {
 	it('can record large text', () => {
