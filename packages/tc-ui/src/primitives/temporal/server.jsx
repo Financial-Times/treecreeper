@@ -48,12 +48,15 @@ const EditTemporal = ({
 	required,
 	disabled,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
 	const name = !isNested
 		? `${propertyName}${disabled ? '-disabled' : ''}`
 		: '';
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
+	const handleChange = !isNested ? null : event => onChange(event);
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
@@ -64,6 +67,8 @@ const EditTemporal = ({
 				value={convertValueForHTMLInput(value, type)}
 				required={required ? 'required' : null}
 				disabled={disabled ? 'disabled' : null}
+				data-parent-code={parentCode}
+				onChange={handleChange}
 			/>
 		</span>
 	);

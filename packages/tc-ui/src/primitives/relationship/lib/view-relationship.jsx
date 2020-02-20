@@ -38,17 +38,21 @@ const OneRelationship = props => {
 				</button>
 				<div className="o-expander__content">
 					<dl className="biz-ops-relationship-props-list">
-						{Object.entries(validValues).map(([name, item]) => {
-							const viewModel = {
-								value: value[name],
-								id: name,
-								...item,
-								...assignComponent(item),
-							};
-							return viewModel.label ? (
-								<LabelledPrimitive {...viewModel} />
-							) : null;
-						})}
+						{Object.entries(validValues).map(
+							([name, item], index) => {
+								const viewModel = {
+									value: value[name],
+									id: name,
+									...item,
+									...assignComponent(item),
+								};
+								return viewModel.label ? (
+									<span key={index}>
+										<LabelledPrimitive {...viewModel} />
+									</span>
+								) : null;
+							},
+						)}
 					</dl>
 				</div>
 			</div>

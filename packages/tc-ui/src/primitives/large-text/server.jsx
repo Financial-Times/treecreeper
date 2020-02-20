@@ -18,8 +18,17 @@ const markdown = text =>
 const outputFreeText = (text = '') => text;
 
 const EditLargeText = props => {
-	const { propertyName, value, dataType, disabled, isNested } = props;
+	const {
+		propertyName,
+		value,
+		dataType,
+		disabled,
+		isNested,
+		parentCode,
+		onChange,
+	} = props;
 	const name = !isNested ? propertyName : '';
+	const handleChange = !isNested ? null : event => onChange(event);
 	return (
 		<>
 			<span className="o-forms-input o-forms-input--textarea">
@@ -29,6 +38,8 @@ const EditLargeText = props => {
 					rows={dataType === 'Document' ? '40' : '8'}
 					disabled={disabled}
 					defaultValue={outputFreeText(value)}
+					data-parent-code={parentCode}
+					onChange={handleChange}
 				/>
 			</span>
 			{dataType === 'Document' ? (

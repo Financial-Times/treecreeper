@@ -8,6 +8,8 @@ const Checkbox = ({
 	disabled,
 	checked,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
 	const name = !isNested ? propertyName : '';
 	return (
@@ -20,6 +22,8 @@ const Checkbox = ({
 				id={`checkbox-${propertyName}-${checkboxValue}`}
 				defaultChecked={checked}
 				disabled={disabled}
+				data-parent-code={parentCode}
+				onChange={isNested ? event => onChange(event) : null}
 			/>
 
 			<span className="o-forms-input__label" aria-hidden="true">
@@ -30,7 +34,15 @@ const Checkbox = ({
 };
 
 const EditMultipleChoice = props => {
-	const { propertyName, value, options, disabled, isNested } = props;
+	const {
+		propertyName,
+		value,
+		options,
+		disabled,
+		isNested,
+		parentCode,
+		onChange,
+	} = props;
 	const name = !isNested ? propertyName : '';
 	return (
 		<span className="o-forms-input o-forms-input--checkbox o-forms-input--inline">
@@ -42,6 +54,8 @@ const EditMultipleChoice = props => {
 					checked={value && value.includes(option)}
 					key={index}
 					isNested={isNested}
+					parentCode={parentCode}
+					onChange={onChange}
 				/>
 			))}
 			{/* We need to send a dummy value every time otherwise there will be no value

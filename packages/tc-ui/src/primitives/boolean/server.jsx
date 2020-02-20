@@ -13,9 +13,12 @@ const Checkbox = ({
 	disabled,
 	userValue,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
-	const name = !isNested ? propertyName : '';
+	const name = !isNested ? propertyName : `${parentCode}-${propertyName}`;
 	const label = getBooleanLabel(checkboxValue);
+	const handleChange = !isNested ? null : event => onChange(event);
 	return (
 		<label>
 			<input
@@ -26,6 +29,8 @@ const Checkbox = ({
 				id={`radio-${propertyName}-${label}`}
 				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
+				data-parent-code={parentCode}
+				onChange={handleChange}
 			/>
 
 			<span className="o-forms-input__label" aria-hidden="true">
@@ -36,7 +41,15 @@ const Checkbox = ({
 };
 
 const EditBoolean = props => {
-	const { propertyName, value, disabled, isNested, parentType } = props;
+	const {
+		propertyName,
+		value,
+		disabled,
+		isNested,
+		parentType,
+		parentCode,
+		onChange,
+	} = props;
 	return (
 		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
 			<Checkbox
@@ -46,6 +59,8 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
+				parentCode={parentCode}
+				onChange={onChange}
 			/>
 			<Checkbox
 				propertyName={propertyName}
@@ -54,6 +69,8 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
+				parentCode={parentCode}
+				onChange={onChange}
 			/>
 		</span>
 	);

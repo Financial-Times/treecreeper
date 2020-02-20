@@ -63,6 +63,7 @@ class RelationshipPicker extends React.Component {
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
+		this.onChange = this.onChange.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -126,6 +127,40 @@ class RelationshipPicker extends React.Component {
 				return false;
 			}
 		}
+	}
+
+	onChange(event) {
+		const { value, id, checked, dataset, type } = event.currentTarget;
+		const { parentCode } = dataset;
+		const propertyName = id.split('-')[1];
+		this.setState(prevState => {
+			const { selectedRelationships } = prevState;
+			const oldState = selectedRelationships.map(relationship => {
+				if (relationship.code === parentCode) {
+					// for multiple choice values
+					if (type === 'checkbox') {
+						const selectedValues = new Set(
+							relationship[propertyName],
+						);
+						// eslint-disable-next-line no-unused-expressions
+						checked
+							? selectedValues.add(value)
+							: selectedValues.delete(value);
+						relationship[propertyName] = [...selectedValues].sort();
+					} else if (
+						typeof relationship[propertyName] === 'boolean'
+					) {
+						relationship[propertyName] = JSON.parse(value);
+					} else {
+						relationship[propertyName] = value;
+					}
+				}
+				return relationship;
+			});
+			return {
+				selectedRelationships: oldState,
+			};
+		});
 	}
 
 	fetchSuggestions({ value }) {
@@ -216,7 +251,7 @@ class RelationshipPicker extends React.Component {
 			isFull,
 			isExpanded,
 		} = this.state;
-
+		// console.log('here selected', selectedRelationships);
 		return (
 			<div
 				data-props={JSON.stringify(props)}
@@ -284,6 +319,7 @@ class RelationshipPicker extends React.Component {
 							index={i}
 							key={i}
 							isExpanded={isExpanded}
+							onChange={this.onChange}
 							{...{ ...props, value: val }}
 						/>
 					))}

@@ -8,10 +8,13 @@ const EditText = ({
 	lockedBy,
 	disabled,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
 	const name = !isNested
 		? `${propertyName}${lockedBy || disabled ? '-disabled' : ''}`
 		: '';
+	const handleChange = !isNested ? null : event => onChange(event);
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
@@ -23,6 +26,8 @@ const EditText = ({
 				defaultValue={value || null}
 				required={required ? 'required' : null}
 				disabled={disabled}
+				data-parent-code={parentCode}
+				onChange={handleChange}
 			/>
 		</span>
 	);
