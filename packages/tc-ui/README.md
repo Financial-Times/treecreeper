@@ -58,7 +58,7 @@ String to send to the API as the `Client-Id` header
 
 Either:
 
--   Function that is passed the object received as input, and should return an object containing additional headers to use when calling the treecreeper endpoints e.g. `api-key`, `client-user-id`.
+-   Function that is passed the object received as input, and should return an object containing additional headers to use when calling the treecreeper endpoints e.g. `Api-Key`, `Client-User-Id`.
 -   An object to be use directly as the headers
 
 ##### Subheader
