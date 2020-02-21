@@ -49,20 +49,32 @@ WHERE related.code IN $${key}
 `;
 };
 
-const addPropsToQueries = (relationshipPropQueries, value) => {
+const addPropsToQueries = (
+	relationshipPropQueries,
+	value,
+	relationshipParameters,
+	code,
+) => {
 	// value: { code: 'node code', someString: 'some string'...}
-	Object.entries(value).forEach(([k, v]) => {
-		if (k !== 'code') {
-			// If no node matches the CASE expression, the expression returns a null.
-			// and no action will be taken
+	Object.entries(value).forEach(([propertyName, propertyValue]) => {
+		// If no node matches the CASE expression, the expression returns a null.
+		// and no action will be taken
+		if (propertyName !== 'code') {
+			// biz-ops-admin to biz_ops_admin
+			// we need to prefix the propertyName with code to avoid parameter mismatch in case of
+			// many relationships
+			code = code.split('-').join('_');
 			relationshipPropQueries.push(`
 				SET (CASE
 				WHEN related.code = '${value.code}'
-				THEN relationship END).${k} = ${v === null ? null : `'${v}'`}
+				THEN relationship END).${propertyName} = {${code}_${propertyName}}
 				`);
 			relationshipPropQueries.push(
 				createRelMetaQueryForUpdate(value.code),
 			);
+			Object.assign(relationshipParameters, {
+				[`${code}_${propertyName}`]: propertyValue,
+			});
 		}
 	});
 };
@@ -87,7 +99,12 @@ const prepareToWriteRelationships = (
 
 		relProps.forEach(relProp => {
 			retrievedCodes.push(relProp.code);
-			addPropsToQueries(relationshipPropQueries, relProp);
+			addPropsToQueries(
+				relationshipPropQueries,
+				relProp,
+				relationshipParameters,
+				relProp.code,
+			);
 		});
 
 		// make sure the parameter referenced in the query exists on the

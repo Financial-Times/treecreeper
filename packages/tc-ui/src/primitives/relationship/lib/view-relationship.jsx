@@ -19,8 +19,12 @@ const OneRelationship = props => {
 		hasValue,
 	} = props;
 	let RelationshipProperties = null;
+	// value[propertyName] !== null since neo4j returns null if there is no value
 	const validValues = Object.keys(value)
-		.filter(key => value[key] && key !== type)
+		.filter(
+			propertyName =>
+				value[propertyName] !== null && propertyName !== type,
+		)
 		.reduce((res, key) => ((res[key] = properties[key]), res), {});
 
 	if (Object.keys(validValues).length && hasValue) {

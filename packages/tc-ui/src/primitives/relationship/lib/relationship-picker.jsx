@@ -138,7 +138,10 @@ class RelationshipPicker extends React.Component {
 			const oldState = selectedRelationships.map(relationship => {
 				if (relationship.code === parentCode) {
 					// for multiple choice values
-					if (type === 'checkbox') {
+					if (
+						type === 'checkbox' &&
+						relationship[propertyName].length
+					) {
 						const selectedValues = new Set(
 							relationship[propertyName],
 						);
@@ -147,10 +150,6 @@ class RelationshipPicker extends React.Component {
 							? selectedValues.add(value)
 							: selectedValues.delete(value);
 						relationship[propertyName] = [...selectedValues].sort();
-					} else if (
-						typeof relationship[propertyName] === 'boolean'
-					) {
-						relationship[propertyName] = JSON.parse(value);
 					} else {
 						relationship[propertyName] = value;
 					}

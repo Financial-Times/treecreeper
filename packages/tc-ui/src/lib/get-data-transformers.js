@@ -30,7 +30,15 @@ const getDataTransformers = assignComponent => {
 					return;
 				}
 				try {
-					data[fieldName] = parser(formData[fieldName]);
+					if (fieldProps.isRelationship) {
+						data[fieldName] = parser(
+							formData[fieldName],
+							fieldProps.properties,
+							assignComponent,
+						);
+					} else {
+						data[fieldName] = parser(formData[fieldName]);
+					}
 				} catch (e) {
 					console.log(e);
 					throw e;

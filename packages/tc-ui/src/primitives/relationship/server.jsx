@@ -24,18 +24,34 @@ module.exports = {
 			{...props}
 		/>
 	),
-	parser: value => {
-		if (!value) {
-			return null;
-		}
-		value = JSON.parse(value);
+	parser: (relValues, relProperties, assignComponent) => {
+		relValues = JSON.parse(relValues);
 		// TODO use hasValue
-		if (!value) {
+		if (!relValues) {
 			return null;
 		}
-		return Array.isArray(value)
-			? value.map(({ code }) => ({ code }))
-			: { code: value.code };
+		const isArray = Array.isArray(relValues);
+		const parsedRelValues = isArray
+			? relValues.map(({ code }) => ({ code }))
+			: { code: relValues.code };
+
+		if (assignComponent && relProperties) {
+			Object.entries(relProperties).forEach(([fieldName, fieldProps]) => {
+				const { parser } = assignComponent(fieldProps);
+				if (isArray) {
+					relValues.forEach((value, index) =>
+						Object.assign(parsedRelValues[index], {
+							[fieldName]: parser(value[fieldName]),
+						}),
+					);
+				} else {
+					Object.assign(parsedRelValues, {
+						[fieldName]: parser(relValues[fieldName]),
+					});
+				}
+			});
+		}
+		return parsedRelValues;
 	},
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
