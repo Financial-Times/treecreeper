@@ -17,13 +17,21 @@ class Relationship extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState(prevState => {
-			const { isMounted } = prevState;
-			const oldState = isMounted;
-			return {
-				isMounted: !oldState,
-			};
-		});
+		this.setState(
+			prevState => {
+				const { isMounted } = prevState;
+				const oldState = isMounted;
+				return {
+					isMounted: !oldState,
+				};
+			},
+			() => {
+				if (window && window.Origami) {
+					// needed to init tooltip used for Annotate button
+					window.Origami['o-tooltip'].init();
+				}
+			},
+		);
 	}
 
 	showRichRelationshipEditor(event) {
