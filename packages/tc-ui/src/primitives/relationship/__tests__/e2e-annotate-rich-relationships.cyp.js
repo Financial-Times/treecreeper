@@ -17,7 +17,7 @@ const {
 	setPropsOnCuriousChildRel,
 	populateCuriousChildRelationshipFields,
 	populateCuriousParentRelationshipFields,
-} = require('../../../test-helpers');
+} = require('../../../test-helpers/cypress');
 
 describe('End-to-end - annotate rich relationship properties', () => {
 	beforeEach(() => {
