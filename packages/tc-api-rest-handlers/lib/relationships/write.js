@@ -55,27 +55,33 @@ const addPropsToQueries = (
 	relationshipParameters,
 	code,
 ) => {
-	// value: { code: 'node code', someString: 'some string'...}
+	// biz-ops-admin to biz_ops_admin
+	const relPropsParameterKey = code.split('-').join('_');
+	const relationshipProps = { code };
 	Object.entries(value).forEach(([propertyName, propertyValue]) => {
 		// If no node matches the CASE expression, the expression returns a null.
 		// and no action will be taken
 		if (propertyName !== 'code') {
-			// biz-ops-admin to biz_ops_admin
-			// we need to prefix the propertyName with code to avoid parameter mismatch in case of
-			// many relationships
-			code = code.split('-').join('_');
+			// make sure the parameter referenced in the query exists on the
+			// globalParameters object passed to the db driver
 			relationshipPropQueries.push(`
-				SET (CASE
-				WHEN related.code = '${value.code}'
-				THEN relationship END).${propertyName} = {${code}_${propertyName}}
+			WITH node, related, relationship
+			UNWIND $${relPropsParameterKey} AS relationshipProp
+			SET (CASE
+			WHEN related.code = relationshipProp.code
+			THEN relationship END).${propertyName} = relationshipProp.${propertyName}
 				`);
+
 			relationshipPropQueries.push(
 				createRelMetaQueryForUpdate(value.code),
 			);
-			Object.assign(relationshipParameters, {
-				[`${code}_${propertyName}`]: propertyValue,
+			Object.assign(relationshipProps, {
+				[propertyName]: propertyValue,
 			});
 		}
+	});
+	Object.assign(relationshipParameters, {
+		[relPropsParameterKey]: relationshipProps,
 	});
 };
 
@@ -107,8 +113,6 @@ const prepareToWriteRelationships = (
 			);
 		});
 
-		// make sure the parameter referenced in the query exists on the
-		// globalParameters object passed to the db driver
 		Object.assign(relationshipParameters, {
 			[key]: retrievedCodes,
 		});
