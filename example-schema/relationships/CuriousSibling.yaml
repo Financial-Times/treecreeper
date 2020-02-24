@@ -1,0 +1,13 @@
+name: CuriousSibling
+from:
+  type: MainType
+  hasMany: true
+to:
+  type: MainType
+  hasMany: true
+relationship: HAS_YOUNGER_ANNOTATED_SIBLING
+properties:
+  someString:
+    label: Label for some string
+    description: Description for some string.
+    type: Word

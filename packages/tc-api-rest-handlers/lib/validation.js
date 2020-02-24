@@ -3,6 +3,7 @@ const { stripIndents } = require('common-tags');
 const {
 	validators,
 	TreecreeperUserError,
+	getType,
 } = require('@financial-times/tc-schema-sdk');
 
 const sdkValidators = Object.entries(validators).reduce(
@@ -27,18 +28,30 @@ const validateParams = ({ type, code }) => {
 	module.exports.validateCode(type, code);
 };
 
-const validateBody = ({ type, code, body: newContent }) => {
+const validateBody = ({
+	type,
+	code,
+	metadata: { clientId } = {},
+	body: newContent,
+}) => {
 	if (newContent.code && newContent.code !== code) {
 		throw httpErrors(
 			400,
 			`Conflicting code property \`${newContent.code}\` in payload for ${type} ${code}`,
 		);
 	}
-
+	const { properties } = getType(type);
 	Object.entries(newContent).forEach(([propName, value]) => {
 		const realPropName = propName.replace(/^!/, '');
 		module.exports.validatePropertyName(realPropName);
 		module.exports.validateProperty(type, realPropName, value);
+		const globalLock = properties[realPropName].lockedBy;
+		if (globalLock && (!clientId || !globalLock.includes(clientId))) {
+			throw httpErrors(
+				400,
+				`Cannot write ${realPropName} on ${type} ${code} - property can only be edited by client ${globalLock}`,
+			);
+		}
 	});
 };
 
