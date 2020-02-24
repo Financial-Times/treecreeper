@@ -36,7 +36,7 @@ const RelationshipProperties = props => {
 			};
 
 			return viewModel.propertyName && viewModel.label ? (
-					<EditComponent key={index} {...viewModel} />
+				<EditComponent key={index} {...viewModel} />
 			) : null;
 		});
 };

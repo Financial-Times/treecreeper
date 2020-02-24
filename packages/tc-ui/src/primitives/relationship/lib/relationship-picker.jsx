@@ -138,10 +138,7 @@ class RelationshipPicker extends React.Component {
 			const oldState = selectedRelationships.map(relationship => {
 				if (relationship.code === parentCode) {
 					// for multiple choice values
-					if (
-						type === 'checkbox' &&
-						relationship[propertyName].length
-					) {
+					if (type === 'checkbox') {
 						const selectedValues = new Set(
 							relationship[propertyName],
 						);
@@ -250,7 +247,6 @@ class RelationshipPicker extends React.Component {
 			isFull,
 			isExpanded,
 		} = this.state;
-		// console.log('here selected', selectedRelationships);
 		return (
 			<div
 				data-props={JSON.stringify(props)}

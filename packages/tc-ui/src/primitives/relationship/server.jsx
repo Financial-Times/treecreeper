@@ -25,6 +25,9 @@ module.exports = {
 		/>
 	),
 	parser: (relValues, relProperties, assignComponent) => {
+		if (!relValues) {
+			return null;
+		}
 		relValues = JSON.parse(relValues);
 		// TODO use hasValue
 		if (!relValues) {
@@ -41,12 +44,16 @@ module.exports = {
 				if (isArray) {
 					relValues.forEach((value, index) =>
 						Object.assign(parsedRelValues[index], {
-							[fieldName]: parser(value[fieldName]),
+							[fieldName]: value[fieldName]
+								? parser(value[fieldName])
+								: null,
 						}),
 					);
 				} else {
 					Object.assign(parsedRelValues, {
-						[fieldName]: parser(relValues[fieldName]),
+						[fieldName]: relValues[fieldName]
+							? parser(relValues[fieldName])
+							: null,
 					});
 				}
 			});
