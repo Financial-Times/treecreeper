@@ -106,7 +106,6 @@
 	display: inline;
 }
 
-
 .biz-ops-relationship-annotate {
 	background: var(--o-colors-black-10);
 	padding: 0.5em;
@@ -114,7 +113,7 @@
 }
 
 .relationship-remove-button,
-.relationship-annotate-button  {
+.relationship-annotate-button {
 	min-width: 60px;
 	width: 70px;
 }

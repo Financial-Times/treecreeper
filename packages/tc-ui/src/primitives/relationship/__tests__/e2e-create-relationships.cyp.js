@@ -47,10 +47,9 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span:first-of-type span').should(
-				'have.text',
-				'e2e-demo-first-child',
-			);
+			cy.get(
+				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
+			).should('have.text', 'e2e-demo-first-child');
 			cy.get('#favouriteChild-picker')
 				.should('be.disabled')
 				.should('have.attr', 'placeholder', placeholderText);
@@ -72,10 +71,9 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span:first-of-type span').should(
-				'have.text',
-				'e2e-demo-first-child',
-			);
+			cy.get(
+				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
+			).should('have.text', 'e2e-demo-first-child');
 			cy.get('#favouriteChild-picker')
 				.should('be.disabled')
 				.should('have.attr', 'placeholder', placeholderText);
@@ -92,10 +90,9 @@ describe('End-to-end - relationship creation', () => {
 			visitEditPage();
 
 			pickFavouriteChild();
-			cy.get('#ul-favouriteChild span:first-of-type span').should(
-				'have.text',
-				'e2e-demo-first-child',
-			);
+			cy.get(
+				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
+			).should('have.text', 'e2e-demo-first-child');
 			cy.get('#favouriteChild-picker')
 				.should('be.disabled')
 				.should('have.attr', 'placeholder', placeholderText);
@@ -137,10 +134,9 @@ describe('End-to-end - relationship creation', () => {
 
 		it('does not disable selection on page load if there is a selection already', () => {
 			// e2e-demo-first-child is already picked during populateMinimumViableFields();
-			cy.get('#ul-children span:first-of-type span').should(
-				'have.text',
-				'e2e-demo-first-child',
-			);
+			cy.get(
+				'#ul-children li:first-of-type span.o-layout-typography',
+			).should('have.text', 'e2e-demo-first-child');
 			cy.get('#children-picker')
 				.should('not.be.disabled')
 				.should('have.attr', 'placeholder', '');
@@ -180,11 +176,11 @@ describe('End-to-end - relationship creation', () => {
 					cy.wrap(children).should('have.length', 2);
 					cy.wrap(children)
 						.eq(0)
-						.find('span:first-of-type span')
+						.find('span.o-layout-typography')
 						.should('have.text', 'e2e-demo-first-child');
 					cy.wrap(children)
 						.eq(1)
-						.find('span:first-of-type span')
+						.find('span.o-layout-typography')
 						.should('have.text', 'e2e-demo-second-child');
 				});
 

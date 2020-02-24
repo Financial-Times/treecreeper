@@ -158,6 +158,45 @@ const setPropsOnCuriousParentRel = async codeLabel => {
 		}
 	});
 };
+
+const populateCuriousChildRelationshipFields = () => {
+	cy.get('#ul-curiousChild').then(curiousChild => {
+		cy.wrap(curiousChild)
+			.find('#id-someString')
+			.type(someString);
+		cy.wrap(curiousChild)
+			.find('#id-anotherString')
+			.type(anotherString);
+		cy.wrap(curiousChild)
+			.find('#id-someInteger')
+			.type(2023);
+		cy.wrap(curiousChild)
+			.find('#id-someEnum')
+			.select(someEnum);
+		cy.wrap(curiousChild)
+			.find('#checkbox-someMultipleChoice-First')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#checkbox-someMultipleChoice-Third')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#radio-someBoolean-Yes')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#id-someFloat')
+			.type(20.23);
+	});
+};
+
+const populateCuriousParentRelationshipFields = parent => {
+	cy.wrap(parent)
+		.find('#id-someString')
+		.type(someString);
+	cy.wrap(parent)
+		.find('#id-anotherString')
+		.type(anotherString);
+};
+
 const resetDb = async () => {
 	await dropFixtures(code);
 };
@@ -178,4 +217,6 @@ module.exports = {
 	resetDb,
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
+	populateCuriousChildRelationshipFields,
+	populateCuriousParentRelationshipFields,
 };
