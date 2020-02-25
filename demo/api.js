@@ -23,21 +23,17 @@ app.use(
 getApp({
 	treecreeperPath: '/api',
 	app,
-	graphqlMethods: ['post', 'get'] ,
+	graphqlMethods: ['post', 'get'],
 	schemaOptions: {
 		updateMode: 'poll',
-		schemaBaseUrl: process.env.SCHEMA_BASE_URL
-	}
-
-
-}).then(
-	() => {
-		app.listen(PORT, () => {
-			// eslint-disable-next-line no-console
-			console.log(`Listening on ${PORT}`);
-		});
+		schemaBaseUrl: process.env.SCHEMA_BASE_URL,
 	},
-);
+}).then(() => {
+	app.listen(PORT, () => {
+		// eslint-disable-next-line no-console
+		console.log(`Listening on ${PORT}`);
+	});
+});
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const {
@@ -47,6 +43,8 @@ const {
 	anotherController,
 } = require('./cms');
 
+const sosTable = require('./controllers/sos')
+app.get('/sos', sosTable)
 const parseBody = bodyParser.urlencoded({ limit: '8mb', extended: true });
 app.get('/lalala', anotherController);
 app.get('/:type/:code/edit', editController);
@@ -55,3 +53,4 @@ app.get('/:type/create', editController);
 app.post('/:type/create', parseBody, editController);
 app.post('/:type/:code/delete', deleteController);
 app.get('/:type/:code', viewController);
+
