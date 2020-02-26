@@ -3,18 +3,9 @@ const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { applyMiddleware } = require('graphql-middleware');
 const { parse } = require('graphql');
 const { getGraphqlDefs, getTypes } = require('@financial-times/tc-schema-sdk');
-const { middleware: requestTracer } = require('./request-tracer');
 
-const resolveDocumentProperty = async ({ code }, args, context, info) => {
-	if (!code) {
-		throw new Error(
-			'Must include code in body of query that requests any Document properties',
-		);
-	}
-	const key = `${info.parentType.name}/${code}`;
-	const record = await context.documentStoreDataLoader.load(key);
-	return record[info.fieldName];
-};
+const { middleware: requestTracer } = require('./request-tracer');
+const { resolveDocumentProperty, resolveTCO } = require('./custom-resolvers');
 
 const getDocumentResolvers = () => {
 	const typeResolvers = {};
@@ -35,9 +26,45 @@ const getDocumentResolvers = () => {
 };
 
 const getAugmentedSchema = ({ documentStore }) => {
+	const resolvers = documentStore ? getDocumentResolvers() : {};
 	const typeDefs = getGraphqlDefs();
+
+	typeDefs.push(
+		`type AWSCostBreakdown {
+			cost: Float
+			formatted: String
+		}`,
+		`type HerokuCostBreakdown {
+			cost: Float
+			formatted: String
+		}`,
+		`type Total {
+			cost: Float
+			formatted: String
+		}`,
+
+		`type HerokuCostBreakdown {
+			cost: Float
+			formatted: String
+		}`,
+		`type CostBreakdown {
+			aws: AWSCostBreakdown
+			heroku: HerokuCostBreakdown
+			totalCost: Total
+		}`,
+		`
+	extend type System {
+		tco: CostBreakdown @neo4j_ignore
+   }`,
+	);
+
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
+
+	// add custom resolver for getting TCO(Total Cost of Ownership) data
+	resolvers.System = {
+		tco: resolveTCO,
+	};
 
 	const schema = makeAugmentedSchema({
 		typeDefs: typeDefs.join('\n'),
@@ -48,8 +75,12 @@ const getAugmentedSchema = ({ documentStore }) => {
 				});
 			},
 		},
-		resolvers: documentStore ? getDocumentResolvers() : {},
-		config: { query: true, mutation: false, debug: true },
+		resolvers,
+		config: {
+			query: true,
+			mutation: false,
+			debug: true,
+		},
 	});
 
 	return applyMiddleware(schema, requestTracer);
