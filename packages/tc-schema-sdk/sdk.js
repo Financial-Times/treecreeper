@@ -17,8 +17,20 @@ class SDK {
 	constructor(options = {}) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
+		this.updater = new SchemaUpdater({
+			options: options.init !== false ? options : undefined,
+			rawData: this.rawData,
+			cache: this.cache,
+			readYaml: this.readYaml,
+		});
+
 		this.TreecreeperUserError = TreecreeperUserError;
 		this.subscribers = [];
+
+		this.updater.on('change', data => {
+			console.log('change');
+			this.subscribers.forEach(handler => handler(data));
+		});
 
 		this.getEnums = this.createEnrichedAccessor(enums);
 		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);
@@ -42,6 +54,7 @@ class SDK {
 		});
 
 		if (options.init !== false) {
+			console.log('init in configure');
 			this.init(options);
 		}
 	}
@@ -54,18 +67,7 @@ class SDK {
 	}
 
 	async init(options) {
-		const schemaUpdater = new SchemaUpdater(
-			options,
-			this.rawData,
-			this.cache,
-			this.readYaml,
-		);
-
-		// hook up schema updater to this.cache then
-		schemaUpdater.on('change', data => {
-			this.subscribers.forEach(handler => handler(data));
-		});
-		this.updater = schemaUpdater;
+		this.updater.configure(options);
 	}
 
 	async ready() {

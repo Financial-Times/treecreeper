@@ -2,13 +2,15 @@ const EventEmitter = require('events');
 const fetch = require('node-fetch');
 
 class SchemaUpdater {
-	constructor(options, rawData, cache, readYaml) {
+	constructor({ options, rawData, cache, readYaml }) {
 		this.eventEmitter = new EventEmitter();
 		this.lastRefreshDate = 0;
 		this.rawData = rawData;
 		this.cache = cache;
 		this.readYaml = readYaml;
-		this.configure(options);
+		if (options) {
+			this.configure(options);
+		}
 	}
 
 	configure({

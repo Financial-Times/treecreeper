@@ -52,14 +52,13 @@ const getApp = async (options = {}) => {
 	router.use(bodyParsers);
 	router.use(restPath, restMiddlewares, getRestApi(options));
 	router.use(errorToErrors);
-
+	schema.init(schemaOptions);
 	const {
 		isSchemaUpdating,
 		graphqlHandler,
 		listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
 	} = getGraphqlApi(options);
 
-	schema.init();
 	updateGraphqlApiOnSchemaChange();
 	updateConstraintsOnSchemaChange();
 
@@ -83,14 +82,12 @@ const getApp = async (options = {}) => {
 		availableEvents,
 	};
 
-	schema.init(schemaOptions);
 	updateGraphqlApiOnSchemaChange();
 	// avoids this running in every single spec file
 	// instead we explictly set up the constraints once before we start the test suite
 	if (!process.env.TREECREEPER_TEST) {
 		updateConstraintsOnSchemaChange();
 	}
-
 	await schema.ready();
 
 	return app;
