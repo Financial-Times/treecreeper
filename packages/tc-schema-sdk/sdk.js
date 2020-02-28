@@ -25,12 +25,6 @@ class SDK {
 		});
 
 		this.TreecreeperUserError = TreecreeperUserError;
-		this.subscribers = [];
-
-		this.updater.on('change', data => {
-			this.subscribers.forEach(handler => handler(data));
-		});
-
 		this.getEnums = this.createEnrichedAccessor(enums);
 		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);
 		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
@@ -78,7 +72,7 @@ class SDK {
 		if (this.rawData.isHydrated) {
 			handler(event);
 		}
-		this.subscribers.push(handler);
+		this.updater.on('change', handler);
 	}
 }
 
