@@ -1,7 +1,9 @@
 /* global it, describe, expect */
 const { SDK } = require('@financial-times/tc-schema-sdk');
 
-const primitiveTypes = new SDK().rawData.getPrimitiveTypes();
+const sdk = new SDK();
+sdk.init();
+const primitiveTypes = sdk.rawData.getPrimitiveTypes();
 
 describe('primitive types', () => {
 	Object.entries(primitiveTypes).forEach(([name, { component, graphql }]) => {

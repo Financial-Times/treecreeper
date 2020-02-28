@@ -14,11 +14,11 @@ const { SchemaUpdater } = require('./lib/updater');
 const utils = require('./lib/utils');
 
 class SDK {
-	constructor(options = {}) {
+	constructor(options) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
 		this.updater = new SchemaUpdater({
-			options: options.init !== false ? options : undefined,
+			options,
 			rawData: this.rawData,
 			cache: this.cache,
 			readYaml: this.readYaml,
@@ -51,10 +51,6 @@ class SDK {
 		Object.entries(utils).forEach(([name, method]) => {
 			this[name] = method.bind(this);
 		});
-
-		if (options.init !== false) {
-			this.init(options);
-		}
 	}
 
 	createEnrichedAccessor({ accessor, cacheKeyGenerator }) {
@@ -64,8 +60,8 @@ class SDK {
 		);
 	}
 
-	async init(options) {
-		this.updater.configure(options);
+	init(options) {
+		return this.updater.configure(options);
 	}
 
 	async ready() {
