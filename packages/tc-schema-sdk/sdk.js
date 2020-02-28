@@ -28,7 +28,6 @@ class SDK {
 		this.subscribers = [];
 
 		this.updater.on('change', data => {
-			console.log('change');
 			this.subscribers.forEach(handler => handler(data));
 		});
 
@@ -54,7 +53,6 @@ class SDK {
 		});
 
 		if (options.init !== false) {
-			console.log('init in configure');
 			this.init(options);
 		}
 	}
