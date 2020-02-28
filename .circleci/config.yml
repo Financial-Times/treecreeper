@@ -187,7 +187,7 @@ workflows:
             - test
             - verify
             - end-to-end-test
-            # - ft-snyk-orb/scan-js-packages
+            - ft-snyk-orb/scan-js-packages
           filters:
             <<: *only_version_tags
             branches:
