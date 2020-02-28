@@ -1,0 +1,429 @@
+https://heimdall.in.ft.com/api/prometheus/v1/query?query=team_servicetier_lifecyclestage%3Ahealth_check_ok%3Agroupleft%7Bsystem%3D%22biz-ops-runbooks%22%7D
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "fastly-reachable",
+          "check_name": "fastly is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "fastly-reachable",
+          "check_name": "fastly is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "lambda-eu-reachable",
+          "check_name": "lambda in eu is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "lambda-eu-reachable",
+          "check_name": "lambda in eu is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "lambda-us-reachable",
+          "check_name": "lambda in us is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "lambda-us-reachable",
+          "check_name": "lambda in us is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-indexing",
+          "check_name": "s3 in eu lists all expected runbooks on its index page",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "2",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-indexing",
+          "check_name": "s3 in eu lists all expected runbooks on its index page",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "2",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-reachable",
+          "check_name": "s3 in eu is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-reachable",
+          "check_name": "s3 in eu is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-updates",
+          "check_name": "s3 in eu has updated a runbook within the last 20 minutes",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "3",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-eu-updates",
+          "check_name": "s3 in eu has updated a runbook within the last 20 minutes",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "3",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-indexing",
+          "check_name": "s3 in us lists all expected runbooks on its index page",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "2",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-indexing",
+          "check_name": "s3 in us lists all expected runbooks on its index page",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "2",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-reachable",
+          "check_name": "s3 in us is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-reachable",
+          "check_name": "s3 in us is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-updates",
+          "check_name": "s3 in us has updated a runbook within the last 20 minutes",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "3",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3-us-updates",
+          "check_name": "s3 in us has updated a runbook within the last 20 minutes",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "3",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3o-reachable",
+          "check_name": "s3o is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks-test.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "no",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "team_servicetier_lifecyclestage:health_check_ok:groupleft",
+          "acknowledged": "false",
+          "check_id": "s3o-reachable",
+          "check_name": "s3o is reachable",
+          "exported_system": "biz-ops-runbooks",
+          "instance": "https://runbooks.in.ft.com/__health",
+          "job": "health_check",
+          "lifecycle_stage": "Production",
+          "observe": "yes",
+          "service_tier": "Platinum",
+          "severity": "1",
+          "system": "biz-ops-runbooks",
+          "team": "reliability-engineering"
+        },
+        "value": [
+          1582798979.545,
+          "1"
+        ]
+      }
+    ]
+  }
+}

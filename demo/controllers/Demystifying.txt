@@ -1,0 +1,7 @@
+1. Design the additions to the schema
+	- what is lists, what is objects
+	- GraphQL model doesn't have to be structured the same as what comes from the API - can preprocess
+	- What types/extensions do we need
+	- If you find you want to connect the data to lots of different records in Biz Ops, maybe syncing the data into the Biz Ops database is better
+
+

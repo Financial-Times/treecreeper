@@ -1,0 +1,5 @@
+2. Write a resolver
+	- starting from a record, make the API call(s) you need to retrieve data
+	- massage the data so it looks like the type definition
+	- GraphQL has default resolvers, so if you pass in an object/nested objects, as long as these conform to the type definitions, it will just pluck properties out
+
