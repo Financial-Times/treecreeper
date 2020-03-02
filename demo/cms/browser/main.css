@@ -136,7 +136,7 @@
 }
 
 .o-labels--green {
-	background: var(--o-colors-wasabi);
+	background: var(--o-colors-jade);
 }
 
 [data-page-type='api-explorer'] .o-layout__main {

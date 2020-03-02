@@ -11,9 +11,7 @@ const EditButton = props => (
 		href={`/${props.type}/${encodeURIComponent(props.code)}/edit?${
 			props.querystring
 		}`}
-		className={getButtonClasses(
-			'o-buttons--primary o-buttons--mono biz-ops-cta--link-style-override',
-		)}
+		className={getButtonClasses('o-buttons--primary o-buttons--mono')}
 	>
 		Edit
 	</a>
@@ -42,7 +40,7 @@ const CancelButton = props => {
 			data-button-type="cancel"
 			href={redirectLocation}
 			className={getButtonClasses(
-				'o-buttons--mono biz-ops-cta--link-style-override',
+				'o-buttons--secondary o-buttons--mono biz-ops-cta--link-style-override',
 			)}
 		>
 			Cancel
@@ -60,7 +58,7 @@ const DeleteButton = props =>
 			<button
 				data-button-type="delete"
 				className={getButtonClasses(
-					'o-buttons--mono biz-ops-cta--delete',
+					'o-buttons--mono biz-ops-cta--link-style-override biz-ops-cta--delete',
 				)}
 				type="submit"
 			>

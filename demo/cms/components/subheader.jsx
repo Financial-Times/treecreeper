@@ -16,7 +16,7 @@ const Subheader = ({ type, code, data }) => (
 					View runbook
 				</a>{' '}
 				<a
-					className="o-buttons o-layout__unstyled-element"
+					className="o-buttons o-buttons--secondary o-layout__unstyled-element"
 					href={`https://heimdall.in.ft.com/system?code=${encodeURIComponent(
 						code,
 					)}`}
@@ -27,7 +27,7 @@ const Subheader = ({ type, code, data }) => (
 					View Heimdall dashboard
 				</a>{' '}
 				<a
-					className="o-buttons o-layout__unstyled-element"
+					className="o-buttons o-buttons--secondary o-layout__unstyled-element"
 					href={`https://sos.in.ft.com/System/${encodeURIComponent(
 						code,
 					)}`}
@@ -39,7 +39,7 @@ const Subheader = ({ type, code, data }) => (
 			</>
 		) : null}
 		<a
-			className="o-buttons o-layout__unstyled-element biz-ops-cta--visualise"
+			className="o-buttons o-buttons--secondary o-layout__unstyled-element biz-ops-cta--visualise"
 			href={`/${type}/${encodeURIComponent(code)}/visualise`}
 			target="_blank"
 			rel="noopener noreferrer"
