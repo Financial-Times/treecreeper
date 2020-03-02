@@ -20,7 +20,7 @@ describe('relationship interfaces', () => {
 			const wrapper = shallow(<EditComponent {...props} />);
 			expect(
 				wrapper.is(
-					'label.o-forms-field[data-biz-ops-type="relationship"]',
+					'label.o-forms-field[data-treecreeper-component="relationship"]',
 				),
 			).toBe(true);
 			expect(wrapper.children().length).toEqual(2);

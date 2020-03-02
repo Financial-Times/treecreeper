@@ -55,58 +55,58 @@
 	position: static !important;
 }
 
-.biz-ops-relationship-props-list {
+.treecreeper-relationship-props-list {
 	margin-top: 0.5em;
 }
 
-.biz-ops-relationship-props-list span {
+.treecreeper-relationship-props-list span {
 	display: flex;
 	flex-wrap: wrap;
 	margin: 0;
 }
 
-.biz-ops-relationship-props-list dt,
-.biz-ops-relationship-props-list dd {
+.treecreeper-relationship-props-list dt,
+.treecreeper-relationship-props-list dd {
 	padding-left: 0.5em;
 	margin-bottom: 0.3em;
 }
 
-.biz-ops-relationship-props-list dd p {
+.treecreeper-relationship-props-list dd p {
 	margin-bottom: 0 !important;
 }
-.biz-ops-relationship-props-list dt {
+.treecreeper-relationship-props-list dt {
 	display: flex;
 }
 
-.biz-ops-relationship-props-list dt:after {
+.treecreeper-relationship-props-list dt:after {
 	content: ':';
 }
 
-.biz-ops-relationship-props-list .biz-ops-help-icon {
+.treecreeper-relationship-props-list .treecreeper-help-icon {
 	display: none;
 }
 
-.biz-ops-selected-relationship {
+.treecreeper-selected-relationship {
 	margin-top: 0;
 	display: grid;
 	grid-auto-flow: row;
 	grid-row-gap: 0.5em;
 }
 
-.biz-ops-selected-relationship > span:first-of-type {
+.treecreeper-selected-relationship > span:first-of-type {
 	display: flex;
 	justify-content: space-between;
 }
 
-.biz-ops-selected-relationship .o-layout-typography {
+.treecreeper-selected-relationship .o-layout-typography {
 	flex-basis: 60%;
 }
 
-.biz-ops-selected-relationship div {
+.treecreeper-selected-relationship div {
 	display: inline;
 }
 
-.biz-ops-relationship-annotate {
+.treecreeper-relationship-annotate {
 	background: var(--o-colors-black-10);
 	padding: 0.5em;
 	margin-left: 1em;

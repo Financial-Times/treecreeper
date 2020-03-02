@@ -78,11 +78,11 @@ const preventIncompleteSubmission = () => {
 			.addEventListener('submit', ev => {
 				const essentialFields = [
 					...essentialFieldsFieldset.querySelectorAll(
-						'[data-biz-ops-type]',
+						'[data-treecreeper-component]',
 					),
 				];
 				const unfilledFields = essentialFields.filter(field => {
-					const type = field.dataset.bizOpsType;
+					const type = field.dataset.treecreeperComponent;
 					const checker =
 						fieldValueCheckers[type] || fieldValueCheckers.default;
 					return !checker(field);

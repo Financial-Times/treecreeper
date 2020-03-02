@@ -41,7 +41,7 @@ const OneRelationship = props => {
 					more info
 				</button>
 				<div className="o-expander__content">
-					<dl className="biz-ops-relationship-props-list">
+					<dl className="treecreeper-relationship-props-list">
 						{Object.entries(validValues).map(
 							([name, item], index) => {
 								const viewModel = {
@@ -91,7 +91,7 @@ const ViewRelationship = props => {
 		return datum.isActive === false;
 	};
 	return Array.isArray(value) ? (
-		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
+		<ul id={id} className="o-layout__unstyled-element treecreeper-links">
 			{sortBy(value, [`${type}.code`]).map((item, index) => {
 				return (
 					<li

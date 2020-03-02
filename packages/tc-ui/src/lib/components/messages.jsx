@@ -30,7 +30,7 @@ const Message = ({
 const FormError = props =>
 	props.error ? (
 		<div
-			className="o-message o-message--inner o-message--alert o-message--error biz-ops-alert"
+			className="o-message o-message--inner o-message--alert o-message--error treecreeper-alert"
 			data-o-component="o-message"
 		>
 			<div className="o-message__container">

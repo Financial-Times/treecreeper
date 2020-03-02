@@ -59,16 +59,16 @@ describe('End-to-end - display relationship properties', () => {
 					)
 					.should('be.visible');
 				cy.wrap(parent)
-					.find('.biz-ops-relationship-props-list #someEnum')
+					.find('.treecreeper-relationship-props-list #someEnum')
 					.should('have.text', 'First');
 				cy.wrap(parent)
 					.find(
-						'.biz-ops-relationship-props-list #someMultipleChoice span:first-of-type',
+						'.treecreeper-relationship-props-list #someMultipleChoice span:first-of-type',
 					)
 					.should('have.text', 'First');
 				cy.wrap(parent)
 					.find(
-						'.biz-ops-relationship-props-list #someMultipleChoice span:last-of-type',
+						'.treecreeper-relationship-props-list #someMultipleChoice span:last-of-type',
 					)
 					.should('have.text', 'Third');
 			});
@@ -86,7 +86,7 @@ describe('End-to-end - display relationship properties', () => {
 					)
 					.should('not.be.visible');
 				cy.wrap(child)
-					.find('.biz-ops-relationship-props-list #someEnum')
+					.find('.treecreeper-relationship-props-list #someEnum')
 					.should('not.be.visible');
 			});
 	});
@@ -106,7 +106,7 @@ describe('End-to-end - display relationship properties', () => {
 			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		cy.get('#curiousChild')
 			.parent()
-			.get('.biz-ops-relationship-props-list')
+			.get('.treecreeper-relationship-props-list')
 			.then(list => {
 				cy.wrap(list)
 					.find('#someString')
