@@ -16,7 +16,8 @@ const {
 	setPropsOnCuriousParentRel,
 	setPropsOnCuriousChildRel,
 	populateCuriousChildRelationshipFields,
-	populateCuriousParentRelationshipFields,
+	populateCuriousParent1RelationshipFields,
+	populateCuriousParent2RelationshipFields,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - annotate rich relationship properties', () => {
@@ -211,7 +212,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 					.should('have.text', '20.23');
 			});
 	});
-	it('can save annotations for one-to-many relationship', () => {
+	it.only('can save annotations for one-to-many relationship', () => {
 		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
@@ -225,7 +226,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 				cy.wrap(parent)
 					.find('button.relationship-annotate-button')
 					.click({ force: true });
-				populateCuriousParentRelationshipFields(parent);
+				populateCuriousParent1RelationshipFields(parent);
 			});
 		cy.get('#ul-curiousParent')
 			.children()
@@ -234,7 +235,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 				cy.wrap(parent)
 					.find('button.relationship-annotate-button')
 					.click({ force: true });
-				populateCuriousParentRelationshipFields(parent);
+				populateCuriousParent2RelationshipFields(parent);
 			});
 		save();
 
@@ -266,10 +267,10 @@ describe('End-to-end - annotate rich relationship properties', () => {
 					.click({ force: true });
 				cy.wrap(child)
 					.find('#someString')
-					.should('have.text', someString);
+					.should('have.text', 'Parent two someString');
 				cy.wrap(child)
 					.find('#anotherString')
-					.should('have.text', anotherString);
+					.should('have.text', 'Parent two anotherString');
 			});
 	});
 });

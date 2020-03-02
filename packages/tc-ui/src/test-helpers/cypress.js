@@ -192,13 +192,22 @@ const populateCuriousChildRelationshipFields = () => {
 	});
 };
 
-const populateCuriousParentRelationshipFields = parent => {
+const populateCuriousParent1RelationshipFields = parent => {
 	cy.wrap(parent)
 		.find('#id-someString')
 		.type(someString);
 	cy.wrap(parent)
 		.find('#id-anotherString')
 		.type(anotherString);
+};
+
+const populateCuriousParent2RelationshipFields = parent => {
+	cy.wrap(parent)
+		.find('#id-someString')
+		.type('Parent two someString');
+	cy.wrap(parent)
+		.find('#id-anotherString')
+		.type('Parent two anotherString');
 };
 
 const setLockedRecord = codeLabel => {
@@ -234,6 +243,7 @@ module.exports = {
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
 	populateCuriousChildRelationshipFields,
-	populateCuriousParentRelationshipFields,
+	populateCuriousParent1RelationshipFields,
+	populateCuriousParent2RelationshipFields,
 	setLockedRecord,
 };

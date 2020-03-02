@@ -864,6 +864,151 @@ describe('rest PATCH relationship create', () => {
 				);
 		});
 
+		it('creates record with relationships which have same properties with different values (two parents)', async () => {
+			const parentOneRelationshipProps = {
+				code: parentCode,
+				someString: 'parent one some string',
+				anotherString: 'Parent one another string',
+			};
+			const parentTwoRelationshipProps = {
+				code: parentCode2,
+				someString,
+				anotherString,
+			};
+			await createMainNode();
+			await createNodes(
+				['ParentType', parentCode],
+				['ParentType', parentCode2],
+			);
+
+			const { status, body } = await basicHandler(
+				{
+					curiousParent: [
+						parentOneRelationshipProps,
+						parentTwoRelationshipProps,
+					],
+				},
+				queries,
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				curiousParent: [
+					{ ...parentOneRelationshipProps, ...meta.create },
+					{ ...parentTwoRelationshipProps, ...meta.create },
+				],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.update)
+				.hasRels(2)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString: parentOneRelationshipProps.someString,
+							anotherString:
+								parentOneRelationshipProps.anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode, ...meta.default },
+					},
+				)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString,
+							anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode2, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationships which have same properties with different values (child and parent)', async () => {
+			const parentRelProps = {
+				code: parentCode,
+				someString: 'parent some string',
+				anotherString: 'Parent another string',
+			};
+			const childRelProps = {
+				code: childCode,
+				someString,
+				anotherString,
+				someMultipleChoice,
+				someEnum,
+				someBoolean,
+			};
+
+			await createMainNode();
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+			const { status, body } = await basicHandler(
+				{
+					curiousChild: [childRelProps],
+					curiousParent: [parentRelProps],
+				},
+				queries,
+			);
+
+			expect(status).toBe(200);
+			// curiousChild's hasMany value is false, curiousParent's hasMany value is true
+			// Therefore in body, curiousParent is in an Array and curiousChild is not.
+			expect(body).toMatchObject({
+				curiousChild: { ...childRelProps, ...meta.create },
+				curiousParent: [{ ...parentRelProps, ...meta.create }],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.update)
+				.hasRels(2)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someString,
+							anotherString,
+							someMultipleChoice,
+							someEnum,
+							someBoolean,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: { code: childCode, ...meta.default },
+					},
+				)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString: parentRelProps.someString,
+							anotherString: parentRelProps.anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode, ...meta.default },
+					},
+				);
+		});
+
 		it('creates record with relationship which has a multiple choice property', async () => {
 			await createMainNode();
 			await createNodes(['ChildType', childCode]);
