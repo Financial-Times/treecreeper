@@ -14,9 +14,11 @@ In many ways, this is the beating heart of Treecreeper. It consumes the schema f
 The package exports a singleton instance, and once initialised, `@financial-times/biz-ops-schema` can be required multiple times in the application. It should be initialised _once and once only per application_. It also exports a reference to the underlying `SDK` class, but this is only exposed for use by other packages' integration tests.
 
 ### Initialisation
+
 This is a little odd (and should be improved in future)
-- When using local, static data (`schemaDirectory` or `schemaData` options below), the `init()` method populates the sdk with data immediately and its methods can be used to access the data immediately
-- When using remote data (`schemaBaseUrl`), no data is populated, and `schema.ready()` must be awaited before using the sdk's synchronous methods.
+
+-   When using local, static data (`schemaDirectory` or `schemaData` options below), the `init()` method populates the sdk with data immediately and its methods can be used to access the data immediately
+-   When using remote data (`schemaBaseUrl`), no data is populated, and `schema.ready()` must be awaited before using the sdk's synchronous methods.
 
 Be aware of the idiosyncrasy above if oyu ever come across errors complaining that no data is available.
 
