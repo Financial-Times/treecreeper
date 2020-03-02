@@ -333,9 +333,12 @@ describe('rest POST', () => {
 			await neo4jTest('MainType', mainCode).noRels();
 		});
 
-		describe('rich relatioship information', () => {
+		describe('rich relationship information', () => {
 			const someString = 'some string';
 			const anotherString = 'another string';
+			const someBoolean = true;
+			const someEnum = 'First';
+			const someMultipleChoice = ['First', 'Second'];
 			const childRelationshipProps = { code: childCode, someString };
 			const childRelationshipTwoProps = {
 				code: childCode,
@@ -563,6 +566,116 @@ describe('rest POST', () => {
 						{
 							type: 'ParentType',
 							props: { code: parentCode, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationship which has a multiple choice property', async () => {
+				const { status, body } = await basicHandler(
+					{
+						curiousChild: { code: childCode, someMultipleChoice },
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					curiousChild: {
+						code: childCode,
+						someMultipleChoice,
+						...meta.create,
+					},
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_CURIOUS_CHILD',
+							direction: 'outgoing',
+							props: {
+								someMultipleChoice,
+								...meta.create,
+							},
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationship which has an enum property', async () => {
+				const { status, body } = await basicHandler(
+					{
+						curiousChild: { code: childCode, someEnum },
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					curiousChild: {
+						code: childCode,
+						someEnum,
+						...meta.create,
+					},
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_CURIOUS_CHILD',
+							direction: 'outgoing',
+							props: {
+								someEnum,
+								...meta.create,
+							},
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
+						},
+					);
+			});
+
+			it('creates record with relationship which has a boolean property', async () => {
+				const { status, body } = await basicHandler(
+					{
+						curiousChild: { code: childCode, someBoolean },
+					},
+					{ upsert: true, richRelationships: true },
+					getMetaPayload(),
+				);
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					curiousChild: {
+						code: childCode,
+						someBoolean,
+						...meta.create,
+					},
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.match(meta.create)
+					.hasRels(1)
+					.hasRel(
+						{
+							type: 'HAS_CURIOUS_CHILD',
+							direction: 'outgoing',
+							props: {
+								someBoolean,
+								...meta.create,
+							},
+						},
+						{
+							type: 'ChildType',
+							props: { code: childCode, ...meta.create },
 						},
 					);
 			});
