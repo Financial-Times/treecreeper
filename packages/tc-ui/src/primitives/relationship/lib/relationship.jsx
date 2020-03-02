@@ -20,9 +20,8 @@ class Relationship extends React.Component {
 		this.setState(
 			prevState => {
 				const { isMounted } = prevState;
-				const oldState = isMounted;
 				return {
-					isMounted: !oldState,
+					isMounted: !isMounted,
 				};
 			},
 			() => {
@@ -38,9 +37,8 @@ class Relationship extends React.Component {
 		this.setState(
 			prevState => {
 				const { annotate } = prevState;
-				const oldState = annotate;
 				return {
-					annotate: !oldState,
+					annotate: !annotate,
 				};
 			},
 			() => {
