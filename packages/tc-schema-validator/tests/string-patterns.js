@@ -1,7 +1,9 @@
 /* global it, describe, expect */
 const { SDK } = require('@financial-times/tc-schema-sdk');
 
-const stringPatterns = new SDK().rawData.getStringPatterns();
+const sdk = new SDK();
+sdk.init();
+const stringPatterns = sdk.rawData.getStringPatterns();
 const longString = 'x'.repeat(257);
 
 describe('string patterns', () => {

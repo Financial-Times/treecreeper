@@ -1,4 +1,4 @@
-const { SDK } = require('../../sdk');
+const { SDK } = require('../..');
 const readYaml = require('../read-yaml');
 
 const getValidator = (type, { enums, relationshipTypes } = {}) => {

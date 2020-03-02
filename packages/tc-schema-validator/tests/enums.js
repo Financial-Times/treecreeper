@@ -1,7 +1,9 @@
 /* global it, describe, expect */
 const { SDK } = require('@financial-times/tc-schema-sdk');
 
-const enums = new SDK().rawData.getEnums();
+const sdk = new SDK();
+sdk.init();
+const enums = sdk.rawData.getEnums();
 
 describe('enums', () => {
 	Object.entries(enums).forEach(([name, { description, options }]) => {
