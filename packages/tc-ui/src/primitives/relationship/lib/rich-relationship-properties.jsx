@@ -10,12 +10,7 @@ const RelationshipProperties = props => {
 	const propertyfields = Object.entries(properties);
 
 	return propertyfields
-		.filter(
-			([, schema]) =>
-				// HACK: need to get rid of fields that are doing this
-				!schema.label.includes('deprecated') &&
-				!schema.deprecationReason,
-		)
+		.filter(([, { deprecationReason }]) => !deprecationReason)
 		.map(([name, item], index) => {
 			const assignComponent = componentAssigner();
 			const { EditComponent } = assignComponent(item);
