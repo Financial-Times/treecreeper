@@ -20,7 +20,7 @@ This is a little odd (and should be improved in future)
 -   When using local, static data (`schemaDirectory` or `schemaData` options below), the `init()` method populates the sdk with data immediately and its methods can be used to access the data immediately
 -   When using remote data (`schemaBaseUrl`), no data is populated, and `schema.ready()` must be awaited before using the sdk's synchronous methods.
 
-Be aware of the idiosyncrasy above if oyu ever come across errors complaining that no data is available.
+Be aware of the idiosyncrasy above if you ever come across errors complaining that no data is available.
 
 ### `init(options)`
 
