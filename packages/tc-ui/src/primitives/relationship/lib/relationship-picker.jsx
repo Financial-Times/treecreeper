@@ -129,32 +129,17 @@ class RelationshipPicker extends React.Component {
 		}
 	}
 
-	onChange(event) {
-		const { value, id, checked, dataset, type } = event.currentTarget;
-		const { parentCode } = dataset;
-		const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value) {
 		this.setState(prevState => {
-			const { selectedRelationships } = prevState;
-			const oldState = selectedRelationships.map(relationship => {
+			const { selectedRelationships: selectedRel } = prevState;
+			const selectedRelationships = selectedRel.map(relationship => {
 				if (relationship.code === parentCode) {
-					// for multiple choice values
-					if (type === 'checkbox') {
-						const selectedValues = new Set(
-							relationship[propertyName],
-						);
-						// eslint-disable-next-line no-unused-expressions
-						checked
-							? selectedValues.add(value)
-							: selectedValues.delete(value);
-						relationship[propertyName] = [...selectedValues].sort();
-					} else {
-						relationship[propertyName] = value;
-					}
+					relationship[propertyName] = value;
 				}
 				return relationship;
 			});
 			return {
-				selectedRelationships: oldState,
+				selectedRelationships,
 			};
 		});
 	}

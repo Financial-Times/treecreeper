@@ -41,6 +41,13 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const EditTemporal = ({
 	type,
 	propertyName,
@@ -56,7 +63,6 @@ const EditTemporal = ({
 		: '';
 	const inputType =
 		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
-	const handleChange = !isNested ? null : event => onChange(event);
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
@@ -68,7 +74,9 @@ const EditTemporal = ({
 				required={required ? 'required' : null}
 				disabled={disabled ? 'disabled' : null}
 				data-parent-code={parentCode}
-				onChange={handleChange}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 		</span>
 	);

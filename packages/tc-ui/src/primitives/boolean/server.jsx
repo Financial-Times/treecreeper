@@ -7,6 +7,13 @@ const getBooleanLabel = value => {
 	return 'Unknown';
 };
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const Checkbox = ({
 	propertyName,
 	checkboxValue,
@@ -18,7 +25,7 @@ const Checkbox = ({
 }) => {
 	const name = !isNested ? propertyName : `${parentCode}-${propertyName}`;
 	const label = getBooleanLabel(checkboxValue);
-	const handleChange = !isNested ? null : event => onChange(event);
+
 	return (
 		<label>
 			<input
@@ -30,7 +37,9 @@ const Checkbox = ({
 				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
 				data-parent-code={parentCode}
-				onChange={handleChange}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 
 			<span className="o-forms-input__label" aria-hidden="true">

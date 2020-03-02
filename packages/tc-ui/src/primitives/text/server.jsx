@@ -1,6 +1,13 @@
 const React = require('react');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const EditText = ({
 	propertyName,
 	value,
@@ -14,7 +21,6 @@ const EditText = ({
 	const name = !isNested
 		? `${propertyName}${lockedBy || disabled ? '-disabled' : ''}`
 		: '';
-	const handleChange = !isNested ? null : event => onChange(event);
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
@@ -27,7 +33,9 @@ const EditText = ({
 				required={required ? 'required' : null}
 				disabled={disabled}
 				data-parent-code={parentCode}
-				onChange={handleChange}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 		</span>
 	);
