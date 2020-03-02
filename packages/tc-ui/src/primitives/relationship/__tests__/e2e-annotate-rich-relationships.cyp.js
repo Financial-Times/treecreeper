@@ -212,7 +212,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 					.should('have.text', '20.23');
 			});
 	});
-	it.only('can save annotations for one-to-many relationship', () => {
+	it('can save annotations for one-to-many relationship', () => {
 		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
