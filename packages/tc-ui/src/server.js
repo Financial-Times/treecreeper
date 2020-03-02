@@ -81,7 +81,7 @@ module.exports = {
 			'o-forms': '^8.2.1',
 			'o-normalise': '^2.0.1',
 			'o-buttons': '^6.0.9',
-			'o-colors': '^5.0.6',
+			'o-colors': '^5.1.0',
 			'o-icons': '^6.0.2',
 			'o-fonts': '^4.0.2',
 			'o-expander': '^5.0.3',
