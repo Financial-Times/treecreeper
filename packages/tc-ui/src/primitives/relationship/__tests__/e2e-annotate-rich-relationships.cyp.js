@@ -74,7 +74,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 		visitEditPage();
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').should(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
 			'not.exist',
 		);
 	});
@@ -82,7 +82,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitEditPage();
 		pickCuriousChild();
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').then(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
 				cy.wrap(parent)
 					.children()
@@ -94,7 +94,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		pickCuriousParent();
 
-		cy.get('#ul-curiousParent .biz-ops-relationship-annotate').then(
+		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
 			parent => {
 				cy.wrap(parent)
 					.children()
@@ -113,7 +113,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 		visitEditPage();
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').should(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
 			'not.exist',
 		);
 
@@ -138,9 +138,9 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		visitEditPage();
 
-		cy.get('#ul-curiousChild span.biz-ops-relationship-annotate').should(
-			'not.exist',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('not.exist');
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
@@ -155,9 +155,9 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 		visitEditPage();
 
-		cy.get('#ul-curiousChild span.biz-ops-relationship-annotate').should(
-			'not.exist',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('not.exist');
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
