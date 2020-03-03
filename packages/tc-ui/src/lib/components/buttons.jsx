@@ -1,6 +1,6 @@
 const React = require('react');
 
-const coreClasses = 'o-buttons o-buttons--big biz-ops-cta';
+const coreClasses = 'o-buttons o-buttons--big treecreeper-cta';
 
 const getButtonClasses = extraClasses =>
 	extraClasses ? `${coreClasses} ${extraClasses}` : coreClasses;
@@ -12,7 +12,7 @@ const EditButton = props => (
 			props.querystring
 		}`}
 		className={getButtonClasses(
-			'o-buttons--primary o-buttons--mono biz-ops-cta--link-style-override',
+			'o-buttons--primary o-buttons--mono treecreeper-cta--link-style-override',
 		)}
 	>
 		Edit
@@ -42,7 +42,7 @@ const CancelButton = props => {
 			data-button-type="cancel"
 			href={redirectLocation}
 			className={getButtonClasses(
-				'o-buttons--mono biz-ops-cta--link-style-override',
+				'o-buttons--mono treecreeper-cta--link-style-override',
 			)}
 		>
 			Cancel
@@ -54,13 +54,13 @@ const DeleteButton = props =>
 	props.isSubset ? null : (
 		<form
 			action={`/${props.type}/${encodeURIComponent(props.code)}/delete`}
-			className="biz-ops-cta"
+			className="treecreeper-cta"
 			method="POST"
 		>
 			<button
 				data-button-type="delete"
 				className={getButtonClasses(
-					'o-buttons--mono biz-ops-cta--delete',
+					'o-buttons--mono treecreeper-cta--delete',
 				)}
 				type="submit"
 			>

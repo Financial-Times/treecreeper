@@ -82,7 +82,7 @@ const View = props => {
 						</div>
 						<Subheader {...props} />
 					</div>
-					<div className="biz-ops-cta-container--sticky">
+					<div className="treecreeper-cta-container--sticky">
 						<EditButton
 							type={schema.type}
 							code={data.code}
@@ -98,7 +98,7 @@ const View = props => {
 						{Object.entries(schema.fieldsets).map(
 							([name, { heading, properties }]) => (
 								<section
-									className={`fieldset-biz-ops fieldset-${name}`}
+									className={`fieldset-treecreeper fieldset-${name}`}
 								>
 									<SectionHeader
 										type={schema.type}
@@ -106,7 +106,7 @@ const View = props => {
 										title={heading}
 										includeEditLink
 									/>
-									<dl className="biz-ops-properties-list">
+									<dl className="treecreeper-properties-list">
 										<Properties
 											fields={properties}
 											data={data}

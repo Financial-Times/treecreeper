@@ -1,7 +1,7 @@
 require('./main.css');
 
 const initDeleteButton = () =>
-	[...document.querySelectorAll('button.biz-ops-cta--delete')].forEach(
+	[...document.querySelectorAll('button.treecreeper-cta--delete')].forEach(
 		button => {
 			button.addEventListener('click', ev => {
 				const response = window.confirm(

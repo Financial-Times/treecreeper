@@ -58,7 +58,7 @@ const WrappedEditComponent = props => {
 	return (
 		<WrapperTag
 			className="o-forms-field"
-			data-biz-ops-type={props.componentType}
+			data-treecreeper-component={props.componentType}
 			data-type={props.dataType}
 			{...(props.wrapperProps || {})}
 		>

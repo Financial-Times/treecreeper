@@ -41,7 +41,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 		visitEditPage();
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').should(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
 			'not.exist',
 		);
 	});
@@ -59,9 +59,9 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.biz-ops-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 	});
 
 	it('hides fields when Annotate button is clicked, if they are visible', () => {
@@ -77,15 +77,15 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.biz-ops-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').should(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
 			'not.exist',
 		);
 	});
@@ -104,11 +104,11 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.biz-ops-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 
-		cy.get('#ul-curiousChild .biz-ops-relationship-annotate').then(
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
 				cy.wrap(parent)
 					.find('#id-someString')
@@ -150,11 +150,11 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousParent .biz-ops-relationship-annotate').should(
+		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').should(
 			'be.visible',
 		);
 
-		cy.get('#ul-curiousParent .biz-ops-relationship-annotate').then(
+		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
 			parent => {
 				cy.wrap(parent)
 					.find('#id-someString')

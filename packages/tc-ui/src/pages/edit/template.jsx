@@ -89,7 +89,7 @@ const EditForm = props => {
 						description={schema.description}
 						moreInformation={schema.moreInformation}
 					/>
-					<div className="biz-ops-cta-container--sticky o-layout__unstyled-element">
+					<div className="treecreeper-cta-container--sticky o-layout__unstyled-element">
 						<SaveButton
 							querystring={querystring || ''}
 							type={type}
@@ -104,7 +104,7 @@ const EditForm = props => {
 					{Object.entries(schema.fieldsets).map(
 						([name, { heading, properties }], index) => (
 							<fieldset
-								className={`fieldset-biz-ops fieldset-${name}`}
+								className={`fieldset-treecreeper fieldset-${name}`}
 								key={index}
 							>
 								<div className="o-layout-typography">

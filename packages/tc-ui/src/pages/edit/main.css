@@ -1,5 +1,5 @@
 /* edit page */
-.fieldset-biz-ops {
+.fieldset-treecreeper {
 	margin: 0;
 	padding: 0;
 	border: none;
@@ -11,7 +11,7 @@
 	padding: 10px;
 }
 
-.fieldset-biz-ops .o-forms-field {
+.fieldset-treecreeper .o-forms-field {
 	max-width: 450px;
 }
 /* stylelint-disable */

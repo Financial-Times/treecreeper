@@ -68,7 +68,7 @@ class Relationship extends React.Component {
 				<li
 					data-name={value.name}
 					data-code={value.code}
-					className="biz-ops-selected-relationship"
+					className="treecreeper-selected-relationship"
 					key={index}
 				>
 					<span>
@@ -119,7 +119,7 @@ class Relationship extends React.Component {
 					</span>
 					{isMounted && annotate && Object.keys(properties).length ? (
 						<span
-							className="biz-ops-relationship-annotate"
+							className="treecreeper-relationship-annotate"
 							key={index}
 						>
 							<RelationshipProperties
