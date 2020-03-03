@@ -131,7 +131,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.should('be.disabled');
 	});
 
-	it('sets label of the button as "Add annotations", if no annotation was done for existing relationships', () => {
+	it('sets label of the button as "Add annotations", if no annotations already exist for existing relationships', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -146,7 +146,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.should('have.text', 'Add annotations');
 	});
-	it('sets label of the button as "Edit annotations", if some annotations was done for existing relationships', () => {
+	it('sets label of the button as "Edit annotations", if annotations already exist for existing relationships', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
