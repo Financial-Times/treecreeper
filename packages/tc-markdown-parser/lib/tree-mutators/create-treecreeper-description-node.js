@@ -3,7 +3,7 @@ const build = require('unist-builder');
 const append = require('../append-node');
 const convertNodeToProblem = require('./convert-node-to-problem');
 
-module.exports = function createBizopsDescriptionNode({
+module.exports = function createTreecreeperDescriptionNode({
 	descriptionFieldName = 'description',
 	titleFieldName = 'name',
 }) {

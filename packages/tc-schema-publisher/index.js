@@ -29,9 +29,7 @@ const sendSchemaToS3 = async (
 	uploadStream.push(null);
 
 	// eslint-disable-next-line no-console
-	console.log(
-		`Deploying schema to biz-ops-schema.${process.env.AWS_ACCOUNT_ID}/${environment}/schema.json`,
-	);
+	console.log(`Deploying schema to ${bucketName}/${environment}/schema.json`);
 
 	await s3Client
 		.upload({
