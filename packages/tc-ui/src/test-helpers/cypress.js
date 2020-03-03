@@ -163,6 +163,53 @@ const setPropsOnCuriousParentRel = async codeLabel => {
 	});
 };
 
+const populateCuriousChildRelationshipFields = () => {
+	cy.get('#ul-curiousChild').then(curiousChild => {
+		cy.wrap(curiousChild)
+			.find('#id-someString')
+			.type(someString);
+		cy.wrap(curiousChild)
+			.find('#id-anotherString')
+			.type(anotherString);
+		cy.wrap(curiousChild)
+			.find('#id-someInteger')
+			.type(2023);
+		cy.wrap(curiousChild)
+			.find('#id-someEnum')
+			.select(someEnum);
+		cy.wrap(curiousChild)
+			.find('#checkbox-someMultipleChoice-First')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#checkbox-someMultipleChoice-Third')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#radio-someBoolean-Yes')
+			.check({ force: true });
+		cy.wrap(curiousChild)
+			.find('#id-someFloat')
+			.type(20.23);
+	});
+};
+
+const populateCuriousParent1RelationshipFields = parent => {
+	cy.wrap(parent)
+		.find('#id-someString')
+		.type(someString);
+	cy.wrap(parent)
+		.find('#id-anotherString')
+		.type(anotherString);
+};
+
+const populateCuriousParent2RelationshipFields = parent => {
+	cy.wrap(parent)
+		.find('#id-someString')
+		.type('Parent two someString');
+	cy.wrap(parent)
+		.find('#id-anotherString')
+		.type('Parent two anotherString');
+};
+
 const setLockedRecord = codeLabel => {
 	const query = `MERGE (m:MainType {code: $code})
 		SET m.lockedField = "locked value 1"
@@ -195,5 +242,8 @@ module.exports = {
 	resetDb,
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
+	populateCuriousChildRelationshipFields,
+	populateCuriousParent1RelationshipFields,
+	populateCuriousParent2RelationshipFields,
 	setLockedRecord,
 };

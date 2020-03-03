@@ -7,15 +7,25 @@ const getBooleanLabel = value => {
 	return 'Unknown';
 };
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const Checkbox = ({
 	propertyName,
 	checkboxValue,
 	disabled,
 	userValue,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
-	const name = !isNested ? propertyName : '';
+	const name = !isNested ? propertyName : `${parentCode}-${propertyName}`;
 	const label = getBooleanLabel(checkboxValue);
+
 	return (
 		<label>
 			<input
@@ -26,6 +36,10 @@ const Checkbox = ({
 				id={`radio-${propertyName}-${label}`}
 				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
+				data-parent-code={parentCode}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 
 			<span className="o-forms-input__label" aria-hidden="true">
@@ -36,7 +50,15 @@ const Checkbox = ({
 };
 
 const EditBoolean = props => {
-	const { propertyName, value, disabled, isNested, parentType } = props;
+	const {
+		propertyName,
+		value,
+		disabled,
+		isNested,
+		parentType,
+		parentCode,
+		onChange,
+	} = props;
 	return (
 		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
 			<Checkbox
@@ -46,6 +68,8 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
+				parentCode={parentCode}
+				onChange={onChange}
 			/>
 			<Checkbox
 				propertyName={propertyName}
@@ -54,6 +78,8 @@ const EditBoolean = props => {
 				userValue={value}
 				isNested={isNested}
 				parentType={parentType}
+				parentCode={parentCode}
+				onChange={onChange}
 			/>
 		</span>
 	);

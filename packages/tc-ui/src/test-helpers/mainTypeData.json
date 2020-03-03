@@ -5,7 +5,7 @@
 	"someString": "Lorem ipsum dolor sit amet",
 	"someEnum": "Second",
 	"someInteger": 2020,
-	"anotherString": "There are many variations of passages of Lorem Ipsum",
+	"anotherString": "There are many variations",
 	"someDate": "2020-01-15",
 	"someDatetime": "2020-01-15T13:00",
 	"someUrl": "https://google.com",

@@ -1,6 +1,13 @@
 const React = require('react');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const EditText = ({
 	propertyName,
 	value,
@@ -8,6 +15,8 @@ const EditText = ({
 	lockedBy,
 	disabled,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
 	const name = !isNested
 		? `${propertyName}${lockedBy || disabled ? '-disabled' : ''}`
@@ -23,6 +32,10 @@ const EditText = ({
 				defaultValue={value || null}
 				required={required ? 'required' : null}
 				disabled={disabled}
+				data-parent-code={parentCode}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 		</span>
 	);

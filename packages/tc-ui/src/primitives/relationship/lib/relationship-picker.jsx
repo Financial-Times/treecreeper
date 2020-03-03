@@ -63,6 +63,7 @@ class RelationshipPicker extends React.Component {
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
+		this.onChange = this.onChange.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -126,6 +127,21 @@ class RelationshipPicker extends React.Component {
 				return false;
 			}
 		}
+	}
+
+	onChange(propertyName, parentCode, value) {
+		this.setState(prevState => {
+			const { selectedRelationships: selectedRel } = prevState;
+			const selectedRelationships = selectedRel.map(relationship => {
+				if (relationship.code === parentCode) {
+					relationship[propertyName] = value;
+				}
+				return relationship;
+			});
+			return {
+				selectedRelationships,
+			};
+		});
 	}
 
 	fetchSuggestions({ value }) {
@@ -216,7 +232,6 @@ class RelationshipPicker extends React.Component {
 			isFull,
 			isExpanded,
 		} = this.state;
-
 		return (
 			<div
 				data-props={JSON.stringify(props)}
@@ -284,6 +299,7 @@ class RelationshipPicker extends React.Component {
 							index={i}
 							key={i}
 							isExpanded={isExpanded}
+							onChange={this.onChange}
 							{...{ ...props, value: val }}
 						/>
 					))}

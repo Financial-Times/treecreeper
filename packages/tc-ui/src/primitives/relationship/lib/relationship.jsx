@@ -17,22 +17,28 @@ class Relationship extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState(prevState => {
-			const { isMounted } = prevState;
-			const oldState = isMounted;
-			return {
-				isMounted: !oldState,
-			};
-		});
+		this.setState(
+			prevState => {
+				const { isMounted } = prevState;
+				return {
+					isMounted: !isMounted,
+				};
+			},
+			() => {
+				if (window && window.Origami) {
+					// needed to init tooltip used for Annotate button
+					window.Origami['o-tooltip'].init();
+				}
+			},
+		);
 	}
 
 	showRichRelationshipEditor(event) {
 		this.setState(
 			prevState => {
 				const { annotate } = prevState;
-				const oldState = annotate;
 				return {
-					annotate: !oldState,
+					annotate: !annotate,
 				};
 			},
 			() => {
@@ -46,7 +52,14 @@ class Relationship extends React.Component {
 	}
 
 	render() {
-		const { value, disabled, onRelationshipRemove, index } = this.props;
+		const {
+			value,
+			disabled,
+			onRelationshipRemove,
+			index,
+			properties,
+			propertyName,
+		} = this.props;
 
 		const { isMounted, annotate } = this.state;
 
@@ -55,38 +68,65 @@ class Relationship extends React.Component {
 				<li
 					data-name={value.name}
 					data-code={value.code}
-					className="selected-relationship"
+					className="biz-ops-selected-relationship"
 					key={index}
 				>
 					<span>
-						<button
-							type="button"
-							disabled={disabled ? 'disabled' : null}
-							className={`o-buttons o-buttons--small relationship-remove-button ${
-								disabled ? 'disabled' : ''
-							}`}
-							onClick={onRelationshipRemove}
-							data-index={`remove-${index}`}
-						>
-							Remove
-						</button>
 						<span className="o-layout-typography">
 							{value.name || value.code}
 						</span>
-						<button
-							type="button"
-							disabled={disabled ? 'disabled' : null}
-							className={`o-buttons o-buttons--small relationship-annotate-button ${
-								disabled ? 'disabled' : ''
-							}`}
-							onClick={this.showRichRelationshipEditor}
-							data-index={`annotate-${index}`}
-						>
-							Annotate
-						</button>
+						<span>
+							<button
+								type="button"
+								disabled={disabled ? 'disabled' : null}
+								className={`o-buttons o-buttons--small relationship-remove-button ${
+									disabled ? 'disabled' : ''
+								}`}
+								onClick={onRelationshipRemove}
+								data-index={`remove-${index}`}
+							>
+								Remove
+							</button>
+							<div
+								className="demo-tooltip-container"
+								id={`id-${propertyName}-${index}`}
+							>
+								<button
+									type="button"
+									disabled={disabled ? 'disabled' : null}
+									className={`o-buttons o-buttons--small relationship-annotate-button ${
+										disabled ? 'disabled' : ''
+									}`}
+									onClick={this.showRichRelationshipEditor}
+									data-index={`annotate-${index}`}
+									id={`id-${propertyName}-${index}`}
+								>
+									Annotate
+								</button>
+								<div
+									data-o-component="o-tooltip"
+									data-o-tooltip-position="above"
+									data-o-tooltip-target={`id-${propertyName}-${index}`}
+									data-o-tooltip-show-on-hover="true"
+								>
+									<div className="o-tooltip-content">
+										Helps you to save more information about
+										this relationship
+									</div>
+								</div>
+							</div>
+						</span>
 					</span>
-					{isMounted && annotate ? (
-						<RelationshipProperties key={index} {...this.props} />
+					{isMounted && annotate && Object.keys(properties).length ? (
+						<span
+							className="biz-ops-relationship-annotate"
+							key={index}
+						>
+							<RelationshipProperties
+								key={index}
+								{...this.props}
+							/>
+						</span>
 					) : null}
 				</li>
 			</>

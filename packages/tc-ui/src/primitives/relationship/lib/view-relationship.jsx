@@ -19,8 +19,12 @@ const OneRelationship = props => {
 		hasValue,
 	} = props;
 	let RelationshipProperties = null;
+	// value[propertyName] !== null since neo4j returns null if there is no value
 	const validValues = Object.keys(value)
-		.filter(key => value[key] && key !== type)
+		.filter(
+			propertyName =>
+				value[propertyName] !== null && propertyName !== type,
+		)
 		.reduce((res, key) => ((res[key] = properties[key]), res), {});
 
 	if (Object.keys(validValues).length && hasValue) {
@@ -38,17 +42,21 @@ const OneRelationship = props => {
 				</button>
 				<div className="o-expander__content">
 					<dl className="biz-ops-relationship-props-list">
-						{Object.entries(validValues).map(([name, item]) => {
-							const viewModel = {
-								value: value[name],
-								id: name,
-								...item,
-								...assignComponent(item),
-							};
-							return viewModel.label ? (
-								<LabelledPrimitive {...viewModel} />
-							) : null;
-						})}
+						{Object.entries(validValues).map(
+							([name, item], index) => {
+								const viewModel = {
+									value: value[name],
+									id: name,
+									...item,
+									...assignComponent(item),
+								};
+								return viewModel.label ? (
+									<span key={index}>
+										<LabelledPrimitive {...viewModel} />
+									</span>
+								) : null;
+							},
+						)}
 					</dl>
 				</div>
 			</div>
