@@ -64,7 +64,6 @@ class RelationshipPicker extends React.Component {
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
 		this.onChange = this.onChange.bind(this);
-		this.toggleAnnotation = this.toggleAnnotation.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -141,15 +140,6 @@ class RelationshipPicker extends React.Component {
 			});
 			return {
 				selectedRelationships,
-			};
-		});
-	}
-
-	toggleAnnotation() {
-		this.setState(prevState => {
-			const { annotate } = prevState;
-			return {
-				annotate: !annotate,
 			};
 		});
 	}
@@ -314,7 +304,6 @@ class RelationshipPicker extends React.Component {
 							index={i}
 							key={i}
 							annotate={annotate}
-							toggleAnnotation={this.toggleAnnotation}
 							onChange={this.onChange}
 							{...{ ...props, value: val }}
 						/>

@@ -8,6 +8,8 @@ class Relationship extends React.Component {
 		this.state = {
 			isMounted: false,
 			isEditing: this.props.annotate,
+			// so that to show annotation fields when a relationship is created
+			annotate: this.props.annotate,
 		};
 
 		this.showRichRelationshipEditor = this.showRichRelationshipEditor.bind(
@@ -24,12 +26,21 @@ class Relationship extends React.Component {
 		});
 	}
 
+	toggleAnnotation() {
+		this.setState(prevState => {
+			const { annotate } = prevState;
+			return {
+				annotate: !annotate,
+			};
+		});
+	}
+
 	showRichRelationshipEditor(event) {
 		this.setState(
 			{
 				isEditing: true,
 			},
-			() => this.props.toggleAnnotation(),
+			() => this.toggleAnnotation(),
 		);
 		event.stopPropagation();
 	}
@@ -42,10 +53,9 @@ class Relationship extends React.Component {
 			index,
 			properties,
 			propertyName,
-			annotate,
 		} = this.props;
 
-		const { isMounted, isEditing } = this.state;
+		const { isMounted, isEditing, annotate } = this.state;
 		const relationshipPropKeys = properties && Object.keys(properties);
 		const canBeAnnotated =
 			relationshipPropKeys && relationshipPropKeys.length > 0;
