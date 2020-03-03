@@ -1,7 +1,7 @@
 {
   "name": "@financial-times/tc-markdown-parser",
   "version": "0.0.0",
-  "description": "parse runbook.md defintitions which corresponds to biz-ops schema",
+  "description": "parse makrdown files and extract treecreeper records",
   "main": "index.js",
   "directories": {
     "lib": "lib",

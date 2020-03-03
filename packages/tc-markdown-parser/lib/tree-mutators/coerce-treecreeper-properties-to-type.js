@@ -226,7 +226,7 @@ module.exports = function coerceTreecreeperPropertiesToType({
 
 		convertNodeToProblem({
 			node,
-			message: `Could not resolve ${node.propertyType} to a valid biz-ops property type or enum`,
+			message: `Could not resolve ${node.propertyType} to a valid property type or enum`,
 		});
 	}
 

@@ -55,7 +55,7 @@ const addPropsToQueries = (
 	relationshipParameters,
 	code,
 ) => {
-	// biz-ops-admin to biz_ops_admin
+	// e.g. biz-ops-admin to biz_ops_admin
 	const relPropsParameterKey = code.split('-').join('_');
 	const relationshipProps = { code };
 	Object.entries(value).forEach(([propertyName, propertyValue]) => {

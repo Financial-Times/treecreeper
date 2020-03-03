@@ -10,7 +10,7 @@ const getDirection = (record, node) =>
 		? 'outgoing'
 		: 'incoming';
 
-const bizOpsRecord = record => {
+const treecreeperRecord = record => {
 	const node = record.get('node');
 	const hasRelationship = record.has('relationship');
 	const ifRelationship = func => (hasRelationship ? func : () => null);
@@ -89,7 +89,7 @@ const constructOutput = ({
 	return response;
 };
 
-const addBizOpsEnhancements = result => {
+const addTreecreeperEnhancements = result => {
 	result.hasRecords = () => !!(result.records && result.records.length);
 
 	result.hasRelationships = () =>
@@ -113,16 +113,16 @@ const addBizOpsEnhancements = result => {
 		result.records[0].get('node');
 
 	if (result.records) {
-		result.records = result.records.map(bizOpsRecord);
+		result.records = result.records.map(treecreeperRecord);
 	}
 	return result;
 };
 
 module.exports = {
 	executeQuery: async (query, params) =>
-		addBizOpsEnhancements(await executeQuery(query, params)),
+		addTreecreeperEnhancements(await executeQuery(query, params)),
 	executeQueriesWithTransaction: async (...queries) => {
 		const results = await executeQueriesWithTransaction(...queries);
-		return results.map(addBizOpsEnhancements);
+		return results.map(addTreecreeperEnhancements);
 	},
 };
