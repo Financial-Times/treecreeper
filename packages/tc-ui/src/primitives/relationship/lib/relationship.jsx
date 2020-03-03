@@ -46,14 +46,17 @@ class Relationship extends React.Component {
 		} = this.props;
 
 		const { isMounted, isEditing } = this.state;
-		const canBeAnnotated = Object.keys(properties).length > 0;
-		const hasAnnotations = Object.keys(properties).filter(
-			propName => value[propName],
-		);
+		const relationshipPropKeys = properties && Object.keys(properties);
+		const canBeAnnotated =
+			relationshipPropKeys && relationshipPropKeys.length > 0;
+		const hasAnnotations =
+			relationshipPropKeys &&
+			relationshipPropKeys.filter(propName => value[propName]);
 
-		const annotateButtonLabel = hasAnnotations.length
-			? 'Edit annotations'
-			: 'Add annotations';
+		const annotateButtonLabel =
+			hasAnnotations && hasAnnotations.length
+				? 'Edit annotations'
+				: 'Add annotations';
 		return (
 			<>
 				<li
