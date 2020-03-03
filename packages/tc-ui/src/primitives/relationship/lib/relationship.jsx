@@ -1,4 +1,3 @@
-/* global window */
 const React = require('react');
 const { RelationshipProperties } = require('./rich-relationship-properties');
 
@@ -7,8 +6,8 @@ class Relationship extends React.Component {
 		super();
 		this.props = props;
 		this.state = {
-			annotate: false,
 			isMounted: false,
+			isEditing: this.props.annotate,
 		};
 
 		this.showRichRelationshipEditor = this.showRichRelationshipEditor.bind(
@@ -17,36 +16,20 @@ class Relationship extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState(
-			prevState => {
-				const { isMounted } = prevState;
-				return {
-					isMounted: !isMounted,
-				};
-			},
-			() => {
-				if (window && window.Origami) {
-					// needed to init tooltip used for Annotate button
-					window.Origami['o-tooltip'].init();
-				}
-			},
-		);
+		this.setState(prevState => {
+			const { isMounted } = prevState;
+			return {
+				isMounted: !isMounted,
+			};
+		});
 	}
 
 	showRichRelationshipEditor(event) {
 		this.setState(
-			prevState => {
-				const { annotate } = prevState;
-				return {
-					annotate: !annotate,
-				};
+			{
+				isEditing: true,
 			},
-			() => {
-				// TODO - can this be done without using global window
-				if (window && this.state.isMounted) {
-					window.Origami['o-expander'].init();
-				}
-			},
+			() => this.props.toggleAnnotation(),
 		);
 		event.stopPropagation();
 	}
@@ -59,10 +42,18 @@ class Relationship extends React.Component {
 			index,
 			properties,
 			propertyName,
+			annotate,
 		} = this.props;
 
-		const { isMounted, annotate } = this.state;
+		const { isMounted, isEditing } = this.state;
+		const canBeAnnotated = Object.keys(properties).length > 0;
+		const hasAnnotations = Object.keys(properties).filter(
+			propName => value[propName],
+		);
 
+		const annotateButtonLabel = hasAnnotations.length
+			? 'Edit annotations'
+			: 'Add annotations';
 		return (
 			<>
 				<li
@@ -87,37 +78,45 @@ class Relationship extends React.Component {
 							>
 								Remove
 							</button>
-							<div
-								className="demo-tooltip-container"
-								id={`id-${propertyName}-${index}`}
-							>
-								<button
-									type="button"
-									disabled={disabled ? 'disabled' : null}
-									className={`o-buttons o-buttons--small relationship-annotate-button ${
-										disabled ? 'disabled' : ''
-									}`}
-									onClick={this.showRichRelationshipEditor}
-									data-index={`annotate-${index}`}
+							{canBeAnnotated ? (
+								<div
+									className="demo-tooltip-container"
 									id={`id-${propertyName}-${index}`}
 								>
-									Annotate
-								</button>
-								<div
-									data-o-component="o-tooltip"
-									data-o-tooltip-position="above"
-									data-o-tooltip-target={`id-${propertyName}-${index}`}
-									data-o-tooltip-show-on-hover="true"
-								>
-									<div className="o-tooltip-content">
-										Helps you to save more information about
-										this relationship
+									<button
+										type="button"
+										disabled={
+											disabled || isEditing
+												? 'disabled'
+												: null
+										}
+										className={`o-buttons o-buttons--small relationship-annotate-button ${
+											disabled ? 'disabled' : ''
+										}`}
+										onClick={
+											this.showRichRelationshipEditor
+										}
+										data-index={`annotate-${index}`}
+										id={`id-${propertyName}-${index}`}
+									>
+										{annotateButtonLabel}
+									</button>
+									<div
+										data-o-component="o-tooltip"
+										data-o-tooltip-position="above"
+										data-o-tooltip-target={`id-${propertyName}-${index}`}
+										data-o-tooltip-show-on-hover="true"
+									>
+										<div className="o-tooltip-content">
+											Helps you to save more information
+											about this relationship
+										</div>
 									</div>
 								</div>
-							</div>
+							) : null}
 						</span>
 					</span>
-					{isMounted && annotate && Object.keys(properties).length ? (
+					{isMounted && annotate && canBeAnnotated ? (
 						<span
 							className="treecreeper-relationship-annotate"
 							key={index}
