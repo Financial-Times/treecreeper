@@ -51,9 +51,9 @@ describe('End-to-end - edit relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.treecreeper-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 	});
 
 	it('hides fields when Annotate button is clicked, if they are visible', () => {
@@ -69,9 +69,9 @@ describe('End-to-end - edit relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.treecreeper-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
@@ -96,9 +96,9 @@ describe('End-to-end - edit relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.treecreeper-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 
 		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
@@ -170,9 +170,9 @@ describe('End-to-end - edit relationship properties', () => {
 			.find('button.relationship-annotate-button')
 			.click({ force: true });
 
-		cy.get('#ul-curiousChild span.treecreeper-relationship-annotate').should(
-			'be.visible',
-		);
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
 
 		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
