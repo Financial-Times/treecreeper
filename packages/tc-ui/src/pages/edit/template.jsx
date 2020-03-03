@@ -30,6 +30,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent }) => {
 				: data[propertyName];
 
 			const viewModel = {
+				parentCode: data.code,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,

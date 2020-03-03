@@ -145,6 +145,7 @@ class RelationshipPicker extends React.Component {
 	}
 
 	fetchSuggestions({ value }) {
+		const { parentCode } = this.props;
 		if (!value) {
 			return;
 		}
@@ -156,11 +157,12 @@ class RelationshipPicker extends React.Component {
 				this.setState(({ selectedRelationships }) => ({
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
+						// don't suggest itself (relationship to self is not supported at the moment)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
-								),
+								) && parentCode !== suggestion.code,
 						),
 				}));
 			});
