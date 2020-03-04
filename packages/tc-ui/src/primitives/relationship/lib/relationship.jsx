@@ -53,6 +53,7 @@ class Relationship extends React.Component {
 			index,
 			properties,
 			propertyName,
+			hasError,
 		} = this.props;
 
 		const { isMounted, isEditing, annotate } = this.state;
@@ -99,7 +100,9 @@ class Relationship extends React.Component {
 									<button
 										type="button"
 										disabled={
-											disabled || isEditing
+											disabled ||
+											isEditing ||
+											(hasError && hasAnnotations.length)
 												? 'disabled'
 												: null
 										}
@@ -129,7 +132,8 @@ class Relationship extends React.Component {
 							) : null}
 						</span>
 					</span>
-					{isMounted && annotate && canBeAnnotated ? (
+					{(isMounted && annotate && canBeAnnotated) ||
+					(hasError && hasAnnotations.length) ? (
 						<span
 							className="treecreeper-relationship-annotate"
 							key={index}
