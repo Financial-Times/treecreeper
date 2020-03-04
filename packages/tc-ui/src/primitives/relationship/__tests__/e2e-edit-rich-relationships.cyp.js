@@ -14,14 +14,15 @@ const {
 
 describe('End-to-end - edit relationship properties', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent-one`);
-		save();
-		populateParentTypeFields(`${code}-parent-two`);
-		save();
-		visitMainTypePage();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateParentTypeFields(`${code}-parent-one`);
+			save();
+			populateParentTypeFields(`${code}-parent-two`);
+			save();
+			visitMainTypePage();
+		});
 	});
 
 	it('does not render annotation fields on page load for existing relationships', () => {
@@ -351,5 +352,133 @@ describe('End-to-end - edit relationship properties', () => {
 						'parent another lorem ipsum edited parent two',
 					);
 			});
+	});
+
+	it('restores in-progress edits to the relationship annotations if the form is submitted but errors', () => {
+		visitEditPage();
+		pickCuriousChild();
+		save();
+
+		cy.wrap().then(() => setPropsOnCuriousChildRel(`${code}-first-child`));
+		visitEditPage();
+
+		cy.get('#ul-curiousChild li')
+			.find('button.relationship-annotate-button')
+			.should('have.text', 'Edit annotations')
+			.click({ force: true });
+
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('be.visible');
+
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
+			parent => {
+				cy.wrap(parent)
+					.find('#id-someString')
+					.should('have.value', 'lorem ipsum');
+				cy.wrap(parent)
+					.find('#id-anotherString')
+					.should('have.value', 'another lorem ipsum');
+				cy.wrap(parent)
+					.find('#id-someInteger')
+					.should('have.value', '2020');
+				cy.wrap(parent)
+					.find('#id-someEnum')
+					.children()
+					.eq(1)
+					.should('have.value', 'First')
+					.should('be.selected');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-First')
+					.should('be.checked');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-Third')
+					.should('be.checked');
+				cy.wrap(parent)
+					.find('#radio-someBoolean-Yes')
+					.should('be.checked');
+				cy.wrap(parent)
+					.find('#id-someFloat')
+					.should('have.value', '12.53');
+
+				// edit
+				cy.wrap(parent)
+					.find('#id-someString')
+					.type(' edited');
+				cy.wrap(parent)
+					.find('#id-anotherString')
+					.type(' edited');
+				cy.wrap(parent)
+					.find('#id-someInteger')
+					.clear()
+					// this will make the form submission error as the value is not a finite integer
+					.type(20.23);
+				cy.wrap(parent)
+					.find('#id-someEnum')
+					.select('Third');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-First')
+					.uncheck({ force: true });
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-Third')
+					.uncheck({
+						force: true,
+					});
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-Second')
+					.check({ force: true });
+			},
+		);
+		save();
+
+		cy.url().should('contain', `/MainType/${code}/edit`);
+		// assert submission has thrown an error
+		cy.get('.o-message__content-main').should(
+			'contain',
+			'Oops. Could not update MainType record for e2e-demo',
+		);
+		cy.get('.o-message__content-additional').should(
+			'contain',
+			`Invalid value \`20.23\` for property \`someInteger\` on type \`CuriousChild\`: Must be a finite integer`,
+		);
+
+		// assert in-progress edits are restored
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
+			parent => {
+				// assert it shows in-progress changes not original data
+				cy.wrap(parent)
+					.find('#id-someString')
+					.should('have.value', 'lorem ipsum edited');
+				cy.wrap(parent)
+					.find('#id-anotherString')
+					.should('have.value', 'another lorem ipsum edited');
+				cy.wrap(parent)
+					.find('#id-someInteger')
+					// the value that caused the error not 2020
+					.should('have.value', '20.23');
+				cy.wrap(parent)
+					.find('#id-someEnum')
+					.children()
+					.eq(3)
+					.should('have.value', 'Third')
+					.should('be.selected');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-First')
+					.should('not.be.checked');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-Second')
+					.should('be.checked');
+				cy.wrap(parent)
+					.find('#checkbox-someMultipleChoice-Third')
+					.should('not.be.checked');
+				// original data form neo4j
+				cy.wrap(parent)
+					.find('#radio-someBoolean-Yes')
+					.should('be.checked');
+				cy.wrap(parent)
+					.find('#id-someFloat')
+					.should('have.value', '12.53');
+			},
+		);
 	});
 });

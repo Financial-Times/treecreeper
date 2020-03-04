@@ -157,7 +157,7 @@ class RelationshipPicker extends React.Component {
 				this.setState(({ selectedRelationships }) => ({
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
-						// don't suggest itself (relationship to self is not supported at the moment)
+						// don't suggest self (relationship to self is not supported at the moment)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
@@ -228,7 +228,7 @@ class RelationshipPicker extends React.Component {
 
 	render() {
 		const { props } = this;
-		const { propertyName } = props;
+		const { propertyName, hasError } = props;
 		const disabled = !!this.props.lockedBy;
 		const {
 			searchTerm,
@@ -301,6 +301,7 @@ class RelationshipPicker extends React.Component {
 				>
 					{selectedRelationships.map((val, i) => (
 						<Relationship
+							hasError={hasError}
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}
 							index={i}

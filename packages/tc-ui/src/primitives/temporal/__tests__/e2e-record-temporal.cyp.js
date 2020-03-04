@@ -12,8 +12,9 @@ const {
 
 describe('End-to-end - record Temporal type', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+		});
 	});
 
 	it('can record date', () => {

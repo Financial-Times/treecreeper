@@ -14,15 +14,16 @@ const {
 
 describe('End-to-end - delete record', () => {
 	beforeEach(() => {
-		resetDb();
-		cy.visit(`/MainType/create`, {
-			onBeforeLoad(win) {
-				cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
-			},
+		cy.wrap(resetDb()).then(() => {
+			cy.visit(`/MainType/create`, {
+				onBeforeLoad(win) {
+					cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
+				},
+			});
+			cy.get('input[name=code]').type(code);
+			cy.get('input[name=someString]').type(someString);
+			save();
 		});
-		cy.get('input[name=code]').type(code);
-		cy.get('input[name=someString]').type(someString);
-		save();
 	});
 
 	it('shows a prompt message', () => {

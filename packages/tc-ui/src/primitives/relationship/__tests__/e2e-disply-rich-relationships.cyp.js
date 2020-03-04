@@ -15,16 +15,17 @@ const {
 
 describe('End-to-end - display relationship properties', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent-one`);
-		save();
-		populateParentTypeFields(`${code}-parent-two`);
-		save();
-		populateChildTypeFields(`${code}-second-child`);
-		save();
-		visitMainTypePage();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateParentTypeFields(`${code}-parent-one`);
+			save();
+			populateParentTypeFields(`${code}-parent-two`);
+			save();
+			populateChildTypeFields(`${code}-second-child`);
+			save();
+			visitMainTypePage();
+		});
 	});
 
 	it('can display/hide relationship properties', () => {

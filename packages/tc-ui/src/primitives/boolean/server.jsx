@@ -102,6 +102,10 @@ module.exports = {
 			{...props}
 		/>
 	),
-	parser: value => (value === undefined ? undefined : value === 'true'),
+	parser: value => {
+		// String(value) - on submission error the value we get is
+		// is boolean because that is what neo4j returns (true !== 'true')
+		return value === undefined ? undefined : String(value) === 'true';
+	},
 	hasValue: value => typeof value === 'boolean',
 };

@@ -19,9 +19,10 @@ const {
 
 describe('End-to-end - edit record', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+		});
 	});
 
 	it('can not edit code of record', () => {
