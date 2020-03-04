@@ -11,8 +11,9 @@ const {
 
 describe('End-to-end - record Number type', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+		});
 	});
 
 	it('can record an integer', () => {

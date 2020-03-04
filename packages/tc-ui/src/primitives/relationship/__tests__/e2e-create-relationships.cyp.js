@@ -14,15 +14,16 @@ const {
 
 describe('End-to-end - relationship creation', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent`);
-		save();
-		populateChildTypeFields(`${code}-second-child`);
-		save();
-		visitMainTypePage();
-		visitEditPage();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateParentTypeFields(`${code}-parent`);
+			save();
+			populateChildTypeFields(`${code}-second-child`);
+			save();
+			visitMainTypePage();
+			visitEditPage();
+		});
 	});
 
 	describe('one-to-one relationship', () => {

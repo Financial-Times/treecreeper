@@ -8,11 +8,12 @@ const {
 
 describe('End-to-end - record multiple choice value', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
 
-		visitEditPage();
+			visitEditPage();
+		});
 	});
 
 	it('can record a single choice', () => {

@@ -14,14 +14,15 @@ const {
 
 describe('End-to-end - edit relationship properties', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent-one`);
-		save();
-		populateParentTypeFields(`${code}-parent-two`);
-		save();
-		visitMainTypePage();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateParentTypeFields(`${code}-parent-one`);
+			save();
+			populateParentTypeFields(`${code}-parent-two`);
+			save();
+			visitMainTypePage();
+		});
 	});
 
 	it('does not render annotation fields on page load for existing relationships', () => {

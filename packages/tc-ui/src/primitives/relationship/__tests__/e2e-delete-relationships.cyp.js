@@ -12,13 +12,14 @@ const {
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateChildTypeFields(`${code}-first-child`);
-		save();
-		populateChildTypeFields(`${code}-second-child`);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateChildTypeFields(`${code}-first-child`);
+			save();
+			populateChildTypeFields(`${code}-second-child`);
+			save();
+		});
 	});
 
 	it('can remove 1-to-1 relationship', () => {

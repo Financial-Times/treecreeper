@@ -22,14 +22,15 @@ const {
 
 describe('End-to-end - annotate rich relationship properties', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateParentTypeFields(`${code}-parent-one`);
-		save();
-		populateParentTypeFields(`${code}-parent-two`);
-		save();
-		visitMainTypePage();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateParentTypeFields(`${code}-parent-one`);
+			save();
+			populateParentTypeFields(`${code}-parent-two`);
+			save();
+			visitMainTypePage();
+		});
 	});
 
 	it('does not show annotation fields on page load', () => {
