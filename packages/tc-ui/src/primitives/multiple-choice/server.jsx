@@ -9,7 +9,8 @@ const localOnChange = (event, currentValues, onChange) => {
 	const propertyName = id.split('-')[1];
 	// eslint-disable-next-line no-unused-expressions
 	checked ? selectedValues.add(value) : selectedValues.delete(value);
-	onChange(propertyName, parentCode, [...selectedValues].sort());
+	const values = selectedValues.size ? [...selectedValues].sort() : null;
+	onChange(propertyName, parentCode, values);
 };
 
 const Checkbox = ({

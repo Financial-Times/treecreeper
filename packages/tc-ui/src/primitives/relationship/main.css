@@ -115,11 +115,11 @@
 .relationship-remove-button,
 .relationship-annotate-button {
 	min-width: 60px;
-	width: 70px;
 }
 
 .relationship-annotate-button {
 	margin-left: 0.5em;
+	margin-right: 0 !important;
 }
 
 .relationship-remove-button {

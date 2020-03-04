@@ -32,7 +32,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 	});
 
-	it('does not render fields on page load', () => {
+	it('does not show annotation fields on page load', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -46,7 +46,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		);
 	});
 
-	it('renders fields when Annotate button is clicked', () => {
+	it('displays annotation fields when annotation button is clicked', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -57,6 +57,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
+			.should('have.text', 'Edit annotations')
 			.click({ force: true });
 
 		cy.get(
@@ -64,7 +65,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		).should('be.visible');
 	});
 
-	it('hides fields when Annotate button is clicked, if they are visible', () => {
+	it('hides all existing annotations for existing relationships on page load', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -73,8 +74,52 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		visitMainTypePage();
 		visitEditPage();
 
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
+			'not.exist',
+		);
+	});
+	it('expands annotations area when adding new relationship', () => {
+		visitEditPage();
+		pickCuriousChild();
+
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
+			parent => {
+				cy.wrap(parent)
+					.children()
+					.should('have.length', 7);
+				// someString,anotherString,someInteger,someEnum,
+				// someMultipleChoice,someBoolean,someFloat = 7
+			},
+		);
+
+		pickCuriousParent();
+
+		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
+			parent => {
+				cy.wrap(parent)
+					.children()
+					.should('have.length', 2);
+				// someString,anotherString
+			},
+		);
+	});
+
+	it('disables the annotation button once annotations area is opened', () => {
+		visitEditPage();
+		pickCuriousChild();
+		save();
+
+		cy.wrap().then(() => setPropsOnCuriousChildRel(`${code}-first-child`));
+		visitMainTypePage();
+		visitEditPage();
+
+		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
+			'not.exist',
+		);
+
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
+			.should('have.text', 'Edit annotations')
 			.click({ force: true });
 
 		cy.get(
@@ -83,11 +128,40 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.click({ force: true });
+			.should('be.disabled');
+	});
 
-		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
-			'not.exist',
-		);
+	it('sets label of the button as "Add annotations", if no annotations already exist for existing relationships', () => {
+		visitEditPage();
+		pickCuriousChild();
+		save();
+
+		visitEditPage();
+
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('not.exist');
+
+		cy.get('#ul-curiousChild li')
+			.find('button.relationship-annotate-button')
+			.should('have.text', 'Add annotations');
+	});
+	it('sets label of the button as "Edit annotations", if annotations already exist for existing relationships', () => {
+		visitEditPage();
+		pickCuriousChild();
+		save();
+
+		cy.wrap().then(() => setPropsOnCuriousChildRel(`${code}-first-child`));
+		visitMainTypePage();
+		visitEditPage();
+
+		cy.get(
+			'#ul-curiousChild span.treecreeper-relationship-annotate',
+		).should('not.exist');
+
+		cy.get('#ul-curiousChild li')
+			.find('button.relationship-annotate-button')
+			.should('have.text', 'Edit annotations');
 	});
 
 	it('displays all fields defined for that relationship property', () => {
@@ -102,6 +176,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
+			.should('have.text', 'Edit annotations')
 			.click({ force: true });
 
 		cy.get(
@@ -115,9 +190,6 @@ describe('End-to-end - annotate rich relationship properties', () => {
 					.should('be.visible');
 				cy.wrap(parent)
 					.find('#id-anotherString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someString')
 					.should('be.visible');
 				cy.wrap(parent)
 					.find('#id-someInteger')

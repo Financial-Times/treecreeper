@@ -53,7 +53,7 @@ class RelationshipPicker extends React.Component {
 			selectedRelationships,
 			hasHighlightedSelection: false,
 			isFull: !props.hasMany && !!selectedRelationships.length,
-			isExpanded: false,
+			annotate: false,
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
@@ -145,6 +145,7 @@ class RelationshipPicker extends React.Component {
 	}
 
 	fetchSuggestions({ value }) {
+		const { parentCode } = this.props;
 		if (!value) {
 			return;
 		}
@@ -156,11 +157,12 @@ class RelationshipPicker extends React.Component {
 				this.setState(({ selectedRelationships }) => ({
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
+						// don't suggest itself (relationship to self is not supported at the moment)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
-								),
+								) && parentCode !== suggestion.code,
 						),
 				}));
 			});
@@ -176,13 +178,18 @@ class RelationshipPicker extends React.Component {
 		if (this.props.hasMany) {
 			this.setState(({ selectedRelationships }) => {
 				selectedRelationships = [...selectedRelationships, suggestion];
-				return { ...neutralState, selectedRelationships };
+				return {
+					...neutralState,
+					selectedRelationships,
+					annotate: true,
+				};
 			});
 		} else {
 			this.setState({
 				...neutralState,
 				selectedRelationships: [suggestion],
 				isFull: true,
+				annotate: true,
 			});
 		}
 		// this is needed to prevent the event propagating up and then
@@ -230,7 +237,7 @@ class RelationshipPicker extends React.Component {
 			isUserError,
 			isUnresolved,
 			isFull,
-			isExpanded,
+			annotate,
 		} = this.state;
 		return (
 			<div
@@ -298,7 +305,7 @@ class RelationshipPicker extends React.Component {
 							onRelationshipRemove={this.onRelationshipRemove}
 							index={i}
 							key={i}
-							isExpanded={isExpanded}
+							annotate={annotate}
 							onChange={this.onChange}
 							{...{ ...props, value: val }}
 						/>
