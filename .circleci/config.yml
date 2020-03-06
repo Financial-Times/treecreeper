@@ -171,8 +171,7 @@ workflows:
       - end-to-end-test:
           requires:
             - build
-          filters:
-            <<: *only_version_tags
+          filters: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
           context: rel-eng-creds
