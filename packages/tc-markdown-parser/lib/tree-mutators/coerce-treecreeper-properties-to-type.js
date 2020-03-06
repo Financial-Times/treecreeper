@@ -78,7 +78,13 @@ const coerceEnumPropertyValue = (
 	{ propertyType: enumName, hasMany, enums },
 ) => {
 	let [subdocument] = node.children;
-
+	const validValues = Object.values(enums[enumName]);
+	if (!subdocument.children.length) {
+		return convertNodeToProblem({
+			node,
+			message: `Must provide a value. Valid values: ${validValues.toString()}`,
+		});
+	}
 	if (hasMany) {
 		if (subdocument.children[0].type !== 'list') {
 			return convertNodeToProblem({
@@ -93,8 +99,6 @@ const coerceEnumPropertyValue = (
 			message: 'Must provide a single enum, not a nested list',
 		});
 	}
-
-	const validValues = Object.values(enums[enumName]);
 
 	const values = subdocument.children.map(child => {
 		const flattenedContent = normalizePropertyKey(
@@ -210,7 +214,6 @@ module.exports = function coerceTreecreeperPropertiesToType({
 				propertyType,
 			});
 		}
-
 		// If it's an enum, make sure it's a valid value for that enum
 		if (propertyType in enums) {
 			coerceEnumPropertyValue(node, {
