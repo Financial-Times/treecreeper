@@ -143,7 +143,7 @@ describe('End-to-end - edit relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations')
+			.should('have.text', 'Edit details')
 			.click({ force: true });
 
 		cy.get(
@@ -264,7 +264,7 @@ describe('End-to-end - edit relationship properties', () => {
 			.then(child => {
 				cy.wrap(child)
 					.find('button.relationship-annotate-button')
-					.should('have.text', 'Edit annotations')
+					.should('have.text', 'Edit details')
 					.click({ force: true });
 				cy.wrap(child)
 					.find('#id-someString')
@@ -282,7 +282,7 @@ describe('End-to-end - edit relationship properties', () => {
 			.then(child => {
 				cy.wrap(child)
 					.find('button.relationship-annotate-button')
-					.should('have.text', 'Add annotations');
+					.should('have.text', 'Add details');
 			});
 		save();
 		cy.wrap().then(() => setPropsOnCuriousParentRel(`${code}-parent-two`));
@@ -364,7 +364,7 @@ describe('End-to-end - edit relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations')
+			.should('have.text', 'Edit details')
 			.click({ force: true });
 
 		cy.get(
