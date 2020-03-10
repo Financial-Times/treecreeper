@@ -48,7 +48,7 @@ describe('End-to-end - display relationship properties', () => {
 			.should('not.be.visible');
 
 		cy.get('[aria-controls="o-expander__toggle--1"]')
-			.should('have.text', 'more info')
+			.should('have.text', 'view details')
 			.click();
 
 		cy.get('#curiousChild')
@@ -75,7 +75,7 @@ describe('End-to-end - display relationship properties', () => {
 			});
 
 		cy.get('[aria-controls="o-expander__toggle--1"]')
-			.should('have.text', 'less')
+			.should('have.text', 'hide details')
 			.click();
 
 		cy.get('#curiousChild')

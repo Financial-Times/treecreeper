@@ -58,7 +58,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations')
+			.should('have.text', 'Edit details')
 			.click({ force: true });
 
 		cy.get(
@@ -120,7 +120,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations')
+			.should('have.text', 'Edit details')
 			.click({ force: true });
 
 		cy.get(
@@ -132,7 +132,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 			.should('be.disabled');
 	});
 
-	it('sets label of the button as "Add annotations", if no annotations already exist for existing relationships', () => {
+	it('sets label of the button as "Add details", if no annotations already exist for existing relationships', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -145,9 +145,9 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Add annotations');
+			.should('have.text', 'Add details');
 	});
-	it('sets label of the button as "Edit annotations", if annotations already exist for existing relationships', () => {
+	it('sets label of the button as "Edit details", if annotations already exist for existing relationships', () => {
 		visitEditPage();
 		pickCuriousChild();
 		save();
@@ -162,7 +162,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations');
+			.should('have.text', 'Edit details');
 	});
 
 	it('displays all fields defined for that relationship property', () => {
@@ -177,7 +177,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild li')
 			.find('button.relationship-annotate-button')
-			.should('have.text', 'Edit annotations')
+			.should('have.text', 'Edit details')
 			.click({ force: true });
 
 		cy.get(

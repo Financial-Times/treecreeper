@@ -33,12 +33,12 @@ const OneRelationship = props => {
 				data-o-component="o-expander"
 				className="o-expander"
 				data-o-expander-shrink-to="hidden"
-				data-o-expander-collapsed-toggle-text="more info"
-				data-o-expander-expanded-toggle-text="less"
+				data-o-expander-collapsed-toggle-text="view details"
+				data-o-expander-expanded-toggle-text="hide details"
 			>
 				{' '}
 				<button className="o-expander__toggle o--if-js" type="button">
-					more info
+					view details
 				</button>
 				<div className="o-expander__content">
 					<dl className="treecreeper-relationship-props-list">

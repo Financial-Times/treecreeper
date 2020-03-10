@@ -66,8 +66,12 @@ class Relationship extends React.Component {
 
 		const annotateButtonLabel =
 			hasAnnotations && hasAnnotations.length
-				? 'Edit annotations'
-				: 'Add annotations';
+				? 'Edit details'
+				: 'Add details';
+		const annotateButtonIcon =
+			hasAnnotations && hasAnnotations.length
+				? ` o-icons-icon--edit`
+				: ` o-icons-icon--plus`;
 		return (
 			<>
 				<li
@@ -115,7 +119,10 @@ class Relationship extends React.Component {
 										data-index={`annotate-${index}`}
 										id={`id-${propertyName}-${index}`}
 									>
-										{annotateButtonLabel}
+										<span>{annotateButtonLabel}</span>
+										<span
+											className={`relationship-annotate-icon o-icons-icon ${annotateButtonIcon}`}
+										/>
 									</button>
 									<div
 										data-o-component="o-tooltip"

@@ -118,10 +118,32 @@
 }
 
 .relationship-annotate-button {
-	margin-left: 0.5em;
 	margin-right: 0 !important;
+	margin-left: 0.5em;
+	padding-top: 0;
+	padding-right: 0;
+	padding-bottom: 0;
 }
 
 .relationship-remove-button {
 	margin: auto 0 !important;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+.relationship-annotate-button span:first-of-type {
+	vertical-align: middle;
+}
+
+.relationship-annotate-icon {
+	width: 1em;
+	height: 1em;
+	font-size: 2em;
+	vertical-align: middle;
+	color: var(--o-colors-black-10);
+}
+
+.relationship-annotate-button .o-icons-icon--edit {
+	height: 0.9em !important;
+	padding-top: 0.1em;
 }
