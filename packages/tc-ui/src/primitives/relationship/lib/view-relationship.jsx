@@ -38,7 +38,7 @@ const OneRelationship = props => {
 			>
 				{' '}
 				<button className="o-expander__toggle o--if-js" type="button">
-					View details
+					view details
 				</button>
 				<div className="o-expander__content">
 					<dl className="treecreeper-relationship-props-list">
