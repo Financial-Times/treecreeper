@@ -149,8 +149,8 @@
 }
 
 .treecreeper-relationship-annotate span.o-forms-input--checkbox {
-    display: grid;
-    grid-template-columns: 50% 50%;
+	display: grid;
+	grid-template-columns: 50% 50%;
 }
 
 .treecreeper-relationship-annotate__tooltip {
