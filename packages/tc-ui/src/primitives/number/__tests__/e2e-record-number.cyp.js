@@ -62,7 +62,7 @@ describe('End-to-end - record Number type', () => {
 			cy.get('input[name=someInteger]').type('0');
 			save();
 
-			cy.url().should('contain', '/MainType/create');
+			cy.url().should('contain', '/MainType/e2e-demo');
 			cy.get('#someInteger').should('have.text', '0');
 			visitEditPage()
 			cy.get('input[name=someInteger]').should('have.value', '0');
