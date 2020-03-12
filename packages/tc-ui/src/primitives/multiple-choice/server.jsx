@@ -1,4 +1,5 @@
 const React = require('react');
+const { getEnums } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 const { OptionsInfo } = require('../enum/server');
 
@@ -13,6 +14,42 @@ const localOnChange = (event, currentValues, onChange) => {
 	onChange(propertyName, parentCode, values);
 };
 
+const getClass = isNested =>
+	isNested ? 'treecreeper-relationship-annotate__tooltip' : '';
+
+const getDescription = (checkboxValue, type, parentCode, isNested) => {
+	const enumWithMeta = getEnums({ withMeta: true })[type];
+	const optionDefs = Object.values(enumWithMeta.options);
+	const hasOptionDescriptions = !!optionDefs[0].description;
+	if (!hasOptionDescriptions) {
+		return null;
+	}
+	const [{ description }] = optionDefs.filter(
+		({ value }) => value === checkboxValue,
+	);
+	return (
+		<div
+			className="tooltip-container"
+			id={`tooltip-target-${parentCode}-${checkboxValue}`}
+		>
+			<span id={`tooltip-target-${parentCode}-${checkboxValue}`} />
+			<i
+				aria-label={`help for ${checkboxValue}`}
+				className="o-icons-icon o-icons-icon--info treecreeper-help-icon"
+			/>
+			<div
+				className={getClass(isNested)}
+				data-o-component="o-tooltip"
+				data-o-tooltip-position="above"
+				data-o-tooltip-target={`tooltip-target-${parentCode}-${checkboxValue}`}
+				data-o-tooltip-append-to-body
+				data-o-tooltip-show-on-hover="true"
+			>
+				<div className="o-tooltip-content">{description}</div>
+			</div>
+		</div>
+	);
+};
 const Checkbox = ({
 	propertyName,
 	checkboxValue,
@@ -22,10 +59,11 @@ const Checkbox = ({
 	parentCode,
 	onChange,
 	currentValue,
+	type,
 }) => {
 	const name = !isNested ? propertyName : '';
 	return (
-		<label>
+		<label className={`checkbox-${propertyName}-${checkboxValue}`}>
 			<input
 				type="checkbox"
 				name={name}
@@ -41,10 +79,10 @@ const Checkbox = ({
 						: null
 				}
 			/>
-
 			<span className="o-forms-input__label" aria-hidden="true">
 				{checkboxValue}
 			</span>
+			{getDescription(checkboxValue, type, parentCode, isNested)}
 		</label>
 	);
 };
@@ -58,6 +96,7 @@ const EditMultipleChoice = props => {
 		isNested,
 		parentCode,
 		onChange,
+		type,
 	} = props;
 	const name = !isNested ? propertyName : '';
 	return (
@@ -73,6 +112,7 @@ const EditMultipleChoice = props => {
 					parentCode={parentCode}
 					onChange={onChange}
 					currentValue={value}
+					type={type}
 				/>
 			))}
 			{/* We need to send a dummy value every time otherwise there will be no value
