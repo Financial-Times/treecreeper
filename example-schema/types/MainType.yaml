@@ -49,6 +49,10 @@ properties:
     type: Int
     description: Int description.
     label: Int label
+  someFloat:
+    type: Float
+    description: Float description.
+    label: Float label
   anotherString:
     type: Word
     description: Word description.
