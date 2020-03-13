@@ -14,10 +14,7 @@ const localOnChange = (event, currentValues, onChange) => {
 	onChange(propertyName, parentCode, values);
 };
 
-const getClass = isNested =>
-	isNested ? 'treecreeper-relationship-annotate__tooltip' : '';
-
-const getDescription = (checkboxValue, type, parentCode, isNested) => {
+const getDescription = (checkboxValue, type, parentCode) => {
 	const enumWithMeta = getEnums({ withMeta: true })[type];
 	const optionDefs = Object.values(enumWithMeta.options);
 	const hasOptionDescriptions = !!optionDefs[0].description;
@@ -38,7 +35,7 @@ const getDescription = (checkboxValue, type, parentCode, isNested) => {
 				className="o-icons-icon o-icons-icon--info treecreeper-help-icon"
 			/>
 			<div
-				className={getClass(isNested)}
+				className="treecreeper-enum__tooltip"
 				data-o-component="o-tooltip"
 				data-o-tooltip-position="above"
 				data-o-tooltip-target={`tooltip-target-${parentCode}-${checkboxValue}`}
