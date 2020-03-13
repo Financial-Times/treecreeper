@@ -7,7 +7,7 @@ const {
 	populateMinimumViableFields,
 	save,
 	resetDb,
-	visitEditPage
+	visitEditPage,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record Number type', () => {
@@ -18,7 +18,6 @@ describe('End-to-end - record Number type', () => {
 	});
 
 	describe('int', () => {
-
 		it('can record an integer', () => {
 			cy.get('input[name=someInteger]').type(someInteger);
 			save();
@@ -64,13 +63,12 @@ describe('End-to-end - record Number type', () => {
 
 			cy.url().should('contain', '/MainType/e2e-demo');
 			cy.get('#someInteger').should('have.text', '0');
-			visitEditPage()
+			visitEditPage();
 			cy.get('input[name=someInteger]').should('have.value', '0');
 		});
-	})
+	});
 
 	describe('float', () => {
-
 		it('can record an integer', () => {
 			cy.get('input[name=someFloat]').type(someInteger);
 			save();
@@ -109,8 +107,8 @@ describe('End-to-end - record Number type', () => {
 
 			cy.url().should('contain', '/MainType/e2e-demo');
 			cy.get('#someFloat').should('have.text', '0');
-			visitEditPage()
+			visitEditPage();
 			cy.get('input[name=someFloat]').should('have.value', '0');
 		});
-	})
+	});
 });
