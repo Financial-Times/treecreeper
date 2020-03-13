@@ -147,3 +147,28 @@
 	height: 0.9em !important;
 	padding-top: 0.1em;
 }
+
+.treecreeper-relationship-annotate span.o-forms-input--checkbox {
+	display: grid;
+	grid-template-columns: 50% 50%;
+}
+
+.treecreeper-enum__tooltip {
+	max-width: 30%;
+}
+
+.treecreeper-relationship-annotate .o-forms-input--checkbox label {
+	max-width: 100%;
+	margin-right: 0;
+}
+
+[data-treecreeper-component='enum'] .tooltip-container {
+	display: inline;
+}
+
+[data-treecreeper-component='enum'] .o-icons-icon--info {
+	width: 1.6em !important;
+	height: 1.6em !important;
+	vertical-align: bottom;
+	margin-right: 1em;
+}
