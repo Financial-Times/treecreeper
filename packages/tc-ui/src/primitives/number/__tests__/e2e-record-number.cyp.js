@@ -28,7 +28,7 @@ describe('End-to-end - record Number type', () => {
 		});
 
 		it('rejects floats', () => {
-			cy.get('input[name=someInteger]').type('0.5');
+			cy.get('input[name=someInteger]').type(0.5);
 			save();
 
 			cy.url().should('contain', '/MainType/create');
@@ -58,7 +58,7 @@ describe('End-to-end - record Number type', () => {
 		});
 
 		it('saves and redisplays zero', () => {
-			cy.get('input[name=someInteger]').type('0');
+			cy.get('input[name=someInteger]').type(0);
 			save();
 
 			cy.url().should('contain', '/MainType/e2e-demo');
@@ -79,7 +79,7 @@ describe('End-to-end - record Number type', () => {
 		});
 
 		it('accepts floats', () => {
-			cy.get('input[name=someFloat]').type('0.5');
+			cy.get('input[name=someFloat]').type(0.5);
 			save();
 
 			cy.url().should('contain', '/MainType/e2e-demo');
@@ -102,7 +102,7 @@ describe('End-to-end - record Number type', () => {
 		});
 
 		it('saves and redisplays zero', () => {
-			cy.get('input[name=someFloat]').type('0');
+			cy.get('input[name=someFloat]').type(0);
 			save();
 
 			cy.url().should('contain', '/MainType/e2e-demo');
