@@ -20,6 +20,11 @@ const OneRelationship = props => {
 	} = props;
 	let RelationshipProperties = null;
 	// value[propertyName] !== null since neo4j returns null if there is no value
+
+	if (!value) {
+		return null;
+	}
+
 	const validValues = Object.keys(value)
 		.filter(
 			propertyName =>
