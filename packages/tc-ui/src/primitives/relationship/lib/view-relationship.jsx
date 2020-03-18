@@ -87,14 +87,14 @@ const ViewRelationship = props => {
 		return <OneRelationship {...props} />;
 	}
 	const schema = getType(type);
-  const inactiveCheck = datum => {
-    if (schema.inactiveRule) {
-      return Object.entries(schema.inactiveRule).every(
-        ([prop, expectedValue]) => datum[type][prop] === expectedValue,
-      );
-    }
-    return datum[type].isActive === false;
-  };
+	const inactiveCheck = datum => {
+		if (schema.inactiveRule) {
+			return Object.entries(schema.inactiveRule).every(
+				([prop, expectedValue]) => datum[type][prop] === expectedValue,
+			);
+		}
+		return datum[type].isActive === false;
+	};
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element treecreeper-links">
 			{sortBy(value, [`${type}.code`]).map((item, index) => {
