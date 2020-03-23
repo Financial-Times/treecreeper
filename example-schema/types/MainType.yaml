@@ -142,5 +142,5 @@ properties:
     direction: incoming
   oddThings:
     type: OddThing
-    description: Odd thing relationship description
+    description: Odd thing relationship description.
     label: Odd thing relationship label
