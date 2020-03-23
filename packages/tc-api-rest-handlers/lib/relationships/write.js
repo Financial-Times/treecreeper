@@ -49,14 +49,19 @@ WHERE related.code IN $${key}
 `;
 };
 
-const addPropsToQueries = (
+const addPropsToQueries = ({
 	relationshipPropQueries,
 	value,
 	relationshipParameters,
 	code,
-) => {
-	// e.g. biz-ops-admin to biz_ops_admin
-	const relPropsParameterKey = code.split('-').join('_');
+	index,
+}) => {
+	// We include the index in order to guarantee uniqueness then
+	// strip out any characters invalid in a cypher variable name
+	const relPropsParameterKey = `code${index}_${code.replace(
+		/[^a-z\d_]/g,
+		'__',
+	)}`;
 	const relationshipProps = { code };
 	Object.entries(value).forEach(([propertyName, propertyValue]) => {
 		// If no node matches the CASE expression, the expression returns a null.
@@ -103,14 +108,15 @@ const prepareToWriteRelationships = (
 		const retrievedCodes = [];
 		const relationshipPropQueries = [];
 
-		relProps.forEach(relProp => {
+		relProps.forEach((relProp, index) => {
 			retrievedCodes.push(relProp.code);
-			addPropsToQueries(
+			addPropsToQueries({
 				relationshipPropQueries,
-				relProp,
+				value: relProp,
 				relationshipParameters,
-				relProp.code,
-			);
+				code: relProp.code,
+				index,
+			});
 		});
 
 		Object.assign(relationshipParameters, {
