@@ -10,5 +10,5 @@ properties:
     pattern: PERMISSIVE
   mainThing:
     type: OddThing
-    description: Main thing relationship description
+    description: Main thing relationship description.
     label: Main thing relationship label
