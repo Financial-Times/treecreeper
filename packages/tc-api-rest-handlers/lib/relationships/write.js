@@ -64,8 +64,12 @@ const prepareToWriteRelationships = (
 	// but unfortunately parameters cannot be used to specify relationship labels
 	// so for every relatinship type we need to append a fragment of cypher
 	Object.entries(relationshipsToCreate).forEach(([relType, relProps]) => {
-		const relDef = validProperties[relType];
-		const { type: relatedType, direction, relationship } = relDef;
+		const relationshipSchema = validProperties[relType];
+		const {
+			type: relatedType,
+			direction,
+			relationship,
+		} = relationshipSchema;
 		const key = `${relationship}${direction}${relatedType}`;
 
 		const relDefs = [];
@@ -85,9 +89,9 @@ const prepareToWriteRelationships = (
 		relationshipQueries.push(
 			stripIndents`
 			WITH node
-			${locateRelatedNodes(relDef, key, upsert)}
+			${locateRelatedNodes(relationshipSchema, key, upsert)}
 			WITH node, related, relDefs
-			MERGE ${relationshipFragmentWithEndNodes('node', relDef, 'related')}
+			MERGE ${relationshipFragmentWithEndNodes('node', relationshipSchema, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate(
 					'relationship',
 				)}, relationship += relDefs.props
@@ -97,7 +101,7 @@ const prepareToWriteRelationships = (
 		`,
 		);
 
-		if (relDef.hasMany) {
+		if (relationshipSchema.hasMany) {
 			const { properties: relatedProperties } = getType(relatedType);
 			const inverseProperties = findInversePropertyNames(
 				nodeType,
@@ -115,7 +119,7 @@ const prepareToWriteRelationships = (
 				WITH node, related
 				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
 					'otherNode',
-					relDef,
+					relationshipSchema,
 					'related',
 					{
 						label: 'conflictingRelationship',
