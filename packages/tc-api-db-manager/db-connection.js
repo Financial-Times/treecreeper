@@ -80,7 +80,6 @@ module.exports = {
 		TIMEOUT = timeout;
 	},
 	executeQuery: (query, parameters) =>
-		console.log(query, parameters) ||
 		driver.session().run(query, parameters),
 	executeQueryWithSharedSession: (session = driver.session()) => {
 		const executeQuery = async (...args) => {
