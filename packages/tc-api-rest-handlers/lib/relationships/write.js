@@ -6,7 +6,7 @@ const {
 } = require('@financial-times/tc-schema-sdk');
 const {
 	metaPropertiesForCreate,
-	createRelMetaQueryForUpdate,
+	metaPropertiesForUpdate,
 } = require('../metadata-helpers');
 
 const relationshipFragment = (
@@ -34,8 +34,8 @@ const relationshipFragmentWithEndNodes = (
 const locateRelatedNodes = ({ type }, key, upsert) => {
 	if (upsert) {
 		return `
-UNWIND $${key} as nodeCodes
-MERGE (related:${type} {code: nodeCodes} )
+UNWIND $${key} as relDefs
+MERGE (related:${type} {code: relDefs.code} )
 	ON CREATE SET ${metaPropertiesForCreate('related')}
 `;
 	}
@@ -44,50 +44,9 @@ MERGE (related:${type} {code: nodeCodes} )
 	// This means the next line tries to create a relationship pointing
 	// at null, so we get an informative error
 	return `
-OPTIONAL MATCH (related:${type})
-WHERE related.code IN $${key}
+UNWIND $${key} as relDefs
+OPTIONAL MATCH (related:${type} {code: relDefs.code})
 `;
-};
-
-const addPropsToQueries = ({
-	relationshipPropQueries,
-	value,
-	relationshipParameters,
-	code,
-	index,
-}) => {
-	// We include the index in order to guarantee uniqueness then
-	// strip out any characters invalid in a cypher variable name
-	const relPropsParameterKey = `code${index}_${code.replace(
-		/[^a-z\d_]/g,
-		'__',
-	)}`;
-	const relationshipProps = { code };
-	Object.entries(value).forEach(([propertyName, propertyValue]) => {
-		// If no node matches the CASE expression, the expression returns a null.
-		// and no action will be taken
-		if (propertyName !== 'code') {
-			// make sure the parameter referenced in the query exists on the
-			// globalParameters object passed to the db driver
-			relationshipPropQueries.push(`
-			WITH node, related, relationship
-			UNWIND $${relPropsParameterKey} AS relationshipProp
-			SET (CASE
-			WHEN related.code = relationshipProp.code
-			THEN relationship END).${propertyName} = relationshipProp.${propertyName}
-				`);
-
-			relationshipPropQueries.push(
-				createRelMetaQueryForUpdate(value.code),
-			);
-			Object.assign(relationshipProps, {
-				[propertyName]: propertyValue,
-			});
-		}
-	});
-	Object.assign(relationshipParameters, {
-		[relPropsParameterKey]: relationshipProps,
-	});
 };
 
 const prepareToWriteRelationships = (
@@ -100,40 +59,41 @@ const prepareToWriteRelationships = (
 	const relationshipParameters = {};
 	const relationshipQueries = [];
 
+	// Note on the limitations of cypher:
+	// It would be so nice to use UNWIND to create all these from a list parameter,
+	// but unfortunately parameters cannot be used to specify relationship labels
+	// so for every relatinship type we need to append a fragment of cypher
 	Object.entries(relationshipsToCreate).forEach(([relType, relProps]) => {
 		const relDef = validProperties[relType];
 		const { type: relatedType, direction, relationship } = relDef;
 		const key = `${relationship}${direction}${relatedType}`;
 
-		const retrievedCodes = [];
-		const relationshipPropQueries = [];
+		const relDefs = [];
 
-		relProps.forEach((relProp, index) => {
-			retrievedCodes.push(relProp.code);
-			addPropsToQueries({
-				relationshipPropQueries,
-				value: relProp,
-				relationshipParameters,
+		relProps.forEach(relProp => {
+			const props = { ...relProp };
+			delete relDefs.push({
 				code: relProp.code,
-				index,
+				props,
 			});
 		});
 
 		Object.assign(relationshipParameters, {
-			[key]: retrievedCodes,
+			[key]: relDefs,
 		});
 
-		// Note on the limitations of cypher:
-		// It would be so nice to use UNWIND to create all these from a list parameter,
-		// but unfortunately parameters cannot be used to specify relationship labels
 		relationshipQueries.push(
 			stripIndents`
 			WITH node
 			${locateRelatedNodes(relDef, key, upsert)}
-			WITH node, related
+			WITH node, related, relDefs
 			MERGE ${relationshipFragmentWithEndNodes('node', relDef, 'related')}
-				ON CREATE SET ${metaPropertiesForCreate('relationship')}
-			${relationshipPropQueries.join('')}
+				ON CREATE SET ${metaPropertiesForCreate(
+					'relationship',
+				)}, relationship += relDefs.props
+				ON MATCH SET ${metaPropertiesForUpdate(
+					'relationship',
+				)}, relationship += relDefs.props
 		`,
 		);
 

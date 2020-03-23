@@ -19,23 +19,6 @@ const metaPropertiesForCreate = recordName => stripIndents`
 `;
 // ${recordName}._lockedFields = $lockedFields,
 
-const createRelMetaQueryForUpdate = code => {
-	const metaForUpdateSets = [
-		['_updatedByRequest', '$requestId'],
-		['_updatedByClient', '$clientId'],
-		['_updatedByUser', '$clientUserId'],
-		['_updatedTimestamp', 'datetime($timestamp)'],
-	];
-
-	return metaForUpdateSets
-		.map(
-			([key, value]) => stripIndents`SET (CASE
-			WHEN related.code = '${code}'
-			THEN relationship END).${key} = ${value}`,
-		)
-		.join('\n');
-};
-
 const prepareMetadataForNeo4jQuery = (metadata = {}) => ({
 	timestamp: new Date().toISOString(),
 	requestId: metadata.requestId || null,
@@ -47,5 +30,4 @@ module.exports = {
 	prepareMetadataForNeo4jQuery,
 	metaPropertiesForUpdate,
 	metaPropertiesForCreate,
-	createRelMetaQueryForUpdate,
 };
