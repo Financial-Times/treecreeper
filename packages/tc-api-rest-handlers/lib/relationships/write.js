@@ -9,13 +9,8 @@ const {
 	metaPropertiesForUpdate,
 } = require('../metadata-helpers');
 
-const relationshipFragment = (
-	type,
-	direction,
-	{ label = 'relationship', reverse = false } = {},
-) => {
-	const [left, right] =
-		reverse === (direction === 'outgoing') ? ['<', ''] : ['', '>'];
+const relationshipFragment = (type, direction, label = 'relationship') => {
+	const [left, right] = direction === 'incoming' ? ['<', ''] : ['', '>'];
 	return `${left}-[${label}:${type}]-${right}`;
 };
 
@@ -23,31 +18,9 @@ const relationshipFragmentWithEndNodes = (
 	head,
 	{ relationship, direction },
 	tail,
-	options,
+	label,
 ) =>
-	`(${head})${relationshipFragment(
-		relationship,
-		direction,
-		options,
-	)}(${tail})`;
-
-const locateRelatedNodes = ({ type }, key, upsert) => {
-	if (upsert) {
-		return `
-UNWIND $${key} as relDefs
-MERGE (related:${type} {code: relDefs.code} )
-	ON CREATE SET ${metaPropertiesForCreate('related')}
-`;
-	}
-	// Uses OPTIONAL MATCH when trying to match a node as it returns [null]
-	// rather than [] if the node doesn't exist
-	// This means the next line tries to create a relationship pointing
-	// at null, so we get an informative error
-	return `
-UNWIND $${key} as relDefs
-OPTIONAL MATCH (related:${type} {code: relDefs.code})
-`;
-};
+	`(${head})${relationshipFragment(relationship, direction, label)}(${tail})`;
 
 const prepareToWriteRelationships = (
 	nodeType,
@@ -70,7 +43,8 @@ const prepareToWriteRelationships = (
 			direction,
 			relationship,
 		} = relationshipSchema;
-		const key = `${relationship}${direction}${relatedType}`;
+
+		const relDefsKey = `${relationship}${direction}${relatedType}`;
 
 		const relDefs = [];
 
@@ -82,14 +56,20 @@ const prepareToWriteRelationships = (
 			});
 		});
 
-		Object.assign(relationshipParameters, {
-			[key]: relDefs,
-		});
+		relationshipParameters[relDefsKey] = relDefs;
 
+		// Uses OPTIONAL MATCH for upsert because it returns [null]
+		// rather than [] if the node doesn't exist
+		// This means the next line tries to create a relationship pointing
+		// at null, so we get an informative error
 		relationshipQueries.push(
 			stripIndents`
 			WITH DISTINCT node
-			${locateRelatedNodes(relationshipSchema, key, upsert)}
+			UNWIND $${relDefsKey} as relDefs
+			${
+				upsert ? 'MERGE' : 'OPTIONAL MATCH'
+			} (related:${relatedType} {code: relDefs.code})
+			${upsert ? `ON CREATE SET ${metaPropertiesForCreate('related')}` : ''}
 			WITH DISTINCT node, related, relDefs
 			MERGE ${relationshipFragmentWithEndNodes('node', relationshipSchema, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate(
@@ -114,6 +94,7 @@ const prepareToWriteRelationships = (
 						!relatedProperties[inverseProperty].hasMany,
 				)
 			) {
+				// TODO - send an update event for this
 				relationshipQueries.push(
 					stripIndents`
 				WITH DISTINCT node, related
@@ -121,9 +102,7 @@ const prepareToWriteRelationships = (
 					'otherNode',
 					relationshipSchema,
 					'related',
-					{
-						label: 'conflictingRelationship',
-					},
+					'conflictingRelationship',
 				)}
 				WHERE otherNode <> node
 				DELETE conflictingRelationship
