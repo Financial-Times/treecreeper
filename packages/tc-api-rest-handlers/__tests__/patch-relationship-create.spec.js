@@ -532,7 +532,9 @@ describe('rest PATCH relationship create', () => {
 	});
 
 	describe('upsert', () => {
-		['merge', 'replace'].forEach(action => {
+		['merge',
+		'replace'
+		].forEach(action => {
 			const handler = (body, query = {}) =>
 				patchHandler()(
 					getInput(body, { relationshipAction: action, ...query }),
@@ -1144,6 +1146,39 @@ describe('rest PATCH relationship create', () => {
 			await neo4jTest('MainType', mainCode)
 				.match(meta.default)
 				.noRels();
+		});
+
+		it('create node related to nodes with strange codes', async () => {
+			const oddCode = `${namespace}:thing/odd`
+			await createMainNode();
+			const { status, body } = await basicHandler(
+				{
+					oddThings: {code: oddCode, oddString: 'blah'},
+				},
+				queries,
+			);
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				oddThings: [oddCode],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_ODD_CODED_THING',
+						direction: 'outgoing',
+						props: {oddString: 'blah', ...meta.create},
+					},
+					{
+						type: 'OddCodeType',
+						props: {
+							code: oddCode,
+							...meta.create,
+						},
+					},
+				);
 		});
 	});
 });
