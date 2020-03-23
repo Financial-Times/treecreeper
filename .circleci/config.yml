@@ -67,7 +67,7 @@ jobs:
           root: *workspace_root
           paths:
             - .
-  build:
+  cypress-build:
     <<: *default_container_config
 
     steps:
@@ -156,9 +156,10 @@ workflows:
       - install:
           context: rel-eng-creds
           filters: *only_version_tags
-      - build:
+      - cypress-build:
           requires:
             - install
+          filters: *only_version_tags
       - test:
           requires:
             - install
@@ -170,7 +171,7 @@ workflows:
           filters: *only_version_tags
       - end-to-end-test:
           requires:
-            - build
+            - cypress-build
           filters: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
