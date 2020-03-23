@@ -159,6 +159,7 @@ workflows:
       - cypress-build:
           requires:
             - install
+          filters: *only_version_tags
       - test:
           requires:
             - install
