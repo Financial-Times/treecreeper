@@ -88,9 +88,9 @@ const prepareToWriteRelationships = (
 
 		relationshipQueries.push(
 			stripIndents`
-			WITH node
+			WITH DISTINCT node
 			${locateRelatedNodes(relationshipSchema, key, upsert)}
-			WITH node, related, relDefs
+			WITH DISTINCT node, related, relDefs
 			MERGE ${relationshipFragmentWithEndNodes('node', relationshipSchema, 'related')}
 				ON CREATE SET ${metaPropertiesForCreate(
 					'relationship',
@@ -116,7 +116,7 @@ const prepareToWriteRelationships = (
 			) {
 				relationshipQueries.push(
 					stripIndents`
-				WITH node, related
+				WITH DISTINCT node, related
 				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
 					'otherNode',
 					relationshipSchema,
@@ -148,7 +148,7 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 			parameters[key] = codes;
 			// Must use OPTIONAL MATCH because 'cypher'
 			return stripIndents`
-				WITH node
+				WITH DISTINCT node
 					OPTIONAL MATCH (node)${relationshipFragment(
 						def.relationship,
 						def.direction,
