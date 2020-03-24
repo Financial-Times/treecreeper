@@ -50,7 +50,8 @@ const prepareToWriteRelationships = (
 
 		relProps.forEach(relProp => {
 			const props = { ...relProp };
-			delete relDefs.push({
+			delete props.code;
+			relDefs.push({
 				code: relProp.code,
 				props,
 			});
