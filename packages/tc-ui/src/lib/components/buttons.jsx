@@ -11,7 +11,9 @@ const EditButton = props => (
 		href={`/${props.type}/${encodeURIComponent(props.code)}/edit?${
 			props.querystring
 		}`}
-		className={getButtonClasses('o-buttons--primary o-buttons--mono treecreeper-cta--link-style-override')}
+		className={getButtonClasses(
+			'o-buttons--primary o-buttons--mono treecreeper-cta--link-style-override',
+		)}
 	>
 		Edit
 	</a>
