@@ -17,6 +17,7 @@ const OneRelationship = props => {
 		value = {},
 		id,
 		hasValue,
+		isRunbooksSystemLink,
 	} = props;
 	let RelationshipProperties = null;
 	// value[propertyName] !== null since neo4j returns null if there is no value
@@ -70,7 +71,12 @@ const OneRelationship = props => {
 
 	return type && value[type] ? (
 		<>
-			<LinkToRecord id={id} type={type} value={value[type]} />
+			<LinkToRecord
+				id={id}
+				type={type}
+				value={value[type]}
+				isRunbooksSystemLink={isRunbooksSystemLink}
+			/>
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value[type]} type={type} />
 			) : null}

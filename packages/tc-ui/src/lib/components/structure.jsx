@@ -139,11 +139,21 @@ const MetaProperties = ({ data, isCreate }) => {
 	);
 };
 
-const LinkToRecord = ({ id, type, value: { name, code } }) => (
-	<a id={id} href={`/${type}/${encodeURIComponent(code)}`}>
-		{name || code}
-	</a>
-);
+const LinkToRecord = ({
+	id,
+	type,
+	value: { name, code },
+	isRunbooksSystemLink,
+}) => {
+	const href = isRunbooksSystemLink
+		? `https://runbooks.in.ft.com/${encodeURIComponent(code)}`
+		: `/${type}/${encodeURIComponent(code)}`;
+	return (
+		<a id={id} href={href}>
+			{name || code}
+		</a>
+	);
+};
 
 module.exports = {
 	LinkToRecord,
