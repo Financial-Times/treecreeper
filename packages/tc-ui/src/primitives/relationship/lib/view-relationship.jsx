@@ -17,7 +17,7 @@ const OneRelationship = props => {
 		value = {},
 		id,
 		hasValue,
-		alternativeHostname,
+		linkGenerator,
 	} = props;
 	let RelationshipProperties = null;
 	// value[propertyName] !== null since neo4j returns null if there is no value
@@ -75,7 +75,7 @@ const OneRelationship = props => {
 				id={id}
 				type={type}
 				value={value[type]}
-				alternativeHostname={alternativeHostname}
+				linkGenerator={linkGenerator}
 			/>
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value[type]} type={type} />

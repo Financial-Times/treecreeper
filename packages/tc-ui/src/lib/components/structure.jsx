@@ -139,17 +139,10 @@ const MetaProperties = ({ data, isCreate }) => {
 	);
 };
 
-const LinkToRecord = ({
-	id,
-	type,
-	value: { name, code },
-	alternativeHostname,
-}) => {
-	const href = alternativeHostname
-		? `${alternativeHostname}/${encodeURIComponent(code)}`
-		: `/${type}/${encodeURIComponent(code)}`;
+const LinkToRecord = ({ id, type, value: { name, code }, linkGenerator }) => {
+	const href = linkGenerator({ type, code });
 	return (
-		<a id={id} href={href}>
+		<a id={id} href={href || `/${type}/${encodeURIComponent(code)}`}>
 			{name || code}
 		</a>
 	);
