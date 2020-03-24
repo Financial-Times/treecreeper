@@ -19,9 +19,10 @@ const {
 
 describe('End-to-end - edit record', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+		});
 	});
 
 	it('can not edit code of record', () => {
@@ -280,7 +281,7 @@ describe('End-to-end - edit record', () => {
 	});
 
 	it('can save record with locked fields', () => {
-		setLockedRecord(code);
+		cy.wrap().then(() => setLockedRecord(code));
 		visitEditPage();
 		cy.get('#id-lockedField').should('have.value', 'locked value 1');
 		cy.get('#id-someString').should('have.value', 'locked value 2');

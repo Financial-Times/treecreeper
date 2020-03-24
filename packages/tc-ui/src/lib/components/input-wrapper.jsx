@@ -53,12 +53,15 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 
 const WrappedEditComponent = props => {
 	props = { ...props, disabled: !!props.lockedBy };
-	const { Component } = props;
-	const WrapperTag = props.wrapperTag || 'label';
+	const { Component, propertyName, wrapperTag } = props;
+	const WrapperTag = wrapperTag || 'label';
+	const htmlFor = WrapperTag === 'label' ? propertyName : '';
+
 	return (
 		<WrapperTag
+			htmlFor={htmlFor}
 			className="o-forms-field"
-			data-biz-ops-type={props.componentType}
+			data-treecreeper-component={props.componentType}
 			data-type={props.dataType}
 			{...(props.wrapperProps || {})}
 		>

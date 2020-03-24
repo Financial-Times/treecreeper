@@ -1,35 +1,41 @@
+/* global window */
 const React = require('react');
 const { getEnums } = require('@financial-times/tc-schema-sdk');
 const {
 	componentAssigner,
 } = require('../../../lib/mappers/component-assigner');
-const { getValue } = require('../../../lib/mappers/get-value.js');
+const { getValue } = require('../../../lib/mappers/get-value');
 
 class RelationshipProperties extends React.Component {
 	constructor(props) {
-		super(props);
+		super();
 		this.props = props;
 	}
 
+	componentDidMount() {
+		if (window && window.Origami) {
+			// needed to init tooltip used for Annotate button
+			window.Origami['o-tooltip'].init();
+			window.Origami['o-expander'].init();
+		}
+	}
+
 	render() {
-		const { value, type, properties } = this.props;
+		const { value, type, properties, onChange } = this.props;
 		const propertyfields = Object.entries(properties);
 
 		return propertyfields
-			.filter(
-				([, schema]) =>
-					// HACK: need to get rid of fields that are doing this
-					!schema.label.includes('deprecated') &&
-					!schema.deprecationReason,
-			)
+			.filter(([, { deprecationReason }]) => !deprecationReason)
 			.map(([name, item], index) => {
 				const assignComponent = componentAssigner();
 				const { EditComponent } = assignComponent(item);
 
 				const viewModel = {
 					isNested: true,
+					parentCode: value.code,
 					propertyName: name,
 					value: getValue(item, value[name]),
+					onChange,
 					dataType: item.type,
 					parentType: type,
 					options: getEnums()[item.type]
@@ -40,9 +46,7 @@ class RelationshipProperties extends React.Component {
 				};
 
 				return viewModel.propertyName && viewModel.label ? (
-					<span className="biz-ops-relationship-annotate" key={index}>
-						<EditComponent key={index} {...viewModel} />
-					</span>
+					<EditComponent key={index} {...viewModel} />
 				) : null;
 			});
 	}

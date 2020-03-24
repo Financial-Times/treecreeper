@@ -1,7 +1,7 @@
 {
   "name": "@financial-times/tc-markdown-parser",
   "version": "0.0.0",
-  "description": "parse runbook.md defintitions which corresponds to biz-ops schema",
+  "description": "parse markdown files and extract treecreeper records",
   "main": "index.js",
   "directories": {
     "lib": "lib",
@@ -20,6 +20,9 @@
     "unist-builder": "^2.0.2",
     "unist-util-select": "^3.0.0",
     "unist-util-visit-parents": "^3.0.1"
+  },
+  "engines": {
+    "node": "^12.0.0"
   },
   "author": "",
   "license": "ISC"

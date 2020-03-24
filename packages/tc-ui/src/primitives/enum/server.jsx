@@ -3,6 +3,13 @@ const React = require('react');
 const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const Option = ({ option }) => (
 	<option value={option === `Don't know` ? 'null' : option}>{option}</option>
 );
@@ -38,7 +45,15 @@ const OptionsInfo = ({ type }) => {
 };
 
 const EditEnum = props => {
-	const { propertyName, value, options, disabled, isNested } = props;
+	const {
+		propertyName,
+		value,
+		options,
+		disabled,
+		isNested,
+		parentCode,
+		onChange,
+	} = props;
 	const optionsWithDefault = ["Don't know"].concat(options);
 	const name = !isNested ? propertyName : '';
 	return (
@@ -48,6 +63,10 @@ const EditEnum = props => {
 				id={`id-${propertyName}`}
 				name={name}
 				defaultValue={value || "Don't know"}
+				data-parent-code={parentCode}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			>
 				{optionsWithDefault.map((option, index) => (
 					<Option option={option} key={index} />

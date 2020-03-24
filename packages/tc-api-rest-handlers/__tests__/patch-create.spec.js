@@ -218,6 +218,9 @@ describe('rest PATCH create', () => {
 	describe('rich relationship information', () => {
 		const someString = 'some string';
 		const anotherString = 'another string';
+		const someBoolean = true;
+		const someEnum = 'First';
+		const someMultipleChoice = ['First', 'Second'];
 		const queries = {
 			relationshipAction: 'merge',
 			richRelationships: true,
@@ -450,6 +453,261 @@ describe('rest PATCH create', () => {
 					{
 						type: 'ParentType',
 						props: { code: parentCode, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationships which have same properties with different values (two parents)', async () => {
+			const parentOneRelationshipProps = {
+				code: parentCode,
+				someString: 'parent one some string',
+				anotherString: 'Parent one another string',
+			};
+			const parentTwoRelationshipProps = {
+				code: parentCode2,
+				someString,
+				anotherString,
+			};
+
+			await createNodes(
+				['ParentType', parentCode],
+				['ParentType', parentCode2],
+			);
+
+			const { status, body } = await basicHandler(
+				{
+					curiousParent: [
+						parentOneRelationshipProps,
+						parentTwoRelationshipProps,
+					],
+				},
+				queries,
+			);
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				curiousParent: [
+					{ ...parentOneRelationshipProps, ...meta.create },
+					{ ...parentTwoRelationshipProps, ...meta.create },
+				],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(2)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString: parentOneRelationshipProps.someString,
+							anotherString:
+								parentOneRelationshipProps.anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode, ...meta.default },
+					},
+				)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString,
+							anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode2, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationships which have same properties with different values (child and parent)', async () => {
+			const parentRelProps = {
+				code: parentCode,
+				someString: 'Parent some string',
+				anotherString: 'Parent another string',
+			};
+			const childRelProps = {
+				code: childCode,
+				someString,
+				anotherString,
+				someMultipleChoice,
+				someEnum,
+				someBoolean,
+			};
+
+			await createNodes(
+				['ChildType', childCode],
+				['ParentType', parentCode],
+			);
+			const { status, body } = await basicHandler(
+				{
+					curiousChild: [childRelProps],
+					curiousParent: [parentRelProps],
+				},
+				queries,
+			);
+
+			expect(status).toBe(201);
+			// curiousChild's hasMany value is false, curiousParent's hasMany value is true
+			// Therefore in body, curiousParent is in an Array and curiousChild is not.
+			expect(body).toMatchObject({
+				curiousChild: { ...childRelProps, ...meta.create },
+				curiousParent: [{ ...parentRelProps, ...meta.create }],
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(2)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someString,
+							anotherString,
+							someMultipleChoice,
+							someEnum,
+							someBoolean,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: { code: childCode, ...meta.default },
+					},
+				)
+				.hasRel(
+					{
+						type: 'IS_CURIOUS_PARENT_OF',
+						direction: 'incoming',
+						props: {
+							someString: parentRelProps.someString,
+							anotherString: parentRelProps.anotherString,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ParentType',
+						props: { code: parentCode, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationship which has a multiple choice property', async () => {
+			await createNodes(['ChildType', childCode]);
+			const { status, body } = await basicHandler(
+				{
+					curiousChild: { code: childCode, someMultipleChoice },
+				},
+				queries,
+			);
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				curiousChild: {
+					code: childCode,
+					someMultipleChoice,
+					...meta.create,
+				},
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someMultipleChoice,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: { code: childCode, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationship which has an enum property', async () => {
+			await createNodes(['ChildType', childCode]);
+			const { status, body } = await basicHandler(
+				{
+					curiousChild: { code: childCode, someEnum },
+				},
+				queries,
+			);
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				curiousChild: {
+					code: childCode,
+					someEnum,
+					...meta.create,
+				},
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someEnum,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: { code: childCode, ...meta.default },
+					},
+				);
+		});
+
+		it('creates record with relationship which has a boolean property', async () => {
+			await createNodes(['ChildType', childCode]);
+			const { status, body } = await basicHandler(
+				{
+					curiousChild: { code: childCode, someBoolean },
+				},
+				queries,
+			);
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				curiousChild: {
+					code: childCode,
+					someBoolean,
+					...meta.create,
+				},
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.match(meta.create)
+				.hasRels(1)
+				.hasRel(
+					{
+						type: 'HAS_CURIOUS_CHILD',
+						direction: 'outgoing',
+						props: {
+							someBoolean,
+							...meta.create,
+						},
+					},
+					{
+						type: 'ChildType',
+						props: { code: childCode, ...meta.default },
 					},
 				);
 		});

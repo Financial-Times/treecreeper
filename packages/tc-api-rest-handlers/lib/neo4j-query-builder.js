@@ -41,7 +41,7 @@ const getBaseQuery = (type, method, willUpdateMeta) => {
 			return stripIndents`
 				CREATE (node:${type} $properties)
 				SET ${metaPropertiesForCreate('node')}
-				WITH node`;
+				WITH DISTINCT node`;
 		case 'MERGE':
 			return stripIndents`
 				MERGE (node:${type} { code: $code })

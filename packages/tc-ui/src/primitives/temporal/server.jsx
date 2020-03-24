@@ -41,6 +41,13 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
+
 const EditTemporal = ({
 	type,
 	propertyName,
@@ -48,6 +55,8 @@ const EditTemporal = ({
 	required,
 	disabled,
 	isNested,
+	parentCode,
+	onChange,
 }) => {
 	const name = !isNested
 		? `${propertyName}${disabled ? '-disabled' : ''}`
@@ -64,6 +73,10 @@ const EditTemporal = ({
 				value={convertValueForHTMLInput(value, type)}
 				required={required ? 'required' : null}
 				disabled={disabled ? 'disabled' : null}
+				data-parent-code={parentCode}
+				onChange={
+					!isNested ? null : event => localOnChange(event, onChange)
+				}
 			/>
 		</span>
 	);

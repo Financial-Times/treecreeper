@@ -16,10 +16,25 @@ const markdown = text =>
 		  Autolinker.link(markdownParser.makeHtml(text || ''));
 
 const outputFreeText = (text = '') => text;
+const localOnChange = (event, onChange) => {
+	const { value, id, dataset } = event.currentTarget;
+	const { parentCode } = dataset;
+	const propertyName = id.split('-')[1];
+	onChange(propertyName, parentCode, value);
+};
 
 const EditLargeText = props => {
-	const { propertyName, value, dataType, disabled, isNested } = props;
+	const {
+		propertyName,
+		value,
+		dataType,
+		disabled,
+		isNested,
+		parentCode,
+		onChange,
+	} = props;
 	const name = !isNested ? propertyName : '';
+
 	return (
 		<>
 			<span className="o-forms-input o-forms-input--textarea">
@@ -29,6 +44,12 @@ const EditLargeText = props => {
 					rows={dataType === 'Document' ? '40' : '8'}
 					disabled={disabled}
 					defaultValue={outputFreeText(value)}
+					data-parent-code={parentCode}
+					onChange={
+						!isNested
+							? null
+							: event => localOnChange(event, onChange)
+					}
 				/>
 			</span>
 			{dataType === 'Document' ? (

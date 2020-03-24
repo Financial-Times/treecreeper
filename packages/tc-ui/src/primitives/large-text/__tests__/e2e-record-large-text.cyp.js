@@ -11,13 +11,14 @@ const {
 
 describe('End-to-end - record LargeText type', () => {
 	it('can record large text', () => {
-		resetDb();
-		populateMinimumViableFields(code);
-		cy.get('textarea[name=someDocument]').type(someDocument);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			cy.get('textarea[name=someDocument]').type(someDocument);
+			save();
 
-		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
-		cy.get('#someDocument').should('have.text', someDocument);
+			cy.get('#code').should('have.text', code);
+			cy.get('#someString').should('have.text', someString);
+			cy.get('#someDocument').should('have.text', someDocument);
+		});
 	});
 });

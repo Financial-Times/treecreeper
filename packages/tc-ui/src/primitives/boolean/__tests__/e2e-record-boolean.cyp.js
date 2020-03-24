@@ -8,10 +8,11 @@ const {
 
 describe('End-to-end - record Boolean type', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		cy.get('#radio-someBoolean-Yes').check({ force: true });
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			cy.get('#radio-someBoolean-Yes').check({ force: true });
+			save();
+		});
 	});
 
 	it('can record a value', () => {

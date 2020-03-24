@@ -5,7 +5,7 @@ const { Concept, SectionHeader } = require('../../lib/components/structure');
 const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
-const PropertyInputs = ({ fields, data, type, assignComponent }) => {
+const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 	const propertyfields = Object.entries(fields);
 
 	const fieldsToLock = data._lockedFields
@@ -26,10 +26,12 @@ const PropertyInputs = ({ fields, data, type, assignComponent }) => {
 
 			const { EditComponent } = assignComponent(propDef);
 			const itemValue = propDef.isRelationship
-				? data[`${propertyName}_rel`]
+				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
 
 			const viewModel = {
+				hasError,
+				parentCode: data.code,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
@@ -89,7 +91,7 @@ const EditForm = props => {
 						description={schema.description}
 						moreInformation={schema.moreInformation}
 					/>
-					<div className="biz-ops-cta-container--sticky o-layout__unstyled-element">
+					<div className="treecreeper-cta-container--sticky o-layout__unstyled-element">
 						<SaveButton
 							querystring={querystring || ''}
 							type={type}
@@ -104,13 +106,14 @@ const EditForm = props => {
 					{Object.entries(schema.fieldsets).map(
 						([name, { heading, properties }], index) => (
 							<fieldset
-								className={`fieldset-biz-ops fieldset-${name}`}
+								className={`fieldset-treecreeper fieldset-${name}`}
 								key={index}
 							>
 								<div className="o-layout-typography">
 									<SectionHeader title={heading} />
 								</div>
 								<PropertyInputs
+									hasError={!!error}
 									fields={properties}
 									data={data}
 									type={type}

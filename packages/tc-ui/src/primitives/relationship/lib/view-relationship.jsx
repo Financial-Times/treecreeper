@@ -19,8 +19,17 @@ const OneRelationship = props => {
 		hasValue,
 	} = props;
 	let RelationshipProperties = null;
+	// value[propertyName] !== null since neo4j returns null if there is no value
+
+	if (!value) {
+		return null;
+	}
+
 	const validValues = Object.keys(value)
-		.filter(key => value[key] && key !== type)
+		.filter(
+			propertyName =>
+				value[propertyName] !== null && propertyName !== type,
+		)
 		.reduce((res, key) => ((res[key] = properties[key]), res), {});
 
 	if (Object.keys(validValues).length && hasValue) {
@@ -29,26 +38,30 @@ const OneRelationship = props => {
 				data-o-component="o-expander"
 				className="o-expander"
 				data-o-expander-shrink-to="hidden"
-				data-o-expander-collapsed-toggle-text="more info"
-				data-o-expander-expanded-toggle-text="less"
+				data-o-expander-collapsed-toggle-text="view details"
+				data-o-expander-expanded-toggle-text="hide details"
 			>
 				{' '}
 				<button className="o-expander__toggle o--if-js" type="button">
-					more info
+					view details
 				</button>
 				<div className="o-expander__content">
-					<dl className="biz-ops-relationship-props-list">
-						{Object.entries(validValues).map(([name, item]) => {
-							const viewModel = {
-								value: value[name],
-								id: name,
-								...item,
-								...assignComponent(item),
-							};
-							return viewModel.label ? (
-								<LabelledPrimitive {...viewModel} />
-							) : null;
-						})}
+					<dl className="treecreeper-relationship-props-list">
+						{Object.entries(validValues).map(
+							([name, item], index) => {
+								const viewModel = {
+									value: value[name],
+									id: name,
+									...item,
+									...assignComponent(item),
+								};
+								return viewModel.label ? (
+									<span key={index}>
+										<LabelledPrimitive {...viewModel} />
+									</span>
+								) : null;
+							},
+						)}
 					</dl>
 				</div>
 			</div>
@@ -77,13 +90,13 @@ const ViewRelationship = props => {
 	const inactiveCheck = datum => {
 		if (schema.inactiveRule) {
 			return Object.entries(schema.inactiveRule).every(
-				([prop, expectedValue]) => datum[prop] === expectedValue,
+				([prop, expectedValue]) => datum[type][prop] === expectedValue,
 			);
 		}
-		return datum.isActive === false;
+		return datum[type].isActive === false;
 	};
 	return Array.isArray(value) ? (
-		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
+		<ul id={id} className="o-layout__unstyled-element treecreeper-links">
 			{sortBy(value, [`${type}.code`]).map((item, index) => {
 				return (
 					<li

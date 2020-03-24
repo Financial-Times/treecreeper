@@ -8,7 +8,11 @@ const { RawDataWrapper } = require('../raw-data-wrapper');
 const { Cache } = require('../cache');
 
 const create = options =>
-	new SchemaUpdater(options, new RawDataWrapper(), new Cache());
+	new SchemaUpdater({
+		options,
+		rawData: new RawDataWrapper(),
+		cache: new Cache(),
+	});
 
 const nextTick = () => new Promise(res => process.nextTick(res));
 

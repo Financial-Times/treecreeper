@@ -37,6 +37,7 @@ const getCMS = ({
 			restApiUrl,
 			graphqlApiUrl,
 			apiHeaders,
+			clientId,
 		});
 
 	const { formDataToRest, formDataToGraphQL } = getDataTransformers(

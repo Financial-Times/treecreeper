@@ -3,6 +3,7 @@ const validURL = require('valid-url');
 const { SDK } = require('@financial-times/tc-schema-sdk');
 
 const sdk = new SDK();
+sdk.init();
 const primitiveTypesMap = sdk.getPrimitiveTypes();
 const { getStringValidator } = sdk;
 const enums = sdk.rawData.getEnums();

@@ -6,16 +6,11 @@ const {
 } = require('@financial-times/tc-schema-sdk');
 const {
 	metaPropertiesForCreate,
-	createRelMetaQueryForUpdate,
+	metaPropertiesForUpdate,
 } = require('../metadata-helpers');
 
-const relationshipFragment = (
-	type,
-	direction,
-	{ label = 'relationship', reverse = false } = {},
-) => {
-	const [left, right] =
-		reverse === (direction === 'outgoing') ? ['<', ''] : ['', '>'];
+const relationshipFragment = (type, direction, label = 'relationship') => {
+	const [left, right] = direction === 'incoming' ? ['<', ''] : ['', '>'];
 	return `${left}-[${label}:${type}]-${right}`;
 };
 
@@ -23,49 +18,9 @@ const relationshipFragmentWithEndNodes = (
 	head,
 	{ relationship, direction },
 	tail,
-	options,
+	label,
 ) =>
-	`(${head})${relationshipFragment(
-		relationship,
-		direction,
-		options,
-	)}(${tail})`;
-
-const locateRelatedNodes = ({ type }, key, upsert) => {
-	if (upsert) {
-		return `
-UNWIND $${key} as nodeCodes
-MERGE (related:${type} {code: nodeCodes} )
-	ON CREATE SET ${metaPropertiesForCreate('related')}
-`;
-	}
-	// Uses OPTIONAL MATCH when trying to match a node as it returns [null]
-	// rather than [] if the node doesn't exist
-	// This means the next line tries to create a relationship pointing
-	// at null, so we get an informative error
-	return `
-OPTIONAL MATCH (related:${type})
-WHERE related.code IN $${key}
-`;
-};
-
-const addPropsToQueries = (relationshipPropQueries, value) => {
-	// value: { code: 'node code', someString: 'some string'...}
-	Object.entries(value).forEach(([k, v]) => {
-		if (k !== 'code') {
-			// If no node matches the CASE expression, the expression returns a null.
-			// and no action will be taken
-			relationshipPropQueries.push(`
-				SET (CASE
-				WHEN related.code = '${value.code}'
-				THEN relationship END).${k} = ${v === null ? null : `'${v}'`}
-				`);
-			relationshipPropQueries.push(
-				createRelMetaQueryForUpdate(value.code),
-			);
-		}
-	});
-};
+	`(${head})${relationshipFragment(relationship, direction, label)}(${tail})`;
 
 const prepareToWriteRelationships = (
 	nodeType,
@@ -77,40 +32,57 @@ const prepareToWriteRelationships = (
 	const relationshipParameters = {};
 	const relationshipQueries = [];
 
+	// Note on the limitations of cypher:
+	// It would be so nice to use UNWIND to create all these from a list parameter,
+	// but unfortunately parameters cannot be used to specify relationship labels
+	// so for every relatinship type we need to append a fragment of cypher
 	Object.entries(relationshipsToCreate).forEach(([relType, relProps]) => {
-		const relDef = validProperties[relType];
-		const { type: relatedType, direction, relationship } = relDef;
-		const key = `${relationship}${direction}${relatedType}`;
+		const relationshipSchema = validProperties[relType];
+		const {
+			type: relatedType,
+			direction,
+			relationship,
+		} = relationshipSchema;
 
-		const retrievedCodes = [];
-		const relationshipPropQueries = [];
+		const relDefsKey = `${relationship}${direction}${relatedType}`;
+
+		const relDefs = [];
 
 		relProps.forEach(relProp => {
-			retrievedCodes.push(relProp.code);
-			addPropsToQueries(relationshipPropQueries, relProp);
+			const props = { ...relProp };
+			delete props.code;
+			relDefs.push({
+				code: relProp.code,
+				props,
+			});
 		});
 
-		// make sure the parameter referenced in the query exists on the
-		// globalParameters object passed to the db driver
-		Object.assign(relationshipParameters, {
-			[key]: retrievedCodes,
-		});
+		relationshipParameters[relDefsKey] = relDefs;
 
-		// Note on the limitations of cypher:
-		// It would be so nice to use UNWIND to create all these from a list parameter,
-		// but unfortunately parameters cannot be used to specify relationship labels
+		// Uses OPTIONAL MATCH for upsert because it returns [null]
+		// rather than [] if the node doesn't exist
+		// This means the next line tries to create a relationship pointing
+		// at null, so we get an informative error
 		relationshipQueries.push(
 			stripIndents`
-			WITH node
-			${locateRelatedNodes(relDef, key, upsert)}
-			WITH node, related
-			MERGE ${relationshipFragmentWithEndNodes('node', relDef, 'related')}
-				ON CREATE SET ${metaPropertiesForCreate('relationship')}
-			${relationshipPropQueries.join('')}
+			WITH DISTINCT node
+			UNWIND $${relDefsKey} as relDefs
+			${
+				upsert ? 'MERGE' : 'OPTIONAL MATCH'
+			} (related:${relatedType} {code: relDefs.code})
+			${upsert ? `ON CREATE SET ${metaPropertiesForCreate('related')}` : ''}
+			WITH DISTINCT node, related, relDefs
+			MERGE ${relationshipFragmentWithEndNodes('node', relationshipSchema, 'related')}
+				ON CREATE SET ${metaPropertiesForCreate(
+					'relationship',
+				)}, relationship += relDefs.props
+				ON MATCH SET ${metaPropertiesForUpdate(
+					'relationship',
+				)}, relationship += relDefs.props
 		`,
 		);
 
-		if (relDef.hasMany) {
+		if (relationshipSchema.hasMany) {
 			const { properties: relatedProperties } = getType(relatedType);
 			const inverseProperties = findInversePropertyNames(
 				nodeType,
@@ -123,16 +95,15 @@ const prepareToWriteRelationships = (
 						!relatedProperties[inverseProperty].hasMany,
 				)
 			) {
+				// TODO - send an update event for this
 				relationshipQueries.push(
 					stripIndents`
-				WITH node, related
+				WITH DISTINCT node, related
 				OPTIONAL MATCH ${relationshipFragmentWithEndNodes(
 					'otherNode',
-					relDef,
+					relationshipSchema,
 					'related',
-					{
-						label: 'conflictingRelationship',
-					},
+					'conflictingRelationship',
 				)}
 				WHERE otherNode <> node
 				DELETE conflictingRelationship
@@ -157,7 +128,7 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 			parameters[key] = codes;
 			// Must use OPTIONAL MATCH because 'cypher'
 			return stripIndents`
-				WITH node
+				WITH DISTINCT node
 					OPTIONAL MATCH (node)${relationshipFragment(
 						def.relationship,
 						def.direction,

@@ -1,4 +1,4 @@
-const metaProperties = require('../lib/meta-properties');
+const metaProperties = require('./meta-properties');
 
 const assignMetaProperties = (properties, { ignoreFields = [] } = {}) => {
 	metaProperties.forEach(metaProperty => {

@@ -7,7 +7,7 @@ const toKebabCase = string =>
 		.join('-');
 
 const Concept = ({ name, description, moreInformation }) => (
-	<aside className="biz-ops-aside" title="Concept">
+	<aside className="treecreeper-aside" title="Concept">
 		<div className="o-forms-title">
 			<div className="o-forms-title__main">A {name} is:</div>
 			<div className="description-text o-forms-title__prompt">
@@ -31,7 +31,7 @@ const SectionHeader = ({ title, code, type, includeEditLink = false }) => (
 				{includeEditLink && code && type ? (
 					<>
 						<a // eslint-disable-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
-							className="o-icons-icon o-icons-icon--edit biz-ops-section-header__edit-link o-layout__unstyled-element"
+							className="o-icons-icon o-icons-icon--edit treecreeper-section-header__edit-link o-layout__unstyled-element"
 							href={`/${type}/${code}/edit?#${toKebabCase(
 								title,
 							)}`}
@@ -75,12 +75,12 @@ const LabelledPrimitive = props => {
 			>
 				{label}
 				<span
-					className={`tooltip-target-${id} biz-ops-help`}
+					className={`tooltip-target-${id} treecreeper-help`}
 					id={`tooltip-target-${id}`}
 				>
 					<i
 						aria-label={`help for ${id}`}
-						className="o-icons-icon o-icons-icon--info biz-ops-help-icon"
+						className="o-icons-icon o-icons-icon--info treecreeper-help-icon"
 					/>
 				</span>
 				<div

@@ -5,6 +5,7 @@ const { SDK } = require('@financial-times/tc-schema-sdk');
 const { typeTestSuite, relationshipTestSuite } = require('./type-test-suite');
 
 const sdk = new SDK();
+sdk.init();
 const { readYaml } = sdk;
 
 const makePath = dir =>

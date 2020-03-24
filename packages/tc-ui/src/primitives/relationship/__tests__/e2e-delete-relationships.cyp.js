@@ -12,13 +12,14 @@ const {
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		save();
-		populateChildTypeFields(`${code}-first-child`);
-		save();
-		populateChildTypeFields(`${code}-second-child`);
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			save();
+			populateChildTypeFields(`${code}-first-child`);
+			save();
+			populateChildTypeFields(`${code}-second-child`);
+			save();
+		});
 	});
 
 	it('can remove 1-to-1 relationship', () => {
@@ -44,7 +45,7 @@ describe('End-to-end - relationship deletion', () => {
 		cy.get('#favouriteChild').should('not.exist');
 	});
 
-	it('can remove a relationship from 1-to-many relationship', () => {
+	it('can remove first relationship from 1-to-many relationship', () => {
 		visitMainTypePage();
 		visitEditPage();
 
@@ -80,6 +81,44 @@ describe('End-to-end - relationship deletion', () => {
 			.should('have.text', `${code}-second-child`)
 			.find('a')
 			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+	});
+
+	it('can remove nth relationship from 1-to-many relationship', () => {
+		visitMainTypePage();
+		visitEditPage();
+
+		// pick second child
+		pickChild();
+
+		save();
+		cy.url().should('contain', `/MainType/${code}`);
+
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
+
+		cy.get('#children>li')
+			.eq(1)
+			.should('have.text', `${code}-second-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-second-child`);
+
+		visitEditPage();
+		cy.get('#ul-children>li')
+			.eq(1)
+			.find('button.relationship-remove-button')
+			.should('have.text', 'Remove')
+			.click();
+		save();
+
+		cy.url().should('contain', `/MainType/${code}`);
+		cy.get('#children>li')
+			.eq(0)
+			.should('have.text', `${code}-first-child`)
+			.find('a')
+			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 	});
 
 	it('can remove all relationships from 1-to-many relationship', () => {

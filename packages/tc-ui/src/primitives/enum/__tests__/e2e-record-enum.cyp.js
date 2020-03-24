@@ -8,10 +8,11 @@ const {
 
 describe('End-to-end - record Enum type', () => {
 	beforeEach(() => {
-		resetDb();
-		populateMinimumViableFields(code);
-		cy.get('select[name=someEnum]').select('First');
-		save();
+		cy.wrap(resetDb()).then(() => {
+			populateMinimumViableFields(code);
+			cy.get('select[name=someEnum]').select('First');
+			save();
+		});
 	});
 
 	it('can record a selection', () => {

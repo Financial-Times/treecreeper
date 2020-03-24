@@ -14,12 +14,17 @@ const { SchemaUpdater } = require('./lib/updater');
 const utils = require('./lib/utils');
 
 class SDK {
-	constructor(options = {}) {
+	constructor(options) {
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper();
-		this.TreecreeperUserError = TreecreeperUserError;
-		this.subscribers = [];
+		this.updater = new SchemaUpdater({
+			options,
+			rawData: this.rawData,
+			cache: this.cache,
+			readYaml: this.readYaml,
+		});
 
+		this.TreecreeperUserError = TreecreeperUserError;
 		this.getEnums = this.createEnrichedAccessor(enums);
 		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);
 		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
@@ -40,10 +45,6 @@ class SDK {
 		Object.entries(utils).forEach(([name, method]) => {
 			this[name] = method.bind(this);
 		});
-
-		if (options.init !== false) {
-			this.init(options);
-		}
 	}
 
 	createEnrichedAccessor({ accessor, cacheKeyGenerator }) {
@@ -53,19 +54,8 @@ class SDK {
 		);
 	}
 
-	async init(options) {
-		const schemaUpdater = new SchemaUpdater(
-			options,
-			this.rawData,
-			this.cache,
-			this.readYaml,
-		);
-
-		// hook up schema updater to this.cache then
-		schemaUpdater.on('change', data => {
-			this.subscribers.forEach(handler => handler(data));
-		});
-		this.updater = schemaUpdater;
+	init(options) {
+		return this.updater.configure(options);
 	}
 
 	async ready() {
@@ -82,7 +72,7 @@ class SDK {
 		if (this.rawData.isHydrated) {
 			handler(event);
 		}
-		this.subscribers.push(handler);
+		this.updater.on('change', handler);
 	}
 }
 

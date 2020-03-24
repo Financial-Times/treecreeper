@@ -15,6 +15,15 @@ The package exports a singleton instance, and once initialised, `@financial-time
 
 ### Initialisation
 
+This is a little odd (and should be improved in future)
+
+-   When using local, static data (`schemaDirectory` or `schemaData` options below), the `init()` method populates the sdk with data immediately and its methods can be used to access the data immediately
+-   When using remote data (`schemaBaseUrl`), no data is populated, and `schema.ready()` must be awaited before using the sdk's synchronous methods.
+
+Be aware of the idiosyncrasy above if you ever come across errors complaining that no data is available.
+
+### `init(options)`
+
 The package exports an `init(options)` function, that takes the following options:
 
 -   `schemaDirectory` - absolute path to a directory that contains schema files as yaml. Will use the `TREECREEPER_SCHEMA_DIRECTORY` environment variable if defined. This is the preferred way of specifying the directory

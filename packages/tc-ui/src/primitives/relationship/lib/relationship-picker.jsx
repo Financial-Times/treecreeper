@@ -53,7 +53,7 @@ class RelationshipPicker extends React.Component {
 			selectedRelationships,
 			hasHighlightedSelection: false,
 			isFull: !props.hasMany && !!selectedRelationships.length,
-			isExpanded: false,
+			annotate: false,
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
@@ -63,6 +63,7 @@ class RelationshipPicker extends React.Component {
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
+		this.onChange = this.onChange.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -70,7 +71,7 @@ class RelationshipPicker extends React.Component {
 		// React witchcraft, event has been replaced by a null one by the time we get to
 		// the setState callback (I presume React implements some kind of instance reuse
 		// optimisation, which doesn't hang around for async stuff to execute)
-		const buttonIndex = event.target.dataset.index;
+		const buttonIndex = Number(event.target.dataset.index.split('-')[1]);
 		this.setState(({ selectedRelationships }) => {
 			selectedRelationships = [...selectedRelationships];
 			selectedRelationships.splice(buttonIndex, 1);
@@ -128,7 +129,23 @@ class RelationshipPicker extends React.Component {
 		}
 	}
 
+	onChange(propertyName, parentCode, value) {
+		this.setState(prevState => {
+			const { selectedRelationships: selectedRel } = prevState;
+			const selectedRelationships = selectedRel.map(relationship => {
+				if (relationship.code === parentCode) {
+					relationship[propertyName] = value;
+				}
+				return relationship;
+			});
+			return {
+				selectedRelationships,
+			};
+		});
+	}
+
 	fetchSuggestions({ value }) {
+		const { parentCode } = this.props;
 		if (!value) {
 			return;
 		}
@@ -140,11 +157,12 @@ class RelationshipPicker extends React.Component {
 				this.setState(({ selectedRelationships }) => ({
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
+						// don't suggest self (relationship to self is not supported at the moment)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
-								),
+								) && parentCode !== suggestion.code,
 						),
 				}));
 			});
@@ -160,13 +178,18 @@ class RelationshipPicker extends React.Component {
 		if (this.props.hasMany) {
 			this.setState(({ selectedRelationships }) => {
 				selectedRelationships = [...selectedRelationships, suggestion];
-				return { ...neutralState, selectedRelationships };
+				return {
+					...neutralState,
+					selectedRelationships,
+					annotate: true,
+				};
 			});
 		} else {
 			this.setState({
 				...neutralState,
 				selectedRelationships: [suggestion],
 				isFull: true,
+				annotate: true,
 			});
 		}
 		// this is needed to prevent the event propagating up and then
@@ -205,7 +228,7 @@ class RelationshipPicker extends React.Component {
 
 	render() {
 		const { props } = this;
-		const { propertyName } = props;
+		const { propertyName, hasError } = props;
 		const disabled = !!this.props.lockedBy;
 		const {
 			searchTerm,
@@ -214,9 +237,8 @@ class RelationshipPicker extends React.Component {
 			isUserError,
 			isUnresolved,
 			isFull,
-			isExpanded,
+			annotate,
 		} = this.state;
-
 		return (
 			<div
 				data-props={JSON.stringify(props)}
@@ -279,11 +301,13 @@ class RelationshipPicker extends React.Component {
 				>
 					{selectedRelationships.map((val, i) => (
 						<Relationship
+							hasError={hasError}
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}
 							index={i}
 							key={i}
-							isExpanded={isExpanded}
+							annotate={annotate}
+							onChange={this.onChange}
 							{...{ ...props, value: val }}
 						/>
 					))}
