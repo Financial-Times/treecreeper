@@ -143,10 +143,10 @@ const LinkToRecord = ({
 	id,
 	type,
 	value: { name, code },
-	isRunbooksSystemLink,
+	alternativeHostname,
 }) => {
-	const href = isRunbooksSystemLink
-		? `https://runbooks.in.ft.com/${encodeURIComponent(code)}`
+	const href = alternativeHostname
+		? `${alternativeHostname}/${encodeURIComponent(code)}`
 		: `/${type}/${encodeURIComponent(code)}`;
 	return (
 		<a id={id} href={href}>

@@ -17,7 +17,7 @@ const OneRelationship = props => {
 		value = {},
 		id,
 		hasValue,
-		isRunbooksSystemLink,
+		alternativeHostname,
 	} = props;
 	let RelationshipProperties = null;
 	// value[propertyName] !== null since neo4j returns null if there is no value
@@ -75,7 +75,7 @@ const OneRelationship = props => {
 				id={id}
 				type={type}
 				value={value[type]}
-				isRunbooksSystemLink={isRunbooksSystemLink}
+				alternativeHostname={alternativeHostname}
 			/>
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value[type]} type={type} />
