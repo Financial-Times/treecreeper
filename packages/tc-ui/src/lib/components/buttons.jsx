@@ -42,7 +42,7 @@ const CancelButton = props => {
 			data-button-type="cancel"
 			href={redirectLocation}
 			className={getButtonClasses(
-				'o-buttons--mono treecreeper-cta--link-style-override',
+				'o-buttons--secondary o-buttons--mono treecreeper-cta--link-style-override',
 			)}
 		>
 			Cancel

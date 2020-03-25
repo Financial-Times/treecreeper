@@ -55,7 +55,10 @@ const EditLargeText = props => {
 			{dataType === 'Document' ? (
 				<div className="document-edit-tools">
 					Edit using github flavoured markdown or use the&nbsp;
-					<button className="o-buttons wysiwyg-toggle" type="button">
+					<button
+						className="o-buttons o-buttons--secondary wysiwyg-toggle"
+						type="button"
+					>
 						wysiwyg HTML editor
 					</button>
 				</div>

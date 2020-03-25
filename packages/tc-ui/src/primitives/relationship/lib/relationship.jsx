@@ -88,7 +88,7 @@ class Relationship extends React.Component {
 							<button
 								type="button"
 								disabled={disabled ? 'disabled' : null}
-								className={`o-buttons o-buttons--small relationship-remove-button ${
+								className={`o-buttons o-buttons--secondary o-buttons--small relationship-remove-button ${
 									disabled ? 'disabled' : ''
 								}`}
 								onClick={onRelationshipRemove}
@@ -110,7 +110,7 @@ class Relationship extends React.Component {
 												? 'disabled'
 												: null
 										}
-										className={`o-buttons o-buttons--small relationship-annotate-button ${
+										className={`o-buttons o-buttons--secondary o-buttons--small relationship-annotate-button ${
 											disabled ? 'disabled' : ''
 										}`}
 										onClick={

@@ -26,15 +26,15 @@ const constructOrigamiUrl = (type, componentsMap) =>
 const assetReferences = {
 	origamiJs: constructOrigamiUrl('js', {
 		...tcUiJsModules,
-		'o-table': '^7.0.5',
-		'o-header-services': '^3.2.3',
+		'o-table': '^8.0.3',
+		'o-header-services': '^4.0.0',
 	}),
 	origamiCss: constructOrigamiUrl('css', {
 		...tcUiCssModules,
-		'o-header-services': '^3.2.3',
-		'o-table': '^7.0.5',
-		'o-labels': '^4.1.1',
-		'o-footer-services': '^2.1.0',
+		'o-header-services': '^4.0.0',
+		'o-table': '^8.0.3',
+		'o-labels': '^5.0.0',
+		'o-footer-services': '^3.0.1',
 	}),
 	mainJs: `${ASSET_ROOT}${assetManifest['main.js']}`,
 	mainCss: `${ASSET_ROOT}${assetManifest['main.css']}`,
