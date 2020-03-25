@@ -139,8 +139,9 @@ const MetaProperties = ({ data, isCreate }) => {
 	);
 };
 
-const LinkToRecord = ({ id, type, value: { name, code }, linkGenerator }) => {
-	const href = linkGenerator && linkGenerator({ type, code });
+const LinkToRecord = ({ id, type, value, linkGenerator }) => {
+	const { name, code } = value;
+	const href = linkGenerator && linkGenerator({ type, ...value });
 	return (
 		<a id={id} href={href || `/${type}/${encodeURIComponent(code)}`}>
 			{name || code}
