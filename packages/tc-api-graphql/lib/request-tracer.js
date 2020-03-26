@@ -17,10 +17,10 @@ class Tracer {
 			Object.entries(this.map).forEach(([type, fields]) => {
 				let properties;
 				try {
-					({ properties } = getType(type))
-				} catch {
+					({ properties } = getType(type));
+				} catch (err) {
 					properties = {};
-				};
+				}
 				fields = [...fields];
 				logger[logType]({
 					event: 'GRAPHQL_TRACE',
