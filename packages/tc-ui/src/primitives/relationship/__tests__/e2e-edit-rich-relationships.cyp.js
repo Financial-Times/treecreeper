@@ -1,32 +1,31 @@
 const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
-	populateParentTypeFields,
+	createType,
+	createMainTypeRecordWithChild,
 	pickCuriousChild,
 	pickCuriousParent,
 	visitEditPage,
 	visitMainTypePage,
 	save,
-	resetDb,
 	setPropsOnCuriousParentRel,
 	setPropsOnCuriousChildRel,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - edit relationship properties', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-			populateParentTypeFields(`${code}-parent-one`);
-			save();
-			populateParentTypeFields(`${code}-parent-two`);
-			save();
+		const firstChild = `${code}-first-child`;
+		const parentOne = `${code}-parent-one`;
+		const parentTwo = `${code}-parent-two`;
+		const p1 = createType({ code: parentOne, type: 'ParentType' });
+		const p2 = createType({ code: parentTwo, type: 'ParentType' });
+		const m = createMainTypeRecordWithChild(code, firstChild);
+		cy.wrap(Promise.all([p1, p2, m])).then(() => {
 			visitMainTypePage();
+			visitEditPage();
 		});
 	});
 
 	it('does not render annotation fields on page load for existing relationships', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 
@@ -40,7 +39,6 @@ describe('End-to-end - edit relationship properties', () => {
 	});
 
 	it('shows fields when the annotation button is clicked', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 
@@ -58,7 +56,6 @@ describe('End-to-end - edit relationship properties', () => {
 	});
 
 	it('displays all fields defined for that relationship property', () => {
-		visitEditPage();
 		pickCuriousParent();
 		pickCuriousChild();
 		save();
@@ -134,7 +131,6 @@ describe('End-to-end - edit relationship properties', () => {
 	});
 
 	it('can edit values one-to-one relationship annotations', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 
@@ -249,8 +245,7 @@ describe('End-to-end - edit relationship properties', () => {
 			});
 	});
 
-	it('can edit values one-to-many relationship annotations', () => {
-		visitEditPage();
+	it('can edit values of one-to-many relationship annotations', () => {
 		pickCuriousParent();
 		pickCuriousParent();
 		save();
@@ -355,7 +350,6 @@ describe('End-to-end - edit relationship properties', () => {
 	});
 
 	it('restores in-progress edits to the relationship annotations if the form is submitted but errors', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 

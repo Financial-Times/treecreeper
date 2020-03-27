@@ -6,7 +6,7 @@ const {
 const {
 	populateChildTypeFields,
 	visitEditPage,
-	visitMainTypePage,
+	visitMVRTypePage,
 	pickChild,
 	save,
 	resetDb,
@@ -15,26 +15,26 @@ const {
 describe('End-to-end - delete record', () => {
 	beforeEach(() => {
 		cy.wrap(resetDb()).then(() => {
-			cy.visit(`/MainType/create`, {
+			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
 					cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
 				},
 			});
-			cy.get('input[name=code]').type(code);
+			cy.get('input[name=code]').type(`${code}`);
 			cy.get('input[name=someString]').type(someString);
 			save();
 		});
 	});
 
 	it('shows a prompt message', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.visit(`/MVRType/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(false);
 			},
 		});
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
+		cy.url().should('contain', `/MVRType/${code}`);
+		cy.get('#code').should('have.text', `${code}`);
 		cy.get('#someString').should('have.text', someString);
 
 		cy.get('[data-button-type="delete"]').click();
@@ -47,32 +47,33 @@ describe('End-to-end - delete record', () => {
 				.its('confirm.args.0')
 				.should('deep.eq', [deleteConfirmText]);
 		});
-		cy.get('#code').should('have.text', code);
+		cy.get('#code').should('have.text', `${code}`);
 		cy.get('#someString').should('have.text', someString);
 	});
 
 	it('can not delete a record with relationship', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.visit(`/MVRType/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(true);
 			},
 		});
 
-		cy.url().should('contain', `/MainType/${code}`);
+		cy.url().should('contain', `/MVRType/${code}`);
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
 
 		populateChildTypeFields(`${code}-child`);
 		save();
 		// create relationship
-		visitMainTypePage();
+		visitMVRTypePage();
 		visitEditPage();
+		cy.url().should('contain', `/MVRType/${code}/edit`);
 		pickChild();
 		save();
 
 		cy.get('[data-button-type="delete"]').click();
 
-		cy.url().should('contain', `/MainType/${code}`);
+		cy.url().should('contain', `/MVRType/${code}`);
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
 		cy.get('#children>li')
@@ -82,22 +83,22 @@ describe('End-to-end - delete record', () => {
 			.should('have.attr', 'href', `/ChildType/${code}-child`);
 		cy.get('.o-message__content-main').should(
 			'contain',
-			`Oops. Could not delete MainType record for ${code}`,
+			`Oops. Could not delete MVRType record for ${code}`,
 		);
 		cy.get('.o-message__content-additional').should(
 			'contain',
-			`Cannot delete - MainType ${code} has relationships.`,
+			`Cannot delete - MVRType ${code} has relationships.`,
 		);
 	});
 
 	it('can delete a record', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.visit(`/MVRType/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(true);
 			},
 		});
 
-		cy.url().should('contain', `/MainType/${code}`);
+		cy.url().should('contain', `/MVRType/${code}`);
 		cy.get('#code').should('have.text', code);
 		cy.get('#someString').should('have.text', someString);
 

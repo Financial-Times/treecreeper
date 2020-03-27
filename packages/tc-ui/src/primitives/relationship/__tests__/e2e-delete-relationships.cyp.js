@@ -1,31 +1,27 @@
 const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
-	populateChildTypeFields,
+	createType,
+	createMainTypeRecordWithChild,
 	pickChild,
 	pickFavouriteChild,
 	visitEditPage,
 	visitMainTypePage,
 	save,
-	resetDb,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - relationship deletion', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-			populateChildTypeFields(`${code}-first-child`);
-			save();
-			populateChildTypeFields(`${code}-second-child`);
-			save();
+		const firstChild = `${code}-first-child`;
+		const secondChild = `${code}-second-child`;
+		const c = createType({ code: secondChild, type: 'ChildType' });
+		const m = createMainTypeRecordWithChild(code, firstChild);
+		cy.wrap(Promise.all([c, m])).then(() => {
+			visitMainTypePage();
+			visitEditPage();
 		});
 	});
 
 	it('can remove 1-to-1 relationship', () => {
-		visitMainTypePage();
-		visitEditPage();
-
 		pickFavouriteChild();
 		save();
 
@@ -46,9 +42,6 @@ describe('End-to-end - relationship deletion', () => {
 	});
 
 	it('can remove first relationship from 1-to-many relationship', () => {
-		visitMainTypePage();
-		visitEditPage();
-
 		// pick second child
 		pickChild();
 
@@ -84,9 +77,6 @@ describe('End-to-end - relationship deletion', () => {
 	});
 
 	it('can remove nth relationship from 1-to-many relationship', () => {
-		visitMainTypePage();
-		visitEditPage();
-
 		// pick second child
 		pickChild();
 
@@ -122,9 +112,6 @@ describe('End-to-end - relationship deletion', () => {
 	});
 
 	it('can remove all relationships from 1-to-many relationship', () => {
-		visitMainTypePage();
-		visitEditPage();
-
 		// pick second child
 		pickChild();
 
@@ -163,10 +150,6 @@ describe('End-to-end - relationship deletion', () => {
 	});
 
 	it('can remove both 1-to-1 and 1-to-many relationships', () => {
-		visitMainTypePage();
-
-		visitEditPage();
-
 		// pick second child
 		pickChild();
 		pickFavouriteChild();
