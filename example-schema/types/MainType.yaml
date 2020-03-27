@@ -2,10 +2,6 @@ name: MainType
 description: Description of MainType.
 moreInformation: |
     More information for MainType
-minimumViableRecord:
-    - code
-    - children
-    - someString
 properties:
   code:
     type: Code
