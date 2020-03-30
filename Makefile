@@ -51,8 +51,10 @@ cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expect
 
 .PHONY: cypress-run
 cypress-run:
-	TREECREEPER_TEST=true \
-	cypress run
+	@if [ -z $(CI) ]; \
+		then TREECREEPER_TEST=true cypress run; \
+		else TREECREEPER_TEST=true cypress run -- --parallel; \
+	fi
 
 .PHONY: cypress-verify
 cypress-verify:
