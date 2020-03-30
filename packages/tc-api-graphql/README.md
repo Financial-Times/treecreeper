@@ -26,12 +26,38 @@ An [optional] reference to a tc-api-s3-document-store instance (or a library imp
 
 ##### `republishSchema`
 
-A boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi. Note that republishing depends on a `TREECREEPER_SCHEMA_BUCKET` envioronment variable, which should be the name of an s3 bucket.
+A boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi. Note that republishing depends on a `TREECREEPER_SCHEMA_BUCKET` environment variable, which should be the name of an s3 bucket.
 
 ##### `republishSchemaPrefix = 'api'`
 
 If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicates the
 prefix to use
+
+#### `options`
+
+An [optional] object value for adding extra resolvers and typeDefs. It should have the following data structure
+
+```
+{
+  options: {
+    typeDefs: [
+      `type ExtendedType {
+        code: String
+        someString: String
+        someFloat: Float
+        someEnum: AnEnum
+      }`,
+      `extend type MainType {
+        extended: ExtendedType @neo4j_ignore
+        }`,],
+    resolvers: {
+      MainType: {
+        extended: () => { ...custom resolver },
+      },
+    },
+  }
+}
+```
 
 ## Example
 
