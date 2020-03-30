@@ -1,17 +1,15 @@
-const { code, someString } = require('../../../test-helpers/mainTypeData.json');
+const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
+	createType,
+	visitMainTypePage,
 	visitEditPage,
 	save,
-	resetDb,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record multiple choice value', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-
+		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
+			visitMainTypePage();
 			visitEditPage();
 		});
 	});
@@ -31,7 +29,6 @@ describe('End-to-end - record multiple choice value', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someMultipleChoice span:first-child').should(
 			'have.text',
 			'First',
@@ -57,7 +54,6 @@ describe('End-to-end - record multiple choice value', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someMultipleChoice span:first-child').should(
 			'have.text',
 			'First',
@@ -88,7 +84,6 @@ describe('End-to-end - record multiple choice value', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someMultipleChoice span:first-child').should(
 			'have.text',
 			'First',
@@ -125,7 +120,6 @@ describe('End-to-end - record multiple choice value', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someMultipleChoice span:first-child').should(
 			'have.text',
 			'First',
@@ -161,7 +155,6 @@ describe('End-to-end - record multiple choice value', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someMultipleChoice span:first-child').should(
 			'have.text',
 			'First',

@@ -49,10 +49,15 @@ cypress-open: ## cypress-open: Opens the Cypress.io Electron test runner. Expect
 	TREECREEPER_TEST=true \
 	cypress open
 
-.PHONY: cypress-run
-cypress-run:
+.PHONY: cypress-run-page
+cypress-run-page:
 	TREECREEPER_TEST=true \
-	cypress run
+	cypress run --spec "packages/tc-ui/src/pages/**/__tests__/**.cyp.js"
+
+.PHONY: cypress-run-primitives
+cypress-run-primitives:
+	TREECREEPER_TEST=true \
+	cypress run --spec "packages/tc-ui/src/primitives/**/__tests__/**.cyp.js"
 
 .PHONY: cypress-verify
 cypress-verify:
@@ -88,8 +93,13 @@ run:
 init-db:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-api-db-manager/index.js
 
-e2e-test:
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run"
+cypress-page:
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page"
+
+cypress-primitives:
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
+
+
 
 run-test-db:
 	java -version; \
