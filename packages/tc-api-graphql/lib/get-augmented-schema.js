@@ -34,8 +34,18 @@ const getDocumentResolvers = () => {
 	return typeResolvers;
 };
 
-const getAugmentedSchema = ({ documentStore }) => {
+const getAugmentedSchema = ({ documentStore, options }) => {
+	const resolvers = documentStore ? getDocumentResolvers() : {};
 	const typeDefs = getGraphqlDefs();
+
+	if (options.schema) {
+		typeDefs.push(options.schema);
+	}
+	if (options.resolvers) {
+		// add custom resolvers
+		Object.assign(resolvers, { ...options.resolvers });
+	}
+
 	// this should throw meaningfully if the defs are invalid;
 	parse(typeDefs.join('\n'));
 
@@ -48,8 +58,12 @@ const getAugmentedSchema = ({ documentStore }) => {
 				});
 			},
 		},
-		resolvers: documentStore ? getDocumentResolvers() : {},
-		config: { query: true, mutation: false, debug: true },
+		resolvers,
+		config: {
+			query: true,
+			mutation: false,
+			debug: true,
+		},
 	});
 
 	return applyMiddleware(schema, requestTracer);
