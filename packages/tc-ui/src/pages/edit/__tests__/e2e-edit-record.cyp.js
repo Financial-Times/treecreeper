@@ -22,6 +22,22 @@ describe('End-to-end - edit record', () => {
 		);
 	});
 
+	it('can not edit code of record', () => {
+		visitEditPage();
+		cy.get('input[name=code]').type('-test');
+		save();
+
+		cy.url().should('contain', `/MainType/${code}/edit`);
+		cy.get('.o-message__content-main').should(
+			'contain',
+			'Oops. Could not update MainType record for e2e-demo.',
+		);
+		cy.get('.o-message__content-additional').should(
+			'contain',
+			`Conflicting code property \`e2e-demo-test\` in payload for MainType e2e-demo`,
+		);
+	});
+
 	it('can edit string type fields', () => {
 		visitEditPage();
 		cy.get('input[name=someString]').type(someString);
