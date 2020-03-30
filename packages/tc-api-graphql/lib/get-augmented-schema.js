@@ -38,8 +38,8 @@ const getAugmentedSchema = ({ documentStore, options }) => {
 	const resolvers = documentStore ? getDocumentResolvers() : {};
 	const typeDefs = getGraphqlDefs();
 
-	if (options.schema) {
-		typeDefs.push(options.schema);
+	if (options.typeDefs) {
+		typeDefs.push(...options.typeDefs);
 	}
 	if (options.resolvers) {
 		// add custom resolvers
