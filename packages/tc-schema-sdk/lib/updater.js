@@ -22,7 +22,8 @@ class SchemaUpdater {
 		schemaDirectory = process.env.TREECREEPER_SCHEMA_DIRECTORY,
 		schemaData,
 	} = {}) {
-		this.updateMode = updateMode;
+		this.updateMode =
+			updateMode || process.env.TREECREEPER_SCHEMA_URL ? 'poll' : 'stale';
 		this.ttl = ttl;
 		this.logger = logger;
 		this.version = version;
