@@ -52,6 +52,31 @@ describe('nested property definition tests', () => {
 				},
 			});
 		});
+
+		it('can be parsed as object which additional property definitions with extra spaces', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## curious child
+
+				${`example-code
+					someString: i like it
+					someBoolean: yes`
+					.replace(/\t+/g, '\t')
+					.split('\n')
+					.join('  \n')}
+			`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				curiousChild: {
+					code: 'example-code',
+					someString: 'i like it',
+					someBoolean: true,
+				},
+			});
+		});
 	});
 
 	describe('boolean type conversion', () => {
