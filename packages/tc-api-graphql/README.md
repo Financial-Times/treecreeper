@@ -33,32 +33,41 @@ A boolean indicating whether the application needs to republish the schema to so
 If the application needs to republish the schema to somewhere once it has updated the graphqlApi, this string indicates the
 prefix to use
 
-#### `options`
+#### `typeDefs`
 
-An [optional] object value for adding extra resolvers and typeDefs. It should have the following data structure
+An [optional] array value for extending the existing type definitions
 
 ```
 {
-  options: {
-    typeDefs: [
-      `type ExtendedType {
-        code: String
-        someString: String
-        someFloat: Float
-        someEnum: AnEnum
-      }`,
-      `extend type MainType {
-        extended: ExtendedType @neo4j_ignore *
-        }`,],
-    resolvers: {
-      MainType: {
-        extended: () => { ...custom resolver },
-      },
-    },
-  }
+  typeDefs: [
+    `type ExtendedType {
+      code: String
+      someString: String
+      someFloat: Float
+      someEnum: AnEnum
+    }`,
+    `extend type MainType {
+      extended: ExtendedType @neo4j_ignore *
+    }`,
+  ],
 }
 ```
-*\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process*
+
+_\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process_
+
+#### `resolvers`
+
+An [optional] object value for adding extra/custom resolvers
+
+```
+{
+  resolvers: {
+    MainType: {
+      extended: () => { ...custom resolver },
+    },
+  },
+}
+```
 
 ## Example
 

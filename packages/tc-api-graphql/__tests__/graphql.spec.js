@@ -297,27 +297,25 @@ describe('graphql', () => {
 				graphqlHandler,
 				listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
 			} = getGraphqlApi({
-				options: {
-					typeDefs: [
-						`type ExtendedType {
+				typeDefs: [
+					`type ExtendedType {
 							code: String
 							someString: String
 							someFloat: Float
 							someEnum: AnEnum
 						}`,
-						`extend type MainType {
+					`extend type MainType {
 					extended: ExtendedType @neo4j_ignore
 			   }`,
-					],
-					resolvers: {
-						MainType: {
-							extended: () => ({
-								code: `${namespace}-extend`,
-								someString: 'some string',
-								someFloat: 20.21,
-								someEnum: 'First',
-							}),
-						},
+				],
+				resolvers: {
+					MainType: {
+						extended: () => ({
+							code: `${namespace}-extend`,
+							someString: 'some string',
+							someFloat: 20.21,
+							someEnum: 'First',
+						}),
 					},
 				},
 			});

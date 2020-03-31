@@ -7,14 +7,19 @@ const getGraphqlApi = ({
 	documentStore,
 	republishSchema,
 	republishSchemaPrefix = 'api',
-	options = {},
+	typeDefs = [],
+	resolvers = {},
 } = {}) => {
 	let schemaDidUpdate;
 	let graphqlHandler;
 
 	const updateAPI = () => {
 		try {
-			graphqlHandler = getApolloMiddleware({ documentStore, options });
+			graphqlHandler = getApolloMiddleware({
+				documentStore,
+				typeDefs,
+				resolvers,
+			});
 
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });

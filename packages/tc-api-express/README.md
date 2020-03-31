@@ -67,32 +67,41 @@ Array of middlewares to call before the relevant REST handler executes
 
 An [optional] reference to a tc-api-s3-document-store instance (or a library implementing the same API), used to store large properties outside the neo4j instance
 
-##### `options`
+##### `typeDefs`
 
-An [optional] object value for adding extra resolvers and typeDefs. It should have the following data structure
+An [optional] array value for extending the existing type definitions
 
 ```
 {
-  options: {
-    typeDefs: [
-      `type ExtendedType {
-        code: String
-        someString: String
-        someFloat: Float
-        someEnum: AnEnum
-      }`,
-      `extend type MainType {
-        extended: ExtendedType @neo4j_ignore *
-        }`,],
-    resolvers: {
-      MainType: {
-        extended: () => { ...custom resolver },
-      },
-    },
-  }
+  typeDefs: [
+    `type ExtendedType {
+      code: String
+      someString: String
+      someFloat: Float
+      someEnum: AnEnum
+    }`,
+    `extend type MainType {
+      extended: ExtendedType @neo4j_ignore *
+    }`,
+  ],
 }
 ```
-*\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process*
+
+_\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process_
+
+##### `resolvers`
+
+An [optional] object value for adding extra/custom resolvers
+
+```
+{
+  resolvers: {
+    MainType: {
+      extended: () => { ...custom resolver },
+    },
+  },
+}
+```
 
 ##### `republishSchema`
 

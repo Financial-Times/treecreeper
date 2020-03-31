@@ -34,16 +34,20 @@ const getDocumentResolvers = () => {
 	return typeResolvers;
 };
 
-const getAugmentedSchema = ({ documentStore, options }) => {
+const getAugmentedSchema = ({
+	documentStore,
+	typeDefs: extendedTypeDefs,
+	resolvers: extendedResolvers,
+}) => {
 	const resolvers = documentStore ? getDocumentResolvers() : {};
 	const typeDefs = getGraphqlDefs();
 
-	if (options.typeDefs) {
-		typeDefs.push(...options.typeDefs);
+	if (extendedTypeDefs.length) {
+		typeDefs.push(...extendedTypeDefs);
 	}
-	if (options.resolvers) {
+	if (Object.keys(extendedResolvers).length) {
 		// add custom resolvers
-		Object.assign(resolvers, { ...options.resolvers });
+		Object.assign(resolvers, { ...extendedResolvers });
 	}
 
 	// this should throw meaningfully if the defs are invalid;
