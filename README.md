@@ -76,6 +76,14 @@ make run
 
 This will start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
 
+### Running Biz-Ops with treecreeper
+
+```shell
+make run-biz-ops
+```
+
+This will hook-up treecreeper with Biz-Ops and make it available on port 8888
+
 ### Testing
 
 ```shell

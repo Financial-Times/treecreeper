@@ -20,14 +20,16 @@ app.use(
 	}),
 );
 
-getApp({ treecreeperPath: '/api', app, graphqlMethods: ['post', 'get'] }).then(
-	() => {
-		app.listen(PORT, () => {
-			// eslint-disable-next-line no-console
-			console.log(`Listening on ${PORT}`);
-		});
-	},
-);
+getApp({
+	treecreeperPath: '/api',
+	app,
+	graphqlMethods: ['post', 'get'],
+}).then(() => {
+	app.listen(PORT, () => {
+		// eslint-disable-next-line no-console
+		console.log(`Listening on ${PORT}`);
+	});
+});
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const {
