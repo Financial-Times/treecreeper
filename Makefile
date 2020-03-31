@@ -100,7 +100,7 @@ cypress-primitives:
 	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
 
 run-biz-ops: build-statics
-	NEO4J_BOLT_URL=${BIZ_OPS_BOLT_URL} TREECREEPER_SCHEMA_URL=${SCHEMA_BASE_URL} SCHEMA_UPDATE_Mode=poll PROJECT_NAME=biz-ops-api PRODUCT_NAME=biz-ops nodemon --inspect demo/api.js
+	NEO4J_BOLT_URL=${BIZ_OPS_BOLT_URL} TREECREEPER_SCHEMA_URL=${SCHEMA_BASE_URL} PROJECT_NAME=biz-ops-api PRODUCT_NAME=biz-ops nodemon --inspect demo/api.js
 
 run-test-db:
 	java -version; \
