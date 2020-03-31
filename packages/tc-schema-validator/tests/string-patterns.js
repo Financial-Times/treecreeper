@@ -16,6 +16,10 @@ describe('string patterns', () => {
 				const regex = new RegExp(pattern);
 				expect(regex.test(longString)).toEqual(false);
 			});
+			it(`${name} matches the start and the end of strings`, () => {
+				expect(pattern.startsWith('^')).toEqual(true);
+				expect(pattern.endsWith('$')).toEqual(true);
+			});
 		} else {
 			it(`${name} evaluates to valid flagged regex`, () => {
 				expect(
