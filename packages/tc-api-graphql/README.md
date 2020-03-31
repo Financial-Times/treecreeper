@@ -48,7 +48,7 @@ An [optional] object value for adding extra resolvers and typeDefs. It should ha
         someEnum: AnEnum
       }`,
       `extend type MainType {
-        extended: ExtendedType @neo4j_ignore
+        extended: ExtendedType @neo4j_ignore *
         }`,],
     resolvers: {
       MainType: {
@@ -58,6 +58,7 @@ An [optional] object value for adding extra resolvers and typeDefs. It should ha
   }
 }
 ```
+*\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process*
 
 ## Example
 

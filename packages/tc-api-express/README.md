@@ -67,6 +67,33 @@ Array of middlewares to call before the relevant REST handler executes
 
 An [optional] reference to a tc-api-s3-document-store instance (or a library implementing the same API), used to store large properties outside the neo4j instance
 
+##### `options`
+
+An [optional] object value for adding extra resolvers and typeDefs. It should have the following data structure
+
+```
+{
+  options: {
+    typeDefs: [
+      `type ExtendedType {
+        code: String
+        someString: String
+        someFloat: Float
+        someEnum: AnEnum
+      }`,
+      `extend type MainType {
+        extended: ExtendedType @neo4j_ignore *
+        }`,],
+    resolvers: {
+      MainType: {
+        extended: () => { ...custom resolver },
+      },
+    },
+  }
+}
+```
+*\* **@neo4j_ignore** must be added so that it is not used during the schema augmentation process*
+
 ##### `republishSchema`
 
 A boolean indicating whether the application needs to republish the schema to somewhere once it has updated the graphqlApi. Note that republishing depends on a `TREECREEPER_SCHEMA_BUCKET` envioronment variable, which should be the name of an s3 bucket.
