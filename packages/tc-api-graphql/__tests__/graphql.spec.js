@@ -287,4 +287,74 @@ describe('graphql', () => {
 			});
 		});
 	});
+
+	describe('with extended typeDef and resolvers', () => {
+		let testApp;
+
+		beforeAll(() => {
+			testApp = express();
+			const {
+				graphqlHandler,
+				listenForSchemaChanges: updateGraphqlApiOnSchemaChange,
+			} = getGraphqlApi({
+				typeDefs: [
+					`type ExtendedType {
+							code: String
+							someString: String
+							someFloat: Float
+							someEnum: AnEnum
+						}`,
+					`extend type MainType {
+					extended: ExtendedType @neo4j_ignore
+			   }`,
+				],
+				resolvers: {
+					MainType: {
+						extended: () => ({
+							code: `${namespace}-extend`,
+							someString: 'some string',
+							someFloat: 20.21,
+							someEnum: 'First',
+						}),
+					},
+				},
+			});
+
+			updateGraphqlApiOnSchemaChange();
+			testApp.post('/graphql', graphqlHandler);
+		});
+
+		it('returns data from extended resolver', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+			});
+			return request(testApp)
+				.post('/graphql')
+				.send({
+					query: `{
+					MainType(filter: {code: "${mainCode}"}) {
+						code
+						extended {
+							code
+							someString
+							someFloat
+							someEnum
+						}
+					}}`,
+				})
+				.expect(200, {
+					data: {
+						MainType: {
+							code: mainCode,
+							extended: {
+								code: `${namespace}-extend`,
+								someString: 'some string',
+								someFloat: 20.21,
+								someEnum: 'First',
+							},
+						},
+					},
+				});
+		});
+	});
 });
