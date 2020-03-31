@@ -42,7 +42,7 @@ TODO. In the meantime, see /demo directory in this repository for inspiration
 
 ### Prerequisities
 
--   nodejs 8
+-   nodejs 12
 -   [docker](https://www.docker.com/get-docker)
 
 ### Set up
