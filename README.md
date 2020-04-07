@@ -44,6 +44,7 @@ TODO. In the meantime, see /demo directory in this repository for inspiration
 
 -   nodejs 12
 -   [docker](https://www.docker.com/get-docker)
+-   [wget](https://www.gnu.org/software/wget/) (if using MacOS this won't be preinstalled)
 
 ### Set up
 
