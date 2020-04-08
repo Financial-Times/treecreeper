@@ -11,6 +11,10 @@ describe('string patterns', () => {
 			it(`${name} evaluates to valid flagless regex`, () => {
 				expect(() => new RegExp(pattern)).not.toThrow();
 			});
+			it(`${name} matches the start and the end of strings`, () => {
+				expect(pattern.startsWith('^')).toEqual(true);
+				expect(pattern.endsWith('$')).toEqual(true);
+			});
 		} else {
 			it(`${name} evaluates to valid flagged regex`, () => {
 				expect(
