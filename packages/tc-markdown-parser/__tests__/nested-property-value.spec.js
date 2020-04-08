@@ -11,6 +11,14 @@ const parser = getParser({
 	type: 'MainType',
 });
 
+// The weird string concatenation in the markdown fixture is so that
+// dev tooling doesn't tidy up the 'extraneous' whitespace
+const addLineBreaks = str =>
+	str
+		.replace(/\t+/g, '\t')
+		.split('\n')
+		.join('  \n');
+
 describe('nested property definition tests', () => {
 	describe('single relationship case - hasMany: false', () => {
 		it('can be parsed only code definition as an object', async () => {
@@ -40,6 +48,28 @@ describe('nested property definition tests', () => {
 				example-code
 					someString: i like it
 					someBoolean: yes
+			`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				curiousChild: {
+					code: 'example-code',
+					someString: 'i like it',
+					someBoolean: true,
+				},
+			});
+		});
+
+		it('can be parsed as object which additional property definitions with line breaks', async () => {
+			const { data, errors } = await parser.parseMarkdownString(here`
+				# name
+
+				## curious child
+
+				${addLineBreaks(`example-code
+					someString: i like it
+					someBoolean: yes`)}
 			`);
 
 			expect(errors).toHaveLength(0);
@@ -453,6 +483,41 @@ describe('nested property definition tests', () => {
 				- example-code02
 					someString: i like it, too
 					someBoolean: no
+			`);
+
+			expect(errors).toHaveLength(0);
+			expect(data).toEqual({
+				name: 'name',
+				isCuriousChildOf: [
+					{
+						code: 'example-code01',
+						someString: 'i like it',
+						someBoolean: true,
+					},
+					{
+						code: 'example-code02',
+						someString: 'i like it, too',
+						someBoolean: false,
+					},
+				],
+			});
+		});
+
+		it('can be parsed as Array of objects with additional property definitions with line breaks', async () => {
+			const childParser = getParser({
+				type: 'ChildType',
+			});
+			const { data, errors } = await childParser.parseMarkdownString(here`
+				# name
+
+				## is curious child of
+
+				${addLineBreaks(`- example-code01
+					someString: i like it
+					someBoolean: yes`)}
+				${addLineBreaks(`- example-code02
+					someString: i like it, too
+					someBoolean: no`)}
 			`);
 
 			expect(errors).toHaveLength(0);

@@ -1,26 +1,22 @@
 const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
-	populateParentTypeFields,
-	populateChildTypeFields,
+	createMainTypeRecordWithChild,
+	createType,
 	pickChild,
 	pickParent,
 	pickFavouriteChild,
 	visitEditPage,
 	visitMainTypePage,
 	save,
-	resetDb,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - relationship creation', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-			populateParentTypeFields(`${code}-parent`);
-			save();
-			populateChildTypeFields(`${code}-second-child`);
-			save();
+		const firstChild = `${code}-first-child`;
+		const secondChild = `${code}-second-child`;
+		const c = createType({ code: secondChild, type: 'ChildType' });
+		const m = createMainTypeRecordWithChild(code, firstChild);
+		cy.wrap(Promise.all([c, m])).then(() => {
 			visitMainTypePage();
 			visitEditPage();
 		});
@@ -31,9 +27,6 @@ describe('End-to-end - relationship creation', () => {
 			'Click "Remove" to replace the existing unique relationship';
 
 		it('can select a selection', () => {
-			visitMainTypePage();
-			visitEditPage();
-
 			pickFavouriteChild();
 			save();
 
@@ -44,9 +37,6 @@ describe('End-to-end - relationship creation', () => {
 		});
 
 		it('disables selection on page load if there is a selection already', () => {
-			visitMainTypePage();
-			visitEditPage();
-
 			pickFavouriteChild();
 			cy.get(
 				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
@@ -68,9 +58,6 @@ describe('End-to-end - relationship creation', () => {
 		});
 
 		it('can not select another selection', () => {
-			visitMainTypePage();
-			visitEditPage();
-
 			pickFavouriteChild();
 			cy.get(
 				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
@@ -87,9 +74,6 @@ describe('End-to-end - relationship creation', () => {
 		});
 
 		it('can select another selection on removing the existing one', () => {
-			visitMainTypePage();
-			visitEditPage();
-
 			pickFavouriteChild();
 			cy.get(
 				'#ul-favouriteChild li:first-of-type span.o-layout-typography',
@@ -212,14 +196,18 @@ describe('End-to-end - relationship creation', () => {
 	});
 
 	it('can create main -> parent relationship', () => {
-		pickParent();
-		save();
+		cy.wrap(
+			createType({ code: `${code}-parent`, type: 'ParentType' }, false),
+		).then(() => {
+			pickParent();
+			save();
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#parents')
-			.find('a')
-			.should('have.text', `${code}-parent`)
-			.should('have.attr', 'href', `/ParentType/${code}-parent`);
+			cy.url().should('contain', `/MainType/${code}`);
+			cy.get('#parents>li a')
+				.eq(0)
+				.should('have.text', `${code}-parent`)
+				.should('have.attr', 'href', `/ParentType/${code}-parent`);
+		});
 	});
 
 	it('fetches suggestions from the autocomplete api', () => {

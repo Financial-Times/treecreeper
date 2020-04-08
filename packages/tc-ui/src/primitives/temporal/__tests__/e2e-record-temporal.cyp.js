@@ -1,19 +1,20 @@
 const {
 	code,
-	someString,
 	someDatetime,
 	someDate,
 } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
+	createType,
+	visitMainTypePage,
+	visitEditPage,
 	save,
-	resetDb,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record Temporal type', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
+		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
+			visitMainTypePage();
+			visitEditPage();
 		});
 	});
 
@@ -28,7 +29,6 @@ describe('End-to-end - record Temporal type', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someDate').should('have.text', '15 January 2020');
 	});
 
@@ -43,7 +43,6 @@ describe('End-to-end - record Temporal type', () => {
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#someDatetime').should(
 			'have.text',
 			'15 January 2020, 1:00:00 PM',

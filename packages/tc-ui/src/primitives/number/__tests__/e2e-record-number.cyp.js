@@ -1,19 +1,19 @@
 const {
 	code,
-	someString,
 	someInteger,
 } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
+	createType,
+	visitMainTypePage,
 	save,
-	resetDb,
 	visitEditPage,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record Number type', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
+		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
+			visitMainTypePage();
+			visitEditPage();
 		});
 	});
 
@@ -23,7 +23,6 @@ describe('End-to-end - record Number type', () => {
 			save();
 
 			cy.get('#code').should('have.text', code);
-			cy.get('#someString').should('have.text', someString);
 			cy.get('#someInteger').should('have.text', String(someInteger));
 		});
 
@@ -31,10 +30,10 @@ describe('End-to-end - record Number type', () => {
 			cy.get('input[name=someInteger]').type(0.5);
 			save();
 
-			cy.url().should('contain', '/MainType/create');
+			cy.url().should('contain', `/MainType/${code}/edit`);
 			cy.get('.o-message__content-main').should(
 				'contain',
-				'Oops. Could not create MainType record for e2e-demo',
+				'Oops. Could not update MainType record for e2e-demo',
 			);
 			cy.get('.o-message__content-additional').should(
 				'contain',
@@ -46,10 +45,10 @@ describe('End-to-end - record Number type', () => {
 			cy.get('input[name=someInteger]').type('haha');
 			save();
 
-			cy.url().should('contain', '/MainType/create');
+			cy.url().should('contain', `/MainType/${code}/edit`);
 			cy.get('.o-message__content-main').should(
 				'contain',
-				'Oops. Could not create MainType record for e2e-demo',
+				'Oops. Could not update MainType record for e2e-demo',
 			);
 			cy.get('.o-message__content-additional').should(
 				'contain',
@@ -74,7 +73,6 @@ describe('End-to-end - record Number type', () => {
 			save();
 
 			cy.get('#code').should('have.text', code);
-			cy.get('#someString').should('have.text', someString);
 			cy.get('#someFloat').should('have.text', String(someInteger));
 		});
 
@@ -90,10 +88,10 @@ describe('End-to-end - record Number type', () => {
 			cy.get('input[name=someFloat]').type('haha');
 			save();
 
-			cy.url().should('contain', '/MainType/create');
+			cy.url().should('contain', `/MainType/${code}/edit`);
 			cy.get('.o-message__content-main').should(
 				'contain',
-				'Oops. Could not create MainType record for e2e-demo',
+				'Oops. Could not update MainType record for e2e-demo',
 			);
 			cy.get('.o-message__content-additional').should(
 				'contain',

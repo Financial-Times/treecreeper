@@ -1,0 +1,13 @@
+name: OddThing
+from:
+  type: MainType
+  hasMany: false
+to:
+  type: OddCodeType
+  hasMany: true
+relationship: HAS_ODD_CODED_THING
+properties:
+  oddString:
+    label: Label for odd string
+    description: Description for odd string.
+    type: Word

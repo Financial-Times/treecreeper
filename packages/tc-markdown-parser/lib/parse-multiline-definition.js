@@ -196,35 +196,47 @@ const checkNodeHasChildren = node => {
 };
 
 const parseMultilineDefinition = ({ children = [] }) => {
-	return children.reduce((definitions, node) => {
-		const hasTextValue = checkNodeHasStringValue(node);
-		const hasChildren = checkNodeHasChildren(node);
+	return children
+		.filter(({ type }) => type !== 'break')
+		.reduce((childrenAsTextNode, currentNode) => {
+			if (!childrenAsTextNode.length) {
+				childrenAsTextNode.push(currentNode);
+			} else {
+				childrenAsTextNode[0].value = `${childrenAsTextNode[0].value}\n${currentNode.value}`;
+			}
+			return childrenAsTextNode;
+		}, [])
+		.reduce((definitions, node) => {
+			const hasTextValue = checkNodeHasStringValue(node);
+			const hasChildren = checkNodeHasChildren(node);
 
-		if (hasTextValue) {
-			const {
-				value,
-				position: {
-					start: { line, column },
-				},
-			} = node;
-			const { code, propDefs } = dividePropertyDefinition(value);
-			definitions.push({
-				...createNode('code', code, line, column),
-				propertyType: 'Code',
-			});
-			if (propDefs !== '') {
-				definitions.push(
-					// add 1 because property definition is the next line of code
-					...parsePropertyDefinition(propDefs, line + 1),
+			if (hasTextValue) {
+				const {
+					value,
+					position: {
+						start: { line, column },
+					},
+				} = node;
+				const { code, propDefs } = dividePropertyDefinition(value);
+				definitions.push({
+					...createNode('code', code, line, column),
+					propertyType: 'Code',
+				});
+				if (propDefs !== '') {
+					definitions.push(
+						// add 1 because property definition is the next line of code
+						...parsePropertyDefinition(propDefs, line + 1),
+					);
+				}
+			}
+
+			if (hasChildren) {
+				definitions = definitions.concat(
+					...parseMultilineDefinition(node),
 				);
 			}
-		}
-
-		if (hasChildren) {
-			definitions = definitions.concat(...parseMultilineDefinition(node));
-		}
-		return definitions;
-	}, []);
+			return definitions;
+		}, []);
 };
 
 module.exports = parseMultilineDefinition;

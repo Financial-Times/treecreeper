@@ -1,28 +1,19 @@
 const {
 	code,
-	someString,
 	deleteConfirmText,
 } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateChildTypeFields,
+	createType,
 	visitEditPage,
 	visitMainTypePage,
 	pickChild,
 	save,
-	resetDb,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - delete record', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			cy.visit(`/MainType/create`, {
-				onBeforeLoad(win) {
-					cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
-				},
-			});
-			cy.get('input[name=code]').type(code);
-			cy.get('input[name=someString]').type(someString);
-			save();
+		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
+			visitMainTypePage();
 		});
 	});
 
@@ -34,8 +25,7 @@ describe('End-to-end - delete record', () => {
 		});
 
 		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
+		cy.get('#code').should('have.text', `${code}`);
 
 		cy.get('[data-button-type="delete"]').click();
 
@@ -47,8 +37,7 @@ describe('End-to-end - delete record', () => {
 				.its('confirm.args.0')
 				.should('deep.eq', [deleteConfirmText]);
 		});
-		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
+		cy.get('#code').should('have.text', `${code}`);
 	});
 
 	it('can not delete a record with relationship', () => {
@@ -60,13 +49,11 @@ describe('End-to-end - delete record', () => {
 
 		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
-
-		populateChildTypeFields(`${code}-child`);
-		save();
-		// create relationship
-		visitMainTypePage();
+		cy.wrap(
+			createType({ code: `${code}-child`, type: 'ChildType' }, false),
+		);
 		visitEditPage();
+		cy.url().should('contain', `/MainType/${code}/edit`);
 		pickChild();
 		save();
 
@@ -74,7 +61,6 @@ describe('End-to-end - delete record', () => {
 
 		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 		cy.get('#children>li')
 			.eq(0)
 			.should('have.text', `${code}-child`)
@@ -99,12 +85,9 @@ describe('End-to-end - delete record', () => {
 
 		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', someString);
 
 		cy.get('[data-button-type="delete"]').click();
 
 		cy.get('#code').should('not.exist');
-		cy.get('#someString').should('not.exist');
-		cy.get('#children').should('not.exist');
 	});
 });

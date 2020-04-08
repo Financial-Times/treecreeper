@@ -27,7 +27,7 @@ aside.treecreeper-aside {
 }
 
 .treecreeper-help-icon {
-	vertical-align: sub;
+	vertical-align: middle;
 	width: 30px !important;
 	height: 30px !important;
 }

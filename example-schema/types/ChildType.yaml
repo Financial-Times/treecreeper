@@ -28,3 +28,10 @@ properties:
     type: CuriousChild
     description: Curious child of description.
     label: Curious child of label
+  isMVRChildOf:
+    relationship: HAS_CHILD
+    type: MVRType
+    description: Is child of description.
+    label: Is child of label
+    direction: incoming
+    hasMany: true

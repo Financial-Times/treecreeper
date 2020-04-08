@@ -1,35 +1,33 @@
 const { code } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
-	populateParentTypeFields,
-	populateChildTypeFields,
+	createType,
+	createMainTypeRecordWithChild,
 	pickCuriousChild,
 	pickCuriousParent,
 	visitEditPage,
 	visitMainTypePage,
 	save,
-	resetDb,
 	setPropsOnCuriousChildRel,
 	setPropsOnCuriousParentRel,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - display relationship properties', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-			populateParentTypeFields(`${code}-parent-one`);
-			save();
-			populateParentTypeFields(`${code}-parent-two`);
-			save();
-			populateChildTypeFields(`${code}-second-child`);
-			save();
+		const firstChild = `${code}-first-child`;
+		const secondChild = `${code}-second-child`;
+		const parentOne = `${code}-parent-one`;
+		const parentTwo = `${code}-parent-two`;
+		const c = createType({ code: secondChild, type: 'ChildType' });
+		const p1 = createType({ code: parentOne, type: 'ParentType' });
+		const p2 = createType({ code: parentTwo, type: 'ParentType' });
+		const m = createMainTypeRecordWithChild(code, firstChild);
+		cy.wrap(Promise.all([c, p1, p2, m])).then(() => {
 			visitMainTypePage();
+			visitEditPage();
 		});
 	});
 
 	it('can display/hide relationship properties', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 
@@ -93,7 +91,6 @@ describe('End-to-end - display relationship properties', () => {
 	});
 
 	it('can display properties on a 1-to-1 relationship', () => {
-		visitEditPage();
 		pickCuriousChild();
 		save();
 
@@ -122,7 +119,6 @@ describe('End-to-end - display relationship properties', () => {
 	});
 
 	it('can display properties on a 1-to-m relationship', () => {
-		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
 		save();
@@ -161,7 +157,6 @@ describe('End-to-end - display relationship properties', () => {
 	});
 
 	it('can display properties on each relationship in a 1-to-m relationship', () => {
-		visitEditPage();
 		pickCuriousParent();
 		pickCuriousParent();
 		save();

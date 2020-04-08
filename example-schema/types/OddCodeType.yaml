@@ -1,0 +1,14 @@
+name: OddCodeType
+description: OddCodeType description.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: PERMISSIVE
+  mainThing:
+    type: OddThing
+    description: Main thing relationship description.
+    label: Main thing relationship label

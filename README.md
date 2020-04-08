@@ -42,8 +42,9 @@ TODO. In the meantime, see /demo directory in this repository for inspiration
 
 ### Prerequisities
 
--   nodejs 8
+-   nodejs 12
 -   [docker](https://www.docker.com/get-docker)
+-   [wget](https://www.gnu.org/software/wget/) (if using MacOS this won't be preinstalled)
 
 ### Set up
 
@@ -75,6 +76,14 @@ make run
 ```
 
 This will start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
+
+### Running Biz-Ops with treecreeper
+
+```shell
+make run-biz-ops
+```
+
+This will hook-up treecreeper with Biz-Ops and make it available on port 8888
 
 ### Testing
 

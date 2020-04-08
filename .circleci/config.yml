@@ -67,7 +67,7 @@ jobs:
           root: *workspace_root
           paths:
             - .
-  build:
+  cypress-build:
     <<: *default_container_config
 
     steps:
@@ -112,7 +112,7 @@ jobs:
       - store_artifacts:
           path: junit
 
-  end-to-end-test:
+  cypress-page:
     <<: *default_container_config
 
     steps:
@@ -123,8 +123,26 @@ jobs:
           name: Prepare neo4j database
           command: make run-test-db
       - run:
-          name: Run End-to-End Tests
-          command: make e2e-test
+          name: Run End-to-End Pages Test
+          command: make cypress-page
+      - store_artifacts:
+          path: cypress/videos
+      - store_artifacts:
+          path: cypress/screenshots
+
+  cypress-primitives:
+    <<: *default_container_config
+
+    steps:
+      - *attach_workspace
+
+      - run: sudo sh -c 'echo "127.0.0.1 local.in.ft.com" >> /etc/hosts'
+      - run:
+          name: Prepare neo4j database
+          command: make run-test-db
+      - run:
+          name: Run End-to-End Primitive types Test
+          command: make cypress-primitives
       - store_artifacts:
           path: cypress/videos
       - store_artifacts:
@@ -156,9 +174,10 @@ workflows:
       - install:
           context: rel-eng-creds
           filters: *only_version_tags
-      - build:
+      - cypress-build:
           requires:
             - install
+          filters: *only_version_tags
       - test:
           requires:
             - install
@@ -168,9 +187,13 @@ workflows:
           requires:
             - install
           filters: *only_version_tags
-      - end-to-end-test:
+      - cypress-page:
           requires:
-            - build
+            - cypress-build
+          filters: *only_version_tags
+      - cypress-primitives:
+          requires:
+            - cypress-build
           filters: *only_version_tags
       # Scan package.json for vulnerable dependencies while developing
       - ft-snyk-orb/scan-js-packages:
@@ -185,7 +208,8 @@ workflows:
             - install
             - test
             - verify
-            - end-to-end-test
+            - cypress-page
+            - cypress-primitives
             - ft-snyk-orb/scan-js-packages
           filters:
             <<: *only_version_tags

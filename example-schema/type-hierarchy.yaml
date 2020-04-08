@@ -6,3 +6,5 @@ test:
     - ParentType
     - ChildType
     - RestrictedType
+    - OddCodeType
+    - MVRType

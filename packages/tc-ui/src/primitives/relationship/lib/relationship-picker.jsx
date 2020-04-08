@@ -71,7 +71,7 @@ class RelationshipPicker extends React.Component {
 		// React witchcraft, event has been replaced by a null one by the time we get to
 		// the setState callback (I presume React implements some kind of instance reuse
 		// optimisation, which doesn't hang around for async stuff to execute)
-		const buttonIndex = event.target.dataset.index;
+		const buttonIndex = Number(event.target.dataset.index.split('-')[1]);
 		this.setState(({ selectedRelationships }) => {
 			selectedRelationships = [...selectedRelationships];
 			selectedRelationships.splice(buttonIndex, 1);

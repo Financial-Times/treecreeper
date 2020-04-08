@@ -1,0 +1,29 @@
+name: MVRType
+description: Description of MVRType.
+moreInformation: |
+    More information for MVRType
+minimumViableRecord:
+    - code
+    - children
+    - someString
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  children:
+    relationship: HAS_CHILD
+    type: ChildType
+    description: Children description.
+    label: Children label
+    direction: outgoing
+    hasMany: true
+  someString:
+    type: Word
+    description: Word description.
+    label: Word label
+    useInSummary: true
+

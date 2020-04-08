@@ -5,14 +5,12 @@ const {
 	someEnum,
 } = require('../../../test-helpers/mainTypeData.json');
 const {
-	populateMinimumViableFields,
-	populateParentTypeFields,
+	createMainTypeRecordWithParentsAndChild,
 	pickCuriousChild,
 	pickCuriousParent,
 	visitEditPage,
 	visitMainTypePage,
 	save,
-	resetDb,
 	setPropsOnCuriousParentRel,
 	setPropsOnCuriousChildRel,
 	populateCuriousChildRelationshipFields,
@@ -22,15 +20,16 @@ const {
 
 describe('End-to-end - annotate rich relationship properties', () => {
 	beforeEach(() => {
-		cy.wrap(resetDb()).then(() => {
-			populateMinimumViableFields(code);
-			save();
-			populateParentTypeFields(`${code}-parent-one`);
-			save();
-			populateParentTypeFields(`${code}-parent-two`);
-			save();
-			visitMainTypePage();
-		});
+		const parent1 = `${code}-parent-one`;
+		const parent2 = `${code}-parent-two`;
+		const childCode = `${code}-first-child`;
+		cy.wrap(
+			createMainTypeRecordWithParentsAndChild(code, {
+				parent1,
+				parent2,
+				childCode,
+			}),
+		).then(() => visitMainTypePage());
 	});
 
 	it('does not show annotation fields on page load', () => {

@@ -17,6 +17,7 @@ const OneRelationship = props => {
 		value = {},
 		id,
 		hasValue,
+		linkGenerator,
 	} = props;
 	let RelationshipProperties = null;
 	// value[propertyName] !== null since neo4j returns null if there is no value
@@ -70,7 +71,12 @@ const OneRelationship = props => {
 
 	return type && value[type] ? (
 		<>
-			<LinkToRecord id={id} type={type} value={value[type]} />
+			<LinkToRecord
+				id={id}
+				type={type}
+				value={value[type]}
+				linkGenerator={linkGenerator}
+			/>
 			{RelationshipAnnotator ? (
 				<RelationshipAnnotator value={value[type]} type={type} />
 			) : null}
@@ -90,10 +96,10 @@ const ViewRelationship = props => {
 	const inactiveCheck = datum => {
 		if (schema.inactiveRule) {
 			return Object.entries(schema.inactiveRule).every(
-				([prop, expectedValue]) => datum[prop] === expectedValue,
+				([prop, expectedValue]) => datum[type][prop] === expectedValue,
 			);
 		}
-		return datum.isActive === false;
+		return datum[type].isActive === false;
 	};
 	return Array.isArray(value) ? (
 		<ul id={id} className="o-layout__unstyled-element treecreeper-links">

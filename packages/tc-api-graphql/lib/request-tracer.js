@@ -15,7 +15,12 @@ class Tracer {
 	_log(logType) {
 		try {
 			Object.entries(this.map).forEach(([type, fields]) => {
-				const { properties } = getType(type);
+				let properties;
+				try {
+					({ properties } = getType(type));
+				} catch (err) {
+					properties = {};
+				}
 				fields = [...fields];
 				logger[logType]({
 					event: 'GRAPHQL_TRACE',
