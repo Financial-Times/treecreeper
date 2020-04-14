@@ -80,10 +80,13 @@ This will start the demo node process on port 8888. See `/demo/app.js` for detai
 ### Running Biz-Ops with treecreeper
 
 ```shell
+make test-env
 make run-biz-ops
 ```
 
 This will hook-up treecreeper with Biz-Ops and make it available on port 8888
+
+e.g. `http://localhost:8888/System/biz-ops-api`
 
 ### Testing
 

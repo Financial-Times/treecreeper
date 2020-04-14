@@ -21,6 +21,10 @@ LOCAL_BOLT_URL=bolt://localhost:7687
 BIZ_OPS_BOLT_URL=${NEO4J_BOLT_URL}
 NEO4J_VERSION=3.5.0
 
+
+PRODUCT_NAME=biz-ops
+PROJECT_NAME=biz-ops-api
+
 env:
 	echo "No secret environment variables needed in test"
 
