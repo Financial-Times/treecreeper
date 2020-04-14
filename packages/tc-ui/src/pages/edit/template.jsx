@@ -24,7 +24,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				lockedBy = fieldsToLock[propertyName];
 			}
 
-			const { EditComponent } = assignComponent(propDef);
+			const { EditComponent, additionalEditComponent } = assignComponent(propDef);
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
@@ -43,7 +43,12 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				lockedBy: propDef.lockedBy || lockedBy,
 			};
 
-			return <EditComponent {...viewModel} />;
+			return (
+				<div>
+					<EditComponent {...viewModel} />
+					{additionalEditComponent}
+				</div>
+			);
 		});
 };
 
