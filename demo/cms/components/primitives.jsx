@@ -92,9 +92,16 @@ const RelationshipAnnotator = ({ type, value }) => (
 	</>
 );
 
+const DecomButton = props => <div className="imhere">Decom button here</div>;
+
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
+	SystemLifecycle: { // can i chuck another edit component and use biz-ops to 
+		...primitives.Enum,
+		AdditionalEditComponent: DecomButton,
+		ViewComponent: LifecycleStage,
+	},
 	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
 	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },

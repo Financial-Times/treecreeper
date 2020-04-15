@@ -23,8 +23,8 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			if (fieldNamesToLock.includes(propertyName)) {
 				lockedBy = fieldsToLock[propertyName];
 			}
+			const { EditComponent, AdditionalEditComponent } = assignComponent(propDef);
 
-			const { EditComponent, additionalEditComponent } = assignComponent(propDef);
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
@@ -44,9 +44,9 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			};
 
 			return (
-				<div>
+				<div className="iaddedthis">
 					<EditComponent {...viewModel} />
-					{additionalEditComponent}
+					{AdditionalEditComponent ? <AdditionalEditComponent /> : null }
 				</div>
 			);
 		});
