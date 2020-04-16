@@ -46,9 +46,9 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			return (
 				<div className="iaddedthis">
 					<EditComponent {...viewModel} />
-					{AdditionalEditComponent 
-					? <AdditionalEditComponent {...viewModel}/> 
-					: null }
+					{AdditionalEditComponent ? (
+						<AdditionalEditComponent />
+					) : null}
 				</div>
 			);
 		});
