@@ -112,6 +112,7 @@
 	margin-left: 1em;
 }
 
+.decom-button,
 .relationship-remove-button,
 .relationship-annotate-button {
 	min-width: 60px;
