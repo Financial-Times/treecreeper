@@ -92,12 +92,88 @@ const RelationshipAnnotator = ({ type, value }) => (
 	</>
 );
 
-const DecomButton = props => <div className="imhere">Decom button here</div>;
+// const onDecom = props => console.log('decom button - parentCode', props.parentCode)
+// const DecomButton = props => {
+// 	console.log('props in decom button')
+// 	return (
+// 	<div className='decommision-override'>
+// 		<span>Mark this system as Decommissioned (override for systems locked by Runbook MD):   </span>
+// 		<button
+// 			type="button"
+// 			// disabled={disabled ? 'disabled' : null}
+// 			// className={`o-buttons o-buttons--secondary o-buttons--small decom-button ${
+// 			// 	disabled ? 'disabled' : ''
+// 			// }`}
+// 			className="o-buttons o-buttons--secondary o-buttons--small decom-button"
+// 			onClick={onDecom(props)}
+// 			// data-index={`remove-${index}`}
+// 		>
+// 			Decommission
+// 		</button>
+// 	</div>
+// )};
 
+{/* <dt id="tooltip-primaryURL" className="inline tooltip-container">Primary URL
+	<span className="tooltip-target-primaryURL treecreeper-help" id="tooltip-target-primaryURL">
+		<i aria-label="help for primaryURL" className="o-icons-icon o-icons-icon--info treecreeper-help-icon"></i>
+	</span>
+	<div data-o-component="o-tooltip" data-o-tooltip-position="below" data-o-tooltip-target="tooltip-target-primaryURL" data-o-tooltip-show-on-click="true" role="tooltip" className="o-tooltip">
+		<div className="o-tooltip-content">The main url served by the system.</div>
+		<button className="o-tooltip-close" aria-label="Close tooltip" title="Close tooltip"></button>
+	</div>
+</dt> */}
+
+const onDecom = props => console.log('decom button - parentCode', props.parentCode)
+const DecomButton = props => {
+	console.log('props in decom button')
+	return (
+	<div className="decommission-override">
+		<div className="inline tooltip-container">Mark this system as Decommissioned
+			<span className="tooltip-target-decomOverride treecreeper-help" id="tooltip-target-decomOverride">
+				<i aria-label="help for decomOverride" className="o-icons-icon o-icons-icon--info treecreeper-help-icon"></i>
+			</span>
+			<div data-o-component="o-tooltip" data-o-tooltip-position="below" data-o-tooltip-target="tooltip-target-decomOverride" data-o-tooltip-show-on-click="true" role="tooltip" className="o-tooltip">
+				<div className="o-tooltip-content">An override for systems locked by Runbook MD. Remember to click Save to complete the update!</div>
+				<button className="o-tooltip-close" aria-label="Close tooltip" title="Close tooltip"></button>
+			</div>
+		</div>
+		{/* should this be a checkbox? */}
+		<button
+			type="button"
+			// disabled={disabled ? 'disabled' : null}
+			// className={`o-buttons o-buttons--secondary o-buttons--small decom-button ${
+			// 	disabled ? 'disabled' : ''
+			// }`}
+			className="o-buttons o-buttons--secondary o-buttons--small decom-button"
+			onClick={onDecom(props)}
+			// data-index={`remove-${index}`}
+		>
+			Decommission
+		</button>
+		<div className="o-forms-field o-forms-field--inline" role="group" aria-labelledby="inline-radio-box-group-title">
+			<span className="o-forms-title o-forms-title--vertical-center">
+				<span className="o-forms-title__main" id="inline-radio-box-group-title">Mark this system as decommissioned?</span>
+			</span>
+			<span className="o-forms-input o-forms-input--radio-box o-forms-input--inline">
+				<div className="o-forms-input--radio-box__container">
+					<label>
+						<input type="radio" name="inline" value="No" aria-label="No" checked required/>
+						<span className="o-forms-input__label" aria-hidden="true">No</span>
+					</label>
+					<label>
+						<input type="radio" name="inline" value="Yes" aria-label="Yes" required/>
+						<span className="o-forms-input__label" aria-hidden="true">Yes</span>
+					</label>
+				</div>
+			</span>
+		</div>
+	</div>
+)};
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
-	SystemLifecycle: { // can i chuck another edit component and use biz-ops to 
+	SystemLifecycle: {
+		// can i chuck another edit component and use biz-ops to
 		...primitives.Enum,
 		AdditionalEditComponent: DecomButton,
 		ViewComponent: LifecycleStage,
