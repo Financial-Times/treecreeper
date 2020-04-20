@@ -58,8 +58,8 @@ const DecomButton = props => {
 						className="o-tooltip"
 					>
 						<div className="o-tooltip-content">
-							Tick if you need to decommission a system locked by
-							RunbookMD.
+							Check the box and Save to decommission a system
+							locked by RunbookMD.
 						</div>
 						<button
 							className="o-tooltip-close"
