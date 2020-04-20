@@ -5,6 +5,12 @@ const React = require('react');
 const { hydrate } = require('react-dom');
 const DecomButton = require('../components/decomButton');
 
-hydrate(<DecomButton />, document.getElementById('decommission-override').parentNode);
+const container = document.querySelector('#decommission-override');
 
-console.log('hihihi');
+if (container) {
+	hydrate(
+		<DecomButton {...JSON.parse(container.dataset.props)} />,
+		container.parentNode,
+	);
+}
+

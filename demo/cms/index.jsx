@@ -4,36 +4,6 @@ const { getCMS } = require('@financial-times/tc-ui');
 
 const { Subheader } = require('./components/subheader');
 const customComponents = require('./components/primitives');
-const ANSIColor = {
-    Reset: "\x1b[0m",
-    Red: "\x1b[31m",
-    Green: "\x1b[32m",
-    Yellow: "\x1b[33m",
-    Blue: "\x1b[34m",
-    Magenta: "\x1b[35m"
-};
-const consoleFunctionNamesWithColors = [
-    ["info", ANSIColor.Green],
-    ["log", ANSIColor.Blue],
-    ["warn", ANSIColor.Yellow],
-    ["error", ANSIColor.Red]
-];
-for (const [functionName, color] of consoleFunctionNamesWithColors) {
-    let oldFunc = console[functionName];
-    console[functionName] = function (...args) {
-        if (args.length) {
-            args = [color + args[0]].concat(args.slice(1), ANSIColor.Reset);
-        }
-        oldFunc.apply(this, args);
-    };
-}
-// example:
-console.info("Info is green.");
-console.log("Log is blue.");
-console.warn("Warn is orange.");
-console.error("Error is red.");
-console.info("--------------------");
-console.info("Formatting works as well. The number = %d", 123);
 
 const wrapCmsHandler = handler => async (req, res) => {
 	try {
