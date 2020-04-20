@@ -25,7 +25,7 @@ const DecomButton = props => {
 						<input
 							type="checkbox"
 							name="DecomOverride"
-							value="Decommissioned"
+							value
 							aria-label="DecomOverride"
 						/>
 						<span
