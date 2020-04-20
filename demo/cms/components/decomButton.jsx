@@ -2,14 +2,21 @@ const React = require('react');
 const fetch = require('node-fetch');
 
 const onDecom = async props => {
-	const fetchtodo = `./decommission`;
-	const response = await fetch(fetchtodo);
-	const json = await response.json();
-	console.log('json response: ', json);
+    // console.log('props received in onDecom', JSON.stringify(props,null,2))
+	const systemCode = props.parentCode;
+	const apiResponse = await fetch(
+		`/system/${encodeURIComponent(systemCode)}/decommission`,
+	).then(results => results.json());
+	window.location.reload();
+	return apiResponse;
 };
-
 const DecomButton = props => {
-	console.log('props in decom button');
+	if (
+		props.lockedBy !== 'biz-ops-runbook-md' ||
+		props.lifecycleStage === 'Decommissioned'
+	) {
+		return null;
+	}
 	return (
 		<div
 			className="decommission-override"
