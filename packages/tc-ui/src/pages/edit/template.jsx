@@ -32,6 +32,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
+				lifecycleStage: data.lifecycleStage,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
@@ -46,9 +47,9 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			return (
 				<div className="iaddedthis">
 					<EditComponent {...viewModel} />
-					<div className='additional-edit-component-hydration-container'>
+					<div className="additional-edit-component-hydration-container">
 						{AdditionalEditComponent ? (
-							<AdditionalEditComponent />
+							<AdditionalEditComponent {...viewModel} />
 						) : null}
 					</div>
 				</div>
@@ -67,7 +68,6 @@ const EditForm = props => {
 		querystring,
 		assignComponent,
 	} = props;
-
 	return (
 		<>
 			<div className="o-layout__sidebar" />
