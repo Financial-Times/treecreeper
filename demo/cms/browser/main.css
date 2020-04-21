@@ -155,7 +155,8 @@
 	max-width: 450px;
 }
 
-.decommision-form {
-	display: flex;
-    flex-direction: row;
+.decommission-tooltip-container {
+	font-family: MetricWeb, sans-serif;
+	font-size: 18px;
+    font-weight: 400;
 }
