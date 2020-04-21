@@ -23,7 +23,7 @@ const DecomButton = props => {
 			id="decommission-override"
 			data-props={JSON.stringify(props)}
 		>
-			<div className="inline tooltip-container">
+			<div className="inline tooltip-container decommission-tooltip-container">
 				Mark this system as Decommissioned
 				<span
 					className="tooltip-target-decomOverride treecreeper-help"
@@ -43,9 +43,9 @@ const DecomButton = props => {
 					className="o-tooltip"
 				>
 					<div className="o-tooltip-content">
-						This is an override for systems locked by Runbook MD,
-						here for when there is no other way to decommission the
-						system.
+						This is an override for systems whose lifecycle stage is
+						locked by Runbook MD, here for when there is no other
+						way to decommission the system.
 					</div>
 					<button
 						className="o-tooltip-close"
