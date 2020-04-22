@@ -5,7 +5,7 @@ const path = require('path');
 
 const filenameTemplate = '[name]';
 module.exports = {
-	entry: ['./demo/cms/browser/main.jsx'],
+	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
 		extensions: ['.js', '.jsx', '.css'],
 	},

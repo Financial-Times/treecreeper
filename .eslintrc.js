@@ -30,6 +30,6 @@ module.exports = {
 	},
 	overrides: [{
 		env: {browser: true},
-		files: ['**/browser/**/*.js', 'packages/tc-ui/**/browser.{jsx,js}', 'demo/cms/browser/main.jsx']
+		files: ['**/browser/**/*.js', 'packages/tc-ui/**/browser.{jsx,js}']
 	}]
 };
