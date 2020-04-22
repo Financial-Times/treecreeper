@@ -34,7 +34,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
-				lifecycleStage: data.lifecycleStage,
+				entireRecord: data,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
@@ -47,7 +47,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			};
 
 			return (
-				<div className="iaddedthis">
+				<div>
 					<EditComponent {...viewModel} />
 					<div className="additional-edit-component-hydration-container">
 						{AdditionalEditComponent ? (
