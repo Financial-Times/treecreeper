@@ -247,4 +247,11 @@ describe('End-to-end - edit record', () => {
 		cy.get('#someString').should('have.text', 'locked value 2');
 		cy.get('#someBoolean').should('have.text', 'Yes');
 	});
+
+	it('renders the space for an additional edit component', () => {
+		visitEditPage();
+		cy.get('.additional-edit-component-hydration-container').should(
+			'exist',
+		);
+	});
 });
