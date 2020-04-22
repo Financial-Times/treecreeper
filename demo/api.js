@@ -47,4 +47,3 @@ app.get('/:type/create', editController);
 app.post('/:type/create', parseBody, editController);
 app.post('/:type/:code/delete', deleteController);
 app.get('/:type/:code', viewController);
-app.get('/:type/:code/decommission'); // not supplied - this corresponds to an api gateway endpoint in the biz-ops-admin repo

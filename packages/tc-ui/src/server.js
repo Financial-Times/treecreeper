@@ -44,7 +44,6 @@ const getCMS = ({
 		assignComponent,
 		clientId,
 	);
-
 	const { handler: viewHandler, render: viewRender } = getViewHandler({
 		getApiClient,
 		getSchemaSubset,

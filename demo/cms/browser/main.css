@@ -148,15 +148,3 @@
 	width: 100%;
 	height: 100%;
 }
-
-.decommission-override {
-	display: flex;
-	justify-content: space-between;
-	max-width: 450px;
-}
-
-.decommission-tooltip-container {
-	font-family: MetricWeb, sans-serif;
-	font-size: 18px;
-    font-weight: 400;
-}
