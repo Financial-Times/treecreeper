@@ -253,5 +253,6 @@ describe('End-to-end - edit record', () => {
 		cy.get('.additional-edit-component-hydration-container').should(
 			'exist',
 		);
+		cy.get('.decommission-override').should('exist'); // fails
 	});
 });
