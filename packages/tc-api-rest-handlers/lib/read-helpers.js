@@ -10,9 +10,9 @@ const getNeo4jRecordCypherQuery = ({
 	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest
 	ORDER BY related.code`;
 
-const getNeo4jRecord = (type, code, richRelationshipsFlag) => {
+const getNeo4jRecord = (type, code, richRelationshipsFlag, idField = "code") => {
 	return executeQuery(
-		`MATCH (node:${type} {code: $code})
+		`MATCH (node:${type} {${idField}: $code})
 			${getNeo4jRecordCypherQuery()}`,
 		{ code },
 		richRelationshipsFlag,
