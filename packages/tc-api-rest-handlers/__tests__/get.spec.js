@@ -37,18 +37,21 @@ describe('rest GET', () => {
 
 	it('gets by alternative field', async () => {
 		await createMainNode({
-			someString: 'example-value'
+			someString: 'example-value',
 		});
 		const { body, status } = await getHandler()({
 			type: 'MainType',
 			code: 'example-value',
 			query: {
-				idField: 'someString'
-			}
+				idField: 'someString',
+			},
 		});
 
 		expect(status).toBe(200);
-		expect(body).toMatchObject({ code: mainCode, someString: 'example-value' });
+		expect(body).toMatchObject({
+			code: mainCode,
+			someString: 'example-value',
+		});
 	});
 
 	it('retrieves array data', async () => {
