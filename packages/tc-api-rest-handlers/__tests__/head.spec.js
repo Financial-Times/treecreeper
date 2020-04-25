@@ -10,7 +10,7 @@ describe('rest HEAD', () => {
 		code: mainCode,
 	};
 
-	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
+	const { createNodes, createNode } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
 		createNode('MainType', { code: mainCode, ...props });
@@ -24,52 +24,62 @@ describe('rest HEAD', () => {
 		expect(status).toBe(200);
 	});
 
-
 	describe('using alternative id', () => {
-	it('gets by alternative id field', async () => {
-		await createMainNode({
-			someString: 'example-value-head',
-		});
-		const { status } = await headHandler()({
-			type: 'MainType',
-			code: 'example-value-head',
-			query: {
-				idField: 'someString',
-			},
+		it('gets by alternative id field', async () => {
+			await createMainNode({
+				someString: 'example-value-head',
+			});
+			const { status } = await headHandler()({
+				type: 'MainType',
+				code: 'example-value-head',
+				query: {
+					idField: 'someString',
+				},
+			});
+
+			expect(status).toBe(200);
 		});
 
-		expect(status).toBe(200);
-	});
+		it('throws 404 error if no record with alternative id', async () => {
+			await expect(
+				headHandler()({
+					type: 'MainType',
+					code: 'example-value-head',
+					query: {
+						idField: 'someString',
+					},
+				}),
+			).rejects.httpError({
+				status: 404,
+				message: `MainType with someString "example-value-head" does not exist`,
+			});
+		});
 
-	it('throws 404 error if no record with alternative id', async () => {
-		await expect(headHandler()({
-			type: 'MainType',
-			code: 'example-value-head',
-			query: {
-				idField: 'someString',
-			},
-		})).rejects.httpError({
-			status: 404,
-			message: `MainType with someString "example-value-head" does not exist`,
+		it('throws 409 error if multiple records with alternative id exist', async () => {
+			await createNodes(
+				[
+					'MainType',
+					{ code: `${mainCode}-1`, someString: 'example-value-head' },
+				],
+				[
+					'MainType',
+					{ code: `${mainCode}-2`, someString: 'example-value-head' },
+				],
+			);
+			await expect(
+				headHandler()({
+					type: 'MainType',
+					code: 'example-value-head',
+					query: {
+						idField: 'someString',
+					},
+				}),
+			).rejects.httpError({
+				status: 409,
+				message: `Multiple MainType records with someString "example-value-head" exist`,
+			});
 		});
 	});
-
-	it('throws 409 error if multiple records with alternative id exist', async () => {
-		await createNodes(
-			['MainType', { code: `${mainCode}-1`, someString: 'example-value-head' }],
-			['MainType', { code: `${mainCode}-2`, someString: 'example-value-head' }]);
-		await expect(headHandler()({
-			type: 'MainType',
-			code: 'example-value-head',
-			query: {
-				idField: 'someString',
-			},
-		})).rejects.httpError({
-			status: 409,
-			message: `Multiple MainType records with someString "example-value-head" exist`,
-		});
-	});
-	})
 
 	it('throws 404 error if no record', async () => {
 		await expect(headHandler()(input)).rejects.httpError({

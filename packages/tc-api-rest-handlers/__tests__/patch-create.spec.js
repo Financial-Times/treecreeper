@@ -67,27 +67,24 @@ describe('rest PATCH create', () => {
 		});
 
 		it('errors if using alternative id field', async () => {
-
-await expect(
+			await expect(
 				patchHandler()({
-		type: 'MainType',
-		code: 'example-value-patch-create',
-		body: {
-			code: mainCode,
-				someBoolean: false,
-			},
-		query: {
-					idField: 'someString',
-				},
-	} )
+					type: 'MainType',
+					code: 'example-value-patch-create',
+					body: {
+						code: mainCode,
+						someBoolean: false,
+					},
+					query: {
+						idField: 'someString',
+					},
+				}),
 			).rejects.httpError({
 				status: 404,
 				message: `MainType with someString "example-value-patch-create" does not exist`,
 			});
 
-
-			await neo4jTest('MainType', mainCode)
-				.notExists()
+			await neo4jTest('MainType', mainCode).notExists();
 		});
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({

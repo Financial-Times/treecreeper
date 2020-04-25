@@ -23,11 +23,15 @@ const patchHandler = ({ documentStore } = {}) => {
 		const {
 			type,
 			body: originalBody,
-			query: { relationshipAction, richRelationships, idField = "code" } = {},
+			query: {
+				relationshipAction,
+				richRelationships,
+				idField = 'code',
+			} = {},
 			metadata = {},
 		} = validateInput(input);
 
-		let {code} = input
+		let { code } = input;
 
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
@@ -35,13 +39,24 @@ const patchHandler = ({ documentStore } = {}) => {
 			normaliseRelationshipProps(type, originalBody);
 		}
 
-		const preflightRequest = await getNeo4jRecord(type, code, null, idField);
+		const preflightRequest = await getNeo4jRecord(
+			type,
+			code,
+			null,
+			idField,
+		);
 		if (idField !== 'code') {
 			if (!preflightRequest.hasRecords()) {
-				throw httpErrors(404, `${type} with ${idField} "${code}" does not exist`);
+				throw httpErrors(
+					404,
+					`${type} with ${idField} "${code}" does not exist`,
+				);
 			}
-			if(preflightRequest.hasMultipleRoots()) {
-				throw httpErrors(409, `Multiple ${type} records with ${idField} "${code}" exist`);
+			if (preflightRequest.hasMultipleRoots()) {
+				throw httpErrors(
+					409,
+					`Multiple ${type} records with ${idField} "${code}" exist`,
+				);
 			}
 		}
 
@@ -50,12 +65,10 @@ const patchHandler = ({ documentStore } = {}) => {
 		}
 
 		if (idField !== 'code') {
-		({code} = preflightRequest.toJson({
-			type
-		}));
-	}
-
-
+			({ code } = preflightRequest.toJson({
+				type,
+			}));
+		}
 
 		const initialContent = preflightRequest.toJson({
 			type,

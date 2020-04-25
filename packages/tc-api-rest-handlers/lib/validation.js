@@ -23,7 +23,7 @@ const sdkValidators = Object.entries(validators).reduce(
 	{},
 );
 
-const validateParams = ({ type, code, query: {idField} = {} }) => {
+const validateParams = ({ type, code, query: { idField } = {} }) => {
 	module.exports.validateTypeName(type);
 	if (idField) {
 		module.exports.validateProperty(type, idField, code);
@@ -37,7 +37,7 @@ const validateBody = ({
 	code,
 	metadata: { clientId } = {},
 	body: newContent,
-	query: {idField = 'code'}  = {}
+	query: { idField = 'code' } = {},
 }) => {
 	if (newContent[idField] && newContent[idField] !== code) {
 		throw httpErrors(

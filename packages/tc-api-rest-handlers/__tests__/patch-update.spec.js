@@ -85,15 +85,15 @@ describe('rest PATCH update', () => {
 				someBoolean: true,
 			});
 			const { status, body } = await patchHandler()({
-		type: 'MainType',
-		code: 'example-value-patch-update',
-		body: {
-				someBoolean: false,
-			},
-		query: {
+				type: 'MainType',
+				code: 'example-value-patch-update',
+				body: {
+					someBoolean: false,
+				},
+				query: {
 					idField: 'someString',
 				},
-	} );
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -112,37 +112,48 @@ describe('rest PATCH update', () => {
 				.noRels();
 		});
 
+		it('throws 409 error if multiple records with alternative id exist', async () => {
+			await createNodes(
+				[
+					'MainType',
+					{
+						code: `${mainCode}-1`,
+						someString: 'example-value-patch-update',
+						someBoolean: true,
+					},
+				],
+				[
+					'MainType',
+					{
+						code: `${mainCode}-2`,
+						someString: 'example-value-patch-update',
+						someBoolean: true,
+					},
+				],
+			);
+			await expect(
+				patchHandler()({
+					type: 'MainType',
+					code: 'example-value-patch-update',
+					body: {
+						someBoolean: false,
+					},
+					query: {
+						idField: 'someString',
+					},
+				}),
+			).rejects.httpError({
+				status: 409,
+				message: `Multiple MainType records with someString "example-value-patch-update" exist`,
+			});
 
-
-	it('throws 409 error if multiple records with alternative id exist', async () => {
-
-		await createNodes(
-			['MainType', { code: `${mainCode}-1`, someString: 'example-value-patch-update', someBoolean: true }],
-			['MainType', { code: `${mainCode}-2`, someString: 'example-value-patch-update', someBoolean: true }]
-		);
-		await expect(patchHandler()({
-		type: 'MainType',
-		code: 'example-value-patch-update',
-		body: {
-				someBoolean: false,
-			},
-		query: {
-					idField: 'someString',
-				},
-	} )).rejects.httpError({
-			status: 409,
-			message: `Multiple MainType records with someString "example-value-patch-update" exist`,
+			await neo4jTest('MainType', `${mainCode}-1`).match({
+				someBoolean: true,
+			});
+			await neo4jTest('MainType', `${mainCode}-2`).match({
+				someBoolean: true,
+			});
 		});
-
-	await neo4jTest('MainType', `${mainCode}-1`)
-				.match({
-					someBoolean: true,
-				})
-				await neo4jTest('MainType', `${mainCode}-2`)
-				.match({
-					someBoolean: true,
-				})
-	});
 
 		it('deletes a property as an update', async () => {
 			await createMainNode({
