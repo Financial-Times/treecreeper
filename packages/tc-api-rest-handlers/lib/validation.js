@@ -1,34 +1,46 @@
 const httpErrors = require('http-errors');
 const { stripIndents } = require('common-tags');
+const { getType } = require('@financial-times/tc-schema-sdk');
 const {
-	validators,
-	TreecreeperUserError,
-	getType,
-} = require('@financial-times/tc-schema-sdk');
+	validateTypeName,
+	validateProperty,
+	validateCode,
+	validatePropertyName,
+} = require('./wrap-sdk-validators');
 
-const sdkValidators = Object.entries(validators).reduce(
-	(methods, [key, validator]) => {
-		methods[key] = (...args) => {
-			try {
-				return validator(...args);
-			} catch (e) {
-				if (e instanceof TreecreeperUserError) {
-					throw httpErrors(400, e.message);
-				}
-				throw e;
+const toArray = val => (Array.isArray(val) ? val : [val]);
+
+const validateRelationshipAction = relationshipAction => {
+	if (!['merge', 'replace'].includes(relationshipAction)) {
+		throw httpErrors(
+			400,
+			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
+		);
+	}
+};
+
+const validateRelationshipInput = body => {
+	Object.entries(body)
+		.filter(([propName]) => propName.startsWith('!'))
+		.forEach(([propName, deletedCodes]) => {
+			const addedCodes = toArray(body[propName.substr(1)]);
+			deletedCodes = toArray(deletedCodes);
+			if (deletedCodes.some(code => addedCodes.includes(code))) {
+				throw httpErrors(
+					400,
+					'Trying to add and remove a relationship to a record at the same time',
+				);
 			}
-		};
-		return methods;
-	},
-	{},
-);
+		});
+};
 
 const validateParams = ({ type, code, query: { idField } = {} }) => {
-	module.exports.validateTypeName(type);
+	validateTypeName(type);
+	// TODO check that method is one of the allowed ones
 	if (idField) {
-		module.exports.validateProperty(type, idField, code);
+		validateProperty(type, idField, code);
 	} else {
-		module.exports.validateCode(type, code);
+		validateCode(type, code);
 	}
 };
 
@@ -48,8 +60,8 @@ const validateBody = ({
 	const { properties } = getType(type);
 	Object.entries(newContent).forEach(([propName, value]) => {
 		const realPropName = propName.replace(/^!/, '');
-		module.exports.validatePropertyName(realPropName);
-		module.exports.validateProperty(type, realPropName, value);
+		validatePropertyName(realPropName);
+		validateProperty(type, realPropName, value);
 		const globalLock = properties[realPropName].lockedBy;
 		if (globalLock && (!clientId || !globalLock.includes(clientId))) {
 			throw httpErrors(
@@ -108,35 +120,9 @@ const validateInput = input => {
 	return input;
 };
 
-const validateRelationshipAction = relationshipAction => {
-	if (!['merge', 'replace'].includes(relationshipAction)) {
-		throw httpErrors(
-			400,
-			'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
-		);
-	}
-};
-
-const toArray = val => (Array.isArray(val) ? val : [val]);
-
-const validateRelationshipInput = body => {
-	Object.entries(body)
-		.filter(([propName]) => propName.startsWith('!'))
-		.forEach(([propName, deletedCodes]) => {
-			const addedCodes = toArray(body[propName.substr(1)]);
-			deletedCodes = toArray(deletedCodes);
-			if (deletedCodes.some(code => addedCodes.includes(code))) {
-				throw httpErrors(
-					400,
-					'Trying to add and remove a relationship to a record at the same time',
-				);
-			}
-		});
-};
-
 module.exports = {
-	validateInput,
 	validateRelationshipAction,
 	validateRelationshipInput,
-	...sdkValidators,
+	validateInput,
+	validateCode,
 };
