@@ -3,10 +3,10 @@ const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 const { broadcast } = require('./lib/events');
+const { logger } = require('@financial-times/tc-api-express-logger');
 
 const deleteHandler = ({
 	documentStore,
-	logger = console,
 } = {}) => async input => {
 	const { type, code } = validateInput(input);
 	const prefetchResult = await getNeo4jRecord(type, code);

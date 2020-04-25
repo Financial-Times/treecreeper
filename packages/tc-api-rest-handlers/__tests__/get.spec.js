@@ -35,7 +35,8 @@ describe('rest GET', () => {
 		expect(body).toMatchObject(meta.default);
 	});
 
-	it('gets by alternative field', async () => {
+	// add test for 404 message too
+	it('gets by alternative id field', async () => {
 		await createMainNode({
 			someString: 'example-value',
 		});
