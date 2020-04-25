@@ -24,6 +24,8 @@ const combineSimilarEvents = events => {
 			unique(updatedPropertiesList)
 				.filter(name => name && name.charAt(0) !== '_')
 				.flatMap(propName =>
+					// this is needed in order to find both deprecated and current
+					// names for relationships
 					schema.findPropertyNames(groupedEvent[0].type, propName),
 				),
 		).sort();
