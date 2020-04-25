@@ -24,9 +24,9 @@ const getNeo4jRecord = (
 	);
 };
 
-const getNeo4jNode = (type, code) => {
+const getNeo4jNode = (type, code, idField = 'code') => {
 	return executeQuery(
-		`MATCH (node:${type} {code: $code})
+		`MATCH (node:${type} {${idField}: $code})
 		RETURN node`,
 		{ code },
 	);

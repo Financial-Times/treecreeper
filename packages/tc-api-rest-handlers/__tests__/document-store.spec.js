@@ -58,6 +58,7 @@ describe('rest document store integration', () => {
 		});
 
 		it('throws if s3 query fails', async () => {
+			await createMainNode();
 			const mockDocstoreGet = createRejectedDocstoreMock(
 				'get',
 				new Error('oh no'),

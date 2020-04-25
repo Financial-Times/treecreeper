@@ -35,38 +35,6 @@ describe('rest GET', () => {
 		expect(body).toMatchObject(meta.default);
 	});
 
-	// add test for 404 message too
-	it('gets by alternative id field', async () => {
-		await createMainNode({
-			someString: 'example-value',
-		});
-		const { body, status } = await getHandler()({
-			type: 'MainType',
-			code: 'example-value',
-			query: {
-				idField: 'someString',
-			},
-		});
-
-		expect(status).toBe(200);
-		expect(body).toMatchObject({
-			code: mainCode,
-			someString: 'example-value',
-		});
-	});
-
-	it('throws 404 error if no record with alternative id', async () => {
-		await expect(getHandler()({
-			type: 'MainType',
-			code: 'example-value',
-			query: {
-				idField: 'someString',
-			},
-		})).rejects.httpError({
-			status: 404,
-			message: `MainType with someString "example-value" does not exist`,
-		});
-	});
 
 
 	it('retrieves array data', async () => {
@@ -107,7 +75,7 @@ describe('rest GET', () => {
 	it('throws 404 error if no record', async () => {
 		await expect(getHandler()(input)).rejects.httpError({
 			status: 404,
-			message: `MainType ${mainCode} does not exist`,
+			message: `MainType with code "${mainCode}" does not exist`,
 		});
 	});
 
@@ -115,6 +83,54 @@ describe('rest GET', () => {
 		dbUnavailable();
 		await expect(getHandler()(input)).rejects.toThrow('oh no');
 	});
+
+	describe('using alternative id', () => {
+	it('gets by alternative id field', async () => {
+		await createMainNode({
+			someString: 'example-value-get',
+		});
+		const { body, status } = await getHandler()({
+			type: 'MainType',
+			code: 'example-value-get',
+			query: {
+				idField: 'someString',
+			},
+		});
+
+		expect(status).toBe(200);
+		expect(body).toMatchObject({
+			code: mainCode,
+			someString: 'example-value-get',
+		});
+	});
+
+	it('throws 404 error if no record with alternative id', async () => {
+		await expect(getHandler()({
+			type: 'MainType',
+			code: 'example-value-get',
+			query: {
+				idField: 'someString',
+			},
+		})).rejects.httpError({
+			status: 404,
+			message: `MainType with someString "example-value-get" does not exist`,
+		});
+	});
+
+	it('throws 409 error if multiple records with alternative id exist', async () => {
+		await createNodes(['MainType', { code: `${mainCode}-1`, someString: 'example-value-get' }],['MainType', { code: `${mainCode}-2`, someString: 'example-value-get' }]);
+		await expect(getHandler()({
+			type: 'MainType',
+			code: 'example-value-get',
+			query: {
+				idField: 'someString',
+			},
+		})).rejects.httpError({
+			status: 409,
+			message: `Multiple MainType records with someString "example-value-get" exist`,
+		});
+	});
+	})
 
 	describe('rich relationship information', () => {
 		it('gets record with rich relationship information if richRelationships query is true', async () => {

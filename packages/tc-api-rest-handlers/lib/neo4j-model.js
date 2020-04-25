@@ -91,7 +91,7 @@ const constructOutput = ({
 
 const addTreecreeperEnhancements = result => {
 	result.hasRecords = () => !!(result.records && result.records.length);
-
+	result.hasMultipleRoots = () => [...new Set(result.records.map(record => record.get('node').properties.code))].length > 1
 	result.hasRelationships = () =>
 		!!(
 			result.hasRecords() &&

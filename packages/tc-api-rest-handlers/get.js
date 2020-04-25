@@ -15,10 +15,12 @@ const getHandler = ({ documentStore } = {}) => async input => {
 		idField,
 	);
 
-	// TODO validate that only has a single root record
 	if (!neo4jResult.hasRecords()) {
-		// TODO throw error talking about idField
 		throw httpErrors(404, `${type} with ${idField} "${code}" does not exist`);
+	}
+
+	if (idField !== 'code' && neo4jResult.hasMultipleRoots()) {
+		throw httpErrors(409, `Multiple ${type} records with ${idField} "${code}" exist`);
 	}
 
 	const neo4jResultAsJson = neo4jResult.toJson({
@@ -27,7 +29,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	});
 
 	const docstoreResult = documentStore
-		? documentStore.get(type, neo4jResultAsJson.code)
+		? await documentStore.get(type, neo4jResultAsJson.code)
 		: { body: {} };
 
 	return {

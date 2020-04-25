@@ -1,6 +1,6 @@
 const { setupMocks } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
-const { getHandler } = require('../get');
+const { headHandler } = require('../head');
 
 describe('rest HEAD', () => {
 	const namespace = 'api-rest-handlers-head';
@@ -15,40 +15,71 @@ describe('rest HEAD', () => {
 	const createMainNode = (props = {}) =>
 		createNode('MainType', { code: mainCode, ...props });
 
-	it('gets record without relationships', async () => {
+	it('gets record', async () => {
 		await createMainNode({
 			someString: 'name1',
 		});
-		const { status } = await getHandler()(input);
+		const { status } = await headHandler()(input);
 
 		expect(status).toBe(200);
 	});
 
-	it('gets record with relationships', async () => {
-		const [main, child, parent] = await createNodes(
-			['MainType', mainCode],
-			['ChildType', `${namespace}-child`],
-			['ParentType', `${namespace}-parent`],
-		);
-		await connectNodes(
-			// tests incoming and outgoing relationships
-			[main, 'HAS_CHILD', child],
-			[parent, 'IS_PARENT_OF', main],
-		);
 
-		const { status } = await getHandler()(input);
+	describe('using alternative id', () => {
+	it('gets by alternative id field', async () => {
+		await createMainNode({
+			someString: 'example-value-head',
+		});
+		const { status } = await headHandler()({
+			type: 'MainType',
+			code: 'example-value-head',
+			query: {
+				idField: 'someString',
+			},
+		});
+
 		expect(status).toBe(200);
 	});
+
+	it('throws 404 error if no record with alternative id', async () => {
+		await expect(headHandler()({
+			type: 'MainType',
+			code: 'example-value-head',
+			query: {
+				idField: 'someString',
+			},
+		})).rejects.httpError({
+			status: 404,
+			message: `MainType with someString "example-value-head" does not exist`,
+		});
+	});
+
+	it('throws 409 error if multiple records with alternative id exist', async () => {
+		await createNodes(
+			['MainType', { code: `${mainCode}-1`, someString: 'example-value-head' }],
+			['MainType', { code: `${mainCode}-2`, someString: 'example-value-head' }]);
+		await expect(headHandler()({
+			type: 'MainType',
+			code: 'example-value-head',
+			query: {
+				idField: 'someString',
+			},
+		})).rejects.httpError({
+			status: 409,
+			message: `Multiple MainType records with someString "example-value-head" exist`,
+		});
+	});
+	})
 
 	it('throws 404 error if no record', async () => {
-		await expect(getHandler()(input)).rejects.httpError({
+		await expect(headHandler()(input)).rejects.httpError({
 			status: 404,
-			message: `MainType ${mainCode} does not exist`,
+			message: `MainType with code "${mainCode}" does not exist`,
 		});
 	});
 
 	it('throws if neo4j query fails', async () => {
 		dbUnavailable();
-		await expect(getHandler()(input)).rejects.toThrow('oh no');
+		await expect(headHandler()(input)).rejects.toThrow('oh no');
 	});
 });

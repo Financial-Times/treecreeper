@@ -36,16 +36,25 @@ const patchHandler = ({ documentStore } = {}) => {
 		}
 
 		const preflightRequest = await getNeo4jRecord(type, code, null, idField);
-		if (!preflightRequest.hasRecords()) {
-			if (idField !== 'code') {
+		if (idField !== 'code') {
+			if (!preflightRequest.hasRecords()) {
 				throw httpErrors(404, `${type} with ${idField} "${code}" does not exist`);
 			}
+			if(preflightRequest.hasMultipleRoots()) {
+				throw httpErrors(409, `Multiple ${type} records with ${idField} "${code}" exist`);
+			}
+		}
+
+		if (!preflightRequest.hasRecords()) {
 			return Object.assign(await post(input), { status: 201 });
 		}
 
+		if (idField !== 'code') {
 		({code} = preflightRequest.toJson({
 			type
 		}));
+	}
+
 
 
 		const initialContent = preflightRequest.toJson({

@@ -71,7 +71,7 @@ describe('rest PATCH create', () => {
 await expect(
 				patchHandler()({
 		type: 'MainType',
-		code: 'example-value',
+		code: 'example-value-patch-create',
 		body: {
 			code: mainCode,
 				someBoolean: false,
@@ -82,7 +82,7 @@ await expect(
 	} )
 			).rejects.httpError({
 				status: 404,
-				message: `MainType with someString "example-value" does not exist`,
+				message: `MainType with someString "example-value-patch-create" does not exist`,
 			});
 
 
