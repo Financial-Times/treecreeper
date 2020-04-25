@@ -23,14 +23,11 @@ const patchHandler = ({ documentStore } = {}) => {
 		const {
 			type,
 			body: originalBody,
-			query: { relationshipAction, richRelationships, idField } = {},
+			query: { relationshipAction, richRelationships, idField = "code" } = {},
 			metadata = {},
-			code: ooerr
 		} = validateInput(input);
 
 		let {code} = input
-
-		console.log({idField, code})
 
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
@@ -40,8 +37,8 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		const preflightRequest = await getNeo4jRecord(type, code, null, idField);
 		if (!preflightRequest.hasRecords()) {
-			if (idField) {
-				throw httpErrors(404, `${type} ${code} does not exist`);
+			if (idField !== 'code') {
+				throw httpErrors(404, `${type} with ${idField} "${code}" does not exist`);
 			}
 			return Object.assign(await post(input), { status: 201 });
 		}
@@ -50,8 +47,6 @@ const patchHandler = ({ documentStore } = {}) => {
 			type
 		}));
 
-
-		console.log({code})
 
 		const initialContent = preflightRequest.toJson({
 			type,

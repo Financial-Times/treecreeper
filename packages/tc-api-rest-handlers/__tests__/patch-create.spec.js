@@ -82,7 +82,7 @@ await expect(
 	} )
 			).rejects.httpError({
 				status: 404,
-				message: `MainType example-value does not exist`,
+				message: `MainType with someString "example-value" does not exist`,
 			});
 
 

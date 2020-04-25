@@ -6,7 +6,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	// TODO validate that idField is a canIdentify field
 	validateInput(input);
 
-	const { type, code, query: { richRelationships, idField } = {} } = input;
+	const { type, code, query: { richRelationships, idField = "code"} = {} } = input;
 
 	const neo4jResult = await getNeo4jRecord(
 		type,
@@ -18,7 +18,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 	// TODO validate that only has a single root record
 	if (!neo4jResult.hasRecords()) {
 		// TODO throw error talking about idField
-		throw httpErrors(404, `${type} ${code} does not exist`);
+		throw httpErrors(404, `${type} with ${idField} "${code}" does not exist`);
 	}
 
 	const neo4jResultAsJson = neo4jResult.toJson({

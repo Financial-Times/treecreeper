@@ -55,6 +55,20 @@ describe('rest GET', () => {
 		});
 	});
 
+	it('throws 404 error if no record with alternative id', async () => {
+		await expect(getHandler()({
+			type: 'MainType',
+			code: 'example-value',
+			query: {
+				idField: 'someString',
+			},
+		})).rejects.httpError({
+			status: 404,
+			message: `MainType with someString "example-value" does not exist`,
+		});
+	});
+
+
 	it('retrieves array data', async () => {
 		await createMainNode({
 			// someStringList: ['one', 'two'],
