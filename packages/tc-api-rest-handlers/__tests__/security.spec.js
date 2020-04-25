@@ -3,7 +3,7 @@ const { getHandler } = require('../get');
 const { deleteHandler } = require('../delete');
 const { postHandler } = require('../post');
 const { patchHandler } = require('../patch');
-// const { absorbHandler } = require('../absorb');
+const { absorbHandler } = require('../absorb');
 
 // Example cypher query taken from https://stackoverflow.com/a/24317293/10917765
 const INJECTION_ATTACK_STRING =
@@ -48,7 +48,7 @@ describe('rest security', () => {
 		['delete', deleteHandler()],
 		['post', postHandler()],
 		['patch', patchHandler()],
-		// ['absorb', absorbHandler()]
+		['absorb', absorbHandler()],
 	].forEach(([handlerName, handler]) => {
 		/* eslint-disable jest/valid-describe */
 		describe(handlerName, () => {
@@ -59,6 +59,10 @@ describe('rest security', () => {
 						type: 'MainType',
 						code: mainCode,
 					};
+
+					if (handlerName === 'absorb') {
+						input.codeToAbsorb = `${mainCode}-absorbed`;
+					}
 					modifier(input);
 					await expect(handler(input)).rejects.httpError({
 						status: 400,
@@ -66,6 +70,20 @@ describe('rest security', () => {
 					});
 				});
 			});
+
+			if (handlerName === 'absorb') {
+				it(`should error when codeToAbsorb is suspicious`, async () => {
+					const input = {
+						type: 'MainType',
+						code: mainCode,
+						codeToAbsorb: INJECTION_ATTACK_STRING,
+					};
+					await expect(handler(input)).rejects.httpError({
+						status: 400,
+						message: /Invalid .*/,
+					});
+				});
+			}
 		});
 	});
 });
