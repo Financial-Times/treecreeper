@@ -52,17 +52,17 @@ const getBaseQuery = (type, method, willUpdateMeta) => {
 	}
 };
 
-const queryBuilder = (method, input, body = {}) => {
+const queryBuilder = (method, input, body = {}, realCode = input.code) => {
 	const { type, code, metadata = {}, query = {} } = input;
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
 
 	// context is used for stacking data to update record
 	const context = { upsert };
-
+	console.log({realCode})
 	const queryParts = [];
 	let parameters = {
-		code,
+		code: realCode,
 		...prepareMetadataForNeo4jQuery(metadata),
 	};
 
@@ -88,7 +88,7 @@ const queryBuilder = (method, input, body = {}) => {
 		});
 		const properties = constructNeo4jProperties({
 			type,
-			code,
+			code: realCode,
 			body: { ...bodyDiff },
 		});
 		updateParameter({ properties });

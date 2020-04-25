@@ -77,6 +77,42 @@ describe('rest PATCH update', () => {
 				.exists()
 				.match(meta.update);
 		});
+
+		// add test for 404 message too
+		it('updates using alternative id field', async () => {
+			await createMainNode({
+				someString: 'example-value',
+				someBoolean: true,
+			});
+			const { status, body } = await patchHandler()({
+		type: 'MainType',
+		code: 'example-value',
+		body: {
+				someBoolean: false,
+			},
+		query: {
+					idField: 'someString',
+				},
+	} );
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: mainCode,
+				someString: 'example-value',
+				someBoolean: false,
+			});
+
+			await neo4jTest('MainType', mainCode)
+				.exists()
+				.match({
+					code: mainCode,
+					someString: 'example-value',
+					someBoolean: false,
+				})
+				.noRels();
+		});
+
+
 		it('deletes a property as an update', async () => {
 			await createMainNode({
 				someString: 'someString',

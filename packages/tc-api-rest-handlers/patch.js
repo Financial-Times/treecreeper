@@ -1,3 +1,4 @@
+const httpErrors = require('http-errors');
 const _isEmpty = require('lodash.isempty');
 const {
 	validateInput,
@@ -21,11 +22,15 @@ const patchHandler = ({ documentStore } = {}) => {
 	return async input => {
 		const {
 			type,
-			code,
 			body: originalBody,
-			query: { relationshipAction, richRelationships } = {},
+			query: { relationshipAction, richRelationships, idField } = {},
 			metadata = {},
+			code: ooerr
 		} = validateInput(input);
+
+		let {code} = input
+
+		console.log({idField, code})
 
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
@@ -33,10 +38,20 @@ const patchHandler = ({ documentStore } = {}) => {
 			normaliseRelationshipProps(type, originalBody);
 		}
 
-		const preflightRequest = await getNeo4jRecord(type, code);
+		const preflightRequest = await getNeo4jRecord(type, code, null, idField);
 		if (!preflightRequest.hasRecords()) {
+			if (idField) {
+				throw httpErrors(404, `${type} ${code} does not exist`);
+			}
 			return Object.assign(await post(input), { status: 201 });
 		}
+
+		({code} = preflightRequest.toJson({
+			type
+		}));
+
+
+		console.log({code})
 
 		const initialContent = preflightRequest.toJson({
 			type,
@@ -57,7 +72,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			: {};
 
 		try {
-			const builder = queryBuilder('MERGE', input, body)
+			const builder = queryBuilder('MERGE', input, body, code)
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)

@@ -23,9 +23,13 @@ const sdkValidators = Object.entries(validators).reduce(
 	{},
 );
 
-const validateParams = ({ type, code }) => {
+const validateParams = ({ type, code, query: {idField} = {} }) => {
 	module.exports.validateTypeName(type);
-	module.exports.validateCode(type, code);
+	if (idField) {
+		module.exports.validateProperty(type, idField, code);
+	} else {
+		module.exports.validateCode(type, code);
+	}
 };
 
 const validateBody = ({
@@ -33,11 +37,12 @@ const validateBody = ({
 	code,
 	metadata: { clientId } = {},
 	body: newContent,
+	query: {idField = 'code'}  = {}
 }) => {
-	if (newContent.code && newContent.code !== code) {
+	if (newContent[idField] && newContent[idField] !== code) {
 		throw httpErrors(
 			400,
-			`Conflicting code property \`${newContent.code}\` in payload for ${type} ${code}`,
+			`Conflicting ${idField} property \`${newContent.code}\` in payload for ${type} ${code}`,
 		);
 	}
 	const { properties } = getType(type);

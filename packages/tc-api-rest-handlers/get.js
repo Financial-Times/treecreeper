@@ -17,6 +17,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 
 	// TODO validate that only has a single root record
 	if (!neo4jResult.hasRecords()) {
+		// TODO throw error talking about idField
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
 
