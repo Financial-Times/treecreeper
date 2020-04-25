@@ -12,12 +12,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 		query: { richRelationships, idField = 'code' } = {},
 	} = input;
 
-	const neo4jResult = await getNeo4jRecord(
-		type,
-		code,
-		richRelationships,
-		idField,
-	);
+	const neo4jResult = await getNeo4jRecord(type, code, idField);
 
 	if (!neo4jResult.hasRecords()) {
 		throw httpErrors(

@@ -39,12 +39,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			normaliseRelationshipProps(type, originalBody);
 		}
 
-		const preflightRequest = await getNeo4jRecord(
-			type,
-			code,
-			null,
-			idField,
-		);
+		const preflightRequest = await getNeo4jRecord(type, code, idField);
 		if (idField !== 'code') {
 			if (!preflightRequest.hasRecords()) {
 				throw httpErrors(
