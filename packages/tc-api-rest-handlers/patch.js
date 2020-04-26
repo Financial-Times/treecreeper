@@ -1,11 +1,10 @@
-const httpErrors = require('http-errors');
 const _isEmpty = require('lodash.isempty');
 const {
 	validateInput,
 	validateRelationshipAction,
 	validateRelationshipInput,
 } = require('./lib/validation');
-const { getNeo4jRecord } = require('./lib/read-helpers');
+const { getNeo4jRecord, checkForUniqueRecord } = require('./lib/read-helpers');
 const {
 	containsRelationshipData,
 	normaliseRelationshipProps,
@@ -41,18 +40,12 @@ const patchHandler = ({ documentStore } = {}) => {
 
 		const preflightRequest = await getNeo4jRecord(type, code, idField);
 		if (idField !== 'code') {
-			if (!preflightRequest.hasRecords()) {
-				throw httpErrors(
-					404,
-					`${type} with ${idField} "${code}" does not exist`,
-				);
-			}
-			if (preflightRequest.hasMultipleRoots()) {
-				throw httpErrors(
-					409,
-					`Multiple ${type} records with ${idField} "${code}" exist`,
-				);
-			}
+			checkForUniqueRecord({
+				neo4jResult: preflightRequest,
+				idField,
+				code,
+				type,
+			});
 		}
 
 		if (!preflightRequest.hasRecords()) {

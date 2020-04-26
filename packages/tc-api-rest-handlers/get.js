@@ -1,6 +1,5 @@
-const httpErrors = require('http-errors');
 const { validateInput } = require('./lib/validation');
-const { getNeo4jRecord } = require('./lib/read-helpers');
+const { getNeo4jRecord, checkForUniqueRecord } = require('./lib/read-helpers');
 
 const getHandler = ({ documentStore } = {}) => async input => {
 	validateInput(input);
@@ -13,19 +12,7 @@ const getHandler = ({ documentStore } = {}) => async input => {
 
 	const neo4jResult = await getNeo4jRecord(type, code, idField);
 
-	if (!neo4jResult.hasRecords()) {
-		throw httpErrors(
-			404,
-			`${type} with ${idField} "${code}" does not exist`,
-		);
-	}
-
-	if (idField !== 'code' && neo4jResult.hasMultipleRoots()) {
-		throw httpErrors(
-			409,
-			`Multiple ${type} records with ${idField} "${code}" exist`,
-		);
-	}
+	checkForUniqueRecord({ neo4jResult, idField, code, type });
 
 	const neo4jResultAsJson = neo4jResult.toJson({
 		type,
