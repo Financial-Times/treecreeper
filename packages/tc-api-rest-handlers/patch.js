@@ -77,7 +77,7 @@ const patchHandler = ({ documentStore } = {}) => {
 			: {};
 
 		try {
-			const builder = queryBuilder('MERGE', input, body, code)
+			const builder = queryBuilder({ method: 'MERGE', input, body, code })
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)

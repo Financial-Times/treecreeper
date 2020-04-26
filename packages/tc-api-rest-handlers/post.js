@@ -41,11 +41,11 @@ const postHandler = ({ documentStore } = {}) => async input => {
 		: {};
 
 	try {
-		const { neo4jResult, queryContext, parameters } = await queryBuilder(
-			'CREATE',
+		const { neo4jResult, queryContext, parameters } = await queryBuilder({
+			method: 'CREATE',
 			input,
 			body,
-		)
+		})
 			.constructProperties()
 			.createRelationships()
 			.setLockFields()

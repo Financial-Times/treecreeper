@@ -52,9 +52,12 @@ const getBaseQuery = (type, method, willUpdateMeta) => {
 	}
 };
 
-const queryBuilder = (method, input, body = {}, code = input.code) => {
-	const { type, metadata = {}, query = {} } = input;
-	const { relationshipAction, lockFields, unlockFields, upsert } = query;
+const queryBuilder = ({ method, input, body = {}, code = input.code }) => {
+	const {
+		type,
+		metadata = {},
+		query: { relationshipAction, lockFields, unlockFields, upsert } = {},
+	} = input;
 	const { clientId } = metadata;
 
 	// context is used for stacking data to update record
