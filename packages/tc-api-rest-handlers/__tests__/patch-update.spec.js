@@ -77,62 +77,14 @@ describe('rest PATCH update', () => {
 				.exists()
 				.match(meta.update);
 		});
-
-		// add test for 404 message too
-		it('updates using alternative id field', async () => {
-			await createMainNode({
-				someString: 'example-value-patch-update',
-				someBoolean: true,
-			});
-			const { status, body } = await patchHandler()({
-				type: 'MainType',
-				code: 'example-value-patch-update',
-				body: {
-					someBoolean: false,
-				},
-				query: {
-					idField: 'someString',
-				},
-			});
-
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				code: mainCode,
-				someString: 'example-value-patch-update',
-				someBoolean: false,
-			});
-
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					code: mainCode,
+		describe('alternatiev id', () => {
+			// add test for 404 message too
+			it('updates using alternative id field', async () => {
+				await createMainNode({
 					someString: 'example-value-patch-update',
-					someBoolean: false,
-				})
-				.noRels();
-		});
-
-		it('throws 409 error if multiple records with alternative id exist', async () => {
-			await createNodes(
-				[
-					'MainType',
-					{
-						code: `${mainCode}-1`,
-						someString: 'example-value-patch-update',
-						someBoolean: true,
-					},
-				],
-				[
-					'MainType',
-					{
-						code: `${mainCode}-2`,
-						someString: 'example-value-patch-update',
-						someBoolean: true,
-					},
-				],
-			);
-			await expect(
-				patchHandler()({
+					someBoolean: true,
+				});
+				const { status, body } = await patchHandler()({
 					type: 'MainType',
 					code: 'example-value-patch-update',
 					body: {
@@ -141,17 +93,94 @@ describe('rest PATCH update', () => {
 					query: {
 						idField: 'someString',
 					},
-				}),
-			).rejects.httpError({
-				status: 409,
-				message: `Multiple MainType records with someString "example-value-patch-update" exist`,
+				});
+
+				expect(status).toBe(200);
+				expect(body).toMatchObject({
+					code: mainCode,
+					someString: 'example-value-patch-update',
+					someBoolean: false,
+				});
+
+				await neo4jTest('MainType', mainCode)
+					.exists()
+					.match({
+						code: mainCode,
+						someString: 'example-value-patch-update',
+						someBoolean: false,
+					})
+					.noRels();
 			});
 
-			await neo4jTest('MainType', `${mainCode}-1`).match({
-				someBoolean: true,
+			it('throws 409 error if multiple records with alternative id exist', async () => {
+				await createNodes(
+					[
+						'MainType',
+						{
+							code: `${mainCode}-1`,
+							someString: 'example-value-patch-update',
+							someBoolean: true,
+						},
+					],
+					[
+						'MainType',
+						{
+							code: `${mainCode}-2`,
+							someString: 'example-value-patch-update',
+							someBoolean: true,
+						},
+					],
+				);
+				await expect(
+					patchHandler()({
+						type: 'MainType',
+						code: 'example-value-patch-update',
+						body: {
+							someBoolean: false,
+						},
+						query: {
+							idField: 'someString',
+						},
+					}),
+				).rejects.httpError({
+					status: 409,
+					message: `Multiple MainType records with someString "example-value-patch-update" exist`,
+				});
+
+				await neo4jTest('MainType', `${mainCode}-1`).match({
+					someBoolean: true,
+				});
+				await neo4jTest('MainType', `${mainCode}-2`).match({
+					someBoolean: true,
+				});
 			});
-			await neo4jTest('MainType', `${mainCode}-2`).match({
-				someBoolean: true,
+			it('throws 400 error if alternative id is not a valid property name', async () => {
+				await expect(
+					patchHandler()({
+						type: 'MainType',
+						code: 'example-value-patch-update',
+						query: {
+							idField: 'somethingElse',
+						},
+					}),
+				).rejects.httpError({
+					status: 400,
+					message: `somethingElse is not a property of MainType and cannot be used to specify a record`,
+				});
+			});
+			it('throws 400 error if alternative id is not indexed', async () => {
+				await expect(
+					patchHandler()({
+						type: 'MainType',
+						code: 'example-value-patch-update',
+						query: {
+							idField: 'someEnum',
+						},
+					}),
+				).rejects.httpError({
+					status: 400,
+					message: `someEnum property of MainType is not indexed and cannot be used to specify a record`,
+				});
 			});
 		});
 

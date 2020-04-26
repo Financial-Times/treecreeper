@@ -3,7 +3,6 @@ const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 
 const getHandler = ({ documentStore } = {}) => async input => {
-	// TODO validate that idField is a canIdentify field
 	validateInput(input);
 
 	const {

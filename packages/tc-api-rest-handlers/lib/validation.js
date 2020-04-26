@@ -36,8 +36,21 @@ const validateRelationshipInput = body => {
 
 const validateParams = ({ type, code, query: { idField } = {} }) => {
 	validateTypeName(type);
-	// TODO check that method is one of the allowed ones
+
 	if (idField) {
+		const { properties } = getType(type);
+		if (!(idField in properties)) {
+			throw httpErrors(
+				400,
+				`${idField} is not a property of ${type} and cannot be used to specify a record`,
+			);
+		}
+		if (!properties[idField].canIdentify) {
+			throw httpErrors(
+				400,
+				`${idField} property of ${type} is not indexed and cannot be used to specify a record`,
+			);
+		}
 		validateProperty(type, idField, code);
 	} else {
 		validateCode(type, code);

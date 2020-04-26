@@ -23,6 +23,7 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
+    canIdentify: true
   # someStringList:
   #   type: Word
   #   hasMany: true

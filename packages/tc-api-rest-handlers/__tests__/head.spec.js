@@ -79,6 +79,35 @@ describe('rest HEAD', () => {
 				message: `Multiple MainType records with someString "example-value-head" exist`,
 			});
 		});
+
+		it('throws 400 error if alternative id is not a valid property name', async () => {
+			await expect(
+				headHandler()({
+					type: 'MainType',
+					code: 'example-value-head',
+					query: {
+						idField: 'somethingElse',
+					},
+				}),
+			).rejects.httpError({
+				status: 400,
+				message: `somethingElse is not a property of MainType and cannot be used to specify a record`,
+			});
+		});
+		it('throws 400 error if alternative id is not indexed', async () => {
+			await expect(
+				headHandler()({
+					type: 'MainType',
+					code: 'example-value-head',
+					query: {
+						idField: 'someEnum',
+					},
+				}),
+			).rejects.httpError({
+				status: 400,
+				message: `someEnum property of MainType is not indexed and cannot be used to specify a record`,
+			});
+		});
 	});
 
 	it('throws 404 error if no record', async () => {
