@@ -204,6 +204,8 @@ const queryBuilder = ({ method, input, body = {}, code = input.code }) => {
 	};
 
 	const execute = async () => {
+		// Note that this means metadata on the main node will not be updated
+		// if the only change is to write properties onto a relationship
 		const willUpdateMeta =
 			context.willModifyNode ||
 			context.willCreateRelationships ||
