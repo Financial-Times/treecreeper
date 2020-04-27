@@ -74,7 +74,9 @@ See the [tc-api-graphql README](https://github.com/Financial-Times/treecreeper/b
 ##### `resolvers`
 
 See the [tc-api-graphql README](https://github.com/Financial-Times/treecreeper/blob/master/packages/tc-api-graphql/README.md)
+
 ##### `excludeTypes`
+
 See the [tc-api-graphql README](https://github.com/Financial-Times/treecreeper/blob/master/packages/tc-api-graphql/README.md)
 
 ##### `republishSchema`

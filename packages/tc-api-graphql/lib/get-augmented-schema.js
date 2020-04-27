@@ -38,7 +38,7 @@ const getAugmentedSchema = ({
 	documentStore,
 	typeDefs: extendedTypeDefs,
 	resolvers: extendedResolvers,
-	excludeTypes
+	excludeTypes,
 }) => {
 	const resolvers = documentStore ? getDocumentResolvers() : {};
 	const typeDefs = getGraphqlDefs();
@@ -65,7 +65,7 @@ const getAugmentedSchema = ({
 		},
 		resolvers,
 		config: {
-			query: excludeTypes ? {exclude: excludeTypes} : true,
+			query: excludeTypes ? { exclude: excludeTypes } : true,
 			mutation: false,
 			debug: true,
 		},

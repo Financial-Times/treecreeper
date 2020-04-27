@@ -9,7 +9,7 @@ const getGraphqlApi = ({
 	republishSchemaPrefix = 'api',
 	typeDefs = [],
 	resolvers = {},
-	excludeTypes
+	excludeTypes,
 } = {}) => {
 	let schemaDidUpdate;
 	let graphqlHandler;
@@ -20,7 +20,7 @@ const getGraphqlApi = ({
 				documentStore,
 				typeDefs,
 				resolvers,
-				excludeTypes
+				excludeTypes,
 			});
 
 			schemaDidUpdate = true;

@@ -8,10 +8,20 @@ const { driver } = require('@financial-times/tc-api-db-manager');
 const { getAugmentedSchema } = require('./get-augmented-schema');
 const { Tracer } = require('./request-tracer');
 
-const getApolloMiddleware = ({ documentStore, typeDefs, resolvers, excludeTypes }) => {
+const getApolloMiddleware = ({
+	documentStore,
+	typeDefs,
+	resolvers,
+	excludeTypes,
+}) => {
 	const apollo = new ApolloServer({
 		subscriptions: false,
-		schema: getAugmentedSchema({ documentStore, typeDefs, resolvers, excludeTypes }),
+		schema: getAugmentedSchema({
+			documentStore,
+			typeDefs,
+			resolvers,
+			excludeTypes,
+		}),
 		context: ({
 			req: { headers },
 			res: {
