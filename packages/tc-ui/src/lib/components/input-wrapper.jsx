@@ -6,7 +6,7 @@ const { LinkToRecord } = require('./structure');
 const FieldTitle = ({ label, description, expandableContent, lockedBy }) => {
 	const converter = new showdown.Converter();
 	const descriptionHTML = converter.makeHtml(description);
-	const expandableContentHTML = converter.makeHtml(expandableContent);
+	const expandableContentHTML = expandableContent ? converter.makeHtml(expandableContent) : undefined;
 	return (
 		<span className="o-forms-title">
 			<span
