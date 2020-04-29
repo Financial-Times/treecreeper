@@ -36,8 +36,11 @@ verify:
 unprepublish:
 	sed s/"dist\/"/"src\/"/ packages/tc-ui/package.json > tmp && mv tmp packages/tc-ui/package.json
 
+<<<<<<< HEAD
 ## Note - no need to clean up ./packages/**/package-lock.json as they are installed lockless
 ## https://github.com/Financial-Times/treecreeper/blob/master/package.json#L59
+=======
+>>>>>>> organise and document Makefile
 clean-deps: unprepublish
 	rm -rf packages/*/node_modules
 	rm -rf node_modules
@@ -54,7 +57,11 @@ install: unprepublish
 ## Builds browser files for tc-ui (in watch mode when local)
 build-statics:
 	@if [ -z $(CI) ]; \
+<<<<<<< HEAD
 		then $(info Webpack bundling modules ...) webpack --mode=development --watch; \
+=======
+		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=development --watch; \
+>>>>>>> organise and document Makefile
 		else $(info Webpack bundling modules ...) webpack --mode=production; \
 	fi
 
