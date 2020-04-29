@@ -15,7 +15,11 @@ const initWysiwyg = container => {
 
 module.exports = {
 	withEditComponent: container => {
-		if (!/></.test(container.querySelector('textarea').value)) {
+		// this is a slightly hacky way to detect when the text area has html in it. Checks for e.g.
+		// 'span>   <em', '</p', '<div'
+		// Better to be greedy than not greedy enough - if it thinks something is html that isn't the
+		// only effect is to display a fairly unobtrusive button
+		if (!/[a-z]+>\s*<[a-z]+|<\/[a-z]+|^<[a-z]+/i.test(container.querySelector('textarea').value)) {
 			container.querySelector('.document-edit-tools').innerHTML =
 				'Edit using github flavoured markdown';
 			return;
