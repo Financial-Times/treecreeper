@@ -19,7 +19,11 @@ module.exports = {
 		// 'span>   <em', '</p', '<div'
 		// Better to be greedy than not greedy enough - if it thinks something is html that isn't the
 		// only effect is to display a fairly unobtrusive button
-		if (!/[a-z]+>\s*<[a-z]+|<\/[a-z]+|^<[a-z]+/i.test(container.querySelector('textarea').value)) {
+		if (
+			!/[a-z]+>\s*<[a-z]+|<\/[a-z]+|^<[a-z]+/i.test(
+				container.querySelector('textarea').value,
+			)
+		) {
 			container.querySelector('.document-edit-tools').innerHTML =
 				'Edit using github flavoured markdown';
 			return;
