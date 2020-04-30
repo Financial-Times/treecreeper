@@ -54,7 +54,7 @@ install: unprepublish
 ## Builds browser files for tc-ui (in watch mode when local)
 build-statics:
 	@if [ -z $(CI) ]; \
-		then $(info Webpack bundling modules ...) ./node_modules/.bin/webpack --mode=development --watch; \
+		then $(info Webpack bundling modules ...) webpack --mode=development --watch; \
 		else $(info Webpack bundling modules ...) webpack --mode=production; \
 	fi
 
