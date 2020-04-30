@@ -19,7 +19,8 @@
     "neo4j-driver": "^1.7.6",
     "node-fetch": "^2.6.0",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -56,7 +57,9 @@
   },
   "scripts": {
     "test": "make test",
-    "postinstall": "athloi exec npm i -- --no-package-lock"
+    "postinstall": "athloi exec npm i -- --no-package-lock",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -76,5 +79,6 @@
   },
   "engines": {
     "node": "^12.0.0"
-  }
+  },
+  "snyk": true
 }
