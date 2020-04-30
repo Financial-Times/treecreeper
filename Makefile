@@ -104,7 +104,7 @@ test:
 		then NEO4J_BOLT_URL=${LOCAL_BOLT_URL} TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*${spec}.*.spec.js" --testEnvironment=node --watch; \
 		else NEO4J_BOLT_URL=${LOCAL_BOLT_URL} TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --maxWorkers=1 --ci --reporters=default --reporters=jest-junit --detectOpenHandles --forceExit; \
+			jest --config="./jest.config.js" "__tests__.*/*.spec.js" --testEnvironment=node --runInBand --ci --reporters=default --reporters=jest-junit --detectOpenHandles --forceExit; \
 	fi
 
 ## Cypress stuff used in CI
