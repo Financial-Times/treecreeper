@@ -1,7 +1,7 @@
 const React = require('react');
 
 const { primitives } = require('@financial-times/tc-ui');
-const DecomButton = require('./decomButton');
+const AdditionalEditComponent = require('./AdditionalEditComponent');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -95,11 +95,16 @@ const RelationshipAnnotator = ({ type, value }) => (
 
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
+// I think this file is the root of the whole confusion. It is _very_ Biz Opsy
+// but when working with the example-schema none of it applies because none of the primitives
+// defined below match anything in the example schema
+// I think it'd be helpful to be able to run the app with 'example-schema' extensions
+// for testing out things abstractly, but when using `make run-biz-ops` it switches to
+// using a more Biz Opsy set of primitives
 module.exports = {
-	SystemLifecycle: {
+	AnEnum: {
 		...primitives.Enum,
-		AdditionalEditComponent: DecomButton,
-		ViewComponent: LifecycleStage,
+		AdditionalEditComponent,
 	},
 	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },

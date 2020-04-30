@@ -248,11 +248,17 @@ describe('End-to-end - edit record', () => {
 		cy.get('#someBoolean').should('have.text', 'Yes');
 	});
 
-	it('renders the space for an additional edit component', () => {
+	// see /demo/cms/components/primitives.jsx for where this component is passed in
+	it('renders an additional edit component with full record data', () => {
 		visitEditPage();
+
 		cy.get('.additional-edit-component-hydration-container').should(
 			'exist',
 		);
-		cy.get('.decommission-override').should('exist'); // fails
+
+		// also add a test to makes sure it only exists once, and is nested in the correct component
+
+		cy.get('.additional-edit-component').should('exist'); // fails
+		// Then add something to check data is being used correctly by the component
 	});
 });
