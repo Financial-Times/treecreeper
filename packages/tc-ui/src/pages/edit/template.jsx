@@ -30,7 +30,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
-
+debugger
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
@@ -49,11 +49,11 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			return (
 				<div>
 					<EditComponent {...viewModel} />
-					<div className="additional-edit-component-hydration-container">
-						{AdditionalEditComponent ? (
+					{AdditionalEditComponent ? (
+						<div className="additional-edit-component-hydration-container">
 							<AdditionalEditComponent {...viewModel} />
-						) : null}
-					</div>
+						</div>
+					) : null}
 				</div>
 			);
 		});

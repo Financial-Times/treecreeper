@@ -140,3 +140,7 @@ properties:
     type: OddThing
     description: Odd thing relationship description.
     label: Odd thing relationship label
+  anotherThing:
+    type: AnotherEnum
+    description: An enum that has something next to it
+    label: Multiple choice next to another thing

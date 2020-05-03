@@ -256,9 +256,24 @@ describe('End-to-end - edit record', () => {
 			'exist',
 		);
 
-		// also add a test to makes sure it only exists once, and is nested in the correct component
+		// checks that it is the second child of its parent
+		cy.get('.additional-edit-component-hydration-container')
+			.parent()
+			.children()
+			.first()
+			.next()
+			.should(
+				'have.class',
+				'additional-edit-component-hydration-container',
+			);
 
-		cy.get('.additional-edit-component').should('exist'); // fails
-		// Then add something to check data is being used correctly by the component
+		// also add a test to makes sure it only exists once, and is
+		cy.get('.additional-edit-component-hydration-container').should(
+			'have.length',
+			1,
+		);
+		cy.get('.additional-edit-component').should('exist');
+		// Componen has access to props
+		cy.get('.additional-edit-component').should('have.text', 'This value: e2e-demo');
 	});
 });

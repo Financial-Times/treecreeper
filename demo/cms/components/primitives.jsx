@@ -102,7 +102,7 @@ primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 // for testing out things abstractly, but when using `make run-biz-ops` it switches to
 // using a more Biz Opsy set of primitives
 module.exports = {
-	AnEnum: {
+	AnotherEnum: {
 		...primitives.Enum,
 		AdditionalEditComponent,
 	},
