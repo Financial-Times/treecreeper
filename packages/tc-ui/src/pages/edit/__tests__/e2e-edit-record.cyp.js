@@ -274,6 +274,9 @@ describe('End-to-end - edit record', () => {
 		);
 		cy.get('.additional-edit-component').should('exist');
 		// Componen has access to props
-		cy.get('.additional-edit-component').should('have.text', 'This value: e2e-demo');
+		cy.get('.additional-edit-component').should(
+			'have.text',
+			'This value: e2e-demo',
+		);
 	});
 });
