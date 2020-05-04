@@ -4,6 +4,7 @@ const path = require('path');
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
 const { getApp } = require('../packages/tc-api-express');
+const { createStore } = require('../packages/tc-api-s3-document-store');
 const { autocomplete } = require('./controllers/autocomplete');
 
 const PORT = process.env.PORT || 8888;
@@ -24,6 +25,10 @@ getApp({
 	treecreeperPath: '/api',
 	app,
 	graphqlMethods: ['post', 'get'],
+
+	documentStore: process.env.WITH_DOCSTORE
+		? createStore(`biz-ops-documents.${process.env.AWS_ACCOUNT_ID}`)
+		: null,
 }).then(() => {
 	app.listen(PORT, () => {
 		// eslint-disable-next-line no-console

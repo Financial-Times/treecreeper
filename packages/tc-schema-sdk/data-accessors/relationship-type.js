@@ -9,7 +9,12 @@ const getFromTo = (direction, rootType, otherType) =>
 
 const isCypherQueryIncluded = property => 'cypher' in property;
 
-const formatSimpleRelationship = (rootType, property, rawData) => {
+const formatSimpleRelationship = (
+	rootType,
+	property,
+	rawData,
+	propertyName,
+) => {
 	if (isCypherQueryIncluded(property)) {
 		return { ...property };
 	}
@@ -23,6 +28,17 @@ const formatSimpleRelationship = (rootType, property, rawData) => {
 			relationship === property.relationship &&
 			type === rootType,
 	);
+
+	// note that this is validating the schema, so shouldn't really
+	// have any place in a library intended to be used in applications
+	// (validating the schema is build time, not run time).
+	// ...however, tc-schema-sdk is used by tc-schema-validator, and without
+	// this check here the output of the validation tests is horrid
+	if (!oppositeProperty) {
+		throw new Error(
+			`${property.type} type should contain a relationship pointing back at ${rootType} to match ${rootType}.${propertyName}`,
+		);
+	}
 
 	const [from, to] = getFromTo(
 		property.direction,
@@ -77,7 +93,12 @@ const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 	}
 
 	if (isSimpleRelationship(property)) {
-		return formatSimpleRelationship(rootType, property, rawData);
+		return formatSimpleRelationship(
+			rootType,
+			property,
+			rawData,
+			propertyName,
+		);
 	}
 
 	const richRelationshipDefinition = findRichRelationshipDefinition(
