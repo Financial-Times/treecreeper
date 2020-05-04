@@ -34,7 +34,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 						more info
 					</button>
 					<div className="o-expander__content">
-						{markdownToHtml(expandableContent)}
+						{expandableContent}
 					</div>
 				</div>
 			) : null}

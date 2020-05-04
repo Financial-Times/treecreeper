@@ -479,6 +479,17 @@ ignore:
     - '@financial-times/tc-ui > showdown > yargs > yargs-parser':
         reason: no fix yet
         expires: '2020-04-23T12:54:36.605Z'
-
+  SNYK-JS-LODASH-567746:
+    - next-metrics > lodash:
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - neo4j-graphql-js > lodash:
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - '@financial-times/tc-api-db-manager > next-metrics > lodash':
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
 patch: {}
-
