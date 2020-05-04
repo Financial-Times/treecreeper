@@ -142,5 +142,5 @@ properties:
     label: Odd thing relationship label
   anotherThing:
     type: AnotherEnum
-    description: An enum that has something next to it
+    description: An enum that has something next to it.
     label: Multiple choice next to another thing
