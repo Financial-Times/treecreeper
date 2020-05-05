@@ -70,6 +70,7 @@ const EditForm = props => {
 		querystring,
 		assignComponent,
 	} = props;
+
 	return (
 		<>
 			<div className="o-layout__sidebar" />

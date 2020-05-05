@@ -267,13 +267,13 @@ describe('End-to-end - edit record', () => {
 				'additional-edit-component-hydration-container',
 			);
 
-		// also add a test to makes sure it only exists once, and is
+		// checks that the component is only rendered once
 		cy.get('.additional-edit-component-hydration-container').should(
 			'have.length',
 			1,
 		);
-		cy.get('.additional-edit-component').should('exist');
-		// Componen has access to props
+
+		// Checks that the component has access to props
 		cy.get('.additional-edit-component').should(
 			'have.text',
 			'This value: e2e-demo',
