@@ -75,7 +75,7 @@ This can be done _without_ docker if desired, by instead installing a neo4j data
 make run
 ```
 
-This will start the demo node process on port 8888. See `/demo/app.js` for details of the urls served
+This will start the demo node process on port 8888. See `/demo/api.js` for details of the urls served
 
 ### Running Biz-Ops with treecreeper
 

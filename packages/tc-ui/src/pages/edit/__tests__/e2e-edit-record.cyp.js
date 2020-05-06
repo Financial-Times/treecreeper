@@ -247,4 +247,36 @@ describe('End-to-end - edit record', () => {
 		cy.get('#someString').should('have.text', 'locked value 2');
 		cy.get('#someBoolean').should('have.text', 'Yes');
 	});
+
+	// see /demo/cms/components/primitives.jsx for where this component is passed in
+	it('renders an additional edit component with full record data', () => {
+		visitEditPage();
+
+		cy.get('.additional-edit-component-hydration-container').should(
+			'exist',
+		);
+
+		// checks that it is the second child of its parent
+		cy.get('.additional-edit-component-hydration-container')
+			.parent()
+			.children()
+			.first()
+			.next()
+			.should(
+				'have.class',
+				'additional-edit-component-hydration-container',
+			);
+
+		// checks that the component is only rendered once
+		cy.get('.additional-edit-component-hydration-container').should(
+			'have.length',
+			1,
+		);
+
+		// Checks that the component has access to props
+		cy.get('.additional-edit-component').should(
+			'have.text',
+			'This value: e2e-demo',
+		);
+	});
 });

@@ -5,3 +5,8 @@ AnEnum:
     First: First description.
     Second: Second description.
     Third: Third description.
+AnotherEnum:
+  description: |
+    Another example enum
+  options:
+    First: First option

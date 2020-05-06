@@ -23,8 +23,10 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			if (fieldNamesToLock.includes(propertyName)) {
 				lockedBy = fieldsToLock[propertyName];
 			}
+			const { EditComponent, AdditionalEditComponent } = assignComponent(
+				propDef,
+			);
 
-			const { EditComponent } = assignComponent(propDef);
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
@@ -32,6 +34,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
+				entireRecord: data,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
@@ -43,7 +46,16 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				lockedBy: propDef.lockedBy || lockedBy,
 			};
 
-			return <EditComponent {...viewModel} />;
+			return (
+				<div>
+					<EditComponent {...viewModel} />
+					{AdditionalEditComponent ? (
+						<div className="additional-edit-component-hydration-container">
+							<AdditionalEditComponent {...viewModel} />
+						</div>
+					) : null}
+				</div>
+			);
 		});
 };
 

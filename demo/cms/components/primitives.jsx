@@ -1,6 +1,7 @@
 const React = require('react');
 
 const { primitives } = require('@financial-times/tc-ui');
+const AdditionalEditComponent = require('./AdditionalEditComponent');
 
 const oLabelsModifiersMap = {
 	platinum: 'tier-platinum',
@@ -95,6 +96,10 @@ const RelationshipAnnotator = ({ type, value }) => (
 primitives.Relationship.setRelationshipAnnotator(RelationshipAnnotator);
 
 module.exports = {
+	AnotherEnum: {
+		...primitives.Enum,
+		AdditionalEditComponent,
+	},
 	ProductLifecycle: { ...primitives.Enum, ViewComponent: LifecycleStage },
 	ServiceTier: { ...primitives.Enum, ViewComponent: ServiceTier },
 	TrafficLight: { ...primitives.Enum, ViewComponent: TrafficLight },

@@ -47,6 +47,7 @@ const getDataTransformers = (assignComponent, clientId) => {
 						data[fieldName] = parser(formData[fieldName]);
 					}
 				} catch (e) {
+					// eslint-disable-next-line no-console
 					console.log(e);
 					throw e;
 				}

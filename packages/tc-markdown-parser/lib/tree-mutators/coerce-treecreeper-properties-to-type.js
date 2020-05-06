@@ -135,6 +135,7 @@ const coerceNestedPropertyValue = (
 ) => {
 	try {
 		const coercedProperties = node.children.map(subdocument =>
+			// eslint-disable-next-line array-callback-return
 			subdocument.children.reduce((values, nestNode) => {
 				if (nestNode.type === 'problem') {
 					throw new Error(nestNode.message);
