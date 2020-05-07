@@ -4,7 +4,8 @@ const logger = require('@financial-times/n-logger').default;
 const schema = require('@financial-times/tc-schema-sdk');
 const dbConnection = require('./db-connection');
 
-const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
+const exclusion = (arr1, arr2) =>
+	arr1.filter(val => !arr2.find(a => a.includes(val)));
 
 const initConstraints = async () => {
 	await schema.ready();
@@ -27,8 +28,20 @@ const initConstraints = async () => {
 			);
 		};
 
+		const retrieveIndexes = async () => {
+			const indexes = await executeQuery('CALL db.indexes');
+			return indexes.records.map(constraint =>
+				constraint.get('description'),
+			);
+		};
+
 		const existingConstraints = await retrieveConstraints();
-		const desiredConstraints = []
+		const existingIndexes = await retrieveIndexes();
+		const existingConstraintsAndIndexes = existingConstraints.concat(
+			existingIndexes,
+		);
+
+		const desiredConstraintsAndIndexes = []
 			.concat(
 				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
@@ -56,8 +69,8 @@ const initConstraints = async () => {
 			.filter(statement => !!statement);
 
 		const createConstraints = exclusion(
-			desiredConstraints,
-			existingConstraints,
+			desiredConstraintsAndIndexes,
+			existingConstraintsAndIndexes,
 		).map(constraint => `CREATE ${constraint}`);
 
 		for (const constraint of createConstraints) {
@@ -65,10 +78,12 @@ const initConstraints = async () => {
 		}
 
 		const constraints = await retrieveConstraints();
+		const indexes = await retrieveIndexes();
 
 		logger.info(
 			`db.constraints updated. ${constraints.length} constraints exist`,
 		);
+		logger.info(`db.indexes updated. ${indexes.length} indexes exist`);
 	} finally {
 		executeQuery.close();
 	}
