@@ -46,7 +46,6 @@ describe('creating db constraints', () => {
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE',
 		);
 	});
-
 	// ignore this test until we upgrade to enterprise adiition - community edition doesn't have exists()
 	it.skip("creates an existence constraint if it doesn't exist", async () => {
 		mockConstraints(dbRun, ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)']);
@@ -82,6 +81,36 @@ describe('creating db constraints', () => {
 		expect(dbRun).not.toHaveBeenCalledWith(
 			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)',
 		);
+	});
+
+	it('creates a index for canIdentify property if it doesnt exist', async () => {
+		mockConstraints(dbRun, ['CREATE INDEX ON :Dog(nose)']);
+		schema.getTypes.mockReturnValue([
+			{ name: 'Dog', properties: { tail: { canIdentify: true } } },
+		]);
+		await initConstraints();
+		expect(dbRun).toHaveBeenCalledWith('CREATE INDEX ON :Dog(tail)');
+	});
+
+	it('doesnt create an index for for canIdentify property if it does exist', async () => {
+		mockConstraints(dbRun, ['CREATE INDEX ON :Dog(nose)']);
+		schema.getTypes.mockReturnValue([
+			{ name: 'Dog', properties: { nose: { canIdentify: true } } },
+		]);
+		await initConstraints();
+		expect(dbRun).not.toHaveBeenCalledWith('CREATE INDEX ON :Dog(tail)');
+	});
+
+	it('doesnt create an index if a uniqueness constraint will be created', async () => {
+		mockConstraints(dbRun, ['CREATE INDEX ON :Dog(nose)']);
+		schema.getTypes.mockReturnValue([
+			{
+				name: 'Dog',
+				properties: { tail: { canIdentify: true, unique: true } },
+			},
+		]);
+		await initConstraints();
+		expect(dbRun).not.toHaveBeenCalledWith('CREATE INDEX ON :Dog(tail)');
 	});
 
 	// ignore this test until we upgrade to enterprise adiition - community edition doesn't have exists()

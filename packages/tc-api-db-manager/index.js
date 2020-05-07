@@ -33,14 +33,21 @@ const initConstraints = async () => {
 				...schema.getTypes().map(({ name: typeName, properties }) => {
 					return [].concat(
 						...Object.entries(properties).map(
-							([propName, { unique }]) => {
-								return [
-									unique &&
+							([propName, { unique, canIdentify }]) => {
+								if (unique) {
+									return [
 										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
+									];
 									// skip the setting of enterprise version specific constraints until we use the enterprise version
-									// required &&
-									// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-								];
+									// 	// required &&
+									// 	// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+									// ];
+								}
+								if (canIdentify) {
+									return [
+										`INDEX ON :${typeName}(${propName})`,
+									];
+								}
 							},
 						),
 					);
