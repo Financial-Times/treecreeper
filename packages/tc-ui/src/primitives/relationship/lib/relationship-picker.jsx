@@ -122,7 +122,6 @@ class RelationshipPicker extends React.Component {
 			) {
 				this.maybeSelectIfOnlyOneSuggestion();
 				// prevent the form being submitted
-				event.stopImmediatePropagation();
 				event.preventDefault();
 				return false;
 			}
