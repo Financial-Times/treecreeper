@@ -121,7 +121,7 @@ describe('creating db constraints and indexes', () => {
 		expect(dbRun).toHaveBeenCalledTimes(5);
 	});
 
-	it('doesnt create an index for for canIdentify property if it does exist', async () => {
+	it('doesnt create an index for a canIdentify property if it does exist', async () => {
 		mockConstraints({
 			stub: dbRun,
 			indexes: ['CREATE INDEX ON :Dog(nose)'],
