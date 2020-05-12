@@ -51,14 +51,16 @@ describe('creating db constraints and indexes', () => {
 	it("creates a uniqueness constraint if it doesn't exist", async () => {
 		mockConstraints({
 			stub: dbRun,
-			constraints: ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE'],
+			constraints: [
+				'CONSTRAINT ON ( dog:Dog ) ASSERT dog.nose IS UNIQUE',
+			],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { tail: { unique: true } } },
 		]);
 		await initConstraints();
 		expect(dbRun).toHaveBeenCalledWith(
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT dog.tail IS UNIQUE',
 		);
 		expect(dbRun).toHaveBeenCalledTimes(5);
 	});
@@ -66,28 +68,30 @@ describe('creating db constraints and indexes', () => {
 	it.skip("creates an existence constraint if it doesn't exist", async () => {
 		mockConstraints({
 			stub: dbRun,
-			constraints: ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)'],
+			constraints: ['CONSTRAINT ON ( dog:Dog ) ASSERT exists(s.nose)'],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { tail: { required: true } } },
 		]);
 		await initConstraints();
 		expect(dbRun).toHaveBeenCalledWith(
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT exists(s.tail)',
 		);
 	});
 
 	it("doesn't create a uniqueness constraint if it does exist", async () => {
 		mockConstraints({
 			stub: dbRun,
-			constraints: ['CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE'],
+			constraints: [
+				'CONSTRAINT ON ( dog:Dog ) ASSERT dog.nose IS UNIQUE',
+			],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { nose: { unique: true } } },
 		]);
 		await initConstraints();
 		expect(dbRun).not.toHaveBeenCalledWith(
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT dog.nose IS UNIQUE',
 		);
 		expect(dbRun).toHaveBeenCalledTimes(4);
 	});
@@ -96,22 +100,22 @@ describe('creating db constraints and indexes', () => {
 	it.skip("doesn't create an existence constraint if it does exist", async () => {
 		mockConstraints({
 			stub: dbRun,
-			constraints: ['CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)'],
+			constraints: ['CONSTRAINT ON ( dog:Dog ) ASSERT exists(dog.nose)'],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { nose: { required: true } } },
 		]);
 		await initConstraints();
 		expect(dbRun).not.toHaveBeenCalledWith(
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT exists(s.nose)',
 		);
 		expect(dbRun).toHaveBeenCalledTimes(4);
 	});
 
-	it('creates a index for canIdentify property if it doesnt exist', async () => {
+	it('creates a index for canIdentify property if it doesnt exist already', async () => {
 		mockConstraints({
 			stub: dbRun,
-			indexes: ['CREATE INDEX ON :Dog(nose)'],
+			indexes: ['INDEX ON :Dog(nose)'],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { tail: { canIdentify: true } } },
@@ -124,7 +128,7 @@ describe('creating db constraints and indexes', () => {
 	it('doesnt create an index for a canIdentify property if it does exist', async () => {
 		mockConstraints({
 			stub: dbRun,
-			indexes: ['CREATE INDEX ON :Dog(nose)'],
+			indexes: ['INDEX ON :Dog(nose)'],
 		});
 		schema.getTypes.mockReturnValue([
 			{ name: 'Dog', properties: { nose: { canIdentify: true } } },
@@ -135,7 +139,7 @@ describe('creating db constraints and indexes', () => {
 		expect(dbRun).toHaveBeenCalledTimes(4);
 	});
 
-	it('doesnt create an index if a uniqueness constraint will be created', async () => {
+	it('does not create an index for fields with an existing unique constraint', async () => {
 		mockConstraints({
 			stub: dbRun,
 		});
@@ -148,7 +152,7 @@ describe('creating db constraints and indexes', () => {
 		await initConstraints();
 		expect(dbRun).not.toHaveBeenCalledWith('CREATE INDEX ON :Dog(tail)');
 		expect(dbRun).toHaveBeenCalledWith(
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT dog.tail IS UNIQUE',
 		);
 		expect(dbRun).toHaveBeenCalledTimes(5);
 	});
@@ -158,9 +162,9 @@ describe('creating db constraints and indexes', () => {
 		mockConstraints({
 			stub: dbRun,
 			constraints: [
-				'CONSTRAINT ON (s:Dog) ASSERT s.nose IS UNIQUE',
-				'CONSTRAINT ON (s:Dog) ASSERT exists(s.tail)',
-				'CONSTRAINT ON (s:Cat) ASSERT exists(s.tail)',
+				'CONSTRAINT ON ( dog:Dog ) ASSERT s.nose IS UNIQUE',
+				'CONSTRAINT ON ( dog:Dog ) ASSERT exists(dog.tail)',
+				'CONSTRAINT ON ( cat:Cat ) ASSERT exists(cat.tail)',
 			],
 		});
 		schema.getTypes.mockReturnValue([
@@ -176,9 +180,9 @@ describe('creating db constraints and indexes', () => {
 		await initConstraints();
 
 		[
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT s.tail IS UNIQUE',
-			'CREATE CONSTRAINT ON (s:Dog) ASSERT exists(s.nose)',
-			'CREATE CONSTRAINT ON (s:Cat) ASSERT exists(s.whiskers)',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT s.tail IS UNIQUE',
+			'CREATE CONSTRAINT ON ( dog:Dog ) ASSERT exists(dog.nose)',
+			'CREATE CONSTRAINT ON ( cat:Cat ) ASSERT exists(cat.whiskers)',
 		].forEach(query => expect(dbRun).toHaveBeenCalledWith(query));
 	});
 

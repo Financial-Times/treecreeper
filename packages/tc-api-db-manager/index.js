@@ -4,8 +4,7 @@ const logger = require('@financial-times/n-logger').default;
 const schema = require('@financial-times/tc-schema-sdk');
 const dbConnection = require('./db-connection');
 
-const exclusion = (arr1, arr2) =>
-	arr1.filter(val => !arr2.find(a => a.includes(val)));
+const exclusion = (arr1, arr2) => arr1.filter(val => !arr2.includes(val));
 
 const initConstraints = async () => {
 	await schema.ready();
@@ -37,35 +36,32 @@ const initConstraints = async () => {
 
 		const existingConstraints = await retrieveConstraints();
 		const existingIndexes = await retrieveIndexes();
-		const existingConstraintsAndIndexes = existingConstraints.concat(
-			existingIndexes,
-		);
+		const existingConstraintsAndIndexes = [
+			...existingConstraints,
+			...existingIndexes,
+		];
 
-		const desiredConstraintsAndIndexes = []
-			.concat(
-				...schema.getTypes().map(({ name: typeName, properties }) => {
-					return [].concat(
-						...Object.entries(properties).map(
-							([propName, { unique, canIdentify }]) => {
-								if (unique) {
-									return [
-										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
-									];
-									// skip the setting of enterprise version specific constraints until we use the enterprise version
-									// 	// required &&
-									// 	// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-									// ];
-								}
-								if (canIdentify) {
-									return [
-										`INDEX ON :${typeName}(${propName})`,
-									];
-								}
-							},
-						),
-					);
-				}),
-			)
+		const desiredConstraintsAndIndexes = schema
+			.getTypes()
+			.flatMap(({ name: typeName, properties }) => {
+				return Object.entries(properties).flatMap(
+					([propName, { unique, canIdentify }]) => {
+						if (unique) {
+							return [
+								`CONSTRAINT ON ( ${typeName.toLowerCase()}:${typeName} ) ASSERT ${typeName.toLowerCase()}.${propName} IS UNIQUE`,
+							];
+							// skip the setting of enterprise version specific constraints until we use the enterprise version
+							// 	// required &&
+							// 	// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+							// ];
+						}
+						if (canIdentify) {
+							return [`INDEX ON :${typeName}(${propName})`];
+						}
+						return [];
+					},
+				);
+			})
 			.filter(statement => !!statement);
 
 		const createConstraints = exclusion(
