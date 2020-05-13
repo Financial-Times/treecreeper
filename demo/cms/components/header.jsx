@@ -12,7 +12,7 @@ const newTabLinkProps = url => {
 
 const userLinks = [
 	{
-		url: 'https://runbooks.in.ft.com',
+		url: 'https://runbooks.ftops.tech',
 		text: 'Looking for runbooks?',
 	},
 	{

@@ -29,7 +29,7 @@ const Subheader = ({
 		{type === 'System' && data.lifecycleStage !== 'Decommissioned' ? (
 			<>
 				<AlternateViewLink
-					url={`https://runbooks.in.ft.com/${encodeURIComponent(
+					url={`https://runbooks.ftops.tech/${encodeURIComponent(
 						code,
 					)}`}
 					ariaLabel={`Edit ${code} in Biz Ops Admin`}
