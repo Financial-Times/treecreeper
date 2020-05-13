@@ -100,6 +100,14 @@ To run tests for a single package use an environment variable: `pkg=tc-schema-sd
 
 For many tests to execute successfully you will also need to run `make run-db` in a separate terminal
 
+#### UI testing
+
+`tc-ui` does not use jest as its test runner - instead it uses cypress to run browser based tests
+
+-   run `make run` in one terminal
+-   In another terminal run `make cypress-verify cypress-open`. This opens an interactive dialog. This allows individual test files to be run on demand. To run a single test use `.only` in the spec file, and then use the cypress UI to just run that file.
+-   Source and test files will reload automatically on change. _However_ this will also restart the demo application and tests will often try to run while the app is not yet ready to receive traffic, so after the tests auto run, wait a few seconds and manually re-run them by clicking on the 'circle with an arrow' button in th browse window that cypress opens.
+
 ## Etymology
 
 A treecreeper is a small, woodland bird which climbs up tree trunks in search of invertebrates to eat.
