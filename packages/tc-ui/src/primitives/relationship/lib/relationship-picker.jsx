@@ -48,6 +48,7 @@ class RelationshipPicker extends React.Component {
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
+			isFetching: false,
 			isUserError: false,
 			isUnresolved: false,
 			selectedRelationships,
@@ -146,9 +147,12 @@ class RelationshipPicker extends React.Component {
 
 	fetchSuggestions({ value }) {
 		const { parentCode } = this.props;
-		if (!value) {
+		if (!value || this.state.isFetching) {
 			return;
 		}
+
+		this.setState({ isFetching: true });
+
 		return fetch(
 			`/autocomplete/${this.props.type}/name?q=${value}&parentType=${this.props.parentType}&propertyName=${this.props.propertyName}`,
 		)
@@ -164,7 +168,12 @@ class RelationshipPicker extends React.Component {
 									({ code }) => code === suggestion.code,
 								) && parentCode !== suggestion.code,
 						),
+					isFetching: false,
 				}));
+			})
+			.catch(error => {
+				this.setState({ isFetching: false });
+				return Promise.reject(error);
 			});
 	}
 
