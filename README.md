@@ -106,7 +106,7 @@ For many tests to execute successfully you will also need to run `make run-db` i
 
 -   run `make run` in one terminal
 -   In another terminal run `make cypress-verify cypress-open`. This opens an interactive dialog. This allows individual test files to be run on demand. To run a single test use `.only` in the spec file, and then use the cypress UI to just run that file.
--   Source and test files will reload automatically on change. _However_ this will also restart the demo application and tests will often try to run while the app is not yet ready to receive traffic, so after the tests auto run, wait a few seconds and manually re-run them by clicking on the 'circle with an arrow' button in th browse window that cypress opens.
+-   Source and test files will reload automatically on change. _However_ this will also restart the demo application and tests will often try to run while the app is not yet ready to receive traffic, so after the tests auto run, wait a few seconds and manually re-run them by clicking on the 'circle with an arrow' button in the browser window that cypress opens.
 
 ## Etymology
 
