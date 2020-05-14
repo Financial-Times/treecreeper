@@ -20,6 +20,16 @@ const UserInput = inputProps => (
 	</span>
 );
 
+const debounce = (callback, delay = 100) => {
+	let timeoutID;
+
+	return function () {
+		const args = arguments;
+		clearTimeout(timeoutID);
+		timeoutID = setTimeout(() => callback(...args), delay);
+	};
+};
+
 const Suggestion = ({ suggestion, searchTerm }) => (
 	<>
 		<Highlighter
@@ -58,7 +68,7 @@ class RelationshipPicker extends React.Component {
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
-		this.fetchSuggestions = this.fetchSuggestions.bind(this);
+		this.fetchSuggestions = debounce(this.fetchSuggestions.bind(this));
 		this.clearSuggestions = this.clearSuggestions.bind(this);
 		this.addRelationship = this.addRelationship.bind(this);
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
