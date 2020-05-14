@@ -3,6 +3,7 @@ const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
+const debounce = require('./debounce');
 
 const ENTER = 13;
 const TAB = 9;
@@ -19,16 +20,6 @@ const UserInput = inputProps => (
 		<input {...inputProps} />
 	</span>
 );
-
-const debounce = (callback, delay = 100) => {
-	let timeoutID;
-
-	return function () {
-		const args = arguments;
-		clearTimeout(timeoutID);
-		timeoutID = setTimeout(() => callback(...args), delay);
-	};
-};
 
 const Suggestion = ({ suggestion, searchTerm }) => (
 	<>
