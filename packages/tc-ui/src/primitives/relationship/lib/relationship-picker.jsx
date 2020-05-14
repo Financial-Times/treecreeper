@@ -44,7 +44,7 @@ const Suggestion = ({ suggestion, searchTerm }) => (
 
 class RelationshipPicker extends React.Component {
 	constructor(props) {
-		super();
+		super(props);
 		const selectedRelationships = toArray(props.value);
 		this.state = {
 			searchTerm: '',
@@ -57,7 +57,6 @@ class RelationshipPicker extends React.Component {
 			isFull: !props.hasMany && !!selectedRelationships.length,
 			annotate: false,
 		};
-		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
 		this.fetchSuggestions = debounce(this.fetchSuggestions.bind(this));
 		this.clearSuggestions = this.clearSuggestions.bind(this);
