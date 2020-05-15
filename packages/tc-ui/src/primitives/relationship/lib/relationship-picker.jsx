@@ -96,9 +96,11 @@ class RelationshipPicker extends React.Component {
 	}
 
 	onSuggestionHighlighted({ suggestion }) {
-		this.setState({
-			hasHighlightedSelection: !!suggestion,
-		});
+		const hasHighlightedSelection = Boolean(suggestion);
+
+		if (this.state.hasHighlightedSelection !== hasHighlightedSelection) {
+			this.setState({ hasHighlightedSelection });
+		}
 	}
 
 	onUserMisconception(event) {
@@ -151,7 +153,7 @@ class RelationshipPicker extends React.Component {
 	fetchSuggestions({ value }) {
 		const { parentCode } = this.props;
 
-		if (!value || value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
+		if (value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
 			return;
 		}
 
