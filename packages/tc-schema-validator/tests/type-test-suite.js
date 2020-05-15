@@ -117,6 +117,11 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 				expect(typeof config.description).toBe('string');
 				expect(/[.?]$/.test(config.description.trim())).toBe(true);
 			});
+			it('has valid markdown formatted description', () => {
+				if (config.description.indexOf('\n') > -1) {
+					config.description.split('\n').map(oneLine => expect(oneLine.length).toBeLessThanOrEqual(80));
+				}
+			});
 			it('has valid type', () => {
 				expect(config.type).toBeDefined();
 				expect(config.type).toMatch(arrayToRegExp(validPropTypes));

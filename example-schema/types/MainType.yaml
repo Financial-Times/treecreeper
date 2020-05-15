@@ -23,6 +23,20 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
+  hasLongDescription:
+    type: Word
+    description: This is a very long description of a schema item to prove that more than 80 characters can be used if a single line is used.
+    label: Word label
+    useInSummary: true
+  hasMutliLineDescription:
+    type: Word
+    description: |
+      These are many lines of decription each of which is of length 80 to prove length
+      These are many lines of decription each of which is of length 80 to prove length
+      These are many lines of decription each of which is of length 80 to prove length
+      These are many lines of decription each of which is of length 80 to prove sizes.
+    label: Word label
+    useInSummary: true
   # someStringList:
   #   type: Word
   #   hasMany: true
@@ -145,3 +159,4 @@ properties:
     type: AnotherEnum
     description: An enum that has something next to it.
     label: Multiple choice next to another thing
+
