@@ -119,7 +119,11 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 			});
 			it('has valid markdown formatted description', () => {
 				if (config.description.indexOf('\n') > -1) {
-					config.description.split('\n').map(oneLine => expect(oneLine.length).toBeLessThanOrEqual(80));
+					config.description
+						.split('\n')
+						.map(oneLine =>
+							expect(oneLine.length).toBeLessThanOrEqual(80),
+						);
 				}
 			});
 			it('has valid type', () => {
