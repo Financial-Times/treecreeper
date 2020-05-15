@@ -8,6 +8,9 @@ const debounce = require('./debounce');
 const ENTER = 13;
 const TAB = 9;
 
+const MIN_QUERY_LENGTH = 2;
+const MAX_SUGGESTIONS_LENGTH = 20;
+
 const toArray = val => {
 	if (!val) {
 		return [];
@@ -147,7 +150,8 @@ class RelationshipPicker extends React.Component {
 
 	fetchSuggestions({ value }) {
 		const { parentCode } = this.props;
-		if (!value || this.state.isFetching) {
+
+		if (!value || value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
 			return;
 		}
 
@@ -162,6 +166,7 @@ class RelationshipPicker extends React.Component {
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
 						// don't suggest self (relationship to self is not supported at the moment)
+						.slice(0, MAX_SUGGESTIONS_LENGTH)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
