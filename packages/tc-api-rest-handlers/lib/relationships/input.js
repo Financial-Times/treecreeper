@@ -13,9 +13,13 @@ const arrDiff = (arr1, arr2) =>
 const relationshipPropsDiff = (newRelationship, existingRelationship) => {
 	const diffs = {};
 	Object.keys(newRelationship).forEach(prop => {
-		if (newRelationship[prop] !== existingRelationship[prop]) {
-			diffs[prop] = newRelationship[prop];
+		if (newRelationship[prop] === existingRelationship[prop]) {
+			return;
 		}
+		if (newRelationship[prop] === null && !(prop in existingRelationship)) {
+			return;
+		}
+		diffs[prop] = newRelationship[prop];
 	});
 	return diffs;
 };

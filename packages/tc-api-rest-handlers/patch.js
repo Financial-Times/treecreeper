@@ -81,6 +81,7 @@ const patchHandler = ({ documentStore } = {}) => {
 					type,
 					richRelationshipsFlag: richRelationships,
 				});
+
 				event.changedRelationships = queryContext.changedRelationships;
 				event.removedRelationships = queryContext.removedRelationships;
 				event.neo4jResult = neo4jResult;

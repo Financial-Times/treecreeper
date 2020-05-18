@@ -100,7 +100,6 @@ describe('Rest events module integration', () => {
 			expect(emitSpy).toHaveBeenCalledTimes(2);
 			expectCreateEvent(mainType, mainCode, [
 				'children',
-
 				'code',
 				'deprecatedChildren',
 				'someString',
@@ -225,6 +224,31 @@ describe('Rest events module integration', () => {
 				'someString',
 			]);
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
+		});
+
+		it('should not send extra UPDATE events when making noop property removal edit to rich relationship', async () => {
+			const [main, child] = await Promise.all([
+				createMainNode(),
+				createNode(childType, { code: childCode }),
+			]);
+			await connectNodes(main, 'HAS_CURIOUS_CHILD', child);
+
+			const { status } = await patchHandler()(
+				getInput(
+					{
+						someString: 'some string',
+						curiousChild: {
+							code: childCode,
+							someString: null,
+						},
+					},
+					{ relationshipAction: 'replace', upsert: true },
+				),
+			);
+
+			expect(status).toBe(200);
+			expect(emitSpy).toHaveBeenCalledTimes(1);
+			expectUpdateEvent(mainType, mainCode, ['someString']);
 		});
 	});
 
