@@ -157,7 +157,7 @@ describe('End-to-end - record creation', () => {
 					);
 			});
 		});
-		it('does not submit entire form when selection relationship with Enter', () => {
+		it('does not submit entire form when relationship input selection using Enter key press', () => {
 			createType({
 				code: `${code}-first-child`,
 				type: 'ChildType',
