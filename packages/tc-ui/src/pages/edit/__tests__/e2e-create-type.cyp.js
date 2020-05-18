@@ -13,7 +13,6 @@ const {
 	save,
 	resetDb,
 	createMainTypeRecordWithParentsAndChildren,
-	createMainTypeRecordWithParentAndChild,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - record creation', () => {
