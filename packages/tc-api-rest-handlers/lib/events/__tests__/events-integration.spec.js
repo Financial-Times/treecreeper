@@ -226,7 +226,7 @@ describe('Rest events module integration', () => {
 			expectUpdateEvent(childType, childCode, ['isChildOf']);
 		});
 
-		it('should not send extra UPDATE events when making noop property removal edit to rich relationship', async () => {
+		it('should not send extra UPDATE events when removing rich relationship property that was already non-existent', async () => {
 			const [main, child] = await Promise.all([
 				createMainNode(),
 				createNode(childType, { code: childCode }),
