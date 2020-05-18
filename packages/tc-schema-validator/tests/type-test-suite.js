@@ -118,7 +118,7 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 				expect(/[.?]$/.test(config.description.trim())).toBe(true);
 			});
 			it('has valid markdown formatted description', () => {
-				if (config.description.indexOf('\n') > -1) {
+				if (config.description.replace(/\n$/, '').indexOf('\n') > -1) {
 					config.description
 						.split('\n')
 						.map(oneLine =>
