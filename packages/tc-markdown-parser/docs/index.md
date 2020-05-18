@@ -2,7 +2,7 @@
 
 **runbook.md** takes a runbook written in markdown
 ([example here](./example-runbook.md)), and converts it to JSON compatible with a Biz
-Ops System record, which powers the [runbooks app](https://runbooks.in.ft.com).
+Ops System record, which powers the [runbooks app](https://runbooks.ftops.tech).
 
 the data is defined in `key`/`value` pairs where an `h2`'s value is coerced to
 the `key`, and the content between the `h2` and the next `h2` (or end-of-file)

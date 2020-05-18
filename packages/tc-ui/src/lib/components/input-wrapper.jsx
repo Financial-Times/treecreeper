@@ -1,5 +1,6 @@
 const React = require('react');
-const autolinker = require('autolinker');
+const { markdownToHtml } = require('../markdown-to-html');
+
 const { LinkToRecord } = require('./structure');
 
 const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
@@ -14,11 +15,7 @@ const FieldTitle = ({ label, description, expandableContent, lockedBy }) => (
 		<span className="o-forms-title__prompt description-text">
 			<span
 				dangerouslySetInnerHTML={{
-					__html:
-						typeof window === 'undefined'
-							? autolinker.link(description)
-							: // eslint-disable-next-line no-undef
-							  Autolinker.link(description),
+					__html: markdownToHtml(description),
 				}}
 			/>
 			{expandableContent ? (

@@ -1,19 +1,6 @@
 const React = require('react');
-const showdown = require('showdown');
-const autolinker = require('autolinker');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-
-showdown.setFlavor('github');
-
-const markdownParser = new showdown.Converter({
-	simplifiedAutoLink: true,
-});
-
-const markdown = text =>
-	typeof window === 'undefined'
-		? autolinker.link(markdownParser.makeHtml(text || ''))
-		: // eslint-disable-next-line no-undef
-		  Autolinker.link(markdownParser.makeHtml(text || ''));
+const { markdownToHtml } = require('../../lib/markdown-to-html');
 
 const outputFreeText = (text = '') => text;
 const localOnChange = (event, onChange) => {
@@ -87,7 +74,7 @@ module.exports = {
 	ViewComponent: ({ value, id }) => (
 		<section
 			id={id}
-			dangerouslySetInnerHTML={{ __html: markdown(value) }}
+			dangerouslySetInnerHTML={{ __html: markdownToHtml(value) }}
 		/>
 	),
 };

@@ -69,6 +69,7 @@ properties:
     type: Url
     description: Url description.
     label: Url label
+    canIdentify: true
   children:
     relationship: HAS_CHILD
     type: ChildType

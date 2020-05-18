@@ -3,9 +3,13 @@ const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
+const debounce = require('./debounce');
 
 const ENTER = 13;
 const TAB = 9;
+
+const MIN_QUERY_LENGTH = 2;
+const MAX_SUGGESTIONS_LENGTH = 20;
 
 const toArray = val => {
 	if (!val) {
@@ -43,11 +47,12 @@ const Suggestion = ({ suggestion, searchTerm }) => (
 
 class RelationshipPicker extends React.Component {
 	constructor(props) {
-		super();
+		super(props);
 		const selectedRelationships = toArray(props.value);
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
+			isFetching: false,
 			isUserError: false,
 			isUnresolved: false,
 			selectedRelationships,
@@ -55,9 +60,8 @@ class RelationshipPicker extends React.Component {
 			isFull: !props.hasMany && !!selectedRelationships.length,
 			annotate: false,
 		};
-		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
-		this.fetchSuggestions = this.fetchSuggestions.bind(this);
+		this.fetchSuggestions = debounce(this.fetchSuggestions.bind(this));
 		this.clearSuggestions = this.clearSuggestions.bind(this);
 		this.addRelationship = this.addRelationship.bind(this);
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
@@ -92,9 +96,11 @@ class RelationshipPicker extends React.Component {
 	}
 
 	onSuggestionHighlighted({ suggestion }) {
-		this.setState({
-			hasHighlightedSelection: !!suggestion,
-		});
+		const hasHighlightedSelection = Boolean(suggestion);
+
+		if (this.state.hasHighlightedSelection !== hasHighlightedSelection) {
+			this.setState({ hasHighlightedSelection });
+		}
 	}
 
 	onUserMisconception(event) {
@@ -145,9 +151,13 @@ class RelationshipPicker extends React.Component {
 
 	fetchSuggestions({ value }) {
 		const { parentCode } = this.props;
-		if (!value) {
+
+		if (value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
 			return;
 		}
+
+		this.setState({ isFetching: true });
+
 		return fetch(
 			`/autocomplete/${this.props.type}/name?q=${value}&parentType=${this.props.parentType}&propertyName=${this.props.propertyName}`,
 		)
@@ -157,13 +167,19 @@ class RelationshipPicker extends React.Component {
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
 						// don't suggest self (relationship to self is not supported at the moment)
+						.slice(0, MAX_SUGGESTIONS_LENGTH)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
 								) && parentCode !== suggestion.code,
 						),
+					isFetching: false,
 				}));
+			})
+			.catch(error => {
+				this.setState({ isFetching: false });
+				return Promise.reject(error);
 			});
 	}
 

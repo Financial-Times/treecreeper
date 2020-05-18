@@ -479,20 +479,18 @@ ignore:
     - '@financial-times/tc-ui > showdown > yargs > yargs-parser':
         reason: no fix yet
         expires: '2020-04-23T12:54:36.605Z'
-# patches apply the minimum changes required to fix a vulnerability
-patch:
   SNYK-JS-LODASH-567746:
-    - cheerio > lodash:
-        patched: '2020-04-30T16:09:38.072Z'
-    - neo4j-graphql-js > lodash:
-        patched: '2020-04-30T16:09:38.072Z'
-    - '@financial-times/tc-api-db-manager > next-metrics > lodash':
-        patched: '2020-04-30T16:09:38.072Z'
-    - enzyme > cheerio > lodash:
-        patched: '2020-04-30T16:09:38.072Z'
-    - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
-        patched: '2020-04-30T16:09:38.072Z'
-    - jsdom > request-promise-native > request-promise-core > lodash:
-        patched: '2020-04-30T16:09:38.072Z'
     - next-metrics > lodash:
-        patched: '2020-04-30T16:09:38.072Z'
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - neo4j-graphql-js > lodash:
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - '@financial-times/tc-api-db-manager > next-metrics > lodash':
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+    - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
+        reason: Wait for lodash fix
+        expires: '2020-05-31T15:33:56.703Z'
+patch: {}
+

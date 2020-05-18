@@ -27,30 +27,46 @@ const initConstraints = async () => {
 			);
 		};
 
+		const retrieveIndexes = async () => {
+			const indexes = await executeQuery('CALL db.indexes');
+			return indexes.records.map(constraint =>
+				constraint.get('description'),
+			);
+		};
+
 		const existingConstraints = await retrieveConstraints();
-		const desiredConstraints = []
-			.concat(
-				...schema.getTypes().map(({ name: typeName, properties }) => {
-					return [].concat(
-						...Object.entries(properties).map(
-							([propName, { unique }]) => {
-								return [
-									unique &&
-										`CONSTRAINT ON (s:${typeName}) ASSERT s.${propName} IS UNIQUE`,
-									// skip the setting of enterprise version specific constraints until we use the enterprise version
-									// required &&
-									// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
-								];
-							},
-						),
-					);
-				}),
-			)
+		const existingIndexes = await retrieveIndexes();
+		const existingConstraintsAndIndexes = [
+			...existingConstraints,
+			...existingIndexes,
+		];
+
+		const desiredConstraintsAndIndexes = schema
+			.getTypes()
+			.flatMap(({ name: typeName, properties }) => {
+				return Object.entries(properties).flatMap(
+					([propName, { unique, canIdentify }]) => {
+						if (unique) {
+							return [
+								`CONSTRAINT ON ( ${typeName.toLowerCase()}:${typeName} ) ASSERT ${typeName.toLowerCase()}.${propName} IS UNIQUE`,
+							];
+							// skip the setting of enterprise version specific constraints until we use the enterprise version
+							// 	// required &&
+							// 	// 	`CONSTRAINT ON (s:${typeName}) ASSERT exists(s.${propName})`
+							// ];
+						}
+						if (canIdentify) {
+							return [`INDEX ON :${typeName}(${propName})`];
+						}
+						return [];
+					},
+				);
+			})
 			.filter(statement => !!statement);
 
 		const createConstraints = exclusion(
-			desiredConstraints,
-			existingConstraints,
+			desiredConstraintsAndIndexes,
+			existingConstraintsAndIndexes,
 		).map(constraint => `CREATE ${constraint}`);
 
 		for (const constraint of createConstraints) {
@@ -58,10 +74,12 @@ const initConstraints = async () => {
 		}
 
 		const constraints = await retrieveConstraints();
+		const indexes = await retrieveIndexes();
 
 		logger.info(
 			`db.constraints updated. ${constraints.length} constraints exist`,
 		);
+		logger.info(`db.indexes updated. ${indexes.length} indexes exist`);
 	} finally {
 		executeQuery.close();
 	}
