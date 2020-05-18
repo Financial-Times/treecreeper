@@ -108,6 +108,15 @@ For many tests to execute successfully you will also need to run `make run-db` i
 -   In another terminal run `make cypress-verify cypress-open`. This opens an interactive dialog. This allows individual test files to be run on demand. To run a single test use `.only` in the spec file, and then use the cypress UI to just run that file.
 -   Source and test files will reload automatically on change. _However_ this will also restart the demo application and tests will often try to run while the app is not yet ready to receive traffic, so after the tests auto run, wait a few seconds and manually re-run them by clicking on the 'circle with an arrow' button in the browser window that cypress opens.
 
+## Deploy
+
+-   Merge branch with master
+-   Create a release tag using [semver](https://semver.org/) versioning standards
+-   Wait for circleci build to complete to publish
+-   Identify and clone any repo's which use the tc-package you have updated
+    -   Update the package.json to require all tc-\* packages at the new version
+    -   Follow specific repo instructions for merging/testing/deploying update
+
 ## Etymology
 
 A treecreeper is a small, woodland bird which climbs up tree trunks in search of invertebrates to eat.
