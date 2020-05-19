@@ -4,6 +4,7 @@ const {
 	promptText,
 } = require('../../../test-helpers/mainTypeData.json');
 const {
+	createType,
 	visitMainTypePage,
 	visitEditPage,
 	populateMinimumViableFields,
@@ -23,14 +24,12 @@ describe('End-to-end - record creation', () => {
 		it('can create MVRType record', () => {
 			populateMinimumViableFields(code);
 			save();
-
 			cy.url().should('contain', `/MVRType/${code}`);
 			cy.get('#record-title a span:first-child').should(
 				'have.text',
 				'MVRType: e2e-demo',
 			);
 		});
-
 		it('can not create record if no code(label) is given', () => {
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
@@ -41,17 +40,14 @@ describe('End-to-end - record creation', () => {
 			// required field
 			cy.get('input:invalid').should('have.length', 1);
 		});
-
 		it('can not create record if description is not given', () => {
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
 					cy.stub(win, 'prompt');
 				},
 			});
-
 			cy.get('#id-code').type(code);
 			save();
-
 			cy.window()
 				.its('prompt')
 				.should('called', 1);
@@ -59,18 +55,15 @@ describe('End-to-end - record creation', () => {
 				.its('prompt.args.0')
 				.should('deep.eq', [promptText]);
 		});
-
 		it('can not create record if child record is not selected', () => {
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
 					cy.stub(win, 'prompt');
 				},
 			});
-
 			cy.get('#id-code').type(code);
 			cy.get('#id-someString').type(someString);
 			save();
-
 			cy.window()
 				.its('prompt')
 				.should('called', 1);
@@ -78,14 +71,12 @@ describe('End-to-end - record creation', () => {
 				.its('prompt.args.0')
 				.should('deep.eq', [promptText]);
 		});
-
 		it('can create record with incomplete fields with "SAVE INCOMPLETE RECORD" option', () => {
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
 					cy.stub(win, 'prompt').returns('SAVE INCOMPLETE RECORD');
 				},
 			});
-
 			cy.get('#id-code').type(code);
 			save();
 			cy.url().should('contain', `/MVRType/${code}`);
@@ -165,6 +156,36 @@ describe('End-to-end - record creation', () => {
 						`/ParentType/${code}-parent-two`,
 					);
 			});
+		});
+		it('does not submit entire form when relationship input selection using Enter key press', () => {
+			createType({
+				code: `${code}-first-child`,
+				type: 'ChildType',
+			});
+
+			cy.visit(`/MainType/create`);
+
+			cy.get('input[name=code]').type(code);
+			cy.get('#children-picker') // eslint-disable-line cypress/no-unnecessary-waiting
+				.type(code)
+				.wait(500)
+				.type('{enter}');
+
+			cy.get('[data-code="e2e-demo-first-child"]').should(
+				'contain',
+				`${code}-first-child`,
+			);
+
+			cy.url().should('contain', `MainType/create`);
+
+			save();
+
+			cy.url().should(
+				'contain',
+				`MainType/e2e-demo?message=MainType%20e2e-demo%20was%20successfully%20updated&message`,
+			);
+
+			cy.get('#children').should('have.length', 1);
 		});
 	});
 });
