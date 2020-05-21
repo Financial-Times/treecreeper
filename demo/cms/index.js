@@ -1,4 +1,3 @@
-const React = require('react');
 const logger = require('@financial-times/lambda-logger');
 const { getCMS } = require('@financial-times/tc-ui');
 
