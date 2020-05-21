@@ -21,11 +21,16 @@ app.use(
 	}),
 );
 
+// removes a little bit of hassle from manually testing the api
+app.use((req, res, next) => {
+	req.headers['client-id'] = 'treecreeper-demo';
+	next()
+})
+
 getApp({
 	treecreeperPath: '/api',
 	app,
 	graphqlMethods: ['post', 'get'],
-
 	documentStore: process.env.WITH_DOCSTORE
 		? createStore(`biz-ops-documents.${process.env.AWS_ACCOUNT_ID}`)
 		: null,
@@ -45,7 +50,11 @@ const {
 } = require('./cms');
 
 const parseBody = bodyParser.urlencoded({ limit: '8mb', extended: true });
-app.get('/lalala', anotherController);
+app.get('/', (req, res) => {
+	res.send(`<html><head></head><body>
+<a href="/graphiql">GraphQL explorer.</a>
+</body></html>`)
+});
 app.get('/:type/:code/edit', editController);
 app.post('/:type/:code/edit', parseBody, editController);
 app.get('/:type/create', editController);
