@@ -24,7 +24,7 @@ Options:
 
 Example:
 
-  tc-schema-publisher -D ./example-schema -B schema-bucket -v latest
+  tc-schema-publisher -D ./example-schema -B schema-bucket -E latest
 ```
 
 You can see this help typing `tc-schema-publisher -h` and some option can override by specifying environment variables:
