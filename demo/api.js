@@ -23,9 +23,11 @@ app.use(
 
 // removes a little bit of hassle from manually testing the api
 app.use((req, res, next) => {
-	req.headers['client-id'] = 'treecreeper-demo';
-	next()
-})
+	if (/\/graphiql$/.test(req.headers.referer)) {
+		req.headers['client-id'] = 'treecreeper-demo';
+	}
+	next();
+});
 
 getApp({
 	treecreeperPath: '/api',
@@ -42,18 +44,13 @@ getApp({
 });
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
-const {
-	editController,
-	viewController,
-	deleteController,
-	anotherController,
-} = require('./cms');
+const { editController, viewController, deleteController } = require('./cms');
 
 const parseBody = bodyParser.urlencoded({ limit: '8mb', extended: true });
 app.get('/', (req, res) => {
 	res.send(`<html><head></head><body>
 <a href="/graphiql">GraphQL explorer.</a>
-</body></html>`)
+</body></html>`);
 });
 app.get('/:type/:code/edit', editController);
 app.post('/:type/:code/edit', parseBody, editController);
