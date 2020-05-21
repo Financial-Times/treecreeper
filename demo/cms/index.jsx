@@ -48,9 +48,4 @@ module.exports = {
 	viewController: wrapCmsHandler(viewHandler),
 	editController: wrapCmsHandler(editHandler),
 	deleteController: wrapCmsHandler(deleteHandler),
-	anotherController: wrapCmsHandler(
-		handleError(() =>
-			renderPage(({ str }) => <div>{str}</div>, { str: 'lalalala' }),
-		),
-	),
 };
