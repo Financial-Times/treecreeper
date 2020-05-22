@@ -17,7 +17,7 @@ const formatTemporal = (value, type) => {
 	}
 
 	if (type === 'Time') {
-		return formatValue(`2020-01-15T${value}`, 'h:mm:ss a')
+		return formatValue(`2020-01-15T${value}`, 'h:mm:ss a');
 	}
 };
 
@@ -31,7 +31,7 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	// the input doesn't error
 	// Should probably store the timestamps without any timezone info for
 	// consistency, but that's a bug to fix in future
-	if (type === 'Time') return value.split(/Z|\+|\-/)[0];
+	if (type === 'Time') return value.split(/Z|\+|-/)[0];
 	const date = new Date(value).toISOString();
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
@@ -62,7 +62,9 @@ const EditTemporal = ({
 			<input
 				name={name}
 				id={`id-${propertyName}`}
-				type={type === 'DateTime' ? 'datetime-local' : type.toLowerCase()}
+				type={
+					type === 'DateTime' ? 'datetime-local' : type.toLowerCase()
+				}
 				step={type === 'Time' ? 1 : null}
 				value={convertValueForHTMLInput(value, type)}
 				required={required ? 'required' : null}
