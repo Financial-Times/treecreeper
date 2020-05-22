@@ -26,7 +26,6 @@ const patchHandler = ({ documentStore } = {}) => {
 			query: { relationshipAction, richRelationships } = {},
 			metadata = {},
 		} = validateInput(input);
-		console.log({originalBody})
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
 			validateRelationshipInput(originalBody);
