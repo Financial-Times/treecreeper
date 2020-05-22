@@ -116,11 +116,11 @@ cypress-verify:
 
 ### Runs tests for pages
 cypress-page: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page"
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page" --video false
 
 ### Runs tests for primitive components
 cypress-primitives: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives" --video false
 
 ## Cypress stuff used in local dev
 
@@ -132,12 +132,12 @@ cypress-open:
 ### Runs tests for pages (assumes the app is running in another terminal)
 cypress-run-page:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-	cypress run --spec "packages/tc-ui/src/pages/**/__tests__/**.cyp.js"
+	cypress run --spec "packages/tc-ui/src/pages/**/__tests__/**.cyp.js" --video false
 
 ### Runs tests for primitive components (assumes the app is running in another terminal)
 cypress-run-primitives:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-	cypress run --spec "packages/tc-ui/src/primitives/**/__tests__/**.cyp.js"
+	cypress run --spec "packages/tc-ui/src/primitives/**/__tests__/**.cyp.js" --video false
 
 # Deploy
 
