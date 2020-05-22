@@ -12,7 +12,6 @@ const getViewHandler = ({
 		const { type, code, error } = event;
 		const apiClient = getApiClient(event);
 		const data = await apiClient.read(type, code);
-
 		return renderPage({
 			template,
 			data: {
