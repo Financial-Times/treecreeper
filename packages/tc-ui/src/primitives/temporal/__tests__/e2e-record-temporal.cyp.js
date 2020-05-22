@@ -30,6 +30,13 @@ describe('End-to-end - record Temporal type', () => {
 
 		cy.get('#code').should('have.text', code);
 		cy.get('#someDate').should('have.text', '12:15:30 PM');
+		cy.get('[data-button-type="edit"]').click({
+			force: true,
+		});
+		cy.get('input[name=someTime]').should('have.value', '12:15:30Z')
+		save();
+		cy.get('#code').should('have.text', code);
+		cy.get('#someTime').should('have.text', '12:15:30 PM');
 	});
 
 	it('can record date', () => {
@@ -42,6 +49,13 @@ describe('End-to-end - record Temporal type', () => {
 			.click();
 		save();
 
+		cy.get('#code').should('have.text', code);
+		cy.get('#someDate').should('have.text', '15 January 2020');
+		cy.get('[data-button-type="edit"]').click({
+			force: true,
+		});
+		cy.get('input[name=someDate]').should('have.value', '2020-01-15')
+		save();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someDate').should('have.text', '15 January 2020');
 	});
@@ -61,5 +75,12 @@ describe('End-to-end - record Temporal type', () => {
 			'have.text',
 			'15 January 2020, 1:00:00 PM',
 		);
+		cy.get('[data-button-type="edit"]').click({
+			force: true,
+		});
+		cy.get('input[name=someDatetime]').should('have.value', '2020-01-15T01:00:00')
+		save();
+		cy.get('#code').should('have.text', code);
+		cy.get('#someDatetime').should('have.text', '15 January 2020, 1:00:00 PM');
 	});
 });
