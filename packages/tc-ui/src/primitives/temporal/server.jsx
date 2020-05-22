@@ -10,10 +10,7 @@ const formatValue = (value, formatString) =>
 // TODO this probably errors - need to write comprehensive tests
 // If date and time are given, time can be formatted but if not,
 // time will be returned as it was inputted. This allows for manual time inputs
-const formatTime = timeInput =>
-	format(timeInput, 'h:mm:ss a') !== 'Invalid Date'
-		? format(timeInput, 'h:mm:ss a')
-		: timeInput;
+const formatTime = timeInput => format(parseISO(`2020-01-15T${timeInput}`), 'h:mm:ss a');
 
 const formatDateTime = (value, type) => {
 	if (type === 'DateTime') {

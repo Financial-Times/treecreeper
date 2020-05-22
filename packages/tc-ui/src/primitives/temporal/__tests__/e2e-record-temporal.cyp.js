@@ -18,6 +18,20 @@ describe('End-to-end - record Temporal type', () => {
 		});
 	});
 
+	it('can record time', () => {
+		cy.get('input[name=someTime]')
+			.click()
+			.then(input => {
+				input[0].dispatchEvent(new Event('input', { bubbles: true }));
+				input.val('12:15:30Z');
+			})
+			.click();
+		save();
+
+		cy.get('#code').should('have.text', code);
+		cy.get('#someDate').should('have.text', '12:15:30 PM');
+	});
+
 	it('can record date', () => {
 		cy.get('input[name=someDate]')
 			.click()
