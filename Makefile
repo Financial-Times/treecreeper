@@ -116,11 +116,11 @@ cypress-verify:
 
 ### Runs tests for pages
 cypress-page: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page" --video false
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page"
 
 ### Runs tests for primitive components
 cypress-primitives: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives" --video false
+	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
 
 ## Cypress stuff used in local dev
 
