@@ -7,12 +7,7 @@ const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 const formatValue = (value, formatString) =>
 	value ? format(parseISO(value), formatString) : null;
 
-// TODO this probably errors - need to write comprehensive tests
-// If date and time are given, time can be formatted but if not,
-// time will be returned as it was inputted. This allows for manual time inputs
-const formatTime = timeInput => format(parseISO(`2020-01-15T${timeInput}`), 'h:mm:ss a');
-
-const formatDateTime = (value, type) => {
+const formatTemporal = (value, type) => {
 	if (type === 'DateTime') {
 		return formatValue(value, 'd MMMM yyyy, h:mm:ss a');
 	}
@@ -22,19 +17,22 @@ const formatDateTime = (value, type) => {
 	}
 
 	if (type === 'Time') {
-		const timeInput = value;
-		return formatTime(timeInput);
+		return formatValue(`2020-01-15T${value}`, 'h:mm:ss a')
 	}
 };
 
 const convertValueForHTMLInput = (wrappedValue, type) => {
 	if (!(wrappedValue && wrappedValue.formatted)) return null;
 	const value = wrappedValue.formatted;
-	if (type === 'Time') return value;
+
+	// HACK - we have never properly thought about what to do with timezones
+	// as we have no usecases and don't know hat behaviour is right
+	// For now we split on time zone designator and trim it off so that
+	// the input doesn't error
+	// Should probably store the timestamps without any timezone info for
+	// consistency, but that's a bug to fix in future
+	if (type === 'Time') return value.split(/Z|\+|\-/)[0];
 	const date = new Date(value).toISOString();
-	/* This is a hack to remove Z in order to prepopulate a time-date field.
-	Revisit this if a time needs to be added as field value.
-	*/
 	return type === 'DateTime' ? date.split('Z')[0] : date.split('T')[0];
 };
 
@@ -58,15 +56,14 @@ const EditTemporal = ({
 	const name = !isNested
 		? `${propertyName}${disabled ? '-disabled' : ''}`
 		: '';
-	const inputType =
-		type === 'DateTime' ? 'datetime-local' : type.toLowerCase();
 
 	return (
 		<span className="o-forms-input o-forms-input--text">
 			<input
 				name={name}
 				id={`id-${propertyName}`}
-				type={`${inputType}`}
+				type={type === 'DateTime' ? 'datetime-local' : type.toLowerCase()}
+				step={type === 'Time' ? 1 : null}
 				value={convertValueForHTMLInput(value, type)}
 				required={required ? 'required' : null}
 				disabled={disabled ? 'disabled' : null}
@@ -89,7 +86,7 @@ module.exports = {
 		/>
 	),
 	ViewComponent: ({ value, id, type }) => (
-		<span id={id}>{formatDateTime(value.formatted, type)}</span>
+		<span id={id}>{formatTemporal(value.formatted, type)}</span>
 	),
 	hasValue: value => !!value.formatted,
 	graphqlFragment: propName => `${propName} {formatted}`,
