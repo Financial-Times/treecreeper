@@ -23,17 +23,17 @@ describe('End-to-end - record Temporal type', () => {
 			.click()
 			.then(input => {
 				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val('12:15:30Z');
+				input.val('12:15:30');
 			})
 			.click();
 		save();
 
 		cy.get('#code').should('have.text', code);
-		cy.get('#someDate').should('have.text', '12:15:30 PM');
+		cy.get('#someTime').should('have.text', '12:15:30 PM');
 		cy.get('[data-button-type="edit"]').click({
 			force: true,
 		});
-		cy.get('input[name=someTime]').should('have.value', '12:15:30Z')
+		cy.get('input[name=someTime]').should('have.value', '12:15:30')
 		save();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someTime').should('have.text', '12:15:30 PM');
@@ -78,7 +78,7 @@ describe('End-to-end - record Temporal type', () => {
 		cy.get('[data-button-type="edit"]').click({
 			force: true,
 		});
-		cy.get('input[name=someDatetime]').should('have.value', '2020-01-15T01:00:00')
+		cy.get('input[name=someDatetime]').should('have.value', '2020-01-15T13:00:00.000')
 		save();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someDatetime').should('have.text', '15 January 2020, 1:00:00 PM');
