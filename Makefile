@@ -31,6 +31,9 @@ PROJECT_NAME=biz-ops-api
 env:
 	echo "No secret environment variables needed in test"
 
+# actually gets credentials from vault
+env-biz-ops: test-env
+
 verify:
 
 unprepublish:
