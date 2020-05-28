@@ -2,7 +2,7 @@ const { logger } = require('@financial-times/tc-api-express-logger');
 const { onChange } = require('@financial-times/tc-schema-sdk');
 const { sendSchemaToS3 } = require('@financial-times/tc-schema-publisher');
 const { getApolloMiddleware } = require('./lib/get-apollo-middleware');
-
+let instanceId = 0;
 const getGraphqlApi = ({
 	documentStore,
 	republishSchema,
@@ -10,18 +10,25 @@ const getGraphqlApi = ({
 	typeDefs = [],
 	resolvers = {},
 	excludeTypes,
+	schemaInstance,
 } = {}) => {
 	let schemaDidUpdate;
 	let graphqlHandler;
+	const instance = instanceId++;
 
 	const updateAPI = () => {
+
 		try {
 			graphqlHandler = getApolloMiddleware({
 				documentStore,
 				typeDefs,
 				resolvers,
 				excludeTypes,
+				schemaInstance,
 			});
+
+
+			console.log({instance, graphqlHandler})
 
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
@@ -51,7 +58,10 @@ const getGraphqlApi = ({
 	};
 
 	return {
-		graphqlHandler: (...args) => graphqlHandler(...args),
+		graphqlHandler: (...args) => {
+			console.log({instance, graphqlHandler})
+			return graphqlHandler(...args)
+		},
 		isSchemaUpdating: () => schemaDidUpdate,
 		listenForSchemaChanges: () => onChange(updateAPI),
 	};

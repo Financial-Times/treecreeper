@@ -2,9 +2,10 @@ const { getType } = require('@financial-times/tc-schema-sdk');
 const { logger } = require('@financial-times/tc-api-express-logger');
 
 class Tracer {
-	constructor(context) {
+	constructor(context, schemaInstance) {
 		this.map = {};
 		this.context = { ...context };
+		this.getType = schemaInstance ? schemaInstance.getType : getType;
 	}
 
 	collect(type, field) {
@@ -17,7 +18,7 @@ class Tracer {
 			Object.entries(this.map).forEach(([type, fields]) => {
 				let properties;
 				try {
-					({ properties } = getType(type));
+					({ properties } = this.getType(type));
 				} catch (err) {
 					properties = {};
 				}

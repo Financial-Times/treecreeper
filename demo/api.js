@@ -4,6 +4,7 @@ const path = require('path');
 const expressPlayground = require('graphql-playground-middleware-express')
 	.default;
 const { getApp } = require('../packages/tc-api-express');
+const { getGraphqlApi } = require('../packages/tc-api-graphql');
 const { createStore } = require('../packages/tc-api-s3-document-store');
 const { autocomplete } = require('./controllers/autocomplete');
 
@@ -29,14 +30,38 @@ app.use((req, res, next) => {
 	next();
 });
 
-getApp({
+const tcPromise = getApp({
 	treecreeperPath: '/api',
 	app,
 	graphqlMethods: ['post', 'get'],
 	documentStore: process.env.WITH_DOCSTORE
 		? createStore(`biz-ops-documents.${process.env.AWS_ACCOUNT_ID}`)
 		: null,
-}).then(() => {
+})
+
+const { SDK } = require('../packages/tc-schema-sdk');
+
+const schemaInstance = new SDK({
+	schemaBaseUrl:
+		'https://s3.eu-west-1.amazonaws.com/biz-ops-schema.510688331160/beta-risk-model',
+});
+
+schemaInstance.init();
+
+const result = getGraphqlApi({
+	schemaInstance,
+});
+
+console.log(result)
+
+const { graphqlHandler } = result;
+
+
+console.log({la: 1, graphqlHandler})
+
+app.post('/api/beta-graphql', graphqlHandler);
+
+Promise.all([tcPromise, schemaInstance.ready()]).then(() => {
 	app.listen(PORT, () => {
 		// eslint-disable-next-line no-console
 		console.log(`Listening on ${PORT}`);

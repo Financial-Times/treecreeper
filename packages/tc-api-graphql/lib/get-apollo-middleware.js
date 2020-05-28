@@ -13,6 +13,7 @@ const getApolloMiddleware = ({
 	typeDefs,
 	resolvers,
 	excludeTypes,
+	schemaInstance,
 }) => {
 	const apollo = new ApolloServer({
 		subscriptions: false,
@@ -21,6 +22,7 @@ const getApolloMiddleware = ({
 			typeDefs,
 			resolvers,
 			excludeTypes,
+			schemaInstance,
 		}),
 		context: ({
 			req: { headers },
@@ -31,7 +33,10 @@ const getApolloMiddleware = ({
 			const context = {
 				driver,
 				headers,
-				trace: new Tracer(getContextByRequestId(requestId)),
+				trace: new Tracer(
+					getContextByRequestId(requestId),
+					schemaInstance,
+				),
 			};
 
 			if (documentStore) {

@@ -73,6 +73,10 @@ An [optional] object value for adding extra/custom resolvers
 
 An [optional] array of type names to exclude from neo4j-graphql-js augmentation. This should list all types which get data from sources other than the neo4j
 
+#### `schemaInstance` [optional]
+
+An instance of `tc-schema-sdk`. This can be used to host multiple graphql APIs running off multiple different schemas within the same application.
+
 ## Example
 
 ```js

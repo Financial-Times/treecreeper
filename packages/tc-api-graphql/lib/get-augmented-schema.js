@@ -2,7 +2,7 @@ const logger = require('@financial-times/n-logger').default;
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { applyMiddleware } = require('graphql-middleware');
 const { parse } = require('graphql');
-const { getGraphqlDefs, getTypes } = require('@financial-times/tc-schema-sdk');
+const tcSchema = require('@financial-times/tc-schema-sdk');
 const { middleware: requestTracer } = require('./request-tracer');
 
 const resolveDocumentProperty = async ({ code }, args, context, info) => {
@@ -16,9 +16,8 @@ const resolveDocumentProperty = async ({ code }, args, context, info) => {
 	return record[info.fieldName];
 };
 
-const getDocumentResolvers = () => {
+const getDocumentResolvers = types => {
 	const typeResolvers = {};
-	const types = getTypes();
 	types.forEach(type => {
 		const nodeProperties = type.properties;
 		const documentResolvers = {};
@@ -39,8 +38,10 @@ const getAugmentedSchema = ({
 	typeDefs: extendedTypeDefs,
 	resolvers: extendedResolvers,
 	excludeTypes,
+	schemaInstance,
 }) => {
-	const resolvers = documentStore ? getDocumentResolvers() : {};
+	const { getGraphqlDefs, getTypes } = schemaInstance || tcSchema;
+	const resolvers = documentStore ? getDocumentResolvers(getTypes()) : {};
 	const typeDefs = getGraphqlDefs();
 
 	if (extendedTypeDefs.length) {
