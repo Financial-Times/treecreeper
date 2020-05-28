@@ -12,7 +12,7 @@ const getGraphqlApi = ({
 	excludeTypes,
 	schemaInstance,
 } = {}) => {
-	const {onChange} = schemaInstance || tcSchemaSdk
+	const { onChange } = schemaInstance || tcSchemaSdk;
 	let schemaDidUpdate;
 	let graphqlHandler;
 

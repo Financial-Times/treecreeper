@@ -358,27 +358,25 @@ describe('graphql', () => {
 		});
 
 		describe('custom schema', () => {
-
-			it('can use a custom schema', async() => {
+			it('can use a custom schema', async () => {
 				const schemaInstance = {
-						getGraphqlDefs: jest.fn(),
-						getTypes: jest.fn(),
-						onChange: jest.fn(),
-					}
+					getGraphqlDefs: jest.fn(),
+					getTypes: jest.fn(),
+					onChange: jest.fn(),
+				};
 
-				schemaInstance.getGraphqlDefs.mockReturnValue([])
-				schemaInstance.getTypes.mockReturnValue([])
-				schemaInstance.onChange.mockImplementation(func => func())
-				const {listenForSchemaChanges} = getGraphqlApi({
+				schemaInstance.getGraphqlDefs.mockReturnValue([]);
+				schemaInstance.getTypes.mockReturnValue([]);
+				schemaInstance.onChange.mockImplementation(func => func());
+				const { listenForSchemaChanges } = getGraphqlApi({
 					schemaInstance,
-					documentStore: {}
+					documentStore: {},
 				});
 
 				listenForSchemaChanges();
-				expect(schemaInstance.onChange).toHaveBeenCalled()
-				expect(schemaInstance.getGraphqlDefs).toHaveBeenCalled()
-				expect(schemaInstance.getTypes).toHaveBeenCalled()
-
+				expect(schemaInstance.onChange).toHaveBeenCalled();
+				expect(schemaInstance.getGraphqlDefs).toHaveBeenCalled();
+				expect(schemaInstance.getTypes).toHaveBeenCalled();
 			});
 		});
 	});

@@ -23,7 +23,7 @@ const addBetaGraphqlApi = ({ app: theApp, apiPath, schemaBaseUrl }) => {
 	listenForSchemaChanges();
 
 	theApp.post(apiPath, graphqlHandler);
-	return {ready: () => schema.ready() };
+	return { ready: () => schema.ready() };
 };
 
 const PORT = process.env.PORT || 8888;
@@ -57,7 +57,7 @@ const tcApiPromise = getApp({
 		: null,
 });
 
-const { ready: betGraphqlReady } = addBetaGraphqlApi({
+const { ready: betaGraphqlReady } = addBetaGraphqlApi({
 	app,
 	apiPath: '/api/beta-graphql',
 	schemaBaseUrl:
@@ -80,7 +80,7 @@ app.post('/:type/create', parseBody, editController);
 app.post('/:type/:code/delete', deleteController);
 app.get('/:type/:code', viewController);
 
-Promise.all([tcApiPromise, betGraphqlReady()]).then(() => {
+Promise.all([tcApiPromise, betaGraphqlReady()]).then(() => {
 	app.listen(PORT, () => {
 		// eslint-disable-next-line no-console
 		console.log(`Listening on ${PORT}`);
