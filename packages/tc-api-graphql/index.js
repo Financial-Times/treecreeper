@@ -27,9 +27,6 @@ const getGraphqlApi = ({
 				schemaInstance,
 			});
 
-
-			console.log({instance, graphqlHandler})
-
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
@@ -58,10 +55,7 @@ const getGraphqlApi = ({
 	};
 
 	return {
-		graphqlHandler: (...args) => {
-			console.log({instance, graphqlHandler})
-			return graphqlHandler(...args)
-		},
+		graphqlHandler: (...args) => graphqlHandler(...args),
 		isSchemaUpdating: () => schemaDidUpdate,
 		listenForSchemaChanges: () => onChange(updateAPI),
 	};

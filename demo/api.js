@@ -7,6 +7,7 @@ const { getApp } = require('../packages/tc-api-express');
 const { getGraphqlApi } = require('../packages/tc-api-graphql');
 const { createStore } = require('../packages/tc-api-s3-document-store');
 const { autocomplete } = require('./controllers/autocomplete');
+const { SDK } = require('../packages/tc-schema-sdk');
 
 const PORT = process.env.PORT || 8888;
 const app = express();
@@ -30,7 +31,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-const tcPromise = getApp({
+const tcApiPromise = getApp({
 	treecreeperPath: '/api',
 	app,
 	graphqlMethods: ['post', 'get'],
@@ -39,34 +40,21 @@ const tcPromise = getApp({
 		: null,
 })
 
-const { SDK } = require('../packages/tc-schema-sdk');
-
-const schemaInstance = new SDK({
+const secondarySchema = new SDK({
 	schemaBaseUrl:
 		'https://s3.eu-west-1.amazonaws.com/biz-ops-schema.510688331160/beta-risk-model',
 });
 
-schemaInstance.init();
+secondarySchema.init();
 
-const result = getGraphqlApi({
-	schemaInstance,
+const { graphqlHandler, listenForSchemaChanges } = getGraphqlApi({
+	schemaInstance: secondarySchema,
 });
 
-console.log(result)
-
-const { graphqlHandler } = result;
-
-
-console.log({la: 1, graphqlHandler})
+listenForSchemaChanges();
 
 app.post('/api/beta-graphql', graphqlHandler);
 
-Promise.all([tcPromise, schemaInstance.ready()]).then(() => {
-	app.listen(PORT, () => {
-		// eslint-disable-next-line no-console
-		console.log(`Listening on ${PORT}`);
-	});
-});
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const { editController, viewController, deleteController } = require('./cms');
@@ -83,3 +71,14 @@ app.get('/:type/create', editController);
 app.post('/:type/create', parseBody, editController);
 app.post('/:type/:code/delete', deleteController);
 app.get('/:type/:code', viewController);
+
+
+Promise.all([
+	tcApiPromise,
+	secondarySchema.ready()
+]).then(() => {
+	app.listen(PORT, () => {
+		// eslint-disable-next-line no-console
+		console.log(`Listening on ${PORT}`);
+	});
+});
