@@ -7,7 +7,7 @@ const {
 const componentAssigner = ({
 	customComponents = {},
 	customTypeMappings = {},
-} = {}) => ({ type, hasMany }) => {
+} = {}) => ({ type, hasMany, cypher }) => {
 	// TO Do - find a better solution
 	/*
 		currently if this require is done at top level we get {} the reason for this is due to
@@ -37,7 +37,7 @@ const componentAssigner = ({
 			return hasMany ? components.MultipleChoice : components.Enum;
 		}
 		if (objectTypes.includes(type)) {
-			return components.Relationship;
+			return cypher ? components.Relationship : components.RichRelationship;
 		}
 	}
 

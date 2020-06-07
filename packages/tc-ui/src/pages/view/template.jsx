@@ -18,7 +18,8 @@ const Properties = ({ fields, data, assignComponent }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
-			const value = item.isRelationship
+
+			const value = item.isRelationship && !item.cypher
 				? data[`${name}_rel`]
 				: data[name];
 
