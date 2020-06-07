@@ -5,7 +5,7 @@ const MultipleChoice = require('./multiple-choice/server');
 const Number = require('./number/server');
 const LargeText = require('./large-text/server');
 const Relationship = require('./relationship/server');
-const RichRelationship = require('./relationship/server');
+const RichRelationship = require('./rich-relationship/server');
 const Temporal = require('./temporal/server');
 
 const addDefaults = obj => ({

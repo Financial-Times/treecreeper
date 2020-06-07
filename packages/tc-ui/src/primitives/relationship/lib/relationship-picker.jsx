@@ -3,13 +3,9 @@ const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
-const debounce = require('./debounce');
 
 const ENTER = 13;
 const TAB = 9;
-
-const MIN_QUERY_LENGTH = 2;
-const MAX_SUGGESTIONS_LENGTH = 20;
 
 const toArray = val => {
 	if (!val) {
@@ -47,27 +43,25 @@ const Suggestion = ({ suggestion, searchTerm }) => (
 
 class RelationshipPicker extends React.Component {
 	constructor(props) {
-		super(props);
+		super();
 		const selectedRelationships = toArray(props.value);
 		this.state = {
 			searchTerm: '',
 			suggestions: [],
-			isFetching: false,
 			isUserError: false,
 			isUnresolved: false,
 			selectedRelationships,
 			hasHighlightedSelection: false,
 			isFull: !props.hasMany && !!selectedRelationships.length,
-			annotate: false,
 		};
+		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
-		this.fetchSuggestions = debounce(this.fetchSuggestions.bind(this));
+		this.fetchSuggestions = this.fetchSuggestions.bind(this);
 		this.clearSuggestions = this.clearSuggestions.bind(this);
 		this.addRelationship = this.addRelationship.bind(this);
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
 		this.onUserMisconception = this.onUserMisconception.bind(this);
 		this.onSuggestionHighlighted = this.onSuggestionHighlighted.bind(this);
-		this.onChange = this.onChange.bind(this);
 	}
 
 	onRelationshipRemove(event) {
@@ -75,7 +69,7 @@ class RelationshipPicker extends React.Component {
 		// React witchcraft, event has been replaced by a null one by the time we get to
 		// the setState callback (I presume React implements some kind of instance reuse
 		// optimisation, which doesn't hang around for async stuff to execute)
-		const buttonIndex = Number(event.target.dataset.index.split('-')[1]);
+		const buttonIndex = event.target.dataset.index;
 		this.setState(({ selectedRelationships }) => {
 			selectedRelationships = [...selectedRelationships];
 			selectedRelationships.splice(buttonIndex, 1);
@@ -84,7 +78,7 @@ class RelationshipPicker extends React.Component {
 		// this is needed to prevent the event propagating up and then
 		// immediately clicking another button. VERY odd behaviour, and
 		// don't fully understand why, but this is the fix
-		event.stopPropagation();
+		event.preventDefault();
 	}
 
 	onSearchTermChange(event, { newValue }) {
@@ -96,11 +90,9 @@ class RelationshipPicker extends React.Component {
 	}
 
 	onSuggestionHighlighted({ suggestion }) {
-		const hasHighlightedSelection = Boolean(suggestion);
-
-		if (this.state.hasHighlightedSelection !== hasHighlightedSelection) {
-			this.setState({ hasHighlightedSelection });
-		}
+		this.setState({
+			hasHighlightedSelection: !!suggestion,
+		});
 	}
 
 	onUserMisconception(event) {
@@ -128,36 +120,17 @@ class RelationshipPicker extends React.Component {
 			) {
 				this.maybeSelectIfOnlyOneSuggestion();
 				// prevent the form being submitted
+				event.stopImmediatePropagation();
 				event.preventDefault();
 				return false;
 			}
 		}
 	}
 
-	onChange(propertyName, parentCode, value) {
-		this.setState(prevState => {
-			const { selectedRelationships: selectedRel } = prevState;
-			const selectedRelationships = selectedRel.map(relationship => {
-				if (relationship.code === parentCode) {
-					relationship[propertyName] = value;
-				}
-				return relationship;
-			});
-			return {
-				selectedRelationships,
-			};
-		});
-	}
-
 	fetchSuggestions({ value }) {
-		const { parentCode } = this.props;
-
-		if (value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
+		if (!value) {
 			return;
 		}
-
-		this.setState({ isFetching: true });
-
 		return fetch(
 			`/autocomplete/${this.props.type}/name?q=${value}&parentType=${this.props.parentType}&propertyName=${this.props.propertyName}`,
 		)
@@ -166,20 +139,13 @@ class RelationshipPicker extends React.Component {
 				this.setState(({ selectedRelationships }) => ({
 					suggestions: suggestions
 						// avoid new suggestions including values that have already been selected
-						// don't suggest self (relationship to self is not supported at the moment)
-						.slice(0, MAX_SUGGESTIONS_LENGTH)
 						.filter(
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
-								) && parentCode !== suggestion.code,
+								),
 						),
-					isFetching: false,
 				}));
-			})
-			.catch(error => {
-				this.setState({ isFetching: false });
-				return Promise.reject(error);
 			});
 	}
 
@@ -193,18 +159,13 @@ class RelationshipPicker extends React.Component {
 		if (this.props.hasMany) {
 			this.setState(({ selectedRelationships }) => {
 				selectedRelationships = [...selectedRelationships, suggestion];
-				return {
-					...neutralState,
-					selectedRelationships,
-					annotate: true,
-				};
+				return { ...neutralState, selectedRelationships };
 			});
 		} else {
 			this.setState({
 				...neutralState,
 				selectedRelationships: [suggestion],
 				isFull: true,
-				annotate: true,
 			});
 		}
 		// this is needed to prevent the event propagating up and then
@@ -243,7 +204,7 @@ class RelationshipPicker extends React.Component {
 
 	render() {
 		const { props } = this;
-		const { propertyName, hasError } = props;
+		const { propertyName } = props;
 		const disabled = !!this.props.lockedBy;
 		const {
 			searchTerm,
@@ -252,8 +213,8 @@ class RelationshipPicker extends React.Component {
 			isUserError,
 			isUnresolved,
 			isFull,
-			annotate,
 		} = this.state;
+
 		return (
 			<div
 				data-props={JSON.stringify(props)}
@@ -263,6 +224,19 @@ class RelationshipPicker extends React.Component {
 				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
+				<ul
+					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
+					id={`ul-${propertyName}`}
+				>
+					{selectedRelationships.map((val, i) => (
+						<Relationship
+							value={val}
+							disabled={disabled}
+							onRelationshipRemove={this.onRelationshipRemove}
+							index={i}
+						/>
+					))}
+				</ul>
 				<input
 					type="hidden"
 					id={`id-${propertyName}`}
@@ -310,23 +284,6 @@ class RelationshipPicker extends React.Component {
 						</span>
 					</div>
 				)}
-				<ul
-					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
-					id={`ul-${propertyName}`}
-				>
-					{selectedRelationships.map((val, i) => (
-						<Relationship
-							hasError={hasError}
-							disabled={disabled}
-							onRelationshipRemove={this.onRelationshipRemove}
-							index={i}
-							key={i}
-							annotate={annotate}
-							onChange={this.onChange}
-							{...{ ...props, value: val }}
-						/>
-					))}
-				</ul>
 			</div>
 		);
 	}

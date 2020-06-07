@@ -1,6 +1,7 @@
 const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
+
 const { RelationshipPicker } = require('./lib/relationship-picker');
 
 const RelationshipPickerContainer = props => (
@@ -14,6 +15,14 @@ const {
 	setRelationshipAnnotator,
 } = require('./lib/view-relationship');
 
+const maybeSort = (hasMany, props) => {
+	if (!hasMany) {
+		return '';
+	}
+	const sortField = props.has('name') ? 'name' : 'code';
+	return `(orderBy: ${sortField}_asc)`;
+};
+
 module.exports = {
 	name: 'Relationship',
 	ViewComponent: ViewRelationship,
@@ -24,46 +33,23 @@ module.exports = {
 			{...props}
 		/>
 	),
-	parser: (relValues, relProperties, assignComponent) => {
-		if (!relValues) {
+	parser: value => {
+		if (!value) {
 			return null;
 		}
-		relValues = JSON.parse(relValues);
+		value = JSON.parse(value);
 		// TODO use hasValue
-		if (!relValues) {
+		if (!value) {
 			return null;
 		}
-		const isArray = Array.isArray(relValues);
-		const parsedRelValues = isArray
-			? relValues.map(({ code }) => ({ code }))
-			: { code: relValues.code };
-
-		if (assignComponent && relProperties) {
-			Object.entries(relProperties).forEach(([fieldName, fieldProps]) => {
-				const { parser } = assignComponent(fieldProps);
-				if (isArray) {
-					relValues.forEach((value, index) =>
-						Object.assign(parsedRelValues[index], {
-							[fieldName]: value[fieldName]
-								? parser(value[fieldName])
-								: null,
-						}),
-					);
-				} else {
-					Object.assign(parsedRelValues, {
-						[fieldName]: relValues[fieldName]
-							? parser(relValues[fieldName])
-							: null,
-					});
-				}
-			});
-		}
-		return parsedRelValues;
+		return Array.isArray(value)
+			? value.map(({ code }) => code)
+			: value.code;
 	},
 	hasValue: (value, { hasMany }) =>
 		hasMany ? value && value.length : !!value,
 	setRelationshipAnnotator,
-	graphqlFragment: (propName, { type, properties }) => {
+	graphqlFragment: (propName, { type, hasMany }) => {
 		const typeDef = getType(type);
 		const props = new Set(['code']);
 		if (typeDef.properties.name) {
@@ -76,11 +62,9 @@ module.exports = {
 		Object.entries(typeDef.properties)
 			.filter(([, { useInSummary }]) => useInSummary)
 			.forEach(([name]) => props.add(name));
-		const nodeProps = [...props].join(' ');
-		const relationshipProps = [...new Set(Object.keys(properties))].join(
-			' ',
-		);
 
-		return `${propName}_rel {${type} {${nodeProps}} ${relationshipProps}}`;
+		return `${propName} ${maybeSort(hasMany, props)} {${[...props].join(
+			' ',
+		)}}`;
 	},
 };
