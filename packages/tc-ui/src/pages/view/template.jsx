@@ -96,7 +96,7 @@ const View = props => {
 					</div>
 					<div className="o-layout-typography">
 						{Object.entries(schema.fieldsets).map(
-							([name, { heading, properties }]) => (
+							([name, { heading, description, properties }]) => (
 								<section
 									className={`fieldset-treecreeper fieldset-${name}`}
 								>
@@ -106,6 +106,10 @@ const View = props => {
 										title={heading}
 										includeEditLink
 									/>
+									<div className="description-text o-forms-title__prompt">
+										{description}
+										<p />
+									</div>
 									<dl className="treecreeper-properties-list">
 										<Properties
 											fields={properties}
