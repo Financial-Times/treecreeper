@@ -149,10 +149,39 @@ const LinkToRecord = ({ id, type, value, linkGenerator }) => {
 	);
 };
 
+const Fieldset = ({
+	type,
+	code,
+	heading,
+	description,
+	name,
+	includeEditLink,
+	children,
+}) => {
+	return (
+		<fieldset
+			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
+		>
+			<SectionHeader
+				type={type}
+				code={code}
+				title={heading}
+				includeEditLink={includeEditLink}
+			/>
+			<div className="description-text o-forms-title__prompt">
+				{description}
+				<p />
+			</div>
+			{children}
+		</fieldset>
+	);
+};
+
 module.exports = {
 	LinkToRecord,
 	Concept,
 	SectionHeader,
 	LabelledPrimitive,
 	MetaProperties,
+	Fieldset,
 };

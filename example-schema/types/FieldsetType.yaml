@@ -27,7 +27,7 @@ properties:
 
 fieldsets:
   fieldsetA:
-    heading: I am a fieldset
+    heading: Fieldset A
   fieldsetB:
     heading: Fieldset B
     description: I have a lovely description.
