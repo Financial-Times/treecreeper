@@ -68,6 +68,11 @@ const visitMainTypePage = () => {
 	cy.url().should('contain', `/MainType/${code}`);
 };
 
+const visitFieldsetTypePage = typeCode => {
+	cy.visit(`/FieldsetType/${typeCode}`);
+	cy.url().should('contain', `/FieldsetType/${typeCode}`);
+};
+
 const visitMVRTypePage = () => {
 	cy.visit(`/MVRType/${code}`);
 	cy.url().should('contain', `/MVRType/${code}`);
@@ -472,6 +477,7 @@ module.exports = {
 	visitEditPage,
 	visitMainTypePage,
 	visitMVRTypePage,
+	visitFieldsetTypePage,
 	save,
 	populateMinimumViableFields,
 	resetDb,

@@ -168,7 +168,9 @@ const Fieldset = ({
 				title={heading}
 				includeEditLink={includeEditLink}
 			/>
-			<div className="description-text o-forms-title__prompt">
+			<div
+				className={`description-text o-forms-title__prompt fieldset-${name}-description`}
+			>
 				{description}
 				<p />
 			</div>
