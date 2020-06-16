@@ -135,12 +135,12 @@ cypress-open:
 ### Runs tests for pages (assumes the app is running in another terminal)
 cypress-run-page:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-	cypress run --spec "packages/tc-ui/src/pages/**/__tests__/**.cyp.js" --video false
+	cypress run --spec "packages/tc-ui/src/pages/**/__tests__/**.cyp.js" --config video=false
 
 ### Runs tests for primitive components (assumes the app is running in another terminal)
 cypress-run-primitives:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-	cypress run --spec "packages/tc-ui/src/primitives/**/__tests__/**.cyp.js" --video false
+	cypress run --spec "packages/tc-ui/src/primitives/**/__tests__/**.cyp.js" --config video=false
 
 # Deploy
 
