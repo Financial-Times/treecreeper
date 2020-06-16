@@ -3,8 +3,8 @@ const { FormError } = require('../../lib/components/messages');
 const {
 	Concept,
 	LabelledPrimitive,
-	SectionHeader,
 	MetaProperties,
+	Fieldset,
 } = require('../../lib/components/structure');
 const { EditButton, DeleteButton } = require('../../lib/components/buttons');
 
@@ -96,16 +96,15 @@ const View = props => {
 					</div>
 					<div className="o-layout-typography">
 						{Object.entries(schema.fieldsets).map(
-							([name, { heading, properties }]) => (
-								<section
-									className={`fieldset-treecreeper fieldset-${name}`}
+							([name, { heading, description, properties }]) => (
+								<Fieldset
+									type={schema.type}
+									code={data.code}
+									heading={heading}
+									description={description}
+									name={name}
+									isInViewMode
 								>
-									<SectionHeader
-										type={schema.type}
-										code={data.code}
-										title={heading}
-										includeEditLink
-									/>
 									<dl className="treecreeper-properties-list">
 										<Properties
 											fields={properties}
@@ -113,7 +112,7 @@ const View = props => {
 											assignComponent={assignComponent}
 										/>
 									</dl>
-								</section>
+								</Fieldset>
 							),
 						)}
 						<p>

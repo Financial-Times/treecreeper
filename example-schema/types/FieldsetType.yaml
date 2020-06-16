@@ -1,0 +1,33 @@
+name: FieldsetType
+description: Description of FieldsetType.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    pattern: CODE
+    label: Code label
+    fieldset: fieldsetA
+  prop1:
+    type: Word
+    description: fieldsetA prop1.
+    label: fieldsetA prop1
+    fieldset: fieldsetA
+  prop2:
+    type: Word
+    description: fieldsetB prop2.
+    label: fieldsetB prop2
+    fieldset: fieldsetB
+  prop3:
+    type: Word
+    description: fieldsetB prop3.
+    label: fieldsetB prop3
+    fieldset: fieldsetB
+
+fieldsets:
+  fieldsetA:
+    heading: Fieldset A
+  fieldsetB:
+    heading: Fieldset B
+    description: I have a lovely description.

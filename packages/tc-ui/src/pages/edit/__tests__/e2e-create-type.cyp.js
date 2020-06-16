@@ -188,4 +188,25 @@ describe('End-to-end - record creation', () => {
 			cy.get('#children').should('have.length', 1);
 		});
 	});
+	describe('Fieldset displays when creating type', () => {
+		beforeEach(() => {
+			cy.visit(`/FieldsetType/create`);
+		});
+		it('displays fieldset heading for fieldsets', () => {
+			cy.get('.fieldset-fieldsetA').should('exist');
+			cy.get('#fieldset-a').contains('Fieldset A');
+			cy.get('.fieldset-fieldsetB').should('exist');
+			cy.get('#fieldset-b').contains('Fieldset B');
+		});
+
+		it('displays fieldset description when provided for fieldsets', () => {
+			cy.get('.fieldset-fieldsetB-description').should('exist');
+			cy.get('.fieldset-fieldsetB-description').should(
+				'have.text',
+				'I have a lovely description.',
+			);
+			cy.get('.fieldset-fieldsetA-description').should('exist');
+			cy.get('.fieldset-fieldsetA-description').should('have.text', '');
+		});
+	});
 });

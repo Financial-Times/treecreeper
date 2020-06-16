@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.13.5
+version: v1.14.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JS-ACORN-559469:
@@ -492,5 +492,14 @@ ignore:
     - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
         reason: Wait for lodash fix
         expires: '2020-05-31T15:33:56.703Z'
-patch: {}
-
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - neo4j-graphql-js > lodash:
+        patched: '2020-06-16T09:38:58.078Z'
+    - '@financial-times/tc-api-db-manager > next-metrics > lodash':
+        patched: '2020-06-16T09:38:58.078Z'
+    - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
+        patched: '2020-06-16T09:38:58.078Z'
+    - next-metrics > lodash:
+        patched: '2020-06-16T09:38:58.078Z'

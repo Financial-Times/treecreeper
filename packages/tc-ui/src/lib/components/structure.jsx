@@ -149,10 +149,57 @@ const LinkToRecord = ({ id, type, value, linkGenerator }) => {
 	);
 };
 
+const Fieldset = ({
+	type,
+	code,
+	heading,
+	description,
+	name,
+	isInViewMode,
+	children,
+}) => {
+	const fieldSetcontent = (
+		<>
+			<SectionHeader
+				type={type}
+				code={code}
+				title={heading}
+				includeEditLink={isInViewMode}
+			/>
+			<div
+				className={`description-text o-forms-title__prompt fieldset-${name}-description`}
+			>
+				{description}
+				<p />
+			</div>
+			{children}
+		</>
+	);
+
+	const wrapper = isInViewMode ? (
+		<section
+			key={name}
+			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
+		>
+			{fieldSetcontent}
+		</section>
+	) : (
+		<fieldset
+			key={name}
+			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
+		>
+			{fieldSetcontent}
+		</fieldset>
+	);
+
+	return wrapper;
+};
+
 module.exports = {
 	LinkToRecord,
 	Concept,
 	SectionHeader,
 	LabelledPrimitive,
 	MetaProperties,
+	Fieldset,
 };

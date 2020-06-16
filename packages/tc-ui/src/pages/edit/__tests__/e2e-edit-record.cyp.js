@@ -13,6 +13,7 @@ const {
 	visitMainTypePage,
 	save,
 	setLockedRecord,
+	visitFieldsetTypePage,
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - edit record', () => {
@@ -278,5 +279,59 @@ describe('End-to-end - edit record', () => {
 			'have.text',
 			'This value: e2e-demo',
 		);
+	});
+	describe('Fieldset display', () => {
+		beforeEach(() => {
+			cy.wrap(
+				createType({
+					code: 'Fieldset-demo',
+					type: 'FieldsetType',
+				}),
+			).then(() => visitFieldsetTypePage('Fieldset-demo'));
+		});
+		describe('view mode', () => {
+			it('displays fieldset heading for fieldsets', () => {
+				cy.get('.fieldset-fieldsetA').should('exist');
+				cy.get('#fieldset-a').should('have.text', 'Fieldset A');
+				cy.get('.fieldset-fieldsetB').should('exist');
+				cy.get('#fieldset-b').should('have.text', 'Fieldset B');
+			});
+
+			it('displays fieldset description when provided for fieldsets', () => {
+				cy.get('.fieldset-fieldsetB-description').should('exist');
+				cy.get('.fieldset-fieldsetB-description').should(
+					'have.text',
+					'I have a lovely description.',
+				);
+				cy.get('.fieldset-fieldsetA-description').should('exist');
+				cy.get('.fieldset-fieldsetA-description').should(
+					'have.text',
+					'',
+				);
+			});
+		});
+		describe('edit mode', () => {
+			it('displays fieldset heading for fieldsets', () => {
+				visitEditPage();
+				cy.get('.fieldset-fieldsetA').should('exist');
+				cy.get('#fieldset-a').contains('Fieldset A');
+				cy.get('.fieldset-fieldsetB').should('exist');
+				cy.get('#fieldset-b').contains('Fieldset B');
+			});
+			it('displays fieldset description when provided for fieldsets', () => {
+				visitEditPage();
+
+				cy.get('.fieldset-fieldsetB-description').should('exist');
+				cy.get('.fieldset-fieldsetB-description').should(
+					'have.text',
+					'I have a lovely description.',
+				);
+				cy.get('.fieldset-fieldsetA-description').should('exist');
+				cy.get('.fieldset-fieldsetA-description').should(
+					'have.text',
+					'',
+				);
+			});
+		});
 	});
 });

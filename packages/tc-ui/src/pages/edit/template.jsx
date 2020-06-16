@@ -1,7 +1,7 @@
 const React = require('react');
 const { getEnums, rawData } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
-const { Concept, SectionHeader } = require('../../lib/components/structure');
+const { Concept, Fieldset } = require('../../lib/components/structure');
 const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
@@ -116,14 +116,17 @@ const EditForm = props => {
 						/>
 					</div>
 					{Object.entries(schema.fieldsets).map(
-						([name, { heading, properties }], index) => (
-							<fieldset
-								className={`fieldset-treecreeper fieldset-${name}`}
+						(
+							[name, { heading, properties, description }],
+							index,
+						) => (
+							<Fieldset
 								key={index}
+								name={name}
+								heading={heading}
+								properties={properties}
+								description={description}
 							>
-								<div className="o-layout-typography">
-									<SectionHeader title={heading} />
-								</div>
 								<PropertyInputs
 									hasError={!!error}
 									fields={properties}
@@ -131,7 +134,7 @@ const EditForm = props => {
 									type={type}
 									assignComponent={assignComponent}
 								/>
-							</fieldset>
+							</Fieldset>
 						),
 					)}
 					<input
