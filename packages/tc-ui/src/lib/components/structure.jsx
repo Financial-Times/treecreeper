@@ -158,10 +158,8 @@ const Fieldset = ({
 	includeEditLink,
 	children,
 }) => {
-	return (
-		<fieldset
-			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
-		>
+	const fieldSetcontent = (
+		<>
 			<SectionHeader
 				type={type}
 				code={code}
@@ -175,8 +173,26 @@ const Fieldset = ({
 				<p />
 			</div>
 			{children}
+		</>
+	);
+
+	const wrapper = includeEditLink ? (
+		<section
+			key={name}
+			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
+		>
+			{fieldSetcontent}
+		</section>
+	) : (
+		<fieldset
+			key={name}
+			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
+		>
+			{fieldSetcontent}
 		</fieldset>
 	);
+
+	return wrapper;
 };
 
 module.exports = {
