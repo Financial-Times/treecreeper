@@ -103,7 +103,7 @@ const View = props => {
 									heading={heading}
 									description={description}
 									name={name}
-									includeEditLink
+									isInViewMode
 								>
 									<dl className="treecreeper-properties-list">
 										<Properties

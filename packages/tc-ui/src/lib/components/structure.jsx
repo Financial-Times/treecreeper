@@ -155,7 +155,7 @@ const Fieldset = ({
 	heading,
 	description,
 	name,
-	includeEditLink,
+	isInViewMode,
 	children,
 }) => {
 	const fieldSetcontent = (
@@ -164,7 +164,7 @@ const Fieldset = ({
 				type={type}
 				code={code}
 				title={heading}
-				includeEditLink={includeEditLink}
+				includeEditLink={isInViewMode}
 			/>
 			<div
 				className={`description-text o-forms-title__prompt fieldset-${name}-description`}
@@ -176,7 +176,7 @@ const Fieldset = ({
 		</>
 	);
 
-	const wrapper = includeEditLink ? (
+	const wrapper = isInViewMode ? (
 		<section
 			key={name}
 			className={`o-layout-typography fieldset-treecreeper fieldset-${name}`}
