@@ -150,7 +150,7 @@ class RelationshipPicker extends React.Component {
 	}
 
 	fetchSuggestions({ value }) {
-		const { parentCode } = this.props;
+		const { parentCode, parentType, type } = this.props;
 
 		if (value.length < MIN_QUERY_LENGTH || this.state.isFetching) {
 			return;
@@ -172,7 +172,9 @@ class RelationshipPicker extends React.Component {
 							suggestion =>
 								!selectedRelationships.find(
 									({ code }) => code === suggestion.code,
-								) && parentCode !== suggestion.code,
+								) &&
+								(parentType !== type ||
+									parentCode !== suggestion.code),
 						),
 					isFetching: false,
 				}));
