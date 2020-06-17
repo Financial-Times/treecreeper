@@ -94,9 +94,22 @@ const validateMetadata = ({
 	}
 };
 
+const coerceEmptyStringsToNull = ({ body }) => {
+	Object.entries(body).forEach(([propName, value]) => {
+		if (value === '') {
+			body[propName] = null;
+		}
+	});
+};
+
 const validateInput = input => {
 	validateParams(input);
 	if (input.body) {
+		// TODO need to do something similar for relationship properties
+		// and consolidate with eth isNull checks in diff-properties.js
+		// Long story short, if we convert everything to null early in here
+		// then diff properties can probably be simplified
+		coerceEmptyStringsToNull(input);
 		validateBody(input);
 	}
 	validateMetadata(input);

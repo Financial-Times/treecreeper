@@ -98,6 +98,46 @@ describe('rest PATCH create', () => {
 				});
 		});
 
+		it('writes successfully when empty string validated against a pattern', async () => {
+			const { status, body } = await patchHandler()({
+				type: 'ValidatedType',
+				code: `${namespace}-validated`,
+				body: { someString: '' },
+				metadata: getMetaPayload(),
+			});
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				code: `${namespace}-validated`,
+			});
+
+			await neo4jTest('ValidatedType', `${namespace}-validated`)
+				.exists()
+				.notMatch({
+					someString: expect.any(String),
+				});
+		});
+
+		it('writes successfully when null value validated against a pattern', async () => {
+			const { status, body } = await patchHandler()({
+				type: 'ValidatedType',
+				code: `${namespace}-validated`,
+				body: {},
+				metadata: getMetaPayload(),
+			});
+
+			expect(status).toBe(201);
+			expect(body).toMatchObject({
+				code: `${namespace}-validated`,
+			});
+
+			await neo4jTest('ValidatedType', `${namespace}-validated`)
+				.exists()
+				.notMatch({
+					someString: expect.any(String),
+				});
+		});
+
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
 			const { status, body } = await basicHandler({
