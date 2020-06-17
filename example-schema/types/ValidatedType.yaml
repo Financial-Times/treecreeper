@@ -1,0 +1,15 @@
+name: ValidatedType
+description: ValidatedType description.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  someString:
+    type: Word
+    description: Word description.
+    label: Word label
+    pattern: ATTRIBUTE_NAME
