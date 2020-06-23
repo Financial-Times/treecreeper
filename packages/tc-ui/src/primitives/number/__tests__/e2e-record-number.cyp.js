@@ -65,6 +65,14 @@ describe('End-to-end - record Number type', () => {
 			visitEditPage();
 			cy.get('input[name=someInteger]').should('have.value', '0');
 		});
+
+		it('does not parse empty input to zero', () => {
+			save();
+			cy.url().should('contain', '/MainType/e2e-demo');
+			cy.get('#someInteger').should('not.exist');
+			visitEditPage();
+			cy.get('input[name=someInteger]').should('have.value', '');
+		});
 	});
 
 	describe('float', () => {
