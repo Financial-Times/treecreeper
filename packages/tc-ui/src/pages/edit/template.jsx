@@ -31,10 +31,23 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
 
+			/**
+			 * Sending the entire record to the client multiple times can increase the payload immensely
+			 * However some components rely on this (eg "decommissioned" functionality)
+			 * As a workaround for now, truncate long text fields
+			 * TODO: think of a better way to be selective about what we send
+			 */
+			const clientSideRecord = {};
+			Object.entries(data).forEach(([key, value]) => {
+				clientSideRecord[key] =
+					typeof value !== 'string' || value.length < 25
+						? value
+						: `${value.substring(0, 24)}…`;
+			});
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
-				entireRecord: data,
+				entireRecord: clientSideRecord,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
