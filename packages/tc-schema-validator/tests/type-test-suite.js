@@ -175,37 +175,42 @@ const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
 					'RELATIONSHIP_NAME',
 				);
 				describe('relationship property', () => {
-					it('must specify underlying relationship', () => {
-						expect(config.relationship).toMatch(RELATIONSHIP_NAME);
-					});
-					it('must specify direction', () => {
-						expect(config.direction).toMatch(/^incoming|outgoing$/);
-					});
-					it('may be hidden', () => {
-						if (config.hidden) {
-							expect(config.hidden).toBe(true);
-						}
-					});
+					if (config.cypher) {
+						it('cypher statement is a string', () => {
+							expect(typeof config.cypher).toBe('string');
+						});
+					} else {
+						it('must specify underlying relationship', () => {
+							expect(config.relationship).toMatch(
+								RELATIONSHIP_NAME,
+							);
+						});
+						it('must specify direction', () => {
+							expect(config.direction).toMatch(
+								/^incoming|outgoing$/,
+							);
+						});
+						it('may be hidden', () => {
+							if (config.hidden) {
+								expect(config.hidden).toBe(true);
+							}
+						});
+						it('is defined at both ends', () => {
+							expect(
+								getTwinnedRelationship(
+									typeName,
+									config.type,
+									config.relationship,
+									config.direction,
+								),
+							).toBeDefined();
+						});
+					}
 
 					it('may have many', () => {
 						if (config.hasMany) {
 							expect(config.hasMany).toBe(true);
 						}
-					});
-					it('may have cypher', () => {
-						if (config.cypher) {
-							expect(typeof config.cypher).toBe('string');
-						}
-					});
-					it('is defined at both ends', () => {
-						expect(
-							getTwinnedRelationship(
-								typeName,
-								config.type,
-								config.relationship,
-								config.direction,
-							),
-						).toBeDefined();
 					});
 				});
 			} else {

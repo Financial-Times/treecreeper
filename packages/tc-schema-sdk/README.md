@@ -104,6 +104,7 @@ The full object structure returned by getType() can been seen [here](GETTYPE.md)
 -   `withRelationships` [default: `true`]: Include the relationships for the type, expressed as graphql property definitions.
 -   `groupProperties` [default: `false`]: Each property may have a `fieldset` attribute. Setting `groupProperties: true` removes the `properties` object from the data, and replaces it with `fieldsets`, where all properties are then grouped by fieldset
 -   `includeMetaFields` [default: `false`]: Determines whether to include metadatafields (prefixed with `_`) in the schema object returned
+-   `includeMetaFields` [default: `true`]: Determines whether to include synthetic fields (those using a custom cypher statement) in the schema object returned
 -   `useMinimumViableRecord` [default: `false`]: If `groupProperties` is `true`, this will put any fields defined as being part of the minimum viable record (see [model spec](MODEL_SPECIFICATION.md#types)) together in a single fieldset
 
 ### getTypes(options)

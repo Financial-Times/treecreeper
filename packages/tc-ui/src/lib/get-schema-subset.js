@@ -8,6 +8,7 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 			schema: getType(type, {
 				groupProperties: true,
 				includeMetaFields: false,
+				includeSyntheticFields: false,
 				useMinimumViableRecord: isCreate,
 			}),
 			isSubset: false,
@@ -18,7 +19,9 @@ const getSchemaSubset = (event, type, isCreate = false) => {
 	const fullSchema = getType(type, {
 		groupProperties: false,
 		includeMetaFields: false,
+		includeSyntheticFields: false,
 	});
+
 	const propertyKeys = properties.split(',');
 	return {
 		schema: {
