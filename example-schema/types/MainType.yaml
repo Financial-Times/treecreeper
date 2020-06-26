@@ -145,3 +145,9 @@ properties:
     type: AnotherEnum
     description: An enum that has something next to it.
     label: Multiple choice next to another thing
+  cypherThing:
+    label: Cypher haha
+    description: Cypher hahahahaha.
+    type: ChildType
+    cypher: "MATCH (this)-[:HAS_CHILD]->(c) RETURN c"
+    hasMany: true

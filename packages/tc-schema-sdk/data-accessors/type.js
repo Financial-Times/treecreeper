@@ -175,16 +175,25 @@ const createPropertiesWithRelationships = function({
 	);
 };
 
+const removeSyntheticProperties = properties => {
+	Object.entries(properties).forEach(([name, { cypher }]) => {
+		if (cypher) {
+			delete properties[name];
+		}
+	});
+};
+
 const cacheKeyGenerator = (
 	typeName,
 	{
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
+		includeSyntheticFields = true,
 		useMinimumViableRecord = false,
 	} = {},
 ) =>
-	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${useMinimumViableRecord}`;
+	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${includeSyntheticFields}:${useMinimumViableRecord}`;
 
 const getType = function(
 	typeName,
@@ -192,6 +201,7 @@ const getType = function(
 		withRelationships = true,
 		groupProperties = false,
 		includeMetaFields = false,
+		includeSyntheticFields = true,
 		useMinimumViableRecord = false,
 	} = {},
 ) {
@@ -218,6 +228,11 @@ const getType = function(
 	}
 
 	let properties = { ...typeSchema.properties };
+
+	if (!includeSyntheticFields) {
+		removeSyntheticProperties(properties);
+	}
+
 	const richRelationshipTypes = this.rawData.getRelationshipTypes();
 
 	const relationshipGetter = propName =>
@@ -241,6 +256,7 @@ const getType = function(
 	if (includeMetaFields) {
 		properties = assignMetaProperties(properties);
 	}
+
 	properties = transformPrimitiveTypes(properties, this.getStringValidator);
 
 	if (groupProperties) {

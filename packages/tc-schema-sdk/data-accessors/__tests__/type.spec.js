@@ -89,6 +89,27 @@ describe('get-type', () => {
 		});
 	});
 
+	it('can exclude meta properties', () => {
+		const metaPropertyName = metaProperties.map(property => property.name);
+		const type = typeFromRawData(
+			{
+				name: 'Type1',
+				description: 'I am Type1',
+				properties: {
+					property1: {
+						type: 'String',
+					},
+				},
+			},
+			{ options: { includeMetaFields: false } },
+		);
+
+		expect(type).toHaveProperty('properties');
+		metaPropertyName.forEach(propertyName => {
+			expect(type.properties).not.toHaveProperty(propertyName);
+		});
+	});
+
 	it('returns a type property to alias the name field', async () => {
 		const type = typeFromRawData({
 			name: 'Type1',
@@ -177,27 +198,35 @@ describe('get-type', () => {
 		expect(validator.test('AB')).toBe(true);
 	});
 
-	it('it returns read-only properties', async () => {
+	it('includes synthetic properties by default', () => {
 		const type = typeFromRawData({
 			name: 'Type1',
 			properties: {
-				primitiveProp: {
-					type: 'Word',
-					autoPopulated: true,
-				},
-				paragraphProp: {
-					type: 'Paragraph',
-					autoPopulated: false,
-				},
-				enumProp: {
-					type: 'SomeEnum',
+				syntheticProp: {
+					type: 'Type1',
+					cypher: 'MATCH blah',
 				},
 			},
 		});
 
-		expect(type.properties.primitiveProp.autoPopulated).toBe(true);
-		expect(type.properties.paragraphProp.autoPopulated).toBe(false);
-		expect(type.properties.enumProp.autoPopulated).toBeFalsy();
+		expect(type.properties).toHaveProperty('syntheticProp');
+	});
+
+	it('can exclude synthetic properties', () => {
+		const type = typeFromRawData(
+			{
+				name: 'Type1',
+				properties: {
+					syntheticProp: {
+						type: 'Type1',
+						cypher: 'MATCH blah',
+					},
+				},
+			},
+			{ options: { includeSyntheticFields: false } },
+		);
+
+		expect(type.properties).not.toHaveProperty('syntheticProp');
 	});
 
 	it('groups properties by fieldset', () => {

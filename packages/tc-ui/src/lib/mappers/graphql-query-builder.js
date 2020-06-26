@@ -7,7 +7,10 @@ const graphqlQueryBuilder = (type, assignComponent) => `
 	query getStuff($itemId: String!) {
     ${type} (code: $itemId) {
     ${Object.entries(
-		schema.getType(type, { includeMetaFields: true }).properties,
+		schema.getType(type, {
+			includeMetaFields: true,
+			includeSyntheticFields: false,
+		}).properties,
 	)
 		.filter(([, { deprecationReason }]) => !deprecationReason)
 		.map(([propName, propDef]) =>
