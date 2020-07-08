@@ -6,7 +6,7 @@ const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
 const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
-	const propertyfields = Object.entries(fields);
+	const propertyDefinitionsArray = Object.entries(fields);
 
 	const fieldsToLock = data._lockedFields
 		? JSON.parse(data._lockedFields)
@@ -16,7 +16,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 		fieldName => fieldsToLock[fieldName] !== 'biz-ops-admin',
 	);
 
-	return propertyfields
+	return propertyDefinitionsArray
 		.filter(([, { deprecationReason }]) => !deprecationReason)
 		.map(([propertyName, propDef]) => {
 			let lockedBy;
@@ -31,10 +31,30 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				? data[`${propertyName}_rel`] || data[propertyName]
 				: data[propertyName];
 
+			/**
+			 * Sending the entire record to the client multiple times can increase the payload immensely
+			 * However some components rely on this (eg "decommissioned" functionality)
+			 * As a workaround for now, truncate long text fields
+			 * TODO: think of a better way to be selective about what we send
+			 */
+			const clientSideRecord = { ...data };
+			propertyDefinitionsArray
+				// HACK Document has a weird status in that it's not part of the tc primitive types
+				// and yet we have an entire sublibrary - tc-api-document-store - built around the
+				// notion of having documents. So it feels a litte dirty, but probably ok, to use
+				// it here
+				// We check for fields
+				.filter(
+					([key]) => 'key' in data && fields[key].type === 'Document',
+				)
+				.forEach(([key]) => {
+					clientSideRecord[key] = `${data[key].substring(0, 24)}…`;
+				});
+
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
-				entireRecord: data,
+				entireRecord: clientSideRecord,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,

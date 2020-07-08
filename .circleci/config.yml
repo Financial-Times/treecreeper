@@ -21,7 +21,7 @@ references:
     ~/
 
   cache_key: &cache_key
-    cache-v4-{{ .Branch }}-{{ checksum "./package.json" }}
+    cache-v5-{{ .Branch }}-{{ checksum "./package.json" }}
 
   attach_workspace: &attach_workspace
     attach_workspace:

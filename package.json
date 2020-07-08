@@ -15,12 +15,13 @@
     "express": "^4.17.1",
     "graphql-playground-middleware-express": "^1.7.14",
     "http-errors": "^1.7.3",
+    "lodash": "^4.17.18",
     "module-alias": "^2.2.2",
     "neo4j-driver": "^1.7.6",
     "node-fetch": "^2.6.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "snyk": "^1.341.1"
+    "snyk": "^1.360.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -30,7 +31,7 @@
     "@babel/preset-react": "^7.7.0",
     "@babel/register": "^7.7.0",
     "@financial-times/athloi": "^1.0.0-beta.29",
-    "@financial-times/rel-engage": "^7.3.3",
+    "@financial-times/rel-engage": "^7.4.3",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
     "aws-sdk": "^2.611.0",
     "babel-loader": "^8.0.6",
