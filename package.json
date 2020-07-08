@@ -15,6 +15,7 @@
     "express": "^4.17.1",
     "graphql-playground-middleware-express": "^1.7.14",
     "http-errors": "^1.7.3",
+    "lodash": "^4.17.18",
     "module-alias": "^2.2.2",
     "neo4j-driver": "^1.7.6",
     "node-fetch": "^2.6.0",
