@@ -47,7 +47,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				.filter(
 					([key]) => 'key' in data && fields[key].type === 'Document',
 				)
-				.forEach(([key, value]) => {
+				.forEach(([key]) => {
 					clientSideRecord[key] = `${data[key].substring(0, 24)}…`;
 				});
 
