@@ -497,6 +497,8 @@ patch:
   SNYK-JS-LODASH-567746:
     - neo4j-graphql-js > lodash:
         patched: '2020-06-16T09:38:58.078Z'
+      lodash:
+        patched: '2020-07-08T17:12:44.609Z'
     - '@financial-times/tc-api-db-manager > next-metrics > lodash':
         patched: '2020-06-16T09:38:58.078Z'
     - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > lodash':
