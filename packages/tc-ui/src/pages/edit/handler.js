@@ -1,5 +1,30 @@
+const { getType } = require('@financial-times/tc-schema-sdk');
 const httpError = require('http-errors');
 const template = require('./template');
+
+const getClientSideRecord = (type, formData) => {
+	const { properties } = getType(type);
+	/**
+	 * Sending the entire record to the client multiple times can increase the payload immensely
+	 * However some components rely on this (eg "decommissioned" functionality)
+	 * As a workaround for now, truncate long text fields
+	 * TODO: think of a better way to be selective about what we send
+	 */
+	const clientSideRecord = { ...formData };
+
+	Object.entries(properties)
+		// HACK Document has a weird status in that it's not part of the tc primitive types
+		// and yet we have an entire sublibrary - tc-api-document-store - built around the
+		// notion of having documents. So it feels a litte dirty, but probably ok, to use
+		// it here
+		// We check for fields
+		.filter(([key]) => formData[key] && properties[key].type === 'Document')
+		.forEach(([key]) => {
+			clientSideRecord[key] = `${formData[key].substring(0, 24)}…`;
+		});
+
+	return clientSideRecord;
+};
 
 const getEditHandler = ({
 	getApiClient,
@@ -30,6 +55,7 @@ const getEditHandler = ({
 
 		const templateData = {
 			...getSchemaSubset(event, type, isCreate),
+			clientSideRecord: getClientSideRecord(type, formData),
 			data: formData,
 			type,
 			code,
