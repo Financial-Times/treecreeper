@@ -41,7 +41,6 @@ const PropertyInputs = ({
 			const viewModel = {
 				hasError,
 				parentCode: data.code,
-				entireRecord: clientSideRecord,
 				propertyName,
 				value: getValue(propDef, itemValue),
 				dataType: propDef.type,
@@ -58,7 +57,7 @@ const PropertyInputs = ({
 					<EditComponent {...viewModel} />
 					{AdditionalEditComponent ? (
 						<div className="additional-edit-component-hydration-container">
-							<AdditionalEditComponent {...viewModel} />
+							<AdditionalEditComponent {...viewModel} entireRecord={clientSideRecord}/>
 						</div>
 					) : null}
 				</div>
@@ -83,6 +82,7 @@ const EditForm = props => {
 		<>
 			<div className="o-layout__sidebar" />
 			<form
+				id="tc-form"
 				className="o-layout__main o-forms"
 				action={
 					isEdit
@@ -92,6 +92,7 @@ const EditForm = props => {
 				method="POST"
 				autoComplete="off"
 				data-tc-page-type={props.pageType}
+				data-tc-entire-record={JSON.stringify(clientSideRecord)}
 			>
 				<div className="o-layout__main__full-span">
 					{/* note we use code || data.code so that, when creating and there is no

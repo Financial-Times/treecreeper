@@ -2,6 +2,9 @@ const { getType } = require('@financial-times/tc-schema-sdk');
 const httpError = require('http-errors');
 const template = require('./template');
 
+
+// hack once we're out of lambda and don't need to care about large payloads
+// any more we can remove this
 const getClientSideRecord = (type, formData) => {
 	const { properties } = getType(type);
 	/**
