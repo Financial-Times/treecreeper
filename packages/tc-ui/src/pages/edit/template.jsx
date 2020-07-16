@@ -5,14 +5,7 @@ const { Concept, Fieldset } = require('../../lib/components/structure');
 const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
-const PropertyInputs = ({
-	fields,
-	data,
-	type,
-	assignComponent,
-	hasError,
-	clientSideRecord,
-}) => {
+const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 	const propertyDefinitionsArray = Object.entries(fields);
 
 	const fieldsToLock = data._lockedFields
@@ -57,7 +50,10 @@ const PropertyInputs = ({
 					<EditComponent {...viewModel} />
 					{AdditionalEditComponent ? (
 						<div className="additional-edit-component-hydration-container">
-							<AdditionalEditComponent {...viewModel} entireRecord={clientSideRecord}/>
+							<AdditionalEditComponent
+								{...viewModel}
+								entireRecord={data}
+							/>
 						</div>
 					) : null}
 				</div>
@@ -75,7 +71,6 @@ const EditForm = props => {
 		code,
 		querystring,
 		assignComponent,
-		clientSideRecord,
 	} = props;
 
 	return (
@@ -92,7 +87,7 @@ const EditForm = props => {
 				method="POST"
 				autoComplete="off"
 				data-tc-page-type={props.pageType}
-				data-tc-entire-record={JSON.stringify(clientSideRecord)}
+				data-tc-entire-record={JSON.stringify(data)}
 			>
 				<div className="o-layout__main__full-span">
 					{/* note we use code || data.code so that, when creating and there is no
@@ -141,7 +136,6 @@ const EditForm = props => {
 									fields={properties}
 									data={data}
 									type={type}
-									clientSideRecord={clientSideRecord}
 									assignComponent={assignComponent}
 								/>
 							</Fieldset>
