@@ -18,7 +18,7 @@ const initDocumentEditors = () => {
 	);
 };
 
-const initRelationshipSelectors = (entireRecord) => {
+const initRelationshipSelectors = entireRecord => {
 	[
 		...document.querySelectorAll(
 			'[data-component="relationship-picker"]:not([data-disabled])',
@@ -105,7 +105,9 @@ Type SAVE INCOMPLETE RECORD below to proceed, or click cancel to return to the f
 
 module.exports.init = async () => {
 	await initSchema();
-	const entireRecord = JSON.parse(document.querySelector("#tc-form").dataset.tcEntireRecord);
+	const entireRecord = JSON.parse(
+		document.querySelector('#tc-form').dataset.tcEntireRecord,
+	);
 	initDocumentEditors();
 	initRelationshipSelectors(entireRecord);
 	preventBadSubmission();
