@@ -379,9 +379,20 @@ const typeTestSuite = type => {
 				expect(type.properties.code.canIdentify).toEqual(true);
 			});
 
-			it('has a code that respects a pattern', () => {
-				expect(type.properties.code.pattern).toBeDefined();
+			it('has a string or integer code', () => {
+				expect(['String', 'Int']).toContain(primitiveTypesMap[type.properties.code.type]);
 			});
+
+			// any string ids (as opposed to integers) should have patterns defined
+			if (primitiveTypesMap[type.properties.code.type] === "String") {
+				it('has a string code that respects a pattern', () => {
+					expect(type.properties.code.pattern).toBeDefined();
+				});
+			} else {
+				it('has an integer code that does not define a custom pattern', () => {
+					expect(type.properties.code.pattern).not.toBeDefined();
+				});
+			}
 
 			propertyTestSuite({
 				typeName: type.name,
