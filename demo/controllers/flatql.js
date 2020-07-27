@@ -75,25 +75,29 @@ module.exports = async (req, res) => {
 
 
 	const opts = { fields: keys };
+	const {format = 'json'} = req.query;
+	if (format === 'json') {
+		res.set('content-type', 'application/json')
+		res.send(flattened)
+	} else if (format === 'csv') {
+		const csv = parse(flattened, opts);
+		res.set('content-type', 'text/csv')
+		res.send(csv)
+	} else if (format === 'ascii') {
+		const ascii = new AsciiTable(req.query.query)
+		ascii
+		  .setHeading(...keys)
 
-	// const csv = parse(flattened, opts);
-
-	// res.send(csv)
-
-
-	const ascii = new AsciiTable(req.query.query)
-	ascii
-	  .setHeading(...keys)
-
-	  flattened.forEach(row => {
-	  	ascii.addRow(...keys.map(key => key in row ? row[key] : ''))
-	  })
-	res.send('<pre>' + ascii.toString() + '</pre>')
+		  flattened.forEach(row => {
+		  	ascii.addRow(...keys.map(key => key in row ? row[key] : ''))
+		  })
+		res.send('<pre>' + ascii.toString() + '</pre>')
+	}
 } catch (e) {
 	res.send(e.toString())
 }
 }
 
 
-// http://local.in.ft.com:8888/csv?query={%20Products%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20})%20{%20code%20comprisedOfSystems%20{%20code%20}%20}%20}&sparse=true
-// http://local.in.ft.com:8888/csv?query={%20Systems%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20componentPartOfProducts:null%20lifecycleStage_not:Decommissioned%20})%20{%20code%20}%20}&sparse=true
+// http://local.in.ft.com:8888/flatql?query={%20Products%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20})%20{%20code%20comprisedOfSystems%20{%20code%20}%20}%20}&sparse=true
+// http://local.in.ft.com:8888/flatql?query={%20Systems%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20componentPartOfProducts:null%20lifecycleStage_not:Decommissioned%20})%20{%20code%20}%20}&sparse=true

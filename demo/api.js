@@ -43,7 +43,7 @@ getApp({
 	});
 });
 
-app.get('/csv', require('./controllers/csv'))
+app.get('/flatql', require('./controllers/flatql'))
 
 require('@babel/register'); // eslint-disable-line  import/no-extraneous-dependencies
 const { editController, viewController, deleteController } = require('./cms');
