@@ -380,11 +380,13 @@ const typeTestSuite = type => {
 			});
 
 			it('has a string or integer code', () => {
-				expect(['String', 'Int']).toContain(primitiveTypesMap[type.properties.code.type]);
+				expect(['String', 'Int']).toContain(
+					primitiveTypesMap[type.properties.code.type],
+				);
 			});
 
 			// any string ids (as opposed to integers) should have patterns defined
-			if (primitiveTypesMap[type.properties.code.type] === "String") {
+			if (primitiveTypesMap[type.properties.code.type] === 'String') {
 				it('has a string code that respects a pattern', () => {
 					expect(type.properties.code.pattern).toBeDefined();
 				});
