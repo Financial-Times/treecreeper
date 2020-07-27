@@ -2,7 +2,7 @@
 const fetch = require('node-fetch');
 const { parse } = require('json2csv');
 
-const collapseTree = (input) => {
+const collapseTree = (input, {sparse = false} = {}) => {
 	const keys = new Set();
 
 	const recursor = (obj, prefix) => {
@@ -38,7 +38,11 @@ const collapseTree = (input) => {
 			}
 		})
 		if (newArray) {
-			newArray = newArray.map(entry => ({...entry, ...newObj}))
+			if (sparse) {
+				Object.assign(newArray[0], newObj)
+			} else {
+				newArray = newArray.map(entry => ({...entry, ...newObj}))
+			}
 		}
 		return newArray || newObj;
 
@@ -61,7 +65,7 @@ module.exports = async (req, res) => {
 		}
 	}).then(res => res.json())
 
-	const {flattened, keys} = collapseTree(data);
+	const {flattened, keys} = collapseTree(data, req.query);
 
 
 	const opts = { fields: keys };
