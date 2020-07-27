@@ -1,7 +1,7 @@
 
 const fetch = require('node-fetch');
 const { parse } = require('json2csv');
-
+const AsciiTable = require('ascii-table')
 const collapseTree = (input, {sparse = false} = {}) => {
 	const keys = new Set();
 
@@ -16,22 +16,28 @@ const collapseTree = (input, {sparse = false} = {}) => {
 			}))
 		}
 
-		const arrayEntries = Object.entries(obj).filter(([key, val]) => Array.isArray(val))
-
-		if (arrayEntries.length > 1) {
-			throw new Error('More than one thing to spread - need a higher dimensional brain')
-		}
-
 		const newObj = {}
 		let newArray;
+
+		const assignNewArray = arr => {
+			if (newArray) {
+				throw new Error('More than one thing to spread - need a higher dimensional brain')
+			}
+			newArray = arr;
+		}
 
 		Object.entries(obj).forEach(([key, val]) => {
 			if (Array.isArray(val)) {
 				if (val.length > 0) {
-					newArray = recursor(val, key);
+					assignNewArray(recursor(val, key));
 				}
 			} else if (typeof val === 'object' && val !== null) {
-				Object.assign(newObj, recursor(val, key))
+				const newVal = recursor(val, key);
+				if (Array.isArray(newVal)) {
+					assignNewArray(newVal);
+				} else {
+					Object.assign(newObj, recursor(val, key))
+				}
 			} else {
 				keys.add(key)
 				newObj[key] = val;
@@ -70,16 +76,24 @@ module.exports = async (req, res) => {
 
 	const opts = { fields: keys };
 
-	const csv = parse(flattened, opts);
+	// const csv = parse(flattened, opts);
 
-	res.send(csv)
+	// res.send(csv)
+
+
+	const ascii = new AsciiTable(req.query.query)
+	ascii
+	  .setHeading(...keys)
+
+	  flattened.forEach(row => {
+	  	ascii.addRow(...keys.map(key => key in row ? row[key] : ''))
+	  })
+	res.send('<pre>' + ascii.toString() + '</pre>')
 } catch (e) {
 	res.send(e.toString())
 }
 }
 
 
-// forEach prop
-// - if flat do nothing
-// - if object change names to include path and flatten all
-// - if array
+// http://local.in.ft.com:8888/csv?query={%20Products%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20})%20{%20code%20comprisedOfSystems%20{%20code%20}%20}%20}&sparse=true
+// http://local.in.ft.com:8888/csv?query={%20Systems%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20componentPartOfProducts:null%20lifecycleStage_not:Decommissioned%20})%20{%20code%20}%20}&sparse=true
