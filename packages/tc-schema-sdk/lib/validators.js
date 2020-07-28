@@ -31,6 +31,7 @@ const validateFloat = (type, value, exit) => {
 };
 
 const validateInt = (type, value, exit) => {
+	console.log({type, value, isFinite: Number.isFinite(value), round: Math.round(value)})
 	if (type === 'Int') {
 		if (!Number.isFinite(value) || Math.round(value) !== value) {
 			exit('Must be a finite integer');

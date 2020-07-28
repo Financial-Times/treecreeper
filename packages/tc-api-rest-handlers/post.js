@@ -9,6 +9,7 @@ const { normaliseRelationshipProps } = require('./lib/relationships/input');
 const { broadcast } = require('./lib/events');
 
 const postHandler = ({ documentStore } = {}) => async input => {
+	console.log({typeof: typeof input.body.code})
 	const {
 		type,
 		code,

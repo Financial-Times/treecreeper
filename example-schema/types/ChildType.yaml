@@ -4,11 +4,10 @@ moreInformation: |
     More information for ChildType
 properties:
   code:
-    type: Code
+    type: Int
     unique: true
     canIdentify: true
     description: Code description.
-    pattern: CODE
     label: Code label
   isChildOf:
     relationship: HAS_CHILD

@@ -219,12 +219,13 @@ const getType = function(
 
 	if (typeSchema.properties.code) {
 		Object.assign(typeSchema.properties.code, {
-			type: 'Code',
 			required: true,
 			unique: true,
 			canIdentify: true,
 			useInSummary: true,
 		});
+
+		typeSchema.properties.code.type = typeSchema.properties.code.type || 'Code';
 	}
 
 	let properties = { ...typeSchema.properties };
