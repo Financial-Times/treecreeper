@@ -2,6 +2,7 @@
 const fetch = require('node-fetch');
 const { parse } = require('json2csv');
 const AsciiTable = require('ascii-table')
+
 const collapseTree = (input, {sparse = false} = {}) => {
 	const keys = new Set();
 
@@ -54,50 +55,91 @@ const collapseTree = (input, {sparse = false} = {}) => {
 
 	}
 
-	const flattened = recursor(input);
+	const table = recursor(input);
 
-	return {flattened, keys: [...keys]}
+	return {table, keys: [...keys]}
 }
 
+
+const nonVariableKeys = ['format', 'sparse', 'query']
+
+const cleanQuery = query => {
+	const newQuery = {...query};
+	nonVariableKeys.forEach(key => {
+		delete newQuery[key]
+	})
+	return newQuery
+}
 
 module.exports = async (req, res) => {
 	try {
 	const {data} = await fetch('http://local.in.ft.com:8888/api/graphql', {
 		method: 'post',
-		body: JSON.stringify(req.query),
+		body: JSON.stringify({
+			query: req.query.query,
+			variables: cleanQuery(req.query)
+		}),
 		headers: {
 			'client-id': 'csv',
 			'content-type': 'application/json'
 		}
 	}).then(res => res.json())
 
-	const {flattened, keys} = collapseTree(data, req.query);
 
+	const tables = Object.entries(data).map(([name, tree]) => ({name, ...collapseTree(tree, req.query)}));
 
-	const opts = { fields: keys };
 	const {format = 'json'} = req.query;
+
 	if (format === 'json') {
 		res.set('content-type', 'application/json')
-		res.send(flattened)
+		res.send(tables)
 	} else if (format === 'csv') {
-		const csv = parse(flattened, opts);
+		const csvs = tables.map(({table, keys}) => parse(table, { fields: keys }));
 		res.set('content-type', 'text/csv')
-		res.send(csv)
+		res.send(csvs.join('\n\n'))
 	} else if (format === 'ascii') {
-		const ascii = new AsciiTable(req.query.query)
-		ascii
-		  .setHeading(...keys)
+		const asciis = tables.map(({table, name, keys}) => {
+			const ascii = new AsciiTable(name)
+			ascii
+			  .setHeading(...keys)
 
-		  flattened.forEach(row => {
-		  	ascii.addRow(...keys.map(key => key in row ? row[key] : ''))
-		  })
-		res.send('<pre>' + ascii.toString() + '</pre>')
+			  table.forEach(row => {
+			  	ascii.addRow(...keys.map(key => key in row ? row[key] : ''))
+			  })
+		  return ascii.toString()
+		})
+		res.send('<pre>' + asciis.join('\n\n') + '</pre>')
 	}
 } catch (e) {
+	console.log(e)
 	res.send(e.toString())
 }
 }
 
+//http://local.in.ft.com:8888/flatql?team=reliability-engineering&query=query%20data($team:%20String!%20){%20Products(filter:%20{%20deliveredBy:%20{%20code:%20$team%20}%20})%20{%20code%20comprisedOfSystems%20{%20code%20}%20}%20OrphanedSystems:%20Systems(%20filter:%20{%20deliveredBy:%20{%20code:%20$team%20}%20componentPartOfProducts:%20null%20lifecycleStage_not:%20Decommissioned%20}%20)%20{%20code%20}%20}&format=ascii&sparse=true
 
-// http://local.in.ft.com:8888/flatql?query={%20Products%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20})%20{%20code%20comprisedOfSystems%20{%20code%20}%20}%20}&sparse=true
-// http://local.in.ft.com:8888/flatql?query={%20Systems%20(filter:{%20deliveredBy:{code:%22reliability-engineering%22}%20componentPartOfProducts:null%20lifecycleStage_not:Decommissioned%20})%20{%20code%20}%20}&sparse=true
+
+
+// {
+//   Groups (filter: {
+//     department: {
+//       code: "product-technology"
+//     }
+//   }){
+//     name
+//   teams(filter: {
+//     delivers_some: {
+//       lifecycleStage_not: Decommissioned
+//       _lockedFields_contains:"runbook-md"
+//     }
+//   } ){
+//     name
+//     delivers (filter:{
+//       lifecycleStage_not: Decommissioned
+//       _lockedFields_contains:"runbook-md"
+//     }){
+//       code
+//     }
+//   }
+//   }
+// }
