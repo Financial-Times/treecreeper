@@ -7,7 +7,7 @@
     "@financial-times/n-logger": "^6.1.0",
     "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
-    "neo4j-driver": "1.7.6",
+    "neo4j-driver": "^1.7.7",
     "next-metrics": "^3.1.22"
   },
   "repository": {
