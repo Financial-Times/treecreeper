@@ -318,6 +318,11 @@ describe('graphql', () => {
 						}),
 					},
 				},
+				documentStore: {
+					get: async (type, code) => ({
+						body: { someDocument: `document for ${code}` },
+					}),
+				},
 			});
 
 			updateGraphqlApiOnSchemaChange();
@@ -351,6 +356,35 @@ describe('graphql', () => {
 								someString: 'some string',
 								someFloat: 20.21,
 								someEnum: 'First',
+							},
+						},
+					},
+				});
+		});
+
+		it('Extended Resolver and document can co-exist on same type', async () => {
+			await createNode('MainType', {
+				code: mainCode,
+			});
+			return request(testApp)
+				.post('/graphql')
+				.send({
+					query: `{
+					MainType(filter: {code: "${mainCode}"}) {
+						code
+						someDocument
+						extended {
+							someString
+						}
+					}}`,
+				})
+				.expect(200, {
+					data: {
+						MainType: {
+							code: mainCode,
+							someDocument: `document for ${mainCode}`,
+							extended: {
+								someString: 'some string',
 							},
 						},
 					},
