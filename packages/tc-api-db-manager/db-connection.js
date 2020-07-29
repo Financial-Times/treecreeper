@@ -39,7 +39,7 @@ const runQueryWithMetrics = async ({
 	try {
 		const result = TIMEOUT
 			? await Promise.race([runner(), getTimeoutRacePromise(TIMEOUT)])
-			: runner();
+			: await runner();
 
 		isSuccessful = true;
 		return result;
