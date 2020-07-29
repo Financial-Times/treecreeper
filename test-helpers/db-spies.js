@@ -3,15 +3,13 @@ const { driver } = require('@financial-times/tc-api-db-manager');
 
 const spyDbQuery = () => {
 	const originalSession = driver.session.bind(driver);
-	let spy;
+	const spy = jest.fn();
 	jest.spyOn(driver, 'session').mockImplementation(() => {
 		const session = originalSession();
-		jest.spyOn(session, 'run');
-		if (!spy) {
-			jest.spyOn(session, 'run');
-			spy = session.run;
-		} else {
-			session.run = spy;
+		const originalRun = session.run.bind(session)
+		session.run = (...args) => {
+			spy(...args);
+			return originalRun(...args)
 		}
 		return session;
 	});
