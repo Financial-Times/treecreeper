@@ -28,25 +28,18 @@ const getTimeoutRacePromise = timeout =>
 		);
 	});
 
-const runQueryWithMetrics = async ({
-	session,
-	runner,
-	closeSession = true,
-}) => {
+const runQueryWithMetrics = async runner => {
 	const start = Date.now();
 	metrics.count('neo4j.query.count');
 	let isSuccessful = false;
 	try {
 		const result = TIMEOUT
 			? await Promise.race([runner(), getTimeoutRacePromise(TIMEOUT)])
-			: runner();
+			: await runner();
 
 		isSuccessful = true;
 		return result;
 	} finally {
-		if (closeSession) {
-			session.close();
-		}
 		const totalTime = Date.now() - start;
 		const metricPrefix = `neo4j.query.${
 			isSuccessful ? 'success' : 'failure'
@@ -66,17 +59,7 @@ driver.session = (...sessionArgs) => {
 	const originalRun = session.run;
 
 	session.run = async (...runArgs) =>
-		runQueryWithMetrics({
-			session,
-			runner: () => originalRun.apply(session, runArgs),
-		});
-
-	session.runKeepOpen = async (...runArgs) =>
-		runQueryWithMetrics({
-			session,
-			runner: () => originalRun.apply(session, runArgs),
-			closeSession: false,
-		});
+		runQueryWithMetrics(() => originalRun.apply(session, runArgs));
 
 	return session;
 };
@@ -86,13 +69,16 @@ module.exports = {
 	setTimeout: timeout => {
 		TIMEOUT = timeout;
 	},
-	executeQuery: (query, parameters) =>
-		driver.session().run(query, parameters),
+	executeQuery: async (query, parameters) => {
+		const session = driver.session();
+		try {
+			return await session.run(query, parameters);
+		} finally {
+			session.close();
+		}
+	},
 	executeQueryWithSharedSession: (session = driver.session()) => {
-		const executeQuery = async (...args) => {
-			const result = await session.runKeepOpen(...args);
-			return result;
-		};
+		const executeQuery = async (...args) => session.run(...args);
 		executeQuery.close = () => session.close();
 
 		return executeQuery;
@@ -102,11 +88,7 @@ module.exports = {
 		const result = await session.writeTransaction(async tx =>
 			Promise.all(
 				queries.map(({ query, parameters }) =>
-					runQueryWithMetrics({
-						session,
-						runner: () => tx.run(query, parameters),
-						closeSession: false,
-					}),
+					runQueryWithMetrics(() => tx.run(query, parameters)),
 				),
 			),
 		);
