@@ -31,7 +31,7 @@ const getTimeoutRacePromise = timeout =>
 const runQueryWithMetrics = async ({
 	session,
 	runner,
-	isTransaction = false,
+	closeSession = true,
 }) => {
 	const start = Date.now();
 	metrics.count('neo4j.query.count');
@@ -39,12 +39,12 @@ const runQueryWithMetrics = async ({
 	try {
 		const result = TIMEOUT
 			? await Promise.race([runner(), getTimeoutRacePromise(TIMEOUT)])
-			: await runner();
+			: runner();
 
 		isSuccessful = true;
 		return result;
 	} finally {
-		if (!isTransaction) {
+		if (closeSession) {
 			session.close();
 		}
 		const totalTime = Date.now() - start;
@@ -71,6 +71,13 @@ driver.session = (...sessionArgs) => {
 			runner: () => originalRun.apply(session, runArgs),
 		});
 
+	session.runKeepOpen = async (...runArgs) =>
+		runQueryWithMetrics({
+			session,
+			runner: () => originalRun.apply(session, runArgs),
+			closeSession: false,
+		});
+
 	return session;
 };
 
@@ -83,7 +90,7 @@ module.exports = {
 		driver.session().run(query, parameters),
 	executeQueryWithSharedSession: (session = driver.session()) => {
 		const executeQuery = async (...args) => {
-			const result = await session.run(...args);
+			const result = await session.runKeepOpen(...args);
 			return result;
 		};
 		executeQuery.close = () => session.close();
@@ -98,7 +105,7 @@ module.exports = {
 					runQueryWithMetrics({
 						session,
 						runner: () => tx.run(query, parameters),
-						isTransaction: true,
+						closeSession: false,
 					}),
 				),
 			),
