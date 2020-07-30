@@ -302,7 +302,7 @@ describe('rest PATCH field-locking', () => {
 					),
 				});
 
-				const getDbSpy = spyDbQuery();
+				const dbQuerySpy = spyDbQuery();
 
 				const { status, body } = await lockHandler(undefined, {
 					lockFields: 'anotherString,someString',
@@ -325,7 +325,7 @@ describe('rest PATCH field-locking', () => {
 						'anotherString',
 					),
 				});
-				expect(getDbSpy()).not.toHaveBeenCalledWith(
+				expect(dbQuerySpy).not.toHaveBeenCalledWith(
 					expect.stringMatching(/MERGE|CREATE/),
 				);
 			});
