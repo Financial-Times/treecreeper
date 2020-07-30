@@ -5,14 +5,15 @@
   "main": "index.js",
   "dependencies": {
     "@financial-times/n-logger": "^6.1.0",
-    "@financial-times/tc-schema-publisher": "file:../tc-schema-publisher",
-    "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
-    "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "@financial-times/tc-api-db-manager": "file:../tc-api-db-manager",
+    "@financial-times/tc-api-express-logger": "file:../tc-api-express-logger",
+    "@financial-times/tc-schema-publisher": "file:../tc-schema-publisher",
+    "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "apollo-server-express": "^2.9.7",
     "dataloader": "^1.4.0",
     "graphql": "^14.5.8",
     "graphql-middleware": "^4.0.2",
+    "lodash.merge": "^4.6.2",
     "neo4j-graphql-js": "financial-times/neo4j-graphql-js#non-leaky-reflexive-relationships"
   },
   "devDependencies": {

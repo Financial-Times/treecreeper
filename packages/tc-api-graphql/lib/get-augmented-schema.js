@@ -3,6 +3,7 @@ const { makeAugmentedSchema } = require('neo4j-graphql-js');
 const { applyMiddleware } = require('graphql-middleware');
 const { parse } = require('graphql');
 const { getGraphqlDefs, getTypes } = require('@financial-times/tc-schema-sdk');
+const merge = require('lodash.merge');
 const { middleware: requestTracer } = require('./request-tracer');
 
 const resolveDocumentProperty = async ({ code }, args, context, info) => {
@@ -48,7 +49,7 @@ const getAugmentedSchema = ({
 	}
 	if (Object.keys(extendedResolvers).length) {
 		// add custom resolvers
-		Object.assign(resolvers, { ...extendedResolvers });
+		merge(resolvers, { ...extendedResolvers });
 	}
 
 	// this should throw meaningfully if the defs are invalid;
