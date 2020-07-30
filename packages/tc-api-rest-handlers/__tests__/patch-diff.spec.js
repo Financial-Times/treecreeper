@@ -33,7 +33,7 @@ describe('rest PATCH diff', () => {
 			someString: 'some string',
 		});
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -50,7 +50,7 @@ describe('rest PATCH diff', () => {
 			someMultipleChoice: ['Second', 'First'],
 		});
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -68,7 +68,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'replace' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -87,7 +87,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -105,7 +105,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).toHaveBeenCalledWith(
+		expect(dbQuerySpy).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -124,7 +124,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).toHaveBeenCalledWith(
+		expect(dbQuerySpy).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -144,7 +144,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -176,7 +176,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+		expect(dbQuerySpy).not.toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -205,7 +205,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).toHaveBeenCalledWith(
+		expect(dbQuerySpy).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -225,7 +225,7 @@ describe('rest PATCH diff', () => {
 			{ relationshipAction: 'merge' },
 		);
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).toHaveBeenCalledWith(
+		expect(dbQuerySpy).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -239,7 +239,7 @@ describe('rest PATCH diff', () => {
 		const dbQuerySpy = spyDbQuery();
 		const { status } = await basicHandler({ someString: null });
 		expect(status).toBe(200);
-		expect(dbQuerySpy()).toHaveBeenCalledWith(
+		expect(dbQuerySpy).toHaveBeenCalledWith(
 			expect.stringMatching(/MERGE|CREATE/),
 			expect.any(Object),
 		);
@@ -262,7 +262,7 @@ describe('rest PATCH diff', () => {
 				{ relationshipAction: 'replace' },
 			);
 			expect(status).toBe(200);
-			expect(dbQuerySpy()).toHaveBeenCalledWith(
+			expect(dbQuerySpy).toHaveBeenCalledWith(
 				expect.stringMatching(/MERGE|CREATE/),
 				expect.any(Object),
 			);
@@ -284,7 +284,7 @@ describe('rest PATCH diff', () => {
 				{ relationshipAction: 'merge' },
 			);
 			expect(status).toBe(200);
-			expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+			expect(dbQuerySpy).not.toHaveBeenCalledWith(
 				expect.stringMatching(/MERGE|CREATE/),
 				expect.any(Object),
 			);

@@ -168,7 +168,7 @@ describe('rest PATCH update', () => {
 					expect(body).toMatchObject({
 						someDate: date,
 					});
-					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+					expect(dbQuerySpy).not.toHaveBeenCalledWith(
 						expect.stringMatching(/MERGE|CREATE/),
 						expect.any(Object),
 					);
@@ -233,7 +233,7 @@ describe('rest PATCH update', () => {
 					});
 
 					expect(status).toBe(200);
-					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+					expect(dbQuerySpy).not.toHaveBeenCalledWith(
 						expect.stringMatching(/MERGE|CREATE/),
 						expect.any(Object),
 					);
@@ -294,7 +294,7 @@ describe('rest PATCH update', () => {
 					expect(body).toMatchObject({
 						someDatetime: neo4jTimePrecision(datetime),
 					});
-					expect(dbQuerySpy()).not.toHaveBeenCalledWith(
+					expect(dbQuerySpy).not.toHaveBeenCalledWith(
 						expect.stringMatching(/MERGE|CREATE/),
 						expect.any(Object),
 					);

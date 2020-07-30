@@ -6,16 +6,14 @@ const spyDbQuery = () => {
 	const spy = jest.fn();
 	jest.spyOn(driver, 'session').mockImplementation(() => {
 		const session = originalSession();
-		const originalRun = session.run.bind(session)
+		const originalRun = session.run.bind(session);
 		session.run = (...args) => {
 			spy(...args);
-			return originalRun(...args)
-		}
+			return originalRun(...args);
+		};
 		return session;
 	});
-	// We have to wrap function in order to trap `spy` variable in this scope
-	// and return lazy affected spy variable properly
-	return () => spy;
+	return spy;
 };
 
 module.exports = { spyDbQuery };
