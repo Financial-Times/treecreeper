@@ -13,11 +13,7 @@ const parser = getParser({
 
 // The weird string concatenation in the markdown fixture is so that
 // dev tooling doesn't tidy up the 'extraneous' whitespace
-const addLineBreaks = str =>
-	str
-		.replace(/\t+/g, '\t')
-		.split('\n')
-		.join('  \n');
+const addLineBreaks = str => str.replace(/\t+/g, '\t').split('\n').join('  \n');
 
 describe('nested property definition tests', () => {
 	describe('single relationship case - hasMany: false', () => {

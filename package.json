@@ -31,7 +31,7 @@
     "@babel/preset-react": "^7.7.0",
     "@babel/register": "^7.7.0",
     "@financial-times/athloi": "^1.0.0-beta.29",
-    "@financial-times/rel-engage": "^7.4.3",
+    "@financial-times/rel-engage": "^8.0.1",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
     "aws-sdk": "^2.611.0",
     "babel-loader": "^8.0.6",

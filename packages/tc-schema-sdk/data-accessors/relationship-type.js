@@ -121,7 +121,7 @@ const cacheKeyGenerator = (
 	{ includeMetaFields = false } = {},
 ) => `relationships:${rootType}:${propertyName}:${includeMetaFields}`;
 
-const getRelationshipType = function(
+const getRelationshipType = function (
 	rootType,
 	propertyName,
 	{ includeMetaFields = false } = {},

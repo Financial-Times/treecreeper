@@ -73,9 +73,7 @@ describe('rest PATCH update', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.update);
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match(meta.update);
+			await neo4jTest('MainType', mainCode).exists().match(meta.update);
 		});
 		it('deletes a property as an update', async () => {
 			await createMainNode({
@@ -125,11 +123,9 @@ describe('rest PATCH update', () => {
 						code: mainCode,
 						someDate: date,
 					});
-					await neo4jTest('MainType', mainCode)
-						.exists()
-						.match({
-							someDate: date,
-						});
+					await neo4jTest('MainType', mainCode).exists().match({
+						someDate: date,
+					});
 				});
 				it('updates existing Date', async () => {
 					await createMainNode({
@@ -146,11 +142,9 @@ describe('rest PATCH update', () => {
 					expect(body).toMatchObject({
 						someDate: date,
 					});
-					await neo4jTest('MainType', mainCode)
-						.exists()
-						.match({
-							someDate: date,
-						});
+					await neo4jTest('MainType', mainCode).exists().match({
+						someDate: date,
+					});
 				});
 				it("doesn't update when effectively the same Date", async () => {
 					const date = '2019-01-09';
@@ -332,12 +326,10 @@ describe('rest PATCH update', () => {
 				someBoolean: false,
 				someInteger: 0,
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					someBoolean: false,
-					someInteger: 0,
-				});
+			await neo4jTest('MainType', mainCode).exists().match({
+				someBoolean: false,
+				someInteger: 0,
+			});
 		});
 		it('no clientId, deletes the _updatedByClient property', async () => {
 			await createMainNode();

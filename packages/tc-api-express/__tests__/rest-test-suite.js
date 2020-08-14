@@ -66,9 +66,7 @@ const testSuite = (method, goodStatus) => {
 
 		describe('client headers', () => {
 			it(`no client-id or client-user-id returns 400`, async () => {
-				return request(app)
-					[getRequestMethod()](restUrl)
-					.expect(400);
+				return request(app)[getRequestMethod()](restUrl).expect(400);
 			});
 
 			it(`client-id but no client-user-id returns ${goodStatus}`, async () => {

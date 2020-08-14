@@ -3,8 +3,5 @@
 	string with no spaces so they can be matched against one another in styles
 */
 module.exports = function normalizePropertyKey(key = '') {
-	return key
-		.normalize()
-		.toLowerCase()
-		.replace(/\s+/g, '');
+	return key.normalize().toLowerCase().replace(/\s+/g, '');
 };

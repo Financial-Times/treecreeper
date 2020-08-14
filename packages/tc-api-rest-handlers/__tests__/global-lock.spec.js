@@ -32,11 +32,9 @@ describe('global field locking', () => {
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					lockedField: 'some string',
-				});
+			await neo4jTest('MainType', mainCode).exists().match({
+				lockedField: 'some string',
+			});
 		});
 		it('fails to create if using wrong client', async () => {
 			await expect(
@@ -71,11 +69,9 @@ describe('global field locking', () => {
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					lockedField: 'some string',
-				});
+			await neo4jTest('MainType', mainCode).exists().match({
+				lockedField: 'some string',
+			});
 		});
 		it('fails to patch if using wrong client', async () => {
 			await createNode('MainType', { code: mainCode });
@@ -90,11 +86,9 @@ describe('global field locking', () => {
 				message:
 					'Cannot write lockedField on MainType global-lock-main - property can only be edited by client global-lock-client',
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.notMatch({
-					lockedField: 'some string',
-				});
+			await neo4jTest('MainType', mainCode).exists().notMatch({
+				lockedField: 'some string',
+			});
 		});
 	});
 });

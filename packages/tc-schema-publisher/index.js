@@ -7,10 +7,7 @@ const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
 const getVersion = schemaObject => {
 	const asString = JSON.stringify(schemaObject, null, 2);
-	return crypto
-		.createHash('md5')
-		.update(asString)
-		.digest('hex');
+	return crypto.createHash('md5').update(asString).digest('hex');
 };
 
 const sendSchemaToS3 = async (

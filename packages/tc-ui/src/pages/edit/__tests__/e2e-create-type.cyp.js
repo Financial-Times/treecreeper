@@ -48,12 +48,8 @@ describe('End-to-end - record creation', () => {
 			});
 			cy.get('#id-code').type(code);
 			save();
-			cy.window()
-				.its('prompt')
-				.should('called', 1);
-			cy.window()
-				.its('prompt.args.0')
-				.should('deep.eq', [promptText]);
+			cy.window().its('prompt').should('called', 1);
+			cy.window().its('prompt.args.0').should('deep.eq', [promptText]);
 		});
 		it('can not create record if child record is not selected', () => {
 			cy.visit(`/MVRType/create`, {
@@ -64,12 +60,8 @@ describe('End-to-end - record creation', () => {
 			cy.get('#id-code').type(code);
 			cy.get('#id-someString').type(someString);
 			save();
-			cy.window()
-				.its('prompt')
-				.should('called', 1);
-			cy.window()
-				.its('prompt.args.0')
-				.should('deep.eq', [promptText]);
+			cy.window().its('prompt').should('called', 1);
+			cy.window().its('prompt.args.0').should('deep.eq', [promptText]);
 		});
 		it('can create record with incomplete fields with "SAVE INCOMPLETE RECORD" option', () => {
 			cy.visit(`/MVRType/create`, {
