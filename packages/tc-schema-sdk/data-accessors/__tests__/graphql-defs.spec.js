@@ -249,4 +249,32 @@ describe('graphql def creation', () => {
 			expect(generated).toMatch(new RegExp(`prop: String`));
 		});
 	});
+	describe('@cypher', () => {
+		it(`Outputs valid graphQL when @cypher directive invoked`, () => {
+			const schema = {
+				types: [
+					{
+						name: 'Fake',
+						description: 'Fake type description',
+						properties: {
+							prop: {
+								type: 'Fake',
+								description: 'a description',
+								cypher: `Multi
+line with
+"quotes"`,
+							},
+						},
+					},
+				],
+				enums: {},
+				stringPatterns,
+				primitiveTypes: {},
+			};
+			const generated = [].concat(...graphqlFromRawData(schema)).join('');
+			expect(generated).toMatch(
+				'prop: Fake @cypher(statement: "Multi\\nline with\\n\\"quotes\\"")',
+			);
+		});
+	});
 });
