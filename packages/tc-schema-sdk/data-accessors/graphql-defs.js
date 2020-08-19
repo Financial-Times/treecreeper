@@ -38,7 +38,10 @@ const maybePaginate = ({ hasMany, isRelationship }) =>
 
 const maybeDirective = def => {
 	if (def.cypher) {
-		return `@cypher(statement: "${def.cypher}")`;
+		return `@cypher(statement: "${def.cypher
+			.replace(/"/g, '\\"')
+			.split(/\n/)
+			.join('\\n')}")`;
 	}
 	if (def.relationship) {
 		return `@relation(name: "${def.relationship}", direction: "${
