@@ -13,6 +13,7 @@ const getGraphqlApi = ({
 } = {}) => {
 	let schemaDidUpdate;
 	let graphqlHandler;
+	let lastError;
 
 	const updateAPI = () => {
 		try {
@@ -23,6 +24,7 @@ const getGraphqlApi = ({
 				excludeTypes,
 			});
 
+			lastError = null;
 			schemaDidUpdate = true;
 			logger.info({ event: 'GRAPHQL_SCHEMA_UPDATED' });
 
@@ -42,6 +44,8 @@ const getGraphqlApi = ({
 			}
 		} catch (error) {
 			schemaDidUpdate = false;
+			lastError = error;
+
 			logger.error(
 				'Graphql schema update failed',
 				{ event: 'GRAPHQL_SCHEMA_UPDATE_FAILED' },
@@ -51,7 +55,13 @@ const getGraphqlApi = ({
 	};
 
 	return {
-		graphqlHandler: (...args) => graphqlHandler(...args),
+		graphqlHandler: (...args) => {
+			if (typeof graphqlHandler === 'function') {
+				return graphqlHandler(...args);
+			}
+			const detail = lastError ? `:\n\n${lastError}` : '';
+			throw new Error(`Apollo middleware failed to initialise ${detail}`);
+		},
 		isSchemaUpdating: () => schemaDidUpdate,
 		listenForSchemaChanges: () => onChange(updateAPI),
 	};
