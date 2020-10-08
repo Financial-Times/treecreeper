@@ -27,8 +27,8 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				propDef,
 			);
 
-			const itemValue = propDef.isRelationship
-				? data[`${propertyName}_rel`] || data[propertyName]
+			const itemValue = propDef.isRelationship && Object.keys(propDef.properties || {}).length
+				? data[`${propertyName}_rel`]
 				: data[propertyName];
 
 			const viewModel = {

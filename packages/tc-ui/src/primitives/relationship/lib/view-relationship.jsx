@@ -1,115 +1,45 @@
-/* eslint-disable no-sequences, no-return-assign */
 const React = require('react');
-const sortBy = require('lodash.sortby');
 const { getType } = require('@financial-times/tc-schema-sdk');
-const {
-	LinkToRecord,
-	LabelledPrimitive,
-} = require('../../../lib/components/structure');
+const { LinkToRecord } = require('../../../lib/components/structure');
 
 let RelationshipAnnotator;
 
-const OneRelationship = props => {
-	const {
-		assignComponent,
-		properties,
-		type,
-		value = {},
-		id,
-		hasValue,
-		linkGenerator,
-	} = props;
-	let RelationshipProperties = null;
-	// value[propertyName] !== null since neo4j returns null if there is no value
-
-	if (!value) {
-		return null;
-	}
-
-	const validValues = Object.keys(value)
-		.filter(
-			propertyName =>
-				value[propertyName] !== null && propertyName !== type,
-		)
-		.reduce((res, key) => ((res[key] = properties[key]), res), {});
-
-	if (Object.keys(validValues).length && hasValue) {
-		RelationshipProperties = (
-			<div
-				data-o-component="o-expander"
-				className="o-expander"
-				data-o-expander-shrink-to="hidden"
-				data-o-expander-collapsed-toggle-text="view details"
-				data-o-expander-expanded-toggle-text="hide details"
-			>
-				{' '}
-				<button className="o-expander__toggle o--if-js" type="button">
-					view details
-				</button>
-				<div className="o-expander__content">
-					<dl className="treecreeper-relationship-props-list">
-						{Object.entries(validValues).map(
-							([name, item], index) => {
-								const viewModel = {
-									value: value[name],
-									id: name,
-									...item,
-									...assignComponent(item),
-								};
-								return viewModel.label ? (
-									<span key={index}>
-										<LabelledPrimitive {...viewModel} />
-									</span>
-								) : null;
-							},
-						)}
-					</dl>
-				</div>
-			</div>
-		);
-	}
-
-	return type && value[type] ? (
+const OneRelationship = ({ type, value = {}, id }) =>
+	type && value.code ? (
 		<>
-			<LinkToRecord
-				id={id}
-				type={type}
-				value={value[type]}
-				linkGenerator={linkGenerator}
-			/>
+			<LinkToRecord id={id} type={type} value={value} />
 			{RelationshipAnnotator ? (
-				<RelationshipAnnotator value={value[type]} type={type} />
+				<RelationshipAnnotator value={value} type={type} />
 			) : null}
-			{RelationshipProperties}
 		</>
 	) : (
 		'Error: unable to construct link'
 	);
-};
 
-const ViewRelationship = props => {
-	const { value, type, id, hasMany } = props;
+const ViewRelationship = ({ value, type, id, hasMany }) => {
 	if (!hasMany) {
+		const props = { type, value, id };
 		return <OneRelationship {...props} />;
 	}
 	const schema = getType(type);
 	const inactiveCheck = datum => {
 		if (schema.inactiveRule) {
 			return Object.entries(schema.inactiveRule).every(
-				([prop, expectedValue]) => datum[type][prop] === expectedValue,
+				([prop, expectedValue]) => datum[prop] === expectedValue,
 			);
 		}
-		return datum[type].isActive === false;
+		return datum.isActive === false;
 	};
 	return Array.isArray(value) ? (
-		<ul id={id} className="o-layout__unstyled-element treecreeper-links">
-			{sortBy(value, [`${type}.code`]).map((item, index) => {
+		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
+			{value.map((item, index) => {
+				const props = { type, value: item };
 				return (
 					<li
 						key={index}
 						className={inactiveCheck(item) ? 'inactive' : 'active'}
 					>
-						<OneRelationship {...{ ...props, value: item }} />
+						<OneRelationship {...props} />
 					</li>
 				);
 			})}
