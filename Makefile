@@ -79,6 +79,9 @@ run-app-biz-ops:
 run:
 	@concurrently "make run-db" "make run-app" "make build-statics"
 
+run-no-db:
+	@concurrently "make run-app" "make build-statics"
+
 run-biz-ops:
 	@concurrently "make run-app-biz-ops" "make build-statics"
 
