@@ -29,7 +29,9 @@ const initRelationshipSelectors = entireRecord => {
 		...document.querySelectorAll(
 			'[data-component="rich-relationship-picker"]:not([data-disabled])',
 		),
-	].forEach(container => attachRelationshipPicker(container, entireRecord));
+	].forEach(container =>
+		attachRichRelationshipPicker(container, entireRecord),
+	);
 };
 
 // TODO - the relationship editors should expose their bad state in some way

@@ -1,3 +1,4 @@
+require('../relationship/main.css');
 require('./main.css');
 const React = require('react');
 const { render } = require('react-dom');
