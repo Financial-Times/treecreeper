@@ -1,11 +1,16 @@
 const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
-const { RelationshipPicker } = require('./lib/relationship-picker');
+const { RelationshipPicker } = require('../relationship-picker');
+const { SelectedRelationship } = require('./lib/selected-relationship');
 
 const RelationshipPickerContainer = props => (
 	<div>
-		<RelationshipPicker {...props} />
+		<RelationshipPicker
+			{...props}
+			SelectedRelationship={SelectedRelationship}
+			componentName="rich-relationship-picker"
+		/>
 	</div>
 );
 

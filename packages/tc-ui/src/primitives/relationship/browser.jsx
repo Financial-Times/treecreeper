@@ -1,12 +1,17 @@
-require('./main.css');
+require('../relationship-picker/main.css');
 const React = require('react');
-const { hydrate } = require('react-dom');
-const { RelationshipPicker } = require('./lib/relationship-picker');
+const { render } = require('react-dom');
+const { RelationshipPicker } = require('../relationship-picker');
+const { SelectedRelationship } = require('./lib/selected-relationship');
 
 module.exports = {
 	withEditComponent: container =>
-		hydrate(
-			<RelationshipPicker {...JSON.parse(container.dataset.props)} />,
+		render(
+			<RelationshipPicker
+				{...JSON.parse(container.dataset.props)}
+				SelectedRelationship={SelectedRelationship}
+				componentName="relationship-picker"
+			/>,
 			container.parentNode,
 		),
 };
