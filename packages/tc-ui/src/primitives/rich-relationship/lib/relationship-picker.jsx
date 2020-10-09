@@ -3,7 +3,7 @@ const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
-const debounce = require('./debounce');
+const debounce = require('../../../lib/debounce');
 
 const ENTER = 13;
 const TAB = 9;

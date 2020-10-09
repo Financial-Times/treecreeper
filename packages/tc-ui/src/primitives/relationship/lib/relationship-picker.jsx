@@ -3,6 +3,7 @@ const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
 const { Relationship } = require('./relationship');
+const debounce = require('../../../lib/debounce');
 
 const ENTER = 13;
 const TAB = 9;
@@ -56,7 +57,7 @@ class RelationshipPicker extends React.Component {
 		};
 		this.props = props;
 		this.onSearchTermChange = this.onSearchTermChange.bind(this);
-		this.fetchSuggestions = this.fetchSuggestions.bind(this);
+		this.fetchSuggestions = debounce(this.fetchSuggestions.bind(this));
 		this.clearSuggestions = this.clearSuggestions.bind(this);
 		this.addRelationship = this.addRelationship.bind(this);
 		this.onRelationshipRemove = this.onRelationshipRemove.bind(this);
