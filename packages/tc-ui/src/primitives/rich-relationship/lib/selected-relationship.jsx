@@ -1,7 +1,7 @@
 const React = require('react');
 const { RelationshipProperties } = require('./rich-relationship-properties');
 
-class Relationship extends React.Component {
+class SelectedRelationship extends React.Component {
 	constructor(props) {
 		super();
 		this.props = props;
@@ -156,4 +156,4 @@ class Relationship extends React.Component {
 		);
 	}
 }
-module.exports = { Relationship };
+module.exports = { SelectedRelationship };

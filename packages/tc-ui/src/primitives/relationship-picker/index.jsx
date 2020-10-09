@@ -2,8 +2,7 @@
 const React = require('react');
 const ReactAutosuggest = require('react-autosuggest');
 const Highlighter = require('react-highlight-words');
-const { Relationship } = require('./relationship');
-const debounce = require('../../../lib/debounce');
+const debounce = require('./debounce');
 
 const ENTER = 13;
 const TAB = 9;
@@ -245,7 +244,12 @@ class RelationshipPicker extends React.Component {
 
 	render() {
 		const { props } = this;
-		const { propertyName, hasError } = props;
+		const {
+			propertyName,
+			hasError,
+			SelectedRelationship,
+			componentName,
+		} = props;
 		const disabled = !!this.props.lockedBy;
 		const {
 			searchTerm,
@@ -260,7 +264,7 @@ class RelationshipPicker extends React.Component {
 			<div
 				data-props={JSON.stringify(props)}
 				data-property-name={props.propertyName}
-				data-component="rich-relationship-picker"
+				data-component={componentName}
 				data-disabled={disabled ? true : null}
 				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
@@ -317,7 +321,7 @@ class RelationshipPicker extends React.Component {
 					id={`ul-${propertyName}`}
 				>
 					{selectedRelationships.map((val, i) => (
-						<Relationship
+						<SelectedRelationship
 							hasError={hasError}
 							disabled={disabled}
 							onRelationshipRemove={this.onRelationshipRemove}

@@ -1,6 +1,11 @@
 const React = require('react');
 
-const Relationship = ({ value, disabled, onRelationshipRemove, index }) => (
+const SelectedRelationship = ({
+	value,
+	disabled,
+	onRelationshipRemove,
+	index,
+}) => (
 	<li
 		data-name={value.name}
 		data-code={value.code}
@@ -29,4 +34,4 @@ const Relationship = ({ value, disabled, onRelationshipRemove, index }) => (
 	</li>
 );
 
-module.exports = { Relationship };
+module.exports = { SelectedRelationship };
