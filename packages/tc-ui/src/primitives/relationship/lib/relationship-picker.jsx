@@ -224,26 +224,6 @@ class RelationshipPicker extends React.Component {
 				data-is-unresolved={isUnresolved ? true : null}
 				className={isUserError ? 'o-forms-input--invalid' : ''}
 			>
-				<ul
-					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
-					id={`ul-${propertyName}`}
-				>
-					{selectedRelationships.map((val, i) => (
-						<Relationship
-							value={val}
-							disabled={disabled}
-							onRelationshipRemove={this.onRelationshipRemove}
-							index={i}
-						/>
-					))}
-				</ul>
-				<input
-					type="hidden"
-					id={`id-${propertyName}`}
-					name={propertyName}
-					value={this.toFormData(selectedRelationships)}
-				/>
-
 				{disabled ? null : (
 					<div className="o-layout-typography">
 						<ReactAutosuggest
@@ -284,6 +264,19 @@ class RelationshipPicker extends React.Component {
 						</span>
 					</div>
 				)}
+				<ul
+					className="relationship-editor__list editable-relationships o-layout__unstyled-element"
+					id={`ul-${propertyName}`}
+				>
+					{selectedRelationships.map((val, i) => (
+						<Relationship
+							value={val}
+							disabled={disabled}
+							onRelationshipRemove={this.onRelationshipRemove}
+							index={i}
+						/>
+					))}
+				</ul>
 			</div>
 		);
 	}

@@ -31,7 +31,7 @@ const ViewRelationship = ({ value, type, id, hasMany }) => {
 		return datum.isActive === false;
 	};
 	return Array.isArray(value) ? (
-		<ul id={id} className="o-layout__unstyled-element biz-ops-links">
+		<ul id={id} className="o-layout__unstyled-element treecreeper-links">
 			{value.map((item, index) => {
 				const props = { type, value: item };
 				return (
