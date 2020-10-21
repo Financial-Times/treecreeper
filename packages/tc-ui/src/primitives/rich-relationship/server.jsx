@@ -97,12 +97,7 @@ module.exports = {
 	prepareValueForEdit: (value, propDef) => {
 		if (propDef.hasMany) {
 			return value
-				? sortBy(
-						value,
-						Object.keys(propDef.properties).length
-							? `${propDef.type}.code`
-							: 'code',
-				  ).map(item => ({
+				? sortBy(value, `${propDef.type}.code`).map(item => ({
 						code: item.code || item[propDef.type].code,
 						name:
 							item.name ||
