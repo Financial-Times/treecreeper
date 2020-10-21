@@ -11,6 +11,7 @@ let RelationshipAnnotator;
 
 const OneRelationship = props => {
 	const {
+		propertyName,
 		assignComponent,
 		properties,
 		type,
@@ -26,14 +27,11 @@ const OneRelationship = props => {
 		return null;
 	}
 
-	const validValues = Object.keys(value)
-		.filter(
-			propertyName =>
-				value[propertyName] !== null && propertyName !== type,
-		)
-		.reduce((res, key) => ((res[key] = properties[key]), res), {});
+	const relationshipProperties = Object.entries(properties).filter(
+		([name]) => value[name] !== null,
+	);
 
-	if (Object.keys(validValues).length && hasValue) {
+	if (relationshipProperties.length && hasValue) {
 		RelationshipProperties = (
 			<div
 				data-o-component="o-expander"
@@ -48,13 +46,13 @@ const OneRelationship = props => {
 				</button>
 				<div className="o-expander__content">
 					<dl className="treecreeper-relationship-props-list">
-						{Object.entries(validValues).map(
-							([name, item], index) => {
+						{relationshipProperties.map(
+							([name, propDef], index) => {
 								const viewModel = {
 									value: value[name],
 									id: name,
-									...item,
-									...assignComponent(item),
+									...propDef,
+									...assignComponent(propDef),
 								};
 								return viewModel.label ? (
 									<span key={index}>
@@ -78,7 +76,12 @@ const OneRelationship = props => {
 				linkGenerator={linkGenerator}
 			/>
 			{RelationshipAnnotator ? (
-				<RelationshipAnnotator value={value[type]} type={type} />
+				<RelationshipAnnotator
+					value={value[type]}
+					type={type}
+					relationshipProperties={value}
+					propertyName={propertyName}
+				/>
 			) : null}
 			{RelationshipProperties}
 		</>

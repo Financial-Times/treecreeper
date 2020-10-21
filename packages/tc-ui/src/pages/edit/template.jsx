@@ -1,5 +1,5 @@
 const React = require('react');
-const { getEnums, rawData } = require('@financial-times/tc-schema-sdk');
+const { rawData } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
 const { Concept, Fieldset } = require('../../lib/components/structure');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
