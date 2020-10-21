@@ -2,7 +2,6 @@ const React = require('react');
 const { getEnums, rawData } = require('@financial-times/tc-schema-sdk');
 const { FormError } = require('../../lib/components/messages');
 const { Concept, Fieldset } = require('../../lib/components/structure');
-const { getValue } = require('../../lib/mappers/get-value');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
 const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
@@ -23,9 +22,11 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			if (fieldNamesToLock.includes(propertyName)) {
 				lockedBy = fieldsToLock[propertyName];
 			}
-			const { EditComponent, AdditionalEditComponent } = assignComponent(
-				propDef,
-			);
+			const {
+				EditComponent,
+				AdditionalEditComponent,
+				prepareValueForEdit,
+			} = assignComponent(propDef);
 
 			const itemValue =
 				propDef.isRelationship &&
@@ -37,7 +38,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				hasError,
 				parentCode: data.code,
 				propertyName,
-				value: getValue(propDef, itemValue),
+				value: prepareValueForEdit(itemValue, propDef),
 				dataType: propDef.type,
 				parentType: type,
 				options: getEnums()[propDef.type]

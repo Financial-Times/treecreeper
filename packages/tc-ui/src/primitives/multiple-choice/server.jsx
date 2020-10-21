@@ -147,4 +147,5 @@ module.exports = {
 			{...props}
 		/>
 	),
+	prepareValueForEdit: value => (value ? value.sort() : []),
 };

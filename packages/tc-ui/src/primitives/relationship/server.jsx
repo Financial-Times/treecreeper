@@ -71,4 +71,5 @@ module.exports = {
 			' ',
 		)}}`;
 	},
+	prepareValueForEdit: value => value || null,
 };
