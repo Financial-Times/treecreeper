@@ -61,17 +61,36 @@ const getDataTransformers = (assignComponent, clientId) => {
 		const typeProperties = schema.getType(type);
 		Object.entries(typeProperties.properties).forEach(
 			([fieldName, fieldProps]) => {
-				const { parser } = assignComponent(fieldProps);
+				const { parser, name: componentName } = assignComponent(
+					fieldProps,
+				);
 				if (
 					formData[fieldName] &&
 					formData[fieldName] !== "Don't know"
 				) {
 					if (fieldProps.isRelationship) {
-						data[fieldName] = parser(
-							formData[fieldName],
-							fieldProps.properties,
-							assignComponent,
-						);
+						// const fieldData = ;
+						if (componentName === 'RichRelationship') {
+							let fieldData = parser(
+								formData[fieldName],
+								fieldProps.properties,
+								assignComponent,
+							);
+							if (Array.isArray(fieldData)) {
+								fieldData = fieldData.map(item => ({
+									...item,
+									[fieldProps.type]: { code: item.code },
+								}));
+							} else {
+								fieldData = {
+									...fieldData,
+									[fieldProps.type]: { code: fieldData.code },
+								};
+							}
+							data[`${fieldName}_rel`] = fieldData;
+						} else {
+							data[fieldName] = parser(formData[fieldName]);
+						}
 					} else {
 						data[fieldName] = parser(formData[fieldName]);
 					}
