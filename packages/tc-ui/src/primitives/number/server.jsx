@@ -1,6 +1,6 @@
 const text = require('../text/server');
 
-const hasValue = value => value || value === 0
+const hasValue = value => value || value === 0;
 
 module.exports = {
 	name: 'Number',
@@ -11,5 +11,5 @@ module.exports = {
 		return Number.isNaN(Number(value)) ? value : Number(value);
 	},
 	hasValue,
-	prepareValueForEdit: value => hasValue(value) ? value : '',
+	prepareValueForEdit: value => (hasValue(value) ? value : ''),
 };

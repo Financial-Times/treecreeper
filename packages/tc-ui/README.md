@@ -125,8 +125,9 @@ tc-ui provides 6 of these by default, but the user may provide more that impleme
 See tc-schema-sdk/data-accessors/primitive-types.js to see which components are used for rendering which default primitive data types
 
 The 'CMS' pages do not make use of `Relationship` at present - all relationships use `RichRelationship`. This is in order to simplify the CMS code. The `Relationship` primitives are provided with an eye to two things
-- making wider use of them to render views in the wider Biz Ops ecosystem _without_ having to always use `_rel` properties in GraphQL
-- adding the ability to render `@cypher` driven properties in the CMS views at some point
+
+-   making wider use of them to render views in the wider Biz Ops ecosystem _without_ having to always use `_rel` properties in GraphQL
+-   adding the ability to render `@cypher` driven properties in the CMS views at some point
 
 Each primitive component constitutes of one or more of the following:
 
