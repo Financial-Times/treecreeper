@@ -59,7 +59,7 @@ const WrappedEditComponent = props => {
 			htmlFor={htmlFor}
 			className="o-forms-field"
 			data-treecreeper-component={props.componentType}
-			data-type={props.dataType}
+			data-type={props.type}
 			{...(props.wrapperProps || {})}
 		>
 			<FieldTitle {...props} />

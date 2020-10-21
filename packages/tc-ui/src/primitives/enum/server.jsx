@@ -48,13 +48,14 @@ const EditEnum = props => {
 	const {
 		propertyName,
 		value,
-		options,
+		type,
 		disabled,
 		isNested,
 		parentCode,
 		onChange,
 	} = props;
-	const optionsWithDefault = ["Don't know"].concat(options);
+
+	const optionsWithDefault = ["Don't know"].concat(Object.keys(getEnums()[type]));
 	const name = !isNested ? propertyName : '';
 	return (
 		<span className="o-forms-input o-forms-input--select">

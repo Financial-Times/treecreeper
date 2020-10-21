@@ -37,7 +37,6 @@ class RelationshipProperties extends React.Component {
 					propertyName: name,
 					value: prepareValueForEdit(value[name], item),
 					onChange,
-					dataType: item.type,
 					parentType: type,
 					options: getEnums()[item.type]
 						? Object.keys(getEnums()[item.type])

@@ -37,11 +37,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				parentCode: data.code,
 				propertyName,
 				value: prepareValueForEdit(itemValue, propDef),
-				dataType: propDef.type,
 				parentType: type,
-				options: getEnums()[propDef.type]
-					? Object.keys(getEnums()[propDef.type])
-					: [],
 				...propDef,
 				lockedBy: propDef.lockedBy || lockedBy,
 			};
