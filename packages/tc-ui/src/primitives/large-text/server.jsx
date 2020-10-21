@@ -14,7 +14,7 @@ const EditLargeText = props => {
 	const {
 		propertyName,
 		value,
-		dataType,
+		type,
 		disabled,
 		isNested,
 		parentCode,
@@ -28,7 +28,7 @@ const EditLargeText = props => {
 				<textarea
 					name={name}
 					id={`id-${propertyName}`}
-					rows={dataType === 'Document' ? '40' : '8'}
+					rows={type === 'Document' ? '40' : '8'}
 					disabled={disabled}
 					defaultValue={outputFreeText(value)}
 					data-parent-code={parentCode}
@@ -39,7 +39,7 @@ const EditLargeText = props => {
 					}
 				/>
 			</span>
-			{dataType === 'Document' ? (
+			{type === 'Document' ? (
 				<div className="document-edit-tools">
 					Edit using github flavoured markdown or use the&nbsp;
 					<button
@@ -59,7 +59,7 @@ module.exports = {
 	EditComponent: props => (
 		<div
 			className={
-				props.dataType === 'Document'
+				props.type === 'Document'
 					? 'o-layout__main__full-span document-field'
 					: ''
 			}
