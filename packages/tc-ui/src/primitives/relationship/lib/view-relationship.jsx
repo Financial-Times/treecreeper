@@ -4,12 +4,16 @@ const { LinkToRecord } = require('../../../lib/components/structure');
 
 let RelationshipAnnotator;
 
-const OneRelationship = ({ type, value = {}, id }) =>
+const OneRelationship = ({ type, value = {}, id, propertyName }) =>
 	type && value.code ? (
 		<>
 			<LinkToRecord id={id} type={type} value={value} />
 			{RelationshipAnnotator ? (
-				<RelationshipAnnotator value={value} type={type} />
+				<RelationshipAnnotator
+					value={value}
+					type={type}
+					propertyName={propertyName}
+				/>
 			) : null}
 		</>
 	) : (
