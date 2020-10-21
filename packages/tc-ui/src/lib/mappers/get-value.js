@@ -8,30 +8,41 @@ const getValue = (itemSchema, itemValue) => {
 
 	// return relationships as type, code and name object
 	if (itemSchema.relationship) {
-		if (itemSchema.hasMany) {
+		if (Object.keys(itemSchema.properties).length) {
+			if (itemSchema.hasMany) {
+				return itemValue
+					? sortBy(
+							itemValue,
+							Object.keys(itemSchema.properties).length
+								? `${itemSchema.type}.code`
+								: 'code',
+					  ).map(item => ({
+							code: item.code || item[itemSchema.type].code,
+							name:
+								item.name ||
+								item.code ||
+								item[itemSchema.type].name ||
+								item[itemSchema.type].code,
+							...item,
+					  }))
+					: [];
+			}
 			return itemValue
-				? sortBy(itemValue, `${itemSchema.type}.code`).map(item => ({
-						code: item.code || item[itemSchema.type].code,
+				? {
+						code: itemValue.code || itemValue[itemSchema.type].code,
 						name:
-							item.name ||
-							item.code ||
-							item[itemSchema.type].name ||
-							item[itemSchema.type].code,
-						...item,
-				  }))
-				: [];
+							itemValue.name ||
+							itemValue.code ||
+							itemValue[itemSchema.type].name ||
+							itemValue[itemSchema.type].code,
+						...itemValue,
+				  }
+				: null;
 		}
-		return itemValue
-			? {
-					code: itemValue.code || itemValue[itemSchema.type].code,
-					name:
-						itemValue.name ||
-						itemValue.code ||
-						itemValue[itemSchema.type].name ||
-						itemValue[itemSchema.type].code,
-					...itemValue,
-			  }
-			: null;
+		if (itemSchema.hasMany) {
+			return itemValue ? itemValue.sort() : [];
+		}
+		return itemValue || null;
 	}
 
 	// everything else is just text

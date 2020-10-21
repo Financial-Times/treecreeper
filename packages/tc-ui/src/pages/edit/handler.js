@@ -28,6 +28,8 @@ const getEditHandler = ({
 			formData = {};
 		}
 
+		console.log(formData);
+
 		const templateData = {
 			...getSchemaSubset(event, type, isCreate),
 			data: formData,
