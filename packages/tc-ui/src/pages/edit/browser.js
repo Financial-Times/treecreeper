@@ -2,7 +2,6 @@ require('./main.css');
 const { init } = require('@financial-times/tc-schema-sdk');
 const {
 	RichRelationship: { withEditComponent: attachRichRelationshipPicker },
-	Relationship: { withEditComponent: attachRelationshipPicker },
 	LargeText: { withEditComponent: attachDocumentEditor },
 } = require('../../primitives/browser');
 
@@ -20,11 +19,6 @@ const initDocumentEditors = () => {
 };
 
 const initRelationshipSelectors = entireRecord => {
-	[
-		...document.querySelectorAll(
-			'[data-component="relationship-picker"]:not([data-disabled])',
-		),
-	].forEach(container => attachRelationshipPicker(container, entireRecord));
 	[
 		...document.querySelectorAll(
 			'[data-component="rich-relationship-picker"]:not([data-disabled])',

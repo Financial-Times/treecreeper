@@ -18,10 +18,9 @@ const Properties = ({ fields, data, assignComponent }) => {
 				!schema.deprecationReason,
 		)
 		.map(([name, item]) => {
-			const value =
-				item.isRelationship && Object.keys(item.properties || {}).length
-					? data[`${name}_rel`]
-					: data[name];
+			const value = item.isRelationship
+				? data[`${name}_rel`]
+				: data[name];
 
 			const viewModel = {
 				value,

@@ -9,4 +9,5 @@ module.exports = {
 		return Number.isNaN(Number(value)) ? value : Number(value);
 	},
 	hasValue: value => value || value === 0,
+	prepareValueForEdit: value => (value === null ? '' : value),
 };
