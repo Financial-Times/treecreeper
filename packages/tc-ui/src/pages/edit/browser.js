@@ -37,7 +37,7 @@ const preventBadSubmission = () => {
 		.addEventListener('submit', ev => {
 			const editorsInUnselectedState = [
 				...document.querySelectorAll(
-					'[data-component="relationship-picker"][data-is-unresolved]',
+					'[data-component="rich-relationship-picker"][data-is-unresolved]',
 				),
 			];
 			if (editorsInUnselectedState.length) {
