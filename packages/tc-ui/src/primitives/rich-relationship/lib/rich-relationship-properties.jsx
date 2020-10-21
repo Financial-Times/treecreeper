@@ -4,7 +4,6 @@ const { getEnums } = require('@financial-times/tc-schema-sdk');
 const {
 	componentAssigner,
 } = require('../../../lib/mappers/component-assigner');
-const { getValue } = require('../../../lib/mappers/get-value');
 
 class RelationshipProperties extends React.Component {
 	constructor(props) {
@@ -28,13 +27,15 @@ class RelationshipProperties extends React.Component {
 			.filter(([, { deprecationReason }]) => !deprecationReason)
 			.map(([name, item], index) => {
 				const assignComponent = componentAssigner();
-				const { EditComponent } = assignComponent(item);
+				const { EditComponent, prepareValueForEdit } = assignComponent(
+					item,
+				);
 
 				const viewModel = {
 					isNested: true,
 					parentCode: value.code,
 					propertyName: name,
-					value: getValue(item, value[name]),
+					value: prepareValueForEdit(value[name], item),
 					onChange,
 					dataType: item.type,
 					parentType: type,

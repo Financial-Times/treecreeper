@@ -108,4 +108,5 @@ module.exports = {
 		return value === undefined ? undefined : String(value) === 'true';
 	},
 	hasValue: value => typeof value === 'boolean',
+	prepareValueForEdit: value => (typeof value === 'boolean' ? value : ''),
 };

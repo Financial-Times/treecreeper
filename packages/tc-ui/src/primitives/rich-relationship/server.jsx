@@ -1,5 +1,6 @@
 const React = require('react');
 const { getType } = require('@financial-times/tc-schema-sdk');
+const sortBy = require('lodash.sortby');
 const { WrappedEditComponent } = require('../../lib/components/input-wrapper');
 const { RelationshipPicker } = require('../relationship-picker');
 const { SelectedRelationship } = require('./lib/selected-relationship');
@@ -92,5 +93,36 @@ module.exports = {
 			' ',
 		);
 		return `${propName}_rel {${type} {${nodeProps}} ${relationshipProps}}`;
+	},
+	prepareValueForEdit: (value, propDef) => {
+		if (propDef.hasMany) {
+			return value
+				? sortBy(
+						value,
+						Object.keys(propDef.properties).length
+							? `${propDef.type}.code`
+							: 'code',
+				  ).map(item => ({
+						code: item.code || item[propDef.type].code,
+						name:
+							item.name ||
+							item.code ||
+							item[propDef.type].name ||
+							item[propDef.type].code,
+						...item,
+				  }))
+				: [];
+		}
+		return value
+			? {
+					code: value.code || value[propDef.type].code,
+					name:
+						value.name ||
+						value.code ||
+						value[propDef.type].name ||
+						value[propDef.type].code,
+					...value,
+			  }
+			: null;
 	},
 };
