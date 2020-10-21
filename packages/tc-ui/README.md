@@ -117,11 +117,16 @@ tc-ui provides 6 of these by default, but the user may provide more that impleme
 -   LargeText
 -   Number
 -   Relationship
+-   RichRelationship (i.e. a relationship which has annotations on the edge)
 -   Temporal
 -   Enum
 -   MultipleChoice
 
 See tc-schema-sdk/data-accessors/primitive-types.js to see which components are used for rendering which default primitive data types
+
+The 'CMS' pages do not make use of `Relationship` at present - all relationships use `RichRelationship`. This is in order to simplify the CMS code. The `Relationship` primitives are provided with an eye to two things
+- making wider use of them to render views in the wider Biz Ops ecosystem _without_ having to always use `_rel` properties in GraphQL
+- adding the ability to render `@cypher` driven properties in the CMS views at some point
 
 Each primitive component constitutes of one or more of the following:
 
@@ -146,6 +151,10 @@ The React component for rendering an editable view of the data.
 #### hasValue(value)
 
 Function for determnining if a property contains a real value. Defaults to whether the property's value is 'truthy' but e.g. for Boolean properties, this is not an adequate check
+
+#### prepareValueForEdit(value)
+
+Function which applies any transforms necessary to convert a value retrieved from GraphQL into data the edit component can use. This can be as simple as making sure null is rendered as an empty string, or as complex as manipulating the structure of relationship data.
 
 #### parser({value, hasMany})
 
