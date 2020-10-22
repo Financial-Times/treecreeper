@@ -37,7 +37,7 @@ const componentAssigner = ({
 			return hasMany ? components.MultipleChoice : components.Enum;
 		}
 		if (objectTypes.includes(type)) {
-			return components.RichRelationship;
+			return components.Relationship;
 		}
 	}
 

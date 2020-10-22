@@ -5,7 +5,7 @@ const MultipleChoice = require('./multiple-choice/server');
 const Number = require('./number/server');
 const LargeText = require('./large-text/server');
 const Relationship = require('./relationship/server');
-const RichRelationship = require('./rich-relationship/server');
+const SimpleRelationship = require('./simple-relationship/server');
 const Temporal = require('./temporal/server');
 
 const addDefaults = obj => ({
@@ -24,6 +24,6 @@ module.exports = {
 	LargeText: addDefaults(LargeText),
 	Temporal: addDefaults(Temporal),
 	Relationship: addDefaults(Relationship),
-	RichRelationship: addDefaults(RichRelationship),
+	SimpleRelationship: addDefaults(SimpleRelationship),
 	MultipleChoice: addDefaults(MultipleChoice),
 };
