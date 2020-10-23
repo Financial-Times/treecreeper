@@ -27,15 +27,13 @@ class RelationshipProperties extends React.Component {
 			.filter(([, { deprecationReason }]) => !deprecationReason)
 			.map(([name, item], index) => {
 				const assignComponent = componentAssigner();
-				const { EditComponent, prepareValueForEdit } = assignComponent(
-					item,
-				);
+				const { EditComponent } = assignComponent(item);
 
 				const viewModel = {
 					isNested: true,
 					parentCode: value.code,
 					propertyName: name,
-					value: prepareValueForEdit(value[name], item),
+					value: value[name],
 					onChange,
 					parentType: type,
 					options: getEnums()[item.type]

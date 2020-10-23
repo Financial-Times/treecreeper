@@ -22,11 +22,9 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			if (fieldNamesToLock.includes(propertyName)) {
 				lockedBy = fieldsToLock[propertyName];
 			}
-			const {
-				EditComponent,
-				AdditionalEditComponent,
-				prepareValueForEdit,
-			} = assignComponent(propDef);
+			const { EditComponent, AdditionalEditComponent } = assignComponent(
+				propDef,
+			);
 
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]
@@ -36,7 +34,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				hasError,
 				parentCode: data.code,
 				propertyName,
-				value: prepareValueForEdit(itemValue, propDef),
+				value: itemValue,
 				parentType: type,
 				...propDef,
 				lockedBy: propDef.lockedBy || lockedBy,

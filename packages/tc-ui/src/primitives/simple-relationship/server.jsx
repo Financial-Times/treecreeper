@@ -35,6 +35,7 @@ module.exports = {
 			Component={RelationshipPickerContainer}
 			componentType="simple-relationship"
 			{...props}
+			value={props.value || null}
 		/>
 	),
 	parser: value => {
@@ -71,5 +72,4 @@ module.exports = {
 			' ',
 		)}}`;
 	},
-	prepareValueForEdit: value => value || null,
 };

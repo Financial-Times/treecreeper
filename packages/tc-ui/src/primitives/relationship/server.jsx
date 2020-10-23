@@ -20,6 +20,33 @@ const {
 	setRelationshipAnnotator,
 } = require('./lib/view-relationship');
 
+const prepareValueForEdit = ({ value, hasMany, type }) => {
+	if (hasMany) {
+		return value
+			? sortBy(value, `${type}.code`).map(item => ({
+					code: item.code || item[type].code,
+					name:
+						item.name ||
+						item.code ||
+						item[type].name ||
+						item[type].code,
+					...item,
+			  }))
+			: [];
+	}
+	return value
+		? {
+				code: value.code || value[type].code,
+				name:
+					value.name ||
+					value.code ||
+					value[type].name ||
+					value[type].code,
+				...value,
+		  }
+		: null;
+};
+
 module.exports = {
 	name: 'Relationship',
 	ViewComponent: ViewRelationship,
@@ -28,6 +55,7 @@ module.exports = {
 			Component={RelationshipPickerContainer}
 			componentType="relationship"
 			{...props}
+			value={prepareValueForEdit(props)}
 		/>
 	),
 	parser: (relValues, relProperties, assignComponent) => {
@@ -93,31 +121,5 @@ module.exports = {
 			' ',
 		);
 		return `${propName}_rel {${type} {${nodeProps}} ${relationshipProps}}`;
-	},
-	prepareValueForEdit: (value, propDef) => {
-		if (propDef.hasMany) {
-			return value
-				? sortBy(value, `${propDef.type}.code`).map(item => ({
-						code: item.code || item[propDef.type].code,
-						name:
-							item.name ||
-							item.code ||
-							item[propDef.type].name ||
-							item[propDef.type].code,
-						...item,
-				  }))
-				: [];
-		}
-		return value
-			? {
-					code: value.code || value[propDef.type].code,
-					name:
-						value.name ||
-						value.code ||
-						value[propDef.type].name ||
-						value[propDef.type].code,
-					...value,
-			  }
-			: null;
 	},
 };
