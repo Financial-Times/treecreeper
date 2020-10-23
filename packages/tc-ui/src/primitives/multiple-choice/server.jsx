@@ -87,7 +87,6 @@ const Checkbox = ({
 const EditMultipleChoice = props => {
 	const {
 		propertyName,
-		value,
 		disabled,
 		isNested,
 		parentCode,
@@ -96,6 +95,7 @@ const EditMultipleChoice = props => {
 	} = props;
 	const name = !isNested ? propertyName : '';
 	const options = Object.keys(getEnums()[type]);
+	const value = props.value ? props.value.sort() : [];
 	return (
 		<span className="o-forms-input o-forms-input--checkbox o-forms-input--inline">
 			{options.map((option, index) => (
@@ -147,5 +147,4 @@ module.exports = {
 			{...props}
 		/>
 	),
-	prepareValueForEdit: value => (value ? value.sort() : []),
 };

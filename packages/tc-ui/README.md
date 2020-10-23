@@ -153,10 +153,6 @@ The React component for rendering an editable view of the data.
 
 Function for determnining if a property contains a real value. Defaults to whether the property's value is 'truthy' but e.g. for Boolean properties, this is not an adequate check
 
-#### prepareValueForEdit(value)
-
-Function which applies any transforms necessary to convert a value retrieved from GraphQL into data the edit component can use. This can be as simple as making sure null is rendered as an empty string, or as complex as manipulating the structure of relationship data.
-
 #### parser({value, hasMany})
 
 Function for converting the value retrieved from the form POST data into a value to be sent to the treecreeper API. Defaults to a noop, but some components require that the data be preprocessed

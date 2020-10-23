@@ -12,7 +12,6 @@ const addDefaults = obj => ({
 	hasValue: value => !!value,
 	parser: value => (value === 'null' ? null : value),
 	graphqlFragment: propName => propName,
-	prepareValueForEdit: value => value || null,
 	...obj,
 });
 

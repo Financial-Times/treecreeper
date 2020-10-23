@@ -52,13 +52,13 @@ const Checkbox = ({
 const EditBoolean = props => {
 	const {
 		propertyName,
-		value,
 		disabled,
 		isNested,
 		parentType,
 		parentCode,
 		onChange,
 	} = props;
+	const value = typeof props.value === 'boolean' ? props.value : '';
 	return (
 		<span className="o-forms-input o-forms-input--radio-round o-forms-input--inline">
 			<Checkbox
@@ -108,5 +108,4 @@ module.exports = {
 		return value === undefined ? undefined : String(value) === 'true';
 	},
 	hasValue: value => typeof value === 'boolean',
-	prepareValueForEdit: value => (typeof value === 'boolean' ? value : ''),
 };
