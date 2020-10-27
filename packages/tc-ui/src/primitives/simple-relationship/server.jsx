@@ -5,6 +5,7 @@ const { RelationshipPicker } = require('../relationship-picker');
 const { SelectedRelationship } = require('./lib/selected-relationship');
 
 const RelationshipPickerContainer = props => (
+	// Note the extra div is there to playa role in flexbox-based styling
 	<div>
 		<RelationshipPicker
 			{...props}

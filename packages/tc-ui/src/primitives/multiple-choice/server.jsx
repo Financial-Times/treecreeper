@@ -95,7 +95,7 @@ const EditMultipleChoice = props => {
 	} = props;
 	const name = !isNested ? propertyName : '';
 	const options = Object.keys(getEnums()[type]);
-	const value = props.value ? props.value.sort() : [];
+	const value = props.value || [];
 	return (
 		<span className="o-forms-input o-forms-input--checkbox o-forms-input--inline">
 			{options.map((option, index) => (
