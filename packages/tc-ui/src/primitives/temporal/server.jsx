@@ -25,12 +25,12 @@ const convertValueForHTMLInput = (wrappedValue, type) => {
 	// this block is to handle the case where the form errors and we have
 	// to accept and rerender the value (an ISO string) that was due to be sent
 	// to the server
-	if (typeof wrappedValue === 'string') {
-		wrappedValue = {formatted: wrappedValue}
+	if (typeof wrappedValue === 'string' && wrappedValue.length > 0) {
+		wrappedValue = { formatted: wrappedValue };
 	}
- 	if (!(wrappedValue && wrappedValue.formatted)) {
-		return null
-	};
+	if (!(wrappedValue && wrappedValue.formatted)) {
+		return null;
+	}
 	const value = wrappedValue.formatted;
 
 	// HACK - we have never properly thought about what to do with timezones
