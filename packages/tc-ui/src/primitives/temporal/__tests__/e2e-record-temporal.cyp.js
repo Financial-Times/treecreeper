@@ -37,6 +37,8 @@ describe('End-to-end - record Temporal type', () => {
 		save();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someTime').should('have.text', '12:15:30 PM');
+		visitEditPage();
+		cy.get('input[name=someTime]').should('have.value', '12:15:30')
 	});
 
 	it('can record date', () => {
@@ -58,6 +60,8 @@ describe('End-to-end - record Temporal type', () => {
 		save();
 		cy.get('#code').should('have.text', code);
 		cy.get('#someDate').should('have.text', '15 January 2020');
+		visitEditPage();
+		cy.get('input[name=someDate]').should('have.value', '2020-01-15')
 	});
 
 	it('can record date-time', () => {
@@ -88,5 +92,7 @@ describe('End-to-end - record Temporal type', () => {
 			'have.text',
 			'15 January 2020, 1:00:00 PM',
 		);
+		visitEditPage();
+		cy.get('input[name=someDatetime]').should('have.value', '2020-01-15T13:00:00.000')
 	});
 });
