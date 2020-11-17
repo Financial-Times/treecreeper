@@ -1,7 +1,7 @@
 name: MainType
 description: Description of MainType.
 moreInformation: |
-    More information for MainType
+  More information for MainType
 properties:
   code:
     type: Code
@@ -149,5 +149,5 @@ properties:
     label: Cypher haha
     description: Cypher hahahahaha.
     type: ChildType
-    cypher: "MATCH (this)-[:HAS_CHILD]->(c) RETURN c"
+    cypher: 'MATCH (this)-[:HAS_CHILD]->(c) RETURN c'
     hasMany: true

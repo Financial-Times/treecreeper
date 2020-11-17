@@ -13,11 +13,7 @@ const parser = getParser({
 
 // The weird string concatenation in the markdown fixture is so that
 // dev tooling doesn't tidy up the 'extraneous' whitespace
-const addLineBreaks = str =>
-	str
-		.replace(/\t+/g, '\t')
-		.split('\n')
-		.join('  \n');
+const addLineBreaks = str => str.replace(/\t+/g, '\t').split('\n').join('  \n');
 
 describe('nested property definition tests', () => {
 	describe('single relationship case - hasMany: false', () => {
@@ -137,7 +133,7 @@ describe('nested property definition tests', () => {
 
 	describe('integer type conversion', () => {
 		const expects = {
-			'10.5': 10,
+			10.5: 10,
 			'-1': -1,
 			'1e7': 10000000,
 		};
@@ -287,7 +283,7 @@ describe('nested property definition tests', () => {
 
 	describe('float type conversion', () => {
 		const expects = {
-			'0.00001': 0.00001,
+			0.00001: 0.00001,
 			'-1.05': -1.05,
 		};
 		Object.entries(expects).forEach(([float, actual]) => {

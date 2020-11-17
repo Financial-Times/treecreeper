@@ -1,7 +1,7 @@
 name: ParentType
 description: Description of ParentType.
 moreInformation: |
-    More information for ParentType
+  More information for ParentType
 properties:
   code:
     type: Code

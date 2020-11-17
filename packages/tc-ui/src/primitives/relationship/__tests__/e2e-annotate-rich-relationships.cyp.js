@@ -84,9 +84,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.children()
-					.should('have.length', 7);
+				cy.wrap(parent).children().should('have.length', 7);
 				// someString,anotherString,someInteger,someEnum,
 				// someMultipleChoice,someBoolean,someFloat = 7
 			},
@@ -96,9 +94,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.children()
-					.should('have.length', 2);
+				cy.wrap(parent).children().should('have.length', 2);
 				// someString,anotherString
 			},
 		);
@@ -185,18 +181,10 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.find('#id-someString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someInteger')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someEnum')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someString').should('be.visible');
+				cy.wrap(parent).find('#id-anotherString').should('be.visible');
+				cy.wrap(parent).find('#id-someInteger').should('be.visible');
+				cy.wrap(parent).find('#id-someEnum').should('be.visible');
 				cy.wrap(parent)
 					.find('#checkbox-someMultipleChoice-First')
 					.should('be.visible');
@@ -212,9 +200,7 @@ describe('End-to-end - annotate rich relationship properties', () => {
 				cy.wrap(parent)
 					.find('#radio-someBoolean-No')
 					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someFloat')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someFloat').should('be.visible');
 			},
 		);
 
@@ -228,12 +214,8 @@ describe('End-to-end - annotate rich relationship properties', () => {
 
 		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.find('#id-someString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someString').should('be.visible');
+				cy.wrap(parent).find('#id-anotherString').should('be.visible');
 			},
 		);
 	});
@@ -267,21 +249,15 @@ describe('End-to-end - annotate rich relationship properties', () => {
 				cy.wrap(parent)
 					.find('#someInteger')
 					.should('have.text', '2023');
-				cy.wrap(parent)
-					.find('#someEnum')
-					.should('have.text', someEnum);
+				cy.wrap(parent).find('#someEnum').should('have.text', someEnum);
 				cy.wrap(parent)
 					.find('#someMultipleChoice span:first-of-type')
 					.should('have.text', 'First');
 				cy.wrap(parent)
 					.find('#someMultipleChoice span:last-of-type')
 					.should('have.text', 'Third');
-				cy.wrap(parent)
-					.find('#someBoolean')
-					.should('have.text', 'Yes');
-				cy.wrap(parent)
-					.find('#someFloat')
-					.should('have.text', '20.23');
+				cy.wrap(parent).find('#someBoolean').should('have.text', 'Yes');
+				cy.wrap(parent).find('#someFloat').should('have.text', '20.23');
 			});
 	});
 	it('can save annotations for one-to-many relationship', () => {

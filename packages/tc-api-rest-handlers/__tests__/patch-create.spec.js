@@ -61,9 +61,7 @@ describe('rest PATCH create', () => {
 
 			expect(status).toBe(201);
 			expect(body).toMatchObject(meta.create);
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match(meta.create);
+			await neo4jTest('MainType', mainCode).exists().match(meta.create);
 		});
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({
@@ -149,12 +147,10 @@ describe('rest PATCH create', () => {
 				code: mainCode,
 				someDate: date,
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					code: mainCode,
-					someDate: date,
-				});
+			await neo4jTest('MainType', mainCode).exists().match({
+				code: mainCode,
+				someDate: date,
+			});
 		});
 
 		const neo4jTimePrecision = timestamp =>

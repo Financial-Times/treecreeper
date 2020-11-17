@@ -109,12 +109,8 @@ describe('End-to-end - display relationship properties', () => {
 				cy.wrap(list)
 					.find('#someString')
 					.should('have.text', 'lorem ipsum');
-				cy.wrap(list)
-					.find('#someEnum')
-					.should('have.text', 'First');
-				cy.wrap(list)
-					.find('#someBoolean')
-					.should('have.text', 'Yes');
+				cy.wrap(list).find('#someEnum').should('have.text', 'First');
+				cy.wrap(list).find('#someBoolean').should('have.text', 'Yes');
 			});
 	});
 
@@ -147,12 +143,8 @@ describe('End-to-end - display relationship properties', () => {
 			.should('have.text', `${code}-parent-two`)
 			.should('have.attr', 'href', `/ParentType/${code}-parent-two`);
 		cy.get(`${secondCuriousParentSelector}`).then(parent => {
-			cy.wrap(parent)
-				.find('#someString')
-				.should('not.exist');
-			cy.wrap(parent)
-				.find('#anotherString')
-				.should('not.exist');
+			cy.wrap(parent).find('#someString').should('not.exist');
+			cy.wrap(parent).find('#anotherString').should('not.exist');
 		});
 	});
 

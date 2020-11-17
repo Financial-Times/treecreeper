@@ -30,9 +30,7 @@ describe('End-to-end - delete record', () => {
 		cy.get('[data-button-type="delete"]').click();
 
 		cy.window().then(win => {
-			cy.wrap(win)
-				.its('confirm')
-				.should('called', 1);
+			cy.wrap(win).its('confirm').should('called', 1);
 			cy.wrap(win)
 				.its('confirm.args.0')
 				.should('deep.eq', [deleteConfirmText]);

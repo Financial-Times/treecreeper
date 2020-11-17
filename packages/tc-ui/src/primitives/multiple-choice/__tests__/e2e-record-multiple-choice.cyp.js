@@ -33,9 +33,7 @@ describe('End-to-end - record multiple choice value', () => {
 			'have.text',
 			'First',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 1);
+		cy.get('#someMultipleChoice').children().should('have.length', 1);
 	});
 
 	it('can record multiple choices', () => {
@@ -62,9 +60,7 @@ describe('End-to-end - record multiple choice value', () => {
 			'have.text',
 			'Third',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 2);
+		cy.get('#someMultipleChoice').children().should('have.length', 2);
 	});
 
 	it('can record all choices', () => {
@@ -100,9 +96,7 @@ describe('End-to-end - record multiple choice value', () => {
 			'have.text',
 			'Third',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 3);
+		cy.get('#someMultipleChoice').children().should('have.length', 3);
 	});
 
 	it('can deselect a choice', () => {
@@ -124,9 +118,7 @@ describe('End-to-end - record multiple choice value', () => {
 			'have.text',
 			'First',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 1);
+		cy.get('#someMultipleChoice').children().should('have.length', 1);
 
 		visitEditPage();
 		cy.get('#checkbox-someMultipleChoice-First').uncheck({ force: true });
@@ -167,9 +159,7 @@ describe('End-to-end - record multiple choice value', () => {
 			'have.text',
 			'Third',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 3);
+		cy.get('#someMultipleChoice').children().should('have.length', 3);
 
 		visitEditPage();
 		cy.get('#checkbox-someMultipleChoice-First').uncheck({ force: true });

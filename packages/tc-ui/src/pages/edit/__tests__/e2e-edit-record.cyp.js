@@ -81,17 +81,13 @@ describe('End-to-end - edit record', () => {
 		cy.get('#code').should('have.text', code);
 
 		visitEditPage();
-		cy.get('[type="radio"]')
-			.first()
-			.check({ force: true });
+		cy.get('[type="radio"]').first().check({ force: true });
 		save();
 		cy.url().should('contain', `/MainType/${code}`);
 		cy.get('#someBoolean').should('have.text', 'Yes');
 
 		visitEditPage();
-		cy.get('[type="radio"]')
-			.eq(1)
-			.check({ force: true });
+		cy.get('[type="radio"]').eq(1).check({ force: true });
 		save();
 
 		cy.url().should('contain', `/MainType/${code}`);
@@ -137,9 +133,7 @@ describe('End-to-end - edit record', () => {
 			'have.text',
 			'Third',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 2);
+		cy.get('#someMultipleChoice').children().should('have.length', 2);
 
 		visitEditPage();
 		cy.get('#checkbox-someMultipleChoice-Third').uncheck({ force: true });
@@ -156,9 +150,7 @@ describe('End-to-end - edit record', () => {
 			'have.text',
 			'Second',
 		);
-		cy.get('#someMultipleChoice')
-			.children()
-			.should('have.length', 2);
+		cy.get('#someMultipleChoice').children().should('have.length', 2);
 	});
 
 	it('can edit date type fields', () => {

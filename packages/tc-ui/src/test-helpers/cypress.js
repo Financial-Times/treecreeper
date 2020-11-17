@@ -106,9 +106,7 @@ const populateMainTypeFields = () => {
 	cy.get('input[name=someString]').type(someString);
 	cy.get('textarea[name=someDocument]').type(someDocument);
 	cy.get('textarea[name=anotherDocument]').type(anotherDocument);
-	cy.get('[type="radio"]')
-		.first()
-		.check({ force: true });
+	cy.get('[type="radio"]').first().check({ force: true });
 	cy.get('select[name=someEnum]').select(someEnum);
 	cy.get('#checkbox-someMultipleChoice-First').check({ force: true });
 	cy.get('#checkbox-someMultipleChoice-Third').check({ force: true });
@@ -406,18 +404,10 @@ const createMainTypeRecordWithChildren = async (
 
 const populateCuriousChildRelationshipFields = () => {
 	cy.get('#ul-curiousChild').then(curiousChild => {
-		cy.wrap(curiousChild)
-			.find('#id-someString')
-			.type(someString);
-		cy.wrap(curiousChild)
-			.find('#id-anotherString')
-			.type(anotherString);
-		cy.wrap(curiousChild)
-			.find('#id-someInteger')
-			.type(2023);
-		cy.wrap(curiousChild)
-			.find('#id-someEnum')
-			.select(someEnum);
+		cy.wrap(curiousChild).find('#id-someString').type(someString);
+		cy.wrap(curiousChild).find('#id-anotherString').type(anotherString);
+		cy.wrap(curiousChild).find('#id-someInteger').type(2023);
+		cy.wrap(curiousChild).find('#id-someEnum').select(someEnum);
 		cy.wrap(curiousChild)
 			.find('#checkbox-someMultipleChoice-First')
 			.check({ force: true });
@@ -427,28 +417,18 @@ const populateCuriousChildRelationshipFields = () => {
 		cy.wrap(curiousChild)
 			.find('#radio-someBoolean-Yes')
 			.check({ force: true });
-		cy.wrap(curiousChild)
-			.find('#id-someFloat')
-			.type(20.23);
+		cy.wrap(curiousChild).find('#id-someFloat').type(20.23);
 	});
 };
 
 const populateCuriousParent1RelationshipFields = parent => {
-	cy.wrap(parent)
-		.find('#id-someString')
-		.type(someString);
-	cy.wrap(parent)
-		.find('#id-anotherString')
-		.type(anotherString);
+	cy.wrap(parent).find('#id-someString').type(someString);
+	cy.wrap(parent).find('#id-anotherString').type(anotherString);
 };
 
 const populateCuriousParent2RelationshipFields = parent => {
-	cy.wrap(parent)
-		.find('#id-someString')
-		.type('Parent two someString');
-	cy.wrap(parent)
-		.find('#id-anotherString')
-		.type('Parent two anotherString');
+	cy.wrap(parent).find('#id-someString').type('Parent two someString');
+	cy.wrap(parent).find('#id-anotherString').type('Parent two anotherString');
 };
 
 const setLockedRecord = codeLabel => {
