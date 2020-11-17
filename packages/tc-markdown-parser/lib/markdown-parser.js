@@ -12,7 +12,7 @@ const stringifyBoast = require('./unist-stringifiers/stringify-boast');
 const setNestedMultilineProperties = require('./tree-mutators/set-nested-multiline-properties');
 
 /* @param schema: Treecreeper schema singleton */
-const unifiedProcessor = function({
+const unifiedProcessor = function ({
 	type,
 	titleFieldName = 'name',
 	descriptionFieldName = 'description',
@@ -78,11 +78,11 @@ const getParser = ({
 		blacklistPropertyNames,
 	});
 
-	markdownParser.createStream = async function() {
+	markdownParser.createStream = async function () {
 		return createStream(await this());
 	};
 
-	markdownParser.parseMarkdownString = async function(markdownString) {
+	markdownParser.parseMarkdownString = async function (markdownString) {
 		const processor = await this();
 		const vfile = await processor.process(markdownString);
 		try {

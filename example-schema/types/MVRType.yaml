@@ -1,11 +1,11 @@
 name: MVRType
 description: Description of MVRType.
 moreInformation: |
-    More information for MVRType
+  More information for MVRType
 minimumViableRecord:
-    - code
-    - children
-    - someString
+  - code
+  - children
+  - someString
 properties:
   code:
     type: Code
@@ -26,4 +26,3 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
-

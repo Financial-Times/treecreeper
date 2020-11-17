@@ -1,7 +1,7 @@
 const invertDirection = direction =>
 	direction === 'incoming' ? 'outgoing' : 'incoming';
 
-const findPropertyNamesFromPropertyDef = function({
+const findPropertyNamesFromPropertyDef = function ({
 	rootType,
 	direction,
 	relationship,
@@ -18,7 +18,7 @@ const findPropertyNamesFromPropertyDef = function({
 		.sort();
 };
 
-const findInversePropertyNames = function(rootType, propName) {
+const findInversePropertyNames = function (rootType, propName) {
 	const { type, relationship, direction } = this.getType(rootType).properties[
 		propName
 	];
@@ -30,7 +30,7 @@ const findInversePropertyNames = function(rootType, propName) {
 	});
 };
 
-const findPropertyNames = function(rootType, propName) {
+const findPropertyNames = function (rootType, propName) {
 	const { type, relationship, direction } = this.getType(rootType).properties[
 		propName
 	];

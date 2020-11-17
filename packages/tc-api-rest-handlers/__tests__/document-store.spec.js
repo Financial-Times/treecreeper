@@ -530,9 +530,7 @@ describe('rest document store integration', () => {
 				children: expect.any(Array),
 			});
 
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.hasRels(0);
+			await neo4jTest('MainType', mainCode).exists().hasRels(0);
 		});
 	});
 });

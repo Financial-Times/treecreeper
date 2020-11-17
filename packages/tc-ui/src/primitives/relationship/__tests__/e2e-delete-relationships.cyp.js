@@ -156,9 +156,7 @@ describe('End-to-end - relationship deletion', () => {
 		save();
 
 		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#children')
-			.children()
-			.should('have.length', 2);
+		cy.get('#children').children().should('have.length', 2);
 		cy.get('#children>li').then(children => {
 			cy.wrap(children)
 				.eq(0)
@@ -190,9 +188,7 @@ describe('End-to-end - relationship deletion', () => {
 			.should('have.text', `${code}-first-child`)
 			.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 
-		cy.get('#children')
-			.children()
-			.should('have.length', 1);
+		cy.get('#children').children().should('have.length', 1);
 
 		visitEditPage();
 		// remove remaining child

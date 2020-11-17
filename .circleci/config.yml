@@ -4,7 +4,6 @@ orbs:
   ft-snyk-orb: financial-times/ft-snyk-orb@0
 
 references:
-
   default_container_config: &default_container_config
     docker:
       # need -browsers as it bundles selenium, which bundles java, which we need
@@ -15,13 +14,11 @@ references:
           TERM: xterm
 
     environment:
-      NEO4J_VERSION: "3.5.0"
+      NEO4J_VERSION: '3.5.0'
 
-  workspace_root: &workspace_root
-    ~/
+  workspace_root: &workspace_root ~/
 
-  cache_key: &cache_key
-    cache-v5-{{ .Branch }}-{{ checksum "./package.json" }}
+  cache_key: &cache_key cache-v5-{{ .Branch }}-{{ checksum "./package.json" }}
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -105,7 +102,7 @@ jobs:
           name: Run tests
           command: make init-db test
           environment:
-            JEST_JUNIT_OUTPUT: "junit/test-results.xml"
+            JEST_JUNIT_OUTPUT: 'junit/test-results.xml'
       - store_test_results:
           path: junit
 

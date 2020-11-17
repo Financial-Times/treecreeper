@@ -1,7 +1,7 @@
 name: ChildType
 description: Description of ChildType.
 moreInformation: |
-    More information for ChildType
+  More information for ChildType
 properties:
   code:
     type: Code

@@ -65,9 +65,7 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match(meta.create);
+			await neo4jTest('MainType', mainCode).exists().match(meta.create);
 		});
 
 		it('sets array data', async () => {
@@ -115,12 +113,10 @@ describe('rest POST', () => {
 				code: mainCode,
 				someDate: date,
 			});
-			await neo4jTest('MainType', mainCode)
-				.exists()
-				.match({
-					code: mainCode,
-					someDate: date,
-				});
+			await neo4jTest('MainType', mainCode).exists().match({
+				code: mainCode,
+				someDate: date,
+			});
 		});
 		const neo4jTimePrecision = timestamp =>
 			timestamp.replace('Z', '000000Z');

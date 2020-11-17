@@ -74,21 +74,11 @@ describe('End-to-end - edit relationship properties', () => {
 
 		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.find('#id-someString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someInteger')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someEnum')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someString').should('be.visible');
+				cy.wrap(parent).find('#id-anotherString').should('be.visible');
+				cy.wrap(parent).find('#id-someString').should('be.visible');
+				cy.wrap(parent).find('#id-someInteger').should('be.visible');
+				cy.wrap(parent).find('#id-someEnum').should('be.visible');
 				cy.wrap(parent)
 					.find('#checkbox-someMultipleChoice-First')
 					.should('be.visible');
@@ -104,9 +94,7 @@ describe('End-to-end - edit relationship properties', () => {
 				cy.wrap(parent)
 					.find('#radio-someBoolean-No')
 					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-someFloat')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someFloat').should('be.visible');
 			},
 		);
 
@@ -120,12 +108,8 @@ describe('End-to-end - edit relationship properties', () => {
 
 		cy.get('#ul-curiousParent .treecreeper-relationship-annotate').then(
 			parent => {
-				cy.wrap(parent)
-					.find('#id-someString')
-					.should('be.visible');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.should('be.visible');
+				cy.wrap(parent).find('#id-someString').should('be.visible');
+				cy.wrap(parent).find('#id-anotherString').should('be.visible');
 			},
 		);
 	});
@@ -176,19 +160,10 @@ describe('End-to-end - edit relationship properties', () => {
 					.find('#id-someFloat')
 					.should('have.value', '12.53');
 
-				cy.wrap(parent)
-					.find('#id-someString')
-					.type(' edited');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.type(' edited');
-				cy.wrap(parent)
-					.find('#id-someInteger')
-					.clear()
-					.type(2023);
-				cy.wrap(parent)
-					.find('#id-someEnum')
-					.select('Third');
+				cy.wrap(parent).find('#id-someString').type(' edited');
+				cy.wrap(parent).find('#id-anotherString').type(' edited');
+				cy.wrap(parent).find('#id-someInteger').clear().type(2023);
+				cy.wrap(parent).find('#id-someEnum').select('Third');
 
 				cy.wrap(parent)
 					.find('#checkbox-someMultipleChoice-First')
@@ -205,10 +180,7 @@ describe('End-to-end - edit relationship properties', () => {
 				cy.wrap(parent)
 					.find('#radio-someBoolean-No')
 					.check({ force: true });
-				cy.wrap(parent)
-					.find('#id-someFloat')
-					.clear()
-					.type(20.23);
+				cy.wrap(parent).find('#id-someFloat').clear().type(20.23);
 			},
 		);
 		save();
@@ -230,18 +202,12 @@ describe('End-to-end - edit relationship properties', () => {
 				cy.wrap(parent)
 					.find('#someInteger')
 					.should('have.text', '2023');
-				cy.wrap(parent)
-					.find('#someEnum')
-					.should('have.text', 'Third');
+				cy.wrap(parent).find('#someEnum').should('have.text', 'Third');
 				cy.wrap(parent)
 					.find('#someMultipleChoice span:first-of-type')
 					.should('have.text', 'Second');
-				cy.wrap(parent)
-					.find('#someBoolean')
-					.should('have.text', 'No');
-				cy.wrap(parent)
-					.find('#someFloat')
-					.should('have.text', '20.23');
+				cy.wrap(parent).find('#someBoolean').should('have.text', 'No');
+				cy.wrap(parent).find('#someFloat').should('have.text', '20.23');
 			});
 	});
 
@@ -396,20 +362,14 @@ describe('End-to-end - edit relationship properties', () => {
 					.should('have.value', '12.53');
 
 				// edit
-				cy.wrap(parent)
-					.find('#id-someString')
-					.type(' edited');
-				cy.wrap(parent)
-					.find('#id-anotherString')
-					.type(' edited');
+				cy.wrap(parent).find('#id-someString').type(' edited');
+				cy.wrap(parent).find('#id-anotherString').type(' edited');
 				cy.wrap(parent)
 					.find('#id-someInteger')
 					.clear()
 					// this will make the form submission error as the value is not a finite integer
 					.type(20.23);
-				cy.wrap(parent)
-					.find('#id-someEnum')
-					.select('Third');
+				cy.wrap(parent).find('#id-someEnum').select('Third');
 				cy.wrap(parent)
 					.find('#checkbox-someMultipleChoice-First')
 					.uncheck({ force: true });

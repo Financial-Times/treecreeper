@@ -112,7 +112,7 @@ const findCardinality = (direction, relationshipType) =>
 		? relationshipType.to.hasMany
 		: relationshipType.from.hasMany;
 
-const createPropertiesWithRelationships = function({
+const createPropertiesWithRelationships = function ({
 	richRelationshipTypes,
 	properties,
 	relationshipGetter,
@@ -195,7 +195,7 @@ const cacheKeyGenerator = (
 ) =>
 	`types:${typeName}:${withRelationships}:${groupProperties}:${includeMetaFields}:${includeSyntheticFields}:${useMinimumViableRecord}`;
 
-const getType = function(
+const getType = function (
 	typeName,
 	{
 		withRelationships = true,

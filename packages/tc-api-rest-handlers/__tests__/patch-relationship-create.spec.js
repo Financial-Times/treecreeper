@@ -1141,9 +1141,7 @@ describe('rest PATCH relationship create', () => {
 					'Invalid property `notInSchema` on type `CuriousChild`.',
 			});
 
-			await neo4jTest('MainType', mainCode)
-				.match(meta.default)
-				.noRels();
+			await neo4jTest('MainType', mainCode).match(meta.default).noRels();
 		});
 
 		it('create node related to nodes with strange codes', async () => {
