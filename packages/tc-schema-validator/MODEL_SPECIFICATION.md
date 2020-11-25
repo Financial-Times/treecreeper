@@ -123,9 +123,9 @@ For relationships that have the same type at both ends, it's important not to re
 Fieldsets group properties with other properties that are related to them e.g. all the properties defining relationships between systems might be grouped in a `relatedSystems` fieldset. This structure is not used in the underlying data store, but is rather applied at a later stage by anything using the data. Fieldsets are defined using ibjects with the following properties
 
 | name        | required | default details | examples                                                     |
-| ----------- | -------- | --------------- | ------------------------------------------------------------ |
-| heading     | yes      |                 | The text to use as a heading for the group of properties     |  |
-| description | no       |                 | The text to use as a description for the group of properties |  |
+| ----------- | -------- | --------------- | ------------------------------------------------------------ | --- |
+| heading     | yes      |                 | The text to use as a heading for the group of properties     |     |
+| description | no       |                 | The text to use as a description for the group of properties |     |
 
 ### Example type file
 
