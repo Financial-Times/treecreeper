@@ -6,7 +6,6 @@
   "main": "index.js",
   "dependencies": {
     "@financial-times/lambda-logger": "^2.0.4",
-    "@financial-times/secret-squirrel": "^2.16.0-beta.1",
     "@financial-times/tc-api-db-manager": "file:./packages/tc-api-db-manager",
     "@financial-times/tc-api-rest-handlers": "file:./packages/tc-api-rest-handlers",
     "@financial-times/tc-schema-publisher": "file:./packages/tc-schema-publisher",
