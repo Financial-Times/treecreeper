@@ -1,6 +1,5 @@
 const stripIndent = require('common-tags/lib/stripIndent');
 const uniqBy = require('lodash.uniqby');
-const { SchemaComposer } = require('graphql-compose')
 
 const stripEmptyFirstLine = (hardCoded, ...vars) => {
 	hardCoded = [...hardCoded];
@@ -184,7 +183,6 @@ const STATIC_DEFINITIONS = stripIndent`
 class GraphqlDefGenerator {
 	constructor(sdk) {
 		this.sdk = sdk;
-		this.composer = new SchemaComposer();
 		this.printTypeDefinition = this.printTypeDefinition.bind(this);
 		this.printRichRelationshipPropertyDefinitions = this.printRichRelationshipPropertyDefinitions.bind(
 			this,
@@ -195,25 +193,6 @@ class GraphqlDefGenerator {
 		this.printRelationshipTypeDefinition = this.printRelationshipTypeDefinition.bind(
 			this,
 		);
-	}
-
-	composeStaticDefinitions() {
-		this.composer.createScalar('DateTime')
-		this.composer.createScalar('Date')
-		this.composer.createScalar('Time')
-		this.composer.addDirective({
-			name: 'deprecated',
-			locations: ['FIELD_DEFINITION','ENUM_VALUE','ARGUMENT_DEFINITION'],
-			args: [{name: 'reason', deafaultValue: 'No longer supported'}]
-		})
-	}
-
-	compose() {
-		this.composeStaticDefinitions();
-		// this.composeTypeDefinitions();
-		// this.composeRelationshipTypeDefinitions();
-		// this.composeQueryDefinition();
-		// this.composeEnumDefinitions();
 	}
 
 	generate() {

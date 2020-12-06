@@ -154,3 +154,6 @@ prepublish:
 monorepo-publish: prepublish
 	npx athloi version --concurrency 10 $(CIRCLE_TAG)
 	npx athloi publish --concurrency 10 -- --access public
+
+ct:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema node compose-test.js
