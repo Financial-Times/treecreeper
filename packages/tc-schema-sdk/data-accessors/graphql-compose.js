@@ -82,7 +82,10 @@ const addTypeDefinition = (composer, sdk) => ({
 	const typeConverter = getGraphqlType(sdk);
 
 	composer.createObjectTC({ name: typeName, description });
-	composer.Query.setField(typeName, { type: typeName });
+	composer.Query.setField(typeName, {
+		type: typeName,
+		args: getArgs(def)
+	});
 
 	Object.entries(properties).forEach(([fieldName, def]) => {
 		composer.types.get(typeName).setField(fieldName, {
