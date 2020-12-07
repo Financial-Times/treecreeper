@@ -141,9 +141,7 @@ describe('graphql def creation', () => {
 			},
 		};
 
-		const generated = [].concat(
-			...graphqlFromRawData(schema).map(explodeString),
-		);
+		const generated = explodeString(graphqlFromRawData(schema));
 		expect(generated).toEqual(explodeString(expectedGraphqlSchemaString));
 	});
 
@@ -172,7 +170,7 @@ describe('graphql def creation', () => {
 					},
 				},
 			};
-			const generated = [].concat(...graphqlFromRawData(schema)).join('');
+			const generated = graphqlFromRawData(schema);
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop: Boolean @deprecated(reason: "not needed")',
@@ -219,7 +217,7 @@ describe('graphql def creation', () => {
 					},
 				},
 			};
-			const generated = [].concat(...graphqlFromRawData(schema)).join('');
+			const generated = graphqlFromRawData(schema);
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
 				'prop(first: Int, offset: Int): [Fake] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
@@ -255,7 +253,7 @@ describe('graphql def creation', () => {
 					},
 				},
 			};
-			const generated = [].concat(...graphqlFromRawData(schema)).join('');
+			const generated = graphqlFromRawData(schema);
 
 			expect(generated).toMatch(new RegExp(`prop: String`));
 		});
@@ -287,7 +285,7 @@ line with
 					},
 				},
 			};
-			const generated = [].concat(...graphqlFromRawData(schema)).join('');
+			const generated = graphqlFromRawData(schema);
 			expect(generated).toMatch(
 				'prop: Fake @cypher(statement: "Multi\\nline with\\n\\"quotes\\"")',
 			);

@@ -55,7 +55,7 @@ const getAugmentedSchema = ({
 	};
 
 	const resolvers = documentStore ? getDocumentResolvers() : {};
-	const typeDefs = getGraphqlDefs();
+	const typeDefs = [getGraphqlDefs()];
 
 	if (extendedTypeDefs.length) {
 		typeDefs.push(...extendedTypeDefs);

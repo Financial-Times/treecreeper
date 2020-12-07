@@ -235,7 +235,6 @@ const compose = sdk => {
 
 module.exports = {
 	accessor() {
-		// still return an array for backwards compatibility... for now
-		return [compose(this).toSDL()];
+		return compose(this).toSDL();
 	},
 };
