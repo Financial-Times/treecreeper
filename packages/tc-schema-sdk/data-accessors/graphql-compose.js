@@ -1,10 +1,13 @@
-const uniqBy = require('lodash.uniqby');
 const { SchemaComposer } = require('graphql-compose');
 const {
 	GraphQLDirective,
-	GraphQLScalarType,
 	GraphQLString,
 } = require('graphql');
+
+/* utils */
+const getGraphqlType = sdk => type => {
+	return sdk.getPrimitiveTypes()[type] || type;
+};
 
 const composeStaticDefinitions = composer => {
 	composer.addDirective(
@@ -28,8 +31,22 @@ const composeStaticDefinitions = composer => {
 	composer.createScalarTC('Time');
 };
 
-const getGraphqlType = sdk => type => {
-	return sdk.getPrimitiveTypes()[type] || type;
+const composeEnumDefinitions = (composer, sdk) => {
+	Object.entries(sdk.getEnums({ withMeta: true })).map(
+		([name, { description: enumDescription, options }]) => {
+			const values = {};
+			Object.values(options).forEach(
+				({ value, description: valueDescription }) => {
+					values[value] = { description: valueDescription };
+				},
+			);
+			composer.createEnumTC({
+				name,
+				description: enumDescription,
+				values,
+			});
+		},
+	);
 };
 
 const addTypeDefinition = (composer, sdk) => ({
@@ -57,28 +74,10 @@ const addTypeDefinition = (composer, sdk) => ({
 	});
 };
 
-const printEnumOptionDefinition = ({ value, description }) =>
-	description ? printDescribedBlock(description, value) : value;
-
-const addEnumDefinition = composer => ([
-	name,
-	{ description: enumDescription, options },
-]) => {
-	const values = {}
-	Object.values(options).forEach(
-		({ value, description: valueDescription }) => {
-			values[value] = { description: valueDescription };
-		},
-	);
-	composer.createEnumTC({ name, description: enumDescription, values });
-};
-
 const compose = sdk => {
 	const composer = new SchemaComposer();
 	composeStaticDefinitions(composer);
-	Object.entries(sdk.getEnums({ withMeta: true })).map(
-		addEnumDefinition(composer),
-	);
+	composeEnumDefinitions(composer, sdk);
 	sdk.getTypes({
 		includeMetaFields: true,
 	}).map(addTypeDefinition(composer, sdk));
