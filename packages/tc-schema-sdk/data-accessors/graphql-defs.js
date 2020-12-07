@@ -31,7 +31,7 @@ const getRelationshipTypeName = ({
 	);
 };
 
-const composeStaticDefinitions = composer => {
+const addStaticDefinitions = composer => {
 	composer.addDirective(
 		new GraphQLDirective({
 			name: 'deprecated',
@@ -53,7 +53,7 @@ const composeStaticDefinitions = composer => {
 	composer.createScalarTC('Time');
 };
 
-const composeEnumDefinitions = (composer, sdk) => {
+const addEnumDefinitions = (composer, sdk) => {
 	Object.entries(sdk.getEnums({ withMeta: true })).map(
 		([name, { description: enumDescription, options }]) => {
 			const values = {};
@@ -110,7 +110,6 @@ const composeObjectProperties = ({ typeName, properties, sdk, composer }) => {
 			extensions: {
 				directives: getDirectives(def),
 			},
-			// TODO - is pagination needed to be set explicitly
 			args: getArgs(def),
 		});
 
@@ -143,7 +142,6 @@ as well as on the records themselves. Use '${fieldName}' instead if you do not n
 							sdk.getRelationshipType(typeName, fieldName),
 						),
 					),
-				// TODO - is pagination needed to be set explicitly
 				args: getArgs(def),
 			});
 		}
@@ -173,7 +171,10 @@ const addTypeDefinition = (composer, sdk) => ({
 			...Object.fromEntries(
 				Object.entries(properties)
 					.filter(([, def]) => !def.relationship && !def.cypher)
-					.map(([name, { type }]) => [name, getGraphqlType(sdk)(type)]),
+					.map(([name, { type }]) => [
+						name,
+						getGraphqlType(sdk)(type),
+					]),
 			),
 		},
 	});
@@ -218,8 +219,8 @@ const addRelationshipTypeDefinition = (composer, sdk) => ({
 
 const compose = sdk => {
 	const composer = new SchemaComposer();
-	composeStaticDefinitions(composer);
-	composeEnumDefinitions(composer, sdk);
+	addStaticDefinitions(composer);
+	addEnumDefinitions(composer, sdk);
 	sdk.getTypes({
 		includeMetaFields: true,
 	}).forEach(addTypeDefinition(composer, sdk));
@@ -234,6 +235,7 @@ const compose = sdk => {
 
 module.exports = {
 	accessor() {
+		// still return an array for backwards compatibility... for now
 		return [compose(this).toSDL()];
 	},
 };

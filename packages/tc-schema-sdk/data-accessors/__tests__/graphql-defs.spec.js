@@ -93,7 +93,7 @@ describe('graphql def creation', () => {
 						},
 						level: {
 							type: 'TrafficLight',
-							description: "How good it is"
+							description: 'How good it is',
 						},
 						hasBudget: {
 							type: 'CostCentre',
@@ -166,11 +166,11 @@ describe('graphql def creation', () => {
 				enums: {},
 				stringPatterns,
 				primitiveTypes: {
-				Word: {
-					graphql: 'String',
-					component: 'Text',
+					Word: {
+						graphql: 'String',
+						component: 'Text',
+					},
 				},
-			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
@@ -213,11 +213,11 @@ describe('graphql def creation', () => {
 				enums: {},
 				stringPatterns,
 				primitiveTypes: {
-				Word: {
-					graphql: 'String',
-					component: 'Text',
+					Word: {
+						graphql: 'String',
+						component: 'Text',
+					},
 				},
-			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
@@ -249,11 +249,11 @@ describe('graphql def creation', () => {
 						graphql: 'String',
 						component: 'Text',
 					},
-				Word: {
-					graphql: 'String',
-					component: 'Text',
+					Word: {
+						graphql: 'String',
+						component: 'Text',
+					},
 				},
-			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 
@@ -281,11 +281,11 @@ line with
 				enums: {},
 				stringPatterns,
 				primitiveTypes: {
-				Word: {
-					graphql: 'String',
-					component: 'Text',
+					Word: {
+						graphql: 'String',
+						component: 'Text',
+					},
 				},
-			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			expect(generated).toMatch(

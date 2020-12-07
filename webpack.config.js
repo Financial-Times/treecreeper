@@ -7,7 +7,7 @@ const filenameTemplate = '[name]';
 module.exports = {
 	entry: ['./demo/cms/browser/main.js'],
 	resolve: {
-		extensions: ['.js', '.jsx', '.css'],
+		extensions: ['.mjs', '.js', '.jsx', '.css'],
 	},
 	output: {
 		path: path.resolve(__dirname, 'dist/browser'),
@@ -16,6 +16,11 @@ module.exports = {
 	stats: 'minimal',
 	module: {
 		rules: [
+			{
+				test: /\.mjs$/,
+				include: /node_modules/,
+				type: 'javascript/auto',
+			},
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
