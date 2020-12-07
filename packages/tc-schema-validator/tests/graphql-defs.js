@@ -6,6 +6,6 @@ describe('graphql defs', () => {
 	it('should be syntactically correct (can be parsed by graphql parser)', () => {
 		const sdk = new SDK();
 		sdk.init();
-		expect(() => parse(sdk.getGraphqlDefs().join('\n'))).not.toThrow();
+		expect(() => parse(sdk.getGraphqlDefs())).not.toThrow();
 	});
 });
