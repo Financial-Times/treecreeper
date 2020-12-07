@@ -91,6 +91,10 @@ describe('graphql def creation', () => {
 							description:
 								'Whether or not the group is still in existence',
 						},
+						level: {
+							type: 'TrafficLight',
+							description: "How good it is"
+						},
 						hasBudget: {
 							type: 'CostCentre',
 							relationship: 'PAYS_FOR',
@@ -122,15 +126,6 @@ describe('graphql def creation', () => {
 				},
 			],
 			enums: {
-				Lifecycle: {
-					description: 'The lifecycle stage of a product',
-					options: {
-						Incubate: 'Incubate description',
-						Sustain: 'Sustain description',
-						Grow: 'Grow description',
-						Sunset: 'Sunset description',
-					},
-				},
 				TrafficLight: {
 					description:
 						'Quality rating based on Red, Amber and Green.',
@@ -170,11 +165,17 @@ describe('graphql def creation', () => {
 				],
 				enums: {},
 				stringPatterns,
+				primitiveTypes: {
+				Word: {
+					graphql: 'String',
+					component: 'Text',
+				},
+			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
-				'prop: Boolean  @deprecated(reason: "not needed")',
+				'prop: Boolean @deprecated(reason: "not needed")',
 			);
 		});
 
@@ -211,6 +212,12 @@ describe('graphql def creation', () => {
 				],
 				enums: {},
 				stringPatterns,
+				primitiveTypes: {
+				Word: {
+					graphql: 'String',
+					component: 'Text',
+				},
+			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			// note the regex has a space, not a new line
@@ -242,7 +249,11 @@ describe('graphql def creation', () => {
 						graphql: 'String',
 						component: 'Text',
 					},
+				Word: {
+					graphql: 'String',
+					component: 'Text',
 				},
+			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 
@@ -269,7 +280,12 @@ line with
 				],
 				enums: {},
 				stringPatterns,
-				primitiveTypes: {},
+				primitiveTypes: {
+				Word: {
+					graphql: 'String',
+					component: 'Text',
+				},
+			},
 			};
 			const generated = [].concat(...graphqlFromRawData(schema)).join('');
 			expect(generated).toMatch(
