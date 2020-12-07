@@ -9,6 +9,8 @@ const getGraphqlType = sdk => type => {
 	return sdk.getPrimitiveTypes()[type] || type;
 };
 
+const maybePluralise = (hasMany, type) => hasMany ? [type] : type;
+
 const composeStaticDefinitions = composer => {
 	composer.addDirective(
 		new GraphQLDirective({
@@ -49,28 +51,56 @@ const composeEnumDefinitions = (composer, sdk) => {
 	);
 };
 
+const getDirectives = ({deprecationReason, cypher, relationship, direction}) => {
+	const directives = [];
+
+	if (cypher) {
+		directives.push({ name: 'cypher', args: { statement: cypher
+			.replace(/"/g, '\\"')
+			.split(/\n/)
+			.join('\\n')}})
+	}
+	if (relationship) {
+		directives.push({name: 'relation', args: {
+			name: relationship,
+			args: {
+				direction: direction === 'outgoing' ? 'OUT' : 'IN'
+			}
+		}})
+	}
+	return directives
+}
+
+const getArgs = ({ hasMany, isRelationship }) =>
+	hasMany && isRelationship ? {first: 'Int', offset: 'Int'} : null
+
 const addTypeDefinition = (composer, sdk) => ({
 	name: typeName,
 	description,
 	properties,
 }) => {
+	const typeConverter = getGraphqlType(sdk);
+
 	composer.createObjectTC({ name: typeName, description });
 	composer.Query.setField(typeName, { type: typeName });
-	const typeConverter = getGraphqlType(sdk);
+
 	Object.entries(properties).forEach(([fieldName, def]) => {
 		composer.types.get(typeName).setField(fieldName, {
 			description: def.description,
-			type: () => typeConverter(def.type),
-			// {
-			// 	pagination: maybePaginate(def),
-			// 	type: maybePluralType({
-			// 		...def,
-			// 		type: this.getGraphqlType(def.type),
-			// 	}),
-			// 	directive: maybeDirective(def),
-			// 	deprecation: maybeDeprecate(def),
-			// }
+			type: () => maybePluralise(def.hasMany, typeConverter(def.type)),
+			...(def.deprecationReason ? {deprecationReason: def.deprecationReason} : {}),
+			extensions: {
+				directives: getDirectives(def)
+			},
+			// TODO - is pagination needed to be se explicitly
+			args: getArgs(def)
 		});
+
+		// 	${indentMultiline(
+		// 		this.printRichRelationshipPropertyDefinitions(properties, name),
+		// 		2,
+		// 		true,
+		// 	)}
 	});
 };
 
@@ -89,26 +119,3 @@ module.exports = {
 		return compose(this).toSDL();
 	},
 };
-
-// 	getTypeDefinitions() {
-
-// 	}
-
-// 	/*
-// 		Outputting types
-// 	*/
-// 	printTypeDefinition({ name, description, properties }) {
-// 		return printDescribedBlock(
-// 			description,
-// 			stripEmptyFirstLine`
-
-// type ${name} {
-// 	${indentMultiline(this.printPropertyDefinitions(properties), 2, true)}
-// 	${indentMultiline(
-// 		this.printRichRelationshipPropertyDefinitions(properties, name),
-// 		2,
-// 		true,
-// 	)}
-// }`,
-// 		);
-// 	}
