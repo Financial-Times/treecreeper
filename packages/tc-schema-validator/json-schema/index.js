@@ -30,13 +30,8 @@ const ajv = new Ajv({ allErrors: true });
 			}
 		}
 	};
-	try {
 
-		if (!ajv.validate(schemaValidator, schema)) {
-			console.error(ajv.errors)
-		};
-	} catch (err) {
-			console.log('erasdsadsad')
-		console.log(err)
-	}
+	if (!ajv.validate(schemaValidator, schema)) {
+		throw new Ajv.ValidationError(ajv.errors)
+	};
 })()
