@@ -130,25 +130,6 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 						not: { enum: ['relationship'] },
 					},
 				},
-
-				// 	// // 					it('may have direction', () => {
-				// 	// // 						if (config.direction) {
-				// 	// // 							expect(config.direction).toMatch(
-				// 	// // 								/^incoming|outgoing$/,
-				// 	// // 							);
-				// 	// // 						}
-				// 	// // 					});
-				// 	// // 					it('can determine relationship direction explicitly', () => {
-				// 	// // 						const relType = relationshipTypes.find(
-				// 	// // 							rel => rel.name === config.type,
-				// 	// // 						);
-
-				// 	// // 						expect(relType).toBeDefined();
-				// 	// // 						if (relType.from.type === relType.to.type) {
-				// 	// // 							expect(config.direction).toBeDefined();
-				// 	// // 						}
-				// 	// // 					});
-				// 	// // 				});
 			},
 		],
 	};
