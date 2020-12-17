@@ -1,3 +1,7 @@
+const {
+  types,
+} = require('./lists');
+
 module.exports = {
 	typeHierarchySchema: {
 		$schema: 'http://json-schema.org/schema#',
@@ -13,8 +17,7 @@ module.exports = {
 					type: 'array',
 					items: {
 						type: 'string',
-
-						// TODO one of the type names and also exhaustively cover them all
+            enum: types
 					},
 				},
 			},
