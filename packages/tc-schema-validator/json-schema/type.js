@@ -12,9 +12,11 @@ const SYSTEM_CODE = '[a-z][\\-a-z]+[a-z]';
 
 const hasManyRule = {
 	if: {
-		properties: {type: {
-			enum: enums.concat(types),
-		}},
+		properties: {
+			type: {
+				enum: enums.concat(types),
+			},
+		},
 	},
 	then: {
 		properties: { hasMany: { type: 'boolean' } },
@@ -23,9 +25,11 @@ const hasManyRule = {
 
 const booleanLabelsRule = {
 	if: {
-		properties: {type: {
-			enum: ['boolean'],
-		}},
+		properties: {
+			type: {
+				enum: ['boolean'],
+			},
+		},
 	},
 	then: {
 		properties: {
@@ -35,7 +39,7 @@ const booleanLabelsRule = {
 	},
 };
 
-const relationshipIndicatorsRule = {
+const relationshipOrPropertyRule = {
 	if: {
 		properties: { type: { enum: complexTypes } },
 	},
@@ -74,17 +78,17 @@ const relationshipIndicatorsRule = {
 			},
 		},
 	},
-		else: {
-			properties: {
-				unique: { type: 'boolean' },
-				required: { type: 'boolean' },
-				canIdentify: { type: 'boolean' },
-				useInSummary: { type: 'boolean' },
-				pattern: { type: 'string', enum: stringPatterns },
-				examples: {
-					type: 'array',
-					items: { type: 'string' },
-				},
+	else: {
+		properties: {
+			unique: { type: 'boolean' },
+			required: { type: 'boolean' },
+			canIdentify: { type: 'boolean' },
+			useInSummary: { type: 'boolean' },
+			pattern: { type: 'string', enum: stringPatterns },
+			examples: {
+				type: 'array',
+				items: { type: 'string' },
+			},
 		},
 	},
 };
@@ -109,11 +113,12 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			fieldset: { type: 'string' },
 		},
 		required: ['label', 'description', 'type'],
-		additionalProperties: false,
+		// TODO see if this can work alongside conditional property rules
+		// additionalProperties: false,
 		allOf: [
 			hasManyRule,
 			booleanLabelsRule,
-			relationshipIndicatorsRule,
+			relationshipOrPropertyRule,
 			{
 				if: {
 					properties: {
@@ -122,28 +127,28 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				},
 				then: {
 					propertyNames: {
-						not: {enum: ['relationship']},
+						not: { enum: ['relationship'] },
 					},
 				},
 
-			// 	// // 					it('may have direction', () => {
-			// 	// // 						if (config.direction) {
-			// 	// // 							expect(config.direction).toMatch(
-			// 	// // 								/^incoming|outgoing$/,
-			// 	// // 							);
-			// 	// // 						}
-			// 	// // 					});
-			// 	// // 					it('can determine relationship direction explicitly', () => {
-			// 	// // 						const relType = relationshipTypes.find(
-			// 	// // 							rel => rel.name === config.type,
-			// 	// // 						);
+				// 	// // 					it('may have direction', () => {
+				// 	// // 						if (config.direction) {
+				// 	// // 							expect(config.direction).toMatch(
+				// 	// // 								/^incoming|outgoing$/,
+				// 	// // 							);
+				// 	// // 						}
+				// 	// // 					});
+				// 	// // 					it('can determine relationship direction explicitly', () => {
+				// 	// // 						const relType = relationshipTypes.find(
+				// 	// // 							rel => rel.name === config.type,
+				// 	// // 						);
 
-			// 	// // 						expect(relType).toBeDefined();
-			// 	// // 						if (relType.from.type === relType.to.type) {
-			// 	// // 							expect(config.direction).toBeDefined();
-			// 	// // 						}
-			// 	// // 					});
-			// 	// // 				});
+				// 	// // 						expect(relType).toBeDefined();
+				// 	// // 						if (relType.from.type === relType.to.type) {
+				// 	// // 							expect(config.direction).toBeDefined();
+				// 	// // 						}
+				// 	// // 					});
+				// 	// // 				});
 			},
 		],
 	};
@@ -152,7 +157,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 		type: 'object',
 		propertyNames: {
 			// NOTE this regex is already defined elsewhere
-			pattern: '^(?=.{2,64}$)[a-z][a-zA-Zd]+$',
+			pattern: '^(?=.{2,64}$)[a-z][a-zA-Z\\d]+$',
 			// banned words
 			not: { enum: ['type'] },
 		},
@@ -240,85 +245,4 @@ const relationshipTypeSchema = {
 	required: ['name', 'from', 'to', 'relationship'],
 };
 
-// const propertyTestSuite = ({ typeName, properties, fieldsets }) => {
-// 	const typeNames = sdk.getTypes().map(({ name }) => name);
-// 	const relationshipTypeNames = sdk
-// 		.getRelationshipTypes()
-// 		.map(({ name }) => name);
-// 	const declaredTypeNames = [].concat(typeNames, relationshipTypeNames);
-
-// 	const validPropTypes = validEnums.concat(
-// 		Object.keys(primitiveTypesMap),
-// 		declaredTypeNames,
-// 	);
-// 	const validFieldsetNames = fieldsets
-// 		? ['self'].concat(Object.keys(fieldsets))
-// 		: [];
-
-// 	Object.entries(properties).forEach(([name, config]) => {
-// 		describe(`${name}`, () => {
-
-// 			it('has valid fieldset', () => {
-// 				if (config.fieldset) {
-// 					expect(validFieldsetNames).toContain(config.fieldset);
-// 				}
-// 			});
-
-// 						it('is defined at both ends', () => {
-// 							expect(
-// 								getTwinnedRelationship(
-// 									typeName,
-// 									config.type,
-// 									config.relationship,
-// 									config.direction,
-// 								),
-// 							).toBeDefined();
-// 						});
-// 					}
-// 				});
-
-// const relationshipTestSuite = type => {
-// 	describe(`${type.name} as Relationship`, () => {
-
-// 		const types = sdk.rawData.getTypes();
-// 		const { properties = {}, from, to } = type;
-
-// 		describe('relationship endpoints', () => {
-
-// 			if (from.type !== to.type) {
-// 				it('from type makes use of this relationship type', () => {
-// 					const endType = types.find(t => t.name === to.type);
-// 					const propertiesUsingRelationshipType = Object.values(
-// 						endType.properties,
-// 					).filter(prop => prop.type === type.name);
-// 					expect(propertiesUsingRelationshipType.length).toBe(1);
-// 				});
-// 				it('to type makes use of this relationship type', () => {
-// 					const endType = types.find(t => t.name === from.type);
-// 					const propertiesUsingRelationshipType = Object.values(
-// 						endType.properties,
-// 					).filter(prop => prop.type === type.name);
-// 					expect(propertiesUsingRelationshipType.length).toBe(1);
-// 				});
-// 			} else {
-// 				it('has deterministic direction', () => {
-// 					const typeDef = types.find(t => t.name === from.type);
-// 					const propertiesUsingRelationshipType = Object.values(
-// 						typeDef.properties,
-// 					).filter(prop => prop.type === type.name);
-
-// 					expect(propertiesUsingRelationshipType.length).toBe(2);
-// 					const startRel = propertiesUsingRelationshipType.find(
-// 						prop => prop.direction === 'outgoing',
-// 					);
-// 					expect(startRel).toBeDefined();
-// 					const endRel = propertiesUsingRelationshipType.find(
-// 						prop => prop.direction === 'incoming',
-// 					);
-// 					expect(endRel).toBeDefined();
-// 				});
-// 			}
-// 		});
-// 	});
-
-module.exports = {typeSchema, relationshipTypeSchema}
+module.exports = { typeSchema, relationshipTypeSchema };
