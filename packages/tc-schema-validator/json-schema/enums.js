@@ -1,6 +1,3 @@
-const sdk = require('./sdk')
-const enums = sdk.rawData.getEnums();
-
 const enumSchema = {
 	$schema: 'http://json-schema.org/schema#',
 	$id: 'http://biz-ops-in.ft.com/schemas/treecreeper/enum.json',
@@ -36,5 +33,5 @@ const enumsSchema = {
 };
 
 module.exports = {
-	enumsSchema
-}
+	enumsSchema,
+};
