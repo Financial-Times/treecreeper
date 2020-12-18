@@ -10,88 +10,21 @@ const {
 
 const SYSTEM_CODE = '[a-z][\\-a-z]+[a-z]';
 
-const hasManyRule = {
-	if: {
-		properties: {
-			type: {
-				enum: enums.concat(types),
-			},
-		},
-	},
-	then: {
-		properties: { hasMany: { type: 'boolean' } },
-	},
-};
+const onlyForRelationships = {
+  properties: { type: { enum: complexTypes } },
+}
 
-const booleanLabelsRule = {
-	if: {
+const onlyForProperties = {
+  properties: { type: { enum: simpleTypes } },
+}
+
+const onlyForBooleans = {
 		properties: {
 			type: {
 				enum: ['boolean'],
 			},
 		},
-	},
-	then: {
-		properties: {
-			trueLabel: { type: 'string' },
-			falseLabel: { type: 'string' },
-		},
-	},
-};
-
-const relationshipOrPropertyRule = {
-	if: {
-		properties: { type: { enum: complexTypes } },
-	},
-	then: {
-		properties: {
-			cypher: { type: 'string' },
-			direction: {
-				type: 'string',
-				enum: ['incoming', 'outgoing'],
-			},
-			relationship: {
-				type: 'string',
-				pattern: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
-			},
-			showInactive: { type: 'boolean' },
-			writeInactive: { type: 'boolean' },
-		},
-		dependencies: {
-			direction: {
-				properties: {
-					cypher: false,
-					relationship: true,
-				},
-			},
-			relationship: {
-				properties: {
-					direction: true,
-					cypher: false,
-				},
-			},
-			cypher: {
-				properties: {
-					direction: false,
-					relationship: false,
-				},
-			},
-		},
-	},
-	else: {
-		properties: {
-			unique: { type: 'boolean' },
-			required: { type: 'boolean' },
-			canIdentify: { type: 'boolean' },
-			useInSummary: { type: 'boolean' },
-			pattern: { type: 'string', enum: stringPatterns },
-			examples: {
-				type: 'array',
-				items: { type: 'string' },
-			},
-		},
-	},
-};
+	}
 
 const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 	const propertyDefSchema = {
@@ -110,27 +43,73 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				items: { type: 'string', pattern: SYSTEM_CODE },
 			},
 			fieldset: { type: 'string' },
+			cypher: { type: 'string' },
+			direction: {
+				type: 'string',
+				enum: ['incoming', 'outgoing'],
+			},
+			relationship: {
+				type: 'string',
+				pattern: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
+			},
+			showInactive: { type: 'boolean' },
+			writeInactive: { type: 'boolean' },
+			unique: { type: 'boolean' },
+			required: { type: 'boolean' },
+			canIdentify: { type: 'boolean' },
+			useInSummary: { type: 'boolean' },
+			pattern: { type: 'string', enum: stringPatterns },
+			examples: {
+				type: 'array',
+				items: { type: 'string' },
+			},
+			 hasMany: { type: 'boolean' },
+			 trueLabel: { type: 'string' },
+			falseLabel: { type: 'string' },
 		},
 		required: ['label', 'description', 'type'],
-		// TODO see if this can work alongside conditional property rules
-		// additionalProperties: false,
-		allOf: [
-			hasManyRule,
-			booleanLabelsRule,
-			relationshipOrPropertyRule,
-			{
-				if: {
-					properties: {
-						type: { enum: relationshipTypes },
-					},
-				},
-				then: {
-					propertyNames: {
-						not: { enum: ['relationship'] },
+		additionalProperties: false,
+
+		"dependencies": {
+	    cypher: {
+	    	properties: {
+	    		type: { enum: types },
+	    		direction: false,
+					relationship: false,
+	    	}
+	    },
+			direction: {
+	    	properties: {
+	    		...onlyForRelationships.properties,
+	    		cypher: false,
+					relationship: true,
+	    	}
+	    },
+			relationship: {
+	    	properties: {
+	    		type: { enum: types },
+	    		direction: true,
+					cypher: false,
+	    	}
+	    },
+			showInactive: onlyForRelationships,
+			writeInactive: onlyForRelationships,
+			unique: onlyForProperties,
+			required: onlyForProperties,
+			canIdentify: onlyForProperties,
+			useInSummary: onlyForProperties,
+			pattern: onlyForProperties,
+			examples: onlyForProperties,
+			hasMany: {
+				properties: {
+					type: {
+						enum: enums.concat(types),
 					},
 				},
 			},
-		],
+			trueLabel: onlyForBooleans,
+			falseLabel: onlyForBooleans
+	  },
 	};
 
 	const propertiesSchema = {
