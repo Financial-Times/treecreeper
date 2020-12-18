@@ -11,17 +11,17 @@ const getJsonSchema = () => {
 		type: 'object',
 		properties: {
 			enums: enumsSchema,
-			types: {
-				type: 'array',
-				items: typeSchema,
-			},
+			stringPatterns: stringPatternsSchema,
+			primitiveTypes: primitiveTypesSchema,
 			relationshipTypes: {
 				type: 'array',
 				items: relationshipTypeSchema,
 			},
+			types: {
+				type: 'array',
+				items: typeSchema,
+			},
 			typeHierarchy: typeHierarchySchema,
-			stringPatterns: stringPatternsSchema,
-			primitiveTypes: primitiveTypesSchema,
 		},
 	};
 };
