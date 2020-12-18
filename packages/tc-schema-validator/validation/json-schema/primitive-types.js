@@ -19,7 +19,7 @@ module.exports = {
 					],
 				},
 			},
-			required: ['component', 'graphql']
+			required: ['component', 'graphql'],
 		},
 	},
 };
