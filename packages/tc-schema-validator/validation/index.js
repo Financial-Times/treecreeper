@@ -17,6 +17,12 @@ const ajv = new Ajv({ allErrors: true });
 		console.dir(new Ajv.ValidationError(ajv.errors), { depth: 10 });
 	}
 
+
 	require('./ad-hoc/presentational-structure')
+	require('./ad-hoc/relationship-consistency')
 	require('./ad-hoc/graphql-defs')
 })();
+
+
+
+
