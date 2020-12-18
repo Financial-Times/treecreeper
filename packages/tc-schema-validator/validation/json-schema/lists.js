@@ -5,14 +5,12 @@ const primitiveTypesMap = sdk.getPrimitiveTypes();
 const enums = sdk.rawData.getEnums();
 const stringPatterns = sdk.rawData.getStringPatterns();
 const validEnums = Object.keys(enums);
-
-const typeNames = sdk.getTypes().map(({ name }) => name);
+const typeNames = sdk.rawData.getTypes().map(({ name }) => name);
 const relationshipTypeNames = [
 	...new Set(
-		sdk
+		sdk.rawData
 			.getRelationshipTypes()
 			.map(({ name }) => name)
-			.filter(it => !!it),
 	),
 ];
 const primitiveTypeNames = Object.keys(primitiveTypesMap);
