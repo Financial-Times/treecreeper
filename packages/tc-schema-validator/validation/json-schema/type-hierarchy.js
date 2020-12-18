@@ -16,9 +16,12 @@ module.exports = {
 					items: {
 						type: 'string',
 						enum: types,
+						errorMessage: 'The list of types in this part of the type hierarchy contains a type name that is not defined in the schema. Is it a typo?'
 					},
 				},
 			},
+			additionalProperties: false,
+			required: ['label', 'description', 'types']
 		},
 	},
 };
