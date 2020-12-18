@@ -9,6 +9,7 @@ const {
 
 const SYSTEM_CODE = '^[a-z][\\-a-z]+[a-z]$';
 const TYPE_NAME = '^[A-Z][a-zA-Z]+$';
+const RELATIONSHIP = '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$'
 
 const typeName = { type: 'string' , pattern: TYPE_NAME, errorMessage: 'Type name should be all alphabetical characters, starting with a capital letter'}
 const onlyForRelationships = {
@@ -51,7 +52,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			},
 			relationship: {
 				type: 'string',
-				pattern: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
+				pattern: RELATIONSHIP,
 			},
 			showInactive: { type: 'boolean' },
 			writeInactive: { type: 'boolean' },
@@ -199,10 +200,10 @@ const relationshipTypeSchema = {
 		name: typeName,
 		from: fromOrTo,
 		to: fromOrTo,
-		relationship: { type: 'string' },
+		relationship: { type: 'string', pattern: RELATIONSHIP, },
 		properties: getPropertiesSchema({ forRelationships: true }),
 	},
-	required: ['name', 'from', 'to', 'relationship'],
+	required: ['name', 'from', 'to', 'relationship', 'properties'],
 };
 
 module.exports = { typeSchema, relationshipTypeSchema };
