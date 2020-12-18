@@ -7,8 +7,10 @@ const {
 	enums,
 } = require('./lists');
 
-const SYSTEM_CODE = '[a-z][\\-a-z]+[a-z]';
+const SYSTEM_CODE = '^[a-z][\\-a-z]+[a-z]$';
+const TYPE_NAME = '^[A-Z][a-zA-Z]+$';
 
+const typeName = { type: 'string' , pattern: TYPE_NAME, errorMessage: 'Type name should be all alphabetical characters, starting with a capital letter'}
 const onlyForRelationships = {
 	properties: { type: { enum: complexTypes } },
 };
@@ -138,7 +140,7 @@ const typeSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		name: { type: 'string' },
+		name: typeName,
 		description: { type: 'string' },
 		moreInformation: { type: 'string' },
 
@@ -194,7 +196,7 @@ const relationshipTypeSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		name: { type: 'string' },
+		name: typeName,
 		from: fromOrTo,
 		to: fromOrTo,
 		relationship: { type: 'string' },

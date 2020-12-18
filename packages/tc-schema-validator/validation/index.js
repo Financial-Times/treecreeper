@@ -15,9 +15,12 @@ const ajv = new Ajv({ allErrors: true });
 
 ajvErrors(ajv);
 
-const signpost = error => {
+const signpost = (sdk) => (error) => {
 	if (/^\/typeHierarchy/.test(error.dataPath)) {
 		error.signpost = `Look in the \`${/^\/typeHierarchy\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the type hierarchy part of the schema`
+	}
+	if (/^\/relationshipTypes/.test(error.dataPath)) {
+		error.signpost = `Look in the \`${sdk.rawData.getRelationshipTypes()[/^\/relationshipTypes\/(\d+)/.exec(error.dataPath)[1]].name}\` relationship type`
 	}
 	if (/^\/stringPatterns/.test(error.dataPath)) {
 		error.signpost = `Look in the string patterns part of the schema`
@@ -43,7 +46,7 @@ const signpost = error => {
 	const schemaValidator = getJsonSchema();
 
 	if (!ajv.validate(schemaValidator, schema.schema)) {
-		ajv.errors.map(signpost)
+		ajv.errors.map(signpost(sdk))
 		ajv.errors = ajv.errors.filter(err => err.keyword !== 'if')
 		console.dir(new Ajv.ValidationError(ajv.errors), { depth: 10 });
 	}
