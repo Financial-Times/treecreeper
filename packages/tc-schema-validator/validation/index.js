@@ -15,14 +15,31 @@ const ajv = new Ajv({ allErrors: true });
 
 ajvErrors(ajv);
 
+
+const signpostTypeError = (error, kind) => {
+		const [,typeIndex,topLevelProperty,property,propDefPart] = (/^\/[a-zA-Z]+\/(\d+)(?:\/([^\/]+)(?:\/([^\/]+)(?:\/([^\/]+))?)?)?/.exec(error.dataPath) || [])
+		const typeDef = sdk.rawData.getTypes()[typeIndex]
+
+		if (propDefPart) {
+			error.signpost = `Problem in the \`${propDefPart}\` supplied for the \`${property}\` property of the \`${typeDef.name}\` ${kind}`
+		} else if (property) {
+			error.signpost = `Problem in the \`${property}\` property of the \`${typeDef.name}\` ${kind}`
+		} else if (topLevelProperty) {
+			error.signpost = `Problem in the \`${topLevelProperty}\` section of the \`${typeDef.name}\` ${kind}`
+		} else {
+			error.signpost = `Problem in the \`${typeDef.name}\` ${kind}`
+		}
+}
+
 const signpost = (sdk) => (error) => {
 	if (/^\/typeHierarchy/.test(error.dataPath)) {
 		error.signpost = `Problem in the \`${/^\/typeHierarchy\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the type hierarchy part of the schema`
 	}
 	if (/^\/relationshipTypes/.test(error.dataPath)) {
-		const [,typeIndex,topLevelProperty] = (/^\/relationshipTypes\/(\d+)(?:\/([^\/]+))?/.exec(error.dataPath) || [])
-		const typeDef = sdk.rawData.getRelationshipTypes()[typeIndex]
-		error.signpost = `Problem in ${topLevelProperty ? `the \`${topLevelProperty}\` section of ` : ''}the \`${typeDef.name}\` relationship type`
+		signpostTypeError(error, 'relationship type')
+	}
+	if (/^\/types/.test(error.dataPath)) {
+		signpostTypeError(error, 'type')
 	}
 	if (/^\/stringPatterns/.test(error.dataPath)) {
 		error.signpost = `Problem in the string patterns part of the schema`
@@ -37,7 +54,6 @@ const signpost = (sdk) => (error) => {
 	// delete error.schemaPath
 	// delete error.dataPath
 	// delete error.keyword
-	// delete error.params
 }
 
 (async function () {

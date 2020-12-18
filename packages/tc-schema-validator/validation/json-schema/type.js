@@ -174,6 +174,7 @@ const typeSchema = {
 					description: { type: 'string' },
 				},
 				required: ['heading'],
+				additionalProperties: false
 			},
 			propertyNames: {
 				not: { enum: ['misc'] },
