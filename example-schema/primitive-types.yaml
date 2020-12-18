@@ -8,5 +8,5 @@ Document:
   graphql: String
   component: LargeText
 Url:
-  graphql: String
+  # graphql: String
   component: Text
