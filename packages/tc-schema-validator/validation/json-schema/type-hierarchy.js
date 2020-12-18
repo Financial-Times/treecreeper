@@ -1,6 +1,4 @@
-const {
-  types,
-} = require('./lists');
+const { types } = require('./lists');
 
 module.exports = {
 	typeHierarchySchema: {
@@ -17,7 +15,7 @@ module.exports = {
 					type: 'array',
 					items: {
 						type: 'string',
-            enum: types
+						enum: types,
 					},
 				},
 			},
