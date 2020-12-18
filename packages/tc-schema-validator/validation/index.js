@@ -1,6 +1,4 @@
-// Run AJV against the entire schema
-// Throw big errors object if found
-// If that passes, run some assertions cross-referencing
+#!/usr/bin/env node
 const Ajv = require('ajv').default;
 const ajvErrors = require("ajv-errors");
 const sdk = require('./sdk');

@@ -10,14 +10,15 @@ Tests to validate that a set of yaml files conforms to the treecreeper schema sp
 
 ## Usage
 
-Has a peer dependency of `jest`
 
-// my-schema-tests.spec.js
+`npm install @financial-times/tc-schema-validator`
 
-```js
-require('@financial-times/tc-schema-validator');
-```
+Set the environment variables accepted by tc-schema-sdk to point at a schema: TREECREEPER_SCHEMA_URL or   TREECREEPER_SCHEMA_DIRECTORY.
+
+Then run `tc-schema-validator`
+
+e.g. 
 
 ```sh
-TREECREEPER_SCHEMA_DIRECTORY=path-to-schema-directory jest my-schema-tests.spec.js
+TREECREEPER_SCHEMA_DIRECTORY=path-to-schema-directory tc-schema-validator
 ```
