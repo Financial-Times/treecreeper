@@ -109,7 +109,6 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				type: 'array',
 				items: { type: 'string', pattern: SYSTEM_CODE },
 			},
-			// TODO get an enum somehow
 			fieldset: { type: 'string' },
 		},
 		required: ['label', 'description', 'type'],

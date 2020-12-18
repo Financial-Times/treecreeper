@@ -1,4 +1,4 @@
-const sdk = require('./sdk');
+const sdk = require('../sdk');
 
 const types = sdk.rawData.getTypes()
 
@@ -16,16 +16,17 @@ if (absentTypes.length) {
 
 
 // Check all properties in all types reference valid fieldset names
-const badFielsets = types.flatMap(type => {
+const badFieldsets = types.flatMap(type => {
 	const fieldsets = ['self'].concat(Object.keys(type.fieldsets || {}));
-	const badProperties = type.properties.filter(({fieldset}) => fieldset && fieldsets.includes(fieldset))
+	const badProperties = Object.entries(type.properties)
+		.filter(([,{fieldset}]) => fieldset && !fieldsets.includes(fieldset))
 
-	return badProperties && {type: type.name, badProperties};
-})
+	return badProperties.length && {type: type.name, fieldsets, badProperties};
+}).filter(x => !!x)
 
 if (badFieldsets.length) {
-	badFieldsets.forEach(({type, badProperties}) => {
-		console.error('blah')
-		throw new Error('Some types have properties that reference non-existent fieldsets')
+	badFieldsets.forEach(({type, fieldsets, badProperties}) => {
+		console.error(type, fieldsets, badProperties)
 	})
+	throw new Error('Some types have properties that reference non-existent fieldsets')
 }
