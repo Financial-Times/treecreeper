@@ -17,19 +17,21 @@ ajvErrors(ajv);
 
 const signpost = (sdk) => (error) => {
 	if (/^\/typeHierarchy/.test(error.dataPath)) {
-		error.signpost = `Look in the \`${/^\/typeHierarchy\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the type hierarchy part of the schema`
+		error.signpost = `Problem in the \`${/^\/typeHierarchy\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the type hierarchy part of the schema`
 	}
 	if (/^\/relationshipTypes/.test(error.dataPath)) {
-		error.signpost = `Look in the \`${sdk.rawData.getRelationshipTypes()[/^\/relationshipTypes\/(\d+)/.exec(error.dataPath)[1]].name}\` relationship type`
+		const [,typeIndex,topLevelProperty] = (/^\/relationshipTypes\/(\d+)(?:\/([^\/]+))?/.exec(error.dataPath) || [])
+		const typeDef = sdk.rawData.getRelationshipTypes()[typeIndex]
+		error.signpost = `Problem in ${topLevelProperty ? `the \`${topLevelProperty}\` section of ` : ''}the \`${typeDef.name}\` relationship type`
 	}
 	if (/^\/stringPatterns/.test(error.dataPath)) {
-		error.signpost = `Look in the string patterns part of the schema`
+		error.signpost = `Problem in the string patterns part of the schema`
 	}
 	if (/^\/primitiveTypes/.test(error.dataPath)) {
-		error.signpost = `Look in the primitive types part of the schema`
+		error.signpost = `Problem in the primitive types part of the schema`
 	}
 	if (/^\/enums/.test(error.dataPath)) {
-		error.signpost = `Look in the \`${/^\/enums\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the enums part of the schema`
+		error.signpost = `Problem in the \`${/^\/enums\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the enums part of the schema`
 	}
 
 	// delete error.schemaPath

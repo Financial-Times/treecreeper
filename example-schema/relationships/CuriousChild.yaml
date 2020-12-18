@@ -6,6 +6,7 @@ to:
   type: ChildType
   hasMany: false
 relationship: HAS_CURIOUS_CHILD
+### CONTINUE FROM HERE
 properties:
   someString:
     label: Label for some string
