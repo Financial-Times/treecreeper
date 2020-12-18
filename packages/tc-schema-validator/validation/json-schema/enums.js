@@ -9,18 +9,16 @@ const enumSchema = {
 				type: 'object',
 			},
 			then: {
-					type: 'object',
-					propertyNames: {
-						pattern: '^[a-zA-Z]+$',
-					},
-					additionalProperties: { type: 'string' },
+				type: 'object',
+				propertyNames: {
+					pattern: '^[a-zA-Z]+$',
 				},
-				else:
-				{
-					type: 'array',
-					items: { type: 'string', pattern: '^[a-zA-Z]+$' },
-				},
-
+				additionalProperties: { type: 'string' },
+			},
+			else: {
+				type: 'array',
+				items: { type: 'string', pattern: '^[a-zA-Z]+$' },
+			},
 		},
 	},
 	additionalProperties: false,
