@@ -59,10 +59,12 @@ const signpost = error => {
 			/^\/enums\/([^/]+)/.exec(error.dataPath)[1]
 		}\` category in the enums part of the schema`;
 	}
-
-	// delete error.schemaPath
-	// delete error.dataPath
-	// delete error.keyword
+	// these require quite a lot of context about how JSON schema actually works
+	// in order to comprehend. All the work done above generates humabn readable
+	// strings which should provide enough context without them
+	delete error.schemaPath
+	delete error.dataPath
+	delete error.keyword
 };
 
 (async function () {
