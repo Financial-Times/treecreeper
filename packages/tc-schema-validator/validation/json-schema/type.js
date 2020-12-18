@@ -1,7 +1,6 @@
 const {
 	allTypes,
 	simpleTypes,
-	relationshipTypes,
 	types,
 	complexTypes,
 	stringPatterns,
@@ -11,20 +10,20 @@ const {
 const SYSTEM_CODE = '[a-z][\\-a-z]+[a-z]';
 
 const onlyForRelationships = {
-  properties: { type: { enum: complexTypes } },
-}
+	properties: { type: { enum: complexTypes } },
+};
 
 const onlyForProperties = {
-  properties: { type: { enum: simpleTypes } },
-}
+	properties: { type: { enum: simpleTypes } },
+};
 
 const onlyForBooleans = {
-		properties: {
-			type: {
-				enum: ['boolean'],
-			},
+	properties: {
+		type: {
+			enum: ['boolean'],
 		},
-	}
+	},
+};
 
 const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 	const propertyDefSchema = {
@@ -63,35 +62,35 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				type: 'array',
 				items: { type: 'string' },
 			},
-			 hasMany: { type: 'boolean' },
-			 trueLabel: { type: 'string' },
+			hasMany: { type: 'boolean' },
+			trueLabel: { type: 'string' },
 			falseLabel: { type: 'string' },
 		},
 		required: ['label', 'description', 'type'],
 		additionalProperties: false,
 
-		"dependencies": {
-	    cypher: {
-	    	properties: {
-	    		type: { enum: types },
-	    		direction: false,
+		dependencies: {
+			cypher: {
+				properties: {
+					type: { enum: types },
+					direction: false,
 					relationship: false,
-	    	}
-	    },
+				},
+			},
 			direction: {
-	    	properties: {
-	    		...onlyForRelationships.properties,
-	    		cypher: false,
-					relationship: true,
-	    	}
-	    },
-			relationship: {
-	    	properties: {
-	    		type: { enum: types },
-	    		direction: true,
+				properties: {
+					...onlyForRelationships.properties,
 					cypher: false,
-	    	}
-	    },
+					relationship: true,
+				},
+			},
+			relationship: {
+				properties: {
+					type: { enum: types },
+					direction: true,
+					cypher: false,
+				},
+			},
 			showInactive: onlyForRelationships,
 			writeInactive: onlyForRelationships,
 			unique: onlyForProperties,
@@ -108,8 +107,8 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				},
 			},
 			trueLabel: onlyForBooleans,
-			falseLabel: onlyForBooleans
-	  },
+			falseLabel: onlyForBooleans,
+		},
 	};
 
 	const propertiesSchema = {

@@ -7,11 +7,7 @@ const stringPatterns = sdk.rawData.getStringPatterns();
 const validEnums = Object.keys(enums);
 const typeNames = sdk.rawData.getTypes().map(({ name }) => name);
 const relationshipTypeNames = [
-	...new Set(
-		sdk.rawData
-			.getRelationshipTypes()
-			.map(({ name }) => name)
-	),
+	...new Set(sdk.rawData.getRelationshipTypes().map(({ name }) => name)),
 ];
 const primitiveTypeNames = Object.keys(primitiveTypesMap);
 

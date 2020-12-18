@@ -4,9 +4,8 @@ const { primitiveTypesSchema } = require('./primitive-types');
 
 const getJsonSchema = () => {
 	// These depend on the sdk already being initialised
-	const { typeSchema, relationshipTypeSchema } = require('./type');
-	const { typeHierarchySchema } = require('./type-hierarchy');
-
+	const { typeSchema, relationshipTypeSchema } = require('./type'); // eslint-disable-line global-require
+	const { typeHierarchySchema } = require('./type-hierarchy'); // eslint-disable-line global-require
 
 	return {
 		type: 'object',
@@ -25,6 +24,6 @@ const getJsonSchema = () => {
 			primitiveTypes: primitiveTypesSchema,
 		},
 	};
-}
+};
 
-module.exports = {getJsonSchema}
+module.exports = { getJsonSchema };
