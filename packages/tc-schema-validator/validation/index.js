@@ -24,6 +24,13 @@ const signpost = error => {
 	if (/^\/stringPatterns/.test(error.dataPath)) {
 		error.signpost = `Look in the string patterns part of the schema`
 	}
+	if (/^\/primitiveTypes/.test(error.dataPath)) {
+		error.signpost = `Look in the primitive types part of the schema`
+	}
+	if (/^\/enums/.test(error.dataPath)) {
+		error.signpost = `Look in the \`${/^\/enums\/([^\/]+)/.exec(error.dataPath)[1]}\` category in the enums part of the schema`
+	}
+
 	// delete error.schemaPath
 	// delete error.dataPath
 	// delete error.keyword
@@ -49,5 +56,6 @@ const signpost = error => {
 
 process.on('unhandledRejection', error => {
   console.error(error);
+  console.error('Exiting process')
   process.exit(2)
 });
