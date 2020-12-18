@@ -1,5 +1,5 @@
 // holds lists of types, got from the schema, to use for cross-referencing
-const sdk = require('./sdk');
+const sdk = require('../sdk');
 
 const primitiveTypesMap = sdk.getPrimitiveTypes();
 const enums = sdk.rawData.getEnums();
