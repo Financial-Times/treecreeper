@@ -5,19 +5,22 @@ const enumSchema = {
 	properties: {
 		description: { type: 'string' },
 		options: {
-			oneOf: [
-				{
+			if: {
+				type: 'object',
+			},
+			then: {
 					type: 'object',
 					propertyNames: {
 						pattern: '^[a-zA-Z]+$',
 					},
 					additionalProperties: { type: 'string' },
 				},
+				else:
 				{
 					type: 'array',
 					items: { type: 'string', pattern: '^[a-zA-Z]+$' },
 				},
-			],
+
 		},
 	},
 	additionalProperties: false,
