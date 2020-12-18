@@ -9,6 +9,7 @@
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "graphql": "^14.5.8",
     "ajv": "^7.0.1",
+    "ajv-errors": "^2.0.0",
     "valid-url": "^1.0.9"
   },
   "peerDependencies": {

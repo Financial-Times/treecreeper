@@ -18,9 +18,9 @@ const validatePresentationalStructure = () => {
 
 	if (absentTypes.length) {
 		assert.fail(
-			`${absentTypes.join(
+			`The following types are not included in type-hierarchy.yaml: ${absentTypes.join(
 				', ',
-			)} types are not included in type-hierarchy.yaml`,
+			)}`,
 		);
 	}
 
