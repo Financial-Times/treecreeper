@@ -179,6 +179,15 @@ const getChangedRelationships = ({ type, initialContent, newContent }) => {
 	return newRelationships.reduce(entriesToObject, {});
 };
 
+const getAllRelationships = (type, payload = {}) => {
+	const isRelationship = identifyRelationships(type);
+	return Object.fromEntries(
+		Object.entries(payload).filter(([propName]) =>
+			isRelationship(propName),
+		),
+	);
+};
+
 const containsRelationshipData = (type, payload = {}) => {
 	const isRelationship = identifyRelationships(type);
 	return Object.entries(getType(type).properties)
@@ -217,6 +226,7 @@ const normaliseRelationshipProps = (type, body = {}) => {
 };
 
 module.exports = {
+	getAllRelationships,
 	getWriteRelationships,
 	getChangedRelationships,
 	getRemovedRelationships,

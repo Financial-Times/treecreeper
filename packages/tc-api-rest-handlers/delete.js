@@ -3,6 +3,7 @@ const { executeQuery } = require('./lib/neo4j-model');
 const { validateInput } = require('./lib/validation');
 const { getNeo4jRecord } = require('./lib/read-helpers');
 const { broadcast } = require('./lib/events');
+const { getAllRelationships } = require('./lib/relationships/input');
 
 const deleteHandler = ({
 	documentStore,
@@ -34,8 +35,17 @@ const deleteHandler = ({
 	}
 
 	try {
-		const neo4jResult = await executeQuery(query, { code });
-		broadcast({ action: 'DELETE', code, type, neo4jResult });
+		await executeQuery(query, { code });
+		broadcast({
+			action: 'DELETE',
+			code,
+			type,
+			// Gets all the relationship properties of the original neo4j record
+			removedRelationships: getAllRelationships(
+				type,
+				prefetchResult.toJson({ type, excludeMeta: true }),
+			),
+		});
 	} catch (error) {
 		logger.error(
 			{
