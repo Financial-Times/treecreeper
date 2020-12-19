@@ -77,7 +77,6 @@ const makeRemovedRelationshipEvents = (nodeType, removedRelationships = {}) =>
 		getEventType: () => 'UPDATE',
 		getUpdatedProperties: ({ rootType, propName }) =>
 			schema.findInversePropertyNames(rootType, propName),
-
 		relationships: removedRelationships,
 	});
 
