@@ -8,20 +8,22 @@ const deleteHandler = ({
 	documentStore,
 	logger = console,
 } = {}) => async input => {
-	const { type, code } = validateInput(input);
+	const { type, code, query: { force } = {} } = validateInput(input);
 	const prefetchResult = await getNeo4jRecord(type, code);
 
 	if (!prefetchResult.hasRecords()) {
 		throw httpErrors(404, `${type} ${code} does not exist`);
 	}
-	if (prefetchResult.hasRelationships()) {
+	if (!force && prefetchResult.hasRelationships()) {
 		throw httpErrors(
 			409,
 			`Cannot delete - ${type} ${code} has relationships.`,
 		);
 	}
 
-	const query = `MATCH (node:${type} {code: $code}) DELETE node`;
+	const query = `MATCH (node:${type} {code: $code}) ${
+		force ? 'DETACH ' : ''
+	}DELETE node`;
 
 	let undoDocstoreWrite;
 
