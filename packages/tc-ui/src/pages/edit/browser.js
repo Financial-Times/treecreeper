@@ -59,12 +59,16 @@ const fieldValueCheckers = {
 	temporal: field => !!field.querySelector('input').value,
 	number: field => !!field.querySelector('input').value,
 	'large-text': field => !!field.querySelector('textarea').value,
-	enum: field => !!field.querySelector('select').value,
+	enum: field => {
+		const { value } = field.querySelector('select');
+		return !!value && value !== 'null';
+	},
 	boolean: field =>
 		!![...field.querySelectorAll('input')].some(input => input.checked),
 	relationship: field =>
 		!![...field.querySelectorAll('input[type="hidden"]')].every(
-			input => !!input.value && input.value !== '[]',
+			input =>
+				!!input.value && input.value !== '[]' && input.value !== 'null',
 		),
 };
 
