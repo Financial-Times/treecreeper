@@ -23,13 +23,28 @@ const signpostTypeError = (error, kind) => {
 		topLevelProperty,
 		property,
 		propDefPart,
-	] = error.dataPath.split('/');
-	const typeDef = sdk.rawData.getTypes()[typeIndex];
+	] = error.dataPath.split('/').slice(2);
 
-	if (propDefPart) {
-		error.signpost = `Problem in the \`${propDefPart}\` supplied for the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
-	} else if (property) {
-		error.signpost = `Problem in the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
+	const typeDef = sdk.rawData[
+		kind === 'type' ? 'getTypes' : 'getRelationshipTypes'
+	]()[typeIndex];
+
+	console.log(error.dataPath, typeIndex,
+		topLevelProperty,
+		property,
+		propDefPart)
+	if (topLevelProperty === 'properties') {
+		if (propDefPart) {
+			error.signpost = `Problem in the \`${propDefPart}\` supplied for the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
+			return
+		} else if (property) {
+			error.signpost = `Problem in the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
+			return
+		}
+	}
+
+	if (property) {
+		error.signpost = `Problem in \`${property}\` of the \`${topLevelProperty}\` section of the \`${typeDef.name}\` ${kind}`;
 	} else if (topLevelProperty) {
 		error.signpost = `Problem in the \`${topLevelProperty}\` section of the \`${typeDef.name}\` ${kind}`;
 	} else {
