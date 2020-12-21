@@ -83,7 +83,7 @@ const signpost = error => {
 const fail = () => {
 	console.error('Treecreeper schema files invalid');
 	process.exit(2);
-}
+};
 
 (async function () {
 	console.log('Validating treecreeper schema files');
@@ -98,7 +98,7 @@ const fail = () => {
 		ajv.errors.map(signpost);
 		ajv.errors = ajv.errors.filter(err => err.keyword !== 'if');
 		console.dir(new Ajv.ValidationError(ajv.errors), { depth: 10 });
-		fail()
+		fail();
 	}
 	validatePresentationalStructure();
 	validateRelationshipConsistency();
