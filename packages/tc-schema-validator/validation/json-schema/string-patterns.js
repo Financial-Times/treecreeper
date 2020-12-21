@@ -1,10 +1,10 @@
-const { CAPITAL_SNAKE_CASE } = require('./references');
+const { STRING_PATTERN_NAME } = require('./references');
 
 module.exports = {
 	stringPatternsSchema: {
 		type: 'object',
 		propertyNames: {
-			pattern: CAPITAL_SNAKE_CASE,
+			pattern: STRING_PATTERN_NAME,
 		},
 		errorMessage: {
 			propertyNames:
