@@ -69,6 +69,7 @@ const signpost = error => {
 };
 
 (async function () {
+	console.log('Validating treecreeper schema files');
 	await sdk.ready();
 	validateFileNames();
 	const schema = {
@@ -84,6 +85,7 @@ const signpost = error => {
 	validatePresentationalStructure();
 	validateRelationshipConsistency();
 	validateGraphQL();
+	console.log('Treecreeper schema files valid');
 })();
 
 process.on('unhandledRejection', error => {
