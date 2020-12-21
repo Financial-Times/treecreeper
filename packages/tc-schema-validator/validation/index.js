@@ -29,17 +29,14 @@ const signpostTypeError = (error, kind) => {
 		kind === 'type' ? 'getTypes' : 'getRelationshipTypes'
 	]()[typeIndex];
 
-	console.log(error.dataPath, typeIndex,
-		topLevelProperty,
-		property,
-		propDefPart)
 	if (topLevelProperty === 'properties') {
 		if (propDefPart) {
 			error.signpost = `Problem in the \`${propDefPart}\` supplied for the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
-			return
-		} else if (property) {
+			return;
+		}
+		if (property) {
 			error.signpost = `Problem in the \`${property}\` property of the \`${typeDef.name}\` ${kind}`;
-			return
+			return;
 		}
 	}
 
