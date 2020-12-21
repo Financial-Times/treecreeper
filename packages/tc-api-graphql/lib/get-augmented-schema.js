@@ -78,6 +78,7 @@ const getAugmentedSchema = ({
 			},
 		},
 		resolvers,
+		allowUndefinedInResolve: true,
 		config: {
 			query: excludeTypes ? { exclude: excludeTypes } : true,
 			mutation: false,

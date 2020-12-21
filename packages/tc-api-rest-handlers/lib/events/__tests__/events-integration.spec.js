@@ -73,6 +73,23 @@ describe('Rest events module integration', () => {
 			expect(emitSpy).toHaveBeenCalledTimes(1);
 			expectDeleteEvent(mainType, mainCode);
 		});
+		it('will send extra UPDATE events when connected to related nodes', async () => {
+			const [main, child] = await Promise.all([
+				createMainNode(),
+				createNode(childType, { code: childCode }),
+			]);
+			await connectNodes(main, 'HAS_CHILD', child);
+
+			const { status } = await deleteHandler()({
+				...input,
+				query: { force: true },
+			});
+
+			expect(status).toBe(204);
+			expect(emitSpy).toHaveBeenCalledTimes(2);
+			expectDeleteEvent(mainType, mainCode);
+			expectUpdateEvent(childType, childCode, ['isChildOf']);
+		});
 	});
 
 	describe('POST', () => {

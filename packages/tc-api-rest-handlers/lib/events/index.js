@@ -46,17 +46,15 @@ const makeEvents = ({
 	neo4jResult,
 	requestId,
 }) => {
-	if (action === 'DELETE') {
-		return [
-			{
-				action: 'DELETE',
-				type,
-				code,
-			},
-		];
-	}
-
 	const events = [];
+
+	if (action === 'DELETE') {
+		events.push({
+			action: 'DELETE',
+			type,
+			code,
+		});
+	}
 
 	if (updatedProperties.length) {
 		if (action === 'UPDATE') {

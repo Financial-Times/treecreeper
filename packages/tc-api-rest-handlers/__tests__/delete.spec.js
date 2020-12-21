@@ -42,6 +42,27 @@ describe('rest DELETE', () => {
 		await neo4jTest('MainType', mainCode).exists();
 	});
 
+	it('deletes record with relationships when force=true', async () => {
+		const [main, child, parent] = await createNodes(
+			['MainType', mainCode],
+			['ChildType', `${namespace}-child`],
+			['ParentType', `${namespace}-parent`],
+		);
+		await connectNodes(
+			// tests incoming and outgoing relationships
+			[main, 'HAS_CHILD', child],
+			[parent, 'IS_PARENT_OF', main],
+		);
+
+		const { status } = await deleteHandler()({
+			...input,
+			query: { force: true },
+		});
+
+		expect(status).toBe(204);
+		await neo4jTest('MainType', mainCode).notExists();
+	});
+
 	it('throws 404 error if no record', async () => {
 		await expect(deleteHandler()(input)).rejects.httpError({
 			status: 404,

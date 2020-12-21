@@ -2,20 +2,22 @@
   "name": "@financial-times/tc-schema-validator",
   "version": "0.0.0",
   "description": "Tests to validate that a set of yaml files conforms to the treecreeper schema specification",
-  "main": "index.js",
+  "main": "validation/index.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@financial-times/tc-schema-sdk": "file:../tc-schema-sdk",
     "graphql": "^14.5.8",
+    "ajv": "^7.0.1",
+    "ajv-errors": "^2.0.0",
     "valid-url": "^1.0.9"
-  },
-  "peerDependencies": {
-    "jest": "*"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Financial-Times/treecreeper.git"
+  },
+  "bin": {
+    "tc-schema-validator": "validation/index.js"
   },
   "engines": {
     "node": "^12.0.0"
