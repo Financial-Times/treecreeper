@@ -1,4 +1,4 @@
-const { types } = require('./lists');
+const { types } = require('./references');
 
 module.exports = {
 	typeHierarchySchema: {
@@ -7,7 +7,6 @@ module.exports = {
 		type: 'object',
 		additionalProperties: {
 			type: 'object',
-			// TODO expect safe property name
 			properties: {
 				label: { type: 'string' },
 				description: { type: 'string' },

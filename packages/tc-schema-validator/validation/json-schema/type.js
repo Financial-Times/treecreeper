@@ -5,11 +5,11 @@ const {
 	complexTypes,
 	stringPatterns,
 	enums,
-} = require('./lists');
-
-const SYSTEM_CODE = '^[a-z][\\-a-z]+[a-z]$';
-const TYPE_NAME = '^[A-Z][a-zA-Z]+$';
-const RELATIONSHIP = '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$';
+	SYSTEM_CODE,
+	TYPE_NAME,
+	CAPITAL_SNAKE_CASE,
+	PROPERTY_NAME,
+} = require('./references');
 
 const typeName = {
 	type: 'string',
@@ -43,7 +43,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 				type: 'string',
 				enum: forRelationships ? simpleTypes : allTypes,
 			},
-			// do we need to avod multiline deprecation reasons once we're on graphql compose?
+			// TODO: do we need to avoid multiline deprecation reasons once we're on graphql compose?
 			deprecationReason: { type: 'string', not: { pattern: '\n' } },
 			lockedBy: {
 				type: 'array',
@@ -57,7 +57,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			},
 			relationship: {
 				type: 'string',
-				pattern: RELATIONSHIP,
+				pattern: CAPITAL_SNAKE_CASE,
 			},
 			showInactive: { type: 'boolean' },
 			writeInactive: { type: 'boolean' },
@@ -123,7 +123,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 		type: 'object',
 		propertyNames: {
 			// NOTE this regex is already defined elsewhere
-			pattern: '^(?=.{2,64}$)[a-z][a-zA-Z\\d]+$',
+			pattern: PROPERTY_NAME,
 			// banned words
 			not: { enum: ['type'] },
 		},
@@ -206,7 +206,7 @@ const relationshipTypeSchema = {
 		name: typeName,
 		from: fromOrTo,
 		to: fromOrTo,
-		relationship: { type: 'string', pattern: RELATIONSHIP },
+		relationship: { type: 'string', pattern: CAPITAL_SNAKE_CASE },
 		properties: getPropertiesSchema({ forRelationships: true }),
 	},
 	required: ['name', 'from', 'to', 'relationship', 'properties'],
