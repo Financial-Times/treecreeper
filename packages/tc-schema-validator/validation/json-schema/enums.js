@@ -1,3 +1,5 @@
+const { ENUM_NAME, ENUM_OPTION } = require('./references');
+
 const enumSchema = {
 	$schema: 'http://json-schema.org/schema#',
 	$id: 'http://biz-ops-in.ft.com/schemas/treecreeper/enum.json',
@@ -11,13 +13,13 @@ const enumSchema = {
 			then: {
 				type: 'object',
 				propertyNames: {
-					pattern: '^[a-zA-Z]+$',
+					pattern: ENUM_OPTION,
 				},
 				additionalProperties: { type: 'string' },
 			},
 			else: {
 				type: 'array',
-				items: { type: 'string', pattern: '^[a-zA-Z]+$' },
+				items: { type: 'string', pattern: ENUM_OPTION },
 			},
 		},
 	},
@@ -29,7 +31,7 @@ const enumsSchema = {
 	type: 'object',
 	additionalProperties: enumSchema,
 	propertyNames: {
-		pattern: '^[A-Z][a-zA-Z]+$',
+		pattern: ENUM_NAME,
 	},
 };
 

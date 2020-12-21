@@ -1,8 +1,10 @@
+const { CAPITAL_SNAKE_CASE } = require('./references');
+
 module.exports = {
 	stringPatternsSchema: {
 		type: 'object',
 		propertyNames: {
-			pattern: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
+			pattern: CAPITAL_SNAKE_CASE,
 		},
 		errorMessage: {
 			propertyNames:
