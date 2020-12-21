@@ -3,6 +3,7 @@ const Ajv = require('ajv').default;
 const ajvErrors = require('ajv-errors');
 const sdk = require('./sdk');
 const { getJsonSchema } = require('./json-schema');
+const { validateFileNames } = require('./ad-hoc/file-names');
 const { validateGraphQL } = require('./ad-hoc/graphql-defs');
 const {
 	validatePresentationalStructure,
@@ -69,6 +70,7 @@ const signpost = error => {
 
 (async function () {
 	await sdk.ready();
+	validateFileNames();
 	const schema = {
 		...sdk.rawData.getAll(),
 	};

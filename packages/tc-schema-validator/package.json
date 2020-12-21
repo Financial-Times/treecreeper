@@ -2,7 +2,7 @@
   "name": "@financial-times/tc-schema-validator",
   "version": "0.0.0",
   "description": "Tests to validate that a set of yaml files conforms to the treecreeper schema specification",
-  "main": "index.js",
+  "main": "validation/index.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
