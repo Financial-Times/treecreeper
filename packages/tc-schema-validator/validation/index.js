@@ -80,6 +80,11 @@ const signpost = error => {
 	delete error.keyword;
 };
 
+const fail = () => {
+	console.error('Treecreeper schema files invalid');
+	process.exit(2);
+}
+
 (async function () {
 	console.log('Validating treecreeper schema files');
 	await sdk.ready();
@@ -93,6 +98,7 @@ const signpost = error => {
 		ajv.errors.map(signpost);
 		ajv.errors = ajv.errors.filter(err => err.keyword !== 'if');
 		console.dir(new Ajv.ValidationError(ajv.errors), { depth: 10 });
+		fail()
 	}
 	validatePresentationalStructure();
 	validateRelationshipConsistency();
@@ -102,6 +108,5 @@ const signpost = error => {
 
 process.on('unhandledRejection', error => {
 	console.error(error);
-	console.error('Exiting process');
-	process.exit(2);
+	fail();
 });

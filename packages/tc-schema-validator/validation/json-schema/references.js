@@ -27,7 +27,8 @@ module.exports = {
 	SYSTEM_CODE: '^[a-z][\\-a-z]+[a-z]$',
 	TYPE_NAME: '^[A-Z][a-zA-Z]+$',
 	CAPITAL_SNAKE_CASE: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
+	STRING_PATTERN_NAME: '^(?=.{2,64}$)[A-Z][A-Z\\d_]*[A-Z\\d]$',
 	PROPERTY_NAME: '^(?=.{2,64}$)[a-z][a-zA-Z\\d]+$',
 	ENUM_NAME: '^[A-Z][a-zA-Z]+$',
-	ENUM_OPTION: '^[a-zA-Z]+$',
+	ENUM_OPTION: '^[a-zA-Z\\d_]+$',
 };

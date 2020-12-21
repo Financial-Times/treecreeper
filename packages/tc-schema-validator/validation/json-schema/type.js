@@ -28,7 +28,7 @@ const onlyForProperties = {
 const onlyForBooleans = {
 	properties: {
 		type: {
-			enum: ['boolean'],
+			enum: ['Boolean'],
 		},
 	},
 };
@@ -37,8 +37,8 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 	const propertyDefSchema = {
 		type: 'object',
 		properties: {
-			label: { type: 'string', not: { pattern: '[.!]$' } },
-			description: { type: 'string', pattern: '[.!?]$' },
+			label: { type: 'string', not: { pattern: '[.!]\\s*$' } },
+			description: { type: 'string', pattern: '[.!?]\\s*$' },
 			type: {
 				type: 'string',
 				enum: forRelationships ? simpleTypes : allTypes,
