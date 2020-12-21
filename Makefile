@@ -106,6 +106,7 @@ run-test-db:
 	make init-db
 
 test:
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-schema-validator/validation/index.js
 	@if [ -z $(CI) ]; \
 		then NEO4J_BOLT_URL=${LOCAL_BOLT_URL} TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*${spec}.*.spec.js" --testEnvironment=node --watch; \

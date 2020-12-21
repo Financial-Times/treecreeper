@@ -132,9 +132,14 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 
 	if (!forRelationships) {
 		propertiesSchema.properties = {
-			// todo expect it to have canIdentify... hmmm, but does the sdk add this anyway?
-			// also expect a pattern... but again do we get a default?
-			code: propertyDefSchema,
+			// Note - the schema-sdk automatically adds lots of required properties to
+			// the `code`` propDef, so no need to validate for them at teh schema
+			// authoring stage
+			code: {
+				...propertyDefSchema,
+				// note that for codes we always expect a pattern so it's not a free for all
+				required: [...propertyDefSchema.required, 'pattern'],
+			},
 		};
 		propertiesSchema.required = ['code'];
 	}
