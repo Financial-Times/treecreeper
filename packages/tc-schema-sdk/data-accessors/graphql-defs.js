@@ -155,6 +155,11 @@ const addTypeDefinition = (composer, sdk) => ({
 	properties,
 }) => {
 	composer.createObjectTC({ name: typeName, description });
+
+	// Build up the type definition
+	composeObjectProperties({ typeName, properties, sdk, composer });
+
+	// Add the ability to query for a single record
 	composer.Query.setField(typeName, {
 		type: typeName,
 		args: Object.fromEntries(
@@ -164,6 +169,7 @@ const addTypeDefinition = (composer, sdk) => ({
 		),
 	});
 
+	// Add the ability to query for a list of records
 	composer.Query.setField(pluralName, {
 		type: [typeName],
 		args: {
@@ -178,8 +184,6 @@ const addTypeDefinition = (composer, sdk) => ({
 			),
 		},
 	});
-
-	composeObjectProperties({ typeName, properties, sdk, composer });
 };
 
 const addRelationshipTypeDefinition = (composer, sdk) => ({
@@ -189,6 +193,9 @@ const addRelationshipTypeDefinition = (composer, sdk) => ({
 	properties,
 }) => {
 	const typeName = getRelationshipTypeName({ from, to, relationship });
+
+	// Use getOrCreate because the relationships type may be referenced
+	// in muiltiple places
 	composer.getOrCreateOTC({
 		name: typeName,
 		description: 'Internal use only',
@@ -203,8 +210,10 @@ const addRelationshipTypeDefinition = (composer, sdk) => ({
 			],
 		},
 	});
+
 	const objectTypeComposer = composer.types.get(typeName);
 
+	// As standard, relationship types must contain from and to
 	objectTypeComposer.addFields({
 		from: {
 			type: () => from.type,
@@ -214,17 +223,25 @@ const addRelationshipTypeDefinition = (composer, sdk) => ({
 		},
 	});
 
+	// Add additional properties to the type exactly as though it were a normal type
 	composeObjectProperties({ typeName, properties, sdk, composer });
 };
 
 const compose = sdk => {
 	const composer = new SchemaComposer();
+	// the handful of scalaras and directives we have to define with simple statements
 	addStaticDefinitions(composer);
+
 	addEnumDefinitions(composer, sdk);
+
 	sdk.getTypes({
 		includeMetaFields: true,
 	}).forEach(addTypeDefinition(composer, sdk));
 
+	// Note that this generates a list of relationship types for every single
+	// Type1 -> Type2 relationship, even when not defined in the schema yaml files
+	// This is so we can have a type that exposes the metadata fro every relationship
+	// even if we don't need to add anuy custom properties to it
 	sdk.getRelationshipTypes({
 		includeMetaFields: true,
 		excludeCypherRelationships: true,
