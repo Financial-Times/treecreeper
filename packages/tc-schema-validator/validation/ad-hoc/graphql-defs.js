@@ -5,7 +5,7 @@ const sdk = require('../sdk');
 module.exports = {
 	validateGraphQL: () => {
 		assert.doesNotThrow(
-			() => parse(sdk.getGraphqlDefs().join('\n')),
+			() => parse(sdk.getGraphqlDefs()),
 			'GraphQL schema construction failed',
 		);
 	},

@@ -11,6 +11,8 @@
     "clone": "^2.1.2",
     "common-tags": "^1.8.0",
     "deep-freeze": "0.0.1",
+    "graphql": "^15.4.0",
+    "graphql-compose": "^7.23.0",
     "js-yaml": "^3.13.1",
     "lodash.uniqby": "^4.7.0",
     "node-fetch": "^2.6.0"

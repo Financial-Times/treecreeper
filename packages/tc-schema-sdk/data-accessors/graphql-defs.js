@@ -1,83 +1,14 @@
-const stripIndent = require('common-tags/lib/stripIndent');
-const uniqBy = require('lodash.uniqby');
+const { SchemaComposer } = require('graphql-compose');
+const { GraphQLDirective, GraphQLString } = require('graphql');
 
-const stripEmptyFirstLine = (hardCoded, ...vars) => {
-	hardCoded = [...hardCoded];
-	hardCoded[0] = hardCoded[0].replace(/^\n+(.*)$/, ($0, $1) => $1);
-	return [...new Array(Math.max(hardCoded.length, vars.length))]
-		.map((val, i) => `${hardCoded[i] || ''}${vars[i] || ''}`)
-		.join('');
+/* utils */
+const getGraphqlType = sdk => type => {
+	return sdk.getPrimitiveTypes()[type] || type;
 };
 
-const indentMultiline = (str, indent, trimFirst) => {
-	indent = [...new Array(indent)].map(() => ' ').join('');
-	return str
-		.split('\n')
-		.map(line => {
-			line = trimFirst ? line.trim() : line;
-			return `${line.length ? indent : ''}${line}`;
-		})
-		.join('\n');
-};
+const PAGINATION_ARGS = { first: 'Int', offset: 'Int' };
 
-const printDescribedBlock = (description, content) => stripEmptyFirstLine`
-"""
-${description}
-"""
-${content}
-`;
-
-/*
-	Outputting property definitions
-*/
-
-const maybePluralType = ({ type, hasMany }) => (hasMany ? `[${type}]` : type);
-
-const maybePaginate = ({ hasMany, isRelationship }) =>
-	hasMany && isRelationship ? '(first: Int, offset: Int)' : '';
-
-const maybeDirective = def => {
-	if (def.cypher) {
-		return `@cypher(statement: "${def.cypher
-			.replace(/"/g, '\\"')
-			.split(/\n/)
-			.join('\\n')}")`;
-	}
-	if (def.relationship) {
-		return `@relation(name: "${def.relationship}", direction: "${
-			def.direction === 'outgoing' ? 'OUT' : 'IN'
-		}")`;
-	}
-
-	return '';
-};
-
-const maybeDeprecate = ({ deprecationReason }) => {
-	if (deprecationReason) {
-		return `@deprecated(reason: "${deprecationReason.replace(
-			/"/g,
-			'\\"',
-		)}")`;
-	}
-	return '';
-};
-
-const printPropertyDefinition = ({
-	description = '',
-	name = '',
-	pagination = '',
-	type = '',
-	directive = '',
-	deprecation = '',
-}) =>
-	printDescribedBlock(
-		description,
-		`${name}${pagination}: ${type} ${directive} ${deprecation}`,
-	);
-
-/*
-	Outputting rich relationships
-*/
+const maybePluralise = (hasMany, type) => (hasMany ? [type] : type);
 
 const snakeToCamel = str => {
 	const camel = str
@@ -90,296 +21,237 @@ const snakeToCamel = str => {
 	return camel;
 };
 
-const getRichRelationshipTypeName = (from, relationship, to) =>
-	snakeToCamel(`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`);
-
-const getRichRelationshipPropertyType = ({
-	from,
-	to,
+const getRelationshipTypeName = ({
+	from: { type: from },
+	to: { type: to },
 	relationship,
-	hasMany,
 }) => {
-	return maybePluralType({
-		type: getRichRelationshipTypeName(from, relationship, to),
-		hasMany,
+	return snakeToCamel(
+		`${from.toUpperCase()}_${relationship}_${to.toUpperCase()}`,
+	);
+};
+
+const addStaticDefinitions = composer => {
+	composer.addDirective(
+		new GraphQLDirective({
+			name: 'deprecated',
+			locations: [
+				'FIELD_DEFINITION',
+				'ENUM_VALUE',
+				'ARGUMENT_DEFINITION',
+			],
+			args: {
+				reason: {
+					defaultValue: 'No longer supported',
+					type: GraphQLString,
+				},
+			},
+		}),
+	);
+	composer.createScalarTC('DateTime');
+	composer.createScalarTC('Date');
+	composer.createScalarTC('Time');
+};
+
+const addEnumDefinitions = (composer, sdk) => {
+	Object.entries(sdk.getEnums({ withMeta: true })).map(
+		([name, { description: enumDescription, options }]) => {
+			const values = {};
+			Object.values(options).forEach(
+				({ value, description: valueDescription }) => {
+					values[value] = { description: valueDescription };
+				},
+			);
+			composer.createEnumTC({
+				name,
+				description: enumDescription,
+				values,
+			});
+		},
+	);
+};
+
+const getDirectives = ({ cypher, relationship, direction }) => {
+	const directives = [];
+
+	if (cypher) {
+		directives.push({
+			name: 'cypher',
+			args: {
+				statement: cypher,
+			},
+		});
+	}
+	if (relationship) {
+		directives.push({
+			name: 'relation',
+			args: {
+				name: relationship,
+				direction: direction === 'outgoing' ? 'OUT' : 'IN',
+			},
+		});
+	}
+	return directives;
+};
+
+// TODO, should this check for `relationship` not `isRelationship` to avoid paginating @cypher props
+const getArgs = ({ hasMany, isRelationship }) =>
+	hasMany && isRelationship ? PAGINATION_ARGS : null;
+
+const composeObjectProperties = ({ typeName, properties, sdk, composer }) => {
+	const typeConverter = getGraphqlType(sdk);
+	const objectTypeComposer = composer.types.get(typeName);
+
+	Object.entries(properties).forEach(([fieldName, def]) => {
+		objectTypeComposer.setField(fieldName, {
+			description: def.description,
+			type: () => maybePluralise(def.hasMany, typeConverter(def.type)),
+			deprecationReason: def.deprecationReason,
+			extensions: {
+				directives: getDirectives(def),
+			},
+			args: getArgs(def),
+		});
+
+		if (def.relationship) {
+			objectTypeComposer.setField(`${fieldName}_rel`, {
+				description: `${def.description}
+*NOTE: This gives access to properties on the relationships between records
+as well as on the records themselves. Use '${fieldName}' instead if you do not need this*`,
+				deprecationReason: def.deprecationReason,
+				extensions: {
+					directives:
+						typeName === def.type
+							? [
+									{
+										name: 'relation',
+										args: {
+											direction:
+												def.direction === 'outgoing'
+													? 'OUT'
+													: 'IN',
+										},
+									},
+							  ]
+							: [],
+				},
+				type: () =>
+					maybePluralise(
+						def.hasMany,
+						getRelationshipTypeName(
+							sdk.getRelationshipType(typeName, fieldName),
+						),
+					),
+				args: getArgs(def),
+			});
+		}
 	});
 };
 
-const flattenRelationshipType = ({ from, to, relationship }) => ({
-	relationship,
-	from: from.type,
-	to: to.type,
-});
+const addTypeDefinition = (composer, sdk) => ({
+	name: typeName,
+	pluralName,
+	description,
+	properties,
+}) => {
+	composer.createObjectTC({ name: typeName, description });
 
-const buildRelationshipTypeModel = relationshipType => {
-	const { from, relationship, to } = flattenRelationshipType(
-		relationshipType,
-	);
-	return {
-		typeName: getRichRelationshipTypeName(from, relationship, to),
-		...relationshipType,
-	};
-};
+	// Build up the type definition
+	composeObjectProperties({ typeName, properties, sdk, composer });
 
-/*
-	Outputting Query definitions
-*/
+	// Add the ability to query for a single record
+	composer.Query.setField(typeName, {
+		type: typeName,
+		args: Object.fromEntries(
+			Object.entries(properties)
+				.filter(([, def]) => def.canIdentify)
+				.map(([name, { type }]) => [name, getGraphqlType(sdk)(type)]),
+		),
+	});
 
-const getIdentifyingFields = config =>
-	Object.entries(config.properties).filter(([, value]) => value.canIdentify);
-
-const getFilteringFields = config =>
-	Object.entries(config.properties).filter(
-		([, { relationship, cypher }]) => !relationship && !cypher,
-	);
-
-const paginationConfig = [
-	{
-		name: 'offset',
-		type: 'Int = 0',
-		description: 'The pagination offset to use',
-	},
-	{
-		name: 'first',
-		type: 'Int = 20000',
-		description:
-			'The number of records to return after the pagination offset. This uses the default neo4j ordering',
-	},
-];
-
-const printPaginationDefinition = paginate =>
-	paginate
-		? indentMultiline(
-				paginationConfig.map(printPropertyDefinition).join('\n'),
-				4,
-				true,
-		  )
-		: '';
-
-const printEnumOptionDefinition = ({ value, description }) =>
-	description ? printDescribedBlock(description, value) : value;
-
-const printEnumDefinition = ([name, { description, options }]) => {
-	const enums = Object.values(options).map(printEnumOptionDefinition);
-
-	return printDescribedBlock(
-		description,
-		`enum ${name} {
-${indentMultiline(enums.join('\n'), 2)}
-}`,
-	);
-};
-
-const STATIC_DEFINITIONS = stripIndent`
-		directive @deprecated(
-		  reason: String = "No longer supported"
-		) on FIELD_DEFINITION | ENUM_VALUE | ARGUMENT_DEFINITION
-
-		scalar DateTime
-		scalar Date
-		scalar Time
-	`;
-
-class GraphqlDefGenerator {
-	constructor(sdk) {
-		this.sdk = sdk;
-		this.printTypeDefinition = this.printTypeDefinition.bind(this);
-		this.printRichRelationshipPropertyDefinitions = this.printRichRelationshipPropertyDefinitions.bind(
-			this,
-		);
-		this.buildRichRelationshipPropertyModel = this.buildRichRelationshipPropertyModel.bind(
-			this,
-		);
-		this.printRelationshipTypeDefinition = this.printRelationshipTypeDefinition.bind(
-			this,
-		);
-	}
-
-	generate() {
-		return [].concat(
-			STATIC_DEFINITIONS,
-			this.getTypeDefinitions(),
-			this.getRelationshipTypeDefinitions(),
-			this.getQueryDefinition(),
-			this.getEnumDefinitions(),
-		);
-	}
-
-	getTypeDefinitions() {
-		return this.sdk
-			.getTypes({
-				includeMetaFields: true,
-			})
-			.map(this.printTypeDefinition);
-	}
-
-	getRelationshipTypeDefinitions() {
-		const relationshipTypes = this.sdk
-			.getRelationshipTypes({
-				includeMetaFields: true,
-				excludeCypherRelationships: true,
-			})
-			.flatMap(buildRelationshipTypeModel);
-
-		return uniqBy(relationshipTypes, ({ typeName }) => typeName).map(
-			this.printRelationshipTypeDefinition,
-		);
-	}
-
-	printRelationshipTypeDefinition({
-		from,
-		to,
-		typeName,
-		relationship,
-		properties,
-	}) {
-		let propStr = '';
-		if (Object.keys(properties).length) {
-			propStr = indentMultiline(
-				this.printPropertyDefinitions(properties),
-				4,
-				true,
-			);
-		}
-		return printDescribedBlock(
-			'Internal use only',
-			stripIndent`
-	type ${typeName} @relation(name: "${relationship}") {
-		from: ${from.type}
-		to: ${to.type}
-		${propStr}
-	}`,
-		);
-	}
-
-	getQueryDefinition() {
-		const types = this.sdk.getTypes({
-			includeMetaFields: true,
-		});
-		return [
-			'type Query {\n',
-			...types.map(config =>
-				[
-					this.printQueryDefinition({
-						name: config.name,
-						type: config.name,
-						description: config.description,
-						properties: getIdentifyingFields(config),
-					}),
-					this.printQueryDefinition({
-						name: config.pluralName,
-						type: `[${config.name}]`,
-						description: config.description,
-						properties: getFilteringFields(config),
-						paginate: true,
-					}),
-				].join('\n'),
+	// Add the ability to query for a list of records
+	composer.Query.setField(pluralName, {
+		type: [typeName],
+		args: {
+			...PAGINATION_ARGS,
+			...Object.fromEntries(
+				Object.entries(properties)
+					.filter(([, def]) => !def.relationship && !def.cypher)
+					.map(([name, { type }]) => [
+						name,
+						getGraphqlType(sdk)(type),
+					]),
 			),
-			'}',
-		];
-	}
+		},
+	});
+};
 
-	printQueryDefinition({ name, type, description, properties, paginate }) {
-		return printDescribedBlock(
-			description,
-			`${name}(
-		${printPaginationDefinition(paginate)}
-		${indentMultiline(this.printPropertyDefinitions(properties), 4, true)}
-	): ${type}`,
-		);
-	}
+const addRelationshipTypeDefinition = (composer, sdk) => ({
+	from,
+	to,
+	relationship,
+	properties,
+}) => {
+	const typeName = getRelationshipTypeName({ from, to, relationship });
 
-	getEnumDefinitions() {
-		return Object.entries(this.sdk.getEnums({ withMeta: true })).map(
-			printEnumDefinition,
-		);
-	}
+	// Use getOrCreate because the relationships type may be referenced
+	// in muiltiple places
+	composer.getOrCreateOTC({
+		name: typeName,
+		description: 'Internal use only',
+		extensions: {
+			directives: [
+				{
+					name: 'relation',
+					args: {
+						name: relationship,
+					},
+				},
+			],
+		},
+	});
 
-	/*
-		Outputting types
-	*/
-	printTypeDefinition({ name, description, properties }) {
-		return printDescribedBlock(
-			description,
-			stripEmptyFirstLine`
+	const objectTypeComposer = composer.types.get(typeName);
 
-type ${name} {
-	${indentMultiline(this.printPropertyDefinitions(properties), 2, true)}
-	${indentMultiline(
-		this.printRichRelationshipPropertyDefinitions(properties, name),
-		2,
-		true,
-	)}
-}`,
-		);
-	}
+	// As standard, relationship types must contain from and to
+	objectTypeComposer.addFields({
+		from: {
+			type: () => from.type,
+		},
+		to: {
+			type: () => to.type,
+		},
+	});
 
-	printRichRelationshipPropertyDefinitions(properties, rootType) {
-		return Object.entries(properties)
-			.filter(([, { relationship }]) => relationship)
-			.map(([propName, def]) =>
-				this.buildRichRelationshipPropertyModel(
-					propName,
-					def,
-					rootType,
-				),
-			)
-			.map(printPropertyDefinition)
-			.join('');
-	}
+	// Add additional properties to the type exactly as though it were a normal type
+	composeObjectProperties({ typeName, properties, sdk, composer });
+};
 
-	buildRichRelationshipPropertyModel(propName, def, rootType) {
-		return {
-			description: stripEmptyFirstLine`
-		${def.description}
-		*NOTE: This gives access to properties on the relationships between records
-		as well as on the records themselves. Use '${propName}' instead if you do not need this*`,
-			name: `${propName}_rel`,
-			pagination: maybePaginate(def),
-			type: getRichRelationshipPropertyType({
-				hasMany: def.hasMany,
-				...flattenRelationshipType(
-					this.sdk.getRelationshipType(rootType, propName),
-				),
-			}),
-			deprecation: maybeDeprecate(def),
-			directive:
-				rootType === def.type
-					? `@relation(direction: "${
-							def.direction === 'outgoing' ? 'OUT' : 'IN'
-					  }")`
-					: '',
-		};
-	}
+const compose = sdk => {
+	const composer = new SchemaComposer();
+	// the handful of scalaras and directives we have to define with simple statements
+	addStaticDefinitions(composer);
 
-	printPropertyDefinitions(properties) {
-		if (!Array.isArray(properties)) {
-			properties = Object.entries(properties);
-		}
+	addEnumDefinitions(composer, sdk);
 
-		return properties
-			.map(([name, def]) => ({
-				description: def.description,
-				name,
-				pagination: maybePaginate(def),
-				type: maybePluralType({
-					...def,
-					type: this.getGraphqlType(def.type),
-				}),
-				directive: maybeDirective(def),
-				deprecation: maybeDeprecate(def),
-			}))
-			.map(printPropertyDefinition)
-			.join('\n');
-	}
+	sdk.getTypes({
+		includeMetaFields: true,
+	}).forEach(addTypeDefinition(composer, sdk));
 
-	getGraphqlType(type) {
-		return this.sdk.getPrimitiveTypes()[type] || type;
-	}
-}
+	// Note that this generates a list of relationship types for every single
+	// Type1 -> Type2 relationship, even when not defined in the schema yaml files
+	// This is so we can have a type that exposes the metadata fro every relationship
+	// even if we don't need to add anuy custom properties to it
+	sdk.getRelationshipTypes({
+		includeMetaFields: true,
+		excludeCypherRelationships: true,
+	}).forEach(addRelationshipTypeDefinition(composer, sdk));
+
+	return composer;
+};
 
 module.exports = {
 	accessor() {
-		return new GraphqlDefGenerator(this).generate();
+		return compose(this).toSDL();
 	},
 };

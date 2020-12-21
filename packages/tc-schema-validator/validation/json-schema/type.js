@@ -122,10 +122,9 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 	const propertiesSchema = {
 		type: 'object',
 		propertyNames: {
-			// NOTE this regex is already defined elsewhere
 			pattern: PROPERTY_NAME,
 			// banned words
-			not: { enum: ['type'] },
+			not: { enum: forRelationships ? ['from', 'to', 'type'] : ['type'] },
 		},
 		additionalProperties: propertyDefSchema,
 	};
