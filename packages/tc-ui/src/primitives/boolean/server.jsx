@@ -25,15 +25,15 @@ const Checkbox = ({
 }) => {
 	const name = !isNested ? propertyName : `${parentCode}-${propertyName}`;
 	const label = getBooleanLabel(checkboxValue);
-
+	const id = `radio-${propertyName}-${label}`;
 	return (
-		<label>
+		<label htmlFor={id}>
 			<input
 				type="radio"
 				name={name}
 				value={checkboxValue.toString()}
 				aria-label={label}
-				id={`radio-${propertyName}-${label}`}
+				id={id}
 				defaultChecked={userValue === checkboxValue ? 'true' : null}
 				disabled={disabled}
 				data-parent-code={parentCode}
