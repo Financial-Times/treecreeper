@@ -52,7 +52,7 @@ const WrappedEditComponent = props => {
 	props = { ...props, disabled: !!props.lockedBy };
 	const { Component, propertyName, wrapperTag } = props;
 	const WrapperTag = wrapperTag || 'label';
-	const htmlFor = WrapperTag === 'label' ? propertyName : '';
+	const htmlFor = WrapperTag === 'label' ? `id-${propertyName}` : '';
 
 	return (
 		<WrapperTag
