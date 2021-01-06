@@ -1,9 +1,11 @@
 name: CuriousSibling
 from:
   type: MainType
+  otherNodeName: youngerSibling
   hasMany: true
 to:
   type: MainType
+  otherNodeName: olderSibling
   hasMany: true
 relationship: HAS_YOUNGER_ANNOTATED_SIBLING
 properties:

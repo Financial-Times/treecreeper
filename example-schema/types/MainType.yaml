@@ -102,6 +102,7 @@ properties:
   youngerSiblings:
     relationship: HAS_YOUNGER_SIBLING
     type: MainType
+    otherNodeName: youngerSibling
     description: Younger siblings description.
     label: Younger siblings label
     direction: outgoing
@@ -109,6 +110,7 @@ properties:
   olderSiblings:
     relationship: HAS_YOUNGER_SIBLING
     type: MainType
+    otherNodeName: olderSibling
     description: Older siblings description.
     label: Older siblings label
     direction: incoming
