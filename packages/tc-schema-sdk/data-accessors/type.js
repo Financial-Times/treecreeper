@@ -56,7 +56,9 @@ const hydrateFieldsets = ({
 		targetFieldset.properties.push([prop, def]);
 	};
 
-	Object.entries(properties).forEach(([prop, def]) => {
+	Object.entries(properties)
+	.filter(([,{isBeta}]) => !isBeta || this.includeBeta)
+	.forEach(([prop, def]) => {
 		const { fieldset } = def;
 
 		if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {

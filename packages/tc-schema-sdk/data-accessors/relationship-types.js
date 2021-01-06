@@ -16,6 +16,7 @@ module.exports = {
 					([, { relationship, type }]) =>
 						relationship || rawRelationshipTypes.includes(type),
 				)
+				.filter(({isBeta}) => !isBeta || this.includeBeta)
 				.map(([propName]) =>
 					this.getRelationshipType(name, propName, {
 						primitiveTypes,

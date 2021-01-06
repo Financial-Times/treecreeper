@@ -137,6 +137,9 @@ const getRelationshipType = function (
 	}
 	let properties = { ...(relationshipType.properties || {}) };
 
+
+	properties = Object.fromEntries(Object.entries(properties).filter(([,{isBeta}]) => !isBeta || this.includeBeta))
+
 	if (includeMetaFields) {
 		properties = assignMetaProperties(properties, {
 			ignoreFields: '_lockedFields',

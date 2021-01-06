@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const AWS = require('aws-sdk');
 const { Readable } = require('stream');
-const schema = require('@financial-times/tc-schema-sdk');
+const {SDK} = require('@financial-times/tc-schema-sdk');
 
 const s3Client = new AWS.S3({ region: 'eu-west-1' });
 
@@ -13,7 +13,9 @@ const getVersion = schemaObject => {
 const sendSchemaToS3 = async (
 	environment,
 	bucketName = process.env.TREECREEPER_SCHEMA_BUCKET,
+	includeBeta = false
 ) => {
+	const schema = new SDK({includeBeta})
 	await schema.ready();
 	const schemaObject = {
 		...schema.rawData.getAll(),
