@@ -73,7 +73,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			hasMany: { type: 'boolean' },
 			trueLabel: { type: 'string' },
 			falseLabel: { type: 'string' },
-			otherNodeName: {type: 'string', pattern: PROPERTY_NAME },
+			otherNodeName: { type: 'string', pattern: PROPERTY_NAME },
 		},
 		required: ['label', 'description', 'type'],
 		additionalProperties: false,
@@ -201,7 +201,7 @@ const fromOrTo = {
 	properties: {
 		type: { type: 'string', enum: types },
 		hasMany: { type: 'boolean' },
-		otherNodeName: {type: 'string', pattern: PROPERTY_NAME },
+		otherNodeName: { type: 'string', pattern: PROPERTY_NAME },
 	},
 };
 
