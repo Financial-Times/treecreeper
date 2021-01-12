@@ -200,6 +200,7 @@ const fromOrTo = {
 	properties: {
 		type: { type: 'string', enum: types },
 		hasMany: { type: 'boolean' },
+		otherNodeName: {type: 'string'},
 	},
 };
 
