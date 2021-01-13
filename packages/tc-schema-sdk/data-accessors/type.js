@@ -107,6 +107,11 @@ const findEndType = (direction, relationshipType) =>
 		? relationshipType.to.type
 		: relationshipType.from.type;
 
+const findEndOtherNodeName = (direction, relationshipType) =>
+	direction === 'outgoing'
+		? relationshipType.to.otherNodeName
+		: relationshipType.from.otherNodeName;
+
 const findCardinality = (direction, relationshipType) =>
 	direction === 'outgoing'
 		? relationshipType.to.hasMany
@@ -140,6 +145,7 @@ const createPropertiesWithRelationships = function ({
 					...updatedProps,
 					[propName]: {
 						...propDef,
+						...(propDef.cypher) && {otherNodeName: propDef.otherNodeName || propDef.type},   // only if its prop is a relationship
 						isRelationship: !!propDef.cypher,
 						hasMany: !!propDef.hasMany,
 					},
@@ -158,6 +164,7 @@ const createPropertiesWithRelationships = function ({
 					...propDef,
 					direction,
 					type: findEndType(direction, relationshipType),
+					otherNodeName: findEndOtherNodeName(direction, relationshipType),
 					relationship: relationshipType.relationship,
 					hasMany: findCardinality(direction, relationshipType),
 					isRelationship: true,
@@ -244,6 +251,7 @@ const getType = function (
 				includeMetaFields,
 			},
 		);
+
 
 	properties = createPropertiesWithRelationships({
 		richRelationshipTypes,

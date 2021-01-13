@@ -651,6 +651,7 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'outgoing',
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				hasMany: false,
 				isRelationship: true,
 				showInactive: true,
@@ -690,6 +691,7 @@ describe('get-type', () => {
 				relationship: 'HAS',
 				direction: 'incoming',
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				isRelationship: true,
 				showInactive: true,
 				writeInactive: false,
@@ -778,6 +780,7 @@ describe('get-type', () => {
 
 			expect(type.properties.testName).toMatchObject({
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				hasMany: false,
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				isRelationship: true,
@@ -831,6 +834,7 @@ describe('get-type', () => {
 				showInactive: true,
 				writeInactive: false,
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				relationship: 'HAS',
 				direction: 'outgoing',
 				hasMany: true,
@@ -839,6 +843,7 @@ describe('get-type', () => {
 			expect(type.properties.cypherMany).toEqual({
 				isRelationship: true,
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				hasMany: true,
 			});
@@ -847,6 +852,7 @@ describe('get-type', () => {
 				showInactive: true,
 				writeInactive: false,
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				relationship: 'HAS',
 				direction: 'incoming',
 				hasMany: false,
@@ -989,6 +995,7 @@ describe('get-type', () => {
 
 			expect(sdk.getType('Type1').properties.testNameOutgoing).toEqual({
 				type: 'Type2',
+				otherNodeName: 'Type2',
 				properties: {
 					testProp: {
 						type: Boolean,
@@ -1003,6 +1010,7 @@ describe('get-type', () => {
 			});
 			expect(sdk.getType('Type2').properties.testNameIncoming).toEqual({
 				type: 'Type1',
+				otherNodeName: 'Type1',
 				properties: {
 					testProp: {
 						type: Boolean,
