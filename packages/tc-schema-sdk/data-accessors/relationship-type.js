@@ -66,11 +66,9 @@ const formatRichRelationship = richRelationshipDefinition => {
 	const { from } = richRelationshipDefinition;
 	const { to } = richRelationshipDefinition;
 	const enriched = {
-		name: richRelationshipDefinition.name,
-		relationship: richRelationshipDefinition.relationship,
-		from: { ...from, otherNodeName: from.type },
-		to: { ...to, otherNodeName: to.type },
-		properties: richRelationshipDefinition.properties,
+		...richRelationshipDefinition,
+		from: {...from, otherNodeName: from.type },
+		to: {...to, otherNodeName: to.type },
 	};
 	return enriched;
 };
