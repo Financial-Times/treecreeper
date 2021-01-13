@@ -44,23 +44,27 @@ describe('get-relationship-type', () => {
 			},
 		});
 
-		it('can retrieve relationship type', () => {
+		it('can retrieve relationship type and otherNodeName', () => {
 			const rel = schema.getRelationshipType(
 				'Type1',
 				'someRelationshipTo',
 			);
-			expect(rel).toMatchObject({
-				from: {
-					type: 'Type1',
-					hasMany: false,
-				},
-				to: {
-					type: 'Type2',
-					hasMany: true,
-				},
-				relationship: 'RELATED',
-				properties: {},
-			});
+			expect(rel).toEqual(
+				expect.objectContaining({
+					from: {
+						type: 'Type1',
+						otherNodeName: 'Type1',
+						hasMany: false,
+					},
+					to: {
+						type: 'Type2',
+						otherNodeName: 'Type2',
+						hasMany: true,
+					},
+					relationship: 'RELATED',
+					properties: {},
+				}),
+			);
 		});
 
 		it('throws TreecreeperUserError if root type not exists', () => {
@@ -133,25 +137,29 @@ describe('get-relationship-type', () => {
 			},
 		});
 
-		it('can retrieve relationship type with expected properties', () => {
+		it('can retrieve relationship type with expected properties including otherNodeName', () => {
 			const from = schema.getRelationshipType('Type1', 'relationshipTo', {
 				includeMetaFields: true,
 			});
 			const to = schema.getRelationshipType('Type2', 'relationshipFrom', {
 				includeMetaFields: true,
 			});
-			expect(from).toMatchObject({
-				from: {
-					type: 'Type1',
-					hasMany: false,
-				},
-				to: {
-					type: 'Type2',
-					hasMany: true,
-				},
-				relationship: 'RELATED',
-				properties: expect.any(Object),
-			});
+			expect(from).toEqual(
+				expect.objectContaining({
+					from: {
+						type: 'Type1',
+						otherNodeName: 'Type1',
+						hasMany: false,
+					},
+					to: {
+						type: 'Type2',
+						otherNodeName: 'Type2',
+						hasMany: true,
+					},
+					relationship: 'RELATED',
+					properties: expect.any(Object),
+				}),
+			);
 			expect(from.properties.someString).toMatchObject({
 				type: 'Word',
 			});
@@ -161,18 +169,22 @@ describe('get-relationship-type', () => {
 				}),
 			);
 
-			expect(to).toMatchObject({
-				from: {
-					type: 'Type1',
-					hasMany: false,
-				},
-				to: {
-					type: 'Type2',
-					hasMany: true,
-				},
-				relationship: 'RELATED',
-				properties: expect.any(Object),
-			});
+			expect(to).toEqual(
+				expect.objectContaining({
+					from: {
+						type: 'Type1',
+						otherNodeName: 'Type1',
+						hasMany: false,
+					},
+					to: {
+						type: 'Type2',
+						otherNodeName: 'Type2',
+						hasMany: true,
+					},
+					relationship: 'RELATED',
+					properties: expect.any(Object),
+				}),
+			);
 			expect(to.properties.someString).toMatchObject({
 				type: 'Word',
 			});

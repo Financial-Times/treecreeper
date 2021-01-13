@@ -44,10 +44,12 @@ const formatSimpleRelationship = (
 		property.direction,
 		{
 			type: rootType,
+			otherNodeName: oppositeProperty.otherNodeName || rootType,
 			hasMany: !!oppositeProperty.hasMany,
 		},
 		{
 			type: property.type,
+			otherNodeName: property.otherNodeName || property.type,
 			hasMany: !!property.hasMany,
 		},
 	);
@@ -58,6 +60,19 @@ const formatSimpleRelationship = (
 		to,
 		properties: {},
 	};
+};
+
+const formatRichRelationship = richRelationshipDefinition => {
+	const { from } = richRelationshipDefinition;
+	const { to } = richRelationshipDefinition;
+	const enriched = {
+		name: richRelationshipDefinition.name,
+		relationship: richRelationshipDefinition.relationship,
+		from: { ...from, otherNodeName: from.type },
+		to: { ...to, otherNodeName: to.type },
+		properties: richRelationshipDefinition.properties,
+	};
+	return enriched;
 };
 
 const getTypeProperty = (rootType, propertyName, rawData) => {
@@ -107,7 +122,7 @@ const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 	);
 
 	if (richRelationshipDefinition) {
-		return richRelationshipDefinition;
+		return formatRichRelationship(richRelationshipDefinition);
 	}
 
 	throw new TreecreeperUserError(
@@ -135,6 +150,7 @@ const getRelationshipType = function (
 	if (!relationshipType) {
 		return;
 	}
+
 	let properties = { ...(relationshipType.properties || {}) };
 
 	if (includeMetaFields) {

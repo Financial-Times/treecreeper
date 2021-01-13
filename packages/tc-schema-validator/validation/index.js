@@ -82,7 +82,7 @@ const signpost = error => {
 
 const fail = () => {
 	console.error('Treecreeper schema files invalid');
-	process.exit(2);
+	// process.exit(2);
 };
 
 (async function () {
@@ -108,5 +108,5 @@ const fail = () => {
 
 process.on('unhandledRejection', error => {
 	console.error(error);
-	fail();
+	// fail();
 });
