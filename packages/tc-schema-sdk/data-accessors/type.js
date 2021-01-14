@@ -163,7 +163,10 @@ const createPropertiesWithRelationships = function ({
 					...propDef,
 					direction,
 					type: findEndType(direction, relationshipType),
-					otherNodeName: findEndOtherNodeName(direction, relationshipType),
+					otherNodeName: findEndOtherNodeName(
+						direction,
+						relationshipType,
+					),
 					relationship: relationshipType.relationship,
 					hasMany: findCardinality(direction, relationshipType),
 					isRelationship: true,
@@ -250,7 +253,6 @@ const getType = function (
 				includeMetaFields,
 			},
 		);
-
 
 	properties = createPropertiesWithRelationships({
 		richRelationshipTypes,

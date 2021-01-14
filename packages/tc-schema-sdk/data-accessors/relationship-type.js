@@ -62,14 +62,17 @@ const formatSimpleRelationship = (
 	};
 };
 
-const formatRichRelationship = richRelationshipDefinition => {
+const setOtherNodeNameWhenAbsent = richRelationshipDefinition => {
 	const { from, to } = richRelationshipDefinition;
-	const enriched = {
+	if (from.otherNodeName && to.otherNodeName) {
+		return richRelationshipDefinition;
+	}
+
+	return {
 		...richRelationshipDefinition,
-		from: {otherNodeName: from.type, ...from },
-		to: {otherNodeName: to.type, ...to },
+		from: { otherNodeName: from.type, ...from },
+		to: { otherNodeName: to.type, ...to },
 	};
-	return enriched;
 };
 
 const getTypeProperty = (rootType, propertyName, rawData) => {
@@ -119,7 +122,7 @@ const getRelationshipTypeFromRawData = (rootType, propertyName, rawData) => {
 	);
 
 	if (richRelationshipDefinition) {
-		return formatRichRelationship(richRelationshipDefinition);
+		return setOtherNodeNameWhenAbsent(richRelationshipDefinition);
 	}
 
 	throw new TreecreeperUserError(

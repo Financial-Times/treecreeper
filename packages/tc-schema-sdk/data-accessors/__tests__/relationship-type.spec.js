@@ -68,7 +68,6 @@ describe('get-relationship-type', () => {
 			);
 		});
 
-
 		it('throws TreecreeperUserError if root type not exists', () => {
 			expect(() =>
 				schema.getRelationshipType('OtherType1', 'someString'),
