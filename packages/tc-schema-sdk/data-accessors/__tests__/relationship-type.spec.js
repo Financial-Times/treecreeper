@@ -27,6 +27,7 @@ describe('get-relationship-type', () => {
 							properties: {
 								someRelationshipFrom: {
 									type: 'Type1',
+									otherNodeName: 'otherType1',
 									relationship: 'RELATED',
 									direction: 'incoming',
 									hasMany: false,
@@ -53,7 +54,7 @@ describe('get-relationship-type', () => {
 				expect.objectContaining({
 					from: {
 						type: 'Type1',
-						otherNodeName: 'Type1',
+						otherNodeName: 'otherType1',
 						hasMany: false,
 					},
 					to: {
@@ -66,6 +67,7 @@ describe('get-relationship-type', () => {
 				}),
 			);
 		});
+
 
 		it('throws TreecreeperUserError if root type not exists', () => {
 			expect(() =>
@@ -119,6 +121,7 @@ describe('get-relationship-type', () => {
 							},
 							from: {
 								type: 'Type1',
+								otherNodeName: 'otherType1',
 								hasMany: false,
 							},
 							to: {
@@ -148,7 +151,7 @@ describe('get-relationship-type', () => {
 				expect.objectContaining({
 					from: {
 						type: 'Type1',
-						otherNodeName: 'Type1',
+						otherNodeName: 'otherType1',
 						hasMany: false,
 					},
 					to: {
@@ -173,7 +176,7 @@ describe('get-relationship-type', () => {
 				expect.objectContaining({
 					from: {
 						type: 'Type1',
-						otherNodeName: 'Type1',
+						otherNodeName: 'otherType1',
 						hasMany: false,
 					},
 					to: {

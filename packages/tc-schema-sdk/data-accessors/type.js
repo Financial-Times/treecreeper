@@ -145,7 +145,6 @@ const createPropertiesWithRelationships = function ({
 					...updatedProps,
 					[propName]: {
 						...propDef,
-						...(propDef.cypher) && {otherNodeName: propDef.otherNodeName || propDef.type},   // only if its prop is a relationship
 						isRelationship: !!propDef.cypher,
 						hasMany: !!propDef.hasMany,
 					},

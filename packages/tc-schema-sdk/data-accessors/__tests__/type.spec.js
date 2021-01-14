@@ -764,6 +764,27 @@ describe('get-type', () => {
 			expect(type.properties.testName2.direction).toBe('incoming');
 		});
 
+		it('retrieve explicit otherNodeName from relationships', () => {
+			const type = typeFromRawData({
+				name: 'Type1',
+				properties: {
+					testName1: {
+						type: 'Type1',
+						otherNodeName: 'otherType1',
+						direction: 'outgoing',
+						relationship: 'HAS',
+					},
+					testName2: {
+						type: 'Type1',
+						direction: 'incoming',
+						relationship: 'HAS',
+					},
+				},
+			});
+			expect(type.properties.testName1.otherNodeName).toBe('otherType1');
+			expect(type.properties.testName2.otherNodeName).toBe('Type1');
+		});
+
 		it('define relationships with cypher query', () => {
 			const type = typeFromRawData({
 				name: 'Type1',
@@ -780,7 +801,6 @@ describe('get-type', () => {
 
 			expect(type.properties.testName).toMatchObject({
 				type: 'Type2',
-				otherNodeName: 'Type2',
 				hasMany: false,
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				isRelationship: true,
@@ -843,7 +863,6 @@ describe('get-type', () => {
 			expect(type.properties.cypherMany).toEqual({
 				isRelationship: true,
 				type: 'Type2',
-				otherNodeName: 'Type2',
 				cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 				hasMany: true,
 			});

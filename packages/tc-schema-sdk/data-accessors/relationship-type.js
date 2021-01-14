@@ -63,12 +63,11 @@ const formatSimpleRelationship = (
 };
 
 const formatRichRelationship = richRelationshipDefinition => {
-	const { from } = richRelationshipDefinition;
-	const { to } = richRelationshipDefinition;
+	const { from, to } = richRelationshipDefinition;
 	const enriched = {
 		...richRelationshipDefinition,
-		from: {...from, otherNodeName: from.type },
-		to: {...to, otherNodeName: to.type },
+		from: {otherNodeName: from.type, ...from },
+		to: {otherNodeName: to.type, ...to },
 	};
 	return enriched;
 };
