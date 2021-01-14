@@ -2,8 +2,8 @@ const {
 	isDateTime,
 	isDate,
 	isTime,
-} = require('neo4j-driver/lib/v1/temporal-types');
-const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
+} = require('neo4j-driver/lib/temporal-types');
+const neo4jTemporalTypes = require('neo4j-driver/lib/temporal-types');
 const { getType } = require('@financial-times/tc-schema-sdk');
 
 const entriesToObject = (map, [key, val]) => Object.assign(map, { [key]: val });

@@ -19,7 +19,7 @@ node_modules/@financial-times/rel-engage/index.mk:
 # ---------------------------
 LOCAL_BOLT_URL=bolt://localhost:7687
 BIZ_OPS_BOLT_URL=${NEO4J_BOLT_URL}
-NEO4J_VERSION=3.5.0
+NEO4J_VERSION=4.1.5
 PRODUCT_NAME=biz-ops
 PROJECT_NAME=biz-ops-api
 

@@ -1,4 +1,4 @@
-const neo4j = require('neo4j-driver').v1;
+const neo4j = require('neo4j-driver');
 const metrics = require('next-metrics');
 const { logger } = require('@financial-times/tc-api-express-logger');
 

@@ -1,4 +1,4 @@
-const neo4jTemporalTypes = require('neo4j-driver/lib/v1/temporal-types');
+const neo4jTemporalTypes = require('neo4j-driver/lib/temporal-types');
 const { getType } = require('@financial-times/tc-schema-sdk');
 
 const isNullValue = val => val === null || val === '';
