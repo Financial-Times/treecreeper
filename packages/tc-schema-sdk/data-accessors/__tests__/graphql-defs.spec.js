@@ -220,7 +220,7 @@ describe('graphql def creation', () => {
 			const generated = graphqlFromRawData(schema);
 			// note the regex has a space, not a new line
 			expect(generated).toContain(
-				'prop(first: Int, offset: Int): [Fake] @relation(name: "HAS", direction: "OUT") @deprecated(reason: "not needed")',
+				'prop(first: Int, offset: Int): [Fake] @relation(name: "HAS") @deprecated(reason: "not needed")',
 			);
 		});
 	});

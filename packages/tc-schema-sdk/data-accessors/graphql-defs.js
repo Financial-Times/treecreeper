@@ -71,7 +71,7 @@ const addEnumDefinitions = (composer, sdk) => {
 	);
 };
 
-const getDirectives = ({ cypher, relationship, direction }) => {
+const getDirectives = ({ cypher, relationship }) => {
 	const directives = [];
 
 	if (cypher) {
@@ -87,7 +87,6 @@ const getDirectives = ({ cypher, relationship, direction }) => {
 			name: 'relation',
 			args: {
 				name: relationship,
-				direction: direction === 'outgoing' ? 'OUT' : 'IN',
 			},
 		});
 	}
@@ -119,22 +118,16 @@ const composeObjectProperties = ({ typeName, properties, sdk, composer }) => {
 *NOTE: This gives access to properties on the relationships between records
 as well as on the records themselves. Use '${fieldName}' instead if you do not need this*`,
 				deprecationReason: def.deprecationReason,
-				extensions: {
-					directives:
-						typeName === def.type
-							? [
-									{
-										name: 'relation',
-										args: {
-											direction:
-												def.direction === 'outgoing'
-													? 'OUT'
-													: 'IN',
-										},
-									},
-							  ]
-							: [],
-				},
+				// extensions: {
+				// 	directives:
+				// 		typeName === def.type
+				// 			? [
+				// 					{
+				// 						name: 'relation',
+				// 					},
+				// 			  ]
+				// 			: [],
+				// },
 				type: () =>
 					maybePluralise(
 						def.hasMany,
