@@ -54,7 +54,7 @@ const addStaticDefinitions = composer => {
 };
 
 const addEnumDefinitions = (composer, sdk) => {
-	Object.entries(sdk.getEnums({ withMeta: true })).map(
+	Object.entries(sdk.getEnums({ withMeta: true })).forEach(
 		([name, { description: enumDescription, options }]) => {
 			const values = {};
 			Object.values(options).forEach(
