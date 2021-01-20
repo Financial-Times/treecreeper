@@ -13,7 +13,8 @@
     "common-tags": "^1.8.0",
     "http-errors": "^1.7.3",
     "lodash.isempty": "^4.4.0",
-    "lodash.groupby": "^4.6.0"
+    "lodash.groupby": "^4.6.0",
+    "neo4j-driver": "^4.0.0"
   },
   "repository": {
     "type": "git",
