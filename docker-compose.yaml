@@ -5,7 +5,7 @@ services:
     environment:
       - NEO4J_dbms_connector_bolt_enabled=true
       - NEO4J_dbms_ssl_policy_bolt_enabled=true
-      - NEO4J_dbms_ssl_policy_bolt_base__directory=/certificates/bolt
+#      - NEO4J_dbms_ssl_policy_bolt_base__directory=/certificates/bolt
 #      - NEO4J_dbms_ssl_policy_bolt_private__key=private.key
 #      - NEO4J_dbms_ssl_policy_bolt_public__certificate=public.crt
       - NEO4J_dbms_logs_query_enabled=VERBOSE
