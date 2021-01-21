@@ -14,7 +14,7 @@ references:
           TERM: xterm
 
     environment:
-      NEO4J_VERSION: '4.1.5'
+      NEO4J_VERSION: '4.1.6'
 
   workspace_root: &workspace_root ~/
 

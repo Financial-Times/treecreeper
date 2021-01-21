@@ -1,7 +1,7 @@
 version: '3'
 services:
   neo4j:
-    image: neo4j:4.1.5
+    image: neo4j:4.1.6
     environment:
       - NEO4J_dbms_logs_query_enabled=VERBOSE
       - NEO4J_AUTH=none
