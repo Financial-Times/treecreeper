@@ -2,8 +2,8 @@
 
 mkdir -p neo4j/{plugins,logs,data}
 
-APOC_PLUGIN_URL=https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.1/apoc-3.5.0.1-all.jar
-APOC_PLUGIN_FILENAME=neo4j/plugins/apoc-3.5.0.1-all.jar
+APOC_PLUGIN_URL=https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.4/apoc-4.1.0.4-all.jar
+APOC_PLUGIN_FILENAME=neo4j/plugins/apoc-4.1.0.4-all.jar
 
 if type wget 2>/dev/null; then
   wget -O $APOC_PLUGIN_FILENAME $APOC_PLUGIN_URL
