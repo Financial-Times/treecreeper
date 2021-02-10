@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-NODEFETCH-674311:
+    - next-metrics > @financial-times/n-logger > isomorphic-fetch > node-fetch:
+        reason: No patch yet
+        expires: '2021-03-12T13:34:26.387Z'
+    - '@financial-times/tc-api-db-manager > next-metrics > @financial-times/n-logger > isomorphic-fetch > node-fetch':
+        reason: No patch yet
+        expires: '2021-03-12T13:34:26.387Z'
+    - '@financial-times/tc-api-rest-handlers > @financial-times/tc-api-db-manager > next-metrics > @financial-times/n-logger > isomorphic-fetch > node-fetch':
+        reason: No patch yet
+        expires: '2021-03-12T13:34:26.387Z'
+patch: {}
