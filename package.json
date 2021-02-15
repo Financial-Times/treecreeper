@@ -21,8 +21,7 @@
     "neo4j-driver": "^4.1.2",
     "node-fetch": "^2.6.0",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "snyk": "^1.360.0"
+    "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -32,7 +31,7 @@
     "@babel/preset-react": "^7.7.0",
     "@babel/register": "^7.7.0",
     "@financial-times/athloi": "^1.0.0-beta.29",
-    "@financial-times/rel-engage": "^8.0.2",
+    "@financial-times/rel-engage": "^8.0.3",
     "@financial-times/tc-api-graphql": "file:./packages/tc-api-graphql",
     "aws-sdk": "^2.611.0",
     "babel-loader": "^8.0.6",
@@ -59,9 +58,7 @@
   },
   "scripts": {
     "test": "snyk test && make test",
-    "postinstall": "athloi exec npm i -- --no-package-lock",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "postinstall": "athloi exec npm i -- --no-package-lock"
   },
   "repository": {
     "type": "git",
@@ -81,6 +78,5 @@
   },
   "engines": {
     "node": "14.x"
-  },
-  "snyk": true
+  }
 }
