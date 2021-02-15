@@ -18,8 +18,7 @@
 		"react": "^16.13.0",
 		"react-autosuggest": "^10.0.2",
 		"react-dom": "^16.13.0",
-		"react-highlight-words": "^0.16.0",
-		"showdown": "^1.9.1"
+		"react-highlight-words": "^0.16.0"
 	},
 	"main": "src/server.js",
 	"browser": "src/browser.js",

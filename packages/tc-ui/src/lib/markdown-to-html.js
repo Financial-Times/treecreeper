@@ -11,8 +11,8 @@ const markdownToHtml = (text = '') => {
 
 	return typeof window === 'undefined'
 		? autolinker.link(html)
-		// eslint-disable-next-line no-undef
-		: Autolinker.link(html);
+		: // eslint-disable-next-line no-undef
+		  Autolinker.link(html);
 };
 
 module.exports = {
