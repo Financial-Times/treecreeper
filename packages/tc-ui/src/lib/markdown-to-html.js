@@ -9,10 +9,13 @@ const markdownToHtml = (text = '') => {
 		smartypants: true,
 	});
 
-	return typeof window === 'undefined'
-		? autolinker.link(html)
-		: // eslint-disable-next-line no-undef
-		  Autolinker.link(html);
+	const autolinked =
+		typeof window === 'undefined'
+			? autolinker.link(html)
+			: // eslint-disable-next-line no-undef
+			  Autolinker.link(html);
+
+	return autolinked.trim();
 };
 
 module.exports = {
