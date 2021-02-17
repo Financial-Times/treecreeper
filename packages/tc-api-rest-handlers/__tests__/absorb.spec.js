@@ -229,7 +229,10 @@ describe('rest POST (absorb)', () => {
 
 			it('move incoming relationships', async () => {
 				const [, absorbed] = await createNodePair();
-				const parent = await createNode('SimpleGraphBranch', parentCode);
+				const parent = await createNode(
+					'SimpleGraphBranch',
+					parentCode,
+				);
 				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
 				const { status, body } = await absorb(getInput());
@@ -356,7 +359,10 @@ describe('rest POST (absorb)', () => {
 			it('returns record with rich relationship information if richRelationships query is true', async () => {
 				const [, absorbed] = await createNodePair();
 				const leaf = await createNode('SimpleGraphLeaf', leafCode);
-				const parent = await createNode('SimpleGraphBranch', parentCode);
+				const parent = await createNode(
+					'SimpleGraphBranch',
+					parentCode,
+				);
 				await connectNodes(absorbed, 'HAS_LEAF', leaf);
 				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
@@ -376,7 +382,7 @@ describe('rest POST (absorb)', () => {
 				expect(body.parent).toMatchObject({
 					code: parentCode,
 					...meta.default,
-				})
+				});
 			});
 		});
 	});

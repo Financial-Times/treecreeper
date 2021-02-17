@@ -1,4 +1,4 @@
-name: AllPrimitives
+name: KitchenSink
 description: A type that has a wide range of primitive properties on it.
 moreInformation: |
   These inclode Document, String, Enum, multiple choice Enum, Boolean, Integer
@@ -65,7 +65,6 @@ properties:
     description: Url description.
     label: Url label
     canIdentify: true
-
 
   # children:
   #   relationship: HAS_CHILD

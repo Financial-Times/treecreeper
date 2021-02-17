@@ -54,7 +54,10 @@ describe('rest document store integration', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({ code: mainCode, ...documentFromS3 });
-			expect(mockDocstoreGet).toHaveBeenCalledWith('DocumentStoreTest', mainCode);
+			expect(mockDocstoreGet).toHaveBeenCalledWith(
+				'DocumentStoreTest',
+				mainCode,
+			);
 		});
 
 		it('throws if s3 query fails', async () => {
@@ -65,7 +68,10 @@ describe('rest document store integration', () => {
 			await expect(getHandler({ documentStore })(input)).rejects.toThrow(
 				'oh no',
 			);
-			expect(mockDocstoreGet).toHaveBeenCalledWith('DocumentStoreTest', mainCode);
+			expect(mockDocstoreGet).toHaveBeenCalledWith(
+				'DocumentStoreTest',
+				mainCode,
+			);
 		});
 
 		it('returns document from neo4j when documentStore is not passed in', async () => {
@@ -73,7 +79,10 @@ describe('rest document store integration', () => {
 			const { body, status } = await getHandler({})(input);
 
 			expect(status).toBe(200);
-			expect(body).toMatchObject({ code: mainCode, firstDocumentProperty });
+			expect(body).toMatchObject({
+				code: mainCode,
+				firstDocumentProperty,
+			});
 		});
 	});
 
@@ -172,7 +181,9 @@ describe('rest document store integration', () => {
 				expect(mockDocstorePost).toHaveBeenCalledWith(
 					'DocumentStoreTest',
 					mainCode,
-					{ firstDocumentProperty },
+					{
+						firstDocumentProperty,
+					},
 				);
 			});
 
@@ -206,7 +217,9 @@ describe('rest document store integration', () => {
 					);
 
 					await expect(
-						handler({ documentStore })(getInput({ firstDocumentProperty })),
+						handler({ documentStore })(
+							getInput({ firstDocumentProperty }),
+						),
 					).rejects.httpError({
 						status: 409,
 						message: `DocumentStoreTest ${mainCode} already exists`,
@@ -214,7 +227,9 @@ describe('rest document store integration', () => {
 					expect(mockDocstorePost).toHaveBeenCalledWith(
 						'DocumentStoreTest',
 						mainCode,
-						{ firstDocumentProperty },
+						{
+							firstDocumentProperty,
+						},
 					);
 					expect(mockUndo).toHaveBeenCalled();
 				});
@@ -226,7 +241,9 @@ describe('rest document store integration', () => {
 					new Error('oh no'),
 				);
 				await expect(
-					handler({ documentStore })(getInput({ firstDocumentProperty })),
+					handler({ documentStore })(
+						getInput({ firstDocumentProperty }),
+					),
 				).rejects.toThrow('oh no');
 				expect(mockDocstorePost).toHaveBeenCalled();
 			});
@@ -240,12 +257,16 @@ describe('rest document store integration', () => {
 				dbUnavailable({ skip: method === 'PATCH' ? 1 : 0 });
 
 				await expect(
-					handler({ documentStore })(getInput({ firstDocumentProperty })),
+					handler({ documentStore })(
+						getInput({ firstDocumentProperty }),
+					),
 				).rejects.toThrow('oh no');
 				expect(mockDocstorePost).toHaveBeenCalledWith(
 					'DocumentStoreTest',
 					mainCode,
-					{ firstDocumentProperty },
+					{
+						firstDocumentProperty,
+					},
 				);
 				expect(mockUndo).toHaveBeenCalled();
 			});
@@ -343,9 +364,13 @@ describe('rest document store integration', () => {
 				status: 200,
 				body: documentBody,
 			});
-			expect(mockPost).toHaveBeenCalledWith('DocumentStoreTest', mainCode, {
-				firstDocumentProperty: 'some document',
-			});
+			expect(mockPost).toHaveBeenCalledWith(
+				'DocumentStoreTest',
+				mainCode,
+				{
+					firstDocumentProperty: 'some document',
+				},
+			);
 		});
 
 		it('throws if s3 query fails', async () => {
@@ -355,7 +380,9 @@ describe('rest document store integration', () => {
 				new Error('oh no'),
 			);
 			await expect(
-				patchHandler({ documentStore })(getInput({ firstDocumentProperty })),
+				patchHandler({ documentStore })(
+					getInput({ firstDocumentProperty }),
+				),
 			).rejects.toThrow('oh no');
 			expect(mockDocstorePatch).toHaveBeenCalled();
 		});
@@ -407,7 +434,10 @@ describe('rest document store integration', () => {
 
 	describe('absorb', () => {
 		it('responds with 500 if s3 query fails', async () => {
-			await createNodes(['DocumentStoreTest', mainCode], ['DocumentStoreTest', otherCode]);
+			await createNodes(
+				['DocumentStoreTest', mainCode],
+				['DocumentStoreTest', otherCode],
+			);
 			const mockDocstoreAbsorb = createRejectedDocstoreMock(
 				'absorb',
 				new Error('oh no'),

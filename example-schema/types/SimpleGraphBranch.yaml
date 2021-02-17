@@ -30,14 +30,14 @@ properties:
   parent:
     type: SimpleGraphBranch
     label: parent label
-    description : parent description.
+    description: parent description.
     relationship: HAS_CHILD
     hasMany: false
     direction: incoming
   children:
     type: SimpleGraphBranch
     label: children label
-    description : children description.
+    description: children description.
     relationship: HAS_CHILD
     hasMany: false
     direction: outgoing

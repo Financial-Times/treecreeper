@@ -37,4 +37,3 @@ properties:
     relationship: HAS_SIBLING
     direction: incoming
     hasMany: true
-

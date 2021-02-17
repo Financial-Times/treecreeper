@@ -1,6 +1,8 @@
 const { setupMocks, neo4jTest } = require('../../../test-helpers');
 const { dbUnavailable } = require('../../../test-helpers/error-stubs');
-const { postHandler } = require('../post');
+const { postHandler: postHandlerFactory } = require('../post');
+
+const postHandler = postHandlerFactory();
 
 describe('rest POST', () => {
 	const namespace = 'api-rest-handlers-post';
@@ -10,94 +12,90 @@ describe('rest POST', () => {
 		namespace,
 	);
 
-		const getInput = (type, body, query, metadata) => ({
-			type,
-			code: mainCode,
-			body,
-			query,
-			metadata,
-		});
-
-
+	const getInput = (type, body, query, metadata) => ({
+		type,
+		code: mainCode,
+		body,
+		query,
+		metadata,
+	});
 
 	describe('writing disconnected records', () => {
-const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...args));
+
+		const postKitchenSinkPayload = body => postHandler({
+			type: 'KitchenSink',
+			code: mainCode,
+			body
+		});
 
 		it('creates record with no body', async () => {
-			const { status, body } = await basicHandler();
+			const { status, body } = await postKitchenSinkPayload();
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
-			await neo4jTest('AllPrimitives', mainCode).exists();
+			await neo4jTest('KitchenSink', mainCode).exists();
 		});
 
 		it('creates record with properties', async () => {
-			const { status, body } = await basicHandler({
+			const payload = {
 				firstStringProperty: 'some string',
 				booleanProperty: true,
 				enumProperty: 'First',
-			});
+			};
+			const { status, body } = await postKitchenSinkPayload(payload);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
-				firstStringProperty: 'some string',
-				booleanProperty: true,
-				enumProperty: 'First',
+				...payload,
 			});
-			await neo4jTest('AllPrimitives', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					firstStringProperty: 'some string',
-					booleanProperty: true,
-					enumProperty: 'First',
+					...payload,
 				})
 				.noRels();
 		});
 
 		it('sets metadata', async () => {
-			const { status, body } = await basicHandler(
-				undefined,
-				undefined,
-				getMetaPayload(),
-			);
+			const { status, body } = await postHandler({
+				type: 'KitchenSink',
+				code: mainCode,
+				metadata: getMetaPayload(),
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
-			await neo4jTest('AllPrimitives', mainCode).exists().match(meta.create);
+			await neo4jTest('KitchenSink', mainCode)
+				.exists()
+				.match(meta.create);
 		});
 
 		it('sets array data', async () => {
-			const { body, status } = await basicHandler({
+			const payload = {
 				// someStringList: ['one', 'two'],
 				multipleChoiceEnumProperty: ['First', 'Second'],
-			});
+			};
+			const { body, status } = await postKitchenSinkPayload(payload);
 
 			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				// someStringList: ['one', 'two'],
-				multipleChoiceEnumProperty: ['First', 'Second'],
-			});
-			await neo4jTest('AllPrimitives', mainCode)
-				.exists()
-				.match({
-					// someStringList: ['one', 'two'],
-					multipleChoiceEnumProperty: ['First', 'Second'],
-				});
+			expect(body).toMatchObject(payload);
+			await neo4jTest('KitchenSink', mainCode).exists().match(payload);
 		});
 
 		it("doesn't set a property when empty string provided", async () => {
-			const { status, body } = await basicHandler({ firstStringProperty: '' });
+			const payload = { firstStringProperty: '' };
+			const { status, body } = await postKitchenSinkPayload(payload);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
 
-			await neo4jTest('AllPrimitives', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.notMatch({
 					firstStringProperty: expect.any(String),
@@ -106,16 +104,15 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
-			const { status, body } = await basicHandler({
-				dateProperty: new Date(date).toISOString(),
-			});
-
+			const { status, body } = await postKitchenSinkPayload({
+					dateProperty: new Date(date).toISOString(),
+				});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
 				dateProperty: date,
 			});
-			await neo4jTest('AllPrimitives', mainCode).exists().match({
+			await neo4jTest('KitchenSink', mainCode).exists().match({
 				code: mainCode,
 				dateProperty: date,
 			});
@@ -126,15 +123,15 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.001Z';
 
-			const { status, body } = await basicHandler({
-				datetimeProperty: datetime,
-			});
+			const { status, body } = await  postKitchenSinkPayload({
+					datetimeProperty: datetime,
+				});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				datetimeProperty: neo4jTimePrecision(datetime),
 			});
-			await neo4jTest('AllPrimitives', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
@@ -144,13 +141,13 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 
 		it('sets Time property', async () => {
 			const time = '12:34:56.789Z';
-			const { status, body } = await basicHandler({ timeProperty: time });
+			const { status, body } = await postKitchenSinkPayload( { timeProperty: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				timeProperty: neo4jTimePrecision(time),
 			});
-			await neo4jTest('AllPrimitives', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
@@ -160,49 +157,52 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 		});
 
 		it('throws 409 error if record already exists', async () => {
-			await createNode('AllPrimitives', {
+			await createNode('KitchenSink', {
 				code: mainCode,
 			});
 			await expect(
-				basicHandler({ firstStringProperty: 'some string' }),
+				postKitchenSinkPayload({ firstStringProperty: 'some string' })
 			).rejects.httpError({
 				status: 409,
-				message: `AllPrimitives ${mainCode} already exists`,
+				message: `KitchenSink ${mainCode} already exists`,
 			});
-			await neo4jTest('AllPrimitives', mainCode).notMatch({
+			await neo4jTest('KitchenSink', mainCode).notMatch({
 				firstStringProperty: 'some string',
 			});
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await expect(
-				basicHandler({ code: 'wrong-code' }),
+				postKitchenSinkPayload({ code: 'wrong-code' }),
 			).rejects.httpError({
 				status: 400,
-				message: `Conflicting code property \`wrong-code\` in payload for AllPrimitives ${mainCode}`,
+				message: `Conflicting code property \`wrong-code\` in payload for KitchenSink ${mainCode}`,
 			});
-			await neo4jTest('AllPrimitives', mainCode).notExists();
+			await neo4jTest('KitchenSink', mainCode).notExists();
 		});
 
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
-				basicHandler({ notInSchema: 'a string' }),
+				postKitchenSinkPayload({ notInSchema: 'a string' }),
 			).rejects.httpError({
 				status: 400,
-				message: 'Invalid property `notInSchema` on type `AllPrimitives`.',
+				message:
+					'Invalid property `notInSchema` on type `KitchenSink`.',
 			});
-			await neo4jTest('AllPrimitives', mainCode).notExists();
+			await neo4jTest('KitchenSink', mainCode).notExists();
 		});
 
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
-			await expect(basicHandler()).rejects.toThrow('oh no');
+			await expect(
+				postKitchenSinkPayload(),
+			).rejects.toThrow('oh no');
 		});
 	});
 
 	describe('creating relationships', () => {
-
-	const basicHandler = (...args) => postHandler()(getInput('MainType', ...args));
+		const basicHandler = (...args) =>
+			postHandler(getInput('MainType', ...args));
 
 		const childCode = `${namespace}-child`;
 		const parentCode = `${namespace}-parent`;
@@ -338,13 +338,19 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 			const booleanProperty = true;
 			const enumProperty = 'First';
 			const multipleChoiceEnumProperty = ['First', 'Second'];
-			const childRelationshipProps = { code: childCode, firstStringProperty };
+			const childRelationshipProps = {
+				code: childCode,
+				firstStringProperty,
+			};
 			const childRelationshipTwoProps = {
 				code: childCode,
 				firstStringProperty,
 				anotherString,
 			};
-			const parentRelationshipProps = { code: parentCode, firstStringProperty };
+			const parentRelationshipProps = {
+				code: parentCode,
+				firstStringProperty,
+			};
 			const parent2RelationshipProps = {
 				code: parentCode2,
 				anotherString,
@@ -677,7 +683,8 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								firstStringProperty: childRelProps.firstStringProperty,
+								firstStringProperty:
+									childRelProps.firstStringProperty,
 								anotherString: childRelProps.anotherString,
 								multipleChoiceEnumProperty,
 								enumProperty,
@@ -695,7 +702,8 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
 							props: {
-								firstStringProperty: parentRelProps.firstStringProperty,
+								firstStringProperty:
+									parentRelProps.firstStringProperty,
 								anotherString: parentRelProps.anotherString,
 								...meta.create,
 							},
@@ -710,7 +718,10 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 			it('creates record with relationship which has a multiple choice property', async () => {
 				const { status, body } = await basicHandler(
 					{
-						curiousChild: { code: childCode, multipleChoiceEnumProperty },
+						curiousChild: {
+							code: childCode,
+							multipleChoiceEnumProperty,
+						},
 					},
 					{ upsert: true, richRelationships: true },
 					getMetaPayload(),
@@ -843,12 +854,11 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 	});
 
 	describe('restricted types', () => {
-
 		const restrictedCode = `${namespace}-restricted`;
 
 		it('throws 400 when creating restricted record', async () => {
 			await expect(
-				postHandler()({
+				postHandler({
 					type: 'RestrictedType',
 					code: restrictedCode,
 				}),
@@ -860,7 +870,7 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 		});
 
 		it('creates restricted record when using correct client-id', async () => {
-			const { status } = await postHandler()({
+			const { status } = await postHandler({
 				type: 'RestrictedType',
 				code: restrictedCode,
 				metadata: {
@@ -874,7 +884,8 @@ const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...arg
 	});
 
 	describe('field locking', () => {
-		const basicHandler = (...args) => postHandler()(getInput('MainType', ...args));
+		const basicHandler = (...args) =>
+			postHandler(getInput('MainType', ...args));
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {

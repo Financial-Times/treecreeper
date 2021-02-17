@@ -7,10 +7,11 @@ let TIMEOUT;
 const timeoutErrorMessage = timeout =>
 	`Neo4j query took more than ${timeout} milliseconds: closing session`;
 
-console.log(	process.env.NEO4J_BOLT_URL,
-		process.env.NEO4J_BOLT_USER,
-		process.env.NEO4J_BOLT_PASSWORD,
-	)
+console.log(
+	process.env.NEO4J_BOLT_URL,
+	process.env.NEO4J_BOLT_USER,
+	process.env.NEO4J_BOLT_PASSWORD,
+);
 
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL,
