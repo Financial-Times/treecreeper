@@ -13,12 +13,12 @@
 		"date-fns": "^2.8.1",
 		"http-errors": "^1.7.3",
 		"lodash.sortby": "^4.7.0",
+		"marked": "^2.0.0",
 		"node-fetch": "^2.6.0",
 		"react": "^16.13.0",
 		"react-autosuggest": "^10.0.2",
 		"react-dom": "^16.13.0",
-		"react-highlight-words": "^0.16.0",
-		"showdown": "^1.9.1"
+		"react-highlight-words": "^0.16.0"
 	},
 	"main": "src/server.js",
 	"browser": "src/browser.js",
