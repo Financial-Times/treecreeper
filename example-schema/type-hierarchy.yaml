@@ -13,3 +13,4 @@ test:
     - AllPrimitives
     - SimpleGraphBranch
     - SimpleGraphLeaf
+    - DocumentStoreTest

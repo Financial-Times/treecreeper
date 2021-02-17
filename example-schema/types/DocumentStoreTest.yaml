@@ -1,0 +1,40 @@
+name: DocumentStoreTest
+description: A type that has a wide range of primitive properties on it.
+moreInformation: |
+  These inclode Document, String, Enum, multiple choice Enum, Boolean, Integer
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  stringProperty:
+    type: Word
+    description: stringProperty description.
+    label: stringProperty label
+    useInSummary: true
+  firstDocumentProperty:
+    type: Document
+    description: firstDocumentProperty description.
+    label: firstDocumentProperty label
+  secondDocumentProperty:
+    type: Document
+    description: secondDocumentProperty description.
+    label: secondDocumentProperty label
+  siblingsOutgoing:
+    label: siblingsOutgoing label
+    description: siblingsOutgoing description.
+    type: WithDocumentProperties
+    relationship: HAS_SIBLING
+    direction: outgoing
+    hasMany: true
+  siblingsIncoming:
+    label: siblingsIncoming label
+    description: siblingsIncoming description.
+    type: WithDocumentProperties
+    relationship: HAS_SIBLING
+    direction: incoming
+    hasMany: true
+
