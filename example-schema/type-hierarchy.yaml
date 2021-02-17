@@ -14,3 +14,4 @@ test:
     - SimpleGraphBranch
     - SimpleGraphLeaf
     - DocumentStoreTest
+    - LockedFieldTest

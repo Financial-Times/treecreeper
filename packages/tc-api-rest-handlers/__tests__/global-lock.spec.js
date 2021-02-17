@@ -9,7 +9,7 @@ describe('global field locking', () => {
 	const { createNode } = setupMocks(namespace);
 
 	const getInput = (body, query, metadata) => ({
-		type: 'MainType',
+		type: 'LockedFieldTest',
 		code: mainCode,
 		body,
 		query,
@@ -32,7 +32,7 @@ describe('global field locking', () => {
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode).exists().match({
+			await neo4jTest('LockedFieldTest', mainCode).exists().match({
 				lockedField: 'some string',
 			});
 		});
@@ -46,15 +46,15 @@ describe('global field locking', () => {
 			).rejects.httpError({
 				status: 400,
 				message:
-					'Cannot write lockedField on MainType global-lock-main - property can only be edited by client global-lock-client',
+					'Cannot write lockedField on LockedFieldTest global-lock-main - property can only be edited by client global-lock-client',
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('LockedFieldTest', mainCode).notExists();
 		});
 	});
 
 	describe('patch', () => {
 		it('patches if using correct client', async () => {
-			await createNode('MainType', { code: mainCode });
+			await createNode('LockedFieldTest', { code: mainCode });
 			const { status, body } = await patchHandler()(
 				getInput({ lockedField: 'some string' }, undefined, {
 					clientId: 'global-lock-client',
@@ -69,12 +69,12 @@ describe('global field locking', () => {
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),
 			});
-			await neo4jTest('MainType', mainCode).exists().match({
+			await neo4jTest('LockedFieldTest', mainCode).exists().match({
 				lockedField: 'some string',
 			});
 		});
 		it('fails to patch if using wrong client', async () => {
-			await createNode('MainType', { code: mainCode });
+			await createNode('LockedFieldTest', { code: mainCode });
 			await expect(
 				patchHandler()(
 					getInput({ lockedField: 'some string' }, undefined, {
@@ -84,9 +84,9 @@ describe('global field locking', () => {
 			).rejects.httpError({
 				status: 400,
 				message:
-					'Cannot write lockedField on MainType global-lock-main - property can only be edited by client global-lock-client',
+					'Cannot write lockedField on LockedFieldTest global-lock-main - property can only be edited by client global-lock-client',
 			});
-			await neo4jTest('MainType', mainCode).exists().notMatch({
+			await neo4jTest('LockedFieldTest', mainCode).exists().notMatch({
 				lockedField: 'some string',
 			});
 		});
