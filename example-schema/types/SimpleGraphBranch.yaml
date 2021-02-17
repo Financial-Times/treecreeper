@@ -31,7 +31,7 @@ properties:
     type: SimpleGraphBranch
     label: parent label
     description: parent description.
-    relationship: HAS_CHILD
+    relationship: HAS_CHILD #change to HAS_OFFSHOOT
     hasMany: false
     direction: incoming
   children:

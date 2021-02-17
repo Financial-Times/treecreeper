@@ -12,23 +12,13 @@ describe('rest POST', () => {
 		namespace,
 	);
 
-	const getInput = (type, body, query, metadata) => ({
-		type,
-		code: mainCode,
-		body,
-		query,
-		metadata,
-	});
-
-	const postKitchenSinkPayload = body => postHandler({
-		type: 'KitchenSink',
-		code: mainCode,
-		body
-	});
-
 	describe('writing disconnected records', () => {
-
-
+		const postKitchenSinkPayload = body =>
+			postHandler({
+				type: 'KitchenSink',
+				code: mainCode,
+				body,
+			});
 
 		it('creates record with no body', async () => {
 			const { status, body } = await postKitchenSinkPayload();
@@ -107,8 +97,8 @@ describe('rest POST', () => {
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
 			const { status, body } = await postKitchenSinkPayload({
-					dateProperty: new Date(date).toISOString(),
-				});
+				dateProperty: new Date(date).toISOString(),
+			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
@@ -125,9 +115,9 @@ describe('rest POST', () => {
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.001Z';
 
-			const { status, body } = await  postKitchenSinkPayload({
-					datetimeProperty: datetime,
-				});
+			const { status, body } = await postKitchenSinkPayload({
+				datetimeProperty: datetime,
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -143,7 +133,9 @@ describe('rest POST', () => {
 
 		it('sets Time property', async () => {
 			const time = '12:34:56.789Z';
-			const { status, body } = await postKitchenSinkPayload( { timeProperty: time });
+			const { status, body } = await postKitchenSinkPayload({
+				timeProperty: time,
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -163,7 +155,7 @@ describe('rest POST', () => {
 				code: mainCode,
 			});
 			await expect(
-				postKitchenSinkPayload({ firstStringProperty: 'some string' })
+				postKitchenSinkPayload({ firstStringProperty: 'some string' }),
 			).rejects.httpError({
 				status: 409,
 				message: `KitchenSink ${mainCode} already exists`,
@@ -196,65 +188,64 @@ describe('rest POST', () => {
 
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
-			await expect(
-				postKitchenSinkPayload(),
-			).rejects.toThrow('oh no');
+			await expect(postKitchenSinkPayload()).rejects.toThrow('oh no');
 		});
 	});
 
 	describe('creating relationships', () => {
-		const basicHandler = (...args) =>
-			postHandler(getInput('MainType', ...args));
-
-		const childCode = `${namespace}-child`;
+		const leafCode = `${namespace}-leaf`;
 		const parentCode = `${namespace}-parent`;
-		const parentCode2 = `${parentCode}-2`;
+
+		const postSimpleGraphBranch = (body, query) =>
+			postHandler({
+				type: 'SimpleGraphBranch',
+				code: mainCode,
+				body,
+				query,
+				metadata: getMetaPayload(),
+			});
 
 		it('creates record related to existing records', async () => {
 			await createNodes(
-				['ChildType', childCode],
-				['ParentType', parentCode],
+				['SimpleGraphLeaf', leafCode],
+				['SimpleGraphBranch', parentCode],
 			);
-			const { status, body } = await basicHandler(
-				{
-					children: [childCode],
-					parents: [parentCode],
-				},
-				undefined,
-				getMetaPayload(),
-			);
+			const { status, body } = await postSimpleGraphBranch({
+				leaves: [leafCode],
+				parent: parentCode,
+			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode],
-				parents: [parentCode],
+				leaves: [leafCode],
+				parent: parentCode,
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', mainCode)
 				.match(meta.create)
 				.notMatch({
-					children: [childCode],
-					parents: [parentCode],
+					leaves: [leafCode],
+					parent: parentCode,
 				})
 				.hasRels(2)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: meta.create,
 					},
 					{
-						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						type: 'SimpleGraphLeaf',
+						props: { code: leafCode, ...meta.default },
 					},
 				)
 				.hasRel(
 					{
-						type: 'IS_PARENT_OF',
+						type: 'HAS_CHILD',
 						direction: 'incoming',
 						props: meta.create,
 					},
 					{
-						type: 'ParentType',
+						type: 'SimpleGraphBranch',
 						props: {
 							code: parentCode,
 							...meta.default,
@@ -265,592 +256,81 @@ describe('rest POST', () => {
 
 		it('throws 400 when creating record related to non-existent records', async () => {
 			await expect(
-				basicHandler({
-					children: [childCode],
-					parents: [parentCode],
+				postSimpleGraphBranch({
+					leaves: [leafCode],
+					parent: parentCode,
 				}),
 			).rejects.httpError({
 				status: 400,
 				message: /Missing related node/,
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('SimpleGraphBranch', mainCode).notExists();
 		});
 
 		it('creates record related to non-existent records when using upsert=true', async () => {
-			const { status, body } = await basicHandler(
+			const { status, body } = await postSimpleGraphBranch(
 				{
-					children: [childCode],
-					parents: [parentCode],
+					leaves: [leafCode],
+					parent: parentCode,
 				},
 				{ upsert: true },
-				getMetaPayload(),
 			);
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode],
-				parents: [parentCode],
+				leaves: [leafCode],
+				parent: parentCode,
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', mainCode)
 				.match(meta.create)
 				.hasRels(2)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: meta.create,
 					},
 					{
-						type: 'ChildType',
-						props: { code: childCode, ...meta.create },
+						type: 'SimpleGraphLeaf',
+						props: { code: leafCode, ...meta.create },
 					},
 				)
 				.hasRel(
 					{
-						type: 'IS_PARENT_OF',
+						type: 'HAS_CHILD',
 						direction: 'incoming',
 						props: meta.create,
 					},
 					{
-						type: 'ParentType',
+						type: 'SimpleGraphBranch',
 						props: { code: parentCode, ...meta.create },
 					},
 				);
 		});
 
 		it('creates record with empty relationships array', async () => {
-			const { status, body } = await basicHandler(
-				{
-					children: [],
-				},
-				getMetaPayload(),
-			);
+			const { status, body } = await postSimpleGraphBranch({
+				leaves: [],
+			});
 
 			expect(status).toBe(200);
 			expect(body).not.toMatchObject({
-				children: expect.any(Array),
+				leaves: expect.any(Array),
 			});
 
-			await neo4jTest('MainType', mainCode).noRels();
+			await neo4jTest('SimpleGraphBranch', mainCode).noRels();
 		});
 
-		describe('rich relationship information', () => {
-			const firstStringProperty = 'some string';
-			const secondStringProperty = 'another string';
-			const booleanProperty = true;
-			const enumProperty = 'First';
-			const multipleChoiceEnumProperty = ['First', 'Second'];
-			const childRelationshipProps = {
-				code: childCode,
-				firstStringProperty,
-			};
-			const childRelationshipTwoProps = {
-				code: childCode,
-				firstStringProperty,
-				secondStringProperty,
-			};
-			const parentRelationshipProps = {
-				code: parentCode,
-				firstStringProperty,
-			};
-			const parent2RelationshipProps = {
-				code: parentCode2,
-				secondStringProperty,
-			};
+		it('returns record with rich relationship information if richRelationships query is true', async () => {
+			const { status, body } = await postSimpleGraphBranch(
+				{ leaves: [leafCode], parent: parentCode },
+				{ upsert: true, richRelationships: true },
+			);
 
-			it('returns record with rich relationship information if richRelationships query is true', async () => {
-				const { status, body } = await basicHandler(
-					{ children: [childCode], parents: [parentCode] },
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					children: [{ code: childCode, ...meta.create }],
-					parents: [{ code: parentCode, ...meta.create }],
-				});
-			});
-
-			it('creates record with relationship which has properties (one child one prop)', async () => {
-				const { status, body } = await basicHandler(
-					{ curiousChild: [childRelationshipProps] },
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousChild: { ...childRelationshipProps, ...meta.create },
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(1)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: { firstStringProperty, ...meta.create },
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has properties (one child two props)', async () => {
-				const { status, body } = await basicHandler(
-					{ curiousChild: [childRelationshipTwoProps] },
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousChild: {
-						...childRelationshipTwoProps,
-						...meta.create,
-					},
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(1)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: {
-								firstStringProperty,
-								secondStringProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has properties (two parents)', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousParent: [
-							parentRelationshipProps,
-							parent2RelationshipProps,
-						],
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousParent: [
-						{ ...parentRelationshipProps, ...meta.create },
-						{ ...parent2RelationshipProps, ...meta.create },
-					],
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(2)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: { firstStringProperty, ...meta.create },
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode, ...meta.create },
-						},
-					)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: { secondStringProperty, ...meta.create },
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode2, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has properties (child and parent)', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: [childRelationshipProps],
-						curiousParent: [parentRelationshipProps],
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				// curiousChild's hasMany value is false, curiousParent's hasMany value is true
-				// Therefore in body, curiousParent is in an Array and curiousChild is not.
-				expect(body).toMatchObject({
-					curiousChild: { ...childRelationshipProps, ...meta.create },
-					curiousParent: [
-						{
-							...parentRelationshipProps,
-							...meta.create,
-						},
-					],
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(2)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: { firstStringProperty, ...meta.create },
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: { firstStringProperty, ...meta.create },
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationships which has a property and also no property', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: [childRelationshipProps],
-						curiousParent: [parentCode],
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				// curiousChild's hasMany value is false, curiousParent's hasMany value is true
-				// Therefore in body, curiousParent is in an Array and curiousChild is not.
-				expect(body).toMatchObject({
-					curiousChild: { ...childRelationshipProps, ...meta.create },
-					curiousParent: [{ code: parentCode, ...meta.create }],
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(2)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: { firstStringProperty, ...meta.create },
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: { ...meta.create },
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationships which have same properties with different values (two parents)', async () => {
-				const parentOneRelationshipProps = {
-					code: parentCode,
-					firstStringProperty: 'parent one some string',
-					secondStringProperty: 'Parent one another string',
-				};
-				const parentTwoRelationshipProps = {
-					code: parentCode2,
-					firstStringProperty,
-					secondStringProperty,
-				};
-
-				const { status, body } = await basicHandler(
-					{
-						curiousParent: [
-							parentOneRelationshipProps,
-							parentTwoRelationshipProps,
-						],
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousParent: [
-						{ ...parentOneRelationshipProps, ...meta.create },
-						{ ...parentTwoRelationshipProps, ...meta.create },
-					],
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(2)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: {
-								firstStringProperty:
-									parentOneRelationshipProps.firstStringProperty,
-								secondStringProperty:
-									parentOneRelationshipProps.secondStringProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode, ...meta.create },
-						},
-					)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: {
-								firstStringProperty,
-								secondStringProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode2, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationships which have same properties with different values (child and parent)', async () => {
-				const parentRelProps = {
-					code: parentCode,
-					firstStringProperty: 'Parent some string',
-					secondStringProperty: 'Parent another string',
-				};
-				const childRelProps = {
-					code: childCode,
-					firstStringProperty,
-					secondStringProperty,
-					multipleChoiceEnumProperty,
-					enumProperty,
-					booleanProperty,
-				};
-
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: [childRelProps],
-						curiousParent: [parentRelProps],
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				// curiousChild's hasMany value is false, curiousParent's hasMany value is true
-				// Therefore in body, curiousParent is in an Array and curiousChild is not.
-				expect(body).toMatchObject({
-					curiousChild: { ...childRelProps, ...meta.create },
-					curiousParent: [{ ...parentRelProps, ...meta.create }],
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(2)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: {
-								firstStringProperty:
-									childRelProps.firstStringProperty,
-								secondStringProperty: childRelProps.secondStringProperty,
-								multipleChoiceEnumProperty,
-								enumProperty,
-								booleanProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					)
-					.hasRel(
-						{
-							type: 'IS_CURIOUS_PARENT_OF',
-							direction: 'incoming',
-							props: {
-								firstStringProperty:
-									parentRelProps.firstStringProperty,
-								secondStringProperty: parentRelProps.secondStringProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ParentType',
-							props: { code: parentCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has a multiple choice property', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: {
-							code: childCode,
-							multipleChoiceEnumProperty,
-						},
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousChild: {
-						code: childCode,
-						multipleChoiceEnumProperty,
-						...meta.create,
-					},
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(1)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: {
-								multipleChoiceEnumProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has an enum property', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: { code: childCode, enumProperty },
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousChild: {
-						code: childCode,
-						enumProperty,
-						...meta.create,
-					},
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(1)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: {
-								enumProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					);
-			});
-
-			it('creates record with relationship which has a boolean property', async () => {
-				const { status, body } = await basicHandler(
-					{
-						curiousChild: { code: childCode, booleanProperty },
-					},
-					{ upsert: true, richRelationships: true },
-					getMetaPayload(),
-				);
-				expect(status).toBe(200);
-				expect(body).toMatchObject({
-					curiousChild: {
-						code: childCode,
-						booleanProperty,
-						...meta.create,
-					},
-				});
-
-				await neo4jTest('MainType', mainCode)
-					.match(meta.create)
-					.hasRels(1)
-					.hasRel(
-						{
-							type: 'HAS_CURIOUS_CHILD',
-							direction: 'outgoing',
-							props: {
-								booleanProperty,
-								...meta.create,
-							},
-						},
-						{
-							type: 'ChildType',
-							props: { code: childCode, ...meta.create },
-						},
-					);
-			});
-
-			it('throws 400 if attempting to write relationship property not in schema', async () => {
-				await expect(
-					basicHandler(
-						{
-							curiousChild: [
-								{
-									code: childCode,
-									notInSchema: 'a string',
-								},
-							],
-						},
-						{ upsert: true, richRelationships: true },
-						getMetaPayload(),
-					),
-				).rejects.httpError({
-					status: 400,
-					message:
-						'Invalid property `notInSchema` on type `CuriousChild`.',
-				});
-
-				await neo4jTest('MainType', mainCode).notExists();
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				leaves: [{ code: leafCode, ...meta.create }],
+				parent: { code: parentCode, ...meta.create },
 			});
 		});
 	});
@@ -886,8 +366,6 @@ describe('rest POST', () => {
 	});
 
 	describe('field locking', () => {
-		const basicHandler = (...args) =>
-			postHandler(getInput('KitchenSink', ...args));
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
@@ -898,7 +376,7 @@ describe('rest POST', () => {
 				query: { lockFields: 'firstStringProperty' },
 				metadata: {
 					clientId: lockClient,
-				}
+				},
 			});
 
 			expect(status).toBe(200);
@@ -925,7 +403,7 @@ describe('rest POST', () => {
 				query: { lockFields: 'firstStringProperty' },
 				metadata: {
 					clientId: lockClient,
-				}
+				},
 			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -952,7 +430,7 @@ describe('rest POST', () => {
 				query: { lockFields: 'all' },
 				metadata: {
 					clientId: lockClient,
-				}
+				},
 			});
 
 			expect(status).toBe(200);
@@ -970,10 +448,14 @@ describe('rest POST', () => {
 
 		it('throws 400 when clientId is not set', async () => {
 			await expect(
-				basicHandler(
-					{ firstStringProperty: 'some string' },
-					{ lockFields: 'all' },
-				),
+				postHandler({
+					type: 'KitchenSink',
+					code: mainCode,
+					body: {
+						firstStringProperty: 'some string',
+					},
+					query: { lockFields: 'all' },
+				}),
 			).rejects.httpError({
 				status: 400,
 				message: /clientId needs to be set to a valid system code in order to lock fields/,
