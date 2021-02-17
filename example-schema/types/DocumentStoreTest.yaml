@@ -26,14 +26,14 @@ properties:
   siblingsOutgoing:
     label: siblingsOutgoing label
     description: siblingsOutgoing description.
-    type: WithDocumentProperties
+    type: DocumentStoreTest
     relationship: HAS_SIBLING
     direction: outgoing
     hasMany: true
   siblingsIncoming:
     label: siblingsIncoming label
     description: siblingsIncoming description.
-    type: WithDocumentProperties
+    type: DocumentStoreTest
     relationship: HAS_SIBLING
     direction: incoming
     hasMany: true

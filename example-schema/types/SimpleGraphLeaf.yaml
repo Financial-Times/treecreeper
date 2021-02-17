@@ -15,3 +15,7 @@ properties:
     direction: incoming
     label: branch label
     description: branch description.
+  formerBranch:
+    type: FallenLeaf
+    label: formerBranch label
+    description: formerBranch description.

@@ -373,12 +373,10 @@ describe('rest POST (absorb)', () => {
 						...meta.default,
 					}),
 				);
-				body.parents.forEach(relationship =>
-					expect(relationship).toMatchObject({
-						code: parentCode,
-						...meta.default,
-					}),
-				);
+				expect(body.parent).toMatchObject({
+					code: parentCode,
+					...meta.default,
+				})
 			});
 		});
 	});

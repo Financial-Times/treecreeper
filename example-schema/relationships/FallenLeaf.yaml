@@ -1,0 +1,13 @@
+name: FallenLeaf
+from:
+  type: SimpleGraphBranch
+  hasMany: false
+to:
+  type: SimpleGraphLeaf
+  hasMany: true
+relationship: HAD_LEAF
+properties:
+  timeOfDeparture:
+    label: timeOfDeparture label
+    description: timeOfDeparture description.
+    type: DateTime

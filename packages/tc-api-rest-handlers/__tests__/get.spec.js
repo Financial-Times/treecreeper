@@ -6,7 +6,7 @@ describe('rest GET', () => {
 	const namespace = 'api-rest-handlers-get';
 	const mainCode = `${namespace}-main`;
 	const input = {
-		type: 'MainType',
+		type: 'SimpleGraphBranch',
 		code: mainCode,
 	};
 
@@ -15,16 +15,16 @@ describe('rest GET', () => {
 	);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
+		createNode('SimpleGraphBranch', { code: mainCode, ...props });
 
 	it('gets record without relationships', async () => {
 		await createMainNode({
-			someString: 'name1',
+			stringProperty: 'name1',
 		});
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
-		expect(body).toMatchObject({ code: mainCode, someString: 'name1' });
+		expect(body).toMatchObject({ code: mainCode, stringProperty: 'name1' });
 	});
 
 	it('retrieves metadata', async () => {
@@ -50,30 +50,30 @@ describe('rest GET', () => {
 	});
 
 	it('gets record with relationships', async () => {
-		const [main, child, parent] = await createNodes(
-			['MainType', mainCode],
-			['ChildType', `${namespace}-child`],
-			['ParentType', `${namespace}-parent`],
+		const [main, leaf, parent] = await createNodes(
+			['SimpleGraphBranch', mainCode],
+			['SimpleGraphLeaf', `${namespace}-leaf`],
+			['SimpleGraphBranch', `${namespace}-parent`],
 		);
 		await connectNodes(
 			// tests incoming and outgoing relationships
-			[main, 'HAS_CHILD', child],
-			[parent, 'IS_PARENT_OF', main],
+			[main, 'HAS_LEAF', leaf],
+			[parent, 'HAS_CHILD', main],
 		);
 
 		const { body, status } = await getHandler()(input);
 		expect(status).toBe(200);
 		expect(body).toMatchObject({
 			code: mainCode,
-			parents: [`${namespace}-parent`],
-			children: [`${namespace}-child`],
+			parent: `${namespace}-parent`,
+			leaves: [`${namespace}-leaf`],
 		});
 	});
 
 	it('throws 404 error if no record', async () => {
 		await expect(getHandler()(input)).rejects.httpError({
 			status: 404,
-			message: `MainType ${mainCode} does not exist`,
+			message: `SimpleGraphBranch ${mainCode} does not exist`,
 		});
 	});
 
@@ -85,15 +85,15 @@ describe('rest GET', () => {
 	describe('rich relationship information', () => {
 		it('gets record with rich relationship information if richRelationships query is true', async () => {
 			const [main, childOne, childTwo, parent] = await createNodes(
-				['MainType', mainCode],
-				['ChildType', `${namespace}-child-1`],
-				['ChildType', `${namespace}-child-2`],
-				['ParentType', `${namespace}-parent`],
+				['SimpleGraphBranch', mainCode],
+				['SimpleGraphLeaf', `${namespace}-leaf-1`],
+				['SimpleGraphLeaf', `${namespace}-leaf-2`],
+				['SimpleGraphBranch', `${namespace}-parent`],
 			);
 			await connectNodes(
-				[main, 'HAS_CHILD', childOne],
-				[main, 'HAS_CHILD', childTwo],
-				[parent, 'IS_PARENT_OF', main],
+				[main, 'HAS_LEAF', childOne],
+				[main, 'HAS_LEAF', childTwo],
+				[parent, 'HAS_CHILD', main],
 			);
 
 			const { body, status } = await getHandler()({
@@ -102,7 +102,7 @@ describe('rest GET', () => {
 			});
 
 			expect(status).toBe(200);
-			[...body.children, ...body.parents].forEach(relationship =>
+			[...body.leaves, body.parent].forEach(relationship =>
 				expect(relationship).toHaveProperty(
 					'code',
 					'_updatedByClient',

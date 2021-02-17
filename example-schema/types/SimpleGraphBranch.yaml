@@ -23,6 +23,10 @@ properties:
     relationship: HAS_LEAF
     hasMany: true
     direction: outgoing
+  fallenLeaves:
+    type: FallenLeaf
+    label: fallenLeaves label
+    description: fallenLeaves description.
   parent:
     type: SimpleGraphBranch
     label: parent label
