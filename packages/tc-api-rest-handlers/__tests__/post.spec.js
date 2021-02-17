@@ -10,17 +10,19 @@ describe('rest POST', () => {
 		namespace,
 	);
 
-	const getInput = (body, query, metadata) => ({
-		type: 'MainType',
-		code: mainCode,
-		body,
-		query,
-		metadata,
-	});
+		const getInput = (type, body, query, metadata) => ({
+			type,
+			code: mainCode,
+			body,
+			query,
+			metadata,
+		});
 
-	const basicHandler = (...args) => postHandler()(getInput(...args));
+
 
 	describe('writing disconnected records', () => {
+const basicHandler = (...args) => postHandler()(getInput('AllPrimitives', ...args));
+
 		it('creates record with no body', async () => {
 			const { status, body } = await basicHandler();
 
@@ -28,30 +30,30 @@ describe('rest POST', () => {
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
-			await neo4jTest('MainType', mainCode).exists();
+			await neo4jTest('AllPrimitives', mainCode).exists();
 		});
 
 		it('creates record with properties', async () => {
 			const { status, body } = await basicHandler({
-				someString: 'some string',
-				someBoolean: true,
-				someEnum: 'First',
+				firstStringProperty: 'some string',
+				booleanProperty: true,
+				enumProperty: 'First',
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
-				someString: 'some string',
-				someBoolean: true,
-				someEnum: 'First',
+				firstStringProperty: 'some string',
+				booleanProperty: true,
+				enumProperty: 'First',
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('AllPrimitives', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someString: 'some string',
-					someBoolean: true,
-					someEnum: 'First',
+					firstStringProperty: 'some string',
+					booleanProperty: true,
+					enumProperty: 'First',
 				})
 				.noRels();
 		});
@@ -65,57 +67,57 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(meta.create);
-			await neo4jTest('MainType', mainCode).exists().match(meta.create);
+			await neo4jTest('AllPrimitives', mainCode).exists().match(meta.create);
 		});
 
 		it('sets array data', async () => {
 			const { body, status } = await basicHandler({
 				// someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second'],
+				multipleChoiceEnumProperty: ['First', 'Second'],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				// someStringList: ['one', 'two'],
-				someMultipleChoice: ['First', 'Second'],
+				multipleChoiceEnumProperty: ['First', 'Second'],
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('AllPrimitives', mainCode)
 				.exists()
 				.match({
 					// someStringList: ['one', 'two'],
-					someMultipleChoice: ['First', 'Second'],
+					multipleChoiceEnumProperty: ['First', 'Second'],
 				});
 		});
 
 		it("doesn't set a property when empty string provided", async () => {
-			const { status, body } = await basicHandler({ someString: '' });
+			const { status, body } = await basicHandler({ firstStringProperty: '' });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('AllPrimitives', mainCode)
 				.exists()
 				.notMatch({
-					someString: expect.any(String),
+					firstStringProperty: expect.any(String),
 				});
 		});
 
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
 			const { status, body } = await basicHandler({
-				someDate: new Date(date).toISOString(),
+				dateProperty: new Date(date).toISOString(),
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: mainCode,
-				someDate: date,
+				dateProperty: date,
 			});
-			await neo4jTest('MainType', mainCode).exists().match({
+			await neo4jTest('AllPrimitives', mainCode).exists().match({
 				code: mainCode,
-				someDate: date,
+				dateProperty: date,
 			});
 		});
 		const neo4jTimePrecision = timestamp =>
@@ -125,50 +127,50 @@ describe('rest POST', () => {
 			const datetime = '2019-01-09T00:00:00.001Z';
 
 			const { status, body } = await basicHandler({
-				someDatetime: datetime,
+				datetimeProperty: datetime,
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someDatetime: neo4jTimePrecision(datetime),
+				datetimeProperty: neo4jTimePrecision(datetime),
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('AllPrimitives', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someDatetime: neo4jTimePrecision(datetime),
+					datetimeProperty: neo4jTimePrecision(datetime),
 				});
 		});
 
 		it('sets Time property', async () => {
 			const time = '12:34:56.789Z';
-			const { status, body } = await basicHandler({ someTime: time });
+			const { status, body } = await basicHandler({ timeProperty: time });
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someTime: neo4jTimePrecision(time),
+				timeProperty: neo4jTimePrecision(time),
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('AllPrimitives', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
-					someTime: neo4jTimePrecision(time),
+					timeProperty: neo4jTimePrecision(time),
 				})
 				.noRels();
 		});
 
 		it('throws 409 error if record already exists', async () => {
-			await createNode('MainType', {
+			await createNode('AllPrimitives', {
 				code: mainCode,
 			});
 			await expect(
-				basicHandler({ someString: 'some string' }),
+				basicHandler({ firstStringProperty: 'some string' }),
 			).rejects.httpError({
 				status: 409,
-				message: `MainType ${mainCode} already exists`,
+				message: `AllPrimitives ${mainCode} already exists`,
 			});
-			await neo4jTest('MainType', mainCode).notMatch({
-				someString: 'some string',
+			await neo4jTest('AllPrimitives', mainCode).notMatch({
+				firstStringProperty: 'some string',
 			});
 		});
 
@@ -177,9 +179,9 @@ describe('rest POST', () => {
 				basicHandler({ code: 'wrong-code' }),
 			).rejects.httpError({
 				status: 400,
-				message: `Conflicting code property \`wrong-code\` in payload for MainType ${mainCode}`,
+				message: `Conflicting code property \`wrong-code\` in payload for AllPrimitives ${mainCode}`,
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('AllPrimitives', mainCode).notExists();
 		});
 
 		it('throws 400 if attempting to write property not in schema', async () => {
@@ -187,13 +189,11 @@ describe('rest POST', () => {
 				basicHandler({ notInSchema: 'a string' }),
 			).rejects.httpError({
 				status: 400,
-				message: 'Invalid property `notInSchema` on type `MainType`.',
+				message: 'Invalid property `notInSchema` on type `AllPrimitives`.',
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('AllPrimitives', mainCode).notExists();
 		});
-	});
 
-	describe('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
 			await expect(basicHandler()).rejects.toThrow('oh no');
@@ -201,6 +201,9 @@ describe('rest POST', () => {
 	});
 
 	describe('creating relationships', () => {
+
+	const basicHandler = (...args) => postHandler()(getInput('MainType', ...args));
+
 		const childCode = `${namespace}-child`;
 		const parentCode = `${namespace}-parent`;
 		const parentCode2 = `${parentCode}-2`;
@@ -330,18 +333,18 @@ describe('rest POST', () => {
 		});
 
 		describe('rich relationship information', () => {
-			const someString = 'some string';
+			const firstStringProperty = 'some string';
 			const anotherString = 'another string';
-			const someBoolean = true;
-			const someEnum = 'First';
-			const someMultipleChoice = ['First', 'Second'];
-			const childRelationshipProps = { code: childCode, someString };
+			const booleanProperty = true;
+			const enumProperty = 'First';
+			const multipleChoiceEnumProperty = ['First', 'Second'];
+			const childRelationshipProps = { code: childCode, firstStringProperty };
 			const childRelationshipTwoProps = {
 				code: childCode,
-				someString,
+				firstStringProperty,
 				anotherString,
 			};
-			const parentRelationshipProps = { code: parentCode, someString };
+			const parentRelationshipProps = { code: parentCode, firstStringProperty };
 			const parent2RelationshipProps = {
 				code: parentCode2,
 				anotherString,
@@ -380,7 +383,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
-							props: { someString, ...meta.create },
+							props: { firstStringProperty, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -412,7 +415,7 @@ describe('rest POST', () => {
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								someString,
+								firstStringProperty,
 								anotherString,
 								...meta.create,
 							},
@@ -451,7 +454,7 @@ describe('rest POST', () => {
 						{
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
-							props: { someString, ...meta.create },
+							props: { firstStringProperty, ...meta.create },
 						},
 						{
 							type: 'ParentType',
@@ -501,7 +504,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
-							props: { someString, ...meta.create },
+							props: { firstStringProperty, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -512,7 +515,7 @@ describe('rest POST', () => {
 						{
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
-							props: { someString, ...meta.create },
+							props: { firstStringProperty, ...meta.create },
 						},
 						{
 							type: 'ParentType',
@@ -546,7 +549,7 @@ describe('rest POST', () => {
 						{
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
-							props: { someString, ...meta.create },
+							props: { firstStringProperty, ...meta.create },
 						},
 						{
 							type: 'ChildType',
@@ -569,12 +572,12 @@ describe('rest POST', () => {
 			it('creates record with relationships which have same properties with different values (two parents)', async () => {
 				const parentOneRelationshipProps = {
 					code: parentCode,
-					someString: 'parent one some string',
+					firstStringProperty: 'parent one some string',
 					anotherString: 'Parent one another string',
 				};
 				const parentTwoRelationshipProps = {
 					code: parentCode2,
-					someString,
+					firstStringProperty,
 					anotherString,
 				};
 
@@ -605,8 +608,8 @@ describe('rest POST', () => {
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
 							props: {
-								someString:
-									parentOneRelationshipProps.someString,
+								firstStringProperty:
+									parentOneRelationshipProps.firstStringProperty,
 								anotherString:
 									parentOneRelationshipProps.anotherString,
 								...meta.create,
@@ -622,7 +625,7 @@ describe('rest POST', () => {
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
 							props: {
-								someString,
+								firstStringProperty,
 								anotherString,
 								...meta.create,
 							},
@@ -637,16 +640,16 @@ describe('rest POST', () => {
 			it('creates record with relationships which have same properties with different values (child and parent)', async () => {
 				const parentRelProps = {
 					code: parentCode,
-					someString: 'Parent some string',
+					firstStringProperty: 'Parent some string',
 					anotherString: 'Parent another string',
 				};
 				const childRelProps = {
 					code: childCode,
-					someString,
+					firstStringProperty,
 					anotherString,
-					someMultipleChoice,
-					someEnum,
-					someBoolean,
+					multipleChoiceEnumProperty,
+					enumProperty,
+					booleanProperty,
 				};
 
 				const { status, body } = await basicHandler(
@@ -674,11 +677,11 @@ describe('rest POST', () => {
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								someString: childRelProps.someString,
+								firstStringProperty: childRelProps.firstStringProperty,
 								anotherString: childRelProps.anotherString,
-								someMultipleChoice,
-								someEnum,
-								someBoolean,
+								multipleChoiceEnumProperty,
+								enumProperty,
+								booleanProperty,
 								...meta.create,
 							},
 						},
@@ -692,7 +695,7 @@ describe('rest POST', () => {
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
 							props: {
-								someString: parentRelProps.someString,
+								firstStringProperty: parentRelProps.firstStringProperty,
 								anotherString: parentRelProps.anotherString,
 								...meta.create,
 							},
@@ -707,7 +710,7 @@ describe('rest POST', () => {
 			it('creates record with relationship which has a multiple choice property', async () => {
 				const { status, body } = await basicHandler(
 					{
-						curiousChild: { code: childCode, someMultipleChoice },
+						curiousChild: { code: childCode, multipleChoiceEnumProperty },
 					},
 					{ upsert: true, richRelationships: true },
 					getMetaPayload(),
@@ -717,7 +720,7 @@ describe('rest POST', () => {
 				expect(body).toMatchObject({
 					curiousChild: {
 						code: childCode,
-						someMultipleChoice,
+						multipleChoiceEnumProperty,
 						...meta.create,
 					},
 				});
@@ -730,7 +733,7 @@ describe('rest POST', () => {
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								someMultipleChoice,
+								multipleChoiceEnumProperty,
 								...meta.create,
 							},
 						},
@@ -744,7 +747,7 @@ describe('rest POST', () => {
 			it('creates record with relationship which has an enum property', async () => {
 				const { status, body } = await basicHandler(
 					{
-						curiousChild: { code: childCode, someEnum },
+						curiousChild: { code: childCode, enumProperty },
 					},
 					{ upsert: true, richRelationships: true },
 					getMetaPayload(),
@@ -754,7 +757,7 @@ describe('rest POST', () => {
 				expect(body).toMatchObject({
 					curiousChild: {
 						code: childCode,
-						someEnum,
+						enumProperty,
 						...meta.create,
 					},
 				});
@@ -767,7 +770,7 @@ describe('rest POST', () => {
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								someEnum,
+								enumProperty,
 								...meta.create,
 							},
 						},
@@ -781,7 +784,7 @@ describe('rest POST', () => {
 			it('creates record with relationship which has a boolean property', async () => {
 				const { status, body } = await basicHandler(
 					{
-						curiousChild: { code: childCode, someBoolean },
+						curiousChild: { code: childCode, booleanProperty },
 					},
 					{ upsert: true, richRelationships: true },
 					getMetaPayload(),
@@ -790,7 +793,7 @@ describe('rest POST', () => {
 				expect(body).toMatchObject({
 					curiousChild: {
 						code: childCode,
-						someBoolean,
+						booleanProperty,
 						...meta.create,
 					},
 				});
@@ -803,7 +806,7 @@ describe('rest POST', () => {
 							type: 'HAS_CURIOUS_CHILD',
 							direction: 'outgoing',
 							props: {
-								someBoolean,
+								booleanProperty,
 								...meta.create,
 							},
 						},
@@ -840,6 +843,7 @@ describe('rest POST', () => {
 	});
 
 	describe('restricted types', () => {
+
 		const restrictedCode = `${namespace}-restricted`;
 
 		it('throws 400 when creating restricted record', async () => {
@@ -870,12 +874,13 @@ describe('rest POST', () => {
 	});
 
 	describe('field locking', () => {
+		const basicHandler = (...args) => postHandler()(getInput('MainType', ...args));
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
 			const { status, body } = await basicHandler(
-				{ someString: 'some string' },
-				{ lockFields: 'someString' },
+				{ firstStringProperty: 'some string' },
+				{ lockFields: 'firstStringProperty' },
 				{
 					clientId: lockClient,
 				},
@@ -883,24 +888,24 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someString: 'some string',
-				_lockedFields: `{"someString":"${lockClient}"}`,
+				firstStringProperty: 'some string',
+				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
-					someString: 'some string',
-					_lockedFields: `{"someString":"${lockClient}"}`,
+					firstStringProperty: 'some string',
+					_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 				});
 		});
 
 		it('creates a record with multiple fields, locking selective ones', async () => {
 			const { status, body } = await basicHandler(
 				{
-					someString: 'some string',
+					firstStringProperty: 'some string',
 					anotherString: 'another string',
 				},
-				{ lockFields: 'someString' },
+				{ lockFields: 'firstStringProperty' },
 				{
 					clientId: lockClient,
 				},
@@ -908,22 +913,22 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someString: 'some string',
+				firstStringProperty: 'some string',
 				anotherString: 'another string',
-				_lockedFields: `{"someString":"${lockClient}"}`,
+				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
-					someString: 'some string',
+					firstStringProperty: 'some string',
 					anotherString: 'another string',
-					_lockedFields: `{"someString":"${lockClient}"}`,
+					_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 				});
 		});
 
 		it('creates a record and locks all fields that are written', async () => {
 			const { status, body } = await basicHandler(
-				{ someString: 'some string' },
+				{ firstStringProperty: 'some string' },
 				{ lockFields: 'all' },
 				{
 					clientId: lockClient,
@@ -932,21 +937,21 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someString: 'some string',
-				_lockedFields: `{"someString":"${lockClient}"}`,
+				firstStringProperty: 'some string',
+				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
 			await neo4jTest('MainType', mainCode)
 				.exists()
 				.match({
-					someString: 'some string',
-					_lockedFields: `{"someString":"${lockClient}"}`,
+					firstStringProperty: 'some string',
+					_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 				});
 		});
 
 		it('throws 400 when clientId is not set', async () => {
 			await expect(
 				basicHandler(
-					{ someString: 'some string' },
+					{ firstStringProperty: 'some string' },
 					{ lockFields: 'all' },
 				),
 			).rejects.httpError({
