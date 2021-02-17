@@ -6,52 +6,52 @@ describe('rest DELETE', () => {
 	const namespace = 'api-rest-handlers-delete';
 	const mainCode = `${namespace}-main`;
 	const input = {
-		type: 'MainType',
+		type: 'SimpleGraphBranch',
 		code: mainCode,
 	};
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
 	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
+		createNode('SimpleGraphBranch', { code: mainCode, ...props });
 
 	it('deletes record without relationships', async () => {
 		await createMainNode();
 		const { status } = await deleteHandler()(input);
 
 		expect(status).toBe(204);
-		await neo4jTest('MainType', mainCode).notExists();
+		await neo4jTest('SimpleGraphBranch', mainCode).notExists();
 	});
 
 	it('errors when deleting record with relationships', async () => {
 		const [main, child, parent] = await createNodes(
-			['MainType', mainCode],
-			['ChildType', `${namespace}-child`],
-			['ParentType', `${namespace}-parent`],
+			['SimpleGraphBranch', mainCode],
+			['LeafType', `${namespace}-leaf`],
+			['SimpleGraphBranch', `${namespace}-parent`],
 		);
 		await connectNodes(
 			// tests incoming and outgoing relationships
-			[main, 'HAS_CHILD', child],
-			[parent, 'IS_PARENT_OF', main],
+			[main, 'HAS_LEAF', child],
+			[parent, 'HAS_CHILD', main],
 		);
 
 		await expect(deleteHandler()(input)).rejects.httpError({
 			status: 409,
-			message: `Cannot delete - MainType ${mainCode} has relationships.`,
+			message: `Cannot delete - SimpleGraphBranch ${mainCode} has relationships.`,
 		});
-		await neo4jTest('MainType', mainCode).exists();
+		await neo4jTest('SimpleGraphBranch', mainCode).exists();
 	});
 
 	it('deletes record with relationships when force=true', async () => {
 		const [main, child, parent] = await createNodes(
-			['MainType', mainCode],
-			['ChildType', `${namespace}-child`],
-			['ParentType', `${namespace}-parent`],
+			['SimpleGraphBranch', mainCode],
+			['LeafType', `${namespace}-leaf`],
+			['SimpleGraphBranch', `${namespace}-parent`],
 		);
 		await connectNodes(
 			// tests incoming and outgoing relationships
-			[main, 'HAS_CHILD', child],
-			[parent, 'IS_PARENT_OF', main],
+			[main, 'HAS_LEAF', child],
+			[parent, 'HAS_CHILD', main],
 		);
 
 		const { status } = await deleteHandler()({
@@ -60,13 +60,13 @@ describe('rest DELETE', () => {
 		});
 
 		expect(status).toBe(204);
-		await neo4jTest('MainType', mainCode).notExists();
+		await neo4jTest('SimpleGraphBranch', mainCode).notExists();
 	});
 
 	it('throws 404 error if no record', async () => {
 		await expect(deleteHandler()(input)).rejects.httpError({
 			status: 404,
-			message: `MainType ${mainCode} does not exist`,
+			message: `SimpleGraphBranch ${mainCode} does not exist`,
 		});
 	});
 
