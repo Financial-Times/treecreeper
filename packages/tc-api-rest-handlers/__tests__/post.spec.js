@@ -20,13 +20,15 @@ describe('rest POST', () => {
 		metadata,
 	});
 
+	const postKitchenSinkPayload = body => postHandler({
+		type: 'KitchenSink',
+		code: mainCode,
+		body
+	});
+
 	describe('writing disconnected records', () => {
 
-		const postKitchenSinkPayload = body => postHandler({
-			type: 'KitchenSink',
-			code: mainCode,
-			body
-		});
+
 
 		it('creates record with no body', async () => {
 			const { status, body } = await postKitchenSinkPayload();
@@ -334,7 +336,7 @@ describe('rest POST', () => {
 
 		describe('rich relationship information', () => {
 			const firstStringProperty = 'some string';
-			const anotherString = 'another string';
+			const secondStringProperty = 'another string';
 			const booleanProperty = true;
 			const enumProperty = 'First';
 			const multipleChoiceEnumProperty = ['First', 'Second'];
@@ -345,7 +347,7 @@ describe('rest POST', () => {
 			const childRelationshipTwoProps = {
 				code: childCode,
 				firstStringProperty,
-				anotherString,
+				secondStringProperty,
 			};
 			const parentRelationshipProps = {
 				code: parentCode,
@@ -353,7 +355,7 @@ describe('rest POST', () => {
 			};
 			const parent2RelationshipProps = {
 				code: parentCode2,
-				anotherString,
+				secondStringProperty,
 			};
 
 			it('returns record with rich relationship information if richRelationships query is true', async () => {
@@ -422,7 +424,7 @@ describe('rest POST', () => {
 							direction: 'outgoing',
 							props: {
 								firstStringProperty,
-								anotherString,
+								secondStringProperty,
 								...meta.create,
 							},
 						},
@@ -471,7 +473,7 @@ describe('rest POST', () => {
 						{
 							type: 'IS_CURIOUS_PARENT_OF',
 							direction: 'incoming',
-							props: { anotherString, ...meta.create },
+							props: { secondStringProperty, ...meta.create },
 						},
 						{
 							type: 'ParentType',
@@ -579,12 +581,12 @@ describe('rest POST', () => {
 				const parentOneRelationshipProps = {
 					code: parentCode,
 					firstStringProperty: 'parent one some string',
-					anotherString: 'Parent one another string',
+					secondStringProperty: 'Parent one another string',
 				};
 				const parentTwoRelationshipProps = {
 					code: parentCode2,
 					firstStringProperty,
-					anotherString,
+					secondStringProperty,
 				};
 
 				const { status, body } = await basicHandler(
@@ -616,8 +618,8 @@ describe('rest POST', () => {
 							props: {
 								firstStringProperty:
 									parentOneRelationshipProps.firstStringProperty,
-								anotherString:
-									parentOneRelationshipProps.anotherString,
+								secondStringProperty:
+									parentOneRelationshipProps.secondStringProperty,
 								...meta.create,
 							},
 						},
@@ -632,7 +634,7 @@ describe('rest POST', () => {
 							direction: 'incoming',
 							props: {
 								firstStringProperty,
-								anotherString,
+								secondStringProperty,
 								...meta.create,
 							},
 						},
@@ -647,12 +649,12 @@ describe('rest POST', () => {
 				const parentRelProps = {
 					code: parentCode,
 					firstStringProperty: 'Parent some string',
-					anotherString: 'Parent another string',
+					secondStringProperty: 'Parent another string',
 				};
 				const childRelProps = {
 					code: childCode,
 					firstStringProperty,
-					anotherString,
+					secondStringProperty,
 					multipleChoiceEnumProperty,
 					enumProperty,
 					booleanProperty,
@@ -685,7 +687,7 @@ describe('rest POST', () => {
 							props: {
 								firstStringProperty:
 									childRelProps.firstStringProperty,
-								anotherString: childRelProps.anotherString,
+								secondStringProperty: childRelProps.secondStringProperty,
 								multipleChoiceEnumProperty,
 								enumProperty,
 								booleanProperty,
@@ -704,7 +706,7 @@ describe('rest POST', () => {
 							props: {
 								firstStringProperty:
 									parentRelProps.firstStringProperty,
-								anotherString: parentRelProps.anotherString,
+								secondStringProperty: parentRelProps.secondStringProperty,
 								...meta.create,
 							},
 						},
@@ -885,24 +887,26 @@ describe('rest POST', () => {
 
 	describe('field locking', () => {
 		const basicHandler = (...args) =>
-			postHandler(getInput('MainType', ...args));
+			postHandler(getInput('KitchenSink', ...args));
 		const lockClient = `${namespace}-lock-client`;
 
 		it('creates a record with _lockedFields', async () => {
-			const { status, body } = await basicHandler(
-				{ firstStringProperty: 'some string' },
-				{ lockFields: 'firstStringProperty' },
-				{
+			const { status, body } = await postHandler({
+				type: 'KitchenSink',
+				code: mainCode,
+				body: { firstStringProperty: 'some string' },
+				query: { lockFields: 'firstStringProperty' },
+				metadata: {
 					clientId: lockClient,
-				},
-			);
+				}
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				firstStringProperty: 'some string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
@@ -911,47 +915,52 @@ describe('rest POST', () => {
 		});
 
 		it('creates a record with multiple fields, locking selective ones', async () => {
-			const { status, body } = await basicHandler(
-				{
+			const { status, body } = await postHandler({
+				type: 'KitchenSink',
+				code: mainCode,
+				body: {
 					firstStringProperty: 'some string',
-					anotherString: 'another string',
+					secondStringProperty: 'another string',
 				},
-				{ lockFields: 'firstStringProperty' },
-				{
+				query: { lockFields: 'firstStringProperty' },
+				metadata: {
 					clientId: lockClient,
-				},
-			);
-
+				}
+			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				firstStringProperty: 'some string',
-				anotherString: 'another string',
+				secondStringProperty: 'another string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
-					anotherString: 'another string',
+					secondStringProperty: 'another string',
 					_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 				});
 		});
 
 		it('creates a record and locks all fields that are written', async () => {
-			const { status, body } = await basicHandler(
-				{ firstStringProperty: 'some string' },
-				{ lockFields: 'all' },
-				{
-					clientId: lockClient,
+			const { status, body } = await postHandler({
+				type: 'KitchenSink',
+				code: mainCode,
+				body: {
+					firstStringProperty: 'some string',
 				},
-			);
+				query: { lockFields: 'all' },
+				metadata: {
+					clientId: lockClient,
+				}
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				firstStringProperty: 'some string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('KitchenSink', mainCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
@@ -969,7 +978,7 @@ describe('rest POST', () => {
 				status: 400,
 				message: /clientId needs to be set to a valid system code in order to lock fields/,
 			});
-			await neo4jTest('MainType', mainCode).notExists();
+			await neo4jTest('KitchenSink', mainCode).notExists();
 		});
 	});
 });
