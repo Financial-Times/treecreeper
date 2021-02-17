@@ -7,7 +7,7 @@ describe('rest POST (absorb)', () => {
 	const namespace = 'api-rest-handlers-absorb';
 	const mainCode = `${namespace}-main`;
 	const absorbedCode = `${namespace}-absorbed`;
-	const childCode = `${namespace}-child`;
+	const leafCode = `${namespace}-leaf`;
 	const parentCode = `${namespace}-parent`;
 
 	const {
@@ -31,7 +31,7 @@ describe('rest POST (absorb)', () => {
 	const absorb = absorbHandler({ documentStore });
 	const getInput = (override, metadata = {}) =>
 		override || {
-			type: 'MainType',
+			type: 'SimpleGraphBranch',
 			code: mainCode,
 			codeToAbsorb: absorbedCode,
 			metadata,
@@ -40,14 +40,14 @@ describe('rest POST (absorb)', () => {
 	const createNodePair = (mainBody, absorbedBody) => {
 		const nodes = [
 			[
-				'MainType',
+				'SimpleGraphBranch',
 				{
 					code: mainCode,
 					...(mainBody || {}),
 				},
 			],
 			[
-				'MainType',
+				'SimpleGraphBranch',
 				{
 					code: absorbedCode,
 					...(absorbedBody || {}),
@@ -69,7 +69,7 @@ describe('rest POST (absorb)', () => {
 			await expect(
 				absorb(
 					getInput({
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						code: mainCode,
 						codeToAbsorb: `${absorbedCode}@@@@@`,
 					}),
@@ -85,7 +85,7 @@ describe('rest POST (absorb)', () => {
 			await expect(
 				absorb(
 					getInput({
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						code: mainCode,
 					}),
 				),
@@ -93,38 +93,38 @@ describe('rest POST (absorb)', () => {
 				status: 400,
 				message: /Invalid value.+codeToAbsorb/,
 			});
-			await neo4jTest('MainType', mainCode).match({
+			await neo4jTest('SimpleGraphBranch', mainCode).match({
 				code: mainCode,
 			});
 		});
 
 		it('errors if main code does not exist', async () => {
-			await createNode('MainType', {
+			await createNode('SimpleGraphBranch', {
 				code: absorbedCode,
-				someString: 'fake1',
+				stringProperty: 'fake1',
 			});
 			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
 				message: `MainType record missing for \`code\``,
 			});
-			await neo4jTest('MainType', absorbedCode).match({
+			await neo4jTest('SimpleGraphBranch', absorbedCode).match({
 				code: absorbedCode,
-				someString: 'fake1',
+				stringProperty: 'fake1',
 			});
 		});
 
 		it('errors if code to absorb does not exist', async () => {
-			await createNode('MainType', {
+			await createNode('SimpleGraphBranch', {
 				code: mainCode,
-				someString: 'fake2',
+				stringProperty: 'fake2',
 			});
 			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
 				message: `MainType record missing for \`codeToAbsorb\``,
 			});
-			await neo4jTest('MainType', mainCode).match({
+			await neo4jTest('SimpleGraphBranch', mainCode).match({
 				code: mainCode,
-				someString: 'fake2',
+				stringProperty: 'fake2',
 			});
 		});
 	});
@@ -137,8 +137,8 @@ describe('rest POST (absorb)', () => {
 				const { status } = await absorb(getInput());
 				expect(status).toBe(200);
 
-				await neo4jTest('MainType', mainCode).exists();
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', mainCode).exists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('sets correct metadata', async () => {
@@ -150,34 +150,34 @@ describe('rest POST (absorb)', () => {
 				expect(status).toBe(200);
 				expect(body).toMatchObject(meta.update);
 
-				await neo4jTest('MainType', mainCode).exists();
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', mainCode).exists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('not modify existing properties of destination node', async () => {
 				await createNodePair(
-					{ someString: 'potato' },
-					{ someString: 'tomato' },
+					{ stringProperty: 'potato' },
+					{ stringProperty: 'tomato' },
 				);
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'potato',
+					stringProperty: 'potato',
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'potato',
+				await neo4jTest('SimpleGraphBranch', mainCode).match({
+					stringProperty: 'potato',
 				});
 			});
 
 			it('add new properties to destination node', async () => {
-				await createNodePair(undefined, { someString: 'potato' });
+				await createNodePair(undefined, { stringProperty: 'potato' });
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'potato',
+					stringProperty: 'potato',
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'potato',
+				await neo4jTest('SimpleGraphBranch', mainCode).match({
+					stringProperty: 'potato',
 				});
 			});
 
@@ -189,48 +189,48 @@ describe('rest POST (absorb)', () => {
 					notInSchema: expect.any(String),
 				});
 
-				await neo4jTest('MainType', mainCode).match({
+				await neo4jTest('SimpleGraphBranch', mainCode).match({
 					notInSchema: 'someVal',
 				});
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 		});
 
 		describe('relationships', () => {
 			it('move outgoing relationships', async () => {
 				const [, absorbed] = await createNodePair();
-				const child = await createNode('ChildType', childCode);
-				await connectNodes(absorbed, 'HAS_CHILD', child);
+				const leaf = await createNode('SimpleGraphLeaf', leafCode);
+				await connectNodes(absorbed, 'HAS_LEAF', leaf);
 
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					children: [childCode],
+					leaves: [leafCode],
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', mainCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_CHILD',
+							type: 'HAS_LEAF',
 							direction: 'outgoing',
 							props: meta.default,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode,
+								code: leafCode,
 								...meta.default,
 							},
 						},
 					);
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('move incoming relationships', async () => {
 				const [, absorbed] = await createNodePair();
-				const parent = await createNode('ParentType', parentCode);
-				await connectNodes(parent, 'IS_PARENT_OF', absorbed);
+				const parent = await createNode('SimpleGraphBranch', parentCode);
+				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
@@ -238,58 +238,58 @@ describe('rest POST (absorb)', () => {
 					parents: [parentCode],
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', mainCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'IS_PARENT_OF',
+							type: 'HAS_CHILD',
 							direction: 'incoming',
 							props: meta.default,
 						},
 						{
-							type: 'ParentType',
+							type: 'SimpleGraphBranch',
 							props: {
 								code: parentCode,
 								...meta.default,
 							},
 						},
 					);
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('merges identical relationships', async () => {
 				const [main, absorbed] = await createNodePair();
-				const child = await createNode('ChildType', childCode);
+				const leaf = await createNode('SimpleGraphLeaf', leafCode);
 
 				await connectNodes(
-					[main, 'HAS_CHILD', child],
-					[absorbed, 'HAS_CHILD', child],
+					[main, 'HAS_LEAF', leaf],
+					[absorbed, 'HAS_LEAF', leaf],
 				);
 
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					children: [childCode],
+					leaves: [leafCode],
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', mainCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_CHILD',
+							type: 'HAS_LEAF',
 							direction: 'outgoing',
 							props: meta.default,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode,
+								code: leafCode,
 								...meta.default,
 							},
 						},
 					);
 
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('discard any newly reflexive relationships', async () => {
@@ -298,67 +298,67 @@ describe('rest POST (absorb)', () => {
 					{ code: absorbedCode },
 				);
 				const [main, absorbed] = nodes;
-				await connectNodes(main, 'HAS_YOUNGER_SIBLING', absorbed);
+				await connectNodes(main, 'HAS_CHILD', absorbed);
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).not.toMatchObject({
-					youngerSiblings: expect.any(Array),
+					children: expect.any(Array),
 				});
 				expect(body).not.toMatchObject({
-					olderSiblings: expect.any(Array),
+					parent: expect.any(Array),
 				});
 
-				await neo4jTest('MainType', mainCode).hasRels(0);
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', mainCode).hasRels(0);
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 
 			it('does not overwrite __-to-one relationships', async () => {
 				const [main, absorbed] = await createNodePair();
 
-				const [child1, child2] = await createNodes(
-					['ChildType', `${namespace}-child1`],
-					['ChildType', `${namespace}-child2`],
+				const [parent1, parent2] = await createNodes(
+					['SimpleGraphBranch', `${namespace}-parent1`],
+					['SimpleGraphBranch', `${namespace}-parent2`],
 				);
 
 				await connectNodes(
-					[main, 'HAS_FAVOURITE_CHILD', child1],
-					[absorbed, 'HAS_FAVOURITE_CHILD', child2],
+					[parent1, 'HAS_CHILD', main],
+					[parent2, 'HAS_CHILD', absorbed],
 				);
 
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					favouriteChild: `${namespace}-child1`,
+					parent: `${namespace}-parent1`,
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', mainCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_FAVOURITE_CHILD',
-							direction: 'outgoing',
+							type: 'HAS_CHILD',
+							direction: 'incoming',
 							props: meta.default,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphBranch',
 							props: {
-								code: `${namespace}-child1`,
+								code: `${namespace}-parent1`,
 								...meta.default,
 							},
 						},
 					);
 
-				await neo4jTest('MainType', absorbedCode).notExists();
+				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
 			});
 		});
 
 		describe('rich relationship information', () => {
 			it('returns record with rich relationship information if richRelationships query is true', async () => {
 				const [, absorbed] = await createNodePair();
-				const child = await createNode('ChildType', childCode);
-				const parent = await createNode('ParentType', parentCode);
-				await connectNodes(absorbed, 'HAS_CHILD', child);
-				await connectNodes(parent, 'IS_PARENT_OF', absorbed);
+				const leaf = await createNode('SimpleGraphLeaf', leafCode);
+				const parent = await createNode('SimpleGraphBranch', parentCode);
+				await connectNodes(absorbed, 'HAS_LEAF', leaf);
+				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
 				const { status, body } = await absorb({
 					...getInput(),
@@ -367,9 +367,9 @@ describe('rest POST (absorb)', () => {
 
 				expect(status).toBe(200);
 
-				body.children.forEach(relationship =>
+				body.leaves.forEach(relationship =>
 					expect(relationship).toMatchObject({
-						code: childCode,
+						code: leafCode,
 						...meta.default,
 					}),
 				);

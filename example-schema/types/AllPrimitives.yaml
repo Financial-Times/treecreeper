@@ -1,0 +1,146 @@
+name: AllPrimitives
+description: A type that has a wide range of primitive properties on it.
+moreInformation: |
+  These inclode Document, String, Enum, multiple choice Enum, Boolean, Integer
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  firstStringProperty:
+    type: Word
+    description: firstStringProperty description.
+    label: firstStringProperty label
+    useInSummary: true
+  secondStringProperty:
+    type: Word
+    description: secondStringProperty description.
+    label: secondStringProperty label
+  firstDocumentProperty:
+    type: Document
+    description: firstDocumentProperty description.
+    label: firstDocumentProperty label
+  secondDocumentProperty:
+    type: Document
+    description: secondDocumentProperty description.
+    label: secondDocumentProperty label
+  booleanProperty:
+    type: Boolean
+    description: booleanProperty description.
+    label: booleanProperty label
+  enumProperty:
+    type: AnEnum
+    description: enumProperty description.
+    label: enumProperty label
+  multipleChoiceEnumProperty:
+    type: AnEnum
+    hasMany: true
+    description: multipleChoiceEnumProperty description.
+    label: multipleChoiceEnumProperty label
+  integerProperty:
+    type: Int
+    description: integerProperty description.
+    label: integerProperty label
+  floatProperty:
+    type: Float
+    description: floatProperty description.
+    label: floatProperty label
+  dateProperty:
+    type: Date
+    description: Date description.
+    label: Date label
+  timeProperty:
+    type: Time
+    description: Time description.
+    label: Time label
+  datetimeProperty:
+    type: DateTime
+    description: DateTime description.
+    label: DateTime label
+  urlProperty:
+    type: Url
+    description: Url description.
+    label: Url label
+    canIdentify: true
+
+
+  # children:
+  #   relationship: HAS_CHILD
+  #   type: ChildType
+  #   description: Children description.
+  #   label: Children label
+  #   direction: outgoing
+  #   hasMany: true
+  # deprecatedChildren:
+  #   relationship: HAS_CHILD
+  #   type: ChildType
+  #   description: Children description.
+  #   label: Children label
+  #   direction: outgoing
+  #   hasMany: true
+  #   deprecationReason: Replaced by children
+  # parents:
+  #   relationship: IS_PARENT_OF
+  #   type: ParentType
+  #   description: Parents description.
+  #   label: Parents label
+  #   direction: incoming
+  #   hasMany: true
+  # favouriteChild:
+  #   relationship: HAS_FAVOURITE_CHILD
+  #   type: ChildType
+  #   description: Favourite child description.
+  #   label: Favourite label
+  #   hasMany: false
+  #   direction: outgoing
+  # youngerSiblings:
+  #   relationship: HAS_YOUNGER_SIBLING
+  #   type: MainType
+  #   description: Younger siblings description.
+  #   label: Younger siblings label
+  #   direction: outgoing
+  #   hasMany: true
+  # olderSiblings:
+  #   relationship: HAS_YOUNGER_SIBLING
+  #   type: MainType
+  #   description: Older siblings description.
+  #   label: Older siblings label
+  #   direction: incoming
+  #   hasMany: true
+  # curiousChild:
+  #   type: CuriousChild
+  #   description: Curious child description.
+  #   label: Curious child label
+  # curiousParent:
+  #   type: CuriousParent
+  #   description: Curious parent description.
+  #   label: Curious parent label
+  # lockedField:
+  #   type: String
+  #   description: Locked field description.
+  #   label: Locked field label
+  #   lockedBy:
+  #     - global-lock-client
+  # curiousYoungerSibling:
+  #   type: CuriousSibling
+  #   description: Curious Younger sibling description.
+  #   label: Curious Younger sibling label
+  #   direction: outgoing
+  # curiousOlderSibling:
+  #   type: CuriousSibling
+  #   description: Curious older sibling description.
+  #   label: Curious older sibling label
+  #   direction: incoming
+  # oddThings:
+  #   type: OddThing
+  #   description: Odd thing relationship description.
+  #   label: Odd thing relationship label
+  # cypherProperty:
+  #   description: cypherProperty description.
+  #   label: cypherProperty label
+  #   type: ChildType
+  #   cypher: 'MATCH (this)-[:HAS_CHILD]->(c) RETURN c'
+  #   hasMany: true

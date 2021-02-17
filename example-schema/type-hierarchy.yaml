@@ -10,3 +10,6 @@ test:
     - MVRType
     - FieldsetType
     - ValidatedType
+    - AllPrimitives
+    - SimpleGraphBranch
+    - SimpleGraphLeaf

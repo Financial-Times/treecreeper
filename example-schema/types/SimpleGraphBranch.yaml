@@ -1,0 +1,39 @@
+name: SimpleGraphBranch
+description: A type that has a few primitive properties and relationships on it, for general testing
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  stringProperty:
+    type: Word
+    description: stringProperty description.
+    label: stringProperty label
+  booleanProperty:
+    type: Boolean
+    description: booleanProperty description.
+    label: booleanProperty label
+  leaves:
+    type: SimpleGraphLeaf
+    label: leaves label
+    description: leaves description.
+    relationship: HAS_LEAF
+    hasMany: true
+    direction: outgoing
+  parent:
+    type: SimpleGraphBranch
+    label: parent label
+    description : parent description.
+    relationship: HAS_CHILD
+    hasMany: false
+    direction: incoming
+  children:
+    type: SimpleGraphBranch
+    label: children label
+    description : children description.
+    relationship: HAS_CHILD
+    hasMany: false
+    direction: outgoing
