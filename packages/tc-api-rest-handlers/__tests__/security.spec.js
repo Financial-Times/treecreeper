@@ -56,7 +56,7 @@ describe('rest security', () => {
 			Object.entries(attackVectors).forEach(([name, modifier]) => {
 				it(`should error when ${name} is suspicious`, async () => {
 					const input = {
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						code: mainCode,
 					};
 					modifier(input);
