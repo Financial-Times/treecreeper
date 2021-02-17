@@ -105,7 +105,7 @@ describe('rest POST (absorb)', () => {
 			});
 			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
-				message: `MainType record missing for \`code\``,
+				message: `SimpleGraphBranch record missing for \`code\``,
 			});
 			await neo4jTest('SimpleGraphBranch', absorbedCode).match({
 				code: absorbedCode,
@@ -120,7 +120,7 @@ describe('rest POST (absorb)', () => {
 			});
 			await expect(absorbHandler()(getInput())).rejects.httpError({
 				status: 404,
-				message: `MainType record missing for \`codeToAbsorb\``,
+				message: `SimpleGraphBranch record missing for \`codeToAbsorb\``,
 			});
 			await neo4jTest('SimpleGraphBranch', mainCode).match({
 				code: mainCode,
@@ -235,7 +235,7 @@ describe('rest POST (absorb)', () => {
 				const { status, body } = await absorb(getInput());
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					parents: [parentCode],
+					parent: parentCode,
 				});
 
 				await neo4jTest('SimpleGraphBranch', mainCode)
