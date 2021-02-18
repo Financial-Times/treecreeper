@@ -94,6 +94,27 @@ describe('rest POST', () => {
 				});
 		});
 
+		it('writes successfully when null value validated against a pattern', async () => {
+			const { status, body } = await postHandler({
+				type: 'ValidatedType',
+				code: `${namespace}-validated`,
+				// Note that this doens't contain a 'someString' property which is validated with regex
+				body: {},
+				metadata: getMetaPayload(),
+			});
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				code: `${namespace}-validated`,
+			});
+
+			await neo4jTest('ValidatedType', `${namespace}-validated`)
+				.exists()
+				.notMatch({
+					someString: expect.any(String),
+				});
+		});
+
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
 			const { status, body } = await postKitchenSinkPayload({
