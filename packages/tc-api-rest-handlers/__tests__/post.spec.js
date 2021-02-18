@@ -8,9 +8,12 @@ describe('rest POST', () => {
 	const namespace = 'api-rest-handlers-post';
 	const branchCode = `${namespace}-branch`;
 
-	const { createNodes, createNode, meta, getMetaPayload } = setupMocks(
-		namespace,
-	);
+	const {
+		createNodes,
+		createNode,
+		stockMetadata,
+		getMetaPayload,
+	} = setupMocks(namespace);
 
 	describe('writing disconnected records', () => {
 		const postKitchenSinkPayload = body =>
@@ -60,10 +63,10 @@ describe('rest POST', () => {
 			});
 
 			expect(status).toBe(200);
-			expect(body).toMatchObject(meta.create);
+			expect(body).toMatchObject(stockMetadata.create);
 			await neo4jTest('KitchenSink', branchCode)
 				.exists()
-				.match(meta.create);
+				.match(stockMetadata.create);
 		});
 
 		it('sets array data', async () => {
@@ -243,7 +246,7 @@ describe('rest POST', () => {
 			});
 
 			await neo4jTest('SimpleGraphBranch', branchCode)
-				.match(meta.create)
+				.match(stockMetadata.create)
 				.notMatch({
 					leaves: [leafCode1],
 					parent: branchCode2,
@@ -253,24 +256,24 @@ describe('rest POST', () => {
 					{
 						type: 'HAS_LEAF',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'SimpleGraphLeaf',
-						props: { code: leafCode1, ...meta.default },
+						props: { code: leafCode1, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'incoming',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'SimpleGraphBranch',
 						props: {
 							code: branchCode2,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -304,28 +307,28 @@ describe('rest POST', () => {
 			});
 
 			await neo4jTest('SimpleGraphBranch', branchCode)
-				.match(meta.create)
+				.match(stockMetadata.create)
 				.hasRels(2)
 				.hasRel(
 					{
 						type: 'HAS_LEAF',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'SimpleGraphLeaf',
-						props: { code: leafCode1, ...meta.create },
+						props: { code: leafCode1, ...stockMetadata.create },
 					},
 				)
 				.hasRel(
 					{
 						type: 'HAS_CHILD',
 						direction: 'incoming',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'SimpleGraphBranch',
-						props: { code: branchCode2, ...meta.create },
+						props: { code: branchCode2, ...stockMetadata.create },
 					},
 				);
 		});
@@ -351,8 +354,8 @@ describe('rest POST', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				leaves: [{ code: leafCode1, ...meta.create }],
-				parent: { code: branchCode2, ...meta.create },
+				leaves: [{ code: leafCode1, ...stockMetadata.create }],
+				parent: { code: branchCode2, ...stockMetadata.create },
 			});
 		});
 
@@ -377,12 +380,12 @@ describe('rest POST', () => {
 					formerBranch: {
 						code: branchCode,
 						...relationshipDef,
-						...meta.create,
+						...stockMetadata.create,
 					},
 				});
 
 				await neo4jTest('SimpleGraphLeaf', leafCode1)
-					.match(meta.create)
+					.match(stockMetadata.create)
 					.hasRels(1)
 					.hasRel(
 						{
@@ -390,12 +393,15 @@ describe('rest POST', () => {
 							direction: 'incoming',
 							props: {
 								...relationshipDef,
-								...meta.create,
+								...stockMetadata.create,
 							},
 						},
 						{
 							type: 'SimpleGraphBranch',
-							props: { code: branchCode, ...meta.create },
+							props: {
+								code: branchCode,
+								...stockMetadata.create,
+							},
 						},
 					);
 			});
@@ -428,39 +434,45 @@ describe('rest POST', () => {
 						{
 							code: leafCode1,
 							...relationshipDef1,
-							...meta.create,
+							...stockMetadata.create,
 						},
 						{
 							code: leafCode2,
 							...relationshipDef2,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					],
 				});
 
 				await neo4jTest('SimpleGraphBranch', branchCode)
-					.match(meta.create)
+					.match(stockMetadata.create)
 					.hasRels(2)
 					.hasRel(
 						{
 							type: 'HAD_LEAF',
 							direction: 'outgoing',
-							props: { ...relationshipDef1, ...meta.create },
+							props: {
+								...relationshipDef1,
+								...stockMetadata.create,
+							},
 						},
 						{
 							type: 'SimpleGraphLeaf',
-							props: { code: leafCode1, ...meta.create },
+							props: { code: leafCode1, ...stockMetadata.create },
 						},
 					)
 					.hasRel(
 						{
 							type: 'HAD_LEAF',
 							direction: 'outgoing',
-							props: { ...relationshipDef2, ...meta.create },
+							props: {
+								...relationshipDef2,
+								...stockMetadata.create,
+							},
 						},
 						{
 							type: 'SimpleGraphLeaf',
-							props: { code: leafCode2, ...meta.create },
+							props: { code: leafCode2, ...stockMetadata.create },
 						},
 					);
 			});
@@ -485,17 +497,20 @@ describe('rest POST', () => {
 				});
 
 				await neo4jTest('SimpleGraphBranch', branchCode)
-					.match(meta.create)
+					.match(stockMetadata.create)
 					.hasRels(1)
 					.hasRel(
 						{
 							type: 'HAD_LEAF',
 							direction: 'outgoing',
-							props: { ...relationshipDef, ...meta.create },
+							props: {
+								...relationshipDef,
+								...stockMetadata.create,
+							},
 						},
 						{
 							type: 'SimpleGraphLeaf',
-							props: { code: leafCode1, ...meta.create },
+							props: { code: leafCode1, ...stockMetadata.create },
 						},
 					);
 			});

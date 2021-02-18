@@ -56,7 +56,7 @@ const fixtureBuilder = (namespace, now, then) => {
 		).toString(),
 	});
 
-	const meta = {
+	const stockMetadata = {
 		default: Object.assign(
 			getMetaObject('_updated', '-default', then),
 			getMetaObject('_created', '-default', then),
@@ -71,8 +71,8 @@ const fixtureBuilder = (namespace, now, then) => {
 		),
 	};
 
-	const createNode = getNodeCreator(namespace, meta.default);
-	const connect = getConnector(namespace, meta.default);
+	const createNode = getNodeCreator(namespace, stockMetadata.default);
+	const connect = getConnector(namespace, stockMetadata.default);
 
 	const connectNodes = (...input) => {
 		if (!Array.isArray(input[0])) {
@@ -83,7 +83,13 @@ const fixtureBuilder = (namespace, now, then) => {
 	const createNodes = (...nodes) =>
 		Promise.all(nodes.map(args => createNode(...args)));
 
-	return { createNodes, createNode, connectNodes, meta, getMetaPayload };
+	return {
+		createNodes,
+		createNode,
+		connectNodes,
+		stockMetadata,
+		getMetaPayload,
+	};
 };
 
 const dropFixtures = namespace =>

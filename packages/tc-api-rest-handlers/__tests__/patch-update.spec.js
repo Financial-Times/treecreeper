@@ -14,7 +14,7 @@ describe('rest PATCH update', () => {
 	const {
 		createNode,
 		createNodes,
-		meta,
+		stockMetadata,
 		getMetaPayload,
 		connectNodes,
 	} = setupMocks(namespace);
@@ -81,10 +81,10 @@ describe('rest PATCH update', () => {
 			);
 
 			expect(status).toBe(200);
-			expect(body).toMatchObject(meta.update);
+			expect(body).toMatchObject(stockMetadata.update);
 			await neo4jTest('KitchenSink', mainCode)
 				.exists()
-				.match(meta.update);
+				.match(stockMetadata.update);
 		});
 		it('deletes a property as an update', async () => {
 			await createKitchenSinkRecord({
@@ -440,7 +440,7 @@ describe('rest PATCH update', () => {
 			});
 
 			await neo4jTest('SimpleGraphBranch', mainCode)
-				.match(meta.default)
+				.match(stockMetadata.default)
 				.hasRels(1)
 				.hasRel(
 					{
@@ -448,14 +448,14 @@ describe('rest PATCH update', () => {
 						direction: 'outgoing',
 						props: {
 							stringProperty: 'new some string',
-							...meta.update,
+							...stockMetadata.update,
 						},
 					},
 					{
 						type: 'SimpleGraphLeaf',
 						props: {
 							code: leafCode,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -489,14 +489,14 @@ describe('rest PATCH update', () => {
 					{
 						type: 'HAD_LEAF',
 						direction: 'outgoing',
-						props: meta.update,
+						props: stockMetadata.update,
 						notProps: ['stringProperty'],
 					},
 					{
 						type: 'SimpleGraphLeaf',
 						props: {
 							code: leafCode,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -537,7 +537,7 @@ describe('rest PATCH update', () => {
 						direction: 'outgoing',
 						props: {
 							stringProperty: 'some string',
-							...meta.default,
+							...stockMetadata.default,
 						},
 						notProps: ['notInSchema'],
 					},
@@ -545,7 +545,7 @@ describe('rest PATCH update', () => {
 						type: 'SimpleGraphLeaf',
 						props: {
 							code: leafCode,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);

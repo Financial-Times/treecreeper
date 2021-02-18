@@ -15,7 +15,7 @@ describe('rest PATCH relationship create', () => {
 		createNodes,
 		createNode,
 		connectNodes,
-		meta,
+		stockMetadata,
 		getMetaPayload,
 	} = setupMocks(namespace);
 
@@ -72,13 +72,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
-							props: meta.create,
+							props: stockMetadata.create,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -103,13 +103,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
-							props: meta.create,
+							props: stockMetadata.create,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -156,13 +156,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
-							props: meta.create,
+							props: stockMetadata.create,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode2,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -200,13 +200,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_FAVOURITE_CHILD',
 							direction: 'outgoing',
-							props: meta.create,
+							props: stockMetadata.create,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode2,
-								...meta.update,
+								...stockMetadata.update,
 							},
 						},
 					);
@@ -244,13 +244,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: meta.create,
+							props: stockMetadata.create,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode2,
-								...meta.update,
+								...stockMetadata.update,
 							},
 						},
 					)
@@ -258,13 +258,13 @@ describe('rest PATCH relationship create', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'outgoing',
-							props: meta.default,
+							props: stockMetadata.default,
 						},
 						{
 							type: 'ChildType',
 							props: {
 								code: childCode1,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -292,11 +292,11 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -323,13 +323,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.default,
+						props: stockMetadata.default,
 					},
 					{
 						type: 'ChildType',
 						props: {
 							code: childCode1,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				)
@@ -337,13 +337,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'ChildType',
 						props: {
 							code: childCode2,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -370,11 +370,11 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -402,13 +402,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'ChildType',
 						props: {
 							code: childCode2,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -441,13 +441,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'incoming',
-						props: meta.default,
+						props: stockMetadata.default,
 					},
 					{
 						type: 'MainType',
 						props: {
 							code: `${mainCode}-2`,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				)
@@ -455,13 +455,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'MainType',
 						props: {
 							code: `${mainCode}-3`,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				)
@@ -469,11 +469,11 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: meta.default,
+						props: stockMetadata.default,
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -504,13 +504,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'incoming',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'MainType',
 						props: {
 							code: `${mainCode}-3`,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				)
@@ -518,13 +518,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_YOUNGER_SIBLING',
 						direction: 'outgoing',
-						props: meta.create,
+						props: stockMetadata.create,
 					},
 					{
 						type: 'MainType',
 						props: {
 							code: `${mainCode}-2`,
-							...meta.default,
+							...stockMetadata.default,
 						},
 					},
 				);
@@ -569,13 +569,13 @@ describe('rest PATCH relationship create', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.create,
+								props: stockMetadata.create,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode,
-									...meta.create,
+									...stockMetadata.create,
 								},
 							},
 						);
@@ -601,13 +601,13 @@ describe('rest PATCH relationship create', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.create,
+								props: stockMetadata.create,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -652,8 +652,8 @@ describe('rest PATCH relationship create', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [{ code: childCode, ...meta.create }],
-				parents: [{ code: parentCode, ...meta.create }],
+				children: [{ code: childCode, ...stockMetadata.create }],
+				parents: [{ code: parentCode, ...stockMetadata.create }],
 			});
 		});
 
@@ -667,21 +667,24 @@ describe('rest PATCH relationship create', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				curiousChild: { ...childRelationshipProps, ...meta.create },
+				curiousChild: {
+					...childRelationshipProps,
+					...stockMetadata.create,
+				},
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(1)
 				.hasRel(
 					{
 						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
-						props: { someString, ...meta.create },
+						props: { someString, ...stockMetadata.create },
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -696,21 +699,28 @@ describe('rest PATCH relationship create', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				curiousChild: { ...childRelationshipTwoProps, ...meta.create },
+				curiousChild: {
+					...childRelationshipTwoProps,
+					...stockMetadata.create,
+				},
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(1)
 				.hasRel(
 					{
 						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
-						props: { someString, anotherString, ...meta.create },
+						props: {
+							someString,
+							anotherString,
+							...stockMetadata.create,
+						},
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -734,34 +744,34 @@ describe('rest PATCH relationship create', () => {
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				curiousParent: [
-					{ ...parentRelationshipProps, ...meta.create },
-					{ ...parent2RelationshipProps, ...meta.create },
+					{ ...parentRelationshipProps, ...stockMetadata.create },
+					{ ...parent2RelationshipProps, ...stockMetadata.create },
 				],
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(2)
 				.hasRel(
 					{
 						type: 'IS_CURIOUS_PARENT_OF',
 						direction: 'incoming',
-						props: { someString, ...meta.create },
+						props: { someString, ...stockMetadata.create },
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode, ...meta.default },
+						props: { code: parentCode, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
 					{
 						type: 'IS_CURIOUS_PARENT_OF',
 						direction: 'incoming',
-						props: { anotherString, ...meta.create },
+						props: { anotherString, ...stockMetadata.create },
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode2, ...meta.default },
+						props: { code: parentCode2, ...stockMetadata.default },
 					},
 				);
 		});
@@ -784,33 +794,38 @@ describe('rest PATCH relationship create', () => {
 			// curiousChild's hasMany value is false, curiousParent's hasMany value is true
 			// Therefore in body, curiousParent is in an Array and curiousChild is not.
 			expect(body).toMatchObject({
-				curiousChild: { ...childRelationshipProps, ...meta.create },
-				curiousParent: [{ ...parentRelationshipProps, ...meta.create }],
+				curiousChild: {
+					...childRelationshipProps,
+					...stockMetadata.create,
+				},
+				curiousParent: [
+					{ ...parentRelationshipProps, ...stockMetadata.create },
+				],
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(2)
 				.hasRel(
 					{
 						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
-						props: { someString, ...meta.create },
+						props: { someString, ...stockMetadata.create },
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
 					{
 						type: 'IS_CURIOUS_PARENT_OF',
 						direction: 'incoming',
-						props: { someString, ...meta.create },
+						props: { someString, ...stockMetadata.create },
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode, ...meta.default },
+						props: { code: parentCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -833,33 +848,36 @@ describe('rest PATCH relationship create', () => {
 			// curiousChild's hasMany value is false, curiousParent's hasMany value is true
 			// Therefore in body, curiousParent is in an Array and curiousChild is not.
 			expect(body).toMatchObject({
-				curiousChild: { ...childRelationshipProps, ...meta.create },
-				curiousParent: [{ code: parentCode, ...meta.create }],
+				curiousChild: {
+					...childRelationshipProps,
+					...stockMetadata.create,
+				},
+				curiousParent: [{ code: parentCode, ...stockMetadata.create }],
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(2)
 				.hasRel(
 					{
 						type: 'HAS_CURIOUS_CHILD',
 						direction: 'outgoing',
-						props: { someString, ...meta.create },
+						props: { someString, ...stockMetadata.create },
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
 					{
 						type: 'IS_CURIOUS_PARENT_OF',
 						direction: 'incoming',
-						props: { ...meta.create },
+						props: { ...stockMetadata.create },
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode, ...meta.default },
+						props: { code: parentCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -894,13 +912,13 @@ describe('rest PATCH relationship create', () => {
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				curiousParent: [
-					{ ...parentOneRelationshipProps, ...meta.create },
-					{ ...parentTwoRelationshipProps, ...meta.create },
+					{ ...parentOneRelationshipProps, ...stockMetadata.create },
+					{ ...parentTwoRelationshipProps, ...stockMetadata.create },
 				],
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(2)
 				.hasRel(
 					{
@@ -910,12 +928,12 @@ describe('rest PATCH relationship create', () => {
 							someString: parentOneRelationshipProps.someString,
 							anotherString:
 								parentOneRelationshipProps.anotherString,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode, ...meta.default },
+						props: { code: parentCode, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
@@ -925,12 +943,12 @@ describe('rest PATCH relationship create', () => {
 						props: {
 							someString,
 							anotherString,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode2, ...meta.default },
+						props: { code: parentCode2, ...stockMetadata.default },
 					},
 				);
 		});
@@ -967,12 +985,12 @@ describe('rest PATCH relationship create', () => {
 			// curiousChild's hasMany value is false, curiousParent's hasMany value is true
 			// Therefore in body, curiousParent is in an Array and curiousChild is not.
 			expect(body).toMatchObject({
-				curiousChild: { ...childRelProps, ...meta.create },
-				curiousParent: [{ ...parentRelProps, ...meta.create }],
+				curiousChild: { ...childRelProps, ...stockMetadata.create },
+				curiousParent: [{ ...parentRelProps, ...stockMetadata.create }],
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(2)
 				.hasRel(
 					{
@@ -984,12 +1002,12 @@ describe('rest PATCH relationship create', () => {
 							someMultipleChoice,
 							someEnum,
 							someBoolean,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				)
 				.hasRel(
@@ -999,12 +1017,12 @@ describe('rest PATCH relationship create', () => {
 						props: {
 							someString: parentRelProps.someString,
 							anotherString: parentRelProps.anotherString,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ParentType',
-						props: { code: parentCode, ...meta.default },
+						props: { code: parentCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -1024,12 +1042,12 @@ describe('rest PATCH relationship create', () => {
 				curiousChild: {
 					code: childCode,
 					someMultipleChoice,
-					...meta.create,
+					...stockMetadata.create,
 				},
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(1)
 				.hasRel(
 					{
@@ -1037,12 +1055,12 @@ describe('rest PATCH relationship create', () => {
 						direction: 'outgoing',
 						props: {
 							someMultipleChoice,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -1062,12 +1080,12 @@ describe('rest PATCH relationship create', () => {
 				curiousChild: {
 					code: childCode,
 					someEnum,
-					...meta.create,
+					...stockMetadata.create,
 				},
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(1)
 				.hasRel(
 					{
@@ -1075,12 +1093,12 @@ describe('rest PATCH relationship create', () => {
 						direction: 'outgoing',
 						props: {
 							someEnum,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -1100,12 +1118,12 @@ describe('rest PATCH relationship create', () => {
 				curiousChild: {
 					code: childCode,
 					someBoolean,
-					...meta.create,
+					...stockMetadata.create,
 				},
 			});
 
 			await neo4jTest('MainType', mainCode)
-				.match(meta.update)
+				.match(stockMetadata.update)
 				.hasRels(1)
 				.hasRel(
 					{
@@ -1113,12 +1131,12 @@ describe('rest PATCH relationship create', () => {
 						direction: 'outgoing',
 						props: {
 							someBoolean,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 					{
 						type: 'ChildType',
-						props: { code: childCode, ...meta.default },
+						props: { code: childCode, ...stockMetadata.default },
 					},
 				);
 		});
@@ -1141,7 +1159,9 @@ describe('rest PATCH relationship create', () => {
 					'Invalid property `notInSchema` on type `CuriousChild`.',
 			});
 
-			await neo4jTest('MainType', mainCode).match(meta.default).noRels();
+			await neo4jTest('MainType', mainCode)
+				.match(stockMetadata.default)
+				.noRels();
 		});
 
 		it('create node related to nodes with strange codes', async () => {
@@ -1170,13 +1190,13 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_ODD_CODED_THING',
 						direction: 'outgoing',
-						props: { oddString: 'blah', ...meta.create },
+						props: { oddString: 'blah', ...stockMetadata.create },
 					},
 					{
 						type: 'OddCodeType',
 						props: {
 							code: oddCode,
-							...meta.create,
+							...stockMetadata.create,
 						},
 					},
 				);

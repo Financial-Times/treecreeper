@@ -16,7 +16,7 @@ describe('rest POST (absorb)', () => {
 		createNodes,
 		createNode,
 		connectNodes,
-		meta,
+		stockMetadata,
 		getMetaPayload,
 	} = setupMocks(namespace);
 
@@ -132,7 +132,7 @@ describe('rest POST (absorb)', () => {
 					metadata: getMetaPayload(),
 				});
 				expect(status).toBe(200);
-				expect(body).toMatchObject(meta.update);
+				expect(body).toMatchObject(stockMetadata.update);
 
 				await neo4jTest('SimpleGraphBranch', mainCode).exists();
 				await neo4jTest('SimpleGraphBranch', absorbedCode).notExists();
@@ -198,13 +198,13 @@ describe('rest POST (absorb)', () => {
 						{
 							type: 'HAS_LEAF',
 							direction: 'outgoing',
-							props: meta.default,
+							props: stockMetadata.default,
 						},
 						{
 							type: 'SimpleGraphLeaf',
 							props: {
 								code: leafCode,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -231,13 +231,13 @@ describe('rest POST (absorb)', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'incoming',
-							props: meta.default,
+							props: stockMetadata.default,
 						},
 						{
 							type: 'SimpleGraphBranch',
 							props: {
 								code: parentCode,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -265,13 +265,13 @@ describe('rest POST (absorb)', () => {
 						{
 							type: 'HAS_LEAF',
 							direction: 'outgoing',
-							props: meta.default,
+							props: stockMetadata.default,
 						},
 						{
 							type: 'SimpleGraphLeaf',
 							props: {
 								code: leafCode,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -324,13 +324,13 @@ describe('rest POST (absorb)', () => {
 						{
 							type: 'HAS_CHILD',
 							direction: 'incoming',
-							props: meta.default,
+							props: stockMetadata.default,
 						},
 						{
 							type: 'SimpleGraphBranch',
 							props: {
 								code: `${namespace}-parent1`,
-								...meta.default,
+								...stockMetadata.default,
 							},
 						},
 					);
@@ -360,12 +360,12 @@ describe('rest POST (absorb)', () => {
 				body.leaves.forEach(relationship =>
 					expect(relationship).toMatchObject({
 						code: leafCode,
-						...meta.default,
+						...stockMetadata.default,
 					}),
 				);
 				expect(body.parent).toMatchObject({
 					code: parentCode,
-					...meta.default,
+					...stockMetadata.default,
 				});
 			});
 		});

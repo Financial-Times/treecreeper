@@ -10,7 +10,7 @@ describe('rest GET', () => {
 		code: mainCode,
 	};
 
-	const { createNodes, createNode, connectNodes, meta } = setupMocks(
+	const { createNodes, createNode, connectNodes, stockMetadata } = setupMocks(
 		namespace,
 	);
 
@@ -30,7 +30,7 @@ describe('rest GET', () => {
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
-		expect(body).toMatchObject(meta.default);
+		expect(body).toMatchObject(stockMetadata.default);
 	});
 
 	it('retrieves array data', async () => {

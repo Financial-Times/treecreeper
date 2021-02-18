@@ -17,7 +17,7 @@ describe('rest PATCH relationship delete', () => {
 		createNodes,
 		createNode,
 		connectNodes,
-		meta,
+		stockMetadata,
 		getMetaPayload,
 	} = setupMocks(namespace);
 
@@ -122,13 +122,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode2,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -167,13 +167,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode1,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -204,13 +204,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode2,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -261,13 +261,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'incoming',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'MainType',
 								props: {
 									code: `${mainCode}2`,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -295,13 +295,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.create,
+								props: stockMetadata.create,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode2,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -386,13 +386,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);
@@ -427,13 +427,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_YOUNGER_SIBLING',
 								direction: 'incoming',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'MainType',
 								props: {
 									code: mainCode2,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						)
@@ -441,13 +441,13 @@ describe('rest PATCH relationship delete', () => {
 							{
 								type: 'HAS_CHILD',
 								direction: 'outgoing',
-								props: meta.default,
+								props: stockMetadata.default,
 							},
 							{
 								type: 'ChildType',
 								props: {
 									code: childCode,
-									...meta.default,
+									...stockMetadata.default,
 								},
 							},
 						);

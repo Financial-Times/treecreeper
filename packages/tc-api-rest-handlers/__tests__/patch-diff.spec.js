@@ -49,9 +49,9 @@ describe('rest PATCH diff', () => {
 			);
 		});
 
-		it.skip("doesn't write if no real date changes detected");
-		it.skip("doesn't write if no real datetime changes detected");
-		it.skip("doesn't write if no real time changes detected");
+		it.skip("doesn't write if no real date changes detected", () => {});
+		it.skip("doesn't write if no real datetime changes detected", () => {});
+		it.skip("doesn't write if no real time changes detected", () => {});
 
 		it('detects deleted property as a change', async () => {
 			await createNode('KitchenSink', {
@@ -198,7 +198,7 @@ describe('rest PATCH diff', () => {
 				await connectNodes(main, 'HAD_LEAF', leaf1, {
 					stringProperty: 'some string',
 				});
-				await connectNodes(main, 'HAS_LEAF', leaf2);
+				await connectNodes(main, 'HAD_LEAF', leaf2);
 				const dbQuerySpy = spyDbQuery();
 				const { status } = await patch({
 					type: 'SimpleGraphBranch',
