@@ -48,6 +48,11 @@ describe('rest PATCH diff', () => {
 				expect.any(Object),
 			);
 		});
+
+		it.skip("doesn't write if no real date changes detected")
+		it.skip("doesn't write if no real datetime changes detected")
+		it.skip("doesn't write if no real time changes detected")
+
 		it('detects deleted property as a change', async () => {
 			await createNode('KitchenSink', {
 				code: mainCode,
