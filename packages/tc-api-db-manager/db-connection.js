@@ -1,8 +1,22 @@
+const assert = require('assert');
 const neo4j = require('neo4j-driver');
 const metrics = require('next-metrics');
 const { logger } = require('@financial-times/tc-api-express-logger');
 
 let TIMEOUT;
+
+// NOTE: This check ensures apps fail on startup instead of getting cryptic
+// error messages later.
+const validateEnvironment = () => {
+	assert.ok(process.env.NEO4J_BOLT_URL, 'Neo4J URL not set');
+	assert.match(process.env.NEO4J_BOLT_URL, /^neo4j\+ssc:/, 'Neo4J URL not valid');
+	assert.ok(process.env.NEO4J_BOLT_USER, 'Neo4J username not set');
+	assert.ok(process.env.NEO4J_BOLT_PASSWORD, 'Neo4J password not set');
+};
+
+if (process.env.NODE_ENV !== 'test') {
+	validateEnvironment();
+}
 
 const timeoutErrorMessage = timeout =>
 	`Neo4j query took more than ${timeout} milliseconds: closing session`;
