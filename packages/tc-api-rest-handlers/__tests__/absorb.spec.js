@@ -26,8 +26,8 @@ describe('rest POST (absorb)', () => {
 		codeToAbsorb: absorbedCode,
 	};
 
-	const createNodePair = (mainBody, absorbedBody) => {
-		const nodes = [
+	const createNodePair = (mainBody, absorbedBody) =>
+		createNodes(
 			[
 				'SimpleGraphBranch',
 				{
@@ -42,9 +42,7 @@ describe('rest POST (absorb)', () => {
 					...(absorbedBody || {}),
 				},
 			],
-		];
-		return createNodes(...nodes);
-	};
+		);
 
 	describe('error handling', () => {
 		it('responds with 500 if neo4j query fails', async () => {
