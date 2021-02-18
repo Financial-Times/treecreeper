@@ -137,10 +137,6 @@ properties:
     description: Curious older sibling description.
     label: Curious older sibling label
     direction: incoming
-  oddThings:
-    type: OddThing
-    description: Odd thing relationship description.
-    label: Odd thing relationship label
   anotherThing:
     type: AnotherEnum
     description: An enum that has something next to it.
