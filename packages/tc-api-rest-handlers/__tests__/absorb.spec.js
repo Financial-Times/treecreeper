@@ -3,6 +3,8 @@ const { dbUnavailable } = require('../../../test-helpers/error-stubs');
 
 const { absorbHandler } = require('../absorb');
 
+const absorb = absorbHandler();
+
 describe('rest POST (absorb)', () => {
 	const namespace = 'api-rest-handlers-absorb';
 	const mainCode = `${namespace}-main`;
@@ -18,24 +20,11 @@ describe('rest POST (absorb)', () => {
 		getMetaPayload,
 	} = setupMocks(namespace);
 
-	const documentStore = {};
-
-	beforeEach(() => {
-		documentStore.absorb = jest.fn(async () => ({}));
-	});
-
-	afterEach(() => {
-		jest.resetAllMocks();
-	});
-
-	const absorb = absorbHandler({ documentStore });
-	const getInput = (override, metadata = {}) =>
-		override || {
-			type: 'SimpleGraphBranch',
-			code: mainCode,
-			codeToAbsorb: absorbedCode,
-			metadata,
-		};
+	const testPayload = {
+		type: 'SimpleGraphBranch',
+		code: mainCode,
+		codeToAbsorb: absorbedCode,
+	};
 
 	const createNodePair = (mainBody, absorbedBody) => {
 		const nodes = [
@@ -61,19 +50,17 @@ describe('rest POST (absorb)', () => {
 		it('responds with 500 if neo4j query fails', async () => {
 			await createNodePair();
 			dbUnavailable();
-			await expect(absorb(getInput())).rejects.toThrow(Error);
+			await expect(absorb(testPayload)).rejects.toThrow(Error);
 		});
 
 		it('errors if unexpected code to abosorb supplied', async () => {
 			await createNodePair();
 			await expect(
-				absorb(
-					getInput({
-						type: 'SimpleGraphBranch',
-						code: mainCode,
-						codeToAbsorb: `${absorbedCode}@@@@@`,
-					}),
-				),
+				absorb({
+					type: 'SimpleGraphBranch',
+					code: mainCode,
+					codeToAbsorb: `${absorbedCode}@@@@@`,
+				}),
 			).rejects.httpError({
 				status: 400,
 				message: /Invalid value.+codeToAbsorb/,
@@ -83,12 +70,10 @@ describe('rest POST (absorb)', () => {
 		it('errors if no code to absorb supplied', async () => {
 			await createNodePair();
 			await expect(
-				absorb(
-					getInput({
-						type: 'SimpleGraphBranch',
-						code: mainCode,
-					}),
-				),
+				absorb({
+					type: 'SimpleGraphBranch',
+					code: mainCode,
+				}),
 			).rejects.httpError({
 				status: 400,
 				message: /Invalid value.+codeToAbsorb/,
@@ -103,7 +88,7 @@ describe('rest POST (absorb)', () => {
 				code: absorbedCode,
 				stringProperty: 'fake1',
 			});
-			await expect(absorbHandler()(getInput())).rejects.httpError({
+			await expect(absorb(testPayload)).rejects.httpError({
 				status: 404,
 				message: `SimpleGraphBranch record missing for \`code\``,
 			});
@@ -118,7 +103,7 @@ describe('rest POST (absorb)', () => {
 				code: mainCode,
 				stringProperty: 'fake2',
 			});
-			await expect(absorbHandler()(getInput())).rejects.httpError({
+			await expect(absorb(testPayload)).rejects.httpError({
 				status: 404,
 				message: `SimpleGraphBranch record missing for \`codeToAbsorb\``,
 			});
@@ -134,7 +119,7 @@ describe('rest POST (absorb)', () => {
 			it('merges unconnected nodes', async () => {
 				await createNodePair();
 
-				const { status } = await absorb(getInput());
+				const { status } = await absorb(testPayload);
 				expect(status).toBe(200);
 
 				await neo4jTest('SimpleGraphBranch', mainCode).exists();
@@ -144,9 +129,10 @@ describe('rest POST (absorb)', () => {
 			it('sets correct metadata', async () => {
 				await createNodePair();
 
-				const { status, body } = await absorb(
-					getInput(null, getMetaPayload()),
-				);
+				const { status, body } = await absorb({
+					...testPayload,
+					metadata: getMetaPayload(),
+				});
 				expect(status).toBe(200);
 				expect(body).toMatchObject(meta.update);
 
@@ -159,7 +145,7 @@ describe('rest POST (absorb)', () => {
 					{ stringProperty: 'potato' },
 					{ stringProperty: 'tomato' },
 				);
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					stringProperty: 'potato',
@@ -171,7 +157,7 @@ describe('rest POST (absorb)', () => {
 
 			it('add new properties to destination node', async () => {
 				await createNodePair(undefined, { stringProperty: 'potato' });
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					stringProperty: 'potato',
@@ -183,7 +169,7 @@ describe('rest POST (absorb)', () => {
 
 			it("doesn't error when unrecognised properties exist", async () => {
 				await createNodePair(undefined, { notInSchema: 'someVal' });
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).not.toMatchObject({
 					notInSchema: expect.any(String),
@@ -202,7 +188,7 @@ describe('rest POST (absorb)', () => {
 				const leaf = await createNode('SimpleGraphLeaf', leafCode);
 				await connectNodes(absorbed, 'HAS_LEAF', leaf);
 
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					leaves: [leafCode],
@@ -235,7 +221,7 @@ describe('rest POST (absorb)', () => {
 				);
 				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					parent: parentCode,
@@ -269,7 +255,7 @@ describe('rest POST (absorb)', () => {
 					[absorbed, 'HAS_LEAF', leaf],
 				);
 
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					leaves: [leafCode],
@@ -302,7 +288,7 @@ describe('rest POST (absorb)', () => {
 				);
 				const [main, absorbed] = nodes;
 				await connectNodes(main, 'HAS_CHILD', absorbed);
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).not.toMatchObject({
 					children: expect.any(Array),
@@ -328,7 +314,7 @@ describe('rest POST (absorb)', () => {
 					[parent2, 'HAS_CHILD', absorbed],
 				);
 
-				const { status, body } = await absorb(getInput());
+				const { status, body } = await absorb(testPayload);
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
 					parent: `${namespace}-parent1`,
@@ -367,7 +353,7 @@ describe('rest POST (absorb)', () => {
 				await connectNodes(parent, 'HAS_CHILD', absorbed);
 
 				const { status, body } = await absorb({
-					...getInput(),
+					...testPayload,
 					query: { richRelationships: true },
 				});
 
