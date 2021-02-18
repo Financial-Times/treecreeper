@@ -15,6 +15,20 @@ properties:
     direction: incoming
     label: branch label
     description: branch description.
+  largestLeafOnBranch:
+    type: SimpleGraphBranch
+    relationship: HAS_LARGEST_LEAF
+    hasMany: false
+    direction: incoming
+    label: largestLeafOnBranch label
+    description: largestLeafOnBranch description.
+  # sharesPlantWithBranches:
+  #   type: SimpleGraphBranch
+  #   label: sharesPlantWithBranches label
+  #   description: sharesPlantWithBranches description.
+  #   relationship: SHARES_PLANT_WITH_LEAF
+  #   hasMany: true
+  #   direction: incoming
   formerBranch:
     type: FallenLeaf
     label: formerBranch label

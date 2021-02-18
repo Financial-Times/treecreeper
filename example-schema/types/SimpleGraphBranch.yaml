@@ -23,6 +23,13 @@ properties:
     relationship: HAS_LEAF
     hasMany: true
     direction: outgoing
+  largestLeaf:
+    type: SimpleGraphLeaf
+    label: largestLeaf label
+    description: largestLeaf description.
+    relationship: HAS_LARGEST_LEAF
+    hasMany: false
+    direction: outgoing
   fallenLeaves:
     type: FallenLeaf
     label: fallenLeaves label
@@ -34,12 +41,19 @@ properties:
     relationship: HAS_CHILD #change to HAS_OFFSHOOT
     hasMany: false
     direction: incoming
+  # sharesPlantWithLeaves:
+  #   type: SimpleGraphLeaf
+  #   label: sharesPlantWithLeaves label
+  #   description: sharesPlantWithLeaves description.
+  #   relationship: SHARES_PLANT_WITH_LEAF
+  #   hasMany: true
+  #   direction: outgoing
   children:
     type: SimpleGraphBranch
     label: children label
     description: children description.
     relationship: HAS_CHILD
-    hasMany: false
+    hasMany: true
     direction: outgoing
   richRelationshipToOddCodedType:
     type: OddThing

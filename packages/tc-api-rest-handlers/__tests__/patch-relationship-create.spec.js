@@ -2,12 +2,16 @@ const { setupMocks, neo4jTest } = require('../../../test-helpers');
 
 const { patchHandler } = require('../patch');
 
+const patch = patchHandler();
+
 describe('rest PATCH relationship create', () => {
 	const namespace = 'api-rest-handlers-patch-relationship-create';
-	const mainCode = `${namespace}-main`;
-	const childCode = `${namespace}-child`;
-	const childCode1 = `${childCode}-1`;
-	const childCode2 = `${childCode}-2`;
+	const branchCode = `${namespace}-branch`;
+	const branchCode1 = `${branchCode}-1`;
+	const branchCode2 = `${branchCode}-2`;
+	const leafCode = `${namespace}-leaf`;
+	const leafCode1 = `${leafCode}-1`;
+	const leafCode2 = `${leafCode}-2`;
 
 	const {
 		createNodes,
@@ -17,24 +21,20 @@ describe('rest PATCH relationship create', () => {
 		getMetaPayload,
 	} = setupMocks(namespace);
 
-	const getInput = (body, query, metadata = getMetaPayload()) => ({
-		type: 'MainType',
-		code: mainCode,
-		body,
-		query,
-		metadata,
-	});
-
-	const basicHandler = (...args) => patchHandler()(getInput(...args));
-
-	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
+	const basePayload = {
+		type: 'SimpleGraphBranch',
+		code: branchCode,
+		metadata: getMetaPayload(),
+	};
 
 	it('errors if updating relationships without relationshipAction query string', async () => {
-		await createMainNode();
+		await createNode('SimpleGraphBranch', { code: branchCode });
 		await expect(
-			basicHandler({
-				children: [childCode],
+			patch({
+				...basePayload,
+				body: {
+					leaves: [leafCode],
+				},
 			}),
 		).rejects.httpError({
 			status: 400,
@@ -42,40 +42,44 @@ describe('rest PATCH relationship create', () => {
 				'PATCHing relationships requires a relationshipAction query param set to `merge` or `replace`',
 		});
 
-		await neo4jTest('MainType', mainCode).noRels();
+		await neo4jTest('SimpleGraphBranch', branchCode).noRels();
 	});
 
 	describe('__-to-one relationships', () => {
 		['merge', 'replace'].forEach(action => {
 			const handler = body =>
-				patchHandler()(getInput(body, { relationshipAction: action }));
+				patch({
+					...basePayload,
+					body,
+					query: { relationshipAction: action },
+				});
 
 			it('accept a string', async () => {
 				await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode],
+					['SimpleGraphBranch', branchCode],
+					['SimpleGraphLeaf', leafCode],
 				);
 				const { status, body } = await handler({
-					favouriteChild: childCode,
+					largestLeaf: leafCode,
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					favouriteChild: childCode,
+					largestLeaf: leafCode,
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', branchCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_FAVOURITE_CHILD',
+							type: 'HAS_LARGEST_LEAF',
 							direction: 'outgoing',
 							props: stockMetadata.create,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode,
+								code: leafCode,
 								...stockMetadata.default,
 							},
 						},
@@ -83,30 +87,30 @@ describe('rest PATCH relationship create', () => {
 			});
 			it('accept an array of length one', async () => {
 				await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode],
+					['SimpleGraphBranch', branchCode],
+					['SimpleGraphLeaf', leafCode],
 				);
 				const { status, body } = await handler({
-					favouriteChild: [childCode],
+					largestLeaf: [leafCode],
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					favouriteChild: childCode,
+					largestLeaf: leafCode,
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', branchCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_FAVOURITE_CHILD',
+							type: 'HAS_LARGEST_LEAF',
 							direction: 'outgoing',
 							props: stockMetadata.create,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode,
+								code: leafCode,
 								...stockMetadata.default,
 							},
 						},
@@ -114,52 +118,52 @@ describe('rest PATCH relationship create', () => {
 			});
 			it('error if trying to write multiple relationships', async () => {
 				await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode1],
-					['ChildType', childCode2],
+					['SimpleGraphBranch', branchCode],
+					['SimpleGraphLeaf', leafCode1],
+					['SimpleGraphLeaf', leafCode2],
 				);
 				await expect(
-					basicHandler({
-						favouriteChild: [childCode1, childCode2],
+					handler({
+						largestLeaf: [leafCode1, leafCode2],
 					}),
 				).rejects.httpError({
 					status: 400,
-					message: /Can only have one favouriteChild/,
+					message: /Can only have one largestLeaf/,
 				});
 
-				await neo4jTest('MainType', mainCode).noRels();
+				await neo4jTest('SimpleGraphBranch', branchCode).noRels();
 			});
 
 			it('replace existing relationship', async () => {
-				const [main, child1] = await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode1],
-					['ChildType', childCode2],
+				const [main, leaf1] = await createNodes(
+					['SimpleGraphBranch', branchCode],
+					['SimpleGraphLeaf', leafCode1],
+					['SimpleGraphLeaf', leafCode2],
 				);
 
-				await connectNodes(main, 'HAS_FAVOURITE_CHILD', child1);
+				await connectNodes(main, 'HAS_LARGEST_LEAF', leaf1);
 
 				const { status, body } = await handler({
-					favouriteChild: childCode2,
+					largestLeaf: leafCode2,
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					favouriteChild: childCode2,
+					largestLeaf: leafCode2,
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', branchCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_FAVOURITE_CHILD',
+							type: 'HAS_LARGEST_LEAF',
 							direction: 'outgoing',
 							props: stockMetadata.create,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode2,
+								code: leafCode2,
 								...stockMetadata.default,
 							},
 						},
@@ -167,19 +171,19 @@ describe('rest PATCH relationship create', () => {
 			});
 
 			it('strictly enforces one-to-__', async () => {
-				const [main, child1] = await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode1],
-					['ChildType', childCode2],
+				const [branch1, leaf] = await createNodes(
+					['SimpleGraphBranch', branchCode1],
+					['SimpleGraphBranch', branchCode2],
+					['SimpleGraphLeaf', leafCode],
 				);
 
-				await connectNodes(main, 'HAS_FAVOURITE_CHILD', child1);
+				await connectNodes(branch1, 'HAS_LEAF', leaf);
 
-				const { status, body } = await patchHandler()({
-					type: 'ChildType',
-					code: childCode2,
+				const { status, body } = await patch({
+					type: 'SimpleGraphBranch',
+					code: branchCode2,
 					body: {
-						isFavouriteChildOf: [mainCode],
+						leaves: [leafCode],
 					},
 					query: {
 						relationshipAction: action,
@@ -189,21 +193,21 @@ describe('rest PATCH relationship create', () => {
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					isFavouriteChildOf: [mainCode],
+					leaves: [leafCode],
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphLeaf', leafCode)
 					.hasRels(1)
 					.hasRel(
 						{
-							type: 'HAS_FAVOURITE_CHILD',
-							direction: 'outgoing',
+							type: 'HAS_LEAF',
+							direction: 'incoming',
 							props: stockMetadata.create,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphBranch',
 							props: {
-								code: childCode2,
+								code: branchCode2,
 								...stockMetadata.update,
 							},
 						},
@@ -211,19 +215,19 @@ describe('rest PATCH relationship create', () => {
 			});
 
 			it(`leaves __-to-__ unchanged`, async () => {
-				const [main, child1] = await createNodes(
-					['MainType', mainCode],
-					['ChildType', childCode1],
-					['ChildType', childCode2],
+				const [main, leaf1] = await createNodes(
+					['SimpleGraphBranch', branchCode],
+					['SimpleGraphLeaf', leafCode1],
+					['SimpleGraphLeaf', leafCode2],
 				);
 
-				await connectNodes(main, 'HAS_CHILD', child1);
+				await connectNodes(main, 'HAS_LEAF', leaf1);
 
-				const { status, body } = await patchHandler()({
-					type: 'ChildType',
-					code: childCode2,
+				const { status, body } = await patch({
+					type: 'SimpleGraphLeaf',
+					code: leafCode2,
 					body: {
-						isChildOf: [mainCode],
+						branch: branchCode,
 					},
 					query: {
 						relationshipAction: action,
@@ -233,35 +237,35 @@ describe('rest PATCH relationship create', () => {
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					isChildOf: [mainCode],
+					branch: branchCode,
 				});
 
-				await neo4jTest('MainType', mainCode)
+				await neo4jTest('SimpleGraphBranch', branchCode)
 					.hasRels(2)
 					.hasRel(
 						{
-							type: 'HAS_CHILD',
+							type: 'HAS_LEAF',
 							direction: 'outgoing',
 							props: stockMetadata.create,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode2,
+								code: leafCode2,
 								...stockMetadata.update,
 							},
 						},
 					)
 					.hasRel(
 						{
-							type: 'HAS_CHILD',
+							type: 'HAS_LEAF',
 							direction: 'outgoing',
 							props: stockMetadata.default,
 						},
 						{
-							type: 'ChildType',
+							type: 'SimpleGraphLeaf',
 							props: {
-								code: childCode1,
+								code: leafCode1,
 								...stockMetadata.default,
 							},
 						},
@@ -271,76 +275,83 @@ describe('rest PATCH relationship create', () => {
 	});
 	describe('merge', () => {
 		const mergeHandler = body =>
-			patchHandler()(getInput(body, { relationshipAction: 'merge' }));
+			patch({
+				...basePayload,
+				body,
+				query: { relationshipAction: 'merge' },
+			});
 		it('can merge with empty relationship set if relationshipAction=merge', async () => {
-			await createNodes(['MainType', mainCode], ['ChildType', childCode]);
+			await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphLeaf', leafCode],
+			);
 
 			const { status, body } = await mergeHandler({
-				children: [childCode],
+				leaves: [leafCode],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode],
+				leaves: [leafCode],
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', branchCode)
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'ChildType',
-						props: { code: childCode, ...stockMetadata.default },
+						type: 'SimpleGraphLeaf',
+						props: { code: leafCode, ...stockMetadata.default },
 					},
 				);
 		});
 		it('can merge with relationships if relationshipAction=merge', async () => {
-			const [main, child1] = await createNodes(
-				['MainType', mainCode],
-				['ChildType', childCode1],
-				['ChildType', childCode2],
+			const [main, leaf1] = await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphLeaf', leafCode1],
+				['SimpleGraphLeaf', leafCode2],
 			);
-			await connectNodes(main, ['HAS_CHILD'], child1);
+			await connectNodes(main, ['HAS_LEAF'], leaf1);
 
 			const { status, body } = await mergeHandler({
-				children: [childCode2],
+				leaves: [leafCode2],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode1, childCode2],
+				leaves: [leafCode1, leafCode2],
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', branchCode)
 				.hasRels(2)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: stockMetadata.default,
 					},
 					{
-						type: 'ChildType',
+						type: 'SimpleGraphLeaf',
 						props: {
-							code: childCode1,
+							code: leafCode1,
 							...stockMetadata.default,
 						},
 					},
 				)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'ChildType',
+						type: 'SimpleGraphLeaf',
 						props: {
-							code: childCode2,
+							code: leafCode2,
 							...stockMetadata.default,
 						},
 					},
@@ -349,63 +360,70 @@ describe('rest PATCH relationship create', () => {
 	});
 	describe('replace', () => {
 		const replaceHandler = body =>
-			patchHandler()(getInput(body, { relationshipAction: 'replace' }));
+			patch({
+				...basePayload,
+				body,
+				query: { relationshipAction: 'replace' },
+			});
 		it('can replace an empty relationship set if relationshipAction=replace', async () => {
-			await createNodes(['MainType', mainCode], ['ChildType', childCode]);
+			await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphLeaf', leafCode],
+			);
 
 			const { status, body } = await replaceHandler({
-				children: [childCode],
+				leaves: [leafCode],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode],
+				leaves: [leafCode],
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', branchCode)
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'ChildType',
-						props: { code: childCode, ...stockMetadata.default },
+						type: 'SimpleGraphLeaf',
+						props: { code: leafCode, ...stockMetadata.default },
 					},
 				);
 		});
 
 		it('can replace relationships if relationshipAction=replace', async () => {
-			const [main, child1] = await createNodes(
-				['MainType', mainCode],
-				['ChildType', childCode1],
-				['ChildType', childCode2],
+			const [main, leaf1] = await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphLeaf', leafCode1],
+				['SimpleGraphLeaf', leafCode2],
 			);
-			await connectNodes(main, ['HAS_CHILD'], child1);
+			await connectNodes(main, ['HAS_LEAF'], leaf1);
 
 			const { status, body } = await replaceHandler({
-				children: [childCode2],
+				leaves: [leafCode2],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				children: [childCode2],
+				leaves: [leafCode2],
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', branchCode)
 				.hasRels(1)
 				.hasRel(
 					{
-						type: 'HAS_CHILD',
+						type: 'HAS_LEAF',
 						direction: 'outgoing',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'ChildType',
+						type: 'SimpleGraphLeaf',
 						props: {
-							code: childCode2,
+							code: leafCode2,
 							...stockMetadata.default,
 						},
 					},
@@ -413,52 +431,38 @@ describe('rest PATCH relationship create', () => {
 		});
 
 		it('leaves relationships in other direction and of other types untouched when replacing', async () => {
-			const [main, main2, , child] = await createNodes(
-				['MainType', mainCode],
-				['MainType', `${mainCode}-2`],
-				['MainType', `${mainCode}-3`],
-				['ChildType', childCode],
+			const [main, main2, , leaf] = await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphBranch', `${branchCode}-2`],
+				['SimpleGraphBranch', `${branchCode}-3`],
+				['SimpleGraphLeaf', leafCode],
 			);
-			await connectNodes([main2, 'HAS_YOUNGER_SIBLING', main]);
-			await connectNodes([main, 'HAS_CHILD', child]);
+			await connectNodes([main2, 'HAS_CHILD', main]);
+			await connectNodes([main, 'HAS_LEAF', leaf]);
 
 			const { status, body } = await replaceHandler({
-				youngerSiblings: [`${mainCode}-3`],
+				children: [`${branchCode}-3`],
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				youngerSiblings: [`${mainCode}-3`],
-				olderSiblings: [`${mainCode}-2`],
-				children: [childCode],
+				children: [`${branchCode}-3`],
+				parent: `${branchCode}-2`,
+				leaves: [leafCode],
 			});
 
-			await neo4jTest('MainType', mainCode)
+			await neo4jTest('SimpleGraphBranch', branchCode)
 				.hasRels(3)
 				.hasRel(
 					{
-						type: 'HAS_YOUNGER_SIBLING',
+						type: 'HAS_CHILD',
 						direction: 'incoming',
 						props: stockMetadata.default,
 					},
 					{
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						props: {
-							code: `${mainCode}-2`,
-							...stockMetadata.default,
-						},
-					},
-				)
-				.hasRel(
-					{
-						type: 'HAS_YOUNGER_SIBLING',
-						direction: 'outgoing',
-						props: stockMetadata.create,
-					},
-					{
-						type: 'MainType',
-						props: {
-							code: `${mainCode}-3`,
+							code: `${branchCode}-2`,
 							...stockMetadata.default,
 						},
 					},
@@ -467,61 +471,75 @@ describe('rest PATCH relationship create', () => {
 					{
 						type: 'HAS_CHILD',
 						direction: 'outgoing',
-						props: stockMetadata.default,
-					},
-					{
-						type: 'ChildType',
-						props: { code: childCode, ...stockMetadata.default },
-					},
-				);
-		});
-
-		it('replaces relationships in multiple directions', async () => {
-			const [main, main2, main3] = await createNodes(
-				['MainType', mainCode],
-				['MainType', `${mainCode}-2`],
-				['MainType', `${mainCode}-3`],
-			);
-			await connectNodes([main2, 'HAS_YOUNGER_SIBLING', main]);
-			await connectNodes([main, 'HAS_YOUNGER_SIBLING', main3]);
-
-			const { status, body } = await replaceHandler({
-				youngerSiblings: [`${mainCode}-2`],
-				olderSiblings: [`${mainCode}-3`],
-			});
-
-			expect(status).toBe(200);
-			expect(body).toMatchObject({
-				youngerSiblings: [`${mainCode}-2`],
-				olderSiblings: [`${mainCode}-3`],
-			});
-
-			await neo4jTest('MainType', mainCode)
-				.hasRels(2)
-				.hasRel(
-					{
-						type: 'HAS_YOUNGER_SIBLING',
-						direction: 'incoming',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						props: {
-							code: `${mainCode}-3`,
+							code: `${branchCode}-3`,
 							...stockMetadata.default,
 						},
 					},
 				)
 				.hasRel(
 					{
-						type: 'HAS_YOUNGER_SIBLING',
+						type: 'HAS_LEAF',
+						direction: 'outgoing',
+						props: stockMetadata.default,
+					},
+					{
+						type: 'SimpleGraphLeaf',
+						props: { code: leafCode, ...stockMetadata.default },
+					},
+				);
+		});
+
+		it('replaces relationships in multiple directions', async () => {
+			const [main, main2, main3] = await createNodes(
+				['SimpleGraphBranch', branchCode],
+				['SimpleGraphBranch', `${branchCode}-2`],
+				['SimpleGraphBranch', `${branchCode}-3`],
+			);
+			await connectNodes([main2, 'HAS_CHILD', main]);
+			await connectNodes([main, 'HAS_CHILD', main3]);
+
+			const { status, body } = await replaceHandler({
+				children: [`${branchCode}-2`],
+				parent: `${branchCode}-3`,
+			});
+
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				children: [`${branchCode}-2`],
+				parent: `${branchCode}-3`,
+			});
+
+			await neo4jTest('SimpleGraphBranch', branchCode)
+				.hasRels(2)
+				.hasRel(
+					{
+						type: 'HAS_CHILD',
+						direction: 'incoming',
+						props: stockMetadata.create,
+					},
+					{
+						type: 'SimpleGraphBranch',
+						props: {
+							code: `${branchCode}-3`,
+							...stockMetadata.default,
+						},
+					},
+				)
+				.hasRel(
+					{
+						type: 'HAS_CHILD',
 						direction: 'outgoing',
 						props: stockMetadata.create,
 					},
 					{
-						type: 'MainType',
+						type: 'SimpleGraphBranch',
 						props: {
-							code: `${mainCode}-2`,
+							code: `${branchCode}-2`,
 							...stockMetadata.default,
 						},
 					},
@@ -532,15 +550,17 @@ describe('rest PATCH relationship create', () => {
 	describe('upsert', () => {
 		['merge', 'replace'].forEach(action => {
 			const handler = (body, query = {}) =>
-				patchHandler()(
-					getInput(body, { relationshipAction: action, ...query }),
-				);
+				patch({
+					...basePayload,
+					body,
+					query: { relationshipAction: action, ...query },
+				});
 
 			describe(`with ${action}`, () => {
 				it(`error when relationship to non-existent node`, async () => {
-					await createMainNode();
+					await createNode('SimpleGraphBranch', { code: branchCode });
 					await expect(
-						handler({ children: [childCode] }),
+						handler({ leaves: [leafCode] }),
 					).rejects.httpError({
 						status: 400,
 						message: 'Missing related node',
@@ -548,31 +568,31 @@ describe('rest PATCH relationship create', () => {
 				});
 
 				it('create node related to non-existent nodes when using upsert=true', async () => {
-					await createMainNode();
+					await createNode('SimpleGraphBranch', { code: branchCode });
 					const { status, body } = await handler(
 						{
-							children: [childCode],
+							leaves: [leafCode],
 						},
 						{ upsert: true },
 					);
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						children: [childCode],
+						leaves: [leafCode],
 					});
 
-					await neo4jTest('MainType', mainCode)
+					await neo4jTest('SimpleGraphBranch', branchCode)
 						.hasRels(1)
 						.hasRel(
 							{
-								type: 'HAS_CHILD',
+								type: 'HAS_LEAF',
 								direction: 'outgoing',
 								props: stockMetadata.create,
 							},
 							{
-								type: 'ChildType',
+								type: 'SimpleGraphLeaf',
 								props: {
-									code: childCode,
+									code: leafCode,
 									...stockMetadata.create,
 								},
 							},
@@ -580,31 +600,31 @@ describe('rest PATCH relationship create', () => {
 				});
 
 				it('not leave creation artifacts on things that already existed when using `upsert=true`', async () => {
-					await createMainNode();
-					await createNode('ChildType', childCode);
+					await createNode('SimpleGraphBranch', { code: branchCode });
+					await createNode('SimpleGraphLeaf', leafCode);
 					const { status, body } = await handler(
 						{
-							children: [childCode],
+							leaves: [leafCode],
 						},
 						{ upsert: true },
 					);
 
 					expect(status).toBe(200);
 					expect(body).toMatchObject({
-						children: [childCode],
+						leaves: [leafCode],
 					});
-					await neo4jTest('MainType', mainCode)
+					await neo4jTest('SimpleGraphBranch', branchCode)
 						.hasRels(1)
 						.hasRel(
 							{
-								type: 'HAS_CHILD',
+								type: 'HAS_LEAF',
 								direction: 'outgoing',
 								props: stockMetadata.create,
 							},
 							{
-								type: 'ChildType',
+								type: 'SimpleGraphLeaf',
 								props: {
-									code: childCode,
+									code: leafCode,
 									...stockMetadata.default,
 								},
 							},
