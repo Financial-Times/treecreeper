@@ -15,3 +15,5 @@ test:
     - SimpleGraphLeaf
     - DocumentStoreTest
     - LockedFieldTest
+    - EventsTest
+    - EventsTestLeaf

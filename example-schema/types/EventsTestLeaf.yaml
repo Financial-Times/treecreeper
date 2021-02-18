@@ -1,0 +1,25 @@
+name: EventsTestLeaf
+description: A verty simple type to serve as a destination for relationships in our simple test graph.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  eventEmitters:
+    type: EventsTestRelationship
+    label: eventEmitters label
+    description: eventEmitters description.
+  deprecatedEventEmitters:
+    deprecationReason: testing events get sent for deprecated relationships
+    type: EventsTestRelationship
+    label: eventEmitters label
+    description: eventEmitters description.
+  uniqueEvent:
+    type: EventsTest
+    relationship: HAS_UNIQUE_LEAF
+    direction: incoming
+    label: uniqueEvent label
+    description: uniqueEvent description.

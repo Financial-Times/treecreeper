@@ -32,7 +32,7 @@ describe('rest PATCH relationship delete', () => {
 		['updating', 'creating'].forEach(mode => {
 			it(`${mode}: throws 400 if no relationshipAction query string when batch deleting`, async () => {
 				if (mode === 'updating') {
-					await createNode('SimpleGraphBranch', { code: branchCode});;
+					await createNode('SimpleGraphBranch', { code: branchCode });
 				}
 				await expect(
 					patch({
@@ -49,7 +49,7 @@ describe('rest PATCH relationship delete', () => {
 			});
 			it(`${mode}: throws 400 if no relationshipAction query string when deleting specific relationships`, async () => {
 				if (mode === 'updating') {
-					await createNode('SimpleGraphBranch', { code: branchCode});;
+					await createNode('SimpleGraphBranch', { code: branchCode });
 				}
 				await expect(
 					patch({
@@ -77,13 +77,13 @@ describe('rest PATCH relationship delete', () => {
 			[main, 'HAS_LEAF', leaf1],
 			[main, 'HAS_LEAF', leaf2],
 		);
-		const { status, body } = await patch(
-			{...basePayload, body:
-				{
-					leaves: [],
-				},
-				query: { relationshipAction: 'replace' },
-			})
+		const { status, body } = await patch({
+			...basePayload,
+			body: {
+				leaves: [],
+			},
+			query: { relationshipAction: 'replace' },
+		});
 
 		expect(status).toBe(200);
 		expect(body).not.toMatchObject({
