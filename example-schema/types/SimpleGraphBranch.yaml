@@ -41,3 +41,7 @@ properties:
     relationship: HAS_CHILD
     hasMany: false
     direction: outgoing
+  richRelationshipToOddCodedType:
+    type: OddThing
+    description: Odd thing relationship description.
+    label: Odd thing relationship label

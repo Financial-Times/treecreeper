@@ -1,6 +1,6 @@
 name: OddThing
 from:
-  type: MainType
+  type: SimpleGraphBranch
   hasMany: false
 to:
   type: OddCodeType
