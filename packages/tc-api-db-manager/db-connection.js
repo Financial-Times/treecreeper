@@ -9,14 +9,16 @@ let TIMEOUT;
 // error messages later.
 const validateEnvironment = () => {
 	assert.ok(process.env.NEO4J_BOLT_URL, 'Neo4J URL not set');
-	assert.match(process.env.NEO4J_BOLT_URL, /^neo4j\+ssc:/, 'Neo4J URL not valid');
+	assert.match(
+		process.env.NEO4J_BOLT_URL,
+		/^neo4j\+ssc:/,
+		'Neo4J URL not valid',
+	);
 	assert.ok(process.env.NEO4J_BOLT_USER, 'Neo4J username not set');
 	assert.ok(process.env.NEO4J_BOLT_PASSWORD, 'Neo4J password not set');
 };
 
-if (process.env.NODE_ENV !== 'test') {
-	validateEnvironment();
-}
+validateEnvironment();
 
 const timeoutErrorMessage = timeout =>
 	`Neo4j query took more than ${timeout} milliseconds: closing session`;
