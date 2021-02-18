@@ -7,17 +7,11 @@ const { patchHandler } = require('../patch');
 
 const patch = patchHandler();
 
-describe('rest PATCH update', () => {
-	const namespace = 'api-rest-handlers-patch-update';
+describe('rest PATCH properties', () => {
+	const namespace = 'api-rest-handlers-patch-properties';
 	const mainCode = `${namespace}-main`;
 
-	const {
-		createNode,
-		createNodes,
-		stockMetadata,
-		getMetaPayload,
-		connectNodes,
-	} = setupMocks(namespace);
+	const { createNode, stockMetadata, getMetaPayload } = setupMocks(namespace);
 
 	const typeAndCode = {
 		type: 'KitchenSink',
@@ -408,147 +402,6 @@ describe('rest PATCH update', () => {
 			await neo4jTest('KitchenSink', mainCode).notMatch({
 				notInSchema: 'a string',
 			});
-		});
-	});
-
-	describe('Relationship properties', () => {
-		const leafCode = `${namespace}-leaf`;
-
-		it("update existing relationship's property", async () => {
-			const [main, leaf] = await createNodes(
-				['SimpleGraphBranch', mainCode],
-				['SimpleGraphLeaf', leafCode],
-			);
-			await connectNodes(main, 'HAD_LEAF', leaf, {
-				stringProperty: 'some string',
-			});
-			const { body, status } = await patch({
-				type: 'SimpleGraphBranch',
-				code: mainCode,
-				body: {
-					fallenLeaves: [
-						{ code: leafCode, stringProperty: 'new some string' },
-					],
-				},
-				query: { relationshipAction: 'merge', richRelationships: true },
-				metadata: getMetaPayload(),
-			});
-
-			expect(status).toBe(200);
-			expect(body.fallenLeaves[0]).toMatchObject({
-				stringProperty: 'new some string',
-			});
-
-			await neo4jTest('SimpleGraphBranch', mainCode)
-				.match(stockMetadata.default)
-				.hasRels(1)
-				.hasRel(
-					{
-						type: 'HAD_LEAF',
-						direction: 'outgoing',
-						props: {
-							stringProperty: 'new some string',
-							...stockMetadata.update,
-						},
-					},
-					{
-						type: 'SimpleGraphLeaf',
-						props: {
-							code: leafCode,
-							...stockMetadata.default,
-						},
-					},
-				);
-		});
-
-		it('deletes a property as an update', async () => {
-			const [main, leaf] = await createNodes(
-				['SimpleGraphBranch', mainCode],
-				['SimpleGraphLeaf', leafCode],
-			);
-			await connectNodes(main, 'HAD_LEAF', leaf, {
-				stringProperty: 'some string',
-			});
-			const { body, status } = await patch({
-				type: 'SimpleGraphBranch',
-				code: mainCode,
-				body: {
-					fallenLeaves: [{ code: leafCode, stringProperty: null }],
-				},
-				query: { relationshipAction: 'merge', richRelationships: true },
-				metadata: getMetaPayload(),
-			});
-
-			expect(status).toBe(200);
-			expect(body.fallenLeaves[0]).not.toMatchObject({
-				stringProperty: 'some string',
-			});
-			await neo4jTest('SimpleGraphBranch', mainCode)
-				.hasRels(1)
-				.hasRel(
-					{
-						type: 'HAD_LEAF',
-						direction: 'outgoing',
-						props: stockMetadata.update,
-						notProps: ['stringProperty'],
-					},
-					{
-						type: 'SimpleGraphLeaf',
-						props: {
-							code: leafCode,
-							...stockMetadata.default,
-						},
-					},
-				);
-		});
-
-		it('throws 400 if attempting to write relationship property not in schema', async () => {
-			const [main, leaf] = await createNodes(
-				['SimpleGraphBranch', mainCode],
-				['SimpleGraphLeaf', leafCode],
-			);
-			await connectNodes(main, 'HAD_LEAF', leaf, {
-				stringProperty: 'some string',
-			});
-
-			await expect(
-				patch({
-					type: 'SimpleGraphBranch',
-					code: mainCode,
-					body: {
-						fallenLeaves: [
-							{ code: leafCode, notInSchema: 'a string' },
-						],
-					},
-					query: {
-						relationshipAction: 'merge',
-						richRelationships: true,
-					},
-				}),
-			).rejects.httpError({
-				status: 400,
-				message: 'Invalid property `notInSchema` on type `FallenLeaf`.',
-			});
-			await neo4jTest('SimpleGraphBranch', mainCode)
-				.hasRels(1)
-				.hasRel(
-					{
-						type: 'HAD_LEAF',
-						direction: 'outgoing',
-						props: {
-							stringProperty: 'some string',
-							...stockMetadata.default,
-						},
-						notProps: ['notInSchema'],
-					},
-					{
-						type: 'SimpleGraphLeaf',
-						props: {
-							code: leafCode,
-							...stockMetadata.default,
-						},
-					},
-				);
 		});
 	});
 
