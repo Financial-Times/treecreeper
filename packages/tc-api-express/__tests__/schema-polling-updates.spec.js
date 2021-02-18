@@ -119,7 +119,7 @@ describe('schema polling updates', () => {
 
 			it('updates validation rules', async () => {
 				return request(app, { useCached: false })
-					.head(`/rest/MainType/main-code-${Date.now()}`)
+					.head(`/rest/SimpleGraphBranch/main-code-${Date.now()}`)
 					.set('client-id', 'polling-client')
 					.expect(400);
 			});
