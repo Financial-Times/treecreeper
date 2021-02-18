@@ -76,12 +76,14 @@ describe('global field locking', () => {
 		});
 		it('fails to patch if using wrong client', async () => {
 			await createNode('LockedFieldTest', { code: mainCode });
-			await expect({
-				...payload,
-				metadata: {
-					clientId: 'global-lock-client-wrong',
-				},
-			}).rejects.httpError({
+			await expect(
+				patchHandler()({
+					...payload,
+					metadata: {
+						clientId: 'global-lock-client-wrong',
+					},
+				}),
+			).rejects.httpError({
 				status: 400,
 				message:
 					'Cannot write lockedField on LockedFieldTest global-lock-main - property can only be edited by client global-lock-client',

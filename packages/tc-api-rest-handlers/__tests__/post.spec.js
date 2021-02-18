@@ -195,6 +195,7 @@ describe('rest POST', () => {
 	describe('creating relationships', () => {
 		const leafCode1 = `${namespace}-leaf-1`;
 		const leafCode2 = `${namespace}-leaf-2`;
+		const branchCode2 = `${namespace}-branch-2`;
 
 		const postSimpleGraphBranch = (body, query) =>
 			postHandler({
@@ -208,23 +209,23 @@ describe('rest POST', () => {
 		it('creates record related to existing records', async () => {
 			await createNodes(
 				['SimpleGraphLeaf', leafCode1],
-				['SimpleGraphBranch', branchCode],
+				['SimpleGraphBranch', branchCode2],
 			);
 			const { status, body } = await postSimpleGraphBranch({
 				leaves: [leafCode1],
-				parent: branchCode,
+				parent: branchCode2,
 			});
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				leaves: [leafCode1],
-				parent: branchCode,
+				parent: branchCode2,
 			});
 
 			await neo4jTest('SimpleGraphBranch', branchCode)
 				.match(meta.create)
 				.notMatch({
 					leaves: [leafCode1],
-					parent: branchCode,
+					parent: branchCode2,
 				})
 				.hasRels(2)
 				.hasRel(
@@ -247,7 +248,7 @@ describe('rest POST', () => {
 					{
 						type: 'SimpleGraphBranch',
 						props: {
-							code: branchCode,
+							code: branchCode2,
 							...meta.default,
 						},
 					},
@@ -258,7 +259,7 @@ describe('rest POST', () => {
 			await expect(
 				postSimpleGraphBranch({
 					leaves: [leafCode1],
-					parent: branchCode,
+					parent: branchCode2,
 				}),
 			).rejects.httpError({
 				status: 400,
@@ -271,14 +272,14 @@ describe('rest POST', () => {
 			const { status, body } = await postSimpleGraphBranch(
 				{
 					leaves: [leafCode1],
-					parent: branchCode,
+					parent: branchCode2,
 				},
 				{ upsert: true },
 			);
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				leaves: [leafCode1],
-				parent: branchCode,
+				parent: branchCode2,
 			});
 
 			await neo4jTest('SimpleGraphBranch', branchCode)
@@ -303,7 +304,7 @@ describe('rest POST', () => {
 					},
 					{
 						type: 'SimpleGraphBranch',
-						props: { code: branchCode, ...meta.create },
+						props: { code: branchCode2, ...meta.create },
 					},
 				);
 		});
@@ -323,14 +324,14 @@ describe('rest POST', () => {
 
 		it('returns record with rich relationship information if richRelationships query is true', async () => {
 			const { status, body } = await postSimpleGraphBranch(
-				{ leaves: [leafCode1], parent: branchCode },
+				{ leaves: [leafCode1], parent: branchCode2 },
 				{ upsert: true, richRelationships: true },
 			);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				leaves: [{ code: leafCode1, ...meta.create }],
-				parent: { code: branchCode, ...meta.create },
+				parent: { code: branchCode2, ...meta.create },
 			});
 		});
 
