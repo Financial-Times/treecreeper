@@ -12,11 +12,9 @@ describe('rest HEAD', () => {
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
-	const createMainNode = (props = {}) =>
-		createNode('SimpleGraphBranch', { code: mainCode, ...props });
-
 	it('gets record without relationships', async () => {
-		await createMainNode({
+		await createNode('SimpleGraphBranch', {
+			code: mainCode,
 			stringProperty: 'name1',
 		});
 		const { status } = await getHandler()(input);

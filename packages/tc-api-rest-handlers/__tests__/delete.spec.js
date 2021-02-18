@@ -12,11 +12,8 @@ describe('rest DELETE', () => {
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
-	const createMainNode = (props = {}) =>
-		createNode('SimpleGraphBranch', { code: mainCode, ...props });
-
 	it('deletes record without relationships', async () => {
-		await createMainNode();
+		await createNode('SimpleGraphBranch', { code: mainCode });
 		const { status } = await deleteHandler()(input);
 
 		expect(status).toBe(204);

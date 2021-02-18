@@ -8,21 +8,20 @@ describe('global field locking', () => {
 
 	const { createNode } = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
+	const payload = {
 		type: 'LockedFieldTest',
 		code: mainCode,
-		body,
-		query,
-		metadata,
-	});
+		body: { lockedField: 'some string' },
+	};
 
 	describe('post', () => {
 		it('creates if using correct client', async () => {
-			const { status, body } = await postHandler()(
-				getInput({ lockedField: 'some string' }, undefined, {
+			const { status, body } = await postHandler()({
+				...payload,
+				metadata: {
 					clientId: 'global-lock-client',
-				}),
-			);
+				},
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -38,11 +37,12 @@ describe('global field locking', () => {
 		});
 		it('fails to create if using wrong client', async () => {
 			await expect(
-				postHandler()(
-					getInput({ lockedField: 'some string' }, undefined, {
+				postHandler()({
+					...payload,
+					metadata: {
 						clientId: 'global-lock-client-wrong',
-					}),
-				),
+					},
+				}),
 			).rejects.httpError({
 				status: 400,
 				message:
@@ -55,11 +55,12 @@ describe('global field locking', () => {
 	describe('patch', () => {
 		it('patches if using correct client', async () => {
 			await createNode('LockedFieldTest', { code: mainCode });
-			const { status, body } = await patchHandler()(
-				getInput({ lockedField: 'some string' }, undefined, {
+			const { status, body } = await patchHandler()({
+				...payload,
+				metadata: {
 					clientId: 'global-lock-client',
-				}),
-			);
+				},
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
@@ -75,13 +76,12 @@ describe('global field locking', () => {
 		});
 		it('fails to patch if using wrong client', async () => {
 			await createNode('LockedFieldTest', { code: mainCode });
-			await expect(
-				patchHandler()(
-					getInput({ lockedField: 'some string' }, undefined, {
-						clientId: 'global-lock-client-incorrect',
-					}),
-				),
-			).rejects.httpError({
+			await expect({
+				...payload,
+				metadata: {
+					clientId: 'global-lock-client-wrong',
+				},
+			}).rejects.httpError({
 				status: 400,
 				message:
 					'Cannot write lockedField on LockedFieldTest global-lock-main - property can only be edited by client global-lock-client',

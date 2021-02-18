@@ -14,11 +14,9 @@ describe('rest GET', () => {
 		namespace,
 	);
 
-	const createMainNode = (props = {}) =>
-		createNode('SimpleGraphBranch', { code: mainCode, ...props });
-
 	it('gets record without relationships', async () => {
-		await createMainNode({
+		await createNode('SimpleGraphBranch', {
+			code: mainCode,
 			stringProperty: 'name1',
 		});
 		const { body, status } = await getHandler()(input);
@@ -28,7 +26,7 @@ describe('rest GET', () => {
 	});
 
 	it('retrieves metadata', async () => {
-		await createMainNode();
+		await createNode('SimpleGraphBranch', { code: mainCode });
 		const { body, status } = await getHandler()(input);
 
 		expect(status).toBe(200);
@@ -36,7 +34,8 @@ describe('rest GET', () => {
 	});
 
 	it('retrieves array data', async () => {
-		await createMainNode({
+		await createNode('SimpleGraphBranch', {
+			code: mainCode,
 			// someStringList: ['one', 'two'],
 			someMultipleChoice: ['First', 'Second'],
 		});
