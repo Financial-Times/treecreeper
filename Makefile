@@ -156,24 +156,3 @@ prepublish:
 monorepo-publish: prepublish
 	npx athloi version --concurrency 10 $(CIRCLE_TAG)
 	npx athloi publish --concurrency 10 -- --access public
-
-# provision-local-db:
-# 	relate env:init --name=treecreeper --type=LOCAL
-# 	relate dbms:install -e treecreeper --name dev 4.1.6
-# 	relate dbms:start -e treecreeper dev
-# 	export PATH="/usr/local/opt/openjdk@11/bin:$PATH
-
-# brew install java11
-
-# For the system Java wrappers to find this JDK, symlink it with
-#   sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
-
-# openjdk@11 is keg-only, which means it was not symlinked into /usr/local,
-# because this is an alternate version of another formula.
-
-# If you need to have openjdk@11 first in your PATH run:
-#   echo 'export PATH="/usr/local/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
-
-# For compilers to find openjdk@11 you may need to set:
-#   export CPPFLAGS="-I/usr/local/opt/openjdk@11/include"
-
