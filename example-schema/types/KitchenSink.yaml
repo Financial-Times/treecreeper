@@ -40,7 +40,6 @@ properties:
     label: enumProperty label
   multipleChoiceEnumProperty:
     type: AnEnum
-    useInSummary: true
     hasMany: true
     description: multipleChoiceEnumProperty description.
     label: multipleChoiceEnumProperty label

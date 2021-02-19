@@ -8,36 +8,31 @@ const save = () =>
 		force: true,
 	});
 
+const createRecord = (props = {}) =>
+	cy.wrap(
+		executeQuery(`CREATE (:KitchenSink $props)`, {
+			props: { code, ...props },
+		}),
+	);
+
 describe('End-to-end - Enum primitive', () => {
 	afterEach(() => cy.wrap(dropFixtures(namespace)));
 
 	// this is currently buggy
 	it.skip('view empty state', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}`);
-		cy.get('#enumProperty').should('have.text', 'Unknown');
+		cy.get('#enumProperty').should('have.text', '');
 	});
 
 	it('edit empty state', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('select[name=enumProperty]').should('not.be.selected');
 	});
 
 	it('can select a value', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('select[name=enumProperty]').select('First');
 		save();
@@ -45,11 +40,7 @@ describe('End-to-end - Enum primitive', () => {
 	});
 
 	it('can select a different value', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code, enumProperty: 'First' },
-			}),
-		);
+		createRecord({ enumProperty: 'First' });
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('select[name=enumProperty]').should('have.value', 'First');
 		cy.get('select[name=enumProperty]').select('Third');

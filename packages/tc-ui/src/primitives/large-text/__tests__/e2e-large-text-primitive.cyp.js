@@ -8,26 +8,25 @@ const save = () =>
 		force: true,
 	});
 
+const createRecord = (props = {}) =>
+	cy.wrap(
+		executeQuery(`CREATE (:KitchenSink $props)`, {
+			props: { code, ...props },
+		}),
+	);
+
 describe('End-to-end - Large Text primitive', () => {
 	before(() => cy.wrap(dropFixtures(namespace)));
 	afterEach(() => cy.wrap(dropFixtures(namespace)));
 
 	it.skip('view empty state', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}`);
 		cy.get('#firstDocumentProperty').should('have.text', '');
 	});
 
 	it('edit empty state', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').should('have.text', '');
 	});
@@ -35,11 +34,7 @@ describe('End-to-end - Large Text primitive', () => {
 	const textInput = 'Long text';
 
 	it('can set large text', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code },
-			}),
-		);
+		createRecord();
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').type(textInput);
 		save();
@@ -47,11 +42,7 @@ describe('End-to-end - Large Text primitive', () => {
 	});
 
 	it('can update large text', () => {
-		cy.wrap(
-			executeQuery(`CREATE (:KitchenSink $props)`, {
-				props: { code, firstDocumentProperty: 'previous' },
-			}),
-		);
+		createRecord({ firstDocumentProperty: 'previous' });
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').type(textInput);
 		save();
