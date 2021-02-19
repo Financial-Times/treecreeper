@@ -1,4 +1,4 @@
-const neo4j = require('neo4j-driver');
+const neo4j = require('neo4j-driver'); // eslint-disable-line import/no-extraneous-dependencies
 
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL || 'bolt://localhost:7687',
@@ -16,6 +16,5 @@ const dropFixtures = namespace =>
 	executeQuery(
 		`MATCH (n) WHERE n.code STARTS WITH "${namespace}" DETACH DELETE n`,
 	);
-
 
 module.exports = { executeQuery, dropFixtures };

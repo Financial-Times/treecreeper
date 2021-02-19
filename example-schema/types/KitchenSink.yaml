@@ -10,24 +10,24 @@ properties:
     description: Code description.
     label: Code label
     pattern: CODE
-  # firstStringProperty:
-  #   type: Word
-  #   description: firstStringProperty description.
-  #   label: firstStringProperty label
-  #   useInSummary: true
-  # secondStringProperty:
-  #   type: Word
-  #   useInSummary: true
-  #   description: secondStringProperty description.
-  #   label: secondStringProperty label
-  # firstDocumentProperty:
-  #   type: Document
-  #   description: firstDocumentProperty description.
-  #   label: firstDocumentProperty label
-  # secondDocumentProperty:
-  #   type: Document
-  #   description: secondDocumentProperty description.
-  #   label: secondDocumentProperty label
+  firstStringProperty:
+    type: Word
+    description: firstStringProperty description.
+    label: firstStringProperty label
+    useInSummary: true
+  secondStringProperty:
+    type: Word
+    useInSummary: true
+    description: secondStringProperty description.
+    label: secondStringProperty label
+  firstDocumentProperty:
+    type: Document
+    description: firstDocumentProperty description.
+    label: firstDocumentProperty label
+  secondDocumentProperty:
+    type: Document
+    description: secondDocumentProperty description.
+    label: secondDocumentProperty label
   booleanProperty:
     type: Boolean
     useInSummary: true

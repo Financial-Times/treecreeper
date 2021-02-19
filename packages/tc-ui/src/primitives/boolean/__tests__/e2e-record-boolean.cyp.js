@@ -8,25 +8,35 @@ const save = () =>
 		force: true,
 	});
 
-describe('End-to-end - record Boolean type', () => {
-
+describe('End-to-end - Boolean primitive', () => {
 	afterEach(() => cy.wrap(dropFixtures(namespace)));
 
-	it('empty state', () => {
+	it('view empty state', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code },
-			})
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}`);
 		cy.get('#booleanProperty').should('have.text', 'Unknown');
 	});
 
-	it('can record a true value', () => {
+	it('edit empty state', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code },
-			})
+			}),
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('#radio-booleanProperty-Yes').should('not.be.checked');
+		cy.get('#radio-booleanProperty-No').should('not.be.checked');
+	});
+
+	it('can set to true', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('#radio-booleanProperty-Yes').check({ force: true });
@@ -34,13 +44,27 @@ describe('End-to-end - record Boolean type', () => {
 		cy.get('#booleanProperty').should('have.text', 'Yes');
 	});
 
-	it('can record a false value', () => {
+	it('can set to false', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code },
-			})
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('#radio-booleanProperty-No').check({ force: true });
+		save();
+		cy.get('#booleanProperty').should('have.text', 'No');
+	});
+
+	it('can change a value', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code, booleanProperty: true },
+			}),
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('#radio-booleanProperty-Yes').should('be.checked');
+		cy.get('#radio-booleanProperty-No').should('not.be.checked');
 		cy.get('#radio-booleanProperty-No').check({ force: true });
 		save();
 		cy.get('#booleanProperty').should('have.text', 'No');

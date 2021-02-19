@@ -8,26 +8,35 @@ const save = () =>
 		force: true,
 	});
 
-describe('End-to-end - record Boolean type', () => {
-
+describe('End-to-end - Enum primitive', () => {
 	afterEach(() => cy.wrap(dropFixtures(namespace)));
 
 	// this is currently buggy
-	it.skip('empty state', () => {
+	it.skip('view empty state', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code },
-			})
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}`);
 		cy.get('#enumProperty').should('have.text', 'Unknown');
 	});
 
-	it('can record a selection', () => {
+	it('edit empty state', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code },
-			})
+			}),
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('select[name=enumProperty]').should('not.be.selected');
+	});
+
+	it('can select a value', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}/edit`);
 		cy.get('select[name=enumProperty]').select('First');
@@ -39,13 +48,12 @@ describe('End-to-end - record Boolean type', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:KitchenSink $props)`, {
 				props: { code, enumProperty: 'First' },
-			})
+			}),
 		);
 		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('select[name=enumProperty]').should('have.value', 'First');
 		cy.get('select[name=enumProperty]').select('Third');
 		save();
 		cy.get('#enumProperty').should('have.text', 'Third');
 	});
-
-
 });
