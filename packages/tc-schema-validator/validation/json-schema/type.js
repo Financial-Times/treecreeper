@@ -65,6 +65,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			required: { type: 'boolean' },
 			canIdentify: { type: 'boolean' },
 			useInSummary: { type: 'boolean' },
+			containsPII: { type: 'boolean' },
 			pattern: { type: 'string', enum: stringPatterns },
 			examples: {
 				type: 'array',
