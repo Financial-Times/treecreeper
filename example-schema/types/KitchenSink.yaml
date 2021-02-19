@@ -38,22 +38,22 @@ properties:
     useInSummary: true
     description: enumProperty description.
     label: enumProperty label
-  # multipleChoiceEnumProperty:
-  #   type: AnEnum
-  #   useInSummary: true
-  #   hasMany: true
-  #   description: multipleChoiceEnumProperty description.
-  #   label: multipleChoiceEnumProperty label
-  # integerProperty:
-  #   type: Int
-  #   useInSummary: true
-  #   description: integerProperty description.
-  #   label: integerProperty label
-  # floatProperty:
-  #   type: Float
-  #   useInSummary: true
-  #   description: floatProperty description.
-  #   label: floatProperty label
+  multipleChoiceEnumProperty:
+    type: AnEnum
+    useInSummary: true
+    hasMany: true
+    description: multipleChoiceEnumProperty description.
+    label: multipleChoiceEnumProperty label
+  integerProperty:
+    type: Int
+    useInSummary: true
+    description: integerProperty description.
+    label: integerProperty label
+  floatProperty:
+    type: Float
+    useInSummary: true
+    description: floatProperty description.
+    label: floatProperty label
   # dateProperty:
   #   type: Date
   #   useInSummary: true
