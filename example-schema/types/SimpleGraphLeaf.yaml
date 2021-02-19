@@ -22,13 +22,6 @@ properties:
     direction: incoming
     label: largestLeafOnBranch label
     description: largestLeafOnBranch description.
-  # sharesPlantWithBranches:
-  #   type: SimpleGraphBranch
-  #   label: sharesPlantWithBranches label
-  #   description: sharesPlantWithBranches description.
-  #   relationship: SHARES_PLANT_WITH_LEAF
-  #   hasMany: true
-  #   direction: incoming
   formerBranch:
     type: FallenLeaf
     label: formerBranch label

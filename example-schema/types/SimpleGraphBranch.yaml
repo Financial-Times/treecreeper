@@ -43,16 +43,9 @@ properties:
     type: SimpleGraphBranch
     label: parent label
     description: parent description.
-    relationship: HAS_CHILD #change to HAS_OFFSHOOT
+    relationship: HAS_CHILD #change to HAS_SHOOT
     hasMany: false
     direction: incoming
-  # sharesPlantWithLeaves:
-  #   type: SimpleGraphLeaf
-  #   label: sharesPlantWithLeaves label
-  #   description: sharesPlantWithLeaves description.
-  #   relationship: SHARES_PLANT_WITH_LEAF
-  #   hasMany: true
-  #   direction: outgoing
   children:
     type: SimpleGraphBranch
     label: children label
