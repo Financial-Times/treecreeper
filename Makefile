@@ -85,7 +85,6 @@ run-no-db:
 run-biz-ops:
 	@concurrently "make run-app-biz-ops" "make build-statics"
 
-
 # Testing & CI
 
 ## Creates indexes on the DB
@@ -131,6 +130,15 @@ cypress-primitives: build-statics
 	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
 
 ## Cypress stuff used in local dev
+
+run-app-stable:
+	NEO4J_BOLT_URL=${LOCAL_BOLT_URL} \
+	TREECREEPER_TEST=true \
+	TREECREEPER_SCHEMA_DIRECTORY=example-schema \
+	node demo/api.js
+
+run-stable:
+	@concurrently "make run-db" "make run-app-stable" "make build-statics"
 
 ### Opens an interactive UI for specifying which tests to run/re-run
 cypress-open:

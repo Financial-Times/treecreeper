@@ -1,5 +1,6 @@
 {
   "baseUrl": "http://localhost:8888",
   "integrationFolder": "./packages/tc-ui/src/",
-  "testFiles": "**/*.cyp.js"
+  "testFiles": "**/*.cyp.js",
+  "failOnStatusCode": false
 }

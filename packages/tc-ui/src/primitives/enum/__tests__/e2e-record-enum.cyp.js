@@ -1,33 +1,51 @@
-const { code } = require('../../../test-helpers/mainTypeData.json');
-const {
-	visitMainTypePage,
-	visitEditPage,
-	createType,
-	save,
-} = require('../../../test-helpers/cypress');
+const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-describe('End-to-end - record Enum type', () => {
-	beforeEach(() => {
-		cy.wrap(createType({ code, type: 'MainType' })).then(() =>
-			visitMainTypePage(),
+const namespace = 'e2e-demo-primitives-enum';
+const code = `${namespace}-code`;
+
+const save = () =>
+	cy.get('[data-button-type="submit"]').click({
+		force: true,
+	});
+
+describe('End-to-end - record Boolean type', () => {
+
+	afterEach(() => cy.wrap(dropFixtures(namespace)));
+
+	// this is currently buggy
+	it.skip('empty state', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			})
 		);
+		cy.visit(`/KitchenSink/${code}`);
+		cy.get('#enumProperty').should('have.text', 'Unknown');
 	});
 
 	it('can record a selection', () => {
-		visitEditPage();
-		cy.get('select[name=someEnum]').select('First');
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			})
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('select[name=enumProperty]').select('First');
 		save();
-
-		cy.get('#code').should('have.text', code);
-		cy.get('#someEnum').should('have.text', 'First');
+		cy.get('#enumProperty').should('have.text', 'First');
 	});
 
 	it('can select a different value', () => {
-		visitEditPage();
-		cy.get('select[name=someEnum]').select('Third');
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code, enumProperty: 'First' },
+			})
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('select[name=enumProperty]').select('Third');
 		save();
-
-		cy.get('#code').should('have.text', code);
-		cy.get('#someEnum').should('have.text', 'Third');
+		cy.get('#enumProperty').should('have.text', 'Third');
 	});
+
+
 });

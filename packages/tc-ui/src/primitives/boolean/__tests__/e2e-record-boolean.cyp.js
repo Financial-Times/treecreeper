@@ -1,33 +1,48 @@
-const { code } = require('../../../test-helpers/mainTypeData.json');
-const {
-	createType,
-	visitMainTypePage,
-	visitEditPage,
-	save,
-} = require('../../../test-helpers/cypress');
+const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
+
+const namespace = 'e2e-demo-primitives-boolean';
+const code = `${namespace}-code`;
+
+const save = () =>
+	cy.get('[data-button-type="submit"]').click({
+		force: true,
+	});
 
 describe('End-to-end - record Boolean type', () => {
-	beforeEach(() => {
-		cy.wrap(createType({ code, type: 'MainType' })).then(() =>
-			visitMainTypePage(),
+
+	afterEach(() => cy.wrap(dropFixtures(namespace)));
+
+	it('empty state', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			})
 		);
+		cy.visit(`/KitchenSink/${code}`);
+		cy.get('#booleanProperty').should('have.text', 'Unknown');
 	});
 
-	it('can record a value', () => {
-		visitEditPage();
-		cy.get('#radio-someBoolean-Yes').check({ force: true });
+	it('can record a true value', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			})
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('#radio-booleanProperty-Yes').check({ force: true });
 		save();
-
-		cy.get('#code').should('have.text', code);
-		cy.get('#someBoolean').should('have.text', 'Yes');
+		cy.get('#booleanProperty').should('have.text', 'Yes');
 	});
 
-	it('can change a value', () => {
-		visitEditPage();
-		cy.get('#radio-someBoolean-No').check({ force: true });
+	it('can record a false value', () => {
+		cy.wrap(
+			executeQuery(`CREATE (:KitchenSink $props)`, {
+				props: { code },
+			})
+		);
+		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.get('#radio-booleanProperty-No').check({ force: true });
 		save();
-
-		cy.get('#code').should('have.text', code);
-		cy.get('#someBoolean').should('have.text', 'No');
+		cy.get('#booleanProperty').should('have.text', 'No');
 	});
 });
