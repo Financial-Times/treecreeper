@@ -106,6 +106,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 			required: onlyForProperties,
 			canIdentify: onlyForProperties,
 			useInSummary: onlyForProperties,
+			containsPII: onlyForProperties,
 			pattern: onlyForProperties,
 			examples: onlyForProperties,
 			hasMany: {
