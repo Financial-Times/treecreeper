@@ -53,20 +53,18 @@ properties:
     useInSummary: true
     description: floatProperty description.
     label: floatProperty label
-  # dateProperty:
-  #   type: Date
-  #   useInSummary: true
-  #   description: Date description.
-  #   label: Date label
-  # timeProperty:
-  #   type: Time
-  #   description: Time description.
-  #   label: Time label
-  # datetimeProperty:
-  #   type: DateTime
-  #   useInSummary: true
-  #   description: DateTime description.
-  #   label: DateTime label
+  dateProperty:
+    type: Date
+    description: Date description.
+    label: Date label
+  timeProperty:
+    type: Time
+    description: Time description.
+    label: Time label
+  datetimeProperty:
+    type: DateTime
+    description: DateTime description.
+    label: DateTime label
   # urlProperty:
   #   type: Url
   #   useInSummary: true

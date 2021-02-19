@@ -1,101 +1,222 @@
-const {
-	code,
-	someDatetime,
-	someDate,
-} = require('../../../test-helpers/mainTypeData.json');
-const {
-	createType,
-	visitMainTypePage,
-	visitEditPage,
-	save,
-} = require('../../../test-helpers/cypress');
+const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-describe('End-to-end - record Temporal type', () => {
-	beforeEach(() => {
-		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
-			visitMainTypePage();
-			visitEditPage();
+const namespace = 'e2e-demo-primitives-temporal';
+const code = `${namespace}-code`;
+
+const save = () =>
+	cy.get('[data-button-type="submit"]').click({
+		force: true,
+	});
+
+const createRecord = (props = {}) =>
+	cy.wrap(
+		executeQuery(`CREATE (:KitchenSink $props)`, {
+			props: { code, ...props },
+		}),
+	);
+
+describe('End-to-end - Temporal primitive', () => {
+	describe('time', () => {
+		afterEach(() => cy.wrap(dropFixtures(namespace)));
+
+		// this is currently buggy
+		it.skip('view empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}`);
+			cy.get('#timeProperty').should('have.text', '');
+		});
+
+		it('edit empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=timeProperty]').should('have.value', '');
+		});
+
+		it('can set a value', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=timeProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('12:15:30');
+				})
+				.click();
+			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
+			save();
+			cy.get('#timeProperty').should('have.text', '12:15:30 PM');
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
+		});
+
+		it('can set a different value', () => {
+			createRecord({ timeProperty: '10:14:29' });
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=timeProperty]').should('have.value', '10:14:29');
+			cy.get('input[name=timeProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('12:15:30');
+				})
+				.click();
+			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
+			save();
+			cy.get('#timeProperty').should('have.text', '12:15:30 PM');
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
 		});
 	});
 
-	it('can record time', () => {
-		cy.get('input[name=someTime]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val('12:15:30');
-			})
-			.click();
-		save();
+	describe('date', () => {
+		afterEach(() => cy.wrap(dropFixtures(namespace)));
 
-		cy.get('#code').should('have.text', code);
-		cy.get('#someTime').should('have.text', '12:15:30 PM');
-		cy.get('[data-button-type="edit"]').click({
-			force: true,
+		// this is currently buggy
+		it.skip('view empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}`);
+			cy.get('#dateProperty').should('have.text', '');
 		});
-		cy.get('input[name=someTime]').should('have.value', '12:15:30');
-		save();
-		cy.get('#code').should('have.text', code);
-		cy.get('#someTime').should('have.text', '12:15:30 PM');
-		visitEditPage();
-		cy.get('input[name=someTime]').should('have.value', '12:15:30');
+
+		it('edit empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=dateProperty]').should('have.value', '');
+		});
+
+		it('can set a value', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=dateProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('2020-01-15');
+				})
+				.click();
+			cy.get('input[name=dateProperty]').should(
+				'have.value',
+				'2020-01-15',
+			);
+			save();
+			cy.get('#dateProperty').should('have.text', '15 January 2020');
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=dateProperty]').should(
+				'have.value',
+				'2020-01-15',
+			);
+		});
+
+		it('can set a different value', () => {
+			createRecord({ dateProperty: '2019-10-04' });
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=dateProperty]').should(
+				'have.value',
+				'2019-10-04',
+			);
+			cy.get('input[name=dateProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('2020-01-15');
+				})
+				.click();
+			cy.get('input[name=dateProperty]').should(
+				'have.value',
+				'2020-01-15',
+			);
+			save();
+			cy.get('#dateProperty').should('have.text', '15 January 2020');
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=dateProperty]').should(
+				'have.value',
+				'2020-01-15',
+			);
+		});
 	});
 
-	it('can record date', () => {
-		cy.get('input[name=someDate]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDate);
-			})
-			.click();
-		save();
+	describe('datetime', () => {
+		afterEach(() => cy.wrap(dropFixtures(namespace)));
 
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDate').should('have.text', '15 January 2020');
-		cy.get('[data-button-type="edit"]').click({
-			force: true,
+		// this is currently buggy
+		it.skip('view empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}`);
+			cy.get('#datetimeProperty').should('have.text', '');
 		});
-		cy.get('input[name=someDate]').should('have.value', '2020-01-15');
-		save();
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDate').should('have.text', '15 January 2020');
-		visitEditPage();
-		cy.get('input[name=someDate]').should('have.value', '2020-01-15');
-	});
 
-	it('can record date-time', () => {
-		cy.get('input[name=someDatetime]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDatetime);
-			})
-			.click();
-		save();
-
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDatetime').should(
-			'have.text',
-			'15 January 2020, 1:00:00 PM',
-		);
-		cy.get('[data-button-type="edit"]').click({
-			force: true,
+		it('edit empty state', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=datetimeProperty]').should('have.value', '');
 		});
-		cy.get('input[name=someDatetime]').should(
-			'have.value',
-			'2020-01-15T13:00:00.000',
-		);
-		save();
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDatetime').should(
-			'have.text',
-			'15 January 2020, 1:00:00 PM',
-		);
-		visitEditPage();
-		cy.get('input[name=someDatetime]').should(
-			'have.value',
-			'2020-01-15T13:00:00.000',
-		);
+
+		it('can set a value', () => {
+			createRecord();
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=datetimeProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('2020-01-15T13:00:00.000');
+				})
+				.click();
+			cy.get('input[name=datetimeProperty]').should(
+				'have.value',
+				'2020-01-15T13:00:00.000',
+			);
+			save();
+			cy.get('#datetimeProperty').should(
+				'have.text',
+				'15 January 2020, 1:00:00 PM',
+			);
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=datetimeProperty]').should(
+				'have.value',
+				'2020-01-15T13:00:00.000',
+			);
+		});
+
+		it('can set a different value', () => {
+			createRecord({ datetimeProperty: '2019-02-04T11:00:00.000' });
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=datetimeProperty]').should(
+				'have.value',
+				'2019-02-04T11:00:00.000',
+			);
+			cy.get('input[name=datetimeProperty]')
+				.click()
+				.then(input => {
+					input[0].dispatchEvent(
+						new Event('input', { bubbles: true }),
+					);
+					input.val('2020-01-15T13:00:00.000');
+				})
+				.click();
+			cy.get('input[name=datetimeProperty]').should(
+				'have.value',
+				'2020-01-15T13:00:00.000',
+			);
+			save();
+			cy.get('#datetimeProperty').should(
+				'have.text',
+				'15 January 2020, 1:00:00 PM',
+			);
+			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.get('input[name=datetimeProperty]').should(
+				'have.value',
+				'2020-01-15T13:00:00.000',
+			);
+		});
 	});
 });
