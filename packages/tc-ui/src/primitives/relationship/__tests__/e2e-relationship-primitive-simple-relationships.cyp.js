@@ -31,17 +31,7 @@ const detachFixtures = () =>
 	MATCH (n)-[r]-() WHERE n.code STARTS WITH "${namespace}" DELETE r
 `);
 
-// VERY IMPORTANT NOTE
-// This does not actually test the simple relationship primitive
-// because currently the only way to use an edit component is to
-// run a tc-ui edit page, which chooses (for good reasons) to use
-// the rich relationship component everywhere, but it detects there
-// are no rich relationship properties available on the relationship
-// and displays something identical to the simple relationship component
-// for that case
-//
-// These tests are written here because .. it felt like a good idea 5 miutes ago
-describe('End-to-end - Simple relationship primitive', () => {
+describe('End-to-end - Rich relationship primitive; simple relationships', () => {
 	before(() => {
 		cy.wrap(dropFixtures(namespace));
 		cy.wrap(createRecords());
@@ -51,23 +41,8 @@ describe('End-to-end - Simple relationship primitive', () => {
 		cy.wrap(dropFixtures(namespace));
 	});
 
-	// simple
-
-	// 	__-to-one
-	// 		- disable button after selecting one
-	// 		- reenable button after removing
-
 	// disable based on lockedness of record
 	// disable based on locked in schema
-
-	// cy.get('#simpleRelationship-picker') // eslint-disable-line cypress/no-unnecessary-waiting
-	// 	.type('e2e')
-	// 	.wait(500)
-	// 	.type('{downarrow}{enter}')
-	// 	.should('not.be.disabled');
-	// cy.get('#simpleRelationship')
-	// 	.should('have.text', `${code}-first-child`)
-	// 	.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 
 	describe('empty state', () => {
 		it.skip('view empty state', () => {
@@ -96,11 +71,6 @@ describe('End-to-end - Simple relationship primitive', () => {
 			)
 				.children()
 				.should('have.lengthOf', 0);
-			// 	.type('{downarrow}{enter}')
-			// 	.should('not.be.disabled');
-			// cy.get('#simpleRelationship')
-			// 	.should('have.text', `${code}-first-child`)
-			// 	.should('have.attr', 'href', `/ChildType/${code}-first-child`);
 		});
 		it('handles no result sensibly', () => {
 			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
@@ -245,46 +215,118 @@ describe('End-to-end - Simple relationship primitive', () => {
 		it('display multiple relationships remove one', () => {
 			cy.wrap(
 				executeQuery(`
-			 MERGE (a:RelationshipTestsMany {code: "${codeMany1}"})-[:MANY_TO_ONE]->(c:RelationshipTestsOne {code: "${codeOne1}"})<-[:MANY_TO_ONE]-(b:RelationshipTestsMany {code: "${codeMany2}"})
-			 RETURN a, b, c
+MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne), (b:RelationshipTestsMany)
+WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}" AND b.code = "${codeMany2}"
+WITH a, b, c
+MERGE (a)-[r:MANY_TO_ONE]->(c)<-[s:MANY_TO_ONE]-(b)
+RETURN a, b, c
 `),
 			);
 			cy.visit(`/RelationshipTestsOne/${codeOne1}`);
+			cy.get('#simpleRelationship').children().should('have.lengthOf', 2);
+			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.eq(0)
+				.find('button')
+				.click();
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.should('have.lengthOf', 1);
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.eq(0)
+				.find('.o-layout-typography')
+				.should('have.text', 'Many 2');
+			save();
+			cy.get('#simpleRelationship').children().should('have.lengthOf', 1);
+			cy.get('#simpleRelationship')
+				.children()
+				.eq(0)
+				.find('a')
+				.should('have.text', 'Many 2');
 		});
 
-		it('display relationships remove all', () => {});
+		it('display relationship remove all', () => {
+			cy.wrap(
+				executeQuery(`
+MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne)
+WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}"
+WITH a, c
+MERGE (a)-[r:MANY_TO_ONE]->(c)
+RETURN a, c
+`),
+			);
+			cy.visit(`/RelationshipTestsOne/${codeOne1}`);
+			cy.get('#simpleRelationship').children().should('have.lengthOf', 1);
+			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.eq(0)
+				.find('button')
+				.click();
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.should('have.lengthOf', 0);
+			save();
+			cy.get('#simpleRelationship').should('have.lengthOf', 0);
+		});
 	});
 
-	// it('edit empty state', () => {
-	// 	createRecord();
-	// 	cy.visit(`/KitchenSink/${code}/edit`);
-	// 	cy.get('#radio-booleanProperty-Yes').should('not.be.checked');
-	// 	cy.get('#radio-booleanProperty-No').should('not.be.checked');
-	// });
+	describe('__-to-one relationships', () => {
+		it('Can create a single relationship', () => {
+			cy.visit(`/RelationshipTestsMany/${codeMany1}/edit`);
+			cy.get('#simpleRelationship-picker').should('not.be.disabled');
+			cy.get('#simpleRelationship-picker') // eslint-disable-line cypress/no-unnecessary-waiting
+				.type('e2e')
+				.wait(500)
+				.type('{downarrow}{enter}')
+				.should('be.disabled');
+			cy.get('#simpleRelationship-picker').should('have.value', '');
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.should('have.lengthOf', 1);
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.first()
+				.find('.o-layout-typography')
+				// demonstrating that it falls back to code when name not defined on the type
+				.should('have.text', 'e2e-simple-relationship-primitive-one1');
+			save();
+			cy.get('#simpleRelationship').should('have.lengthOf', 1);
+			cy.get('#simpleRelationship')
+				// demonstrating that it falls back to code when name not defined on the type
+				.should('have.text', 'e2e-simple-relationship-primitive-one1');
+			cy.get('#simpleRelationship').should(
+				'have.attr',
+				'href',
+				`/RelationshipTestsOne/${codeOne1}`,
+			);
+		});
 
-	// it('can set to true', () => {
-	// 	createRecord();
-	// 	cy.visit(`/KitchenSink/${code}/edit`);
-	// 	cy.get('#radio-booleanProperty-Yes').check({ force: true });
-	// 	save();
-	// 	cy.get('#booleanProperty').should('have.text', 'Yes');
-	// });
-
-	// it('can set to false', () => {
-	// 	createRecord();
-	// 	cy.visit(`/KitchenSink/${code}/edit`);
-	// 	cy.get('#radio-booleanProperty-No').check({ force: true });
-	// 	save();
-	// 	cy.get('#booleanProperty').should('have.text', 'No');
-	// });
-
-	// it('can change a value', () => {
-	// 	createRecord({ booleanProperty: true });
-	// 	cy.visit(`/KitchenSink/${code}/edit`);
-	// 	cy.get('#radio-booleanProperty-Yes').should('be.checked');
-	// 	cy.get('#radio-booleanProperty-No').should('not.be.checked');
-	// 	cy.get('#radio-booleanProperty-No').check({ force: true });
-	// 	save();
-	// 	cy.get('#booleanProperty').should('have.text', 'No');
-	// });
+		it('Can remove a single relationship', () => {
+			cy.wrap(
+				executeQuery(`
+MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne)
+WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}"
+WITH a, c
+MERGE (a)-[r:MANY_TO_ONE]->(c)
+RETURN a, c
+`),
+			);
+			cy.visit(`/RelationshipTestsMany/${codeMany1}/edit`);
+			cy.get('#simpleRelationship-picker').should('be.disabled');
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.eq(0)
+				.find('button')
+				.click();
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.should('have.lengthOf', 0);
+			cy.get('#simpleRelationship-picker').should('not.be.disabled');
+			save();
+			cy.get('#simpleRelationship').should('have.lengthOf', 0);
+		});
+	});
 });
