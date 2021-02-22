@@ -16,6 +16,9 @@ const {
 	visitFieldsetTypePage,
 } = require('../../../test-helpers/cypress');
 
+// disable based on lockedness of record
+// disable based on locked in schema
+
 describe('End-to-end - edit record', () => {
 	beforeEach(() => {
 		cy.wrap(createType({ code, type: 'MainType' })).then(() =>
