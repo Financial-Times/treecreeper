@@ -1,5 +1,7 @@
 const React = require('react');
 
+const { markdownToHtml } = require('../../lib/markdown-to-html');
+
 const toKebabCase = string =>
 	string
 		.split(' ')
@@ -11,9 +13,13 @@ const Concept = ({ name, description, moreInformation }) => (
 		<div className="o-forms-title">
 			<div className="o-forms-title__main">A {name} is:</div>
 			<div className="description-text o-forms-title__prompt">
-				{description}
+				<div
+					dangerouslySetInnerHTML={{ __html: markdownToHtml(description) }}
+				/>
 				<p />
-				{moreInformation}
+				<div
+					dangerouslySetInnerHTML={{ __html: markdownToHtml(moreInformation) }}
+				/>
 			</div>
 		</div>
 	</aside>

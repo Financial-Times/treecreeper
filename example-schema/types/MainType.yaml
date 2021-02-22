@@ -1,7 +1,15 @@
 name: MainType
-description: Description of MainType.
+description: |
+  Description of MainType.
+  - bullet 1
+  - bullet 2
+  - bullet 3
+  Some more text
 moreInformation: |
   More information for MainType
+  - bullet
+  *bold text*
+  - another bullet
 properties:
   code:
     type: Code
