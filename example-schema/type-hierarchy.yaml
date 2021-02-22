@@ -17,3 +17,5 @@ test:
     - LockedFieldTest
     - EventsTest
     - EventsTestLeaf
+    - RelationshipTestsMany
+    - RelationshipTestsOne

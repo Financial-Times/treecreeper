@@ -9,7 +9,7 @@ const driver = neo4j.driver(
 	{ disableLosslessIntegers: true },
 );
 
-const executeQuery = (query, parameters) =>
+const executeQuery = (query, parameters = {}) =>
 	driver.session().run(query, parameters);
 
 const dropFixtures = namespace =>
