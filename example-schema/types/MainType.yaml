@@ -23,6 +23,11 @@ properties:
     description: Word description.
     label: Word label
     useInSummary: true
+  somethingPersonal:
+    type: Word
+    description: Some words which contains personal info.
+    label: Personal label
+    containsPII: true
   # someStringList:
   #   type: Word
   #   hasMany: true
