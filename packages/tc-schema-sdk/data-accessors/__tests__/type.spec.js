@@ -23,6 +23,7 @@ describe('get-type', () => {
 			properties: {
 				property1: {
 					type: 'String',
+					containsPII: true,
 				},
 				property2: {
 					type: 'Boolean',
@@ -43,6 +44,7 @@ describe('get-type', () => {
 			expect(compiledType.properties).toHaveProperty('property1');
 			expect(compiledType.properties.property1).toMatchObject({
 				type: 'String',
+				containsPII: true,
 			});
 			expect(compiledType.properties).toHaveProperty('property2');
 			expect(compiledType.properties.property2).toMatchObject({
