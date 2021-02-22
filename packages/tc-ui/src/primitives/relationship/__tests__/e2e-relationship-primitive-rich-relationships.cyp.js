@@ -16,19 +16,6 @@ const getPicker = () => cy.get('#richRelationship-picker');
 
 const search = term => getPicker().type(term).wait(500);
 
-const assertSelected = (...texts) => {
-	cy.get('#ul-richRelationship')
-		.children()
-		.should('have.lengthOf', texts.length);
-	texts.forEach((text, i) => {
-		cy.get('#ul-richRelationship')
-			.children()
-			.eq(i)
-			.find('.o-layout-typography')
-			.should('have.text', text);
-	});
-};
-
 const createRecords = () =>
 	executeQuery(`
 			CREATE (a:RelationshipTestsMany),
@@ -60,7 +47,7 @@ describe('End-to-end - Rich relationship primitive; rich relationships', () => {
 	});
 
 	describe('view', () => {
-		context('__-to-many', () => {
+		describe('__-to-many', () => {
 			before(() => {
 				cy.wrap(
 					executeQuery(`
@@ -125,7 +112,7 @@ describe('End-to-end - Rich relationship primitive; rich relationships', () => {
 			});
 		});
 
-		context('__-to-one', () => {
+		describe('__-to-one', () => {
 			before(() => {
 				cy.wrap(
 					executeQuery(`
@@ -184,20 +171,226 @@ describe('End-to-end - Rich relationship primitive; rich relationships', () => {
 			});
 		});
 	});
-});
 
-describe('edit', () => {
-	// 	- 'collapses annotation fields on page load for existing relationships'
-	// - 'sets label of the button as "Add details", if no annotations already exist for existing relationships'
-	// - 'sets label of the button as "Edit details", if annotations already exist for existing relationships'
-	// - 'displays annotation fields when annotation button is clicked'
-	// - 'disables the annotation button once annotations area is opened'
-	// - 'can edit an existing annotated relationship'
-	// - 'can remove a relationship with annotations'
-	// - 'can remove all annotations from a relationship'
-	// - 'restores in-progress edits to the relationship annotations if the form is submitted but errors'
-	// - 'expands annotations area when adding new relationship'
-	// - 'can add a new relationship without annotations'
-	// - 'displays all fields defined for that relationship property'
-	// - 'can add a new relationship with annotations'
+	describe('edit', () => {
+		context('display existing relationships', () => {
+			before(() => {
+				cy.wrap(
+					executeQuery(`
+					MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne), (b:RelationshipTestsMany)
+					WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}" AND b.code = "${codeMany2}"
+					WITH a, b, c
+					MERGE (a)-[r:RICH_MANY_TO_ONE]->(c)<-[s:RICH_MANY_TO_ONE]-(b)
+					SET r.stringProperty = "apples"
+					RETURN a, b, c
+					`),
+				);
+				cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			});
+
+			after(() => cy.wrap(detachFixtures()));
+
+			it('collapses annotation fields on page load for existing relationships', () => {
+				cy.get(
+					'#ul-richRelationship .treecreeper-relationship-annotate',
+				).should('not.exist');
+			});
+			it('sets label of the button as "Edit details", if annotations already exist for existing relationships', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.should('have.text', 'Edit details');
+			});
+			it('sets label of the button as "Add details", if no annotations already exist for existing relationships', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(1)
+					.find('button.relationship-annotate-button')
+					.should('have.text', 'Add details');
+			});
+
+			it('displays annotation fields when annotation button is clicked', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.click();
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('.treecreeper-relationship-annotate')
+					.should('exist');
+				cy.get('#ul-richRelationship li')
+					.eq(1)
+					.find('button.relationship-annotate-button')
+					.click();
+				cy.get('#ul-richRelationship li')
+					.eq(1)
+					.find('.treecreeper-relationship-annotate')
+					.should('exist');
+				cy.get(
+					'#ul-richRelationship .treecreeper-relationship-annotate',
+				).should('have.lengthOf', 2);
+			});
+			it('disables the annotation button once annotations area is opened', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.should('be.disabled');
+				cy.get('#ul-richRelationship li')
+					.eq(1)
+					.find('button.relationship-annotate-button')
+					.should('be.disabled');
+			});
+		});
+		describe('editing', () => {
+			beforeEach(() => {
+				cy.wrap(
+					executeQuery(`
+					MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne), (b:RelationshipTestsMany)
+					WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}" AND b.code = "${codeMany2}"
+					WITH a, b, c
+					MERGE (a)-[r:RICH_MANY_TO_ONE]->(c)<-[s:RICH_MANY_TO_ONE]-(b)
+					SET r.stringProperty = "apples"
+					RETURN a, b, c
+					`),
+				);
+				cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			});
+
+			afterEach(() => cy.wrap(detachFixtures()));
+			it('can edit an existing annotated relationship', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.click();
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-stringProperty')
+					.clear()
+					.type('oranges');
+				// We use multiple choice as this adds an extra level of nested data that is easy
+				// to accidentally break while refactoring
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('#checkbox-multipleChoiceEnumProperty-Third')
+					.check({
+						force: true,
+					});
+				save();
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('[aria-controls="o-expander__toggle--1"]')
+					.click();
+
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('#stringProperty')
+					.should('have.text', 'oranges');
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('#multipleChoiceEnumProperty')
+					.should('have.text', 'Third');
+			});
+			it('can remove a relationship with annotations', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-remove-button')
+					.click();
+				save();
+				cy.get('#richRelationship')
+					.children()
+					.should('have.lengthOf', 1);
+
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.should('have.text', 'Many 2');
+			});
+			it('can remove all annotations from a relationship', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.click();
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-stringProperty')
+					.clear();
+				save();
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('[aria-controls="o-expander__toggle--1"]')
+					.should('not.exist');
+			});
+			it('restores in-progress edits to the relationship annotations if the form is submitted but errors', () => {
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.click();
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-stringProperty')
+					.clear()
+					.type('oranges');
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-integerProperty')
+					.type('mistake');
+				save();
+				cy.url().should(
+					'contain',
+					`/RelationshipTestsOne/${codeOne1}/edit`,
+				);
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-stringProperty')
+					.should('have.value', 'oranges');
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-integerProperty')
+					.should('have.value', 'mistake');
+			});
+		});
+
+		describe('create', () => {
+			afterEach(() => cy.wrap(detachFixtures()));
+			it('expands annotations area when adding new relationship', () => {
+				cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+				search('e2e').type('{downarrow}{enter}');
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('.treecreeper-relationship-annotate')
+					.should('exist');
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('button.relationship-annotate-button')
+					.should('be.disabled');
+			});
+			it('can add a new relationship without annotations', () => {
+				cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+				search('e2e').type('{downarrow}{enter}');
+				save();
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('[data-o-component="o-expander"]')
+					.should('have.lengthOf', 0);
+			});
+			it('can add a new relationship with annotations', () => {
+				cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+				search('e2e').type('{downarrow}{enter}');
+				cy.get('#ul-richRelationship li')
+					.eq(0)
+					.find('input#id-stringProperty')
+					.type('apples');
+				save();
+				cy.get('#richRelationship')
+					.children()
+					.eq(0)
+					.find('[data-o-component="o-expander"]')
+					.should('have.lengthOf', 1);
+			});
+		});
+	});
 });

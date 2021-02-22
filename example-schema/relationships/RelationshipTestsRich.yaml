@@ -11,16 +11,12 @@ properties:
     type: Word
     description: stringProperty description.
     label: stringProperty label
-  booleanProperty:
-    type: Boolean
-    description: booleanProperty description.
-    label: booleanProperty label
+  integerProperty:
+    type: Int
+    description: integerProperty description.
+    label: integerProperty label
   multipleChoiceEnumProperty:
     type: AnEnum
     hasMany: true
     description: multipleChoiceEnumProperty description.
     label: multipleChoiceEnumProperty label
-  # datetimeProperty:
-  #   label: datetimeProperty label
-  #   description: datetimeProperty description.
-  #   type: DateTime
