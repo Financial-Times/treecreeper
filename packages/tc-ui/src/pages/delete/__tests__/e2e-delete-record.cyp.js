@@ -1,31 +1,25 @@
-const {
-	code,
-	deleteConfirmText,
-} = require('../../../test-helpers/mainTypeData.json');
-const {
-	createType,
-	visitEditPage,
-	visitMainTypePage,
-	pickChild,
-	save,
-} = require('../../../test-helpers/cypress');
+const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
+const namespace = 'e2e-page-delete';
+const code = `${namespace}-code`;
+const deleteConfirmText =
+	'Are you sure you wish to delete?\n\nUnless you created something by accident, a more appropriate action is usually to mark the record as inactive, either in the Is Active or Lifecycle Stage fields,';
 describe('End-to-end - delete record', () => {
-	beforeEach(() => {
-		cy.wrap(createType({ code, type: 'MainType' })).then(() => {
-			visitMainTypePage();
-		});
-	});
-
+	// beforeEach(() => {
+	// 	cy.wrap(createType({ code, type: 'RelationshipTestsMany' })).then(() => {
+	// 		visitMainTypePage();
+	// 	});
+	// });
+	afterEach(() => cy.wrap(dropFixtures()));
 	it('shows a prompt message', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.wrap(
+			executeQuery(`CREATE (:RelationshipTestsMany {code: "${code}"})`),
+		);
+		cy.visit(`/RelationshipTestsMany/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(false);
 			},
 		});
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', `${code}`);
 
 		cy.get('[data-button-type="delete"]').click();
 
@@ -35,57 +29,55 @@ describe('End-to-end - delete record', () => {
 				.its('confirm.args.0')
 				.should('deep.eq', [deleteConfirmText]);
 		});
-		cy.get('#code').should('have.text', `${code}`);
+		cy.url().should('contain', `/RelationshipTestsMany/${code}`);
 	});
 
 	it('can not delete a record with relationship', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.wrap(
+			executeQuery(`
+				CREATE (m:RelationshipTestsMany {code: "${code}"}), (o:RelationshipTestsOne {code: "${code}-1"})
+				MERGE (m)-[:MANY_TO_ONE]->(o)
+				RETURN m, o
+
+`),
+		);
+		cy.visit(`/RelationshipTestsMany/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(true);
 			},
 		});
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.wrap(
-			createType({ code: `${code}-child`, type: 'ChildType' }, false),
-		);
-		visitEditPage();
-		cy.url().should('contain', `/MainType/${code}/edit`);
-		pickChild();
-		save();
-
 		cy.get('[data-button-type="delete"]').click();
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#children>li')
-			.eq(0)
-			.should('have.text', `${code}-child`)
-			.find('a')
-			.should('have.attr', 'href', `/ChildType/${code}-child`);
+		cy.url().should('contain', `/RelationshipTestsMany/${code}`);
+
 		cy.get('.o-message__content-main').should(
 			'contain',
-			`Oops. Could not delete MainType record for ${code}`,
+			`Oops. Could not delete RelationshipTestsMany record for ${code}`,
 		);
 		cy.get('.o-message__content-additional').should(
 			'contain',
-			`Cannot delete - MainType ${code} has relationships.`,
+			`Cannot delete - RelationshipTestsMany ${code} has relationships.`,
 		);
 	});
 
 	it('can delete a record', () => {
-		cy.visit(`/MainType/${code}`, {
+		cy.wrap(
+			executeQuery(`CREATE (:RelationshipTestsMany {code: "${code}"})`),
+		);
+		cy.visit(`/RelationshipTestsMany/${code}`, {
 			onBeforeLoad(win) {
 				cy.stub(win, 'confirm').returns(true);
 			},
 		});
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
+		cy.url().should('contain', `/RelationshipTestsMany/${code}`);
 
 		cy.get('[data-button-type="delete"]').click();
 
-		cy.get('#code').should('not.exist');
+		cy.url().should(
+			'contain',
+			`/?message=RelationshipTestsMany%20${code}%20was%20successfully%20deleted&messageType=success`,
+		);
 	});
 });
