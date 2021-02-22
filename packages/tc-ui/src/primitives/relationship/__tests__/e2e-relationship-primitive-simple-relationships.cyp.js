@@ -75,6 +75,12 @@ describe('End-to-end - Rich relationship primitive; simple relationships', () =>
 	});
 
 	describe('autocomplete', () => {
+		const getSuggestions = () =>
+			cy
+				.get(
+					'[for="id-simpleRelationship"] .react-autosuggest__suggestions-container [role="listbox"]',
+				)
+				.children();
 		it('does not search based on single character', () => {
 			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
 			search('e');
@@ -103,13 +109,6 @@ describe('End-to-end - Rich relationship primitive; simple relationships', () =>
 				'[for="id-simpleRelationship"] .react-autosuggest__suggestions-container',
 			).should('have.lengthOf', 1);
 
-			const getSuggestions = () =>
-				cy
-					.get(
-						'[for="id-simpleRelationship"] .react-autosuggest__suggestions-container [role="listbox"]',
-					)
-					.children();
-
 			getSuggestions().should('have.lengthOf', 3);
 			getSuggestions()
 				.eq(0)
@@ -125,6 +124,27 @@ describe('End-to-end - Rich relationship primitive; simple relationships', () =>
 				);
 			getSuggestions()
 				.eq(2)
+				.should(
+					'have.text',
+					'Many 3 (e2e-simple-relationship-primitive-many3)',
+				);
+		});
+
+		it('does not suggest previously selected records', () => {
+			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			search('e2e').type('{downarrow}{enter}').should('not.be.disabled');
+			getPicker().should('have.value', '');
+			assertSelected('Many 1');
+			search('e2e');
+			getSuggestions().should('have.lengthOf', 2);
+			getSuggestions()
+				.eq(0)
+				.should(
+					'have.text',
+					'Many 2 (e2e-simple-relationship-primitive-many2)',
+				);
+			getSuggestions()
+				.eq(1)
 				.should(
 					'have.text',
 					'Many 3 (e2e-simple-relationship-primitive-many3)',
@@ -195,7 +215,7 @@ describe('End-to-end - Rich relationship primitive; simple relationships', () =>
 				);
 		});
 
-		it('display multiple relationships remove one', () => {
+		it('display multiple and remove first relationship', () => {
 			cy.wrap(
 				executeQuery(`
 MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne), (b:RelationshipTestsMany)
@@ -221,6 +241,34 @@ RETURN a, b, c
 				.eq(0)
 				.find('a')
 				.should('have.text', 'Many 2');
+		});
+
+		it('display multiple and remove last relationship', () => {
+			cy.wrap(
+				executeQuery(`
+MATCH (a:RelationshipTestsMany), (c:RelationshipTestsOne), (b:RelationshipTestsMany)
+WHERE a.code = "${codeMany1}" AND c.code = "${codeOne1}" AND b.code = "${codeMany2}"
+WITH a, b, c
+MERGE (a)-[r:MANY_TO_ONE]->(c)<-[s:MANY_TO_ONE]-(b)
+RETURN a, b, c
+`),
+			);
+			cy.visit(`/RelationshipTestsOne/${codeOne1}`);
+			cy.get('#simpleRelationship').children().should('have.lengthOf', 2);
+			cy.visit(`/RelationshipTestsOne/${codeOne1}/edit`);
+			cy.get('#ul-simpleRelationship')
+				.children()
+				.eq(1)
+				.find('button')
+				.click();
+			assertSelected('Many 1');
+			save();
+			cy.get('#simpleRelationship').children().should('have.lengthOf', 1);
+			cy.get('#simpleRelationship')
+				.children()
+				.eq(0)
+				.find('a')
+				.should('have.text', 'Many 1');
 		});
 
 		it('display relationship remove all', () => {
