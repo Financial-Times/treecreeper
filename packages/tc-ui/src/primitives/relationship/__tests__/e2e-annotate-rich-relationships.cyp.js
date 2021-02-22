@@ -19,33 +19,6 @@ const {
 } = require('../../../test-helpers/cypress');
 
 describe('End-to-end - annotate rich relationship properties', () => {
-	beforeEach(() => {
-		const parent1 = `${code}-parent-one`;
-		const parent2 = `${code}-parent-two`;
-		const childCode = `${code}-first-child`;
-		cy.wrap(
-			createMainTypeRecordWithParentsAndChild(code, {
-				parent1,
-				parent2,
-				childCode,
-			}),
-		).then(() => visitMainTypePage());
-	});
-
-	it('does not show annotation fields on page load', () => {
-		visitEditPage();
-		pickCuriousChild();
-		save();
-
-		cy.wrap().then(() => setPropsOnCuriousChildRel(`${code}-first-child`));
-		visitMainTypePage();
-		visitEditPage();
-
-		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
-			'not.exist',
-		);
-	});
-
 	it('displays annotation fields when annotation button is clicked', () => {
 		visitEditPage();
 		pickCuriousChild();
@@ -65,19 +38,6 @@ describe('End-to-end - annotate rich relationship properties', () => {
 		).should('be.visible');
 	});
 
-	it('hides all existing annotations for existing relationships on page load', () => {
-		visitEditPage();
-		pickCuriousChild();
-		save();
-
-		cy.wrap().then(() => setPropsOnCuriousChildRel(`${code}-first-child`));
-		visitMainTypePage();
-		visitEditPage();
-
-		cy.get('#ul-curiousChild .treecreeper-relationship-annotate').should(
-			'not.exist',
-		);
-	});
 	it('expands annotations area when adding new relationship', () => {
 		visitEditPage();
 		pickCuriousChild();
