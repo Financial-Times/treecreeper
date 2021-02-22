@@ -14,7 +14,7 @@ describe('rest PATCH field-locking', () => {
 	const { createNode } = setupMocks(namespace);
 
 	const typeAndCode = {
-		type: 'KitchenSink',
+		type: 'PropertiesTest',
 		code: mainCode,
 	};
 
@@ -29,7 +29,7 @@ describe('rest PATCH field-locking', () => {
 		);
 
 	const createLockedRecord = (clientId, ...fields) =>
-		createNode('KitchenSink', {
+		createNode('PropertiesTest', {
 			code: mainCode,
 			firstStringProperty: 'first string',
 			secondStringProperty: 'second string',
@@ -37,7 +37,7 @@ describe('rest PATCH field-locking', () => {
 		});
 
 	const createUnlockedRecord = () =>
-		createNode('KitchenSink', {
+		createNode('PropertiesTest', {
 			code: mainCode,
 			firstStringProperty: 'first string',
 			secondStringProperty: 'second string',
@@ -63,7 +63,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'first string',
 					secondStringProperty: 'new second string',
 					_lockedFields: getLockMetadata(
@@ -91,7 +91,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -118,7 +118,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -144,7 +144,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -171,7 +171,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -199,7 +199,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -228,7 +228,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					secondStringProperty: 'new another string',
 					_lockedFields: getLockMetadata(
@@ -258,7 +258,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					secondStringProperty: 'new another string',
 					_lockedFields: getLockMetadata(
@@ -284,7 +284,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'new first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -309,7 +309,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					_lockedFields: getLockMetadata(
 						mainClientId,
 						'firstStringProperty',
@@ -335,7 +335,7 @@ describe('rest PATCH field-locking', () => {
 						'firstStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -369,7 +369,7 @@ describe('rest PATCH field-locking', () => {
 						'secondStringProperty',
 					),
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'first string',
 					_lockedFields: getLockMetadata(
 						mainClientId,
@@ -404,7 +404,7 @@ describe('rest PATCH field-locking', () => {
 						'clientId needs to be set to a valid system code in order to lock fields',
 				});
 
-				await neo4jTest('KitchenSink', mainCode).notMatch({
+				await neo4jTest('PropertiesTest', mainCode).notMatch({
 					_lockedFields: expect.any(String),
 				});
 			});
@@ -421,7 +421,7 @@ describe('rest PATCH field-locking', () => {
 					message: `The following fields cannot be written because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
 				});
 
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					_lockedFields: getLockMetadata(
 						otherClientId,
 						'firstStringProperty',
@@ -443,7 +443,7 @@ describe('rest PATCH field-locking', () => {
 					message: `The following fields cannot be locked because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
 				});
 
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					_lockedFields: getLockMetadata(
 						otherClientId,
 						'firstStringProperty',
@@ -465,7 +465,7 @@ describe('rest PATCH field-locking', () => {
 					status: 409,
 					message: `The following fields cannot be locked because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
 				});
-				await neo4jTest('KitchenSink', mainCode).match({
+				await neo4jTest('PropertiesTest', mainCode).match({
 					firstStringProperty: 'first string',
 					_lockedFields: getLockMetadata(
 						otherClientId,
@@ -491,7 +491,7 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});
@@ -510,7 +510,7 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});
@@ -533,7 +533,7 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});

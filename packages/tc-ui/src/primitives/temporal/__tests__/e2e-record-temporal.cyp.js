@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-demo-primitives-temporal';
+const namespace = 'e2e-primitives-temporal';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:PropertiesTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -22,19 +22,19 @@ describe('End-to-end - Temporal primitive', () => {
 		// this is currently buggy
 		it.skip('view empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}`);
+			cy.visit(`/PropertiesTest/${code}`);
 			cy.get('#timeProperty').should('have.text', '');
 		});
 
 		it('edit empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=timeProperty]').should('have.value', '');
 		});
 
 		it('can set a value', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=timeProperty]')
 				.click()
 				.then(input => {
@@ -47,13 +47,13 @@ describe('End-to-end - Temporal primitive', () => {
 			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
 			save();
 			cy.get('#timeProperty').should('have.text', '12:15:30 PM');
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
 		});
 
 		it('can set a different value', () => {
 			createRecord({ timeProperty: '10:14:29' });
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=timeProperty]').should('have.value', '10:14:29');
 			cy.get('input[name=timeProperty]')
 				.click()
@@ -67,7 +67,7 @@ describe('End-to-end - Temporal primitive', () => {
 			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
 			save();
 			cy.get('#timeProperty').should('have.text', '12:15:30 PM');
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=timeProperty]').should('have.value', '12:15:30');
 		});
 	});
@@ -78,19 +78,19 @@ describe('End-to-end - Temporal primitive', () => {
 		// this is currently buggy
 		it.skip('view empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}`);
+			cy.visit(`/PropertiesTest/${code}`);
 			cy.get('#dateProperty').should('have.text', '');
 		});
 
 		it('edit empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=dateProperty]').should('have.value', '');
 		});
 
 		it('can set a value', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=dateProperty]')
 				.click()
 				.then(input => {
@@ -106,7 +106,7 @@ describe('End-to-end - Temporal primitive', () => {
 			);
 			save();
 			cy.get('#dateProperty').should('have.text', '15 January 2020');
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=dateProperty]').should(
 				'have.value',
 				'2020-01-15',
@@ -115,7 +115,7 @@ describe('End-to-end - Temporal primitive', () => {
 
 		it('can set a different value', () => {
 			createRecord({ dateProperty: '2019-10-04' });
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=dateProperty]').should(
 				'have.value',
 				'2019-10-04',
@@ -135,7 +135,7 @@ describe('End-to-end - Temporal primitive', () => {
 			);
 			save();
 			cy.get('#dateProperty').should('have.text', '15 January 2020');
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=dateProperty]').should(
 				'have.value',
 				'2020-01-15',
@@ -149,19 +149,19 @@ describe('End-to-end - Temporal primitive', () => {
 		// this is currently buggy
 		it.skip('view empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}`);
+			cy.visit(`/PropertiesTest/${code}`);
 			cy.get('#datetimeProperty').should('have.text', '');
 		});
 
 		it('edit empty state', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=datetimeProperty]').should('have.value', '');
 		});
 
 		it('can set a value', () => {
 			createRecord();
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=datetimeProperty]')
 				.click()
 				.then(input => {
@@ -180,7 +180,7 @@ describe('End-to-end - Temporal primitive', () => {
 				'have.text',
 				'15 January 2020, 1:00:00 PM',
 			);
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=datetimeProperty]').should(
 				'have.value',
 				'2020-01-15T13:00:00.000',
@@ -189,7 +189,7 @@ describe('End-to-end - Temporal primitive', () => {
 
 		it('can set a different value', () => {
 			createRecord({ datetimeProperty: '2019-02-04T11:00:00.000' });
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=datetimeProperty]').should(
 				'have.value',
 				'2019-02-04T11:00:00.000',
@@ -212,7 +212,7 @@ describe('End-to-end - Temporal primitive', () => {
 				'have.text',
 				'15 January 2020, 1:00:00 PM',
 			);
-			cy.visit(`/KitchenSink/${code}/edit`);
+			cy.visit(`/PropertiesTest/${code}/edit`);
 			cy.get('input[name=datetimeProperty]').should(
 				'have.value',
 				'2020-01-15T13:00:00.000',

@@ -5,12 +5,8 @@ const code = `${namespace}-code`;
 const deleteConfirmText =
 	'Are you sure you wish to delete?\n\nUnless you created something by accident, a more appropriate action is usually to mark the record as inactive, either in the Is Active or Lifecycle Stage fields,';
 describe('End-to-end - delete record', () => {
-	// beforeEach(() => {
-	// 	cy.wrap(createType({ code, type: 'RelationshipTestsMany' })).then(() => {
-	// 		visitMainTypePage();
-	// 	});
-	// });
-	afterEach(() => cy.wrap(dropFixtures()));
+	before(() => cy.wrap(dropFixtures(namespace)));
+	afterEach(() => cy.wrap(dropFixtures(namespace)));
 	it('shows a prompt message', () => {
 		cy.wrap(
 			executeQuery(`CREATE (:RelationshipTestsMany {code: "${code}"})`),

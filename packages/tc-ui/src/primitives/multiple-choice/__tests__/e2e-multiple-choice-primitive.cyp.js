@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-demo-primitives-multiple-choice';
+const namespace = 'e2e-primitives-multiple-choice';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:PropertiesTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -22,7 +22,7 @@ describe('End-to-end - Enum primitive', () => {
 	// buggy for some reason
 	it.skip('view empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}`);
+		cy.visit(`/PropertiesTest/${code}`);
 		cy.get('#multipleChoiceEnumProperty')
 			.children()
 			.should('have.length', 0);
@@ -30,7 +30,7 @@ describe('End-to-end - Enum primitive', () => {
 
 	it('edit empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#checkbox-multipleChoiceEnumProperty-First')
 			.should('have.value', 'First')
 			.should('not.be.checked');
@@ -44,7 +44,7 @@ describe('End-to-end - Enum primitive', () => {
 
 	it('can select multiple values', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 
 		cy.get('#checkbox-multipleChoiceEnumProperty-First').check({
 			force: true,
@@ -79,7 +79,7 @@ describe('End-to-end - Enum primitive', () => {
 
 	it('can edit selected values', () => {
 		createRecord({ multipleChoiceEnumProperty: ['First', 'Third'] });
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#checkbox-multipleChoiceEnumProperty-First').uncheck({
 			force: true,
 		});
@@ -113,7 +113,7 @@ describe('End-to-end - Enum primitive', () => {
 		createRecord({
 			multipleChoiceEnumProperty: ['First', 'Second', 'Third'],
 		});
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#checkbox-multipleChoiceEnumProperty-First').uncheck({
 			force: true,
 		});
@@ -134,8 +134,6 @@ describe('End-to-end - Enum primitive', () => {
 			.should('not.be.checked');
 		save();
 
-		cy.get('#multipleChoiceEnumProperty')
-			.children()
-			.should('have.length', 0);
+		cy.get('#multipleChoiceEnumProperty').should('not.exist')
 	});
 });

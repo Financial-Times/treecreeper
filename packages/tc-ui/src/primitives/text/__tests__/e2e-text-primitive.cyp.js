@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-demo-primitives-text';
+const namespace = 'e2e-primitives-text';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:PropertiesTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -21,13 +21,13 @@ describe('End-to-end - Text primitive', () => {
 
 	it('view empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}`);
+		cy.visit(`/PropertiesTest/${code}`);
 		cy.get('#firstStringProperty').should('have.text', '');
 	});
 
 	it('edit empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('input[name=firstStringProperty]').should('have.value', '');
 	});
 
@@ -35,7 +35,7 @@ describe('End-to-end - Text primitive', () => {
 
 	it('can set value', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('input[name=firstStringProperty]').type(textInput);
 		save();
 		cy.get('#firstStringProperty').should('have.text', textInput);
@@ -43,7 +43,7 @@ describe('End-to-end - Text primitive', () => {
 
 	it('can update large text', () => {
 		createRecord({ firstStringProperty: 'previous' });
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('input[name=firstStringProperty]').type(textInput);
 		save();
 		cy.get('#firstStringProperty').should(

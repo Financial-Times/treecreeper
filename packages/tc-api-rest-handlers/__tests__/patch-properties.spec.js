@@ -14,7 +14,7 @@ describe('rest PATCH properties', () => {
 	const { createNode, stockMetadata, getMetaPayload } = setupMocks(namespace);
 
 	const typeAndCode = {
-		type: 'KitchenSink',
+		type: 'PropertiesTest',
 		code: mainCode,
 	};
 
@@ -23,24 +23,24 @@ describe('rest PATCH properties', () => {
 		metadata: getMetaPayload(),
 	};
 
-	const patchKitchenSinkRecord = (body, query) =>
+	const patchPropertiesTestRecord = (body, query) =>
 		patch({
 			...typeCodeAndMeta,
 			body,
 			query,
 		});
 
-	const createKitchenSinkRecord = (props = {}) =>
-		createNode('KitchenSink', { code: mainCode, ...props });
+	const createPropertiesTestRecord = (props = {}) =>
+		createNode('PropertiesTest', { code: mainCode, ...props });
 
 	describe('updating disconnected records', () => {
 		it('updates record with properties', async () => {
-			await createKitchenSinkRecord({
+			await createPropertiesTestRecord({
 				firstStringProperty: 'some string',
 				booleanProperty: true,
 				enumProperty: 'First',
 			});
-			const { status, body } = await patchKitchenSinkRecord({
+			const { status, body } = await patchPropertiesTestRecord({
 				firstStringProperty: 'updated string',
 				secondStringProperty: 'another string',
 				booleanProperty: false,
@@ -55,7 +55,7 @@ describe('rest PATCH properties', () => {
 				booleanProperty: false,
 				enumProperty: 'Second',
 			});
-			await neo4jTest('KitchenSink', mainCode)
+			await neo4jTest('PropertiesTest', mainCode)
 				.exists()
 				.match({
 					code: mainCode,
@@ -67,8 +67,8 @@ describe('rest PATCH properties', () => {
 				.noRels();
 		});
 		it('updates metadata', async () => {
-			await createKitchenSinkRecord();
-			const { status, body } = await patchKitchenSinkRecord(
+			await createPropertiesTestRecord();
+			const { status, body } = await patchPropertiesTestRecord(
 				{ firstStringProperty: 'updated string' },
 				undefined,
 				getMetaPayload(),
@@ -76,27 +76,27 @@ describe('rest PATCH properties', () => {
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(stockMetadata.update);
-			await neo4jTest('KitchenSink', mainCode)
+			await neo4jTest('PropertiesTest', mainCode)
 				.exists()
 				.match(stockMetadata.update);
 		});
 		it('deletes a property as an update', async () => {
-			await createKitchenSinkRecord({
+			await createPropertiesTestRecord({
 				firstStringProperty: 'firstStringProperty',
 			});
-			const { body, status } = await patchKitchenSinkRecord({
+			const { body, status } = await patchPropertiesTestRecord({
 				firstStringProperty: null,
 			});
 			expect(status).toBe(200);
 			expect(body).not.toMatchObject({
 				firstStringProperty: 'firstStringProperty',
 			});
-			await neo4jTest('KitchenSink', mainCode)
+			await neo4jTest('PropertiesTest', mainCode)
 				.exists()
 				.notHave('firstStringProperty');
 		});
 		it('sets array data', async () => {
-			const { body, status } = await patchKitchenSinkRecord({
+			const { body, status } = await patchPropertiesTestRecord({
 				// // someStringList: ['one', 'two'],
 				multipleChoiceEnumProperty: ['First', 'Second'],
 			});
@@ -106,7 +106,7 @@ describe('rest PATCH properties', () => {
 				// // someStringList: ['one', 'two'],
 				multipleChoiceEnumProperty: ['First', 'Second'],
 			});
-			await neo4jTest('KitchenSink', mainCode)
+			await neo4jTest('PropertiesTest', mainCode)
 				.exists()
 				.match({
 					// // someStringList: ['one', 'two'],
@@ -119,9 +119,9 @@ describe('rest PATCH properties', () => {
 
 			describe('Date', () => {
 				it('sets Date when no previous value', async () => {
-					await createKitchenSinkRecord();
+					await createPropertiesTestRecord();
 					const date = '2019-01-09';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						dateProperty: new Date(date).toISOString(),
 					});
 
@@ -130,18 +130,18 @@ describe('rest PATCH properties', () => {
 						code: mainCode,
 						dateProperty: date,
 					});
-					await neo4jTest('KitchenSink', mainCode).exists().match({
+					await neo4jTest('PropertiesTest', mainCode).exists().match({
 						dateProperty: date,
 					});
 				});
 				it('updates existing Date', async () => {
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						dateProperty: neo4jTemporalTypes.Date.fromStandardDate(
 							new Date('2018-01-09'),
 						),
 					});
 					const date = '2019-01-09';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						dateProperty: new Date(date).toISOString(),
 					});
 
@@ -149,19 +149,19 @@ describe('rest PATCH properties', () => {
 					expect(body).toMatchObject({
 						dateProperty: date,
 					});
-					await neo4jTest('KitchenSink', mainCode).exists().match({
+					await neo4jTest('PropertiesTest', mainCode).exists().match({
 						dateProperty: date,
 					});
 				});
 				it("doesn't update when effectively the same Date", async () => {
 					const date = '2019-01-09';
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						dateProperty: neo4jTemporalTypes.Date.fromStandardDate(
 							new Date(date),
 						),
 					});
 					const dbQuerySpy = spyDbQuery();
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						dateProperty: new Date(date).toISOString(),
 					});
 
@@ -178,9 +178,9 @@ describe('rest PATCH properties', () => {
 
 			describe('Time', () => {
 				it('sets Time when no previous value', async () => {
-					await createKitchenSinkRecord();
+					await createPropertiesTestRecord();
 					const time = '12:34:56.789Z';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						timeProperty: time,
 					});
 
@@ -188,7 +188,7 @@ describe('rest PATCH properties', () => {
 					expect(body).toMatchObject({
 						timeProperty: neo4jTimePrecision(time),
 					});
-					await neo4jTest('KitchenSink', mainCode)
+					await neo4jTest('PropertiesTest', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
@@ -198,13 +198,13 @@ describe('rest PATCH properties', () => {
 				});
 
 				it('updates existing Time', async () => {
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						timeProperty: neo4jTemporalTypes.Time.fromStandardDate(
 							new Date('2018-01-09'),
 						),
 					});
 					const time = '12:34:56.789Z';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						timeProperty: time,
 					});
 
@@ -212,7 +212,7 @@ describe('rest PATCH properties', () => {
 					expect(body).toMatchObject({
 						timeProperty: neo4jTimePrecision(time),
 					});
-					await neo4jTest('KitchenSink', mainCode)
+					await neo4jTest('PropertiesTest', mainCode)
 						.exists()
 						.match({
 							code: mainCode,
@@ -223,13 +223,13 @@ describe('rest PATCH properties', () => {
 
 				it("doesn't update when effectively the same Time", async () => {
 					const time = '12:34:56.789';
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						timeProperty: neo4jTemporalTypes.Time.fromStandardDate(
 							new Date(`2018-01-09T${time}`),
 						),
 					});
 					const dbQuerySpy = spyDbQuery();
-					const { status } = await patchKitchenSinkRecord({
+					const { status } = await patchPropertiesTestRecord({
 						timeProperty: `${time}0000000`,
 					});
 
@@ -243,9 +243,9 @@ describe('rest PATCH properties', () => {
 
 			describe('Datetime', () => {
 				it('sets Datetime when no previous value', async () => {
-					await createKitchenSinkRecord();
+					await createPropertiesTestRecord();
 					const datetime = '2019-01-09T00:00:00.001Z';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						datetimeProperty: datetime,
 					});
 
@@ -253,20 +253,20 @@ describe('rest PATCH properties', () => {
 					expect(body).toMatchObject({
 						datetimeProperty: neo4jTimePrecision(datetime),
 					});
-					await neo4jTest('KitchenSink', mainCode)
+					await neo4jTest('PropertiesTest', mainCode)
 						.exists()
 						.match({
 							datetimeProperty: neo4jTimePrecision(datetime),
 						});
 				});
 				it('updates existing Datetime', async () => {
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						datetimeProperty: neo4jTemporalTypes.DateTime.fromStandardDate(
 							new Date('2018-01-09T00:00:00.001Z'),
 						),
 					});
 					const datetime = '2019-01-09T00:00:00.001Z';
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						datetimeProperty: datetime,
 					});
 
@@ -274,7 +274,7 @@ describe('rest PATCH properties', () => {
 					expect(body).toMatchObject({
 						datetimeProperty: neo4jTimePrecision(datetime),
 					});
-					await neo4jTest('KitchenSink', mainCode)
+					await neo4jTest('PropertiesTest', mainCode)
 						.exists()
 						.match({
 							datetimeProperty: neo4jTimePrecision(datetime),
@@ -282,13 +282,13 @@ describe('rest PATCH properties', () => {
 				});
 				it("doesn't update when effectively the same Datetime", async () => {
 					const datetime = '2019-01-09T00:00:00.001Z';
-					await createKitchenSinkRecord({
+					await createPropertiesTestRecord({
 						datetimeProperty: neo4jTemporalTypes.DateTime.fromStandardDate(
 							new Date('2019-01-09T00:00:00.001Z'),
 						),
 					});
 					const dbQuerySpy = spyDbQuery();
-					const { status, body } = await patchKitchenSinkRecord({
+					const { status, body } = await patchPropertiesTestRecord({
 						datetimeProperty: datetime.replace('Z', '000Z'),
 					});
 					expect(status).toBe(200);
@@ -304,10 +304,10 @@ describe('rest PATCH properties', () => {
 		});
 
 		it('unsets a property when empty string provided', async () => {
-			await createKitchenSinkRecord({
+			await createPropertiesTestRecord({
 				firstStringProperty: 'some string',
 			});
-			const { status, body } = await patchKitchenSinkRecord({
+			const { status, body } = await patchPropertiesTestRecord({
 				firstStringProperty: '',
 			});
 
@@ -316,18 +316,18 @@ describe('rest PATCH properties', () => {
 				code: mainCode,
 			});
 
-			await neo4jTest('KitchenSink', mainCode)
+			await neo4jTest('PropertiesTest', mainCode)
 				.exists()
 				.notMatch({
 					firstStringProperty: expect.any(String),
 				});
 		});
 		it('not unset property when falsy value provided', async () => {
-			await createKitchenSinkRecord('KitchenSink', {
+			await createPropertiesTestRecord('PropertiesTest', {
 				booleanProperty: true,
 				integerProperty: 1,
 			});
-			const { body } = await patchKitchenSinkRecord({
+			const { body } = await patchPropertiesTestRecord({
 				booleanProperty: false,
 				integerProperty: 0,
 			});
@@ -335,13 +335,13 @@ describe('rest PATCH properties', () => {
 				booleanProperty: false,
 				integerProperty: 0,
 			});
-			await neo4jTest('KitchenSink', mainCode).exists().match({
+			await neo4jTest('PropertiesTest', mainCode).exists().match({
 				booleanProperty: false,
 				integerProperty: 0,
 			});
 		});
 		it('no clientId, deletes the _updatedByClient property', async () => {
-			await createKitchenSinkRecord();
+			await createPropertiesTestRecord();
 			const { body } = await patch({
 				...typeAndCode,
 				body: { firstStringProperty: 'some string' },
@@ -355,13 +355,13 @@ describe('rest PATCH properties', () => {
 			expect(body).not.toMatchObject({
 				_updatedByClient: expect.any(String),
 			});
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_updatedByClient: expect.any(String),
 			});
 		});
 
 		it('no clientUserId, deletes the _updatedByUser property', async () => {
-			await createKitchenSinkRecord();
+			await createPropertiesTestRecord();
 			const { body } = await patch({
 				...typeAndCode,
 				body: { firstStringProperty: 'some string' },
@@ -375,31 +375,31 @@ describe('rest PATCH properties', () => {
 			expect(body).not.toMatchObject({
 				_updatedByUser: expect.any(String),
 			});
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_updatedByUser: expect.any(String),
 			});
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
-			await createKitchenSinkRecord();
+			await createPropertiesTestRecord();
 			await expect(
-				patchKitchenSinkRecord({ code: 'wrong-code' }),
+				patchPropertiesTestRecord({ code: 'wrong-code' }),
 			).rejects.httpError({
 				status: 400,
-				message: `Conflicting code property \`wrong-code\` in payload for KitchenSink ${mainCode}`,
+				message: `Conflicting code property \`wrong-code\` in payload for PropertiesTest ${mainCode}`,
 			});
 		});
 
 		it('throws 400 if attempting to write property not in schema', async () => {
-			await createKitchenSinkRecord();
+			await createPropertiesTestRecord();
 			await expect(
-				patchKitchenSinkRecord({ notInSchema: 'a string' }),
+				patchPropertiesTestRecord({ notInSchema: 'a string' }),
 			).rejects.httpError({
 				status: 400,
 				message:
-					'Invalid property `notInSchema` on type `KitchenSink`.',
+					'Invalid property `notInSchema` on type `PropertiesTest`.',
 			});
-			await neo4jTest('KitchenSink', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				notInSchema: 'a string',
 			});
 		});
@@ -407,10 +407,10 @@ describe('rest PATCH properties', () => {
 
 	describe('generic error states', () => {
 		it('throws if neo4j query fails', async () => {
-			await createKitchenSinkRecord();
+			await createPropertiesTestRecord();
 			dbUnavailable({ skip: 1 });
 			await expect(
-				patchKitchenSinkRecord({ firstStringProperty: 'a string' }),
+				patchPropertiesTestRecord({ firstStringProperty: 'a string' }),
 			).rejects.toThrow('oh no');
 		});
 	});

@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-demo-primitives-large-text';
+const namespace = 'e2e-primitives-large-text';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:DocumentStoreTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -21,13 +21,13 @@ describe('End-to-end - Large Text primitive', () => {
 
 	it.skip('view empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}`);
+		cy.visit(`/DocumentStoreTest/${code}`);
 		cy.get('#firstDocumentProperty').should('have.text', '');
 	});
 
 	it('edit empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/DocumentStoreTest/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').should('have.text', '');
 	});
 
@@ -35,7 +35,7 @@ describe('End-to-end - Large Text primitive', () => {
 
 	it('can set large text', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/DocumentStoreTest/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').type(textInput);
 		save();
 		cy.get('#firstDocumentProperty').should('have.text', textInput);
@@ -43,7 +43,7 @@ describe('End-to-end - Large Text primitive', () => {
 
 	it('can update large text', () => {
 		createRecord({ firstDocumentProperty: 'previous' });
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/DocumentStoreTest/${code}/edit`);
 		cy.get('textarea[name=firstDocumentProperty]').type(textInput);
 		save();
 		cy.get('#firstDocumentProperty').should(

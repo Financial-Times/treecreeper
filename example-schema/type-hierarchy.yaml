@@ -10,7 +10,7 @@ test:
     - MVRType
     - FieldsetType
     - ValidatedType
-    - KitchenSink
+    - PropertiesTest
     - SimpleGraphBranch
     - SimpleGraphLeaf
     - DocumentStoreTest

@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-demo-primitives-enum';
+const namespace = 'e2e-primitives-enum';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:PropertiesTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -21,19 +21,19 @@ describe('End-to-end - Enum primitive', () => {
 	// this is currently buggy
 	it.skip('view empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}`);
+		cy.visit(`/PropertiesTest/${code}`);
 		cy.get('#enumProperty').should('have.text', '');
 	});
 
 	it('edit empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('select[name=enumProperty]').should('not.be.selected');
 	});
 
 	it('can select a value', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('select[name=enumProperty]').select('First');
 		save();
 		cy.get('#enumProperty').should('have.text', 'First');
@@ -41,7 +41,7 @@ describe('End-to-end - Enum primitive', () => {
 
 	it('can select a different value', () => {
 		createRecord({ enumProperty: 'First' });
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('select[name=enumProperty]').should('have.value', 'First');
 		cy.get('select[name=enumProperty]').select('Third');
 		save();

@@ -10,7 +10,7 @@ const save = () =>
 
 const createRecord = (props = {}) =>
 	cy.wrap(
-		executeQuery(`CREATE (:KitchenSink $props)`, {
+		executeQuery(`CREATE (:PropertiesTest $props)`, {
 			props: { code, ...props },
 		}),
 	);
@@ -21,20 +21,20 @@ describe('End-to-end - Boolean primitive', () => {
 
 	it('view empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}`);
+		cy.visit(`/PropertiesTest/${code}`);
 		cy.get('#booleanProperty').should('have.text', 'Unknown');
 	});
 
 	it('edit empty state', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#radio-booleanProperty-Yes').should('not.be.checked');
 		cy.get('#radio-booleanProperty-No').should('not.be.checked');
 	});
 
 	it('can set to true', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#radio-booleanProperty-Yes').check({ force: true });
 		save();
 		cy.get('#booleanProperty').should('have.text', 'Yes');
@@ -42,7 +42,7 @@ describe('End-to-end - Boolean primitive', () => {
 
 	it('can set to false', () => {
 		createRecord();
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#radio-booleanProperty-No').check({ force: true });
 		save();
 		cy.get('#booleanProperty').should('have.text', 'No');
@@ -50,7 +50,7 @@ describe('End-to-end - Boolean primitive', () => {
 
 	it('can change a value', () => {
 		createRecord({ booleanProperty: true });
-		cy.visit(`/KitchenSink/${code}/edit`);
+		cy.visit(`/PropertiesTest/${code}/edit`);
 		cy.get('#radio-booleanProperty-Yes').should('be.checked');
 		cy.get('#radio-booleanProperty-No').should('not.be.checked');
 		cy.get('#radio-booleanProperty-No').check({ force: true });
