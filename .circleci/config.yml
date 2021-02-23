@@ -18,7 +18,7 @@ references:
 
   workspace_root: &workspace_root ~/
 
-  cache_key: &cache_key cache-v5-{{ .Branch }}-{{ checksum "./package.json" }}
+  cache_key: &cache_key cache-v6-{{ .Branch }}-{{ checksum "./package.json" }}
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -34,7 +34,7 @@ references:
       key: *cache_key
       paths:
         - ./node_modules/
-        - ./.cache
+        - ~/.cache
 
   only_version_tags: &only_version_tags
     tags:
@@ -58,6 +58,9 @@ jobs:
       - run:
           name: Get test env vars
           command: make env
+      # run verify and then save cache.
+      # this ensures that the Cypress verified status is cached too
+      - run: make cypress-verify
 
       - *cache_node_modules
 
@@ -76,9 +79,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: npm ci
-      # run verify and then save cache.
-      # this ensures that the Cypress verified status is cached too
-      - run: make cypress-verify
+
       # save new cache folder if needed
       - save_cache:
           key: *cache_key
