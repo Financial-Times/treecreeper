@@ -17,7 +17,6 @@ properties:
     useInSummary: true
   secondStringProperty:
     type: Word
-    useInSummary: true
     description: secondStringProperty description.
     label: secondStringProperty label
   booleanProperty:
