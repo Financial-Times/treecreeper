@@ -134,6 +134,6 @@ describe('End-to-end - Enum primitive', () => {
 			.should('not.be.checked');
 		save();
 
-		cy.get('#multipleChoiceEnumProperty').should('not.exist')
+		cy.get('#multipleChoiceEnumProperty').should('not.exist');
 	});
 });

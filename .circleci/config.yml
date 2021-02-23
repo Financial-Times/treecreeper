@@ -68,30 +68,6 @@ jobs:
           root: *workspace_root
           paths:
             - .
-  cypress-build:
-    <<: *default_container_config
-
-    steps:
-      - *attach_workspace
-      - restore_cache:
-          keys:
-            - *cache_key
-      - run:
-          name: Install Dependencies
-          command: npm ci
-
-      # save new cache folder if needed
-      - save_cache:
-          key: *cache_key
-          paths:
-            - ~/.npm
-            - ~/.cache
-      # all other test jobs will run AFTER this build job finishes
-      # to avoid reinstalling dependencies, we persist the Cypress binary to workspace
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .cache/Cypress
   test:
     <<: *default_container_config
     steps:
@@ -172,10 +148,6 @@ workflows:
     jobs:
       - install:
           context: rel-eng-creds
-          filters: *only_version_tags
-      - cypress-build:
-          requires:
-            - install
           filters: *only_version_tags
       - test:
           requires:
