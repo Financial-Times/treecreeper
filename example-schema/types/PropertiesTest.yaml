@@ -29,6 +29,11 @@ properties:
     useInSummary: true
     description: enumProperty description.
     label: enumProperty label
+  anotherEnumProperty:
+    type: AnotherEnum
+    useInSummary: true
+    description: anotherEnumProperty description.
+    label: anotherEnumProperty label
   multipleChoiceEnumProperty:
     type: AnEnum
     hasMany: true

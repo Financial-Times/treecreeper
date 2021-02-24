@@ -33,9 +33,11 @@ describe('End-to-end - page view', () => {
 		cy.get('#firstStringProperty').should('have.text', '');
 		// has useInSummary: false, so not shown as empty
 		cy.get('#secondStringProperty').should('not.exist');
+	});
+	it('any property with a value is shown', () => {
 		cy.wrap(
 			executeQuery(`
-				MERGE (n:PropertiesTest {code: "${code}"})
+				CREATE (n:PropertiesTest {code: "${code}"})
 				SET n.secondStringProperty = "a string"
 				RETURN n
 `),

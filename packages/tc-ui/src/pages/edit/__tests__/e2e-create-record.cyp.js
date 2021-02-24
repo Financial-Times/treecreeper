@@ -1,21 +1,7 @@
-const {
-	someString,
-	promptText,
-} = require('../../../test-helpers/mainTypeData.json');
-const {
-	createType,
-	visitMainTypePage,
-	visitEditPage,
-	populateMinimumViableFields,
-	populateMainTypeFields,
-	assertMainTypeFields,
-	resetDb,
-	createMainTypeRecordWithParentsAndChildren,
-} = require('../../../test-helpers/cypress');
-
+/* eslint-disable cypress/no-unnecessary-waiting */
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-view-record';
+const namespace = 'e2e-create-record';
 const code = `${namespace}-code`;
 
 const save = () =>
@@ -24,7 +10,10 @@ const save = () =>
 	});
 
 describe('End-to-end - record creation', () => {
-	beforeEach(() => {
+	before(() => {
+		cy.wrap(dropFixtures(namespace));
+	});
+	afterEach(() => {
 		cy.wrap(dropFixtures(namespace));
 	});
 
@@ -88,13 +77,13 @@ describe('End-to-end - record creation', () => {
 
 		cy.get(`[data-code="${code}-many"]`).should('contain', `${code}-many`);
 
-		cy.url().should('contain', `PropertiesTest/create`);
+		cy.url().should('contain', `RelationshipTestsOne/create`);
 
 		save();
 
 		cy.url().should(
 			'contain',
-			`PropertiesTest/${code}?message=PropertiesTest%20${code}%20was%20successfully%20updated&message`,
+			`RelationshipTestsOne/${code}?message=RelationshipTestsOne%20${code}%20was%20successfully%20created&message`,
 		);
 	});
 
@@ -113,18 +102,19 @@ describe('End-to-end - record creation', () => {
 		cy.get('.fieldset-fieldsetA-description').should('have.text', '');
 	});
 
-	it('disables canonically locked fields, but saves anyway', () => {
+	it('disables canonically locked fields, but saves record anyway', () => {
 		cy.visit(`/LockedFieldTest/create`);
 		cy.get('input[name=code]').type(code);
-		cy.get('input[name=lockedField]').should('be.disabled');
+		cy.get('input[name=lockedField]').should('not.exist');
+		cy.get('input[name=lockedField-disabled]').should('be.disabled');
 		save();
 		cy.url().should(
 			'contain',
-			`PropertiesTest/${code}?message=PropertiesTest%20${code}%20was%20successfully%20created&message`,
+			`LockedFieldTest/${code}?message=LockedFieldTest%20${code}%20was%20successfully%20created&message`,
 		);
 	});
 
-	describe.only('Minimum Viable Records', () => {
+	describe('Minimum Viable Records', () => {
 		beforeEach(() => {
 			cy.wrap(
 				executeQuery(`CREATE (a:MVRTypeChild {code: "${code}-child"})`),
@@ -138,24 +128,24 @@ describe('End-to-end - record creation', () => {
 				cy.get('input#radio-booleanProperty-No').check({ force: true });
 			skip === 'number' || cy.get('input[name=numberProperty]').type(0);
 			// skip === 'multipleChoiceEnum' || cy.get('input#checkbox-multipleChoiceEnumProperty-First').check({force: true})
+
 			skip === 'relationship' ||
 				cy
-					.get('#relationshipProperty-picker') // eslint-disable-line cypress/no-unnecessary-waiting
+					.get('#relationshipProperty-picker')
 					.type('e2e')
 					.wait(500)
 					.type('{enter}');
 		};
-		it('can create MVRType record', () => {
+		it('can create record when MBVR fields are all filled', () => {
 			cy.visit(`/MVRType/create`);
 			populate();
 			save();
 			cy.url().should('contain', `/MVRType/${code}`);
 		});
 		it('can not create record if string is missing', () => {
-			let prompt;
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
-					prompt = cy.stub(win, 'prompt');
+					cy.stub(win, 'prompt');
 				},
 			});
 			populate('string');
@@ -169,10 +159,9 @@ describe('End-to-end - record creation', () => {
 			cy.url().should('contain', `/MVRType/create`);
 		});
 		it('can not create record if boolean is missing', () => {
-			let prompt;
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
-					prompt = cy.stub(win, 'prompt');
+					cy.stub(win, 'prompt');
 				},
 			});
 			populate('boolean');
@@ -186,10 +175,9 @@ describe('End-to-end - record creation', () => {
 			cy.url().should('contain', `/MVRType/create`);
 		});
 		it('can not create record if number is missing', () => {
-			let prompt;
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
-					prompt = cy.stub(win, 'prompt');
+					cy.stub(win, 'prompt');
 				},
 			});
 			populate('number');
@@ -203,10 +191,9 @@ describe('End-to-end - record creation', () => {
 			cy.url().should('contain', `/MVRType/create`);
 		});
 		it('can not create record if relationship is missing', () => {
-			let prompt;
 			cy.visit(`/MVRType/create`, {
 				onBeforeLoad(win) {
-					prompt = cy.stub(win, 'prompt');
+					cy.stub(win, 'prompt');
 				},
 			});
 			populate('relationship');

@@ -41,4 +41,3 @@ properties:
   #   hasMany: true
   #   description: AnEnum description.
   #   label: AnEnum label
-
