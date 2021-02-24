@@ -27,44 +27,46 @@ const OneRelationship = props => {
 		return null;
 	}
 
-	const relationshipProperties = Object.entries(properties).filter(
-		([name]) => value[name] !== null,
-	);
-
-	if (relationshipProperties.length && hasValue) {
-		RelationshipProperties = (
-			<div
-				data-o-component="o-expander"
-				className="o-expander"
-				data-o-expander-shrink-to="hidden"
-				data-o-expander-collapsed-toggle-text="view details"
-				data-o-expander-expanded-toggle-text="hide details"
-			>
-				{' '}
-				<button className="o-expander__toggle o--if-js" type="button">
-					view details
-				</button>
-				<div className="o-expander__content">
-					<dl className="treecreeper-relationship-props-list">
-						{relationshipProperties.map(
-							([name, propDef], index) => {
-								const viewModel = {
-									value: value[name],
-									id: name,
-									...propDef,
-									...assignComponent(propDef),
-								};
-								return viewModel.label ? (
-									<span key={index}>
-										<LabelledPrimitive {...viewModel} />
-									</span>
-								) : null;
-							},
-						)}
-					</dl>
-				</div>
-			</div>
+	if(properties) {
+		const relationshipProperties = Object.entries(properties).filter(
+			([name]) => value[name] !== null,
 		);
+	
+		if (relationshipProperties.length && hasValue) {
+			RelationshipProperties = (
+				<div
+					data-o-component="o-expander"
+					className="o-expander"
+					data-o-expander-shrink-to="hidden"
+					data-o-expander-collapsed-toggle-text="view details"
+					data-o-expander-expanded-toggle-text="hide details"
+				>
+					{' '}
+					<button className="o-expander__toggle o--if-js" type="button">
+						view details
+					</button>
+					<div className="o-expander__content">
+						<dl className="treecreeper-relationship-props-list">
+							{relationshipProperties.map(
+								([name, propDef], index) => {
+									const viewModel = {
+										value: value[name],
+										id: name,
+										...propDef,
+										...assignComponent(propDef),
+									};
+									return viewModel.label ? (
+										<span key={index}>
+											<LabelledPrimitive {...viewModel} />
+										</span>
+									) : null;
+								},
+							)}
+						</dl>
+					</div>
+				</div>
+			);
+		}
 	}
 
 	return type && value[type] ? (
