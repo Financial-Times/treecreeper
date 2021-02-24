@@ -2,9 +2,6 @@ test:
   label: Test
   description: Test types
   types:
-    - MainType
-    - ParentType
-    - ChildType
     - RestrictedType
     - OddCodeType
     - MVRType

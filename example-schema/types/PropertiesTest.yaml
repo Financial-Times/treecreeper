@@ -61,9 +61,12 @@ properties:
     type: DateTime
     description: DateTime description.
     label: DateTime label
-  # urlProperty:
-  #   type: Url
-  #   useInSummary: true
-  #   description: Url description.
-  #   label: Url label
-  #   canIdentify: true
+  urlProperty:
+    type: Url
+    description: Url description.
+    label: Url label
+    canIdentify: true
+  documentProperty:
+    type: Document
+    description: Document description.
+    label: Document label
