@@ -1,4 +1,4 @@
-name: KitchenSink
+name: PropertiesTest
 description: A type that has a wide range of primitive properties on it.
 moreInformation: |
   These inclode Document, String, Enum, multiple choice Enum, Boolean, Integer
@@ -19,22 +19,21 @@ properties:
     type: Word
     description: secondStringProperty description.
     label: secondStringProperty label
-  firstDocumentProperty:
-    type: Document
-    description: firstDocumentProperty description.
-    label: firstDocumentProperty label
-  secondDocumentProperty:
-    type: Document
-    description: secondDocumentProperty description.
-    label: secondDocumentProperty label
   booleanProperty:
     type: Boolean
+    useInSummary: true
     description: booleanProperty description.
     label: booleanProperty label
   enumProperty:
     type: AnEnum
+    useInSummary: true
     description: enumProperty description.
     label: enumProperty label
+  anotherEnumProperty:
+    type: AnotherEnum
+    useInSummary: true
+    description: anotherEnumProperty description.
+    label: anotherEnumProperty label
   multipleChoiceEnumProperty:
     type: AnEnum
     hasMany: true
@@ -42,10 +41,12 @@ properties:
     label: multipleChoiceEnumProperty label
   integerProperty:
     type: Int
+    useInSummary: true
     description: integerProperty description.
     label: integerProperty label
   floatProperty:
     type: Float
+    useInSummary: true
     description: floatProperty description.
     label: floatProperty label
   dateProperty:
@@ -65,3 +66,7 @@ properties:
     description: Url description.
     label: Url label
     canIdentify: true
+  documentProperty:
+    type: Document
+    description: Document description.
+    label: Document label

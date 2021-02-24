@@ -13,13 +13,13 @@ describe('rest PATCH diff', () => {
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 	describe('properties', () => {
 		it("doesn't write if no real property changes detected", async () => {
-			await createNode('KitchenSink', {
+			await createNode('PropertiesTest', {
 				code: mainCode,
 				firstStringProperty: 'some string',
 			});
 			const dbQuerySpy = spyDbQuery();
 			const { status } = await patch({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: mainCode,
 				body: { firstStringProperty: 'some string' },
 			});
@@ -31,13 +31,13 @@ describe('rest PATCH diff', () => {
 		});
 
 		it("doesn't write if no real array property changes detected", async () => {
-			await createNode('KitchenSink', {
+			await createNode('PropertiesTest', {
 				code: mainCode,
 				multipleChoiceEnumProperty: ['First', 'Second'],
 			});
 			const dbQuerySpy = spyDbQuery();
 			const { status } = await patch({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: mainCode,
 				// firstStringPropertyList: ['two', 'one'],
 				body: { multipleChoiceEnumProperty: ['Second', 'First'] },
@@ -54,13 +54,13 @@ describe('rest PATCH diff', () => {
 		it.skip("doesn't write if no real time changes detected", () => {});
 
 		it('detects deleted property as a change', async () => {
-			await createNode('KitchenSink', {
+			await createNode('PropertiesTest', {
 				code: mainCode,
 				firstStringProperty: 'firstStringProperty',
 			});
 			const dbQuerySpy = spyDbQuery();
 			const { status } = await patch({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: mainCode,
 				body: { firstStringProperty: null },
 			});

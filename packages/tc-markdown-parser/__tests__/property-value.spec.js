@@ -8,7 +8,7 @@ schema.init({
 });
 
 const parser = getParser({
-	type: 'MainType',
+	type: 'PropertiesTest',
 });
 
 describe('boolean types are coerced to boolean', () => {
@@ -24,12 +24,12 @@ describe('boolean types are coerced to boolean', () => {
 			const { data } = await parser.parseMarkdownString(here`
 				# name
 
-				## some boolean
+				## boolean property
 				${bool}
 			`);
 			expect(data).toEqual({
 				name: 'name',
-				someBoolean: actual,
+				booleanProperty: actual,
 			});
 		});
 	});
@@ -39,7 +39,7 @@ test('boolean fields with non-boolean contents are errors', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
-		## some boolean
+		## boolean property
 		sure
 	`);
 
@@ -55,17 +55,17 @@ test('string types are coerced to string', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
-		## some string
+		## firstStringProperty
 
 		hello
 
-		## another string
+		## secondStringProperty
 
 		hello
 	`);
 
-	expect(typeof data.someString).toBe('string');
-	expect(typeof data.anotherString).toBe('string');
+	expect(typeof data.firstStringProperty).toBe('string');
+	expect(typeof data.secondStringProperty).toBe('string');
 });
 
 describe('enums', () => {
@@ -73,32 +73,32 @@ describe('enums', () => {
 		const { data } = await parser.parseMarkdownString(here`
 			# name
 
-			## some enum
+			## enumProperty
 			first
 
 		`);
 
-		expect(data.someEnum).toBe('First');
+		expect(data.enumProperty).toBe('First');
 	});
 
 	test('multiple choice types correctly return their value', async () => {
 		const { data } = await parser.parseMarkdownString(here`
 			# name
 
-			## some multiple choice
+			## multiple choice enum property
 			- first
 			- second
 
 		`);
 
-		expect(data.someMultipleChoice).toEqual(['First', 'Second']);
+		expect(data.multipleChoiceEnumProperty).toEqual(['First', 'Second']);
 	});
 
 	test('enums must not be a list', async () => {
 		const { errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some enum
+			## enumProperty
 			- first
 
 		`);
@@ -113,7 +113,7 @@ describe('enums', () => {
 		const { errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some multiple choice
+			## multiple choice enum property
 			first
 
 		`);
@@ -128,12 +128,12 @@ describe('enums', () => {
 		const { data, errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some enum
+			## enumProperty
 
 			Fourth
 		`);
 
-		expect(data.someEnum).toBe(undefined);
+		expect(data.enumProperty).toBe(undefined);
 		expect(errors.length).toBe(1);
 		const [{ message }] = errors;
 		expect(message).toMatch(/\bfourth\b/);
@@ -144,7 +144,7 @@ describe('enums', () => {
 		const { data, errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some multiple choice
+			## multiple choice enum property
 
 			- Fourth
 		`);
@@ -162,15 +162,15 @@ test('urls should stay urls', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
-		## some url
+		## url property
 		https://snoot.club
 	`);
 
-	expect(data.someUrl).toBe('https://snoot.club');
-	expect(typeof data.someUrl).toBe('string');
+	expect(typeof data.urlProperty).toBe('string');
+	expect(data.urlProperty).toBe('https://snoot.club');
 });
 
-describe('relationship properties', () => {
+describe.skip('relationship properties', () => {
 	test('nested fields are coerced to string (the code)', async () => {
 		const { data } = await parser.parseMarkdownString(here`
 		# name
@@ -248,33 +248,29 @@ describe('relationship properties', () => {
 	});
 });
 
-test('thows error if defined property is included with blacklist', async () => {
+test('throws error if defined property is included with blacklist', async () => {
 	const blacklistedParser = getParser({
-		type: 'MainType',
-		blacklistPropertyNames: ['youngerSiblings'],
+		type: 'PropertiesTest',
+		blacklistPropertyNames: ['secondStringProperty'],
 	});
 
 	const { data, errors } = await blacklistedParser.parseMarkdownString(here`
 		# name
 
-		## children
+		## first string property
 
-		* chee-rabbits
+		chee-rabbits
 
-		## younger siblings
+		## second string property
 
-		* ft-app-fruitcake
+		ft-app-fruitcake
 	`);
 
 	expect(errors).toHaveLength(1);
-	expect(data.children).toEqual([
-		{
-			code: 'chee-rabbits',
-		},
-	]);
+	expect(data.firstStringProperty).toEqual('chee-rabbits');
 	const [{ message }] = errors;
 	expect(message).toEqual(
-		'youngerSiblings is not permitted within markdown (to allow other people to edit it)',
+		'secondStringProperty is not permitted within markdown (to allow other people to edit it)',
 	);
 });
 
@@ -282,14 +278,14 @@ test('subdocuments have their headers reduced two levels', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
-		## some document
+		## document property
 
 		### hello
 	`);
 
 	expect(data).toEqual({
 		name: 'name',
-		someDocument: '# hello',
+		documentProperty: '# hello',
 	});
 });
 
@@ -299,24 +295,24 @@ test('date fields are coerced to iso strings', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
-		## some date
+		## date property
 
 		July 21 2018
 	`);
 
-	expect(data.someDate).toMatch(naiveJavaScriptIsoStringRegex);
+	expect(data.dateProperty).toMatch(naiveJavaScriptIsoStringRegex);
 });
 
 test('date fields keep the correct date', async () => {
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 
-		## some date
+		## date property
 
 		1965-09-17
 	`);
 
-	const date = new Date(data.someDate);
+	const date = new Date(data.dateProperty);
 
 	// gotta go fast
 	expect(date.getFullYear()).toBe(1965);
@@ -328,7 +324,7 @@ test('date fields with bad dates are an error', async () => {
 	const { errors } = await parser.parseMarkdownString(here`
 		# name
 
-		## some date
+		## date property
 
 		mario's birthday
 	`);
@@ -345,11 +341,11 @@ test('explicit empty section should be an error', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
-		## some string
+		## firstStringProperty
 
-		## another string
+		## secondStringProperty
 
-		## some document
+		## document property
 		`);
 	expect(data).toEqual({
 		name: 'name',
@@ -358,15 +354,15 @@ test('explicit empty section should be an error', async () => {
 	expect(errors).toEqual([
 		{
 			line: 3,
-			message: 'property "someString" has no value',
+			message: 'property "firstStringProperty" has no value',
 		},
 		{
 			line: 5,
-			message: 'property "anotherString" has no value',
+			message: 'property "secondStringProperty" has no value',
 		},
 		{
 			line: 7,
-			message: 'property "someDocument" has no value',
+			message: 'property "documentProperty" has no value',
 		},
 	]);
 });
@@ -376,11 +372,11 @@ describe('dealing with html comments', () => {
 		const { data, errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some string
+			## firstStringProperty
 
 			<!-- here is hidden comment -->
 
-			## some document
+			## documentProperty
 
 			<!-- here is hidden comment, too -->
 
@@ -394,11 +390,11 @@ describe('dealing with html comments', () => {
 		const { data, errors } = await parser.parseMarkdownString(here`
 			# name
 
-			## some string
+			## firstStringProperty
 
 			<!-- here is hidden comment --> hello
 
-			## some document
+			## documentProperty
 
 			<!-- here is hidden comment, too --> hello
 
@@ -406,8 +402,8 @@ describe('dealing with html comments', () => {
 		expect(errors).toHaveLength(0);
 		expect(data).toEqual({
 			name: 'name',
-			someString: 'hello',
-			someDocument: 'hello',
+			firstStringProperty: 'hello',
+			documentProperty: 'hello',
 		});
 	});
 });

@@ -16,21 +16,21 @@ describe('rest POST', () => {
 	} = setupMocks(namespace);
 
 	describe('writing disconnected records', () => {
-		const postKitchenSinkPayload = body =>
+		const postPropertiesTestPayload = body =>
 			postHandler({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: branchCode,
 				body,
 			});
 
 		it('creates record with no body', async () => {
-			const { status, body } = await postKitchenSinkPayload();
+			const { status, body } = await postPropertiesTestPayload();
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: branchCode,
 			});
-			await neo4jTest('KitchenSink', branchCode).exists();
+			await neo4jTest('PropertiesTest', branchCode).exists();
 		});
 
 		it('creates record with properties', async () => {
@@ -39,14 +39,14 @@ describe('rest POST', () => {
 				booleanProperty: true,
 				enumProperty: 'First',
 			};
-			const { status, body } = await postKitchenSinkPayload(payload);
+			const { status, body } = await postPropertiesTestPayload(payload);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: branchCode,
 				...payload,
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					code: branchCode,
@@ -57,14 +57,14 @@ describe('rest POST', () => {
 
 		it('sets metadata', async () => {
 			const { status, body } = await postHandler({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: branchCode,
 				metadata: getMetaPayload(),
 			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(stockMetadata.create);
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match(stockMetadata.create);
 		});
@@ -74,23 +74,25 @@ describe('rest POST', () => {
 				// someStringList: ['one', 'two'],
 				multipleChoiceEnumProperty: ['First', 'Second'],
 			};
-			const { body, status } = await postKitchenSinkPayload(payload);
+			const { body, status } = await postPropertiesTestPayload(payload);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject(payload);
-			await neo4jTest('KitchenSink', branchCode).exists().match(payload);
+			await neo4jTest('PropertiesTest', branchCode)
+				.exists()
+				.match(payload);
 		});
 
 		it("doesn't set a property when empty string provided", async () => {
 			const payload = { firstStringProperty: '' };
-			const { status, body } = await postKitchenSinkPayload(payload);
+			const { status, body } = await postPropertiesTestPayload(payload);
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
 				code: branchCode,
 			});
 
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.notMatch({
 					firstStringProperty: expect.any(String),
@@ -120,7 +122,7 @@ describe('rest POST', () => {
 
 		it('sets Date property', async () => {
 			const date = '2019-01-09';
-			const { status, body } = await postKitchenSinkPayload({
+			const { status, body } = await postPropertiesTestPayload({
 				dateProperty: new Date(date).toISOString(),
 			});
 			expect(status).toBe(200);
@@ -128,7 +130,7 @@ describe('rest POST', () => {
 				code: branchCode,
 				dateProperty: date,
 			});
-			await neo4jTest('KitchenSink', branchCode).exists().match({
+			await neo4jTest('PropertiesTest', branchCode).exists().match({
 				code: branchCode,
 				dateProperty: date,
 			});
@@ -139,7 +141,7 @@ describe('rest POST', () => {
 		it('sets Datetime property', async () => {
 			const datetime = '2019-01-09T00:00:00.001Z';
 
-			const { status, body } = await postKitchenSinkPayload({
+			const { status, body } = await postPropertiesTestPayload({
 				datetimeProperty: datetime,
 			});
 
@@ -147,7 +149,7 @@ describe('rest POST', () => {
 			expect(body).toMatchObject({
 				datetimeProperty: neo4jTimePrecision(datetime),
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					code: branchCode,
@@ -157,7 +159,7 @@ describe('rest POST', () => {
 
 		it('sets Time property', async () => {
 			const time = '12:34:56.789Z';
-			const { status, body } = await postKitchenSinkPayload({
+			const { status, body } = await postPropertiesTestPayload({
 				timeProperty: time,
 			});
 
@@ -165,7 +167,7 @@ describe('rest POST', () => {
 			expect(body).toMatchObject({
 				timeProperty: neo4jTimePrecision(time),
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					code: branchCode,
@@ -175,44 +177,46 @@ describe('rest POST', () => {
 		});
 
 		it('throws 409 error if record already exists', async () => {
-			await createNode('KitchenSink', {
+			await createNode('PropertiesTest', {
 				code: branchCode,
 			});
 			await expect(
-				postKitchenSinkPayload({ firstStringProperty: 'some string' }),
+				postPropertiesTestPayload({
+					firstStringProperty: 'some string',
+				}),
 			).rejects.httpError({
 				status: 409,
-				message: `KitchenSink ${branchCode} already exists`,
+				message: `PropertiesTest ${branchCode} already exists`,
 			});
-			await neo4jTest('KitchenSink', branchCode).notMatch({
+			await neo4jTest('PropertiesTest', branchCode).notMatch({
 				firstStringProperty: 'some string',
 			});
 		});
 
 		it('throws 400 if code in body conflicts with code in url', async () => {
 			await expect(
-				postKitchenSinkPayload({ code: 'wrong-code' }),
+				postPropertiesTestPayload({ code: 'wrong-code' }),
 			).rejects.httpError({
 				status: 400,
-				message: `Conflicting code property \`wrong-code\` in payload for KitchenSink ${branchCode}`,
+				message: `Conflicting code property \`wrong-code\` in payload for PropertiesTest ${branchCode}`,
 			});
-			await neo4jTest('KitchenSink', branchCode).notExists();
+			await neo4jTest('PropertiesTest', branchCode).notExists();
 		});
 
 		it('throws 400 if attempting to write property not in schema', async () => {
 			await expect(
-				postKitchenSinkPayload({ notInSchema: 'a string' }),
+				postPropertiesTestPayload({ notInSchema: 'a string' }),
 			).rejects.httpError({
 				status: 400,
 				message:
-					'Invalid property `notInSchema` on type `KitchenSink`.',
+					'Invalid property `notInSchema` on type `PropertiesTest`.',
 			});
-			await neo4jTest('KitchenSink', branchCode).notExists();
+			await neo4jTest('PropertiesTest', branchCode).notExists();
 		});
 
 		it('throws if neo4j query fails', async () => {
 			dbUnavailable();
-			await expect(postKitchenSinkPayload()).rejects.toThrow('oh no');
+			await expect(postPropertiesTestPayload()).rejects.toThrow('oh no');
 		});
 	});
 
@@ -573,7 +577,7 @@ describe('rest POST', () => {
 
 		it('creates a record with _lockedFields', async () => {
 			const { status, body } = await postHandler({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: branchCode,
 				body: { firstStringProperty: 'some string' },
 				query: { lockFields: 'firstStringProperty' },
@@ -587,7 +591,7 @@ describe('rest POST', () => {
 				firstStringProperty: 'some string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
@@ -597,7 +601,7 @@ describe('rest POST', () => {
 
 		it('creates a record with multiple fields, locking selective ones', async () => {
 			const { status, body } = await postHandler({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: branchCode,
 				body: {
 					firstStringProperty: 'some string',
@@ -614,7 +618,7 @@ describe('rest POST', () => {
 				secondStringProperty: 'another string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
@@ -625,7 +629,7 @@ describe('rest POST', () => {
 
 		it('creates a record and locks all fields that are written', async () => {
 			const { status, body } = await postHandler({
-				type: 'KitchenSink',
+				type: 'PropertiesTest',
 				code: branchCode,
 				body: {
 					firstStringProperty: 'some string',
@@ -641,7 +645,7 @@ describe('rest POST', () => {
 				firstStringProperty: 'some string',
 				_lockedFields: `{"firstStringProperty":"${lockClient}"}`,
 			});
-			await neo4jTest('KitchenSink', branchCode)
+			await neo4jTest('PropertiesTest', branchCode)
 				.exists()
 				.match({
 					firstStringProperty: 'some string',
@@ -652,7 +656,7 @@ describe('rest POST', () => {
 		it('throws 400 when clientId is not set', async () => {
 			await expect(
 				postHandler({
-					type: 'KitchenSink',
+					type: 'PropertiesTest',
 					code: branchCode,
 					body: {
 						firstStringProperty: 'some string',
@@ -663,7 +667,7 @@ describe('rest POST', () => {
 				status: 400,
 				message: /clientId needs to be set to a valid system code in order to lock fields/,
 			});
-			await neo4jTest('KitchenSink', branchCode).notExists();
+			await neo4jTest('PropertiesTest', branchCode).notExists();
 		});
 	});
 });

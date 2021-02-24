@@ -1,0 +1,30 @@
+name: RelationshipTestsMany
+description: A type that has a few primitive properties and relationships on it, for general testing
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  name:
+    type: Word
+    description: name description.
+    label: name label
+  enumProperty:
+    type: AnEnum
+    useInSummary: true
+    description: enumProperty description.
+    label: enumProperty label
+  simpleRelationship:
+    type: RelationshipTestsOne
+    label: simpleRelationship label
+    description: simpleRelationship description.
+    relationship: MANY_TO_ONE
+    hasMany: false
+    direction: outgoing
+  richRelationship:
+    type: RelationshipTestsRich
+    label: richRelationship label
+    description: richRelationship description.

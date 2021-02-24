@@ -1,0 +1,21 @@
+name: RelationshipTestsOne
+description: A type that has a few primitive properties and relationships on it, for general testing
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  simpleRelationship:
+    type: RelationshipTestsMany
+    label: simpleRelationship label
+    description: simpleRelationship description.
+    relationship: MANY_TO_ONE
+    hasMany: true
+    direction: incoming
+  richRelationship:
+    type: RelationshipTestsRich
+    label: richRelationship label
+    description: richRelationship description.
