@@ -4,8 +4,11 @@ moreInformation: |
   More information for MVRType
 minimumViableRecord:
   - code
-  - children
-  - someString
+  - stringProperty
+  - booleanProperty
+  - numberProperty
+  - relationshipProperty
+  - multipleChoiceEnumProperty
 properties:
   code:
     type: Code
@@ -14,15 +17,28 @@ properties:
     description: Code description.
     label: Code label
     pattern: CODE
-  children:
+  relationshipProperty:
     relationship: HAS_CHILD
-    type: ChildType
+    type: MVRTypeChild
     description: Children description.
     label: Children label
     direction: outgoing
     hasMany: true
-  someString:
+  stringProperty:
     type: Word
     description: Word description.
     label: Word label
-    useInSummary: true
+  booleanProperty:
+    type: Boolean
+    description: Boolean description.
+    label: Boolean label
+  numberProperty:
+    type: Int
+    description: Int description.
+    label: Int label
+  # multipleChoiceEnumProperty:
+  #   type: AnEnum
+  #   hasMany: true
+  #   description: AnEnum description.
+  #   label: AnEnum label
+

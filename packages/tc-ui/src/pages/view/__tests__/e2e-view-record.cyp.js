@@ -1,6 +1,6 @@
 const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-const namespace = 'e2e-page-view';
+const namespace = 'e2e-view-record';
 const code = `${namespace}-code`;
 
 describe('End-to-end - page view', () => {
