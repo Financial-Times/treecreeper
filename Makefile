@@ -133,15 +133,6 @@ cypress-primitives: build-statics
 
 ## Cypress stuff used in local dev
 
-run-app-stable:
-	NEO4J_BOLT_URL=${LOCAL_BOLT_URL} \
-	TREECREEPER_TEST=true \
-	TREECREEPER_SCHEMA_DIRECTORY=example-schema \
-	node demo/api.js
-
-run-stable:
-	@concurrently "make run-db" "make run-app-stable" "make build-statics"
-
 ### Opens an interactive UI for specifying which tests to run/re-run
 cypress-open:
 	TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema \

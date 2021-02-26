@@ -74,7 +74,8 @@
     "packages/*"
   ],
   "nodemonConfig": {
-    "ext": "js,graphql,yaml,jsx"
+    "ext": "js,graphql,yaml,jsx",
+    "ignore": ["*.cyp.js", "**/__tests__/*.js", "test-helpers", "cypress"]
   },
   "engines": {
     "node": "14.x"
