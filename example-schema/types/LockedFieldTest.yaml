@@ -1,7 +1,5 @@
 name: LockedFieldTest
-description: Description of MainType.
-moreInformation: |
-  More information for MainType
+description: Description of LockedFieldTest.
 properties:
   code:
     type: Code
