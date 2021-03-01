@@ -41,11 +41,10 @@ const s3Client = new AWS.S3({
 describe('docstore events', () => {
 	const namespace = 'api-rest-handlers-broadcast';
 	const mainCode = `${namespace}-main`;
-	const mainType = 'MainType';
 	const absorbedCode = `${namespace}-absorbed`;
 
 	const getInput = (body, query = {}) => ({
-		type: mainType,
+		type: 'EventsTest',
 		code: mainCode,
 		body,
 		query,
@@ -53,8 +52,6 @@ describe('docstore events', () => {
 	});
 
 	const { createNode } = setupMocks(namespace);
-	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
 
 	const documentStore = docstore(s3Client);
 
@@ -74,43 +71,46 @@ describe('docstore events', () => {
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await postHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
+					firstDocumentProperty: 'some document',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectCreateEvent(mainType, mainCode, ['code', 'someDocument']);
+			expectCreateEvent('EventsTest', mainCode, [
+				'code',
+				'firstDocumentProperty',
+			]);
 		});
 		it('should include created document props alongside normal ones in a CREATE event', async () => {
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await postHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
-					someString: 'some string',
+					firstDocumentProperty: 'some document',
+					stringProperty: 'some string',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectCreateEvent(mainType, mainCode, [
+			expectCreateEvent('EventsTest', mainCode, [
 				'code',
-				'someDocument',
-				'someString',
+				'firstDocumentProperty',
+				'stringProperty',
 			]);
 		});
 	});
@@ -120,120 +120,127 @@ describe('docstore events', () => {
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
+					firstDocumentProperty: 'some document',
 				}),
 			);
 
 			expect(status).toBe(201);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectCreateEvent(mainType, mainCode, ['code', 'someDocument']);
+			expectCreateEvent('EventsTest', mainCode, [
+				'code',
+				'firstDocumentProperty',
+			]);
 		});
 		it('should include created document props in an UPDATE event if record does exist but has no document', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () => Promise.reject({ code: 'NoSuchKey' }), // eslint-disable-line prefer-promise-reject-errors
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
+					firstDocumentProperty: 'some document',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, ['someDocument']);
+			expectUpdateEvent('EventsTest', mainCode, [
+				'firstDocumentProperty',
+			]);
 		});
 
 		it('should include created document props alongisde normal ones in an UPDATE event if record does exist but has no document', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () => Promise.reject({ code: 'NoSuchKey' }), // eslint-disable-line prefer-promise-reject-errors
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
-					someString: 'some string',
+					firstDocumentProperty: 'some document',
+					stringProperty: 'some string',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, [
-				'someDocument',
-				'someString',
+			expectUpdateEvent('EventsTest', mainCode, [
+				'firstDocumentProperty',
+				'stringProperty',
 			]);
 		});
 
 		it('should include created document props in an UPDATE event if record does exist and already has some document properties', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"anotherDocument": "another document"}',
+						Body: '{"secondDocumentProperty": "another document"}',
 					}),
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
 						Body:
-							'{"someDocument": "some document", "anotherDocument": "another document"}',
+							'{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
+					firstDocumentProperty: 'some document',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, ['someDocument']);
+			expectUpdateEvent('EventsTest', mainCode, [
+				'firstDocumentProperty',
+			]);
 		});
 
 		it('should not include document props in an UPDATE event if record does exist and already has the same document properties', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document',
+					firstDocumentProperty: 'some document',
 				}),
 			);
 
@@ -242,40 +249,42 @@ describe('docstore events', () => {
 		});
 
 		it('should include document props in an UPDATE event if record does exist and already has the same document properties', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document2"}',
+						Body: '{"firstDocumentProperty": "some document2"}',
 					}),
 			}));
 			const { status } = await patchHandler({
 				documentStore,
 			})(
 				getInput({
-					someDocument: 'some document2',
+					firstDocumentProperty: 'some document2',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, ['someDocument']);
+			expectUpdateEvent('EventsTest', mainCode, [
+				'firstDocumentProperty',
+			]);
 		});
 	});
 
 	describe('ABSORB', () => {
 		it('should include details of changed document props when absorbed', async () => {
 			await Promise.all([
-				createMainNode(),
-				createNode(mainType, {
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', {
 					code: absorbedCode,
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			]);
 			s3Client.deleteObject.mockImplementation(() => ({
@@ -285,8 +294,8 @@ describe('docstore events', () => {
 				promise: () =>
 					Promise.resolve({
 						Body: /absorbed/.test(Key)
-							? '{"anotherDocument": "another document"}'
-							: '{"someDocument": "some document"}',
+							? '{"secondDocumentProperty": "another document"}'
+							: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			s3Client.upload.mockImplementation(() => ({
@@ -294,31 +303,31 @@ describe('docstore events', () => {
 					Promise.resolve({
 						VersionId: 'lalalala',
 						Body:
-							'{"someDocument": "some document", "anotherDocument": "another document"}',
+							'{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
 					}),
 			}));
 
 			const { status } = await absorbHandler({ documentStore })({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, [
-				'anotherDocument',
-				'someString',
+			expectUpdateEvent('EventsTest', mainCode, [
+				'secondDocumentProperty',
+				'stringProperty',
 			]);
-			expectDeleteEvent(mainType, absorbedCode);
+			expectDeleteEvent('EventsTest', absorbedCode);
 		});
 
 		it('should not include details of unchanged document props when absorbed', async () => {
 			await Promise.all([
-				createMainNode(),
-				createNode(mainType, {
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', {
 					code: absorbedCode,
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			]);
 			s3Client.deleteObject.mockImplementation(() => ({
@@ -327,27 +336,27 @@ describe('docstore events', () => {
 			s3Client.getObject.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
 						VersionId: 'lalalala',
-						Body: '{"someDocument": "some document"}',
+						Body: '{"firstDocumentProperty": "some document"}',
 					}),
 			}));
 
 			const { status } = await absorbHandler({ documentStore })({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, ['someString']);
-			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent('EventsTest', mainCode, ['stringProperty']);
+			expectDeleteEvent('EventsTest', absorbedCode);
 		});
 	});
 });

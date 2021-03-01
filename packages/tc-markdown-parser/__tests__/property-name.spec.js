@@ -8,20 +8,20 @@ schema.init({
 });
 
 const parser = getParser({
-	type: 'MainType',
+	type: 'PropertiesTest',
 });
 
 describe('a valid property name gets correctly coerced', () => {
 	const headings = [
-		'some boolean',
-		'someBoolean',
-		'some Boolean',
-		'SomeBoolean',
-		'Some boolean',
-		'SomeBoolean',
+		'boolean property',
+		'booleanProperty',
+		'boolean property',
+		'booleanProperty',
+		'boolean property',
+		'booleanProperty',
 	];
 	headings.forEach(heading => {
-		it(`${heading} should coerce as someBoolean`, async () => {
+		it(`${heading} should coerce as booleanProperty`, async () => {
 			const { data } = await parser.parseMarkdownString(here`
 				# name
 
@@ -29,7 +29,7 @@ describe('a valid property name gets correctly coerced', () => {
 				yes
 				`);
 
-			expect(data).toHaveProperty('someBoolean', true);
+			expect(data).toHaveProperty('booleanProperty', true);
 		});
 	});
 });
@@ -52,20 +52,20 @@ test('cannot set same property name in the definition', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# name
 
-		## some string
+		## first string property
 		foo
 
-		## some string
+		## first string property
 		bar
 	`);
 
 	expect(errors).toHaveProperty('length', 1);
 	const [{ message }] = errors;
 	expect(message).toEqual(
-		'Duplicate headings for "someString" field. Only one of each heading allowed in the markdown file.',
+		'Duplicate headings for "firstStringProperty" field. Only one of each heading allowed in the markdown file.',
 	);
 	expect(data).toEqual({
 		name: 'name',
-		someString: 'foo',
+		firstStringProperty: 'foo',
 	});
 });

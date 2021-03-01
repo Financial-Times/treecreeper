@@ -20,6 +20,9 @@
 		"react-dom": "^16.13.0",
 		"react-highlight-words": "^0.16.0"
 	},
+	"devDependencies": {
+		"neo4j-driver": "^4.1.2"
+	},
 	"main": "src/server.js",
 	"browser": "src/browser.js",
 	"engines": {

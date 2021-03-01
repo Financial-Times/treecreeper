@@ -23,41 +23,41 @@ describe('graphql', () => {
 	});
 
 	it('Return a single record', async () => {
-		await createNode('MainType', {
+		await createNode('SimpleGraphBranch', {
 			code: mainCode,
-			someString: 'name1',
-			someEnum: 'First',
+			stringProperty: 'name1',
+			booleanProperty: true,
 		});
 		return request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					MainType(code: "${mainCode}") {
+					SimpleGraphBranch(code: "${mainCode}") {
 						code
-						someString
-						someEnum
+						stringProperty
+						booleanProperty
 					}}`,
 			})
 			.expect(200, {
 				data: {
-					MainType: {
+					SimpleGraphBranch: {
 						code: mainCode,
-						someEnum: 'First',
-						someString: 'name1',
+						booleanProperty: true,
+						stringProperty: 'name1',
 					},
 				},
 			});
 	});
 
 	it('Return metadata for record', async () => {
-		await createNode('MainType', {
+		await createNode('SimpleGraphBranch', {
 			code: mainCode,
 		});
 		return request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					MainType(code: "${mainCode}") {
+					SimpleGraphBranch(code: "${mainCode}") {
 						code
 						_createdTimestamp {formatted}
 						_updatedTimestamp {formatted}
@@ -69,7 +69,7 @@ describe('graphql', () => {
 			})
 			.expect(200, {
 				data: {
-					MainType: {
+					SimpleGraphBranch: {
 						code: mainCode,
 						_createdByClient: 'api-graphql-default-client',
 						_createdByUser: 'api-graphql-default-user',
@@ -87,32 +87,32 @@ describe('graphql', () => {
 	});
 
 	it('Returns related entities', async () => {
-		const childCode = `${namespace}-child`;
-		const [main, child] = await createNodes(
+		const leafCode = `${namespace}-leaf`;
+		const [main, leaf] = await createNodes(
 			[
-				'MainType',
+				'SimpleGraphBranch',
 				{
 					code: mainCode,
 				},
 			],
-			['ChildType', { code: childCode }],
+			['SimpleGraphLeaf', { code: leafCode }],
 		);
 
-		await connectNodes(main, 'HAS_CHILD', child);
+		await connectNodes(main, 'HAS_LEAF', leaf);
 		return request(app)
 			.post('/graphql')
 			.send({
 				query: `{
-					MainType(code: "${mainCode}") {
+					SimpleGraphBranch(code: "${mainCode}") {
 						code
-						children {code}
+						leaves {code}
 					}}`,
 			})
 			.expect(200, {
 				data: {
-					MainType: {
+					SimpleGraphBranch: {
 						code: mainCode,
-						children: [{ code: childCode }],
+						leaves: [{ code: leafCode }],
 					},
 				},
 			});
@@ -121,13 +121,13 @@ describe('graphql', () => {
 	it('Returns a list of entities', async () => {
 		await createNodes(
 			[
-				'MainType',
+				'SimpleGraphBranch',
 				{
 					code: mainCode + 1,
 				},
 			],
 			[
-				'MainType',
+				'SimpleGraphBranch',
 				{
 					code: mainCode + 2,
 				},
@@ -137,13 +137,13 @@ describe('graphql', () => {
 			.post('/graphql')
 			.send({
 				query: `{
-					MainTypes (orderBy: code_asc, filter: {code_starts_with: "${mainCode}"}) {
+					SimpleGraphBranches (orderBy: code_asc, filter: {code_starts_with: "${mainCode}"}) {
 						code
 					}}`,
 			})
 			.expect(200, {
 				data: {
-					MainTypes: [
+					SimpleGraphBranches: [
 						{
 							code: mainCode + 1,
 						},
@@ -157,23 +157,23 @@ describe('graphql', () => {
 
 	describe('Document properties', () => {
 		it('can read Documents when not configured to use docstore', async () => {
-			await createNode('MainType', {
+			await createNode('SimpleGraphBranch', {
 				code: mainCode,
-				someDocument: 'document',
+				documentProperty: 'document',
 			});
 			return request(app)
 				.post('/graphql')
 				.send({
 					query: `{
-					MainType(code: "${mainCode}") {
-						someDocument
+					SimpleGraphBranch(code: "${mainCode}") {
+						documentProperty
 					}}`,
 				})
 
 				.expect(200, {
 					data: {
-						MainType: {
-							someDocument: 'document',
+						SimpleGraphBranch: {
+							documentProperty: 'document',
 						},
 					},
 				});
@@ -190,7 +190,7 @@ describe('graphql', () => {
 				} = getGraphqlApi({
 					documentStore: {
 						get: async (type, code) => ({
-							body: { someDocument: `document for ${code}` },
+							body: { documentProperty: `document for ${code}` },
 						}),
 					},
 				});
@@ -199,15 +199,15 @@ describe('graphql', () => {
 				docstoreApp.post('/graphql', graphqlHandler);
 			});
 			it('returns an error if no code provided', async () => {
-				await createNode('MainType', {
+				await createNode('SimpleGraphBranch', {
 					code: mainCode,
 				});
 				return request(docstoreApp)
 					.post('/graphql')
 					.send({
 						query: `{
-						MainType(filter: {code: "${mainCode}"}) {
-							someDocument
+						SimpleGraphBranch(filter: {code: "${mainCode}"}) {
+							documentProperty
 						}}`,
 					})
 					.expect(200)
@@ -224,23 +224,23 @@ describe('graphql', () => {
 			});
 
 			it('retrieves document for single record if code included in query', async () => {
-				await createNode('MainType', {
+				await createNode('SimpleGraphBranch', {
 					code: mainCode,
 				});
 				return request(docstoreApp)
 					.post('/graphql')
 					.send({
 						query: `{
-						MainType(filter: {code: "${mainCode}"}) {
+						SimpleGraphBranch(filter: {code: "${mainCode}"}) {
 							code
-							someDocument
+							documentProperty
 						}}`,
 					})
 					.expect(200, {
 						data: {
-							MainType: {
+							SimpleGraphBranch: {
 								code: mainCode,
-								someDocument: `document for ${mainCode}`,
+								documentProperty: `document for ${mainCode}`,
 							},
 						},
 					});
@@ -249,13 +249,13 @@ describe('graphql', () => {
 			it('retrieves document for multiple records if code included in query', async () => {
 				await createNodes(
 					[
-						'MainType',
+						'SimpleGraphBranch',
 						{
 							code: mainCode + 1,
 						},
 					],
 					[
-						'MainType',
+						'SimpleGraphBranch',
 						{
 							code: mainCode + 2,
 						},
@@ -265,21 +265,21 @@ describe('graphql', () => {
 					.post('/graphql')
 					.send({
 						query: `{
-						MainTypes (orderBy: code_asc, filter: {code_starts_with: "${mainCode}"}){
+						SimpleGraphBranches (orderBy: code_asc, filter: {code_starts_with: "${mainCode}"}){
 							code
-							someDocument
+							documentProperty
 						}}`,
 					})
 					.expect(200, {
 						data: {
-							MainTypes: [
+							SimpleGraphBranches: [
 								{
 									code: mainCode + 1,
-									someDocument: `document for ${mainCode}1`,
+									documentProperty: `document for ${mainCode}1`,
 								},
 								{
 									code: mainCode + 2,
-									someDocument: `document for ${mainCode}2`,
+									documentProperty: `document for ${mainCode}2`,
 								},
 							],
 						},
@@ -300,27 +300,27 @@ describe('graphql', () => {
 				typeDefs: [
 					`type ExtendedType {
 							code: String
-							someString: String
+							stringProperty: String
 							someFloat: Float
-							someEnum: AnEnum
+							enumProperty: AnEnum
 						}`,
-					`extend type MainType {
+					`extend type SimpleGraphBranch {
 					extended: ExtendedType @neo4j_ignore
 			   }`,
 				],
 				resolvers: {
-					MainType: {
+					SimpleGraphBranch: {
 						extended: () => ({
 							code: `${namespace}-extend`,
-							someString: 'some string',
+							stringProperty: 'some string',
 							someFloat: 20.21,
-							someEnum: 'First',
+							enumProperty: 'First',
 						}),
 					},
 				},
 				documentStore: {
 					get: async (type, code) => ({
-						body: { someDocument: `document for ${code}` },
+						body: { documentProperty: `document for ${code}` },
 					}),
 				},
 			});
@@ -330,32 +330,32 @@ describe('graphql', () => {
 		});
 
 		it('returns data from extended resolver', async () => {
-			await createNode('MainType', {
+			await createNode('SimpleGraphBranch', {
 				code: mainCode,
 			});
 			return request(testApp)
 				.post('/graphql')
 				.send({
 					query: `{
-					MainType(filter: {code: "${mainCode}"}) {
+					SimpleGraphBranch(filter: {code: "${mainCode}"}) {
 						code
 						extended {
 							code
-							someString
+							stringProperty
 							someFloat
-							someEnum
+							enumProperty
 						}
 					}}`,
 				})
 				.expect(200, {
 					data: {
-						MainType: {
+						SimpleGraphBranch: {
 							code: mainCode,
 							extended: {
 								code: `${namespace}-extend`,
-								someString: 'some string',
+								stringProperty: 'some string',
 								someFloat: 20.21,
-								someEnum: 'First',
+								enumProperty: 'First',
 							},
 						},
 					},
@@ -363,28 +363,28 @@ describe('graphql', () => {
 		});
 
 		it('Extended Resolver and document can co-exist on same type', async () => {
-			await createNode('MainType', {
+			await createNode('SimpleGraphBranch', {
 				code: mainCode,
 			});
 			return request(testApp)
 				.post('/graphql')
 				.send({
 					query: `{
-					MainType(filter: {code: "${mainCode}"}) {
+					SimpleGraphBranch(filter: {code: "${mainCode}"}) {
 						code
-						someDocument
+						documentProperty
 						extended {
-							someString
+							stringProperty
 						}
 					}}`,
 				})
 				.expect(200, {
 					data: {
-						MainType: {
+						SimpleGraphBranch: {
 							code: mainCode,
-							someDocument: `document for ${mainCode}`,
+							documentProperty: `document for ${mainCode}`,
 							extended: {
-								someString: 'some string',
+								stringProperty: 'some string',
 							},
 						},
 					},

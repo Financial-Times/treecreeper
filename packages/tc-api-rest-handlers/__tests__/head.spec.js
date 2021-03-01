@@ -6,18 +6,16 @@ describe('rest HEAD', () => {
 	const namespace = 'api-rest-handlers-head';
 	const mainCode = `${namespace}-main`;
 	const input = {
-		type: 'MainType',
+		type: 'SimpleGraphBranch',
 		code: mainCode,
 	};
 
 	const { createNodes, createNode, connectNodes } = setupMocks(namespace);
 
-	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
-
 	it('gets record without relationships', async () => {
-		await createMainNode({
-			someString: 'name1',
+		await createNode('SimpleGraphBranch', {
+			code: mainCode,
+			stringProperty: 'name1',
 		});
 		const { status } = await getHandler()(input);
 
@@ -26,14 +24,14 @@ describe('rest HEAD', () => {
 
 	it('gets record with relationships', async () => {
 		const [main, child, parent] = await createNodes(
-			['MainType', mainCode],
-			['ChildType', `${namespace}-child`],
-			['ParentType', `${namespace}-parent`],
+			['SimpleGraphBranch', mainCode],
+			['SimpleGraphLeaf', `${namespace}-child`],
+			['SimpleGraphBranch', `${namespace}-parent`],
 		);
 		await connectNodes(
 			// tests incoming and outgoing relationships
-			[main, 'HAS_CHILD', child],
-			[parent, 'IS_PARENT_OF', main],
+			[main, 'HAS_LEAF', child],
+			[parent, 'HAS_CHILD', main],
 		);
 
 		const { status } = await getHandler()(input);
@@ -43,7 +41,7 @@ describe('rest HEAD', () => {
 	it('throws 404 error if no record', async () => {
 		await expect(getHandler()(input)).rejects.httpError({
 			status: 404,
-			message: `MainType ${mainCode} does not exist`,
+			message: `SimpleGraphBranch ${mainCode} does not exist`,
 		});
 	});
 

@@ -1,0 +1,13 @@
+name: EventsTestRelationship
+from:
+  type: EventsTest
+  hasMany: true
+to:
+  type: EventsTestLeaf
+  hasMany: true
+relationship: GENERIC_RELATIONSHIP
+properties:
+  stringProperty:
+    type: Word
+    description: stringProperty description.
+    label: stringProperty label

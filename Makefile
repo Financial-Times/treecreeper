@@ -85,7 +85,6 @@ run-no-db:
 run-biz-ops:
 	@concurrently "make run-app-biz-ops" "make build-statics"
 
-
 # Testing & CI
 
 ## Creates indexes on the DB
@@ -106,8 +105,10 @@ run-test-db:
   ./scripts/neo4j-wait-for-start;
 	make init-db
 
-test:
+test-schema:
 	TREECREEPER_SCHEMA_DIRECTORY=example-schema packages/tc-schema-validator/validation/index.js
+
+test: test-schema
 	@if [ -z $(CI) ]; \
 		then NEO4J_BOLT_URL=${LOCAL_BOLT_URL} TREECREEPER_TEST=true TREECREEPER_SCHEMA_DIRECTORY=example-schema DEBUG=true TIMEOUT=500000 \
 			jest --config="./jest.config.js" "${pkg}.*__tests__.*${spec}.*.spec.js" --testEnvironment=node --watch; \
@@ -124,11 +125,11 @@ cypress-verify:
 
 ### Runs tests for pages
 cypress-page: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-page"
+	start-server-and-test "make run-app" http-get://localhost:8888/ "make cypress-run-page"
 
 ### Runs tests for primitive components
 cypress-primitives: build-statics
-	start-server-and-test "make run-app" http-get://localhost:8888/MainType/create "make cypress-run-primitives"
+	start-server-and-test "make run-app" http-get://localhost:8888/ "make cypress-run-primitives"
 
 ## Cypress stuff used in local dev
 

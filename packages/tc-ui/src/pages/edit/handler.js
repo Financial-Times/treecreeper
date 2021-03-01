@@ -82,7 +82,9 @@ const getEditHandler = ({
 			headers: {
 				location: `/${type}/${encodeURIComponent(
 					code,
-				)}?message=${type} ${code} was successfully updated&messageType=success`,
+				)}?message=${type} ${code} was successfully ${
+					method === 'PATCH' ? 'updated' : 'created'
+				}&messageType=success`,
 				'Cache-Control': 'max-age=0, private',
 			},
 		};

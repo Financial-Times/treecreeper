@@ -1,0 +1,52 @@
+name: EventsTest
+description: A type that has a wide range of primitive properties on it.
+moreInformation: |
+  These inclode Document, String, Enum, multiple choice Enum, Boolean, Integer
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  stringProperty:
+    type: Word
+    description: stringProperty description.
+    label: stringProperty label
+    useInSummary: true
+  firstDocumentProperty:
+    type: Document
+    description: firstDocumentProperty description.
+    label: firstDocumentProperty label
+  secondDocumentProperty:
+    type: Document
+    description: secondDocumentProperty description.
+    label: secondDocumentProperty label
+  relationshipProperty:
+    type: EventsTestRelationship
+    label: relationshipProperty label
+    description: relationshipProperty description.
+  deprecatedRelationshipProperty:
+    deprecationReason: testing events get sent for deprecated relationships
+    type: EventsTestRelationship
+    label: relationshipProperty label
+    description: relationshipProperty description.
+  previousEvent:
+    type: EventsTest
+    relationship: NEXT_EVENT
+    direction: outgoing
+    label: previousEvent label
+    description: previousEvent description.
+  nextEvent:
+    type: EventsTest
+    relationship: NEXT_EVENT
+    direction: incoming
+    label: previousEvent label
+    description: previousEvent description.
+  uniqueLeaf:
+    type: EventsTestLeaf
+    relationship: HAS_UNIQUE_LEAF
+    direction: outgoing
+    label: uniqueLeaf label
+    description: uniqueLeaf description.

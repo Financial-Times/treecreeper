@@ -90,12 +90,15 @@ const validateRelationshipConsistency = () => {
 			);
 
 			assert.equal(
-				fromPropDefs.length,
+				fromPropDefs.filter(
+					({ deprecationReason }) => !deprecationReason,
+				).length,
 				1,
 				`${relationshipTypeName} should be used by a property of ${from.type}`,
 			);
 			assert.equal(
-				toPropDefs.length,
+				toPropDefs.filter(({ deprecationReason }) => !deprecationReason)
+					.length,
 				1,
 				`${relationshipTypeName} should be used by a property of ${to.type}`,
 			);

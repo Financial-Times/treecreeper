@@ -1,0 +1,19 @@
+name: MVRTypeChild
+description: Description of MVRTypeChild.
+moreInformation: |
+  More information for MVRType
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  parents:
+    relationship: HAS_CHILD
+    type: MVRType
+    description: Children description.
+    label: Children label
+    direction: incoming
+    hasMany: true

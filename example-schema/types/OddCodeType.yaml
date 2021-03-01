@@ -8,7 +8,7 @@ properties:
     description: Code description.
     label: Code label
     pattern: PERMISSIVE
-  mainThing:
+  richRelationshipToBranch:
     type: OddThing
-    description: Main thing relationship description.
-    label: Main thing relationship label
+    description: richRelationshipToBranch description.
+    label: richRelationshipToBranch label

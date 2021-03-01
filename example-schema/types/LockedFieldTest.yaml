@@ -1,0 +1,16 @@
+name: LockedFieldTest
+description: Description of LockedFieldTest.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  lockedField:
+    type: String
+    description: Locked field description.
+    label: Locked field label
+    lockedBy:
+      - global-lock-client

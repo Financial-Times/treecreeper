@@ -8,7 +8,7 @@ schema.init({
 });
 
 const parser = getParser({
-	type: 'MainType',
+	type: 'PropertiesTest',
 });
 
 test('any top level content outside an h2-range is parsed as description by default', async () => {
@@ -17,7 +17,7 @@ test('any top level content outside an h2-range is parsed as description by defa
 
 		hello monkey
 
-		## some string
+		## first string property
 
 		https://ft.com?
 	`);
@@ -27,7 +27,7 @@ test('any top level content outside an h2-range is parsed as description by defa
 
 test('any top level content outside an h2-range is parsed as configured field', async () => {
 	const paragraphParser = getParser({
-		type: 'MainType',
+		type: 'PropertiesTest',
 		descriptionFieldName: 'configured',
 	});
 
@@ -36,7 +36,7 @@ test('any top level content outside an h2-range is parsed as configured field', 
 
 		hello monkey
 
-		## some string
+		## first string property
 
 		https://ft.com?
 	`);
@@ -47,7 +47,7 @@ test('any top level content outside an h2-range is parsed as configured field', 
 test('top level content in an h2-range is not parsed as description', async () => {
 	const { data, errors } = await parser.parseMarkdownString(here`
 		# i have a heading
-		## some string
+		## first string property
 		how's tricks
 	`);
 	expect(errors.length).toBe(0);
@@ -62,7 +62,7 @@ test('disallow mutiple description in blocks', async () => {
 
 		this is second desctiption
 
-		## some string
+		## first string property
 
 		how's tricks
 	`);
@@ -72,7 +72,7 @@ test('disallow mutiple description in blocks', async () => {
 	expect(data).toMatchObject({
 		name: 'well',
 		description: 'this is first description',
-		someString: "how's tricks",
+		firstStringProperty: "how's tricks",
 	});
 });
 

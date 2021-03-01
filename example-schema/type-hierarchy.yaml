@@ -2,11 +2,18 @@ test:
   label: Test
   description: Test types
   types:
-    - MainType
-    - ParentType
-    - ChildType
     - RestrictedType
     - OddCodeType
     - MVRType
+    - MVRTypeChild
     - FieldsetType
     - ValidatedType
+    - PropertiesTest
+    - SimpleGraphBranch
+    - SimpleGraphLeaf
+    - DocumentStoreTest
+    - LockedFieldTest
+    - EventsTest
+    - EventsTestLeaf
+    - RelationshipTestsMany
+    - RelationshipTestsOne
