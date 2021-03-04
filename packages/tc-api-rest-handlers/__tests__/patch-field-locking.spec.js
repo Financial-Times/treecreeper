@@ -3,326 +3,378 @@ const { spyDbQuery } = require('../../../test-helpers/db-spies');
 
 const { patchHandler } = require('../patch');
 
+const patch = patchHandler();
+
 describe('rest PATCH field-locking', () => {
 	const namespace = 'api-rest-handlers-patch-field-locking';
 	const mainCode = `${namespace}-main`;
-	const childCode = `${namespace}-child`;
-	const clientId = `${namespace}-client`;
+	const mainClientId = `${namespace}-client`;
 	const otherClientId = `${namespace}-other-client`;
 
 	const { createNode } = setupMocks(namespace);
 
-	const getInput = (body, query, metadata) => ({
-		type: 'MainType',
+	const typeAndCode = {
+		type: 'PropertiesTest',
 		code: mainCode,
-		body,
-		query,
-		metadata,
-	});
+	};
 
-	const lockHandler = (body, query) =>
-		patchHandler()(getInput(body, query, { clientId }));
+	const typeCodeAndClient = {
+		...typeAndCode,
+		metadata: { clientId: mainClientId },
+	};
 
-	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
-
-	const lock = (client, ...fields) =>
+	const getLockMetadata = (clientId, ...fields) =>
 		JSON.stringify(
-			fields.reduce((obj, field) => ({ ...obj, [field]: client }), {}),
+			fields.reduce((obj, field) => ({ ...obj, [field]: clientId }), {}),
 		);
 
-	const lockedSomeString = lock(clientId, 'someString');
-	const otherLockedSomeString = lock(otherClientId, 'someString');
-	const lockedAnotherString = lock(clientId, 'anotherString');
+	const createLockedRecord = (clientId, ...fields) =>
+		createNode('PropertiesTest', {
+			code: mainCode,
+			firstStringProperty: 'first string',
+			secondStringProperty: 'second string',
+			_lockedFields: getLockMetadata(clientId, ...fields),
+		});
+
+	const createUnlockedRecord = () =>
+		createNode('PropertiesTest', {
+			code: mainCode,
+			firstStringProperty: 'first string',
+			secondStringProperty: 'second string',
+		});
 
 	describe('locking', () => {
 		describe('success', () => {
 			it('writes a field that is unlocked', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: otherLockedSomeString,
-				});
-				const { status, body } = await lockHandler({
-					anotherString: 'another string',
+				await createLockedRecord(otherClientId, 'firstStringProperty');
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						secondStringProperty: 'new second string',
+					},
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'some string',
-					anotherString: 'another string',
-					_lockedFields: otherLockedSomeString,
+					firstStringProperty: 'first string',
+					secondStringProperty: 'new second string',
+					_lockedFields: getLockMetadata(
+						otherClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'some string',
-					anotherString: 'another string',
-					_lockedFields: otherLockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'first string',
+					secondStringProperty: 'new second string',
+					_lockedFields: getLockMetadata(
+						otherClientId,
+						'firstStringProperty',
+					),
 				});
 			});
-			it('writes a field that is locked by the same clientId', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: lockedSomeString,
-				});
-				const { status, body } = await lockHandler({
-					someString: 'new some string',
+
+			it('writes a field that is locked by the same mainClientId', async () => {
+				await createLockedRecord(mainClientId, 'firstStringProperty');
+
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
+					},
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 
 			it('can lock all edited fields', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-				});
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
+				await createUnlockedRecord();
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
 					},
-					{ lockFields: 'all' },
-				);
+					query: { lockFields: 'all' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 			it('simultaneously writes and locks a field', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-				});
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
+				await createUnlockedRecord();
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 
 			it('does not add duplicates to locked field object', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: lockedSomeString,
-				});
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
+				await createLockedRecord(mainClientId, 'firstStringProperty');
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 			it('merges new locked fields with existing', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: lockedAnotherString,
-				});
+				await createLockedRecord(mainClientId, 'secondStringProperty');
 
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lock(
-						clientId,
-						'anotherString',
-						'someString',
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'secondStringProperty',
+						'firstStringProperty',
 					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lock(
-						clientId,
-						'anotherString',
-						'someString',
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'secondStringProperty',
+						'firstStringProperty',
 					),
 				});
 			});
-			it('does NOT modify lock fields when just updating locked and unlocked fields', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					anotherString: 'another string',
-					_lockedFields: lockedSomeString,
-				});
+			it('does NOT modify getLockMetadata fields when just updating locked and unlocked fields', async () => {
+				await createLockedRecord(mainClientId, 'firstStringProperty');
 
-				const { status, body } = await lockHandler({
-					someString: 'new some string',
-					anotherString: 'new another string',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
+						secondStringProperty: 'new another string',
+					},
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					anotherString: 'new another string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					secondStringProperty: 'new another string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					anotherString: 'new another string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					secondStringProperty: 'new another string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
-			it('can selectively lock fields that are being written to', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					anotherString: 'another string',
-				});
+			it('can selectively getLockMetadata fields that are being written to', async () => {
+				await createUnlockedRecord();
 
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
-						anotherString: 'new another string',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
+						secondStringProperty: 'new another string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					anotherString: 'new another string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					secondStringProperty: 'new another string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					anotherString: 'new another string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					secondStringProperty: 'new another string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 			it('creates a new node with locked fields when no exisitng node exists', async () => {
-				const { status, body } = await lockHandler(
-					{
-						someString: 'new some string',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'new first string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(201);
 				expect(body).toMatchObject({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'new some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'new first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 
 			it('can lock fields without having to send any data changes', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-				});
-				const { status, body } = await lockHandler(undefined, {
-					lockFields: 'someString',
+				await createUnlockedRecord();
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					query: {
+						lockFields: 'firstStringProperty',
+					},
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					_lockedFields: lockedSomeString,
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 			it('can lock fields when sending values that make no changes', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-				});
+				await createUnlockedRecord();
 
-				const { status, body } = await lockHandler(
-					{
-						someString: 'some string',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					body: {
+						firstStringProperty: 'first string',
 					},
-					{ lockFields: 'someString' },
-				);
+					query: { lockFields: 'firstStringProperty' },
+				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'some string',
-					_lockedFields: lockedSomeString,
+					firstStringProperty: 'first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'some string',
-					_lockedFields: lockedSomeString,
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 
 			it("doesn't write when 'changing order' of locked fields", async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: lock(
-						clientId,
-						'someString',
-						'anotherString',
-					),
-				});
+				await createLockedRecord(
+					mainClientId,
+					'firstStringProperty',
+					'secondStringProperty',
+				);
 
 				const dbQuerySpy = spyDbQuery();
 
-				const { status, body } = await lockHandler(undefined, {
-					lockFields: 'anotherString,someString',
+				const { status, body } = await patch({
+					...typeCodeAndClient,
+					query: {
+						lockFields: 'secondStringProperty,firstStringProperty',
+					},
 				});
 
 				expect(status).toBe(200);
 				expect(body).toMatchObject({
-					someString: 'some string',
-					_lockedFields: lock(
-						clientId,
-						'someString',
-						'anotherString',
+					firstStringProperty: 'first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+						'secondStringProperty',
 					),
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'some string',
-					_lockedFields: lock(
-						clientId,
-						'someString',
-						'anotherString',
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'first string',
+					_lockedFields: getLockMetadata(
+						mainClientId,
+						'firstStringProperty',
+						'secondStringProperty',
 					),
 				});
 				expect(dbQuerySpy).not.toHaveBeenCalledWith(
@@ -333,84 +385,92 @@ describe('rest PATCH field-locking', () => {
 
 		describe('failure', () => {
 			it('throws 400 when clientId is not set', async () => {
-				await createMainNode();
+				await createUnlockedRecord();
 				await expect(
-					patchHandler()(
-						getInput(
-							{
-								children: [childCode],
-							},
-							{
-								lockFields: 'someString',
-								relationshipAction: 'merge',
-							},
-						),
-					),
+					patch({
+						...typeAndCode,
+
+						body: {
+							secondStringProperty: 'blah',
+						},
+						query: {
+							lockFields: 'firstStringProperty',
+							relationshipAction: 'merge',
+						},
+					}),
 				).rejects.httpError({
 					status: 400,
 					message:
 						'clientId needs to be set to a valid system code in order to lock fields',
 				});
 
-				await await neo4jTest('MainType', mainCode).notMatch({
+				await neo4jTest('PropertiesTest', mainCode).notMatch({
 					_lockedFields: expect.any(String),
 				});
 			});
-			it('throws 409 when trying to write a field that is locked by another clientId', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					_lockedFields: otherLockedSomeString,
-				});
+			it('throws 409 when trying to write a field that is locked by another mainClientId', async () => {
+				await createLockedRecord(otherClientId, 'firstStringProperty');
 
 				await expect(
-					lockHandler({ someString: 'new some string' }),
+					patch({
+						...typeCodeAndClient,
+						body: { firstStringProperty: 'new first string' },
+					}),
 				).rejects.httpError({
 					status: 409,
-					message: `The following fields cannot be written because they are locked by another client: someString is locked by ${otherClientId}`,
+					message: `The following fields cannot be written because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
 				});
 
-				await neo4jTest('MainType', mainCode).match({
-					_lockedFields: otherLockedSomeString,
-				});
-			});
-			it('throws 409 when trying to lock a field that is locked by another clientId', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					_lockedFields: otherLockedSomeString,
-				});
-
-				await expect(
-					lockHandler(undefined, { lockFields: 'someString' }),
-				).rejects.httpError({
-					status: 409,
-					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
-				});
-
-				await neo4jTest('MainType', mainCode).match({
-					_lockedFields: otherLockedSomeString,
-				});
-			});
-			it('throws 409 when locking all fields, including some that are locked by another clientId', async () => {
-				await createNode('MainType', {
-					code: mainCode,
-					someString: 'some string',
-					_lockedFields: otherLockedSomeString,
-				});
-
-				await expect(
-					lockHandler(
-						{
-							someString: 'new some string',
-						},
-						{ lockFields: 'all' },
+				await neo4jTest('PropertiesTest', mainCode).match({
+					_lockedFields: getLockMetadata(
+						otherClientId,
+						'firstStringProperty',
 					),
+				});
+			});
+			it('throws 409 when trying to getLockMetadata a field that is locked by another mainClientId', async () => {
+				await createLockedRecord(otherClientId, 'firstStringProperty');
+
+				await expect(
+					patch({
+						...typeCodeAndClient,
+						query: {
+							lockFields: 'firstStringProperty',
+						},
+					}),
 				).rejects.httpError({
 					status: 409,
-					message: `The following fields cannot be locked because they are locked by another client: someString is locked by ${otherClientId}`,
+					message: `The following fields cannot be locked because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
 				});
-				await neo4jTest('MainType', mainCode).match({
-					someString: 'some string',
-					_lockedFields: otherLockedSomeString,
+
+				await neo4jTest('PropertiesTest', mainCode).match({
+					_lockedFields: getLockMetadata(
+						otherClientId,
+						'firstStringProperty',
+					),
+				});
+			});
+			it('throws 409 when locking all fields, including some that are locked by another mainClientId', async () => {
+				await createLockedRecord(otherClientId, 'firstStringProperty');
+
+				await expect(
+					patch({
+						...typeCodeAndClient,
+						body: {
+							firstStringProperty: 'new first string',
+						},
+						query: { lockFields: 'all' },
+					}),
+				).rejects.httpError({
+					status: 409,
+					message: `The following fields cannot be locked because they are locked by another client: firstStringProperty is locked by ${otherClientId}`,
+				});
+				await neo4jTest('PropertiesTest', mainCode).match({
+					firstStringProperty: 'first string',
+					_lockedFields: getLockMetadata(
+						otherClientId,
+						'firstStringProperty',
+					),
 				});
 			});
 		});
@@ -418,12 +478,12 @@ describe('rest PATCH field-locking', () => {
 
 	describe('unlocking fields', () => {
 		it('unlocks specific fields', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				_lockedFields: lockedSomeString,
-			});
-			const { status, body } = await lockHandler(undefined, {
-				unlockFields: 'someString',
+			await createLockedRecord(mainClientId, 'firstStringProperty');
+			const { status, body } = await patch({
+				...typeCodeAndClient,
+				query: {
+					unlockFields: 'firstStringProperty',
+				},
 			});
 
 			expect(status).toBe(200);
@@ -431,18 +491,18 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('MainType', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});
 
-		it('unlocks fields when request is given by a different clientId', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				_lockedFields: otherLockedSomeString,
-			});
-			const { status, body } = await lockHandler(undefined, {
-				unlockFields: 'someString',
+		it('unlocks fields when request is given by a different mainClientId', async () => {
+			await createLockedRecord(otherClientId, 'firstStringProperty');
+			const { status, body } = await patch({
+				...typeCodeAndClient,
+				query: {
+					unlockFields: 'firstStringProperty',
+				},
 			});
 
 			expect(status).toBe(200);
@@ -450,18 +510,22 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('MainType', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});
 
 		it('unlocks `all` fields', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				_lockedFields: lock(clientId, 'someString', 'anotherString'),
-			});
-			const { status, body } = await lockHandler(undefined, {
-				unlockFields: 'all',
+			await createLockedRecord(
+				mainClientId,
+				'firstStringProperty',
+				'secondStringProperty',
+			);
+			const { status, body } = await patch({
+				...typeCodeAndClient,
+				query: {
+					unlockFields: 'all',
+				},
 			});
 
 			expect(status).toBe(200);
@@ -469,27 +533,24 @@ describe('rest PATCH field-locking', () => {
 				_lockedFields: expect.any(String),
 			});
 
-			await neo4jTest('MainType', mainCode).notMatch({
+			await neo4jTest('PropertiesTest', mainCode).notMatch({
 				_lockedFields: expect.any(String),
 			});
 		});
 
 		it('unlocks a locked field and writes new value in same request', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				someString: 'some string',
-				_lockedFields: lockedSomeString,
-			});
-			const { status, body } = await lockHandler(
-				{
-					someString: 'new some string',
+			await createLockedRecord(mainClientId, 'firstStringProperty');
+			const { status, body } = await patch({
+				...typeCodeAndClient,
+				body: {
+					firstStringProperty: 'new first string',
 				},
-				{ unlockFields: 'someString' },
-			);
+				query: { unlockFields: 'firstStringProperty' },
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someString: 'new some string',
+				firstStringProperty: 'new first string',
 			});
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),
@@ -497,21 +558,18 @@ describe('rest PATCH field-locking', () => {
 		});
 
 		it('unlocks the locked field when value sent makes no changes', async () => {
-			await createNode('MainType', {
-				code: mainCode,
-				someString: 'some string',
-				_lockedFields: lockedSomeString,
-			});
-			const { status, body } = await lockHandler(
-				{
-					someString: 'some string',
+			await createLockedRecord(mainClientId, 'firstStringProperty');
+			const { status, body } = await patch({
+				...typeCodeAndClient,
+				body: {
+					firstStringProperty: 'first string',
 				},
-				{ unlockFields: 'someString' },
-			);
+				query: { unlockFields: 'firstStringProperty' },
+			});
 
 			expect(status).toBe(200);
 			expect(body).toMatchObject({
-				someString: 'some string',
+				firstStringProperty: 'first string',
 			});
 			expect(body).not.toMatchObject({
 				_lockedFields: expect.any(String),

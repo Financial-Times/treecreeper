@@ -39,17 +39,15 @@ const expectDeleteEvent = eventTester('DELETE');
 describe('Rest events module integration', () => {
 	const namespace = 'api-rest-handlers-broadcast';
 	const mainCode = `${namespace}-main`;
-	const mainType = 'MainType';
-	const childType = 'ChildType';
-	const childCode = `${namespace}-child`;
+	const leafCode = `${namespace}-leaf`;
 	const absorbedCode = `${namespace}-absorbed`;
 	const input = {
-		type: mainType,
+		type: 'EventsTest',
 		code: mainCode,
 	};
 
 	const getInput = (body, query = {}) => ({
-		type: mainType,
+		type: 'EventsTest',
 		code: mainCode,
 		body,
 		query,
@@ -57,8 +55,6 @@ describe('Rest events module integration', () => {
 	});
 
 	const { createNode, connectNodes } = setupMocks(namespace);
-	const createMainNode = (props = {}) =>
-		createNode('MainType', { code: mainCode, ...props });
 
 	afterEach(() => {
 		events.emitter.emit.mockClear();
@@ -66,19 +62,19 @@ describe('Rest events module integration', () => {
 
 	describe('DELETE', () => {
 		it('will send DELETE event', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			const { status } = await deleteHandler()(input);
 
 			expect(status).toBe(204);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectDeleteEvent(mainType, mainCode);
+			expectDeleteEvent('EventsTest', mainCode);
 		});
 		it('will send extra UPDATE events when connected to related nodes', async () => {
-			const [main, child] = await Promise.all([
-				createMainNode(),
-				createNode(childType, { code: childCode }),
+			const [main, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
-			await connectNodes(main, 'HAS_CHILD', child);
+			await connectNodes(main, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await deleteHandler()({
 				...input,
@@ -87,8 +83,11 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(204);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectDeleteEvent(mainType, mainCode);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectDeleteEvent('EventsTest', mainCode);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 	});
 
@@ -96,40 +95,46 @@ describe('Rest events module integration', () => {
 		it('should send a CREATE event', async () => {
 			const { status } = await postHandler()(
 				getInput({
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectCreateEvent(mainType, mainCode, ['code', 'someString']);
+			expectCreateEvent('EventsTest', mainCode, [
+				'code',
+				'stringProperty',
+			]);
 		});
 		it('should send extra UPDATE events when connecting to related nodes', async () => {
-			await createNode('ChildType', { code: childCode });
+			await createNode('EventsTestLeaf', { code: leafCode });
 			const { status } = await postHandler()(
 				getInput({
-					someString: 'some string',
-					children: [childCode],
+					stringProperty: 'some string',
+					relationshipProperty: [leafCode],
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectCreateEvent(mainType, mainCode, [
-				'children',
+			expectCreateEvent('EventsTest', mainCode, [
 				'code',
-				'deprecatedChildren',
-				'someString',
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
+				'stringProperty',
 			]);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 
 		it('should send extra CREATE events when upserting to related nodes', async () => {
 			const { status } = await postHandler()(
 				getInput(
 					{
-						someString: 'some string',
-						children: [childCode],
+						stringProperty: 'some string',
+						relationshipProperty: [leafCode],
 					},
 					{ upsert: true },
 				),
@@ -137,13 +142,17 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectCreateEvent(mainType, mainCode, [
-				'children',
+			expectCreateEvent('EventsTest', mainCode, [
 				'code',
-				'deprecatedChildren',
-				'someString',
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
+				'stringProperty',
 			]);
-			expectCreateEvent(childType, childCode, ['code', 'isChildOf']);
+			expectCreateEvent('EventsTestLeaf', leafCode, [
+				'code',
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 	});
 
@@ -151,35 +160,38 @@ describe('Rest events module integration', () => {
 		it("should send a CREATE event if record doesn't exist", async () => {
 			const { status } = await patchHandler()(
 				getInput({
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			);
 
 			expect(status).toBe(201);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectCreateEvent(mainType, mainCode, ['code', 'someString']);
+			expectCreateEvent('EventsTest', mainCode, [
+				'code',
+				'stringProperty',
+			]);
 		});
 
 		it('should send an UPDATE event if record exists', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			const { status } = await patchHandler()(
 				getInput({
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			);
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, ['someString']);
+			expectUpdateEvent('EventsTest', mainCode, ['stringProperty']);
 		});
 		it('should send extra UPDATE events when connecting to related nodes', async () => {
-			await createNode(mainType, mainCode);
-			await createNode(childType, childCode);
+			await createNode('EventsTest', mainCode);
+			await createNode('EventsTestLeaf', leafCode);
 			const { status } = await patchHandler()(
 				getInput(
 					{
-						someString: 'some string',
-						children: [childCode],
+						stringProperty: 'some string',
+						relationshipProperty: [leafCode],
 					},
 					{ relationshipAction: 'replace' },
 				),
@@ -187,21 +199,24 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, [
-				'children',
-				'deprecatedChildren',
-				'someString',
+			expectUpdateEvent('EventsTest', mainCode, [
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
+				'stringProperty',
 			]);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 
 		it('should send extra CREATE events when upserting to related nodes', async () => {
-			await createMainNode();
+			await createNode('EventsTest', { code: mainCode });
 			const { status } = await patchHandler()(
 				getInput(
 					{
-						someString: 'some string',
-						children: [childCode],
+						stringProperty: 'some string',
+						relationshipProperty: [leafCode],
 					},
 					{ upsert: true, relationshipAction: 'replace' },
 				),
@@ -209,25 +224,29 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, [
-				'children',
-				'deprecatedChildren',
-				'someString',
+			expectUpdateEvent('EventsTest', mainCode, [
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
+				'stringProperty',
 			]);
-			expectCreateEvent(childType, childCode, ['code', 'isChildOf']);
+			expectCreateEvent('EventsTestLeaf', leafCode, [
+				'code',
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 		it('should send extra UPDATE events when disconnecting from related nodes', async () => {
-			const [main, child] = await Promise.all([
-				createMainNode(),
-				createNode(childType, { code: childCode }),
+			const [main, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
-			await connectNodes(main, 'HAS_CHILD', child);
+			await connectNodes(main, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await patchHandler()(
 				getInput(
 					{
-						someString: 'some string',
-						'!children': [childCode],
+						stringProperty: 'some string',
+						'!relationshipProperty': [leafCode],
 					},
 					{ relationshipAction: 'replace' },
 				),
@@ -235,28 +254,31 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, [
-				'children',
-				'deprecatedChildren',
-				'someString',
+			expectUpdateEvent('EventsTest', mainCode, [
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
+				'stringProperty',
 			]);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 
 		it('should not send extra UPDATE events when removing rich relationship property that was already non-existent', async () => {
-			const [main, child] = await Promise.all([
-				createMainNode(),
-				createNode(childType, { code: childCode }),
+			const [main, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
-			await connectNodes(main, 'HAS_CURIOUS_CHILD', child);
+			await connectNodes(main, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await patchHandler()(
 				getInput(
 					{
-						someString: 'some string',
-						curiousChild: {
-							code: childCode,
-							someString: null,
+						stringProperty: 'some string',
+						relationshipProperty: {
+							code: leafCode,
+							stringProperty: null,
 						},
 					},
 					{ relationshipAction: 'replace', upsert: true },
@@ -265,163 +287,172 @@ describe('Rest events module integration', () => {
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
-			expectUpdateEvent(mainType, mainCode, ['someString']);
+			expectUpdateEvent('EventsTest', mainCode, ['stringProperty']);
 		});
 	});
 
 	describe('ABSORB', () => {
 		it('should send DELETE and UPDATE events for main nodes', async () => {
 			await Promise.all([
-				createMainNode(),
-				createNode(mainType, {
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', {
 					code: absorbedCode,
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			]);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectUpdateEvent(mainType, mainCode, ['someString']);
-			expectDeleteEvent(mainType, absorbedCode);
+			expectUpdateEvent('EventsTest', mainCode, ['stringProperty']);
+			expectDeleteEvent('EventsTest', absorbedCode);
 		});
 
 		it('should send no update event if no real changes absorbed', async () => {
 			await Promise.all([
-				createNode(mainType, {
+				createNode('EventsTest', {
 					code: mainCode,
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
-				createNode(mainType, {
+				createNode('EventsTest', {
 					code: absorbedCode,
-					someString: 'some string',
+					stringProperty: 'some string',
 				}),
 			]);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(1);
 
-			expectDeleteEvent(mainType, absorbedCode);
+			expectDeleteEvent('EventsTest', absorbedCode);
 		});
 		it('should send extra update events when relationships are absorbed', async () => {
-			const [, absorbed, child] = await Promise.all([
-				createMainNode(),
-				createNode(mainType, { code: absorbedCode }),
-				createNode(childType, { code: childCode }),
+			const [, absorbed, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', { code: absorbedCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
 
-			await connectNodes(absorbed, 'HAS_CHILD', child);
+			await connectNodes(absorbed, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(3);
-			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(mainType, mainCode, [
-				'children',
-				'deprecatedChildren',
+			expectDeleteEvent('EventsTest', absorbedCode);
+			expectUpdateEvent('EventsTest', mainCode, [
+				'deprecatedRelationshipProperty',
+				'relationshipProperty',
 			]);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 
 		it('should send extra update events for peers who lose relationships', async () => {
-			const [main, absorbed, child] = await Promise.all([
-				createMainNode(),
-				createNode(mainType, { code: absorbedCode }),
-				createNode(childType, { code: childCode }),
+			const [main, absorbed, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', { code: absorbedCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
 
-			await connectNodes(main, 'HAS_CHILD', child);
-			await connectNodes(absorbed, 'HAS_CHILD', child);
+			await connectNodes(main, 'GENERIC_RELATIONSHIP', leaf);
+			await connectNodes(absorbed, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectDeleteEvent('EventsTest', absorbedCode);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 
 		it('should send no main update events when identical relationship is absorbed', async () => {
-			const [main, absorbed, child] = await Promise.all([
-				createMainNode(),
-				createNode(mainType, { code: absorbedCode }),
-				createNode(childType, { code: childCode }),
+			const [main, absorbed, leaf] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', { code: absorbedCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
 			]);
 
-			await connectNodes(main, 'HAS_CHILD', child);
-			await connectNodes(absorbed, 'HAS_CHILD', child);
+			await connectNodes(main, 'GENERIC_RELATIONSHIP', leaf);
+			await connectNodes(absorbed, 'GENERIC_RELATIONSHIP', leaf);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(childType, childCode, ['isChildOf']);
+			expectDeleteEvent('EventsTest', absorbedCode);
+			expectUpdateEvent('EventsTestLeaf', leafCode, [
+				'deprecatedEventEmitters',
+				'eventEmitters',
+			]);
 		});
 		it('should send update events when reflective relationships are absorbed', async () => {
 			const [main, absorbed] = await Promise.all([
-				createMainNode(),
-				createNode(mainType, { code: absorbedCode }),
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', { code: absorbedCode }),
 			]);
 
-			await connectNodes(main, 'HAS_YOUNGER_SIBLING', absorbed);
+			await connectNodes(main, 'NEXT_EVENT', absorbed);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(mainType, mainCode, ['youngerSiblings']);
+			expectDeleteEvent('EventsTest', absorbedCode);
+			expectUpdateEvent('EventsTest', mainCode, ['previousEvent']);
 		});
 		it('should send no extra update events when N-to-1 relationships are absorbed', async () => {
-			const [main, absorbed, child, child2] = await Promise.all([
-				createMainNode(),
-				createNode(mainType, { code: absorbedCode }),
-				createNode(childType, { code: childCode }),
-				createNode(childType, { code: childCode + 2 }),
+			const [main, absorbed, leaf, leaf2] = await Promise.all([
+				createNode('EventsTest', { code: mainCode }),
+				createNode('EventsTest', { code: absorbedCode }),
+				createNode('EventsTestLeaf', { code: leafCode }),
+				createNode('EventsTestLeaf', { code: leafCode + 2 }),
 			]);
 
-			await connectNodes(main, 'HAS_FAVOURITE_CHILD', child);
-			await connectNodes(absorbed, 'HAS_FAVOURITE_CHILD', child2);
+			await connectNodes(main, 'HAS_UNIQUE_LEAF', leaf);
+			await connectNodes(absorbed, 'HAS_UNIQUE_LEAF', leaf2);
 
 			const { status } = await absorbHandler()({
 				code: mainCode,
-				type: mainType,
+				type: 'EventsTest',
 				codeToAbsorb: absorbedCode,
 			});
 
 			expect(status).toBe(200);
 			expect(emitSpy).toHaveBeenCalledTimes(2);
-			expectDeleteEvent(mainType, absorbedCode);
-			expectUpdateEvent(childType, childCode + 2, ['isFavouriteChildOf']);
+			expectDeleteEvent('EventsTest', absorbedCode);
+			expectUpdateEvent('EventsTestLeaf', leafCode + 2, ['uniqueEvent']);
 		});
 	});
 });

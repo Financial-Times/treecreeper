@@ -1,4 +1,4 @@
-const neo4j = require('neo4j-driver').v1;
+const neo4j = require('neo4j-driver');
 
 const driver = neo4j.driver(
 	process.env.NEO4J_BOLT_URL || 'bolt://localhost:7687',

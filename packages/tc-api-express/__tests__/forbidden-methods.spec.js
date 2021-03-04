@@ -16,8 +16,8 @@ describe('api-express disallows methods', () => {
 			const otherCode = `${namespace}-other`;
 			const restUrl =
 				method === 'absorb'
-					? `/rest/MainType/${mainCode}/absorb/${otherCode}`
-					: `/rest/MainType/${mainCode}?upsert=yes`;
+					? `/rest/SimpleGraphBranch/${mainCode}/absorb/${otherCode}`
+					: `/rest/SimpleGraphBranch/${mainCode}?upsert=yes`;
 			const getRequestMethod = () =>
 				method === 'absorb' ? 'post' : method;
 

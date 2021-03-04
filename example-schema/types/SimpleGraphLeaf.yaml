@@ -1,0 +1,28 @@
+name: SimpleGraphLeaf
+description: A verty simple type to serve as a destination for relationships in our simple test graph.
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  branch:
+    type: SimpleGraphBranch
+    relationship: HAS_LEAF
+    hasMany: false
+    direction: incoming
+    label: branch label
+    description: branch description.
+  largestLeafOnBranch:
+    type: SimpleGraphBranch
+    relationship: HAS_LARGEST_LEAF
+    hasMany: false
+    direction: incoming
+    label: largestLeafOnBranch label
+    description: largestLeafOnBranch description.
+  formerBranch:
+    type: FallenLeaf
+    label: formerBranch label
+    description: formerBranch description.

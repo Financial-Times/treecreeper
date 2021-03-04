@@ -52,8 +52,8 @@ const testSuite = (method, goodStatus) => {
 			method === 'absorb'
 				? // although upsert doesn't apply to absorb, it is used to test for
 				  // passing query string to handlers
-				  `/rest/MainType/${mainCode}/absorb/${otherCode}?upsert=yes`
-				: `/rest/MainType/${mainCode}?upsert=yes`;
+				  `/rest/SimpleGraphBranch/${mainCode}/absorb/${otherCode}?upsert=yes`
+				: `/rest/SimpleGraphBranch/${mainCode}?upsert=yes`;
 		const useBody = ['post', 'patch'].includes(method);
 		const { createNode } = setupMocks(namespace);
 		// overwrite method to post is method is absorb
@@ -70,7 +70,7 @@ const testSuite = (method, goodStatus) => {
 			});
 
 			it(`client-id but no client-user-id returns ${goodStatus}`, async () => {
-				await createNode('MainType', mainCode);
+				await createNode('SimpleGraphBranch', mainCode);
 				return request(app)
 					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
@@ -78,7 +78,7 @@ const testSuite = (method, goodStatus) => {
 			});
 
 			it(`client-user-id but no client-id returns ${goodStatus}`, async () => {
-				await createNode('MainType', mainCode);
+				await createNode('SimpleGraphBranch', mainCode);
 				return request(app)
 					[getRequestMethod()](restUrl)
 					.set('client-user-id', 'test-user-id')
@@ -86,7 +86,7 @@ const testSuite = (method, goodStatus) => {
 			});
 
 			it(`client-id and client-user-id returns ${goodStatus}`, async () => {
-				await createNode('MainType', mainCode);
+				await createNode('SimpleGraphBranch', mainCode);
 				return request(app)
 					[getRequestMethod()](restUrl)
 					.set('client-id', 'test-client-id')
@@ -122,7 +122,7 @@ const testSuite = (method, goodStatus) => {
 					},
 					body: useBody ? { property: 'value' } : {},
 					query: { upsert: 'yes' },
-					type: 'MainType',
+					type: 'SimpleGraphBranch',
 					code: mainCode,
 				};
 				expect(mockHandler).toHaveBeenCalledWith(

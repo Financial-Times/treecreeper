@@ -23,15 +23,13 @@ const initConstraints = async () => {
 		const retrieveConstraints = async () => {
 			const constraints = await executeQuery('CALL db.constraints');
 			return constraints.records.map(constraint =>
-				constraint.get('description'),
+				constraint.get('name'),
 			);
 		};
 
 		const retrieveIndexes = async () => {
 			const indexes = await executeQuery('CALL db.indexes');
-			return indexes.records.map(constraint =>
-				constraint.get('description'),
-			);
+			return indexes.records.map(constraint => constraint.get('name'));
 		};
 
 		const existingConstraints = await retrieveConstraints();

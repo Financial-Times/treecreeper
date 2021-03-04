@@ -20,14 +20,14 @@ describe('api-express graphql', () => {
 
 	it('can support GET requests', async () => {
 		await request(app)
-			.get('/graphql?query={MainType(code: "test") {code}}')
+			.get('/graphql?query={SimpleGraphBranch(code: "test") {code}}')
 			.set('client-id', 'test-client-id')
 			.expect(200);
 	});
 	it('supports POST requests', async () => {
 		await request(app)
 			.post('/graphql')
-			.send({ query: '{MainType(code: "test") {code}}' })
+			.send({ query: '{SimpleGraphBranch(code: "test") {code}}' })
 			.set('client-id', 'test-client-id')
 			.expect(200);
 	});

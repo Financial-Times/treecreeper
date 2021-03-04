@@ -1,249 +1,93 @@
-const {
-	code,
-	anotherDocument,
-	someString,
-	anotherString,
-	someEnum,
-	someDate,
-	someDatetime,
-} = require('../../../test-helpers/mainTypeData.json');
-const {
-	createType,
-	visitEditPage,
-	visitMainTypePage,
-	save,
-	setLockedRecord,
-	visitFieldsetTypePage,
-} = require('../../../test-helpers/cypress');
+/* eslint-disable cypress/no-unnecessary-waiting */
+const { executeQuery, dropFixtures } = require('../../../test-helpers/db');
 
-describe('End-to-end - edit record', () => {
-	beforeEach(() => {
-		cy.wrap(createType({ code, type: 'MainType' })).then(() =>
-			visitMainTypePage(),
-		);
+const namespace = 'e2e-edit-record';
+const code = `${namespace}-code`;
+
+const save = () =>
+	cy.get('[data-button-type="submit"]').click({
+		force: true,
 	});
 
-	it('can not edit code of record', () => {
-		visitEditPage();
-		cy.get('input[name=code]').type('-test');
+const createRecord = type => {
+	cy.wrap(executeQuery(`CREATE (a:${type} {code: "${code}"})`));
+};
+
+// TODO
+// hides deprecated fields
+// hides @cypher fields
+
+describe('End-to-end - record creation', () => {
+	before(() => {
+		cy.wrap(dropFixtures(namespace));
+	});
+	afterEach(() => {
+		cy.wrap(dropFixtures(namespace));
+	});
+
+	it('can edit a record', () => {
+		createRecord('PropertiesTest');
+		cy.visit(`/PropertiesTest/${code}/edit`);
+
+		cy.get('input[name="firstStringProperty"]').type('new string');
 		save();
 
-		cy.url().should('contain', `/MainType/${code}/edit`);
+		cy.url().should(
+			'contain',
+			`PropertiesTest/${code}?message=PropertiesTest%20${code}%20was%20successfully%20updated&message`,
+		);
+		cy.get('#firstStringProperty').should('have.text', 'new string');
+	});
+
+	it('cannot edit code of record', () => {
+		createRecord('PropertiesTest');
+		cy.visit(`/PropertiesTest/${code}/edit`);
+
+		cy.get('input[name="code"]').type('-test');
+		save();
+		cy.url().should('contain', `/PropertiesTest/${code}/edit`);
 		cy.get('.o-message__content-main').should(
 			'contain',
-			'Oops. Could not update MainType record for e2e-demo.',
+			`Oops. Could not update PropertiesTest record for ${code}.`,
 		);
 		cy.get('.o-message__content-additional').should(
 			'contain',
-			`Conflicting code property \`e2e-demo-test\` in payload for MainType e2e-demo`,
+			`Conflicting code property \`${code}-test\` in payload for PropertiesTest ${code}`,
 		);
 	});
 
-	it('can edit string type fields', () => {
-		visitEditPage();
-		cy.get('input[name=someString]').type(someString);
+	it('preserves data after error', () => {
+		createRecord('PropertiesTest');
+		cy.visit(`/PropertiesTest/${code}/edit`);
+
+		cy.get('input[name="firstStringProperty"]').type('some text');
+		cy.get('input[name="integerProperty"]').type('not a number');
 		save();
 
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#someString').should('have.text', someString);
+		cy.url().should('contain', `/PropertiesTest/${code}`);
 
-		visitEditPage();
-		cy.get('input[name=someString]').type(` updated`);
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someString').should('have.text', `${someString} updated`);
-	});
-
-	it('can edit document type fields', () => {
-		visitEditPage();
-		cy.get('textarea[name=anotherDocument]').type(anotherDocument);
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#anotherDocument').should('have.text', anotherDocument);
-
-		visitEditPage();
-		cy.get('textarea[name=anotherDocument]').type(` ${anotherString}`);
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#anotherDocument').should(
-			'have.text',
-			`${anotherDocument} ${anotherString}`,
+		cy.get('.o-message__content-main').should(
+			'contain',
+			`Oops. Could not update PropertiesTest record for ${code}`,
 		);
-	});
-
-	it('can edit boolean type fields', () => {
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-
-		visitEditPage();
-		cy.get('[type="radio"]').first().check({ force: true });
-		save();
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#someBoolean').should('have.text', 'Yes');
-
-		visitEditPage();
-		cy.get('[type="radio"]').eq(1).check({ force: true });
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someBoolean').should('have.text', 'No');
-	});
-
-	it('can edit enum type fields', () => {
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-
-		visitEditPage();
-		cy.get('select[name=someEnum]').select(someEnum);
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#someEnum').should('have.text', someEnum);
-
-		visitEditPage();
-		cy.get('select[name=someEnum]').select(`Third`);
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someEnum').should('have.text', 'Third');
-	});
-
-	it('can edit multiple choice type fields', () => {
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-
-		visitEditPage();
-		cy.get('#checkbox-someMultipleChoice-First').check({ force: true });
-		cy.get('#checkbox-someMultipleChoice-Third').check({ force: true });
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#someMultipleChoice span:first-child').should(
-			'have.text',
-			'First',
+		cy.get('.o-message__content-additional').should(
+			'contain',
+			`Invalid value \`not a number\` for property \`integerProperty\` on type \`PropertiesTest\`: Must be a finite integer`,
 		);
-		cy.get('#someMultipleChoice span:last-child').should(
-			'have.text',
-			'Third',
+		cy.get('input[name="firstStringProperty"]').should(
+			'have.value',
+			'some text',
 		);
-		cy.get('#someMultipleChoice').children().should('have.length', 2);
-
-		visitEditPage();
-		cy.get('#checkbox-someMultipleChoice-Third').uncheck({ force: true });
-		cy.get('#checkbox-someMultipleChoice-Second').check({ force: true });
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someMultipleChoice span:first-child').should(
-			'have.text',
-			'First',
+		cy.get('input[name="integerProperty"]').should(
+			'have.value',
+			'not a number',
 		);
-		cy.get('#someMultipleChoice span:last-child').should(
-			'have.text',
-			'Second',
-		);
-		cy.get('#someMultipleChoice').children().should('have.length', 2);
-	});
-
-	it('can edit date type fields', () => {
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-
-		visitEditPage();
-		cy.get('input[name=someDate]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDate);
-			})
-			.click();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDate').should('have.text', '15 January 2020');
-
-		visitEditPage();
-
-		cy.get('input[name=someDate]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val('2022-09-12');
-			})
-			.click();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDate').should('have.text', '12 September 2022');
-	});
-
-	it('can edit date-time type fields', () => {
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-
-		visitEditPage();
-		cy.get('input[name=someDatetime]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val(someDatetime);
-			})
-			.click();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDatetime').should(
-			'have.text',
-			'15 January 2020, 1:00:00 PM',
-		);
-
-		visitEditPage();
-
-		cy.get('input[name=someDatetime]')
-			.click()
-			.then(input => {
-				input[0].dispatchEvent(new Event('input', { bubbles: true }));
-				input.val('2022-11-12T19:00');
-			})
-			.click();
-		save();
-
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#someDatetime').should(
-			'have.text',
-			'12 November 2022, 7:00:00 PM',
-		);
-	});
-
-	it('can save record with locked fields', () => {
-		cy.wrap().then(() => setLockedRecord(code));
-		visitEditPage();
-		cy.get('#id-lockedField').should('have.value', 'locked value 1');
-		cy.get('#id-someString').should('have.value', 'locked value 2');
-		cy.get('#radio-someBoolean-Yes').should('be.checked');
-		save();
-		cy.url().should('contain', `/MainType/${code}`);
-		cy.get('#code').should('have.text', code);
-		cy.get('#lockedField').should('have.text', 'locked value 1');
-		cy.get('#someString').should('have.text', 'locked value 2');
-		cy.get('#someBoolean').should('have.text', 'Yes');
 	});
 
 	// see /demo/cms/components/primitives.jsx for where this component is passed in
-	it('renders an additional edit component with full record data', () => {
-		visitEditPage();
+	it('hydrates additional edit components with full record data', () => {
+		createRecord('PropertiesTest');
+		cy.visit(`/PropertiesTest/${code}/edit`);
 
 		cy.get('.additional-edit-component-hydration-container').should(
 			'exist',
@@ -269,61 +113,97 @@ describe('End-to-end - edit record', () => {
 		// Checks that the component has access to props
 		cy.get('.additional-edit-component').should(
 			'have.text',
-			'This value: e2e-demo',
+			`This value: ${code}`,
 		);
 	});
-	describe('Fieldset display', () => {
-		beforeEach(() => {
-			cy.wrap(
-				createType({
-					code: 'Fieldset-demo',
-					type: 'FieldsetType',
-				}),
-			).then(() => visitFieldsetTypePage('Fieldset-demo'));
-		});
-		describe('view mode', () => {
-			it('displays fieldset heading for fieldsets', () => {
-				cy.get('.fieldset-fieldsetA').should('exist');
-				cy.get('#fieldset-a').should('have.text', 'Fieldset A');
-				cy.get('.fieldset-fieldsetB').should('exist');
-				cy.get('#fieldset-b').should('have.text', 'Fieldset B');
-			});
 
-			it('displays fieldset description when provided for fieldsets', () => {
-				cy.get('.fieldset-fieldsetB-description').should('exist');
-				cy.get('.fieldset-fieldsetB-description').should(
-					'have.text',
-					'I have a lovely description.',
-				);
-				cy.get('.fieldset-fieldsetA-description').should('exist');
-				cy.get('.fieldset-fieldsetA-description').should(
-					'have.text',
-					'',
-				);
-			});
-		});
-		describe('edit mode', () => {
-			it('displays fieldset heading for fieldsets', () => {
-				visitEditPage();
-				cy.get('.fieldset-fieldsetA').should('exist');
-				cy.get('#fieldset-a').contains('Fieldset A');
-				cy.get('.fieldset-fieldsetB').should('exist');
-				cy.get('#fieldset-b').contains('Fieldset B');
-			});
-			it('displays fieldset description when provided for fieldsets', () => {
-				visitEditPage();
+	it('useInSummary does not hide properties', () => {
+		createRecord('PropertiesTest');
+		cy.visit(`/PropertiesTest/${code}/edit`);
 
-				cy.get('.fieldset-fieldsetB-description').should('exist');
-				cy.get('.fieldset-fieldsetB-description').should(
-					'have.text',
-					'I have a lovely description.',
-				);
-				cy.get('.fieldset-fieldsetA-description').should('exist');
-				cy.get('.fieldset-fieldsetA-description').should(
-					'have.text',
-					'',
-				);
-			});
-		});
+		cy.get('input[name="secondStringProperty"]').should('exist');
+	});
+
+	it('does not submit entire form when relationship input selection using Enter key press', () => {
+		createRecord('RelationshipTestsOne');
+		cy.wrap(
+			executeQuery(
+				`CREATE (a:RelationshipTestsMany {code: "${code}-many"})`,
+			),
+		);
+
+		cy.visit(`/RelationshipTestsOne/${code}/edit`);
+
+		cy.get('#simpleRelationship-picker') // eslint-disable-line cypress/no-unnecessary-waiting
+			.type(code)
+			.wait(500)
+			.type('{enter}');
+
+		cy.get(`[data-code="${code}-many"]`).should('contain', `${code}-many`);
+
+		cy.url().should('contain', `RelationshipTestsOne/${code}/edit`);
+
+		save();
+
+		cy.url().should(
+			'contain',
+			`RelationshipTestsOne/${code}?message=RelationshipTestsOne%20${code}%20was%20successfully%20updated&message`,
+		);
+	});
+
+	it('fieldsets used on edit screen', () => {
+		createRecord('FieldsetType');
+		cy.visit(`/FieldsetType/${code}/edit`);
+		cy.get('.fieldset-fieldsetA').should('exist');
+		cy.get('#fieldset-a').contains('Fieldset A');
+		cy.get('.fieldset-fieldsetB').should('exist');
+		cy.get('#fieldset-b').contains('Fieldset B');
+		cy.get('.fieldset-fieldsetB-description').should('exist');
+		cy.get('.fieldset-fieldsetB-description').should(
+			'have.text',
+			'I have a lovely description.',
+		);
+		cy.get('.fieldset-fieldsetA-description').should('exist');
+		cy.get('.fieldset-fieldsetA-description').should('have.text', '');
+	});
+
+	it('disables canonically locked fields, but saves record anyway', () => {
+		createRecord('LockedFieldTest');
+		cy.visit(`/LockedFieldTest/${code}/edit`);
+		cy.get('input[name=lockedField]').should('not.exist');
+		cy.get('input[name=lockedField-disabled]').should('be.disabled');
+		save();
+		cy.url().should(
+			'contain',
+			`LockedFieldTest/${code}?message=LockedFieldTest%20${code}%20was%20successfully%20updated&message`,
+		);
+	});
+
+	it('disables specifically locked fields, but saves record anyway', () => {
+		cy.wrap(
+			executeQuery(
+				`CREATE (a:PropertiesTest {code: "${code}"})
+				SET a.firstStringProperty="a string"
+				SET a._lockedFields='{"firstStringProperty":"another-client"}' `,
+			),
+		);
+		cy.visit(`/PropertiesTest/${code}/edit`);
+		cy.get('input[name=firstStringProperty]').should('not.exist');
+		cy.get('input[name=firstStringProperty-disabled]').should(
+			'be.disabled',
+		);
+		save();
+		cy.url().should(
+			'contain',
+			`PropertiesTest/${code}?message=PropertiesTest%20${code}%20was%20successfully%20updated&message`,
+		);
+	});
+	it('can edit MVR record even when mvr fields are not populated', () => {
+		createRecord('MVRType');
+		cy.visit(`/MVRType/${code}/edit`);
+		cy.get('input[name=stringProperty]').type('a string');
+		save();
+		cy.url().should('contain', `/MVRType/${code}`);
+		cy.url().should('not.contain', `/MVRType/${code}/edit`);
 	});
 });
