@@ -6,6 +6,32 @@ class RawDataWrapper {
 		this.rawData = {};
 	}
 
+	filterObject(obj) {
+		if (this.includeTestDefinitions) {
+			return obj;
+		}
+		return Object.fromEntries(
+			Object.entries(obj).filter(([, { isTest }]) => !isTest),
+		);
+	}
+
+	filterArray(arr) {
+		if (this.includeTestDefinitions) {
+			return arr;
+		}
+		return arr.filter(({ isTest }) => !isTest);
+	}
+
+	filterArrayOfTypes(arr = []) {
+		if (this.includeTestDefinitions) {
+			return arr;
+		}
+		return this.filterArray(arr).map(obj => ({
+			...obj,
+			properties: this.filterObject(obj.properties),
+		}));
+	}
+
 	checkDataExists() {
 		if (!this.rawData.schema) {
 			throw new Error(`Schema data does not exist.
@@ -20,17 +46,28 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 
 	getTypes() {
 		this.checkDataExists();
-		return this.rawData.schema.types;
+		return this.filterArrayOfTypes(this.rawData.schema.types);
 	}
 
 	getRelationshipTypes() {
 		this.checkDataExists();
-		return this.rawData.schema.relationshipTypes || [];
+		return this.filterArrayOfTypes(this.rawData.schema.relationshipTypes);
 	}
 
 	getTypeHierarchy() {
 		this.checkDataExists();
-		return this.rawData.schema.typeHierarchy;
+		if (this.includeTestDefinitions) {
+			return this.rawData.schema.typeHierarchy;
+		}
+		const typeNames = this.filterArray(this.rawData.schema.types).map(
+			type => type.name,
+		);
+		return Object.fromEntries(
+			Object.entries(this.rawData.schema.typeHierarchy).map(category => ({
+				...category,
+				types: category.types.filter(type => typeNames.includes(type)),
+			})),
+		);
 	}
 
 	getStringPatterns() {
@@ -40,7 +77,8 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 
 	getEnums() {
 		this.checkDataExists();
-		return this.rawData.schema.enums;
+		// TODO - allow test enum values
+		return this.filterObject(this.rawData.schema.enums);
 	}
 
 	getPrimitiveTypes() {
@@ -54,7 +92,17 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 
 	getAll() {
 		this.checkDataExists();
-		return this.rawData;
+		return {
+			schema: {
+				types: this.getTypes(),
+				relationshipTypes: this.getRelationshipTypes(),
+				stringPatterns: this.getStringPatterns(),
+				enums: this.getEnums(),
+				primitiveTypes: this.getPrimitiveTypes(),
+				typeHierarchy: this.getTypeHiererchy(),
+			},
+			version: this.getVersion(),
+		};
 	}
 
 	set(data) {

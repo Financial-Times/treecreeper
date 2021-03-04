@@ -21,11 +21,7 @@ module.exports = {
 
 		return Object.entries(hierarchy).reduce(
 			(result, [categoryName, { label, description, types }]) => {
-				types = types
-					.filter(
-						({ isTest }) => !isTest || this.includeTestDefinitions,
-					)
-					.map(name => this.getType(name, options));
+				types = types.map(name => this.getType(name, options));
 				return Object.assign(result, {
 					[categoryName]: { label, description, types },
 				});

@@ -28,9 +28,8 @@ const restructureOptions = (options, withMeta) => {
 module.exports = {
 	cacheKeyGenerator: ({ withMeta = false } = {}) => `enums:${withMeta}`,
 	accessor({ withMeta = false } = {}) {
-		return Object.entries(this.rawData.getEnums() || {})
-			.filter(({ isTest }) => !isTest || this.includeTestDefinitions)
-			.reduce((map, [key, { options, description }]) => {
+		return Object.entries(this.rawData.getEnums() || {}).reduce(
+			(map, [key, { options, description }]) => {
 				options = restructureOptions(options, withMeta);
 				const entry = withMeta
 					? {
@@ -40,6 +39,8 @@ module.exports = {
 					: options;
 
 				return Object.assign(map, { [key]: entry });
-			}, {});
+			},
+			{},
+		);
 	},
 };

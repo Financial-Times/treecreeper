@@ -26,7 +26,6 @@ class SDK {
 			cache: this.cache,
 			readYaml: this.readYaml,
 		});
-		this.includeTestDefinitions = options.includeTestDefinitions;
 		this.TreecreeperUserError = TreecreeperUserError;
 		this.getEnums = this.createEnrichedAccessor(enums);
 		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);
