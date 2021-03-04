@@ -13,7 +13,12 @@ const pkg = JSON.parse(
 
 const action = async (...args) => {
 	const [command] = args;
-	const { schemaDirectory, bucketName, env, includeTestDefinitions } = command;
+	const {
+		schemaDirectory,
+		bucketName,
+		env,
+		includeTestDefinitions,
+	} = command;
 	try {
 		if (!bucketName) {
 			throw new Error(
@@ -34,9 +39,8 @@ const action = async (...args) => {
 		if (!stat.isDirectory()) {
 			throw new Error('schema directory is not a directory');
 		}
-
-		schema.init({ schemaDirectory });
-		await sendSchemaToS3(env, bucketName, includeTestDefinitions);
+		schema.init({ schemaDirectory, includeTestDefinitions });
+		await sendSchemaToS3(env, bucketName);
 		console.log('successfully deployed');
 	} catch (err) {
 		console.error('Failed to deploy');

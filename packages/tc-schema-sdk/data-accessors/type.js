@@ -57,26 +57,26 @@ const hydrateFieldsets = ({
 	};
 
 	Object.entries(properties)
-	.filter(([,{isTest}]) => !isTest || this.includeTestDefinitions)
-	.forEach(([prop, def]) => {
-		const { fieldset } = def;
+		.filter(([, { isTest }]) => !isTest || this.includeTestDefinitions)
+		.forEach(([prop, def]) => {
+			const { fieldset } = def;
 
-		if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {
-			insertIntoFieldset('minimumViableRecord', prop, def);
-		} else if (fieldset === 'self') {
-			fieldsetEntries.push([
-				prop,
-				{
-					heading: def.label,
-					description: def.description,
-					isSingleField: true,
-					properties: [[prop, def]],
-				},
-			]);
-		} else {
-			insertIntoFieldset(fieldset, prop, def);
-		}
-	});
+			if (useMinimumViableRecord && minimumViableRecord.includes(prop)) {
+				insertIntoFieldset('minimumViableRecord', prop, def);
+			} else if (fieldset === 'self') {
+				fieldsetEntries.push([
+					prop,
+					{
+						heading: def.label,
+						description: def.description,
+						isSingleField: true,
+						properties: [[prop, def]],
+					},
+				]);
+			} else {
+				insertIntoFieldset(fieldset, prop, def);
+			}
+		});
 
 	return entriesArrayToObject(
 		fieldsetEntries

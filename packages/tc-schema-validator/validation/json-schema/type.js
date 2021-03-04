@@ -37,7 +37,7 @@ const getPropertiesSchema = ({ forRelationships = false } = {}) => {
 	const propertyDefSchema = {
 		type: 'object',
 		properties: {
-			isTest: {type: 'boolean'},
+			isTest: { type: 'boolean' },
 			label: { type: 'string', not: { pattern: '[.!]\\s*$' } },
 			description: { type: 'string', pattern: '[.!?]\\s*$' },
 			type: {
@@ -153,7 +153,7 @@ const typeSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		isTest: {type: 'boolean'},
+		isTest: { type: 'boolean' },
 		name: typeName,
 		description: { type: 'string' },
 		moreInformation: { type: 'string' },
@@ -211,7 +211,7 @@ const relationshipTypeSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		isTest: {type: 'boolean'},
+		isTest: { type: 'boolean' },
 		name: typeName,
 		from: fromOrTo,
 		to: fromOrTo,

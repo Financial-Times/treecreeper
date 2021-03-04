@@ -6,7 +6,7 @@ const enumSchema = {
 	type: 'object',
 	properties: {
 		description: { type: 'string' },
-		isTest: {type: 'boolean'},
+		isTest: { type: 'boolean' },
 		options: {
 			if: {
 				type: 'object',
