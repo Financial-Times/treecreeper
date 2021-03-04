@@ -233,7 +233,6 @@ const compose = sdk => {
 	addStaticDefinitions(composer);
 
 	addEnumDefinitions(composer, sdk);
-
 	sdk.getTypes({
 		includeMetaFields: true,
 	}).forEach(addTypeDefinition(composer, sdk));
