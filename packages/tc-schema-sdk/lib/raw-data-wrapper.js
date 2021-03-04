@@ -2,7 +2,7 @@ const deepFreeze = require('deep-freeze');
 
 class RawDataWrapper {
 	constructor(options) {
-		this.includeBeta = options.includeBeta;
+		this.includeTestDefinitions = options.includeTestDefinitions;
 		this.rawData = {};
 	}
 

@@ -57,7 +57,7 @@ const hydrateFieldsets = ({
 	};
 
 	Object.entries(properties)
-	.filter(([,{isBeta}]) => !isBeta || this.includeBeta)
+	.filter(([,{isTest}]) => !isTest || this.includeTestDefinitions)
 	.forEach(([prop, def]) => {
 		const { fieldset } = def;
 

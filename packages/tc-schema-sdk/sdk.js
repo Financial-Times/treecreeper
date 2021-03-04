@@ -13,7 +13,7 @@ const relationshipType = require('./data-accessors/relationship-type');
 const { SchemaUpdater } = require('./lib/updater');
 const utils = require('./lib/utils');
 
-const defaultOptions = {includeBeta: false}
+const defaultOptions = {includeTestDefinitions: false}
 
 class SDK {
 	constructor(userOptions) {
@@ -26,7 +26,7 @@ class SDK {
 			cache: this.cache,
 			readYaml: this.readYaml,
 		});
-		this.includeBeta = options.includeBeta
+		this.includeTestDefinitions = options.includeTestDefinitions
 		this.TreecreeperUserError = TreecreeperUserError;
 		this.getEnums = this.createEnrichedAccessor(enums);
 		this.getPrimitiveTypes = this.createEnrichedAccessor(primitiveTypes);

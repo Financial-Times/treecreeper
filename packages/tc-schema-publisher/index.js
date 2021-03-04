@@ -13,9 +13,9 @@ const getVersion = schemaObject => {
 const sendSchemaToS3 = async (
 	environment,
 	bucketName = process.env.TREECREEPER_SCHEMA_BUCKET,
-	includeBeta = false
+	includeTestDefinitions = false
 ) => {
-	const schema = new SDK({includeBeta})
+	const schema = new SDK({includeTestDefinitions})
 	await schema.ready();
 	const schemaObject = {
 		...schema.rawData.getAll(),

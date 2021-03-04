@@ -29,7 +29,7 @@ module.exports = {
 	cacheKeyGenerator: ({ withMeta = false } = {}) => `enums:${withMeta}`,
 	accessor({ withMeta = false } = {}) {
 		return Object.entries(this.rawData.getEnums() || {})
-			.filter(({isBeta}) => !isBeta || this.includeBeta)
+			.filter(({isTest}) => !isTest || this.includeTestDefinitions)
 			.reduce(
 			(map, [key, { options, description }]) => {
 				options = restructureOptions(options, withMeta);

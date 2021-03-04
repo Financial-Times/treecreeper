@@ -13,7 +13,7 @@ const pkg = JSON.parse(
 
 const action = async (...args) => {
 	const [command] = args;
-	const { schemaDirectory, bucketName, env, includeBeta } = command;
+	const { schemaDirectory, bucketName, env, includeTestDefinitions } = command;
 	try {
 		if (!bucketName) {
 			throw new Error(
@@ -36,7 +36,7 @@ const action = async (...args) => {
 		}
 
 		schema.init({ schemaDirectory });
-		await sendSchemaToS3(env, bucketName);
+		await sendSchemaToS3(env, bucketName, includeTestDefinitions);
 		console.log('successfully deployed');
 	} catch (err) {
 		console.error('Failed to deploy');
@@ -68,8 +68,8 @@ program
 		process.env.TREECREEPER_SCHEMA_BUCKET,
 	)
 	.option(
-		'--include-beta <bool>',
-		'Whether to include beta properties in the release. (default: false))',
+		'--include-test-definitions <bool>',
+		'Whether to include definitions intended only for the test environment in the release. (default: false))',
 		false,
 	)
 	.option('-E, --env <env>', 'specify publish environment', 'latest')
