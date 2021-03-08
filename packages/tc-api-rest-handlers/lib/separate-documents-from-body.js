@@ -1,4 +1,3 @@
-const _isEmpty = require('lodash.isempty');
 const { getType } = require('@financial-times/tc-schema-sdk');
 
 const separateDocsFromBody = (nodeType, body = {}) => {
@@ -8,14 +7,9 @@ const separateDocsFromBody = (nodeType, body = {}) => {
 
 	Object.entries(body).forEach(([key, value]) => {
 		if (key.charAt(0) !== '!' && properties[key].type === 'Document') {
-			// We should check the value is empty only when type is Document
-			// because other type will be passed as boolean, number, etc...
-			// then _isEmpty() will returns true
-			if (!_isEmpty(value)) {
-				bodyDocuments[key] = body[key];
-			}
+			bodyDocuments[key] = value;
 		} else {
-			bodyNoDocs[key] = body[key];
+			bodyNoDocs[key] = value;
 		}
 	});
 

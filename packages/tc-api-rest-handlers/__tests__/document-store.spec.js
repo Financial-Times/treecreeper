@@ -321,7 +321,9 @@ describe('rest document store integration', () => {
 			);
 		});
 
-		it('unsets a Document property when empty string provided', async () => {
+		// This, combined with a test in tc-api-s3-docstore, gives some confidence that
+		// deleting document properties is possible
+		it('Forwards empty document properties to the docstore to be handled appropriately', async () => {
 			await createMainNode();
 			const anotherDocFromS3 = {
 				secondDocumentProperty: 'another document from s3',
@@ -330,22 +332,17 @@ describe('rest document store integration', () => {
 				versionMarker,
 				body: anotherDocFromS3,
 			});
-			const { status, body } = await patchHandler({ documentStore })(
+			await patchHandler({ documentStore })(
 				getInput({
 					firstDocumentProperty: '',
 					secondDocumentProperty: 'another document',
 				}),
 			);
-
-			expect(status).toBe(200);
-			expect(body).toMatchObject({ code: mainCode, ...anotherDocFromS3 });
-
-			await neo4jTest('DocumentStoreTest', mainCode).exists();
-
 			expect(mockDocstorePatch).toHaveBeenCalledWith(
 				'DocumentStoreTest',
 				mainCode,
 				{
+					firstDocumentProperty: null,
 					secondDocumentProperty: 'another document',
 				},
 			);
