@@ -14,7 +14,8 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 		// check that at least one has a value to avoid e.g. null !== undefined causing
 		// an unnecessary write (the api will send nulls sometimes, but the json object will
 		// contain undefineds)
-		key => (body[key] || existingBody[key]) && body[key] !== existingBody[key],
+		key =>
+			(body[key] || existingBody[key]) && body[key] !== existingBody[key],
 	);
 
 	// If PATCHing body is completely same with existing body,
