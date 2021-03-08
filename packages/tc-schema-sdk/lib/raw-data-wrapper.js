@@ -8,11 +8,12 @@ class RawDataWrapper {
 	checkDataExists() {
 		if (!this.rawData.schema) {
 			throw new Error(`Schema data does not exist.
-Check that you have configured biz-ops-schema correctly (see the README)
+Check that you have configured tc-schema-sdk correctly (see https://github.com/Financial-Times/treecreeper/tree/master/packages/tc-schema-sdk)
 and that you are using the correct refresh pattern for your environment
 and have waited for the first fetch of schema data to happen.
-
-If npm linking the schema locally, set \`updateMode: 'dev'\`
+Often this error occurs because a method of tc-schema-sdk is called once at the
+top level of a module; try calling it from within the function that uses the data
+instead.
 `);
 		}
 	}
