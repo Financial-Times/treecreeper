@@ -22,6 +22,16 @@ This is a little odd (and should be improved in future)
 
 Be aware of the idiosyncrasy above if you ever come across errors complaining that no data is available.
 
+#### Lifecycle guide
+
+- `schema.init()` - configures the schema library, telling it where to fetch the schema from and which methodology to use to update it in memory (these vary depending on lambda vs express and test vs prod). 
+- `schema.ready()` - makes the initial fetch for data and starts the polling interval. Returns a promise that resolves when the first set of data has been stored in memory.
+- `schema.getType()` etc, attempts to read to read data synchronously from memory. Errors if schema.ready() has not resolved yet
+
+So initialising is always a synchronous step (`init`), followed by an asynchronous step (`ready`) you need to await once, and then after that all the other method calls should be synchronous.
+
+The one exception is a call to `schema.refresh()` - asynchronous which must be called at the beginning of each lambda event handled because the background long-polling pattern does not work in lambda. 
+
 ### `init(options)`
 
 The package exports an `init(options)` function, that takes the following options:
