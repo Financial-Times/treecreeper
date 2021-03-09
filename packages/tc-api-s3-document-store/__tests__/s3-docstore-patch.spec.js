@@ -258,4 +258,39 @@ describe('S3 document helper patch', () => {
 			VersionId: givenVersionMarker,
 		});
 	});
+	test('does not write when only nulls and empty strings sent', async () => {
+		const givenSystemCode = 'docstore-patch-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
+			givenVersionMarker,
+		);
+		const store = docstore(s3Instance);
+
+		stubGetObject.mockResolvedValue({
+			body: {},
+		});
+		const patchBody = {
+			someDocument: null,
+			anotherDocument: '',
+		};
+		const result = await store.patch(
+			consistentNodeType,
+			givenSystemCode,
+			patchBody,
+		);
+
+		const expectedBody = {};
+		expect(result).toMatchObject({
+			body: expectedBody,
+		});
+		expect(result).not.toMatchObject({
+			undo: expect.any(Function),
+		});
+		expect(stubUpload).not.toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
+	});
 });
