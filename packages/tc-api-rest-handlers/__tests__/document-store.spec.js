@@ -199,7 +199,13 @@ describe('rest document store integration', () => {
 				});
 				await neo4jTest('DocumentStoreTest', mainCode).exists();
 
-				expect(mockDocstorePost).not.toHaveBeenCalled();
+				expect(mockDocstorePost).toHaveBeenCalledWith(
+					'DocumentStoreTest',
+					mainCode,
+					{
+						firstDocumentProperty: null,
+					},
+				);
 			});
 
 			if (method === 'POST') {
