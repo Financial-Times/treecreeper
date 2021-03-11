@@ -6,7 +6,7 @@ const separateDocsFromBody = (nodeType, body = {}) => {
 	const bodyNoDocs = {};
 
 	Object.entries(body).forEach(([key, value]) => {
-		// checking for `!` avoids errors being thrown when iterating over 
+		// checking for `!` avoids errors being thrown when iterating over
 		// 'delete relationships' properties
 		if (key.charAt(0) !== '!' && properties[key].type === 'Document') {
 			bodyDocuments[key] = value;
