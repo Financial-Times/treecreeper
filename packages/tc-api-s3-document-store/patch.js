@@ -11,8 +11,13 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 		code,
 	});
 	const changedProperties = Object.keys(body).filter(
-		key => body[key] !== existingBody[key],
+		// check that at least one has a value to avoid e.g. null !== undefined causing
+		// an unnecessary write (the api will send nulls sometimes, but the json object will
+		// contain undefineds)
+		key =>
+			(body[key] || existingBody[key]) && body[key] !== existingBody[key],
 	);
+
 	// If PATCHing body is completely same with existing body,
 	// return existing body without upload - won't create new version
 	if (!changedProperties.length) {
@@ -28,10 +33,15 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 	}
 
 	const newBodyDocument = Object.assign(existingBody, body);
+
+	const newBodyWithoutEmpty = Object.fromEntries(
+		Object.entries(newBodyDocument).filter(([, value]) => !!value),
+	);
+
 	const params = {
 		Bucket: bucketName,
 		Key: `${type}/${code}`,
-		Body: JSON.stringify(newBodyDocument),
+		Body: JSON.stringify(newBodyWithoutEmpty),
 		ContentType: 'application/json',
 	};
 	const versionId = await upload({
@@ -41,7 +51,7 @@ const s3Patch = async ({ s3Instance, bucketName, type, code, body }) => {
 	});
 	return {
 		versionMarker: versionId,
-		body: newBodyDocument,
+		body: newBodyWithoutEmpty,
 		updatedProperties: changedProperties,
 		undo: undo({
 			s3Instance,

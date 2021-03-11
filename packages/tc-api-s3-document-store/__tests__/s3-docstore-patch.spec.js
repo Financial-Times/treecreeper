@@ -147,4 +147,150 @@ describe('S3 document helper patch', () => {
 			VersionId: givenVersionMarker,
 		});
 	});
+
+	test('deletes when empty strings sent', async () => {
+		const givenSystemCode = 'docstore-patch-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const {
+			stubUpload,
+			stubGetObject,
+			stubDeleteOnUndo,
+			s3Instance,
+		} = mockS3Patch(givenVersionMarker);
+		const store = docstore(s3Instance);
+
+		const patchBody = {
+			someDocument: '',
+		};
+		const result = await store.patch(
+			consistentNodeType,
+			givenSystemCode,
+			patchBody,
+		);
+
+		const expectedBody = { anotherDocument: 'Another document' };
+		const callParams = {
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			Body: JSON.stringify(expectedBody),
+			ContentType: 'application/json',
+		};
+
+		expect(result).toMatchObject({
+			versionMarker: givenVersionMarker,
+			body: expectedBody,
+			undo: expect.any(Function),
+		});
+		expect(stubUpload).toHaveBeenCalled();
+		expect(stubUpload).toHaveBeenCalledWith({
+			s3Instance,
+			params: callParams,
+			requestType: 'PATCH',
+		});
+		expect(stubGetObject).toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
+
+		const undoResult = await result.undo();
+		expect(undoResult).toMatchObject({
+			versionMarker: givenVersionMarker,
+		});
+		expect(stubDeleteOnUndo).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
+	});
+	test('deletes when null sent', async () => {
+		const givenSystemCode = 'docstore-patch-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const {
+			stubUpload,
+			stubGetObject,
+			stubDeleteOnUndo,
+			s3Instance,
+		} = mockS3Patch(givenVersionMarker);
+		const store = docstore(s3Instance);
+
+		const patchBody = {
+			someDocument: null,
+		};
+		const result = await store.patch(
+			consistentNodeType,
+			givenSystemCode,
+			patchBody,
+		);
+
+		const expectedBody = { anotherDocument: 'Another document' };
+		const callParams = {
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			Body: JSON.stringify(expectedBody),
+			ContentType: 'application/json',
+		};
+
+		expect(result).toMatchObject({
+			versionMarker: givenVersionMarker,
+			body: expectedBody,
+			undo: expect.any(Function),
+		});
+		expect(stubUpload).toHaveBeenCalled();
+		expect(stubUpload).toHaveBeenCalledWith({
+			s3Instance,
+			params: callParams,
+			requestType: 'PATCH',
+		});
+		expect(stubGetObject).toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
+
+		const undoResult = await result.undo();
+		expect(undoResult).toMatchObject({
+			versionMarker: givenVersionMarker,
+		});
+		expect(stubDeleteOnUndo).toHaveBeenCalledWith({
+			Bucket: TREECREEPER_DOCSTORE_S3_BUCKET,
+			Key: `${consistentNodeType}/${givenSystemCode}`,
+			VersionId: givenVersionMarker,
+		});
+	});
+	test('does not write when only nulls and empty strings sent', async () => {
+		const givenSystemCode = 'docstore-patch-test';
+		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
+
+		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
+			givenVersionMarker,
+		);
+		const store = docstore(s3Instance);
+
+		stubGetObject.mockResolvedValue({
+			body: {},
+		});
+		const patchBody = {
+			someDocument: null,
+			anotherDocument: '',
+		};
+		const result = await store.patch(
+			consistentNodeType,
+			givenSystemCode,
+			patchBody,
+		);
+
+		const expectedBody = {};
+		expect(result).toMatchObject({
+			body: expectedBody,
+		});
+		expect(result).not.toMatchObject({
+			undo: expect.any(Function),
+		});
+		expect(stubUpload).not.toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalled();
+		expect(stubGetObject).toHaveBeenCalledWith(
+			matcher(s3Instance, givenSystemCode),
+		);
+	});
 });
