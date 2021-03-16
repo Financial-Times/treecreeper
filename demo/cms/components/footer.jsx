@@ -51,7 +51,7 @@ const Footer = () => (
 						</a>
 					</div>
 					<p>
-						{`© THE FINANCIAL TIMES LTD 2020. `}
+					{`© THE FINANCIAL TIMES LTD ${new Date().getFullYear()}. `}
 						FT and ‘Financial Times’ are trademarks of The Financial
 						Times Ltd.
 					</p>
