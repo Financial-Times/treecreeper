@@ -66,8 +66,8 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 			type => type.name,
 		);
 		return Object.fromEntries(
-			Object.entries(this.rawData.schema.typeHierarchy || {}).map(
-				([name, category]) => [
+			Object.entries(this.rawData.schema.typeHierarchy || {})
+				.map(([name, category]) => [
 					name,
 					{
 						...category,
@@ -75,8 +75,8 @@ If npm linking the schema locally, set \`updateMode: 'dev'\`
 							typeNames.includes(type),
 						),
 					},
-				],
-			),
+				])
+				.filter(([, category]) => category.types.length),
 		);
 	}
 
