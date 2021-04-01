@@ -1,0 +1,11 @@
+name: TypeB
+description: type b
+isTest: true
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE

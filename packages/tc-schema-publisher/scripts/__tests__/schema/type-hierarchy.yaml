@@ -3,3 +3,8 @@ prod:
   description: Prod types
   types:
     - TypeA
+test:
+  label: Test
+  description: Test types
+  types:
+    - TypeB
