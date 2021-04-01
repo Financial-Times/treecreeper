@@ -1,36 +1,83 @@
 const deepFreeze = require('deep-freeze');
 
 class RawDataWrapper {
-	constructor() {
+	constructor(options = {}) {
+		this.includeTestDefinitions = options.includeTestDefinitions;
 		this.rawData = {};
+	}
+
+	filterTestProperties(obj = {}) {
+		if (this.includeTestDefinitions) {
+			return obj;
+		}
+		return Object.fromEntries(
+			Object.entries(obj).filter(([, { isTest }]) => !isTest),
+		);
+	}
+
+	filterTestItems(arr = []) {
+		if (this.includeTestDefinitions) {
+			return arr;
+		}
+		return arr.filter(({ isTest }) => !isTest);
+	}
+
+	filterTestTypes(arr = []) {
+		if (this.includeTestDefinitions) {
+			return arr;
+		}
+		return this.filterTestItems(arr).map(obj => ({
+			...obj,
+			properties: this.filterTestProperties(obj.properties),
+		}));
 	}
 
 	checkDataExists() {
 		if (!this.rawData.schema) {
 			throw new Error(`Schema data does not exist.
-Check that you have configured tc-schema-sdk correctly (see https://github.com/Financial-Times/treecreeper/tree/master/packages/tc-schema-sdk)
+Check that you have configured biz-ops-schema correctly (see the README)
 and that you are using the correct refresh pattern for your environment
 and have waited for the first fetch of schema data to happen.
-Often this error occurs because a method of tc-schema-sdk is called once at the
-top level of a module; try calling it from within the function that uses the data
-instead.
+
+If npm linking the schema locally, set \`updateMode: 'dev'\`
 `);
 		}
 	}
 
 	getTypes() {
 		this.checkDataExists();
-		return this.rawData.schema.types;
+		return this.filterTestTypes(this.rawData.schema.types);
 	}
 
 	getRelationshipTypes() {
 		this.checkDataExists();
-		return this.rawData.schema.relationshipTypes || [];
+		return this.filterTestTypes(this.rawData.schema.relationshipTypes);
 	}
 
 	getTypeHierarchy() {
 		this.checkDataExists();
-		return this.rawData.schema.typeHierarchy;
+		if (!this.rawData.schema.typeHierarchy) {
+			return;
+		}
+		if (this.includeTestDefinitions) {
+			return this.rawData.schema.typeHierarchy;
+		}
+		const typeNames = this.filterTestItems(this.rawData.schema.types).map(
+			type => type.name,
+		);
+		return Object.fromEntries(
+			Object.entries(this.rawData.schema.typeHierarchy || {})
+				.map(([name, category]) => [
+					name,
+					{
+						...category,
+						types: category.types.filter(type =>
+							typeNames.includes(type),
+						),
+					},
+				])
+				.filter(([, category]) => category.types.length),
+		);
 	}
 
 	getStringPatterns() {
@@ -40,7 +87,8 @@ instead.
 
 	getEnums() {
 		this.checkDataExists();
-		return this.rawData.schema.enums;
+		// TODO - allow test enum values
+		return this.filterTestProperties(this.rawData.schema.enums);
 	}
 
 	getPrimitiveTypes() {
@@ -54,7 +102,17 @@ instead.
 
 	getAll() {
 		this.checkDataExists();
-		return this.rawData;
+		return {
+			schema: {
+				types: this.getTypes(),
+				relationshipTypes: this.getRelationshipTypes(),
+				stringPatterns: this.getStringPatterns(),
+				enums: this.getEnums(),
+				primitiveTypes: this.getPrimitiveTypes(),
+				typeHierarchy: this.getTypeHierarchy(),
+			},
+			version: this.getVersion(),
+		};
 	}
 
 	set(data) {
