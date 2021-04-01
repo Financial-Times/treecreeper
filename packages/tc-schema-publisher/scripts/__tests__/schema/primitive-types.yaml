@@ -1,0 +1,12 @@
+Code:
+  graphql: String
+  component: Text
+Word:
+  graphql: String
+  component: Text
+Document:
+  graphql: String
+  component: LargeText
+Url:
+  graphql: String
+  component: Text

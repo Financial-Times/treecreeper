@@ -1,0 +1,5 @@
+AnEnum:
+  description: |
+    Another example enum
+  options:
+    First: First option

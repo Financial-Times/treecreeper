@@ -1,0 +1,5 @@
+prod:
+  label: Prod
+  description: Prod types
+  types:
+    - TypeA
