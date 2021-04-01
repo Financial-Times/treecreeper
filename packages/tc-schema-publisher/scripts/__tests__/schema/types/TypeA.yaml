@@ -1,0 +1,19 @@
+name: TypeA
+description: type a
+properties:
+  code:
+    type: Code
+    unique: true
+    canIdentify: true
+    description: Code description.
+    label: Code label
+    pattern: CODE
+  stringPropertyA:
+    type: Word
+    description: stringPropertyA description.
+    label: stringPropertyA label
+  stringPropertyB:
+    type: Word
+    description: stringPropertyB description.
+    label: stringPropertyB label
+    isTest: true

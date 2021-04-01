@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "This package saves a treecreeper schema to s3",
   "bin": {
-    "tc-schema-publisher": "scripts/deploy.js"
+    "tc-schema-publisher": "scripts/command.js"
   },
   "main": "index.js",
   "author": "",
@@ -13,6 +13,9 @@
     "aws-sdk": "^2.564.0",
     "commander": "^4.0.1",
     "stream": "0.0.2"
+  },
+  "devDependencies": {
+    "@npmcli/promise-spawn": "^1.3.2"
   },
   "repository": {
     "type": "git",

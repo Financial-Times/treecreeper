@@ -1,0 +1,11 @@
+AnEnum:
+  description: |
+    Another example enum
+  options:
+    First: First option
+ATestEnum:
+  description: |
+    Another example enum
+  isTest: true
+  options:
+    First: First option
