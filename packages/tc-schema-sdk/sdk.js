@@ -16,7 +16,7 @@ const utils = require('./lib/utils');
 const defaultOptions = { includeTestDefinitions: false };
 
 class SDK {
-	constructor(userOptions) {
+	constructor(userOptions = {}) {
 		const options = { ...defaultOptions, ...userOptions };
 		this.cache = new Cache();
 		this.rawData = new RawDataWrapper(options);

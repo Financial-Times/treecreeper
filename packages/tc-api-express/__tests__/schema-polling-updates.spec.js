@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
 const schemaPublisher = require('@financial-times/tc-schema-publisher');
 const request = require('supertest');
-const { getApp } = require('..');
+
+let getApp;
 
 jest.useFakeTimers();
 jest.mock('@financial-times/tc-schema-publisher', () => ({
@@ -84,6 +85,7 @@ describe('schema polling updates', () => {
 					{ overwriteRoutes: false },
 				)
 				.catch(200);
+			({ getApp } = require('..'));
 			app = await getApp({
 				republishSchemaPrefix: 'custom',
 				republishSchema: true,

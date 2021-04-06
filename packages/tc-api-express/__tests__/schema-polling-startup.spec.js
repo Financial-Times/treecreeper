@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const { getApp } = require('..');
 
 describe('schema polling startup', () => {
 	beforeAll(() => {
@@ -14,6 +13,7 @@ describe('schema polling startup', () => {
 		process.env.TEST_STARTUP = true;
 		process.env.TREECREEPER_SCHEMA_URL = 'http://example.com';
 		fetch.mock('*', {});
+		const { getApp } = require('..');
 		let initialised = false;
 		const promiseOfApp = getApp({ schemaOptions: { updateMode: 'poll' } });
 		expect(initialised).toBe(false);
