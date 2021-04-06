@@ -43,8 +43,8 @@ The package exports an `init(options)` function, that takes the following option
 -   `updateMode` - 'poll' or 'stale'. 'poll' will start polling on an interval for schema updates, whereas 'stale' will fetch whenever a user calls the sdk's `refresh()` method and the schema is older than the `ttl`
 -   `logger` (default `console`) - choice of logger to use in the sdk
 -   `version` - used to specify the version of the schema being used. Only used in tests
-- `includeTestDefinitions` - (default: `false`) a flag to indicate whether to use schema definitions that are flagged as test only using `isTest: true`
-One of `schemaDirectory`, `schemaData` or `schemaBaseUrl` must be defined. If `schemaBaseUrl` is defined, then `updateMode` must also be defined.
+-   `includeTestDefinitions` - (default: `false`) a flag to indicate whether to use schema definitions that are flagged as test only using `isTest: true`
+    One of `schemaDirectory`, `schemaData` or `schemaBaseUrl` must be defined. If `schemaBaseUrl` is defined, then `updateMode` must also be defined.
 
 ### Update APIs
 
