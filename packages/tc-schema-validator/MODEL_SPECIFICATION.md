@@ -24,6 +24,7 @@ Types are defined in individual files in `schema/types`. Add a `.yaml` file name
 | createPermissions   | no       |         | An array listing the names of systems that are allowed to create instances of this type. If not specified, any system is allowed to                                                                                                                                                                             | `- biz-ops-github-importer`                       |
 | minimumViableRecord | no       |         | An array listing the names of properties of this type that are considered particularly important. This information can then be used by other systems to take action to ensure this data is entered                                                                                                              | `- delivereyTeam`                                 |
 | inactiveRule        | no       |         | Many types have an `isActive` property, which is used to specify whether a particular record is active. Some types may use different properties to define this, and may define an `inactiveRule` object defining one or more property names and the values they can take that denote they are inactive          | `lifecycleStage: Decommissioned`                  |
+| isTest        | no       |         | Types that should only be defined in test environments can flag this by setting this flag          | `isTest: true`                  |
 
 ### Property Definitions
 
@@ -46,6 +47,8 @@ Each property definition is an object with the following properties
 | pattern      | no       |                                                            | String which is the name of a [string matching pattern]string validation rule](#string-validation-rules).                                                                                                                                                                           | `CODE`, `MAX_LENGTH_64`    |
 
 | lockedBy | no | | Array of strings listing the client-ids that are allowed to edit the values stored in this property | |
+
+| isTest        | no       |         | Properties that should only be defined in test environments can flag this by setting this flag          | `isTest: true`                  |
 
 Note: All existing and any new properties, except for relationships, will automatically have the functionality to be filtered.
 
@@ -93,6 +96,8 @@ Sometimes it's useful to be able to annotate relationships with additional metad
 | to           | yes      |         | Details of the end node of the relationship. An object with two properties, `type` and `hasMany`, specifying the type and cardinality of this end of the relationship         | `{type: 'House', hasMany: false}` , `{type: 'Person', hasMany: true}` |
 | relationship | yes      |         | The name of the underlying neo4j relationship                                                                                                                                 | `LIVES_IN`                                                            |
 | properties   | no       |         | A map defining the names, types & labels etc. of properties to be stored on the relationship. See the (#property-definitions)[Property definitions section for more details]. |                                                                       |
+| isTest        | no       |         | Relationship types that should only be defined in test environments can flag this by setting this flag          | `isTest: true`                  |
+
 
 To apply rich relationship definitions to a type, carry out a substititution similar to that below:
 
@@ -181,6 +186,10 @@ StarRating:
   Two: 2
   ...
 ```
+
+
+Enums that should only be defined in test environments can flag this by setting the property `isTest: true`                  
+
 
 ### Add Description
 
