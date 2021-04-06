@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "This package saves a treecreeper schema to s3",
   "bin": {
-    "tc-schema-publisher": "scripts/deploy.js"
+    "tc-schema-publisher": "scripts/command.js"
   },
   "main": "index.js",
   "author": "",
