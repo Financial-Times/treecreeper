@@ -12,3 +12,8 @@ properties:
     type: Word
     description: stringPropertyA description.
     label: stringPropertyA label
+  stringPropertyB:
+    type: Word
+    description: stringPropertyB description.
+    label: stringPropertyB label
+    isTest: true

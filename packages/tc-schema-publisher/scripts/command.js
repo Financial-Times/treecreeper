@@ -42,6 +42,11 @@ program
 		'S3 bucket name which you want to upload. (default: "process.env.TREECREEPER_SCHEMA_BUCKET")',
 		process.env.TREECREEPER_SCHEMA_BUCKET,
 	)
+	.option(
+		'--include-test-definitions <bool>',
+		'Whether to include definitions intended only for the test environment in the release. (default: false))',
+		false,
+	)
 	.option('-E, --env <env>', 'specify publish environment', 'latest')
 	.version(pkg.version)
 	.action(action)

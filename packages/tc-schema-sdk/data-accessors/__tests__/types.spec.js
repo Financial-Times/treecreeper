@@ -1,6 +1,7 @@
 const typeAccessor = jest.fn();
 typeAccessor.mockImplementation(name => ({
-	name: `${name} - retrieved`,
+	name: `${name}`,
+	retrieved: true,
 }));
 
 jest.doMock('../../data-accessors/type', () => {
@@ -28,10 +29,12 @@ describe('get-types', () => {
 
 		expect(types).toEqual([
 			{
-				name: 'Type1 - retrieved',
+				name: 'Type1',
+				retrieved: true,
 			},
 			{
-				name: 'Type2 - retrieved',
+				name: 'Type2',
+				retrieved: true,
 			},
 		]);
 
@@ -44,7 +47,7 @@ describe('get-types', () => {
 	});
 
 	describe('with hierarchy', () => {
-		it('expects to be returned in order of type hiererchy', () => {
+		it('expects to be returned in order of type hierarchy', () => {
 			const types = new SDK({
 				schemaData: {
 					schema: {
@@ -68,10 +71,12 @@ describe('get-types', () => {
 
 			expect(types).toEqual([
 				{
-					name: 'Type2 - retrieved',
+					name: 'Type2',
+					retrieved: true,
 				},
 				{
-					name: 'Type1 - retrieved',
+					name: 'Type1',
+					retrieved: true,
 				},
 			]);
 		});
@@ -102,14 +107,16 @@ describe('get-types', () => {
 				category1: {
 					types: [
 						{
-							name: 'Type2 - retrieved',
+							name: 'Type2',
+							retrieved: true,
 						},
 					],
 				},
 				category2: {
 					types: [
 						{
-							name: 'Type1 - retrieved',
+							name: 'Type1',
+							retrieved: true,
 						},
 					],
 				},

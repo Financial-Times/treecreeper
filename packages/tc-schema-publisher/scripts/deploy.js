@@ -6,7 +6,12 @@ const { SDK } = require('@financial-times/tc-schema-sdk');
 const { sendSchemaToS3 } = require('..');
 
 const deploy = async command => {
-	const { schemaDirectory, bucketName, env } = command;
+	const {
+		schemaDirectory,
+		bucketName,
+		env,
+		includeTestDefinitions,
+	} = command;
 
 	try {
 		if (!bucketName) {
@@ -28,7 +33,7 @@ const deploy = async command => {
 		if (!stat.isDirectory()) {
 			throw new Error('schema directory is not a directory');
 		}
-		const schema = new SDK({ schemaDirectory });
+		const schema = new SDK({ schemaDirectory, includeTestDefinitions });
 		await sendSchemaToS3(env, bucketName, schema);
 		console.log('successfully deployed');
 	} catch (err) {
