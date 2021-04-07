@@ -95,25 +95,13 @@ const schemaFixture = {
 };
 
 describe('test schema properties', () => {
-	it('excludes test properties by default', async () => {
-		const schema = new SDK({ schemaData: { schema: schemaFixture } });
-		await schema.ready();
-		expect(schema.getTypes().length).toEqual(1);
-		expect(schema.getTypes()[0].name).toEqual('TypeA');
-		expect(Object.keys(schema.getTypes()[0].properties)).toEqual([
-			'code',
-			'stringPropertyA',
-		]);
-		expect(Object.keys(schema.getEnums())).toEqual(['AnEnum']);
-		expect(Object.keys(schema.getTypes({ grouped: true }))).toEqual([
-			'prod',
-		]);
-		expect(schema.getTypes({ grouped: true }).prod.types[0].name).toEqual(
-			'TypeA',
-		);
-	});
 
-	it('includes test properties on demand', async () => {
+	// Note that this behaviour is the opposite as tc-schema-publisher
+	// This is because, consider teh test environment:
+	// 1. tc-schema-publisher explicitly publishes including test properties
+	// 2. Now that they are in, we don't want any instance of the SDK running in a
+	//		test app to strip them out again!
+	it('includes test properties by default', async () => {
 		const schema = new SDK({
 			schemaData: { schema: schemaFixture },
 			includeTestDefinitions: true,
@@ -137,6 +125,24 @@ describe('test schema properties', () => {
 		);
 		expect(schema.getTypes({ grouped: true }).test.types[0].name).toEqual(
 			'TypeB',
+		);
+	});
+
+	it('excludes test properties on demand', async () => {
+		const schema = new SDK({ schemaData: { schema: schemaFixture } });
+		await schema.ready();
+		expect(schema.getTypes().length).toEqual(1);
+		expect(schema.getTypes()[0].name).toEqual('TypeA');
+		expect(Object.keys(schema.getTypes()[0].properties)).toEqual([
+			'code',
+			'stringPropertyA',
+		]);
+		expect(Object.keys(schema.getEnums())).toEqual(['AnEnum']);
+		expect(Object.keys(schema.getTypes({ grouped: true }))).toEqual([
+			'prod',
+		]);
+		expect(schema.getTypes({ grouped: true }).prod.types[0].name).toEqual(
+			'TypeA',
 		);
 	});
 });

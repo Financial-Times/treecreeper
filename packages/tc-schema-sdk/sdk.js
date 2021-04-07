@@ -13,7 +13,7 @@ const relationshipType = require('./data-accessors/relationship-type');
 const { SchemaUpdater } = require('./lib/updater');
 const utils = require('./lib/utils');
 
-const defaultOptions = { includeTestDefinitions: false };
+const defaultOptions = { includeTestDefinitions: true };
 
 class SDK {
 	constructor(userOptions = {}) {
