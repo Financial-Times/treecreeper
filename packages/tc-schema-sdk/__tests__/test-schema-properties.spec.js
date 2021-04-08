@@ -95,7 +95,6 @@ const schemaFixture = {
 };
 
 describe('test schema properties', () => {
-
 	// Note that this behaviour is the opposite as tc-schema-publisher
 	// This is because, consider teh test environment:
 	// 1. tc-schema-publisher explicitly publishes including test properties
@@ -104,7 +103,6 @@ describe('test schema properties', () => {
 	it('includes test properties by default', async () => {
 		const schema = new SDK({
 			schemaData: { schema: schemaFixture },
-			includeTestDefinitions: true,
 		});
 		await schema.ready();
 		expect(schema.getTypes().length).toEqual(2);
@@ -129,7 +127,10 @@ describe('test schema properties', () => {
 	});
 
 	it('excludes test properties on demand', async () => {
-		const schema = new SDK({ schemaData: { schema: schemaFixture } });
+		const schema = new SDK({
+			schemaData: { schema: schemaFixture },
+			includeTestDefinitions: false,
+		});
 		await schema.ready();
 		expect(schema.getTypes().length).toEqual(1);
 		expect(schema.getTypes()[0].name).toEqual('TypeA');
