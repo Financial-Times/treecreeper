@@ -14,8 +14,12 @@ const validateEnvironment = () => {
 		/^neo4j\+ssc:/,
 		'Neo4J URL not valid',
 	);
-	assert.ok(process.env.NEO4J_BOLT_USER, 'Neo4J username not set');
-	assert.ok(process.env.NEO4J_BOLT_PASSWORD, 'Neo4J password not set');
+
+	// In development we tend to run unauthenticated databases
+	if (process.env.NODE_ENV === 'production') {
+		assert.ok(process.env.NEO4J_BOLT_USER, 'Neo4J username not set');
+		assert.ok(process.env.NEO4J_BOLT_PASSWORD, 'Neo4J password not set');
+	}
 };
 
 validateEnvironment();
