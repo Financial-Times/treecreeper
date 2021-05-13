@@ -9,11 +9,6 @@ let TIMEOUT;
 // error messages later.
 const validateEnvironment = () => {
 	assert.ok(process.env.NEO4J_BOLT_URL, 'Neo4J URL not set');
-	assert.match(
-		process.env.NEO4J_BOLT_URL,
-		process.env.NODE_ENV === 'production' ? /^neo4j\+s:/ : /^neo4j:/,
-		'Neo4J URL not valid',
-	);
 
 	// In development we tend to run unauthenticated databases
 	if (process.env.NODE_ENV === 'production') {

@@ -32,12 +32,10 @@ class SDK {
 		this.getStringValidator = this.createEnrichedAccessor(stringValidator);
 		this.getType = this.createEnrichedAccessor(type);
 		this.getTypes = this.createEnrichedAccessor(types);
-		this.getRelationshipType = this.createEnrichedAccessor(
-			relationshipType,
-		);
-		this.getRelationshipTypes = this.createEnrichedAccessor(
-			relationshipTypes,
-		);
+		this.getRelationshipType =
+			this.createEnrichedAccessor(relationshipType);
+		this.getRelationshipTypes =
+			this.createEnrichedAccessor(relationshipTypes);
 		this.getGraphqlDefs = graphqlDefs.accessor.bind(this);
 		this.validators = getValidators(this);
 		this.ready = this.ready.bind(this);

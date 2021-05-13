@@ -30,43 +30,42 @@ const isProperty = type => {
 		properties[propName] && !properties[propName].isRelationship;
 };
 
-const getPropertyChangeDetector = (properties, initialContent) => ([
-	propName,
-	newVal,
-]) => {
-	const { type, hasMany } = properties[propName] || {};
+const getPropertyChangeDetector =
+	(properties, initialContent) =>
+	([propName, newVal]) => {
+		const { type, hasMany } = properties[propName] || {};
 
-	if (!(propName in initialContent)) {
-		return !isNullValue(newVal);
-	}
+		if (!(propName in initialContent)) {
+			return !isNullValue(newVal);
+		}
 
-	if (isNullValue(newVal)) {
-		return true;
-	}
+		if (isNullValue(newVal)) {
+			return true;
+		}
 
-	const oldVal = initialContent[propName];
+		const oldVal = initialContent[propName];
 
-	if (isTemporalTypeName(type)) {
-		return !datesAreEqual(
-			type,
-			newVal,
-			initialContent[propName],
-			neo4jTemporalTypes[type],
-		);
-	}
+		if (isTemporalTypeName(type)) {
+			return !datesAreEqual(
+				type,
+				newVal,
+				initialContent[propName],
+				neo4jTemporalTypes[type],
+			);
+		}
 
-	if (hasMany) {
-		const sortedNew = newVal.sort();
-		const sortedOld = oldVal.sort();
+		if (hasMany) {
+			const sortedNew = newVal.sort();
+			const sortedOld = oldVal.sort();
 
-		return (
-			sortedNew.some((val, i) => sortedOld[i] !== val) ||
-			sortedOld.some((val, i) => sortedNew[i] !== val)
-		);
-	}
+			return (
+				sortedNew.some((val, i) => sortedOld[i] !== val) ||
+				sortedOld.some((val, i) => sortedNew[i] !== val)
+			);
+		}
 
-	return newVal !== oldVal;
-};
+		return newVal !== oldVal;
+	};
 
 const detectPropertyChanges = (type, initialContent = {}) => {
 	if (!Object.keys(initialContent).length) {

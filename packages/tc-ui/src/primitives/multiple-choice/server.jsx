@@ -85,14 +85,8 @@ const Checkbox = ({
 };
 
 const EditMultipleChoice = props => {
-	const {
-		propertyName,
-		disabled,
-		isNested,
-		parentCode,
-		onChange,
-		type,
-	} = props;
+	const { propertyName, disabled, isNested, parentCode, onChange, type } =
+		props;
 	const name = !isNested ? propertyName : '';
 	const options = Object.keys(getEnums()[type]);
 	const value = props.value || [];

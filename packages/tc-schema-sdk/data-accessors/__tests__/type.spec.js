@@ -770,8 +770,7 @@ describe('get-type', () => {
 				properties: {
 					testName: {
 						type: 'Type2',
-						cypher:
-							'MATCH (this)-[]->(related) RETURN DISTINCT related',
+						cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 						label: 'test label',
 						description: 'test description',
 					},
@@ -807,8 +806,7 @@ describe('get-type', () => {
 						cypherMany: {
 							type: 'Type2',
 							hasMany: true,
-							cypher:
-								'MATCH (this)-[]->(related) RETURN DISTINCT related',
+							cypher: 'MATCH (this)-[]->(related) RETURN DISTINCT related',
 						},
 					},
 				},

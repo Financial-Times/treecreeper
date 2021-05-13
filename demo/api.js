@@ -1,8 +1,8 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');
-const expressPlayground = require('graphql-playground-middleware-express')
-	.default;
+const expressPlayground =
+	require('graphql-playground-middleware-express').default;
 const { getApp } = require('../packages/tc-api-express');
 const { createStore } = require('../packages/tc-api-s3-document-store');
 const { autocomplete } = require('./controllers/autocomplete');

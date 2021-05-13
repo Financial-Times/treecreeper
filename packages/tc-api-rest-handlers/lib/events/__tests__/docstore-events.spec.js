@@ -203,8 +203,7 @@ describe('docstore events', () => {
 			s3Client.upload.mockImplementation(() => ({
 				promise: () =>
 					Promise.resolve({
-						Body:
-							'{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
+						Body: '{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
 					}),
 			}));
 			const { status } = await patchHandler({
@@ -302,8 +301,7 @@ describe('docstore events', () => {
 				promise: () =>
 					Promise.resolve({
 						VersionId: 'lalalala',
-						Body:
-							'{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
+						Body: '{"firstDocumentProperty": "some document", "secondDocumentProperty": "another document"}',
 					}),
 			}));
 

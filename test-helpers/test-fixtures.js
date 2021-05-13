@@ -5,27 +5,26 @@ const { driver } = require('./db-connection');
 const executeQuery = (query, parameters) =>
 	driver.session().run(query, parameters);
 
-const getNodeCreator = (namespace, defaultProps) => async (
-	type,
-	props = {},
-) => {
-	if (typeof props === 'string') {
-		props = { code: props };
-	}
-	const result = await executeQuery(`CREATE (n:${type} $props) RETURN n`, {
-		props: { ...defaultProps, ...props },
-	});
-	return result.records[0].get('n').identity;
-};
+const getNodeCreator =
+	(namespace, defaultProps) =>
+	async (type, props = {}) => {
+		if (typeof props === 'string') {
+			props = { code: props };
+		}
+		const result = await executeQuery(
+			`CREATE (n:${type} $props) RETURN n`,
+			{
+				props: { ...defaultProps, ...props },
+			},
+		);
+		return result.records[0].get('n').identity;
+	};
 
-const getConnector = (namespace, defaultProps) => (
-	id1,
-	relationshipType,
-	id2,
-	props = {},
-) =>
-	executeQuery(
-		`
+const getConnector =
+	(namespace, defaultProps) =>
+	(id1, relationshipType, id2, props = {}) =>
+		executeQuery(
+			`
 MATCH (n1) WHERE ID(n1) = toInteger($id1)
 WITH n1
 MATCH (n2) WHERE ID(n2) = toInteger($id2)
@@ -33,12 +32,12 @@ WITH n1, n2
 MERGE (n1)-[rel:${relationshipType}]->(n2)
 SET rel = $props
 RETURN n1, n2, rel`,
-		{
-			id1,
-			id2,
-			props: { ...defaultProps, ...props },
-		},
-	);
+			{
+				id1,
+				id2,
+				props: { ...defaultProps, ...props },
+			},
+		);
 
 const fixtureBuilder = (namespace, now, then) => {
 	const getMetaPayload = () => ({

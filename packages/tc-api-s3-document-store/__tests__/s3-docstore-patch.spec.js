@@ -66,9 +66,8 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
-			givenVersionMarker,
-		);
+		const { stubUpload, stubGetObject, s3Instance } =
+			mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 		const expectedData = createExampleBodyData();
 
@@ -95,12 +94,8 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const {
-			stubUpload,
-			stubGetObject,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Patch(givenVersionMarker);
+		const { stubUpload, stubGetObject, stubDeleteOnUndo, s3Instance } =
+			mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 		const expectedData = createExampleBodyData();
 
@@ -152,12 +147,8 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const {
-			stubUpload,
-			stubGetObject,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Patch(givenVersionMarker);
+		const { stubUpload, stubGetObject, stubDeleteOnUndo, s3Instance } =
+			mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 
 		const patchBody = {
@@ -207,12 +198,8 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const {
-			stubUpload,
-			stubGetObject,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Patch(givenVersionMarker);
+		const { stubUpload, stubGetObject, stubDeleteOnUndo, s3Instance } =
+			mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 
 		const patchBody = {
@@ -262,9 +249,8 @@ describe('S3 document helper patch', () => {
 		const givenSystemCode = 'docstore-patch-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, stubGetObject, s3Instance } = mockS3Patch(
-			givenVersionMarker,
-		);
+		const { stubUpload, stubGetObject, s3Instance } =
+			mockS3Patch(givenVersionMarker);
 		const store = docstore(s3Instance);
 
 		stubGetObject.mockResolvedValue({

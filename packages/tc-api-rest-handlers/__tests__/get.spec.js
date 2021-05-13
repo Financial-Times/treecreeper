@@ -10,9 +10,8 @@ describe('rest GET', () => {
 		code: mainCode,
 	};
 
-	const { createNodes, createNode, connectNodes, stockMetadata } = setupMocks(
-		namespace,
-	);
+	const { createNodes, createNode, connectNodes, stockMetadata } =
+		setupMocks(namespace);
 
 	it('gets record without relationships', async () => {
 		await createNode('SimpleGraphBranch', {

@@ -112,9 +112,8 @@ module.exports = function parseNestedMutlilineProperties({
 		if (!isNested) {
 			return;
 		}
-		const { hasMany, properties: nestedProperties = {} } = properties[
-			node.key
-		];
+		const { hasMany, properties: nestedProperties = {} } =
+			properties[node.key];
 		const listedDefinitions = selectAll('listItem', node);
 		try {
 			if (!listedDefinitions.length) {

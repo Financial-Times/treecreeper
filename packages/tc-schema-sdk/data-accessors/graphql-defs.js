@@ -148,84 +148,81 @@ as well as on the records themselves. Use '${fieldName}' instead if you do not n
 	});
 };
 
-const addTypeDefinition = (composer, sdk) => ({
-	name: typeName,
-	pluralName,
-	description,
-	properties,
-}) => {
-	composer.createObjectTC({ name: typeName, description });
+const addTypeDefinition =
+	(composer, sdk) =>
+	({ name: typeName, pluralName, description, properties }) => {
+		composer.createObjectTC({ name: typeName, description });
 
-	// Build up the type definition
-	composeObjectProperties({ typeName, properties, sdk, composer });
+		// Build up the type definition
+		composeObjectProperties({ typeName, properties, sdk, composer });
 
-	// Add the ability to query for a single record
-	composer.Query.setField(typeName, {
-		type: typeName,
-		args: Object.fromEntries(
-			Object.entries(properties)
-				.filter(([, def]) => def.canIdentify)
-				.map(([name, { type }]) => [name, getGraphqlType(sdk)(type)]),
-		),
-	});
-
-	// Add the ability to query for a list of records
-	composer.Query.setField(pluralName, {
-		type: [typeName],
-		args: {
-			...PAGINATION_ARGS,
-			...Object.fromEntries(
+		// Add the ability to query for a single record
+		composer.Query.setField(typeName, {
+			type: typeName,
+			args: Object.fromEntries(
 				Object.entries(properties)
-					.filter(([, def]) => !def.relationship && !def.cypher)
+					.filter(([, def]) => def.canIdentify)
 					.map(([name, { type }]) => [
 						name,
 						getGraphqlType(sdk)(type),
 					]),
 			),
-		},
-	});
-};
+		});
 
-const addRelationshipTypeDefinition = (composer, sdk) => ({
-	from,
-	to,
-	relationship,
-	properties,
-}) => {
-	const typeName = getRelationshipTypeName({ from, to, relationship });
+		// Add the ability to query for a list of records
+		composer.Query.setField(pluralName, {
+			type: [typeName],
+			args: {
+				...PAGINATION_ARGS,
+				...Object.fromEntries(
+					Object.entries(properties)
+						.filter(([, def]) => !def.relationship && !def.cypher)
+						.map(([name, { type }]) => [
+							name,
+							getGraphqlType(sdk)(type),
+						]),
+				),
+			},
+		});
+	};
 
-	// Use getOrCreate because the relationships type may be referenced
-	// in muiltiple places
-	composer.getOrCreateOTC({
-		name: typeName,
-		description: 'Internal use only',
-		extensions: {
-			directives: [
-				{
-					name: 'relation',
-					args: {
-						name: relationship,
+const addRelationshipTypeDefinition =
+	(composer, sdk) =>
+	({ from, to, relationship, properties }) => {
+		const typeName = getRelationshipTypeName({ from, to, relationship });
+
+		// Use getOrCreate because the relationships type may be referenced
+		// in muiltiple places
+		composer.getOrCreateOTC({
+			name: typeName,
+			description: 'Internal use only',
+			extensions: {
+				directives: [
+					{
+						name: 'relation',
+						args: {
+							name: relationship,
+						},
 					},
-				},
-			],
-		},
-	});
+				],
+			},
+		});
 
-	const objectTypeComposer = composer.types.get(typeName);
+		const objectTypeComposer = composer.types.get(typeName);
 
-	// As standard, relationship types must contain from and to
-	objectTypeComposer.addFields({
-		from: {
-			type: () => from.type,
-		},
-		to: {
-			type: () => to.type,
-		},
-	});
+		// As standard, relationship types must contain from and to
+		objectTypeComposer.addFields({
+			from: {
+				type: () => from.type,
+			},
+			to: {
+				type: () => to.type,
+			},
+		});
 
-	// Add additional properties to the type exactly as though it were a normal type
-	composeObjectProperties({ typeName, properties, sdk, composer });
-};
+		// Add additional properties to the type exactly as though it were a normal type
+		composeObjectProperties({ typeName, properties, sdk, composer });
+	};
 
 const compose = sdk => {
 	const composer = new SchemaComposer();

@@ -112,9 +112,8 @@ module.exports = {
 		};
 	},
 	Boolean(subdocument) {
-		const flattenedContent = flattenNodeToPlainString(
-			subdocument,
-		).toLowerCase();
+		const flattenedContent =
+			flattenNodeToPlainString(subdocument).toLowerCase();
 
 		switch (flattenedContent) {
 			case 'true':

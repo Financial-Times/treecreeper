@@ -22,9 +22,8 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 			if (fieldNamesToLock.includes(propertyName)) {
 				lockedBy = fieldsToLock[propertyName];
 			}
-			const { EditComponent, AdditionalEditComponent } = assignComponent(
-				propDef,
-			);
+			const { EditComponent, AdditionalEditComponent } =
+				assignComponent(propDef);
 
 			const itemValue = propDef.isRelationship
 				? data[`${propertyName}_rel`] || data[propertyName]

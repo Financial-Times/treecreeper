@@ -6,12 +6,8 @@ const { SDK } = require('@financial-times/tc-schema-sdk');
 const { sendSchemaToS3 } = require('..');
 
 const deploy = async command => {
-	const {
-		schemaDirectory,
-		bucketName,
-		env,
-		includeTestDefinitions,
-	} = command;
+	const { schemaDirectory, bucketName, env, includeTestDefinitions } =
+		command;
 
 	try {
 		if (!bucketName) {
