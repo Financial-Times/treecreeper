@@ -2,17 +2,13 @@ const propertyNameRegex = /^[a-z][a-zA-Z\d]+$/;
 const { stripIndents } = require('common-tags');
 const TreecreeperUserError = require('./biz-ops-error');
 
-const throwInvalidValueError = (
-	typeName,
-	propertyName,
-	propertyValue,
-	aliasPropertyName,
-) => reason => {
-	const propName = aliasPropertyName || propertyName;
-	throw new TreecreeperUserError(
-		stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
-	);
-};
+const throwInvalidValueError =
+	(typeName, propertyName, propertyValue, aliasPropertyName) => reason => {
+		const propName = aliasPropertyName || propertyName;
+		throw new TreecreeperUserError(
+			stripIndents`Invalid value \`${propertyValue}\` for property \`${propName}\` on type \`${typeName}\`: ${reason}`,
+		);
+	};
 
 const validateBoolean = (type, value, exit) => {
 	if (type === 'Boolean') {
@@ -158,12 +154,8 @@ const validateProperty = ({
 			);
 		}
 
-		const {
-			validator,
-			isRelationship,
-			hasMany,
-			cypher,
-		} = propertyDefinition;
+		const { validator, isRelationship, hasMany, cypher } =
+			propertyDefinition;
 
 		const primitiveTypesMap = getPrimitiveTypes();
 

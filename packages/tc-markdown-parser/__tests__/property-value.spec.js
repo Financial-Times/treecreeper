@@ -291,7 +291,8 @@ test('subdocuments have their headers reduced two levels', async () => {
 
 // There are currently no date fields permitted in runbook.md; lastServiceReviewDate is reserved for Ops manual entry
 test('date fields are coerced to iso strings', async () => {
-	const naiveJavaScriptIsoStringRegex = /^\d{4}(?:-\d{2}){2}T(?:\d{2}:){2}\d{2}\.\d{3}Z$/;
+	const naiveJavaScriptIsoStringRegex =
+		/^\d{4}(?:-\d{2}){2}T(?:\d{2}:){2}\d{2}\.\d{3}Z$/;
 	const { data } = await parser.parseMarkdownString(here`
 		# name
 

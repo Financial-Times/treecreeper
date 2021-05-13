@@ -18,16 +18,14 @@ ajvErrors(ajv);
 
 const signpostTypeError = (error, kind) => {
 	// this takes e.g. /types/0/properties/code/type and splits into its constituent parts
-	const [
-		typeIndex,
-		topLevelProperty,
-		property,
-		propDefPart,
-	] = error.dataPath.split('/').slice(2);
+	const [typeIndex, topLevelProperty, property, propDefPart] = error.dataPath
+		.split('/')
+		.slice(2);
 
-	const typeDef = sdk.rawData[
-		kind === 'type' ? 'getTypes' : 'getRelationshipTypes'
-	]()[typeIndex];
+	const typeDef =
+		sdk.rawData[kind === 'type' ? 'getTypes' : 'getRelationshipTypes']()[
+			typeIndex
+		];
 
 	if (topLevelProperty === 'properties') {
 		if (propDefPart) {

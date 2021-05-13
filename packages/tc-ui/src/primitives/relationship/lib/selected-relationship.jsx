@@ -12,9 +12,8 @@ class SelectedRelationship extends React.Component {
 			annotate: this.props.annotate,
 		};
 
-		this.showRichRelationshipEditor = this.showRichRelationshipEditor.bind(
-			this,
-		);
+		this.showRichRelationshipEditor =
+			this.showRichRelationshipEditor.bind(this);
 	}
 
 	componentDidMount() {

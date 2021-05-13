@@ -8,12 +8,8 @@ describe('rest POST', () => {
 	const namespace = 'api-rest-handlers-post';
 	const branchCode = `${namespace}-branch`;
 
-	const {
-		createNodes,
-		createNode,
-		stockMetadata,
-		getMetaPayload,
-	} = setupMocks(namespace);
+	const { createNodes, createNode, stockMetadata, getMetaPayload } =
+		setupMocks(namespace);
 
 	describe('writing disconnected records', () => {
 		const postPropertiesTestPayload = body =>
@@ -665,7 +661,8 @@ describe('rest POST', () => {
 				}),
 			).rejects.httpError({
 				status: 400,
-				message: /clientId needs to be set to a valid system code in order to lock fields/,
+				message:
+					/clientId needs to be set to a valid system code in order to lock fields/,
 			});
 			await neo4jTest('PropertiesTest', branchCode).notExists();
 		});

@@ -80,48 +80,49 @@ const isDeleteRelationship = type => {
 		(isRelationship(propName) && codes === null);
 };
 
-const findActualDeletions = initialContent => ([propName, newValues]) => {
-	const codesToDelete = newValues && newValues.map(value => value.code);
-	const realPropName = unNegatePropertyName(propName);
-	const isDeleteAll = realPropName === propName && codesToDelete === null;
-	const initialCodes = retrieveRelationshipCodes(
-		realPropName,
-		initialContent,
-	);
-
-	return [
-		realPropName,
-		toArray(isDeleteAll ? initialCodes : codesToDelete).filter(code =>
-			(initialCodes || []).includes(code),
-		),
-	];
-};
-
-const findImplicitDeletions = (initialContent, schema, action) => ([
-	relType,
-	newValues,
-]) => {
-	const newCodes = newValues.map(value => value.code);
-	const isCardinalityOne = !schema.properties[relType].hasMany;
-	if (action === 'replace' || isCardinalityOne) {
-		const existingCodes = retrieveRelationshipCodes(
-			relType,
+const findActualDeletions =
+	initialContent =>
+	([propName, newValues]) => {
+		const codesToDelete = newValues && newValues.map(value => value.code);
+		const realPropName = unNegatePropertyName(propName);
+		const isDeleteAll = realPropName === propName && codesToDelete === null;
+		const initialCodes = retrieveRelationshipCodes(
+			realPropName,
 			initialContent,
 		);
-		if (!existingCodes) {
-			return;
-		}
-		const existingCodesOnly = arrDiff(existingCodes, toArray(newCodes));
-		if (existingCodesOnly.length) {
-			return [relType, existingCodesOnly];
-		}
-	}
-};
 
-const findActualAdditions = initialContent => ([relType, newRelationships]) => [
-	relType,
-	getDiffs(newRelationships, initialContent[relType]),
-];
+		return [
+			realPropName,
+			toArray(isDeleteAll ? initialCodes : codesToDelete).filter(code =>
+				(initialCodes || []).includes(code),
+			),
+		];
+	};
+
+const findImplicitDeletions =
+	(initialContent, schema, action) =>
+	([relType, newValues]) => {
+		const newCodes = newValues.map(value => value.code);
+		const isCardinalityOne = !schema.properties[relType].hasMany;
+		if (action === 'replace' || isCardinalityOne) {
+			const existingCodes = retrieveRelationshipCodes(
+				relType,
+				initialContent,
+			);
+			if (!existingCodes) {
+				return;
+			}
+			const existingCodesOnly = arrDiff(existingCodes, toArray(newCodes));
+			if (existingCodesOnly.length) {
+				return [relType, existingCodesOnly];
+			}
+		}
+	};
+
+const findActualAdditions =
+	initialContent =>
+	([relType, newRelationships]) =>
+		[relType, getDiffs(newRelationships, initialContent[relType])];
 
 const getRemovedRelationships = ({
 	type,

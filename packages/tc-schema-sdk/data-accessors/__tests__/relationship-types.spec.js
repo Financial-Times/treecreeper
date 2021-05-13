@@ -124,8 +124,7 @@ describe('get-relationship-types', () => {
 							name: 'Type1',
 							properties: {
 								relatedTo: {
-									cypher:
-										'MATCH (n1:Type1)-[:RELATED]->(n2:Type2)',
+									cypher: 'MATCH (n1:Type1)-[:RELATED]->(n2:Type2)',
 								},
 							},
 						},
@@ -133,8 +132,7 @@ describe('get-relationship-types', () => {
 							name: 'Type2',
 							properties: {
 								relatedFrom: {
-									cypher:
-										'MATCH (n1:Type1)-[:RELATED]->(n2:Type2)',
+									cypher: 'MATCH (n1:Type1)-[:RELATED]->(n2:Type2)',
 								},
 							},
 						},

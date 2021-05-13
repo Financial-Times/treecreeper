@@ -67,11 +67,10 @@ const constructOutput = ({
 								propertyType === record.relatedType(),
 						)
 						.map(record => {
-							const convertedRelationshipsProps = convertNeo4jToJson(
-								{
+							const convertedRelationshipsProps =
+								convertNeo4jToJson({
 									...record.richRelationship().properties,
-								},
-							);
+								});
 							return richRelationshipsFlag
 								? {
 										...convertedRelationshipsProps,

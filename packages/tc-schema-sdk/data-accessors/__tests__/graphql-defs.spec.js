@@ -56,8 +56,7 @@ describe('graphql def creation', () => {
 						hasNestedGroups: {
 							type: 'Group',
 							hasMany: true,
-							cypher:
-								'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
+							cypher: 'MATCH (this)-[:PAYS_FOR*1..20]->(related:Group) RETURN DISTINCT related',
 							description:
 								'The recursive groups which are costed to the cost centre',
 						},

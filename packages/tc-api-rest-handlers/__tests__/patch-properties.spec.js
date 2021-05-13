@@ -261,9 +261,10 @@ describe('rest PATCH properties', () => {
 				});
 				it('updates existing Datetime', async () => {
 					await createPropertiesTestRecord({
-						datetimeProperty: neo4jTemporalTypes.DateTime.fromStandardDate(
-							new Date('2018-01-09T00:00:00.001Z'),
-						),
+						datetimeProperty:
+							neo4jTemporalTypes.DateTime.fromStandardDate(
+								new Date('2018-01-09T00:00:00.001Z'),
+							),
 					});
 					const datetime = '2019-01-09T00:00:00.001Z';
 					const { status, body } = await patchPropertiesTestRecord({
@@ -283,9 +284,10 @@ describe('rest PATCH properties', () => {
 				it("doesn't update when effectively the same Datetime", async () => {
 					const datetime = '2019-01-09T00:00:00.001Z';
 					await createPropertiesTestRecord({
-						datetimeProperty: neo4jTemporalTypes.DateTime.fromStandardDate(
-							new Date('2019-01-09T00:00:00.001Z'),
-						),
+						datetimeProperty:
+							neo4jTemporalTypes.DateTime.fromStandardDate(
+								new Date('2019-01-09T00:00:00.001Z'),
+							),
 					});
 					const dbQuerySpy = spyDbQuery();
 					const { status, body } = await patchPropertiesTestRecord({

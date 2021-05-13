@@ -114,8 +114,7 @@ const getPrimaryNavItems = ({ activeNavItem }) =>
 				{ text: 'Team list', url: '/list/Teams' },
 				{
 					text: 'Platinum Systems',
-					url:
-						'/list/Systems?title=Platinum Systems&serviceTier=Platinum&lifecycleStage=Production&extras=deliveredBy,supportedBy,sosTrafficLight',
+					url: '/list/Systems?title=Platinum Systems&serviceTier=Platinum&lifecycleStage=Production&extras=deliveredBy,supportedBy,sosTrafficLight',
 				},
 			],
 		},
@@ -153,18 +152,15 @@ const getPrimaryNavItems = ({ activeNavItem }) =>
 			items: [
 				{
 					text: 'Decommissioned Systems',
-					url:
-						'/list/Systems?title=Decommissioned Systems&lifecycleStage=Decommissioned',
+					url: '/list/Systems?title=Decommissioned Systems&lifecycleStage=Decommissioned',
 				},
 				{
 					text: 'Discontinued Systems',
-					url:
-						'/list/Systems?title=Discontinued Systems&lifecycleStage=Discontinued',
+					url: '/list/Systems?title=Discontinued Systems&lifecycleStage=Discontinued',
 				},
 				{
 					text: 'Deprecated Systems',
-					url:
-						'/list/Systems?title=Deprecated Systems&lifecycleStage=Deprecated',
+					url: '/list/Systems?title=Deprecated Systems&lifecycleStage=Deprecated',
 				},
 				{
 					text: 'Inactive Teams',
@@ -173,13 +169,11 @@ const getPrimaryNavItems = ({ activeNavItem }) =>
 
 				{
 					text: 'Unowned Systems',
-					url:
-						'/list/Systems?title=Unowned Systems&deliveredBy=null&supportedBy=null&lifecycleStage=!Decommissioned&extras=deliveredBy,supportedBy',
+					url: '/list/Systems?title=Unowned Systems&deliveredBy=null&supportedBy=null&lifecycleStage=!Decommissioned&extras=deliveredBy,supportedBy',
 				},
 				{
 					text: 'Unsupported Systems',
-					url:
-						'/list/Systems?title=Unsupported Systems&serviceTier=Unsupported&lifecycleStage=!Decommissioned&extras=deliveredBy,supportedBy',
+					url: '/list/Systems?title=Unsupported Systems&serviceTier=Unsupported&lifecycleStage=!Decommissioned&extras=deliveredBy,supportedBy',
 				},
 				{
 					text: 'Undefined Systems',

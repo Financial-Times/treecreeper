@@ -71,11 +71,8 @@ const patchHandler = ({ documentStore } = {}) => {
 			};
 
 			if (builder.isNeo4jUpdateNeeded()) {
-				const {
-					neo4jResult,
-					queryContext,
-					parameters,
-				} = await builder.execute();
+				const { neo4jResult, queryContext, parameters } =
+					await builder.execute();
 				neo4jResultBody = neo4jResult.toJson({
 					type,
 					richRelationshipsFlag: richRelationships,

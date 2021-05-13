@@ -31,8 +31,7 @@ const TailAssets = ({ mainJs, origamiJs }) => (
 		<script defer src={origamiJs} />
 		<script
 			dangerouslySetInnerHTML={{
-				__html:
-					"document.documentElement.classList.replace('core', 'enhanced')",
+				__html: "document.documentElement.classList.replace('core', 'enhanced')",
 			}}
 		/>
 	</>

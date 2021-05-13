@@ -98,10 +98,8 @@ const queryBuilder = (method, input, body = {}) => {
 
 	const createRelationships = () => {
 		const relationships = getWriteRelationships({ type, body });
-		const {
-			relationshipParameters,
-			relationshipQueries,
-		} = prepareToWriteRelationships(type, relationships, upsert);
+		const { relationshipParameters, relationshipQueries } =
+			prepareToWriteRelationships(type, relationships, upsert);
 		queryParts.push(...relationshipQueries);
 		updateParameter(relationshipParameters);
 		context.changedRelationships = relationships;
@@ -123,8 +121,8 @@ const queryBuilder = (method, input, body = {}) => {
 			queryParts.push(...deleteRelationshipQueries);
 			updateParameter(deleteRelationshipParams);
 		}
-		context.willDeleteRelationships = !!Object.keys(removedRelationships)
-			.length;
+		context.willDeleteRelationships =
+			!!Object.keys(removedRelationships).length;
 		context.removedRelationships = removedRelationships;
 		return builder;
 	};
@@ -144,15 +142,15 @@ const queryBuilder = (method, input, body = {}) => {
 			updateParameter(changeRelationshipParams);
 		}
 		const isRelationship = identifyRelationships(type);
-		const initialContentRels = Object.keys(
-			initialContent,
-		).filter(propName => isRelationship(propName));
+		const initialContentRels = Object.keys(initialContent).filter(
+			propName => isRelationship(propName),
+		);
 
 		// context.willChangeRelationships indicates these changes are included
 		// - creating new relationships
 		// - updating relationship props (additons and deletions)
-		context.willChangeRelationships = !!Object.keys(changedRelationships)
-			.length;
+		context.willChangeRelationships =
+			!!Object.keys(changedRelationships).length;
 		context.willCreateRelationships = !_isEmpty(
 			Object.keys(changedRelationships).filter(
 				changedRelationship =>

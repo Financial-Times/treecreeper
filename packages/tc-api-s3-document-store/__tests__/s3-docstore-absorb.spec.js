@@ -166,16 +166,11 @@ describe('S3 document helper absorb', () => {
 		const rootNodeBody = createDestinationBodyData();
 		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const {
-			stubGet,
-			stubPost,
-			stubDelete,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Absorb(
-			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
-			{ rootSystemCode, rootNodeBody, rootVersionMarker },
-		);
+		const { stubGet, stubPost, stubDelete, stubDeleteOnUndo, s3Instance } =
+			mockS3Absorb(
+				{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+				{ rootSystemCode, rootNodeBody, rootVersionMarker },
+			);
 
 		const store = docstore(s3Instance);
 
@@ -386,16 +381,11 @@ describe('S3 document helper absorb', () => {
 		const rootNodeBody = createDestinationBodyData();
 		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const {
-			stubGet,
-			stubPost,
-			stubDelete,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Absorb(
-			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
-			{ rootSystemCode, rootNodeBody, rootVersionMarker },
-		);
+		const { stubGet, stubPost, stubDelete, stubDeleteOnUndo, s3Instance } =
+			mockS3Absorb(
+				{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+				{ rootSystemCode, rootNodeBody, rootVersionMarker },
+			);
 
 		const store = docstore(s3Instance);
 		await expect(
@@ -441,16 +431,11 @@ describe('S3 document helper absorb', () => {
 		const rootNodeBody = createDestinationBodyData();
 		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const {
-			stubGet,
-			stubPost,
-			stubDelete,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Absorb(
-			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
-			{ rootSystemCode, rootNodeBody, rootVersionMarker },
-		);
+		const { stubGet, stubPost, stubDelete, stubDeleteOnUndo, s3Instance } =
+			mockS3Absorb(
+				{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+				{ rootSystemCode, rootNodeBody, rootVersionMarker },
+			);
 
 		const store = docstore(s3Instance);
 		await expect(
@@ -496,16 +481,11 @@ describe('S3 document helper absorb', () => {
 		const rootNodeBody = createDestinationBodyData();
 		const rootVersionMarker = 'ios1J2p4h2MywrrvbfaUts.B3JbAQe2V';
 
-		const {
-			stubGet,
-			stubPost,
-			stubDelete,
-			stubDeleteOnUndo,
-			s3Instance,
-		} = mockS3Absorb(
-			{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
-			{ rootSystemCode, rootNodeBody, rootVersionMarker },
-		);
+		const { stubGet, stubPost, stubDelete, stubDeleteOnUndo, s3Instance } =
+			mockS3Absorb(
+				{ absorbedSystemCode, absorbedNodeBody, absorbedVersionMarker },
+				{ rootSystemCode, rootNodeBody, rootVersionMarker },
+			);
 
 		const store = docstore(s3Instance);
 		const result = await store.absorb(

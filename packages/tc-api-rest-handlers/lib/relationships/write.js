@@ -142,7 +142,8 @@ const prepareRelationshipDeletion = (nodeType, removedRelationships) => {
 	return { parameters, queryParts };
 };
 
-const MISSING_RELATED_NODE_REGEX = /Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./;
+const MISSING_RELATED_NODE_REGEX =
+	/Failed to create relationship ` {2}relationship@(\d+)`, node ` {2}related@(\d+)` is missing./;
 
 const handleUpsertError = err => {
 	if (MISSING_RELATED_NODE_REGEX.test(err.message)) {

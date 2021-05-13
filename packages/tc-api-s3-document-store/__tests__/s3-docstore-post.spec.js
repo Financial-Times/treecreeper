@@ -53,9 +53,8 @@ describe('S3 document helper post', () => {
 		const givenSystemCode = 'docstore-post-test';
 		const givenVersionMarker = 'Mw4owdmcWOlJIW.YZQRRsdksCXwPcTar';
 
-		const { stubUpload, stubDeleteOnUndo, s3Instance } = mockS3Post(
-			givenVersionMarker,
-		);
+		const { stubUpload, stubDeleteOnUndo, s3Instance } =
+			mockS3Post(givenVersionMarker);
 		const store = docstore(s3Instance);
 		const exampleData = createExampleBodyData();
 

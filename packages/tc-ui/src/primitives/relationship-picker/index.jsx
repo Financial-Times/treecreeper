@@ -244,12 +244,8 @@ class RelationshipPicker extends React.Component {
 
 	render() {
 		const { props } = this;
-		const {
-			propertyName,
-			hasError,
-			SelectedRelationship,
-			componentName,
-		} = props;
+		const { propertyName, hasError, SelectedRelationship, componentName } =
+			props;
 		const disabled = !!this.props.lockedBy;
 		const {
 			searchTerm,
