@@ -143,8 +143,8 @@ describe('schema polling updates', () => {
 		describe('failure', () => {
 			beforeAll(async () => {
 				process.env.NODE_ENV = 'production';
-							process.env.NEO4J_BOLT_USER = 'test-user';
-			process.env.NEO4J_BOLT_PASSWORD = 'test-password';
+				process.env.NEO4J_BOLT_USER = 'test-user';
+				process.env.NEO4J_BOLT_PASSWORD = 'test-password';
 				schemaPublisher.sendSchemaToS3.mockClear();
 
 				fetch
@@ -188,8 +188,8 @@ describe('schema polling updates', () => {
 			});
 			afterAll(() => {
 				process.env.NODE_ENV = 'test';
-							delete process.env.NEO4J_BOLT_USER;
-			delete process.env.NEO4J_BOLT_PASSWORD;
+				delete process.env.NEO4J_BOLT_USER;
+				delete process.env.NEO4J_BOLT_PASSWORD;
 			});
 
 			it('graphql endpoint still runs on old schema version', async () => {
