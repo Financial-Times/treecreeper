@@ -21,6 +21,8 @@ describe('schema polling updates', () => {
 		let app;
 		beforeAll(async () => {
 			process.env.NODE_ENV = 'production';
+			process.env.NEO4J_BOLT_USER = 'test-user';
+			process.env.NEO4J_BOLT_PASSWORD = 'test-password';
 			delete process.env.TREECREEPER_SCHEMA_DIRECTORY;
 			process.env.TREECREEPER_SCHEMA_URL = 'http://example.com';
 			schemaPublisher.sendSchemaToS3.mockResolvedValue(true);
@@ -97,6 +99,8 @@ describe('schema polling updates', () => {
 		});
 		afterAll(() => {
 			process.env.NODE_ENV = 'test';
+			delete process.env.NEO4J_BOLT_USER;
+			delete process.env.NEO4J_BOLT_PASSWORD;
 			fetch.config.fallbackToNetwork = 'always';
 			fetch.reset();
 			jest.resetModules();
@@ -139,6 +143,8 @@ describe('schema polling updates', () => {
 		describe('failure', () => {
 			beforeAll(async () => {
 				process.env.NODE_ENV = 'production';
+							process.env.NEO4J_BOLT_USER = 'test-user';
+			process.env.NEO4J_BOLT_PASSWORD = 'test-password';
 				schemaPublisher.sendSchemaToS3.mockClear();
 
 				fetch
@@ -182,6 +188,8 @@ describe('schema polling updates', () => {
 			});
 			afterAll(() => {
 				process.env.NODE_ENV = 'test';
+							delete process.env.NEO4J_BOLT_USER;
+			delete process.env.NEO4J_BOLT_PASSWORD;
 			});
 
 			it('graphql endpoint still runs on old schema version', async () => {
