@@ -1,4 +1,4 @@
-const { DateTime } = require('neo4j-driver/lib/temporal-types.js');
+const { DateTime } = require('neo4j-driver/lib/temporal-types');
 
 const { driver } = require('./db-connection');
 
