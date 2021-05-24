@@ -24,7 +24,7 @@ module.exports = {
 	simpleTypes: [...validEnums, ...primitiveTypeNames],
 	complexTypes: [...typeNames, ...relationshipTypeNames],
 	stringPatterns: Object.keys(stringPatterns),
-	SYSTEM_CODE: '^[a-z][\\-a-z]+[a-z]$',
+	SYSTEM_CODE: '^[a-z][a-z0-9-]+[a-z0-9]$',
 	TYPE_NAME: '^[A-Z][a-zA-Z]+$',
 	CAPITAL_SNAKE_CASE: '^(?=.{2,64}$)[A-Z][A-Z_]*[A-Z]$',
 	STRING_PATTERN_NAME: '^(?=.{2,64}$)[A-Z][A-Z\\d_]*[A-Z\\d]$',
