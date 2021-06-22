@@ -11,7 +11,7 @@ const getHandler =
 		const richRelationshipsFlag = query && query.richRelationships;
 
 		const [neo4jResult, docstoreResult] = await Promise.all([
-			getNeo4jRecord(type, code, richRelationshipsFlag),
+			getNeo4jRecord(type, code, { richRelationshipsFlag }),
 			documentStore ? documentStore.get(type, code) : { body: {} },
 		]);
 
