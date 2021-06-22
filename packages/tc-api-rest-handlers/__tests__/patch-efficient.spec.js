@@ -80,4 +80,24 @@ describe('rest PATCH efficient', () => {
 		});
 	});
 
+	it("doesn't error when no relationships", async () => {
+		await createNode('PropertiesTest', {
+			code: mainCode,
+		});
+		const dbQuerySpy = spyDbQuery();
+		const { status } = await patch({
+			type: 'PropertiesTest',
+			code: mainCode,
+			body: { firstStringProperty: 'blah' },
+			query: {
+				efficientWrite: true,
+			},
+		});
+		expect(status).toBe(200);
+		dbQuerySpy.mock.calls.forEach(([query]) => {
+			expect(query).toContain(
+				'OPTIONAL MATCH (node)-[relationship]-(related)',
+			);
+		});
+	});
 });
