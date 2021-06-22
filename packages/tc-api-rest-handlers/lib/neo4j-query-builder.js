@@ -52,7 +52,7 @@ const getBaseQuery = (type, method, willUpdateMeta) => {
 	}
 };
 
-const queryBuilder = (method, input, body = {}) => {
+const queryBuilder = (method, input, body = {}, relationshipTypes) => {
 	const { type, code, metadata = {}, query = {} } = input;
 	const { relationshipAction, lockFields, unlockFields, upsert } = query;
 	const { clientId } = metadata;
@@ -205,7 +205,7 @@ const queryBuilder = (method, input, body = {}) => {
 			context.willCreateRelationships ||
 			context.willDeleteRelationships;
 		queryParts.unshift(getBaseQuery(type, method, willUpdateMeta));
-		queryParts.push(getNeo4jRecordCypherQuery());
+		queryParts.push(getNeo4jRecordCypherQuery({ relationshipTypes }));
 		const neo4jQuery = queryParts.join('\n');
 		const neo4jResult = await executeQuery(neo4jQuery, parameters);
 
