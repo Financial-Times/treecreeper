@@ -42,12 +42,9 @@ const patchHandler = ({ documentStore } = {}) => {
 			);
 		}
 
-		const preflightRequest = await getNeo4jRecord(
-			type,
-			code,
-			null,
-			efficientWrite && underlyingRelationshipNames,
-		);
+		const preflightRequest = await getNeo4jRecord(type, code, {
+			relationshipTypes: efficientWrite && underlyingRelationshipNames,
+		});
 		if (!preflightRequest.hasRecords()) {
 			return Object.assign(await post(input), { status: 201 });
 		}

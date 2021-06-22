@@ -18,8 +18,7 @@ const getNeo4jRecordCypherQuery = ({
 const getNeo4jRecord = (
 	type,
 	code,
-	richRelationshipsFlag,
-	relationshipTypes,
+	{ richRelationshipsFlag, relationshipTypes } = {},
 ) => {
 	return executeQuery(
 		`MATCH (node:${type} {code: $code})
