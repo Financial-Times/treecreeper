@@ -226,11 +226,23 @@ const normaliseRelationshipProps = (type, body = {}) => {
 	});
 };
 
+const getUnderlyingRelationshipNames = (type, body = {}) => {
+	const isRelationship = identifyRelationships(type);
+	const relationships = Object.keys(body)
+		.filter(propName => isRelationship(unNegatePropertyName(propName)))
+		.map(name => name.replace(/^!/, ''));
+	const { properties } = getType(type);
+	return [
+		...new Set(relationships.map(name => properties[name].relationship)),
+	];
+};
+
 module.exports = {
 	getAllRelationships,
 	getWriteRelationships,
 	getChangedRelationships,
 	getRemovedRelationships,
+	getUnderlyingRelationshipNames,
 	containsRelationshipData,
 	normaliseRelationshipProps,
 	identifyRelationships,

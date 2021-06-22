@@ -8,6 +8,7 @@ const { getNeo4jRecord } = require('./lib/read-helpers');
 const {
 	containsRelationshipData,
 	normaliseRelationshipProps,
+	getUnderlyingRelationshipNames,
 } = require('./lib/relationships/input');
 const { postHandler } = require('./post');
 const { handleUpsertError } = require('./lib/relationships/write');
@@ -23,16 +24,30 @@ const patchHandler = ({ documentStore } = {}) => {
 			type,
 			code,
 			body: originalBody,
-			query: { relationshipAction, richRelationships } = {},
+			query: {
+				relationshipAction,
+				richRelationships,
+				efficientWrite,
+			} = {},
 			metadata = {},
 		} = validateInput(input);
+		let underlyingRelationshipNames;
 		if (containsRelationshipData(type, originalBody)) {
 			validateRelationshipAction(relationshipAction);
 			validateRelationshipInput(originalBody);
 			normaliseRelationshipProps(type, originalBody);
+			underlyingRelationshipNames = getUnderlyingRelationshipNames(
+				type,
+				originalBody,
+			);
 		}
 
-		const preflightRequest = await getNeo4jRecord(type, code);
+		const preflightRequest = await getNeo4jRecord(
+			type,
+			code,
+			null,
+			efficientWrite && underlyingRelationshipNames,
+		);
 		if (!preflightRequest.hasRecords()) {
 			return Object.assign(await post(input), { status: 201 });
 		}
@@ -56,7 +71,12 @@ const patchHandler = ({ documentStore } = {}) => {
 			: {};
 
 		try {
-			const builder = queryBuilder('MERGE', input, body)
+			const builder = queryBuilder(
+				'MERGE',
+				input,
+				body,
+				efficientWrite && underlyingRelationshipNames,
+			)
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
 				.removeRelationships(initialContent)

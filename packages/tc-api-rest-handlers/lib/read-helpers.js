@@ -4,16 +4,26 @@ const { executeQuery } = require('./neo4j-model');
 const getNeo4jRecordCypherQuery = ({
 	nodeName = 'node',
 	includeWithStatement = true,
-} = {}) => stripIndents`
+	relationshipTypes,
+} = {}) => {
+	return stripIndents`
 	${includeWithStatement ? `WITH DISTINCT ${nodeName}` : ''}
-	OPTIONAL MATCH (${nodeName})-[relationship]-(related)
+	OPTIONAL MATCH (${nodeName})-[relationship${
+		relationshipTypes ? `:${relationshipTypes.join('|')}` : ''
+	}]-(related)
 	RETURN ${nodeName}, relationship, labels(related) AS relatedLabels, related.code AS relatedCode, related._createdByRequest
 	ORDER BY related.code`;
+};
 
-const getNeo4jRecord = (type, code, richRelationshipsFlag) => {
+const getNeo4jRecord = (
+	type,
+	code,
+	richRelationshipsFlag,
+	relationshipTypes,
+) => {
 	return executeQuery(
 		`MATCH (node:${type} {code: $code})
-			${getNeo4jRecordCypherQuery()}`,
+			${getNeo4jRecordCypherQuery({ relationshipTypes })}`,
 		{ code },
 		richRelationshipsFlag,
 	);
