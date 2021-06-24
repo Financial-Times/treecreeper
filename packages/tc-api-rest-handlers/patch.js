@@ -41,9 +41,12 @@ const patchHandler = ({ documentStore } = {}) => {
 				originalBody,
 			);
 		}
+		const relationshipTypes = efficientWrite
+			? underlyingRelationshipNames
+			: undefined;
 
 		const preflightRequest = await getNeo4jRecord(type, code, {
-			relationshipTypes: efficientWrite && underlyingRelationshipNames,
+			relationshipTypes,
 		});
 		if (!preflightRequest.hasRecords()) {
 			return Object.assign(await post(input), { status: 201 });
@@ -72,7 +75,7 @@ const patchHandler = ({ documentStore } = {}) => {
 				'MERGE',
 				input,
 				body,
-				efficientWrite && underlyingRelationshipNames,
+				relationshipTypes,
 			)
 				.constructProperties(initialContent)
 				.mergeLockFields(initialContent)
