@@ -4,7 +4,14 @@ const { FormError } = require('../../lib/components/messages');
 const { Concept, Fieldset } = require('../../lib/components/structure');
 const { SaveButton, CancelButton } = require('../../lib/components/buttons');
 
-const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
+const PropertyInputs = ({
+	fields,
+	data,
+	type,
+	assignComponent,
+	hasError,
+	isEdit,
+}) => {
 	const propertyDefinitionsArray = Object.entries(fields);
 
 	const fieldsToLock = data._lockedFields
@@ -30,6 +37,7 @@ const PropertyInputs = ({ fields, data, type, assignComponent, hasError }) => {
 				: data[propertyName];
 
 			const viewModel = {
+				isEdit,
 				hasError,
 				parentCode: data.code,
 				propertyName,
@@ -126,6 +134,7 @@ const EditForm = props => {
 								description={description}
 							>
 								<PropertyInputs
+									isEdit={isEdit}
 									hasError={!!error}
 									fields={properties}
 									data={data}

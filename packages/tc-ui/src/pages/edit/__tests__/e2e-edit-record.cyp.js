@@ -39,22 +39,28 @@ describe('End-to-end - record creation', () => {
 		cy.get('#firstStringProperty').should('have.text', 'new string');
 	});
 
-	it('cannot edit code of record', () => {
+	it('the code field of the record should be disabled', () => {
 		createRecord('PropertiesTest');
 		cy.visit(`/PropertiesTest/${code}/edit`);
-
-		cy.get('input[name="code"]').type('-test');
-		save();
-		cy.url().should('contain', `/PropertiesTest/${code}/edit`);
-		cy.get('.o-message__content-main').should(
-			'contain',
-			`Oops. Could not update PropertiesTest record for ${code}.`,
-		);
-		cy.get('.o-message__content-additional').should(
-			'contain',
-			`Conflicting code property \`${code}-test\` in payload for PropertiesTest ${code}`,
-		);
+		cy.get('input[name="code"]').should('be.disabled');
 	});
+
+	// it('cannot edit code of record', () => {
+	// 	createRecord('PropertiesTest');
+	// 	cy.visit(`/PropertiesTest/${code}/edit`);
+	//
+	// 	cy.get('input[name="code"]').type('-test');
+	// 	save();
+	// 	cy.url().should('contain', `/PropertiesTest/${code}/edit`);
+	// 	cy.get('.o-message__content-main').should(
+	// 		'contain',
+	// 		`Oops. Could not update PropertiesTest record for ${code}.`,
+	// 	);
+	// 	cy.get('.o-message__content-additional').should(
+	// 		'contain',
+	// 		`Conflicting code property \`${code}-test\` in payload for PropertiesTest ${code}`,
+	// 	);
+	// });
 
 	it('preserves data after error', () => {
 		createRecord('PropertiesTest');
