@@ -1,5 +1,0 @@
-# See here for more details on this file https://help.github.com/en/articles/about-code-owners
-
-# This file will automatically add the reliability-engineering team as reviewers for open PRs.
-# Feel free to change it to another team if appropriate
-* @financial-times/reliability-engineering
