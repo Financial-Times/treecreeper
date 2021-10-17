@@ -12,7 +12,7 @@
     "common-tags": "^1.8.0",
     "deep-freeze": "0.0.1",
     "graphql": "^14.0.0",
-    "graphql-compose": "^7.23.0",
+    "graphql-compose": "^9.0.4",
     "js-yaml": "^3.13.1",
     "lodash.uniqby": "^4.7.0",
     "node-fetch": "^2.6.0"
