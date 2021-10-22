@@ -1,5 +1,5 @@
 <img align="right" src=https://user-images.githubusercontent.com/447559/71667873-c7c56680-2d5e-11ea-9e44-a0947997e18c.png />
-
+**This project is no longer supported**
 # Treecreeper
 
 Treecreeper is a set of modular nodejs libraries for managing Graph data. It is built on top of neo4j and uses libraries and many ideas developed for [GRANDstack](https://grandstack.io). From the end user's point of view it provides:
